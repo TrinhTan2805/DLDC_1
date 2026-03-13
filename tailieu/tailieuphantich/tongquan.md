@@ -1,21 +1,31 @@
 # 4.1. PM01.TQ - TỔNG QUAN (DASHBOARD)
 
-## 4.1.1. Mục đích
-Cung cấp cái nhìn toàn cảnh về hiệu năng và tình trạng hoạt động của hệ thống Kho DLDC thông qua các chỉ số KPI, biểu đồ xu hướng và dữ liệu thống kê chi tiết.
+## 4.1.1. PM01.TQ.DB – Dashboard tổng quan
 
-## 4.1.2. PM01.TQ.MH01 – Màn hình Tổng quan hệ thống
-*(Giao diện tham chiếu: [DashboardHome.tsx](file:///d:/Tư%20pháp/KhoDLDC/DLDC_1/src/components/dashboard/DashboardHome.tsx))*
+### *4.1.1.1. Mục đích*
+Cung cấp một cái nhìn toàn cảnh, tập trung về hiệu năng và tình trạng hoạt động của toàn bộ hệ thống Kho DLDC. Màn hình này giúp lãnh đạo và cán bộ quản trị nhanh chóng nắm bắt các chỉ số KPI quan trọng, theo dõi xu hướng và phát hiện các vấn đề cần chú ý thông qua các biểu đồ trực quan.
 
-### 4.1.2.1. Nhóm chỉ số chính (KPI Cards)
+### 4.1.1.2. PM01.TQ.DB.MH01 – Màn hình Tổng quan hệ thống
+
+#### 4.1.1.2.1. MH01 Màn hình Tổng quan hệ thống
+##### Màn hình
+- Màn hình:
+
+![Dashboard Tổng quan](./images/dashboard_tongquan.png)
+
+<p align="center" style="background-color: #E0E0E0; padding: 5px; display: inline-block; margin: 0 auto;">Hình 1 - Màn hình Dashboard Tổng quan hệ thống</p>
+
+##### Mô tả thông tin trên màn hình
+
+**A. Nhóm chỉ số chính (KPI Cards)**
 Hiển thị các con số quan trọng nhất của hệ thống. Người dùng có thể nhấn vào từng thẻ để xem chi tiết.
-
 | Chỉ số | Mô tả | Chi tiết hiển thị |
 | :--- | :--- | :--- |
 | **Thu thập** | Tổng số bản ghi đã được thu về kho. | Số lượng bản ghi tăng thêm trong tháng. |
 | **Xử lý** | Số lượng bản ghi đã qua quy trình làm sạch/chuẩn hóa. | Tỷ lệ hoàn thành xử lý (%). |
 | **Chia sẻ** | Tổng lượt truy xuất và cung cấp dữ liệu. | Số lượt phát sinh trong tuần. |
 
-### 4.1.2.2. Hệ thống biểu đồ thống kê
+**B. Hệ thống biểu đồ thống kê**
 | Tên biểu đồ | Loại | Mô tả |
 | :--- | :--- | :--- |
 | **Xu hướng Thu thập** | Line Chart | Theo dõi lượng dữ liệu thu thập trong 7 ngày gần nhất. |
@@ -26,29 +36,35 @@ Hiển thị các con số quan trọng nhất của hệ thống. Người dùn
 | **Danh mục dùng chung** | Horiz. Bar | Thống kê số lượng danh mục (Giới tính, Dân tộc, Đơn vị hành chính...). |
 | **Dữ liệu mở** | Stacked Bar | Tỷ lệ dữ liệu đã công bố và đang chờ phê duyệt theo lĩnh vực. |
 
-### 4.1.2.3. Các thông tin khác
-- **Kiến trúc hệ thống**: Tóm tắt mục tiêu phát triển Nền tảng số và Kho dữ liệu Hợp nhất.
-- **Tài khoản người dùng**: Biểu đồ tăng trưởng số lượng người dùng hệ thống.
-- **Tần suất tra cứu**: Thống kê các dịch vụ được tìm kiếm nhiều nhất trong tháng.
+##### Chức năng trên màn hình
+| STT | Mã chức năng | Định dạng | Mô tả |
+| :--- | :--- | :--- | :--- |
+| 1 | CN01 | Click | Nhấn vào một thẻ KPI để mở popup chi tiết (MH01.P01). |
+| 2 | CN02 | Hover | Di chuột qua các cột/phần của biểu đồ để xem số liệu chi tiết. |
+| 3 | CN03 | Dropdown | Lọc dữ liệu trên toàn bộ dashboard theo khoảng thời gian (7 ngày, 30 ngày...). |
 
-## 4.1.3. PM01.TQ.MH02 – Chi tiết chỉ số (Popup)
+#### 4.1.1.2.2. MH01.P01 – Chi tiết chỉ số (Popup)
+##### Màn hình
+- Màn hình: (Popup hiển thị danh sách chi tiết)
+
+##### Mô tả thông tin trên màn hình
 Hiển thị khi người dùng nhấn vào các thẻ KPI (Thu thập, Xử lý, Chia sẻ).
-
 | Trường thông tin | Kiểu dữ liệu | Bắt buộc | Mặc định | Mô tả |
 | :--- | :--- | :--- | :--- | :--- |
-| Tên dữ liệu | Văn bản | - | - | Tên CSDL hoặc dịch vụ cụ thể. |
-| Nguồn | Văn bản | - | - | Hệ thống hoặc đơn vị cung cấp dữ liệu. |
-| Số lượng đồng bộ | Số | - | - | Tổng số bản ghi đã ghi nhận. |
-| Lần đồng bộ cuối | Ngày giờ | - | - | Thời điểm cập nhật dữ liệu gần nhất. |
-| Trạng thái | Nhãn | - | - | Thành công, Cảnh báo hoặc Lỗi. |
+| Tên dữ liệu | VARCHAR2(255) | - | - | Tên CSDL hoặc dịch vụ cụ thể. |
+| Nguồn | VARCHAR2(255) | - | - | Hệ thống hoặc đơn vị cung cấp dữ liệu. |
+| Số lượng đồng bộ | NUMBER | - | - | Tổng số bản ghi đã ghi nhận. |
+| Lần đồng bộ cuối | DATE | - | - | Thời điểm cập nhật dữ liệu gần nhất. |
+| Trạng thái | VARCHAR2(50) | - | - | Thành công, Cảnh báo hoặc Lỗi. |
 
-### 4.1.3.1. Thống kê tổng hợp trong Popup
-- **Tổng nguồn**: Số lượng hệ thống đang kết nối.
-- **Tổng đồng bộ**: Tổng bản ghi của nhóm đang xem.
-- **Thành công/Lỗi**: Phân bổ trạng thái của các nguồn dữ liệu.
+##### Chức năng trên màn hình
+| STT | Mã chức năng | Định dạng | Mô tả |
+| :--- | :--- | :--- | :--- |
+| 1 | CN01 | Button text | Đóng popup. |
 
-## 4.1.4. Luồng ứng dụng tổng quan
+## 4.1.2. Luồng ứng dụng tổng quan
 
+### *4.1.2.1. Sơ đồ luồng ứng dụng*
 Sơ đồ dưới đây thể hiện luồng điều hướng chính của người dùng sau khi đăng nhập vào hệ thống:
 
 ```mermaid
@@ -86,6 +102,5 @@ graph TD
         J --> J4[Thống kê & báo cáo]
     end
 ```
-
 ---
 *Tài liệu này cung cấp cái nhìn tổng thể. Chi tiết về từng phân hệ vui lòng tham khảo các tệp tin phân tích tương ứng.*

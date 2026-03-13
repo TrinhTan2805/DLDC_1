@@ -6,7 +6,7 @@ Tài liệu này tổng hợp toàn bộ các sơ đồ luồng màn hình của
 
 Sơ đồ thể hiện luồng điều hướng chính sau khi người dùng đăng nhập thành công:
 
-![Sơ đồ tổng quan](file:///C:/Users/trinh/.gemini/antigravity/brain/ef5d8a70-ddc2-4901-b7ec-e8cc666d0868/overall_flow_visual_png_1773130097802.png)
+![Sơ đồ tổng quan](flowdata/overall_flow_1773297855567.png)
 
 ### Mã Mermaid tham chiếu:
 ```mermaid
@@ -24,6 +24,11 @@ graph TD
     C --> J[Quản trị & vận hành]
 ```
 
+**Mô tả quy trình:**
+1. **Đăng nhập:** Người dùng truy cập hệ thống qua màn hình đăng nhập.
+2. **Dashboard:** Sau khi xác thực thành công, hệ thống chuyển hướng đến Dashboard tổng quan.
+3. **Điều hướng:** Từ Dashboard, người dùng có thể truy cập nhanh vào 7 phân hệ chính của hệ thống Kho DLDC.
+
 ---
 
 ## 2. Luồng theo từng chức năng (Menu)
@@ -31,7 +36,7 @@ graph TD
 ### 2.1. Quản lý thu thập (Data Collection)
 Sơ đồ quy trình thiết lập và thực hiện thu thập dữ liệu:
 
-![Luồng Thu thập](file:///C:/Users/trinh/.gemini/antigravity/brain/ef5d8a70-ddc2-4901-b7ec-e8cc666d0868/collection_flow_visual_png_1773130119400.png)
+![Luồng Thu thập](flowdata/collection_flow_1773297876543.png)
 
 #### Mã Mermaid tham chiếu:
 ```mermaid
@@ -48,31 +53,47 @@ graph TD
     Reconcile --> End([Kết thúc])
 ```
 
+**Mô tả quy trình:**
+1. **Thiết lập:** Khai báo nguồn dữ liệu và thực hiện kiểm tra kết nối kỹ thuật.
+2. **Cấu hình:** Thiết lập lịch trình và tần suất đồng bộ dữ liệu tự động.
+3. **Thu thập:** Hệ thống thực hiện quét và lấy dữ liệu từ nguồn về kho tạm.
+4. **Kiểm tra & Đối soát:** Dữ liệu được kiểm tra tính hợp lệ và thực hiện đối soát số lượng trước khi kết thúc luồng.
+
 ### 2.2. Xử lý dữ liệu (Data Processing)
 Sơ đồ quy trình làm sạch, chuẩn hóa và biến đổi dữ liệu:
 
-![Luồng Xử lý](file:///C:/Users/trinh/.gemini/antigravity/brain/ef5d8a70-ddc2-4901-b7ec-e8cc666d0868/processing_flow_visual_png_1773130136419.png)
+![Luồng Xử lý](flowdata/processing_flow_1773297893113.png)
 
 #### Mã Mermaid tham chiếu:
 ```mermaid
 graph TD
     A[Tiếp nhận dữ liệu thô] --> B[Thiết lập quy tắc xử lý]
     B --> C[Giai đoạn 1: Làm sạch]
-    C --> D[Giai đoạn 2: Chuẩn hóa]
-    D --> E[Giai đoạn 3: Biến đổi]
-    E --> F{Kiểm tra kết quả}
-    F -- Có lỗi --> G[Danh sách bản ghi lỗi]
-    G --> H[Sửa đổi/Phản hồi nguồn]
+    C --> C_Check{Kiểm tra Làm sạch?}
+    C_Check -- Không đạt --> G[Ghi nhật ký lỗi & Sửa đổi]
+    C_Check -- Đạt --> D[Giai đoạn 2: Chuẩn hóa]
+    D --> D_Check{Kiểm tra Chuẩn hóa?}
+    D_Check -- Không đạt --> G
+    D_Check -- Đạt --> E[Giai đoạn 3: Biến đổi]
+    E --> E_Check{Kiểm tra Biến đổi?}
+    E_Check -- Không đạt --> G
+    E_Check -- Đạt --> I[Lưu vào kho dữ liệu sạch]
+    G --> H[Phản hồi nguồn/Sửa thủ công]
     H --> B
-    F -- Thành công --> I[Lưu vào kho dữ liệu sạch]
     I --> J[Phân loại & Bảo mật]
     J --> End([Kết thúc])
 ```
 
+**Mô tả quy trình:**
+1. **Tiếp nhận:** Dữ liệu thô từ kho tạm được đưa vào quy trình xử lý theo các quy tắc thiết lập sẵn.
+2. **Xử lý đa tầng có kiểm soát:** Dữ liệu trải qua 3 giai đoạn (Làm sạch, Chuẩn hóa, Biến đổi). **Điểm quan trọng:** Sau mỗi giai đoạn, hệ thống thực hiện kiểm tra (Check) ngay lập tức. Chỉ khi đạt yêu cầu mới được chuyển sang giai đoạn tiếp theo.
+3. **Xử lý lỗi:** Nếu bất kỳ bước kiểm tra nào không đạt, bản ghi lỗi được ghi nhật ký và chuyển sang bộ phận sửa đổi thủ công hoặc phản hồi lại nguồn dữ liệu.
+4. **Lưu trữ:** Dữ liệu sau khi vượt qua tất cả các tầng kiểm tra sẽ được phân loại bảo mật và lưu vào kho dữ liệu sạch chính thức.
+
 ### 2.3. Quản lý danh mục (Category Management)
 Sơ đồ vòng đời của một danh mục:
 
-![Luồng Danh mục](file:///C:/Users/trinh/.gemini/antigravity/brain/ef5d8a70-ddc2-4901-b7ec-e8cc666d0868/category_flow_visual_png_1773130158948.png)
+![Luồng Danh mục](flowdata/category_flow_1773297910829.png)
 
 #### Mã Mermaid tham chiếu:
 ```mermaid
@@ -89,10 +110,16 @@ graph TD
     Public --> End([Kết thúc])
 ```
 
+**Mô tả quy trình:**
+1. **Khởi tạo:** Tạo mới hoặc đồng bộ danh mục từ các nguồn dùng chung về hệ thống dưới dạng bản nháp.
+2. **Biên tập:** Người dùng chỉnh sửa các giá trị, định nghĩa trong danh mục.
+3. **Phê duyệt:** Chuyển qua quy trình duyệt đa cấp để đảm bảo tính chính xác của dữ liệu danh mục.
+4. **Công bố:** Sau khi được duyệt, danh mục được thiết lập phạm vi và thực hiện công bố để các hệ thống khác sử dụng.
+
 ### 2.4. Dữ liệu mở (Open Data)
 Sơ đồ quy trình công bố tập dữ liệu mở:
 
-![Luồng Dữ liệu mở](file:///C:/Users/trinh/.gemini/antigravity/brain/ef5d8a70-ddc2-4901-b7ec-e8cc666d0868/open_data_flow_visual_png_1773130172065.png)
+![Luồng Dữ liệu mở](flowdata/open_data_flow_1773297933014.png)
 
 #### Mã Mermaid tham chiếu:
 ```mermaid
@@ -109,10 +136,16 @@ graph TD
     I --> End([Kết thúc])
 ```
 
+**Mô tả quy trình:**
+1. **Cấu hình Dataset:** Thiết lập tập dữ liệu mới, chọn định dạng xuất (JSON, CSV, API) và tần suất cập nhật.
+2. **Quy trình duyệt:** Gửi hồ sơ công bố dữ liệu mở lên cấp lãnh đạo phê duyệt.
+3. **Thực hiện công bố:** Sau khi được duyệt, hệ thống cấu hình phạm vi truy cập và đẩy dữ liệu lên cổng dữ liệu mở.
+4. **Giám sát:** Theo dõi hiệu quả khai thác qua các chỉ số thống kê lượt truy cập và tải về.
+
 ### 2.5. Quản lý dữ liệu chủ (Master Data)
 Sơ đồ quy trình định danh và hợp nhất thực thể dữ liệu gốc:
 
-![Luồng Dữ liệu chủ](file:///C:/Users/trinh/.gemini/antigravity/brain/ef5d8a70-ddc2-4901-b7ec-e8cc666d0868/master_data_flow_visual_png_1773130187704.png)
+![Luồng Dữ liệu chủ](flowdata/master_data_flow_1773297952668.png)
 
 #### Mã Mermaid tham chiếu:
 ```mermaid
@@ -130,10 +163,16 @@ graph TD
     J --> End([Kết thúc])
 ```
 
+**Mô tả quy trình:**
+1. **Nhận diện:** Tiếp nhận dữ liệu sạch, thực hiện thuật toán so khớp để phát hiện các bản ghi trùng lặp.
+2. **Xử lý trùng:** Nếu trùng, thực hiện hợp nhất (Merge) các thuộc tính tốt nhất; nếu không, tạo mã định danh duy nhất (Unique ID) mới.
+3. **Cập nhật:** Rà soát và phê duyệt các thay đổi đối với thực thể dữ liệu gốc.
+4. **Lưu trữ & Chia sẻ:** Lưu vào kho Master Data chính thức và cung cấp quyền truy xuất qua API cho toàn hệ thống.
+
 ### 2.6. Điều phối dữ liệu (Data Orchestration/API)
 Sơ đồ quy trình quản trị vận hành các API cung cấp dữ liệu:
 
-![Luồng Điều phối](file:///C:/Users/trinh/.gemini/antigravity/brain/ef5d8a70-ddc2-4901-b7ec-e8cc666d0868/orchestration_flow_visual_png_1773130218010.png)
+![Luồng Điều phối](flowdata/orchestration_flow_1773297973760.png)
 
 #### Mã Mermaid tham chiếu:
 ```mermaid
@@ -148,10 +187,16 @@ graph TD
     G --> H[Giám sát & Nhật ký]
 ```
 
+**Mô tả quy trình:**
+1. **Thiết lập API:** Khai báo các Endpoint cung cấp dữ liệu (Push/Pull).
+2. **Cấu hình bảo mật:** Thiết lập phương thức xác thực (Token, IP,...) và các giới hạn về băng thông (Rate Limiting).
+3. **Kiểm thử:** Thực hiện test kết nối và hiệu năng API.
+4. **Vận hành:** Kích hoạt API và thực hiện giám sát nhật ký truy cập theo thời gian thực.
+
 ### 2.7. Quản trị & vận hành (Admin Operations)
 Sơ đồ các hoạt động quản trị hệ thống:
 
-![Luồng Quản trị](file:///C:/Users/trinh/.gemini/antigravity/brain/ef5d8a70-ddc2-4901-b7ec-e8cc666d0868/admin_flow_visual_png_1773130238469.png)
+![Luồng Quản trị](flowdata/admin_flow_1773297990651.png)
 
 #### Mã Mermaid tham chiếu:
 ```mermaid
@@ -167,3 +212,8 @@ graph TD
     UserMgmt --> Audit[Ghi nhật ký thao tác]
     Config --> Audit
 ```
+
+**Mô tả quy trình:**
+1. **Đăng nhập quản trị:** Tài khoản có quyền Admin truy cập vào phân hệ quản trị.
+2. **Lựa chọn tác vụ:** Thực hiện các chức năng cốt lõi như Phân quyền, Cấu hình thông số hệ thống, hoặc Giám sát nhật ký hoạt động.
+3. **Kiểm soát (Audit):** Mọi thao tác thay đổi cấu hình hoặc người dùng đều được hệ thống ghi nhật ký Audit Log để phục vụ hậu kiểm.
