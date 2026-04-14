@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Plus, Search, Server, Eye, Edit, Trash2, CheckCircle, XCircle, Settings as SettingsIcon, Database, Globe, X, Save, EyeOff, Eye as EyeIcon, FileCheck, FileText, Shield, GitBranch, Clock, AlertCircle, User, Lock, Share, Wifi, FolderOpen, Mail, MessageSquare, BarChart3, TrendingUp } from 'lucide-react';
 import { MonitoringPage } from './MonitoringPage';
 import { AddProvisionServiceModal } from './AddProvisionServiceModal';
+import { ApprovalReviewModal } from './ApprovalReviewModal';
 import { GrantPermissionModal } from '../../GrantPermissionModal';
 
 interface Service {
@@ -10,7 +11,7 @@ interface Service {
   name: string;
   description: string;
   type: 'REST' | 'SOAP' | 'GraphQL';
-  status: 'active' | 'inactive' | 'maintenance' | 'pending';
+  status: 'active' | 'inactive' | 'maintenance' | 'pending' | 'approved' | 'published' | 'publishing' | 'rejected';
   endpoint: string;
   version: string;
   department: string;
@@ -143,16 +144,15 @@ const mockServices: Service[] = [
     name: 'Dịch vụ B',
     description: 'API cung cấp dịch vụ B',
     type: 'REST',
-    status: 'pending',
-    endpoint: 'https://api.moj.gov.vn/service-b/v2',
+    status: 'approved',
+    endpoint: 'https://api.dldc.moj.gov.vn/v1/api002',
     version: 'v2.1.8',
     department: 'Đơn vị B',
-    createdDate: '20/02/2024',
-    lastModified: '10/12/2024',
-    visibility: 'private',
+    createdDate: '11/12/2024',
+    lastModified: '11/12/2024',
+    visibility: 'public',
     maxRequestsPerDay: 50000,
-    assignedUnits: ['Đơn vị c'],
-    accessStartDate: '15/02/2024'
+    assignedUnits: ['Đơn vị c']
   },
   {
     id: '3',
@@ -166,47 +166,57 @@ const mockServices: Service[] = [
     department: 'Đơn vị C',
     createdDate: '10/03/2024',
     lastModified: '08/12/2024',
-    visibility: 'private',
-    maxRequestsPerDay: 5000,
-    assignedUnits: [],
-    accessStartDate: '01/03/2024'
+    visibility: 'private'
+  },
+  {
+    id: '4',
+    code: 'SVC004',
+    name: 'API Tra cứu Đăng ký Kinh doanh',
+    description: 'API chia sẻ dữ liệu DKKD cho Bộ Kế hoạch và Đầu tư',
+    type: 'REST',
+    status: 'approved',
+    endpoint: 'https://api.moj.gov.vn/dkkd/v1',
+    version: 'v1.0.0',
+    department: 'Phòng CNTT',
+    createdDate: '14/04/2025',
+    lastModified: '14/04/2025',
+    visibility: 'public',
+    maxRequestsPerDay: 10000
   },
 ];
 
 const mockApprovals: ApprovalRequest[] = [
   {
     id: 'APR001',
-    apiCode: 'API001',
-    apiName: 'API tra cứu thông tin công dân',
+    apiCode: 'SVC002',
+    apiName: 'Dịch vụ B',
     requestType: 'publish',
     submitter: 'Nguyễn Văn A',
-    submitDate: '15/12/2024 10:30',
+    submitDate: '15/04/2025 10:30',
     status: 'pending',
-    note: 'Yêu cầu công bố API mới để cung cấp cho các đơn vị địa phương'
+    note: 'Yêu cầu công bố dịch vụ B (đã hoàn thiện cấu hình kết nối)'
   },
   {
     id: 'APR002',
-    apiCode: 'API002',
-    apiName: 'API nhận dữ liệu đăng ký kinh doanh',
-    requestType: 'update',
-    submitter: 'Trần Thị B',
-    submitDate: '14/12/2024 14:20',
-    status: 'approved',
-    reviewer: 'Lê Văn C',
-    reviewDate: '15/12/2024 09:15',
-    note: 'Cập nhật endpoint và thêm trường mới'
+    apiCode: 'SVC004',
+    apiName: 'API Tra cứu Đăng ký Kinh doanh',
+    requestType: 'publish',
+    submitter: 'Phạm Minh D',
+    submitDate: '14/04/2025 09:15',
+    status: 'pending',
+    note: 'Gửi phê duyệt dịch vụ chia sẻ DKKD cho Bộ KH&ĐT'
   },
   {
     id: 'APR003',
-    apiCode: 'API005',
-    apiName: 'API nhận yêu cầu trợ giúp pháp lý',
-    requestType: 'delete',
-    submitter: 'Phạm Văn D',
-    submitDate: '13/12/2024 16:45',
-    status: 'rejected',
-    reviewer: 'Hoàng Thị E',
-    reviewDate: '14/12/2024 10:00',
-    note: 'API đang được sử dụng bởi nhiều đơn vị, không thể xóa'
+    apiCode: 'SVC001',
+    apiName: 'Dịch vụ A',
+    requestType: 'update',
+    submitter: 'Trần Thị B',
+    submitDate: '10/04/2025 14:20',
+    status: 'approved',
+    reviewer: 'Lê Văn C',
+    reviewDate: '12/04/2025 09:15',
+    note: 'Cập nhật tần suất đồng bộ'
   }
 ];
 
@@ -424,7 +434,7 @@ const mockVersions: ApiVersion[] = [
 ];
 
 export function ServiceSetupPage() {
-  const [activeTab, setActiveTab] = useState<'setup' | 'passive-data' | 'monitoring' | 'permissions' | 'versions'>('setup');
+  const [activeTab, setActiveTab] = useState<'setup' | 'passive-data' | 'monitoring' | 'permissions' | 'versions' | 'approvals' | 'public'>('setup');
   const [services, setServices] = useState<Service[]>(mockServices);
   const [approvals, setApprovals] = useState<ApprovalRequest[]>(mockApprovals);
   const [logs, setLogs] = useState<LogEntry[]>(mockLogs);
@@ -433,18 +443,20 @@ export function ServiceSetupPage() {
   
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [approvalSubTab, setApprovalSubTab] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const [filterType, setFilterType] = useState('all');
   const [filterPublicType, setFilterPublicType] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
+  const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view' | 'approve'>('add');
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showSubmitApprovalModal, setShowSubmitApprovalModal] = useState(false);
-  const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [showPermissionModal, setShowPermissionModal] = useState(false);
   const [showVersionModal, setShowVersionModal] = useState(false);
   const [showGrantPermissionModal, setShowGrantPermissionModal] = useState(false);
+  const [showApprovalReviewModal, setShowApprovalReviewModal] = useState(false);
+  const [showPublishConfirm, setShowPublishConfirm] = useState(false);
+  const [serviceToPublish, setServiceToPublish] = useState<Service | null>(null);
   
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [selectedApproval, setSelectedApproval] = useState<ApprovalRequest | null>(null);
@@ -579,18 +591,21 @@ export function ServiceSetupPage() {
     return matchesSearch && matchesStatus && matchesType && matchesPublicType;
   });
 
-  const filteredApprovals = approvals.filter(approval =>
-    approval.apiCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    approval.apiName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    approval.submitter.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredLogs = logs.filter(log => {
+    const matchesSearch = log.apiName.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         log.apiCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         log.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         log.action.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesSearch;
+  });
 
-  const filteredLogs = logs.filter(log =>
-    log.apiCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    log.apiName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    log.user.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredApprovals = approvals.filter(a => {
+    const matchesSearch = a.apiName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         a.apiCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         a.submitter.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesTab = approvalSubTab === 'all' || a.status === approvalSubTab;
+    return matchesSearch && matchesTab;
+  });
 
   const filteredPermissions = permissions.filter(perm =>
     perm.apiCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -605,19 +620,41 @@ export function ServiceSetupPage() {
     ver.version.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleOpenAddModal = () => {
+    setModalMode('add');
+    setSelectedService(null);
+    setShowAddModal(true);
+  };
+
+  const handleOpenEditModal = (service: Service) => {
+    setSelectedService(service);
+    setModalMode('edit');
+    setShowAddModal(true);
+  };
+
+  const handleOpenViewModal = (service: Service) => {
+    setSelectedService(service);
+    setModalMode('view');
+    setShowAddModal(true);
+  };
+
+  const handlePublishService = (serviceId: string) => {
+    setServices(prev => prev.map(s => 
+      s.id === serviceId ? { ...s, status: 'publishing' } : s
+    ));
+    
+    // Giả lập quá trình công khai tự động
+    setTimeout(() => {
+      setServices(prev => prev.map(s => 
+        s.id === serviceId ? { ...s, status: 'published' } : s
+      ));
+      alert('Dịch vụ đã được công khai tự động lên Cổng dữ liệu dùng chung thành công!');
+    }, 2000);
+  };
+
   const handleCloseServiceForm = () => {
     setShowAddModal(false);
-    setServiceForm({
-      serviceName: '',
-      serviceCode: '',
-      dataType: '',
-      frequency: '',
-      protocol: '',
-      accessScope: '',
-      sharingPolicy: '',
-      description: '',
-      category: ''
-    });
+    setSelectedService(null);
   };
 
   const handleServiceFormChange = (field: keyof ServiceForm, value: string) => {
@@ -653,13 +690,19 @@ export function ServiceSetupPage() {
       active: 'bg-green-100 text-green-700 border-green-200',
       inactive: 'bg-slate-100 text-slate-600 border-slate-200',
       maintenance: 'bg-amber-100 text-amber-700 border-amber-200',
-      pending: 'bg-orange-100 text-orange-700 border-orange-200'
+      pending: 'bg-orange-100 text-orange-700 border-orange-200',
+      approved: 'bg-blue-100 text-blue-700 border-blue-200',
+      published: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+      publishing: 'bg-purple-100 text-purple-700 border-purple-200'
     };
     const labels = {
       active: 'Hoạt động',
       inactive: 'Chưa hoạt động',
       maintenance: 'Bảo trì',
-      pending: 'Đang phê duyệt'
+      pending: 'Đang phê duyệt',
+      approved: 'Đã phê duyệt',
+      published: 'Đang công khai',
+      publishing: 'Đang xử lý công khai'
     };
     return (
       <span className={`px-2 py-1 text-xs border rounded-full ${styles[status as keyof typeof styles]}`}>
@@ -821,7 +864,6 @@ export function ServiceSetupPage() {
       s.id === id ? { ...s, status: 'active' } : s
     ));
     
-    setShowApprovalModal(false);
     setSelectedApproval(null);
   };
 
@@ -841,7 +883,6 @@ export function ServiceSetupPage() {
       s.id === id ? { ...s, status: 'inactive', visibility: 'private' } : s
     ));
     
-    setShowApprovalModal(false);
     setSelectedApproval(null);
   };
 
@@ -881,6 +922,13 @@ export function ServiceSetupPage() {
     retired: versions.filter(v => v.status === 'retired').length
   };
 
+  const publicStats = {
+    total: services.filter(s => s.visibility === 'public').length,
+    eligible: services.filter(s => (s.status === 'approved' || s.status === 'active') && s.visibility === 'public').length,
+    published: services.filter(s => s.status === 'published' || s.status === 'active').length,
+    publishing: services.filter(s => s.status === 'publishing').length
+  };
+
   return (
     <div className="space-y-6">
       {/* Tabs */}
@@ -896,26 +944,7 @@ export function ServiceSetupPage() {
           >
             Thiết lập dịch vụ
           </button>
-          <button
-            onClick={() => setActiveTab('passive-data')}
-            className={`pb-3 px-1 border-b-2 transition-colors whitespace-nowrap ${
-              activeTab === 'passive-data'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            Dữ liệu thụ động/Theo yêu cầu
-          </button>
-          <button
-            onClick={() => setActiveTab('permissions')}
-            className={`pb-3 px-1 border-b-2 transition-colors whitespace-nowrap ${
-              activeTab === 'permissions'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            Cấp quyền truy cập API
-          </button>
+
           <button
             onClick={() => setActiveTab('versions')}
             className={`pb-3 px-1 border-b-2 transition-colors whitespace-nowrap ${
@@ -935,6 +964,32 @@ export function ServiceSetupPage() {
             }`}
           >
             Giám sát & Log
+          </button>
+          <button
+            onClick={() => setActiveTab('approvals')}
+            className={`pb-3 px-1 border-b-2 transition-colors whitespace-nowrap flex items-center gap-1.5 ${
+              activeTab === 'approvals'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            Phê duyệt
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${activeTab === 'approvals' ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-600'}`}>
+              {approvals.filter(a => a.status === 'pending').length}
+            </span>
+          </button>
+          <button
+            onClick={() => setActiveTab('public')}
+            className={`pb-3 px-1 border-b-2 transition-colors whitespace-nowrap flex items-center gap-1.5 ${
+              activeTab === 'public'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            Công khai
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${activeTab === 'public' ? 'bg-green-100 text-green-600' : 'bg-slate-100 text-slate-600'}`}>
+              {services.filter(s => s.visibility === 'public' && (s.status === 'approved' || s.status === 'published' || s.status === 'publishing' || s.status === 'active')).length}
+            </span>
           </button>
         </div>
       </div>
@@ -996,51 +1051,73 @@ export function ServiceSetupPage() {
       <div className="bg-white border border-slate-200 rounded-lg p-3">
         <div className="grid grid-cols-5 gap-3">
           <div className="relative">
+            <label htmlFor="service-search" className="sr-only">Tìm kiếm dịch vụ</label>
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
+              id="service-search"
               type="text"
+              aria-label="Tìm kiếm dịch vụ"
+              title="Tìm kiếm theo tên, mã dịch vụ, đơn vị..."
               placeholder="Tìm kiếm theo tên, mã dịch vụ, đơn vị..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">Tất cả trạng thái</option>
-            <option value="active">Đang hoạt động</option>
-            <option value="inactive">Chưa hoạt động</option>
-            <option value="maintenance">Đang bảo trì</option>
-            <option value="pending">Đang phê duyệt</option>
-          </select>
-          <select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-            className="px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">Tất cả loại dịch vụ</option>
-            <option value="REST">REST API</option>
-            <option value="SOAP">SOAP</option>
-            <option value="GraphQL">GraphQL</option>
-          </select>
-          <select
-            value={filterPublicType}
-            onChange={(e) => setFilterPublicType(e.target.value)}
-            className="px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">Tất cả phân loại</option>
-            <option value="public">Công khai</option>
-            <option value="private">Không công khai</option>
-          </select>
+          <div>
+            <label htmlFor="filter-status" className="sr-only">Lọc theo trạng thái</label>
+            <select
+              id="filter-status"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              aria-label="Lọc theo trạng thái"
+              title="Lọc theo trạng thái"
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">Tất cả trạng thái</option>
+              <option value="active">Đang hoạt động</option>
+              <option value="inactive">Chưa hoạt động</option>
+              <option value="maintenance">Đang bảo trì</option>
+              <option value="pending">Đang phê duyệt</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="filter-type" className="sr-only">Lọc theo loại dịch vụ</label>
+            <select
+              id="filter-type"
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              aria-label="Lọc theo loại dịch vụ"
+              title="Lọc theo loại dịch vụ"
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">Tất cả loại dịch vụ</option>
+              <option value="REST">REST API</option>
+              <option value="SOAP">SOAP</option>
+              <option value="GraphQL">GraphQL</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="filter-public" className="sr-only">Lọc theo phân loại</label>
+            <select
+              id="filter-public"
+              value={filterPublicType}
+              onChange={(e) => setFilterPublicType(e.target.value)}
+              aria-label="Lọc theo phân loại"
+              title="Lọc theo phân loại"
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">Tất cả phân loại</option>
+              <option value="public">Công khai</option>
+              <option value="private">Không công khai</option>
+            </select>
+          </div>
         </div>
       </div>
 
       {/* Add Service Button */}
       <div className="flex items-center justify-end">
-        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2" onClick={() => setShowAddModal(true)}>
+        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2" onClick={handleOpenAddModal}>
           <Plus className="w-4 h-4" />
           Thêm dịch vụ mới
         </button>
@@ -1075,9 +1152,16 @@ export function ServiceSetupPage() {
                   <tr key={service.id} className="hover:bg-slate-50">
                     <td className="px-4 py-3 text-sm text-slate-700">{index + 1}</td>
                     <td className="px-4 py-3 text-sm">
-                      <code className="px-2 py-0.5 bg-slate-100 text-blue-700 rounded text-xs">
+                      <button 
+                        onClick={() => {
+                          setSelectedService(service);
+                          setModalMode('view');
+                          setShowAddModal(true);
+                        }}
+                        className="px-2 py-0.5 bg-slate-100 text-blue-700 hover:bg-blue-600 hover:text-white rounded text-xs transition-all font-mono"
+                      >
                         {service.code}
-                      </code>
+                      </button>
                     </td>
                     <td className="px-4 py-3">
                       <div className="text-sm text-slate-900">{service.name}</div>
@@ -1098,12 +1182,15 @@ export function ServiceSetupPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
+
                         <button 
                           className="p-1.5 text-blue-600 hover:bg-blue-50 rounded" 
                           title="Xem chi tiết"
+                          aria-label={`Xem chi tiết dịch vụ ${service.name}`}
                           onClick={() => {
                             setSelectedService(service);
-                            setShowViewModal(true);
+                            setModalMode('view');
+                            setShowAddModal(true);
                           }}
                         >
                           <Eye className="w-4 h-4" />
@@ -1111,17 +1198,15 @@ export function ServiceSetupPage() {
                         <button 
                           className="p-1.5 text-amber-600 hover:bg-amber-50 rounded" 
                           title="Chỉnh sửa"
-                          onClick={() => {
-                            setSelectedService(service);
-                            setFormData(service);
-                            setShowEditModal(true);
-                          }}
+                          aria-label={`Chỉnh sửa dịch vụ ${service.name}`}
+                          onClick={() => handleOpenEditModal(service)}
                         >
                           <Edit className="w-4 h-4" />
                         </button>
                         <button 
                           className="p-1.5 text-slate-600 hover:bg-slate-50 rounded" 
                           title="Cấu hình"
+                          aria-label={`Cấu hình dịch vụ ${service.name}`}
                           onClick={() => {
                             setSelectedService(service);
                             setShowConfigModal(true);
@@ -1132,6 +1217,7 @@ export function ServiceSetupPage() {
                         <button 
                           className="p-1.5 text-purple-600 hover:bg-purple-50 rounded" 
                           title="Trình duyệt"
+                          aria-label={`Trình duyệt dịch vụ ${service.name}`}
                           onClick={() => {
                             setSelectedService(service);
                             setShowSubmitApprovalModal(true);
@@ -1142,9 +1228,11 @@ export function ServiceSetupPage() {
                         <button 
                           className="p-1.5 text-green-600 hover:bg-green-50 rounded" 
                           title="Duyệt"
+                          aria-label={`Phê duyệt dịch vụ ${service.name}`}
                           onClick={() => {
                             setSelectedService(service);
-                            setShowApprovalModal(true);
+                            setModalMode('approve');
+                            setShowAddModal(true);
                           }}
                         >
                           <CheckCircle className="w-4 h-4" />
@@ -1152,6 +1240,7 @@ export function ServiceSetupPage() {
                         <button 
                           className="p-1.5 text-red-600 hover:bg-red-50 rounded" 
                           title="Xóa"
+                          aria-label={`Xóa dịch vụ ${service.name}`}
                           onClick={() => {
                             setSelectedService(service);
                             setShowDeleteModal(true);
@@ -1173,545 +1262,321 @@ export function ServiceSetupPage() {
 
 
 
-      {/* Removed: Tab Quản lý Log - Now merged with Giám sát */}
-      {false && activeTab === 'logs' && (
-        <div className="space-y-6">
-          {/* Statistics */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-600">Tổng log</p>
-                  <p className="text-2xl text-slate-900 mt-1">{logStats.total}</p>
-                </div>
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <FileText className="w-6 h-6 text-blue-600" />
-                </div>
+      {activeTab === 'approvals' && (
+        <div className="space-y-6 animate-in fade-in duration-500">
+          {/* 1. Dashboard Thống kê (Stat Cards) */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white rounded-xl border-l-4 border-l-amber-500 shadow-sm p-5 flex items-center justify-between group hover:shadow-md transition-shadow">
+              <div>
+                <p className="text-sm font-medium text-amber-600 mb-1">Chờ phê duyệt</p>
+                <p className="text-3xl font-bold text-slate-800">{approvalStats.pending}</p>
+              </div>
+              <div className="w-14 h-14 bg-amber-50 rounded-full flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
+                <Clock className="w-8 h-8" />
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-xl border-l-4 border-l-green-500 shadow-sm p-5 flex items-center justify-between group hover:shadow-md transition-shadow">
+              <div>
+                <p className="text-sm font-medium text-green-600 mb-1">Đã phê duyệt</p>
+                <p className="text-3xl font-bold text-slate-800">{approvalStats.approved}</p>
+              </div>
+              <div className="w-14 h-14 bg-green-50 rounded-full flex items-center justify-center text-green-500 group-hover:scale-110 transition-transform">
+                <FileCheck className="w-8 h-8" />
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-600">Thành công</p>
-                  <p className="text-2xl text-slate-900 mt-1">{logStats.success}</p>
-                </div>
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <CheckCircle className="w-6 h-6 text-green-600" />
-                </div>
+            <div className="bg-white rounded-xl border-l-4 border-l-red-500 shadow-sm p-5 flex items-center justify-between group hover:shadow-md transition-shadow">
+              <div>
+                <p className="text-sm font-medium text-red-600 mb-1">Từ chối</p>
+                <p className="text-3xl font-bold text-slate-800">{approvalStats.rejected}</p>
               </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-600">Thất bại</p>
-                  <p className="text-2xl text-slate-900 mt-1">{logStats.failed}</p>
-                </div>
-                <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                  <AlertCircle className="w-6 h-6 text-red-600" />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-600">Hôm nay</p>
-                  <p className="text-2xl text-slate-900 mt-1">{logStats.today}</p>
-                </div>
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <Clock className="w-6 h-6 text-purple-600" />
-                </div>
+              <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center text-red-500 group-hover:scale-110 transition-transform">
+                <XCircle className="w-8 h-8" />
               </div>
             </div>
           </div>
 
-          {/* Search */}
-          <div className="bg-white border border-slate-200 rounded-lg p-4">
-            <div className="relative">
+          {/* 2. Bộ lọc phụ & Tìm kiếm */}
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div className="flex flex-wrap items-center bg-slate-50/50 border-b border-slate-100 px-2 py-1.5 gap-1">
+              {[
+                { id: 'all', label: 'Tất cả', count: approvalStats.total },
+                { id: 'pending', label: 'Chờ phê duyệt', count: approvalStats.pending },
+                { id: 'approved', label: 'Đã phê duyệt', count: approvalStats.approved },
+                { id: 'rejected', label: 'Từ chối', count: approvalStats.rejected },
+              ].map((sub) => (
+                <button
+                  key={sub.id}
+                  onClick={() => setApprovalSubTab(sub.id as any)}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg flex items-center gap-2 transition-all ${
+                    approvalSubTab === sub.id
+                      ? 'bg-white shadow-sm ring-1 ring-slate-200 text-blue-600'
+                      : 'text-slate-500 hover:bg-slate-100'
+                  }`}
+                >
+                  {sub.label}
+                  <span className={`px-1.5 py-0.5 rounded text-[10px] ${
+                    approvalSubTab === sub.id ? 'bg-blue-100 text-blue-600' : 'bg-slate-200 text-slate-500'
+                  }`}>
+                    {sub.count}
+                  </span>
+                </button>
+              ))}
+            </div>
+            <div className="p-4 bg-white">
+              <div className="relative w-full">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  id="approval-search-input"
+                  type="text"
+                  placeholder="Tìm kiếm theo tên, mã danh mục..."
+                  aria-label="Tìm kiếm yêu cầu phê duyệt"
+                  title="Tìm kiếm theo tên, mã danh mục..."
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* 3. Danh sách Card yêu cầu */}
+          <div className="space-y-4">
+            {filteredApprovals.map((app) => (
+              <div key={app.id} className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 hover:border-blue-300 transition-colors group">
+                <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="text-base font-bold text-slate-800">{app.apiName}</h3>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
+                        app.status === 'pending' ? 'bg-amber-100 text-amber-700' :
+                        app.status === 'approved' ? 'bg-green-100 text-green-700' :
+                        'bg-red-100 text-red-700'
+                      }`}>
+                        {app.status === 'pending' ? 'Chờ phê duyệt' : app.status === 'approved' ? 'Đã phê duyệt' : 'Từ chối'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded border border-slate-200 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors uppercase">
+                        {app.apiCode}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button 
+                      onClick={() => {
+                        const service = services.find(s => s.code === app.apiCode);
+                        if (service) {
+                          setSelectedService(service);
+                          setModalMode('approve');
+                          setShowAddModal(true);
+                        } else {
+                          alert('Không tìm thấy thông tin chi tiết của dịch vụ này.');
+                        }
+                      }}
+                      className="px-5 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-2 shadow-sm shadow-blue-100 transition-all active:scale-95"
+                    >
+                      <Eye className="w-4 h-4" />
+                      Kiểm tra và phê duyệt
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 py-4 border-y border-slate-100">
+                  <div>
+                    <p className="text-[11px] text-slate-400 mb-1">Cơ quan quản lý</p>
+                    <p className="text-sm font-medium text-slate-700">Bộ Tư pháp</p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] text-slate-400 mb-1">Loại dữ liệu</p>
+                    <p className="text-sm font-medium text-slate-700">Văn bản pháp luật</p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] text-slate-400 mb-1">Người gửi</p>
+                    <div className="flex items-center gap-2">
+                       <span className="text-sm font-medium text-slate-700">{app.submitter}</span>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-[11px] text-slate-400 mb-1">Ngày gửi</p>
+                    <p className="text-sm font-medium text-slate-700">{app.submitDate}</p>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2 mt-5">
+                  <span className="px-2 py-1 bg-blue-50 text-blue-600 text-[10px] font-medium rounded-full border border-blue-100 flex items-center gap-1">
+                    <Database className="w-3 h-3" /> 12 thuộc tính
+                  </span>
+                  <span className="px-2 py-1 bg-purple-50 text-purple-600 text-[10px] font-medium rounded-full border border-purple-100 flex items-center gap-1">
+                    <Share className="w-3 h-3" /> 3 quan hệ
+                  </span>
+                  <span className="px-2 py-1 bg-pink-50 text-pink-600 text-[10px] font-medium rounded-full border border-pink-100 flex items-center gap-1">
+                    <Plus className="w-3 h-3" /> 2 đính kèm
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+
+
+      {activeTab === 'public' && (
+        <div className="space-y-6 animate-in fade-in duration-500">
+          {/* 1. Dashboard Thống kê */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex items-center gap-4">
+              <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600">
+                <Globe className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-xs text-slate-500 font-medium">Tổng dịch vụ công khai</p>
+                <p className="text-xl font-bold text-slate-900">{publicStats.total}</p>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex items-center gap-4">
+              <div className="w-12 h-12 bg-amber-50 rounded-lg flex items-center justify-center text-amber-600">
+                <FileCheck className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-xs text-slate-500 font-medium">Chờ công khai</p>
+                <p className="text-xl font-bold text-slate-900">{publicStats.eligible}</p>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex items-center gap-4">
+              <div className="w-12 h-12 bg-indigo-50 rounded-lg flex items-center justify-center text-indigo-600">
+                <Share className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-xs text-slate-500 font-medium">Đang công khai</p>
+                <p className="text-xl font-bold text-slate-900">{publicStats.published}</p>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex items-center gap-4">
+              <div className="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center text-purple-600">
+                <SettingsIcon className="w-6 h-6 animate-spin-slow" />
+              </div>
+              <div>
+                <p className="text-xs text-slate-500 font-medium">Đang xử lý</p>
+                <p className="text-xl font-bold text-slate-900">{publicStats.publishing}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* 2. Filters */}
+          <div className="bg-white border border-slate-200 rounded-lg p-3">
+            <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
+                id="public-service-search"
                 type="text"
-                placeholder="Tìm kiếm log..."
+                placeholder="Tìm kiếm dịch vụ công khai..."
+                aria-label="Tìm kiếm dịch vụ công khai"
+                title="Tìm kiếm dịch vụ công khai..."
+                className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
 
-          {/* Log List */}
-          <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-slate-200 bg-slate-50">
-                    <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Mã API</th>
-                    <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Tên API</th>
-                    <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Hành động</th>
-                    <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Người dùng</th>
-                    <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Thời gian</th>
-                    <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">IP Address</th>
-                    <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Chi tiết</th>
-                    <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Trạng thái</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredLogs.map((log) => (
-                    <tr key={log.id} className="border-b border-slate-100 hover:bg-slate-50">
-                      <td className="px-6 py-4 text-sm text-slate-900">
-                        <code className="px-2 py-0.5 bg-slate-100 text-blue-700 rounded text-xs">{log.apiCode}</code>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-slate-900">{log.apiName}</td>
-                      <td className="px-6 py-4 text-sm text-slate-600">{log.action}</td>
-                      <td className="px-6 py-4 text-sm text-slate-600">{log.user}</td>
-                      <td className="px-6 py-4 text-sm text-slate-600">{log.timestamp}</td>
-                      <td className="px-6 py-4 text-sm text-slate-600">
-                        <code className="text-xs">{log.ip}</code>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-slate-600">{log.details}</td>
-                      <td className="px-6 py-4">{getLogStatusBadge(log.status)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Tab Dữ liệu thụ động/Theo yêu cầu */}
-      {activeTab === 'passive-data' && (
-        <div className="space-y-4">
-      {/* Stats */}
-      <div className="grid grid-cols-4 gap-3">
-        <div className="bg-white border border-slate-200 rounded-lg p-2.5">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Database className="w-4 h-4 text-blue-600" />
-            </div>
-            <div>
-              <div className="text-xs text-slate-600">Tổng số dịch vụ</div>
-              <div className="text-sm text-slate-900 mt-0.5">{stats.total}</div>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white border border-slate-200 rounded-lg p-2.5">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-              <CheckCircle className="w-4 h-4 text-green-600" />
-            </div>
-            <div>
-              <div className="text-xs text-slate-600">Đang hoạt động</div>
-              <div className="text-sm text-slate-900 mt-0.5">{stats.active}</div>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white border border-slate-200 rounded-lg p-2.5">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Globe className="w-4 h-4 text-blue-600" />
-            </div>
-            <div>
-              <div className="text-xs text-slate-600">Công khai</div>
-              <div className="text-sm text-slate-900 mt-0.5">{services.filter(s => s.visibility === 'public').length}</div>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white border border-slate-200 rounded-lg p-2.5">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
-              <XCircle className="w-4 h-4 text-slate-600" />
-            </div>
-            <div>
-              <div className="text-xs text-slate-600">Chưa hoạt động</div>
-              <div className="text-sm text-slate-900 mt-0.5">{stats.inactive}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="bg-white border border-slate-200 rounded-lg p-3">
-        <div className="grid grid-cols-5 gap-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Tìm kiếm theo tên, mã dịch vụ, đơn vị..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">Tất cả trạng thái</option>
-            <option value="active">Đang hoạt động</option>
-            <option value="inactive">Chưa hoạt động</option>
-            <option value="maintenance">Đang bảo trì</option>
-            <option value="pending">Đang phê duyệt</option>
-          </select>
-          <select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-            className="px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">Tất cả loại dịch vụ</option>
-            <option value="REST">REST API</option>
-            <option value="SOAP">SOAP</option>
-            <option value="GraphQL">GraphQL</option>
-          </select>
-          <select
-            value={filterPublicType}
-            onChange={(e) => setFilterPublicType(e.target.value)}
-            className="px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">Tất cả phân loại</option>
-            <option value="public">Công khai</option>
-            <option value="private">Không công khai</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Add Service Button */}
-      <div className="flex items-center justify-end">
-        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2" onClick={() => setShowAddModal(true)}>
-          <Plus className="w-4 h-4" />
-          Thêm dịch vụ mới
-        </button>
-      </div>
-
-      {/* Service List */}
-      <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-slate-50 border-b border-slate-200">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">STT</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Mã dịch vụ</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Tên dịch vụ</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Loại</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Phiên bản</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Đơn vị quản lý</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Trạng thái</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Phân loại</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredServices.length === 0 ? (
-                <tr>
-                  <td colSpan={9} className="px-6 py-8 text-center text-slate-500 text-sm">
-                    Không tìm thấy dịch vụ phù hợp
-                  </td>
-                </tr>
-              ) : (
-                filteredServices.map((service, index) => (
-                  <tr key={service.id} className="hover:bg-slate-50">
-                    <td className="px-4 py-3 text-sm text-slate-700">{index + 1}</td>
-                    <td className="px-4 py-3 text-sm">
-                      <code className="px-2 py-0.5 bg-slate-100 text-blue-700 rounded text-xs">
-                        {service.code}
-                      </code>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="text-sm text-slate-900">{service.name}</div>
-                      <div className="text-xs text-slate-500 mt-0.5">{service.description}</div>
-                    </td>
-                    <td className="px-4 py-3 text-sm">{getTypeBadge(service.type)}</td>
-                    <td className="px-4 py-3 text-sm text-slate-700">
-                      <code className="text-xs">{service.version}</code>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-slate-700">{service.department}</td>
-                    <td className="px-4 py-3 text-sm">{getStatusBadge(service.status)}</td>
-                    <td className="px-4 py-3 text-sm">
-                      <span className={`inline-flex px-2 py-1 text-xs rounded-full ${
-                        service.visibility === 'public' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'
-                      }`}>
-                        {service.visibility === 'public' ? 'Công khai' : 'Không công khai'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <button 
-                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded" 
-                          title="Xem chi tiết"
-                          onClick={() => {
-                            setSelectedService(service);
-                            setShowViewModal(true);
-                          }}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <button 
-                          className="p-1.5 text-amber-600 hover:bg-amber-50 rounded" 
-                          title="Chỉnh sửa"
-                          onClick={() => {
-                            setSelectedService(service);
-                            setFormData(service);
-                            setShowEditModal(true);
-                          }}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button 
-                          className="p-1.5 text-slate-600 hover:bg-slate-50 rounded" 
-                          title="Cấu hình"
-                          onClick={() => {
-                            setSelectedService(service);
-                            setShowConfigModal(true);
-                          }}
-                        >
-                          <SettingsIcon className="w-4 h-4" />
-                        </button>
-                        <button 
-                          className="p-1.5 text-purple-600 hover:bg-purple-50 rounded" 
-                          title="Trình duyệt"
-                          onClick={() => {
-                            setSelectedService(service);
-                            setShowSubmitApprovalModal(true);
-                          }}
-                        >
-                          <FileCheck className="w-4 h-4" />
-                        </button>
-                        <button 
-                          className="p-1.5 text-green-600 hover:bg-green-50 rounded" 
-                          title="Duyệt"
-                          onClick={() => {
-                            setSelectedService(service);
-                            setShowApprovalModal(true);
-                          }}
-                        >
-                          <CheckCircle className="w-4 h-4" />
-                        </button>
-                        <button 
-                          className="p-1.5 text-red-600 hover:bg-red-50 rounded" 
-                          title="Xóa"
-                          onClick={() => {
-                            setSelectedService(service);
-                            setShowDeleteModal(true);
-                          }}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+          {/* 3. Service List */}
+          <div className="space-y-4">
+            {services.filter(s => 
+              s.visibility === 'public' && 
+              (s.status === 'approved' || s.status === 'published' || s.status === 'publishing' || s.status === 'active') &&
+              (s.name.toLowerCase().includes(searchTerm.toLowerCase()) || s.code.toLowerCase().includes(searchTerm.toLowerCase()))
+            ).map((service) => (
+              <div key={service.id} className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 hover:border-blue-300 transition-all group">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex gap-4">
+                    <div className="w-12 h-12 bg-slate-50 border border-slate-100 rounded-lg flex items-center justify-center group-hover:bg-blue-50 transition-colors">
+                      <Globe className="w-6 h-6 text-slate-400 group-hover:text-blue-500" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-bold text-slate-800">{service.name}</h4>
+                        {getStatusBadge(service.status)}
                       </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-      )}
-
-      {/* Tab Cấp quyền truy cập API */}
-      {activeTab === 'permissions' && (
-        <div className="space-y-4">
-          {/* Header */}
-          <h3 className="text-lg text-slate-900">Quản lý cấp quyền truy cập API</h3>
-
-          {/* Stats - Only 2 cards */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-blue-600" />
+                      <div className="flex items-center gap-3 text-xs text-slate-500">
+                        <span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded uppercase">{service.code}</span>
+                        <span>•</span>
+                        <span>{service.department}</span>
+                        <span>•</span>
+                        <span>v{service.version}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {service.status === 'approved' ? (
+                      <button 
+                        onClick={() => handlePublishService(service.id)}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm font-medium shadow-sm transition-all active:scale-95"
+                      >
+                        <Share className="w-4 h-4" />
+                        Công khai dịch vụ
+                      </button>
+                    ) : service.status === 'publishing' ? (
+                      <button className="px-4 py-2 bg-slate-100 text-slate-400 rounded-lg flex items-center gap-2 text-sm font-medium cursor-not-allowed" disabled>
+                        <SettingsIcon className="w-4 h-4 animate-spin" />
+                        Đang xử lý...
+                      </button>
+                    ) : (
+                      <button className="px-4 py-2 bg-green-50 text-green-600 border border-green-200 rounded-lg flex items-center gap-2 text-sm font-medium cursor-default">
+                        <CheckCircle className="w-4 h-4" />
+                        Đã công khai
+                      </button>
+                    )}
+                    <button 
+                      className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                      title="Xem chi tiết"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
-                <div>
-                  <div className="text-sm text-slate-600">Tổng số API</div>
-                  <div className="text-xl text-slate-900 mt-0.5">{stats.total}</div>
+
+                <div className="mt-4 pt-4 border-t border-slate-50 grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="space-y-1">
+                    <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Loại dịch vụ</p>
+                    <div className="flex items-center gap-2">
+                      <Database className="w-3.5 h-3.5 text-blue-500" />
+                      <span className="text-sm text-slate-700 font-medium">{service.type}</span>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Cổng dữ liệu</p>
+                    <div className="flex items-center gap-2">
+                      <Globe className="w-3.5 h-3.5 text-emerald-500" />
+                      <span className="text-sm text-slate-700 font-medium">Cổng dữ liệu dùng chung</span>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Ngày phê duyệt</p>
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-3.5 h-3.5 text-amber-500" />
+                      <span className="text-sm text-slate-700 font-medium">15/04/2025</span>
+                    </div>
+                  </div>
+                  <div className="space-y-1 text-right">
+                     {service.status === 'published' || service.status === 'active' ? (
+                       <span className="text-[10px] text-green-600 font-medium bg-green-50 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                          <Wifi className="w-3 h-3" /> Online
+                       </span>
+                     ) : (
+                       <span className="text-[10px] text-slate-400 font-medium bg-slate-100 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                          <EyeOff className="w-3 h-3" /> Offline
+                       </span>
+                     )}
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                </div>
-                <div>
-                  <div className="text-sm text-slate-600">Số API đã cấp quyền</div>
-                  <div className="text-xl text-slate-900 mt-0.5">{services.filter(s => s.status === 'active').length}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Filters */}
-          <div className="bg-white border border-slate-200 rounded-lg p-3">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm theo tên, mã dịch vụ, đơn vị..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="all">Tất cả</option>
-                <option value="granted">Đã cấp quyền</option>
-                <option value="notGranted">Chưa cấp quyền</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Add Permission Button - Moved here below search */}
-          <div className="flex justify-end">
-            <button
-              onClick={() => {
-                setShowGrantPermissionModal(true);
-                setGrantStep(1);
-                setSelectedApiForGrant(null);
-                setSelectedOrganization('');
-              }}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              Cấp quyền mới
-            </button>
-          </div>
-
-          {/* Services Table */}
-          <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-slate-50 border-b border-slate-200">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">STT</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Mã dịch vụ</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Tên dịch vụ</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Loại</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Phiên bản</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Đơn vị nhận api</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Ngày tạo</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {filteredServices.length === 0 ? (
-                    <tr>
-                      <td colSpan={8} className="px-6 py-8 text-center text-slate-500 text-sm">
-                        Không tìm thấy dịch vụ phù hợp
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredServices.map((service, index) => (
-                      <tr key={service.id} className="hover:bg-slate-50">
-                        <td className="px-4 py-3 text-sm text-slate-700">{index + 1}</td>
-                        <td className="px-4 py-3 text-sm">
-                          <code className="px-2 py-0.5 bg-slate-100 text-blue-700 rounded text-xs">
-                            {service.code}
-                          </code>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="text-sm text-slate-900">{service.name}</div>
-                          <div className="text-xs text-slate-500 mt-0.5">{service.description}</div>
-                        </td>
-                        <td className="px-4 py-3">{getTypeBadge(service.type)}</td>
-                        <td className="px-4 py-3">
-                          <code className="px-2 py-0.5 bg-green-100 text-green-700 rounded text-xs">
-                            {service.version}
-                          </code>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex flex-col gap-2">
-                            {service.assignedUnits && service.assignedUnits.length > 0 ? (
-                              <>
-                                {service.assignedUnits.map((unit: string, idx: number) => (
-                                  <div key={idx} className="flex items-center gap-2 group">
-                                    <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg flex-1 min-w-0">
-                                      <User className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
-                                      <span className="text-sm text-slate-900 truncate">{unit}</span>
-                                    </div>
-                                    <button 
-                                      className="p-1.5 text-amber-600 hover:bg-amber-50 rounded transition-colors opacity-0 group-hover:opacity-100"
-                                      title="Thay thế"
-                                      onClick={() => {
-                                        alert('Thay thế đơn vị: ' + unit);
-                                      }}
-                                    >
-                                      <Edit className="w-4 h-4" />
-                                    </button>
-                                    <button 
-                                      className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100"
-                                      title="Xóa"
-                                      onClick={() => {
-                                        alert('Xóa đơn vị: ' + unit);
-                                      }}
-                                    >
-                                      <X className="w-4 h-4" />
-                                    </button>
-                                  </div>
-                                ))}
-                                <button 
-                                  className="flex items-center gap-1.5 px-3 py-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-sm border border-dashed border-blue-300"
-                                  onClick={() => {
-                                    setSelectedApiForGrant(service);
-                                    setShowGrantPermissionModal(true);
-                                    setGrantStep(2);
-                                  }}
-                                >
-                                  <Plus className="w-4 h-4" />
-                                  Thêm đơn vị
-                                </button>
-                              </>
-                            ) : (
-                              <button 
-                                className="flex items-center gap-1.5 px-3 py-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-sm border border-dashed border-blue-300"
-                                onClick={() => {
-                                  setSelectedApiForGrant(service);
-                                  setShowGrantPermissionModal(true);
-                                  setGrantStep(2);
-                                }}
-                              >
-                                <Plus className="w-4 h-4" />
-                                Thêm đơn vị
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-2 text-sm text-slate-700">
-                            <Clock className="w-4 h-4 text-slate-400" />
-                            <span>{service.accessStartDate || '-'}</span>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-2">
-                            <button
-                              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                              title="Xem chi tiết"
-                              onClick={() => {
-                                setSelectedService(service);
-                                setShowViewModal(true);
-                              }}
-                            >
-                              <Eye className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+            ))}
           </div>
         </div>
       )}
+
+
 
       {/* Tab Quản lý phiên bản API */}
       {activeTab === 'versions' && (
@@ -1773,8 +1638,11 @@ export function ServiceSetupPage() {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
+                  id="version-search-input"
                   type="text"
                   placeholder="Tìm kiếm theo mã API, tên API hoặc phiên bản..."
+                  aria-label="Tìm kiếm theo mã API, tên API hoặc phiên bản"
+                  title="Tìm kiếm theo mã API, tên API hoặc phiên bản..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -1838,6 +1706,7 @@ export function ServiceSetupPage() {
                           <button 
                             className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" 
                             title="Xem chi tiết"
+                            aria-label="Xem chi tiết"
                             onClick={() => {
                               setSelectedVersion(version);
                               setShowVersionDetailModal(true);
@@ -1857,202 +1726,12 @@ export function ServiceSetupPage() {
       )}
 
       {/* Add Service Form Modal */}
-      <AddProvisionServiceModal isOpen={showAddModal} onClose={handleCloseServiceForm} />
-
-      {/* Modal Xem chi tiết */}
-      {showViewModal && selectedService && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-            {/* Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-5 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                  <Eye className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-xl text-white">Chi tiết cấp quyền API</h3>
-                  <p className="text-sm text-blue-100 mt-0.5">{selectedService.code}</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowViewModal(false)}
-                className="text-white/80 hover:text-white hover:bg-white/10 p-2 rounded-lg transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Content */}
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-160px)]">
-              <div className="space-y-6">
-                {/* Thông tin API */}
-                <div>
-                  <h4 className="text-sm text-slate-500 mb-3 flex items-center gap-2">
-                    <Server className="w-4 h-4" />
-                    Thông tin API
-                  </h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-slate-50 p-3 rounded-lg">
-                      <p className="text-xs text-slate-500 mb-1">Tên dịch vụ</p>
-                      <p className="text-sm text-slate-900">{selectedService.name}</p>
-                    </div>
-                    <div className="bg-slate-50 p-3 rounded-lg">
-                      <p className="text-xs text-slate-500 mb-1">Mã dịch vụ</p>
-                      <p className="text-sm text-slate-900 font-mono">{selectedService.code}</p>
-                    </div>
-                    <div className="bg-slate-50 p-3 rounded-lg">
-                      <p className="text-xs text-slate-500 mb-1">Loại</p>
-                      <p className="text-sm text-slate-900">{selectedService.type}</p>
-                    </div>
-                    <div className="bg-slate-50 p-3 rounded-lg">
-                      <p className="text-xs text-slate-500 mb-1">Phiên bản</p>
-                      <p className="text-sm text-slate-900">{selectedService.version}</p>
-                    </div>
-                    <div className="bg-slate-50 p-3 rounded-lg col-span-2">
-                      <p className="text-xs text-slate-500 mb-1">Endpoint</p>
-                      <p className="text-sm text-slate-900 font-mono break-all">{selectedService.endpoint}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Đơn vị nhận API */}
-                <div>
-                  <h4 className="text-sm text-slate-500 mb-3 flex items-center gap-2">
-                    <User className="w-4 h-4" />
-                    Đơn vị nhận API
-                  </h4>
-                  <div className="space-y-4">
-                    {selectedService.assignedUnits && selectedService.assignedUnits.length > 0 ? (
-                      selectedService.assignedUnits.map((unit, idx) => (
-                        <div key={idx} className="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <p className="text-xs text-slate-500 mb-1">Tên đơn vị nhận</p>
-                              <p className="text-sm text-slate-900">{unit}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-slate-500 mb-1">Thuộc đơn vị</p>
-                              <p className="text-sm text-slate-900">Bộ Tư pháp</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-slate-500 mb-1">Thông tin đầu mối</p>
-                              <p className="text-sm text-slate-900">Nguyễn Văn A</p>
-                              <p className="text-xs text-slate-600 mt-0.5">Email: nguyen.van.a@moj.gov.vn</p>
-                              <p className="text-xs text-slate-600">SĐT: 0123456789</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-slate-500 mb-1">Khóa key</p>
-                              <div className="flex items-center gap-2">
-                                <code className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-700">
-                                  {`${unit.substring(0, 3).toUpperCase()}_${Math.random().toString(36).substring(2, 15)}`}
-                                </code>
-                                <button className="text-blue-600 hover:text-blue-700" title="Copy">
-                                  <FileText className="w-3 h-3" />
-                                </button>
-                              </div>
-                            </div>
-                            <div>
-                              <p className="text-xs text-slate-500 mb-1">Quyền call/ngày</p>
-                              <p className="text-sm text-slate-900">1,000 requests/ngày</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-slate-500 mb-1">Ngày cấp quyền</p>
-                              <p className="text-sm text-slate-900">15/12/2024</p>
-                            </div>
-                            <div className="col-span-2">
-                              <p className="text-xs text-slate-500 mb-1">Quyền truy cập</p>
-                              <div className="flex gap-2 flex-wrap">
-                                <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">Đọc</span>
-                                <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">Ghi</span>
-                                <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded">Cập nhật</span>
-                              </div>
-                            </div>
-                            <div className="col-span-2">
-                              <p className="text-xs text-slate-500 mb-1">IP được phép truy cập</p>
-                              <div className="flex gap-2 flex-wrap">
-                                <code className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-700">192.168.1.100</code>
-                                <code className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-700">192.168.1.101</code>
-                                <code className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-700">10.0.0.50</code>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="bg-slate-50 p-4 rounded-lg text-center text-sm text-slate-500">
-                        Chưa có đơn vị được cấp quyền
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Giới hạn và bảo mật */}
-                <div>
-                  <h4 className="text-sm text-slate-500 mb-3 flex items-center gap-2">
-                    <Shield className="w-4 h-4" />
-                    Giới hạn và bảo mật
-                  </h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                      <p className="text-xs text-blue-600 mb-1">Số lượng request tối đa/ngày</p>
-                      <p className="text-sm text-slate-900">{selectedService.maxRequestsPerDay?.toLocaleString() || '10,000'}</p>
-                    </div>
-                    <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                      <p className="text-xs text-blue-600 mb-1">Loại xác thực</p>
-                      <p className="text-sm text-slate-900">{selectedService.authType || 'API Key'}</p>
-                    </div>
-                    <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                      <p className="text-xs text-blue-600 mb-1">HTTP Method</p>
-                      <p className="text-sm text-slate-900 font-mono">{selectedService.httpMethod || 'GET'}</p>
-                    </div>
-                    <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                      <p className="text-xs text-blue-600 mb-1">Content Type</p>
-                      <p className="text-sm text-slate-900 font-mono">{selectedService.contentType || 'application/json'}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Mô tả */}
-                <div>
-                  <h4 className="text-sm text-slate-500 mb-3 flex items-center gap-2">
-                    <FileText className="w-4 h-4" />
-                    Mô tả
-                  </h4>
-                  <div className="bg-slate-50 p-4 rounded-lg">
-                    <p className="text-sm text-slate-700 leading-relaxed">
-                      {selectedService.description}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Thông tin khác */}
-                <div>
-                  <h4 className="text-sm text-slate-500 mb-3 flex items-center gap-2">
-                    <Clock className="w-4 h-4" />
-                    Thông tin khác
-                  </h4>
-                  <div className="bg-slate-50 p-4 rounded-lg">
-                    <div className="flex items-center justify-between text-xs text-slate-600">
-                      <span>Ngày tạo: {selectedService.createdDate}</span>
-                      <span>Cập nhật: {selectedService.lastModified}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end">
-              <button
-                onClick={() => setShowViewModal(false)}
-                className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Đóng
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <AddProvisionServiceModal 
+        isOpen={showAddModal} 
+        onClose={handleCloseServiceForm} 
+        mode={modalMode}
+        data={selectedService}
+      />
 
       {/* Modal Thêm phiên bản mới */}
       {showVersionModal && (
@@ -2082,6 +1761,7 @@ export function ServiceSetupPage() {
                     status: 'current'
                   });
                 }}
+                aria-label="Đóng thêm phiên bản"
                 className="text-white/80 hover:text-white hover:bg-white/10 p-2 rounded-lg transition-colors"
               >
                 <X className="w-5 h-5" />
@@ -2093,10 +1773,12 @@ export function ServiceSetupPage() {
               <div className="space-y-4">
                 {/* Select API */}
                 <div>
-                  <label className="block text-sm text-slate-700 mb-2">
+                  <label htmlFor="version-api-select" className="block text-sm text-slate-700 mb-2">
                     Chọn API <span className="text-red-500">*</span>
                   </label>
                   <select
+                    id="version-api-select"
+                    title="Chọn API để thêm phiên bản"
                     value={versionForm.apiCode}
                     onChange={(e) => setVersionForm({ ...versionForm, apiCode: e.target.value })}
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -2113,11 +1795,13 @@ export function ServiceSetupPage() {
 
                 {/* Version Number */}
                 <div>
-                  <label className="block text-sm text-slate-700 mb-2">
+                  <label htmlFor="version-number-input" className="block text-sm text-slate-700 mb-2">
                     Số phiên bản <span className="text-red-500">*</span>
                   </label>
                   <input
+                    id="version-number-input"
                     type="text"
+                    title="Nhập số phiên bản (vd: v1.0.0)"
                     value={versionForm.version}
                     onChange={(e) => setVersionForm({ ...versionForm, version: e.target.value })}
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 font-mono"
@@ -2129,10 +1813,13 @@ export function ServiceSetupPage() {
 
                 {/* Status */}
                 <div>
-                  <label className="block text-sm text-slate-700 mb-2">
+                  <label htmlFor="version-status-select" className="block text-sm text-slate-700 mb-2">
                     Trạng thái <span className="text-red-500">*</span>
                   </label>
                   <select
+                    id="version-status-select"
+                    title="Chọn trạng thái phiên bản"
+                    aria-label="Chọn trạng thái phiên bản"
                     value={versionForm.status}
                     onChange={(e) => setVersionForm({ ...versionForm, status: e.target.value as any })}
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -2146,11 +1833,14 @@ export function ServiceSetupPage() {
                 {/* Dates */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm text-slate-700 mb-2">
+                    <label htmlFor="version-release-date" className="block text-sm text-slate-700 mb-2">
                       Ngày phát hành <span className="text-red-500">*</span>
                     </label>
                     <input
+                      id="version-release-date"
                       type="date"
+                      title="Chọn ngày phát hành"
+                      aria-label="Chọn ngày phát hành"
                       value={versionForm.releaseDate}
                       onChange={(e) => setVersionForm({ ...versionForm, releaseDate: e.target.value })}
                       className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -2158,11 +1848,14 @@ export function ServiceSetupPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm text-slate-700 mb-2">
+                    <label htmlFor="version-end-date" className="block text-sm text-slate-700 mb-2">
                       Ngày kết thúc
                     </label>
                     <input
+                      id="version-end-date"
                       type="date"
+                      title="Chọn ngày kết thúc (nếu có)"
+                      aria-label="Chọn ngày kết thúc (nếu có)"
                       value={versionForm.endOfLife}
                       onChange={(e) => setVersionForm({ ...versionForm, endOfLife: e.target.value })}
                       className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -2175,6 +1868,9 @@ export function ServiceSetupPage() {
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
+                      id="breaking-changes-checkbox"
+                      title="Có Breaking Changes"
+                      aria-label="Có Breaking Changes (thay đổi không tương thích ngược)"
                       checked={versionForm.breakingChanges}
                       onChange={(e) => setVersionForm({ ...versionForm, breakingChanges: e.target.checked })}
                       className="w-4 h-4 text-purple-600 border-slate-300 rounded focus:ring-2 focus:ring-purple-500"
@@ -2191,6 +1887,9 @@ export function ServiceSetupPage() {
                     Changelog <span className="text-red-500">*</span>
                   </label>
                   <textarea
+                    id="version-changelog"
+                    title="Nhập mô tả các thay đổi"
+                    aria-label="Changelog: Mô tả các thay đổi trong phiên bản này"
                     value={versionForm.changelog}
                     onChange={(e) => setVersionForm({ ...versionForm, changelog: e.target.value })}
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -2285,6 +1984,7 @@ export function ServiceSetupPage() {
                   setShowVersionDetailModal(false);
                   setSelectedVersion(null);
                 }}
+                aria-label="Đóng"
                 className="text-white/80 hover:text-white hover:bg-white/10 p-2 rounded-lg transition-colors"
               >
                 <X className="w-5 h-5" />
@@ -2393,7 +2093,7 @@ export function ServiceSetupPage() {
         currentStep={grantStep}
         setCurrentStep={setGrantStep}
         selectedApi={selectedApiForGrant}
-        setSelectedApi={setSelectedApiForGrant}
+        setSelectedApi={(api) => setSelectedApiForGrant(api)}
         selectedOrganization={selectedOrganization}
         setSelectedOrganization={setSelectedOrganization}
         permissions={grantPermissions}
@@ -2408,234 +2108,7 @@ export function ServiceSetupPage() {
         setValidUntil={setValidUntil}
       />
 
-      {/* Modal Chỉnh sửa */}
-      {showEditModal && selectedService && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-            {/* Header */}
-            <div className="bg-gradient-to-r from-amber-600 to-orange-600 px-6 py-5 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                  <Edit className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-xl text-white">Chỉnh sửa Dịch vụ</h3>
-                  <p className="text-sm text-orange-100 mt-0.5">{selectedService.code}</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowEditModal(false)}
-                className="text-white/80 hover:text-white hover:bg-white/10 p-2 rounded-lg transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
 
-            {/* Content */}
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
-              <div className="space-y-5">
-                {/* Basic Info */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm text-slate-700 mb-1.5">Tên dịch vụ *</label>
-                    <input
-                      type="text"
-                      defaultValue={selectedService.name}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-slate-700 mb-1.5">Mã dịch vụ *</label>
-                    <input
-                      type="text"
-                      defaultValue={selectedService.code}
-                      disabled
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-slate-100 cursor-not-allowed font-mono"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm text-slate-700 mb-1.5">Loại *</label>
-                    <select
-                      defaultValue={selectedService.type}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-                    >
-                      <option value="REST">REST API</option>
-                      <option value="SOAP">SOAP</option>
-                      <option value="GraphQL">GraphQL</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm text-slate-700 mb-1.5">Version *</label>
-                    <input
-                      type="text"
-                      defaultValue={selectedService.version}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-slate-700 mb-1.5">Trạng thái *</label>
-                    <select
-                      id="edit-service-status"
-                      defaultValue={selectedService.status}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-                      onChange={(e) => {
-                        const visibilitySelect = document.getElementById('edit-service-visibility') as HTMLSelectElement;
-                        if (e.target.value !== 'active') {
-                          visibilitySelect.value = 'private';
-                          visibilitySelect.disabled = true;
-                          visibilitySelect.className = 'w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-slate-100 text-slate-500 cursor-not-allowed';
-                        } else {
-                          visibilitySelect.disabled = false;
-                          visibilitySelect.className = 'w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500';
-                        }
-                      }}
-                    >
-                      <option value="active">Hoạt động</option>
-                      <option value="inactive">Chưa hoạt động</option>
-                      <option value="pending">Đang phê duyệt</option>
-                      <option value="maintenance">Bảo trì</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm text-slate-700 mb-1.5">
-                      <Globe className="w-3 h-3 inline mr-1" />
-                      Phân loại *
-                    </label>
-                    <div className="flex gap-4 mt-2">
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="edit-visibility"
-                          value="private"
-                          defaultChecked={selectedService.visibility !== 'public'}
-                          className="w-4 h-4 text-purple-600 border-slate-300 focus:ring-2 focus:ring-amber-500"
-                        />
-                        <span className="text-sm text-slate-700">Không công khai</span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="edit-visibility"
-                          value="public"
-                          defaultChecked={selectedService.visibility === 'public'}
-                          className="w-4 h-4 text-purple-600 border-slate-300 focus:ring-2 focus:ring-amber-500"
-                        />
-                        <span className="text-sm text-slate-700">Công khai</span>
-                      </label>
-                    </div>
-                    <p className="text-xs text-blue-600 mt-2 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      Phân loại có thể thay đổi sau khi được phê duyệt
-                    </p>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm text-slate-700 mb-1.5">Endpoint URL *</label>
-                  <input
-                    type="text"
-                    defaultValue={selectedService.endpoint}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
-                    placeholder="https://api.example.com/v1/service"
-                  />
-                </div>
-
-                {/* Technical Config */}
-                <div className="pt-4 border-t border-slate-200">
-                  <h4 className="text-sm text-slate-700 mb-3 flex items-center gap-2">
-                    <SettingsIcon className="w-4 h-4" />
-                    Cấu hình kỹ thuật
-                  </h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm text-slate-700 mb-1.5">HTTP Method</label>
-                      <select
-                        defaultValue={selectedService.httpMethod || 'GET'}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-                      >
-                        <option value="GET">GET</option>
-                        <option value="POST">POST</option>
-                        <option value="PUT">PUT</option>
-                        <option value="DELETE">DELETE</option>
-                        <option value="PATCH">PATCH</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm text-slate-700 mb-1.5">Content Type</label>
-                      <select
-                        defaultValue={selectedService.contentType || 'application/json'}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-                      >
-                        <option value="application/json">application/json</option>
-                        <option value="application/xml">application/xml</option>
-                        <option value="text/plain">text/plain</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm text-slate-700 mb-1.5">Authentication</label>
-                      <select
-                        defaultValue={selectedService.authType || 'apikey'}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-                      >
-                        <option value="none">None</option>
-                        <option value="apikey">API Key</option>
-                        <option value="basic">Basic Auth</option>
-                        <option value="bearer">Bearer Token</option>
-                        <option value="oauth2">OAuth 2.0</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm text-slate-700 mb-1.5">Max Requests/Day</label>
-                      <input
-                        type="number"
-                        defaultValue={selectedService.maxRequestsPerDay || 10000}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm text-slate-700 mb-1.5">Mô tả</label>
-                  <textarea
-                    defaultValue={selectedService.description}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
-              <p className="text-xs text-slate-500 flex items-center gap-1">
-                <AlertCircle className="w-3.5 h-3.5" />
-                Thay đổi có thể yêu cầu phê duyệt
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowEditModal(false)}
-                  className="px-4 py-2.5 text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
-                >
-                  Hủy
-                </button>
-                <button
-                  onClick={() => {
-                    setShowEditModal(false);
-                  }}
-                  className="px-5 py-2.5 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center gap-2"
-                >
-                  <Save className="w-4 h-4" />
-                  Lưu thay đổi
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Modal Cấu hình */}
       {showConfigModal && selectedService && (
@@ -2654,6 +2127,7 @@ export function ServiceSetupPage() {
               </div>
               <button
                 onClick={() => setShowConfigModal(false)}
+                aria-label="Đóng cấu hình"
                 className="text-white/80 hover:text-white hover:bg-white/10 p-2 rounded-lg transition-colors"
               >
                 <X className="w-5 h-5" />
@@ -2674,6 +2148,8 @@ export function ServiceSetupPage() {
                       <label className="block text-xs text-slate-600 mb-1.5">Max Retries</label>
                       <input
                         type="number"
+                        title="Max Retries"
+                        aria-label="Max Retries"
                         defaultValue={3}
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                       />
@@ -2682,6 +2158,8 @@ export function ServiceSetupPage() {
                       <label className="block text-xs text-slate-600 mb-1.5">Initial Delay (ms)</label>
                       <input
                         type="number"
+                        title="Initial Delay (ms)"
+                        aria-label="Initial Delay (ms)"
                         defaultValue={1000}
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                       />
@@ -2690,6 +2168,8 @@ export function ServiceSetupPage() {
                       <label className="block text-xs text-slate-600 mb-1.5">Max Delay (ms)</label>
                       <input
                         type="number"
+                        title="Max Delay (ms)"
+                        aria-label="Max Delay (ms)"
                         defaultValue={10000}
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                       />
@@ -2708,6 +2188,8 @@ export function ServiceSetupPage() {
                       <label className="block text-xs text-slate-600 mb-1.5">Connection Timeout (s)</label>
                       <input
                         type="number"
+                        title="Connection Timeout (s)"
+                        aria-label="Connection Timeout (s)"
                         defaultValue={30}
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
@@ -2716,6 +2198,8 @@ export function ServiceSetupPage() {
                       <label className="block text-xs text-slate-600 mb-1.5">Read Timeout (s)</label>
                       <input
                         type="number"
+                        title="Read Timeout (s)"
+                        aria-label="Read Timeout (s)"
                         defaultValue={60}
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
@@ -2734,6 +2218,8 @@ export function ServiceSetupPage() {
                       <label className="block text-xs text-slate-600 mb-1.5">Requests per Second</label>
                       <input
                         type="number"
+                        title="Requests per Second"
+                        aria-label="Requests per Second"
                         defaultValue={100}
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
                       />
@@ -2742,6 +2228,8 @@ export function ServiceSetupPage() {
                       <label className="block text-xs text-slate-600 mb-1.5">Burst Size</label>
                       <input
                         type="number"
+                        title="Burst Size"
+                        aria-label="Burst Size"
                         defaultValue={200}
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
                       />
@@ -2760,6 +2248,8 @@ export function ServiceSetupPage() {
                       <label className="block text-xs text-slate-600 mb-1.5">Failure Threshold</label>
                       <input
                         type="number"
+                        title="Failure Threshold"
+                        aria-label="Failure Threshold"
                         defaultValue={5}
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                       />
@@ -2768,6 +2258,8 @@ export function ServiceSetupPage() {
                       <label className="block text-xs text-slate-600 mb-1.5">Reset Timeout (s)</label>
                       <input
                         type="number"
+                        title="Reset Timeout (s)"
+                        aria-label="Reset Timeout (s)"
                         defaultValue={60}
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                       />
@@ -2776,6 +2268,8 @@ export function ServiceSetupPage() {
                       <label className="block text-xs text-slate-600 mb-1.5">Half-Open Requests</label>
                       <input
                         type="number"
+                        title="Half-Open Requests"
+                        aria-label="Half-Open Requests"
                         defaultValue={3}
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                       />
@@ -2793,6 +2287,8 @@ export function ServiceSetupPage() {
                     <label className="flex items-center gap-3 cursor-pointer">
                       <input
                         type="checkbox"
+                        title="Enable request logging"
+                        aria-label="Enable request logging"
                         defaultChecked
                         className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-2 focus:ring-indigo-500"
                       />
@@ -2801,6 +2297,8 @@ export function ServiceSetupPage() {
                     <label className="flex items-center gap-3 cursor-pointer">
                       <input
                         type="checkbox"
+                        title="Enable performance metrics"
+                        aria-label="Enable performance metrics"
                         defaultChecked
                         className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-2 focus:ring-indigo-500"
                       />
@@ -2809,6 +2307,8 @@ export function ServiceSetupPage() {
                     <label className="flex items-center gap-3 cursor-pointer">
                       <input
                         type="checkbox"
+                        title="Enable error alerting"
+                        aria-label="Enable error alerting"
                         className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-2 focus:ring-indigo-500"
                       />
                       <span className="text-sm text-slate-700">Enable error alerting</span>
@@ -2940,6 +2440,7 @@ export function ServiceSetupPage() {
               </div>
               <button
                 onClick={() => setShowSubmitApprovalModal(false)}
+                aria-label="Đóng cửa sổ"
                 className="text-white/80 hover:text-white hover:bg-white/10 p-2 rounded-lg transition-colors"
               >
                 <X className="w-5 h-5" />
@@ -2977,10 +2478,10 @@ export function ServiceSetupPage() {
 
                 {/* Loại yêu cầu */}
                 <div>
-                  <label className="block text-sm text-slate-700 mb-2">
+                  <label htmlFor="approval-request-type" className="block text-sm text-slate-700 mb-2">
                     Loại yêu cầu phê duyệt *
                   </label>
-                  <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
+                  <select id="approval-request-type" title="Chọn loại yêu cầu phê duyệt" aria-label="Loại yêu cầu phê duyệt" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
                     <option value="publish">Xuất bản dịch vụ mới</option>
                     <option value="update">Cập nhật dịch vụ</option>
                     <option value="delete">Xóa dịch vụ</option>
@@ -2990,11 +2491,11 @@ export function ServiceSetupPage() {
 
                 {/* Người duyệt */}
                 <div>
-                  <label className="block text-sm text-slate-700 mb-2 flex items-center gap-2">
+                  <label htmlFor="approver-selection" className="block text-sm text-slate-700 mb-2 flex items-center gap-2">
                     <User className="w-4 h-4" />
                     Chọn người duyệt *
                   </label>
-                  <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
+                  <select id="approver-selection" title="Chọn người phê duyệt" aria-label="Chọn người phê duyệt" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
                     <option value="">-- Chọn người duyệt --</option>
                     <option value="user1">Nguyễn Văn A - Trưởng phòng Kỹ thuật</option>
                     <option value="user2">Trần Thị B - Phó Giám đốc CNTT</option>
@@ -3003,42 +2504,7 @@ export function ServiceSetupPage() {
                   </select>
                 </div>
 
-                {/* Độ ưu tiên */}
-                <div>
-                  <label className="block text-sm text-slate-700 mb-2">
-                    Độ ưu tiên
-                  </label>
-                  <div className="flex gap-3">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="priority"
-                        value="normal"
-                        defaultChecked
-                        className="w-4 h-4 text-purple-600 border-slate-300 focus:ring-2 focus:ring-purple-500"
-                      />
-                      <span className="text-sm text-slate-700">Bình thường</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="priority"
-                        value="high"
-                        className="w-4 h-4 text-purple-600 border-slate-300 focus:ring-2 focus:ring-purple-500"
-                      />
-                      <span className="text-sm text-slate-700">Cao</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="priority"
-                        value="urgent"
-                        className="w-4 h-4 text-purple-600 border-slate-300 focus:ring-2 focus:ring-purple-500"
-                      />
-                      <span className="text-sm text-orange-700">Khẩn cấp</span>
-                    </label>
-                  </div>
-                </div>
+
 
                 {/* Phân loại công khai */}
                 <div>
@@ -3052,6 +2518,8 @@ export function ServiceSetupPage() {
                         type="radio"
                         name="visibility"
                         value="private"
+                        title="Phân loại: Không công khai"
+                        aria-label="Phân loại: Không công khai"
                         defaultChecked
                         className="w-4 h-4 text-purple-600 border-slate-300 focus:ring-2 focus:ring-purple-500"
                       />
@@ -3062,6 +2530,8 @@ export function ServiceSetupPage() {
                         type="radio"
                         name="visibility"
                         value="public"
+                        title="Phân loại: Công khai"
+                        aria-label="Phân loại: Công khai"
                         className="w-4 h-4 text-purple-600 border-slate-300 focus:ring-2 focus:ring-purple-500"
                       />
                       <span className="text-sm text-slate-700">Công khai</span>
@@ -3079,7 +2549,10 @@ export function ServiceSetupPage() {
                     Lý do trình duyệt *
                   </label>
                   <textarea
+                    id="submit-reason-textarea"
                     rows={4}
+                    title="Nhập lý do trình duyệt"
+                    aria-label="Lý do và mục đích cần phê duyệt dịch vụ này"
                     placeholder="Nhập lý do và mục đích cần phê duyệt dịch vụ này..."
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
                   />
@@ -3136,334 +2609,41 @@ export function ServiceSetupPage() {
         </div>
       )}
 
-      {/* Modal Duyệt */}
-      {showApprovalModal && selectedService && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden">
-            {/* Header */}
-            <div className="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-5 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                  <CheckCircle className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-xl text-white">Phê duyệt Yêu cầu</h3>
-                  <p className="text-sm text-green-100 mt-0.5">Xem xét và ra quyết định</p>
-                </div>
+      {/* Màn hình Phê duyệt Lãnh đạo (UC2, UC3, UC4) */}
+      <ApprovalReviewModal
+        isOpen={showApprovalReviewModal}
+        onClose={() => setShowApprovalReviewModal(false)}
+      />
+
+      {/* Confirm Công khai (UC5) */}
+      {showPublishConfirm && serviceToPublish && (
+        <div className="fixed inset-0 bg-black/40 z-[80] flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                <Globe className="w-5 h-5 text-green-600" />
               </div>
+              <div>
+                <h3 className="font-semibold text-slate-800 text-sm">Xác nhận Công khai Dịch vụ</h3>
+                <p className="text-xs text-slate-500 mt-0.5">{serviceToPublish.name}</p>
+              </div>
+            </div>
+            <p className="text-sm text-slate-600 mb-5">
+              Dịch vụ sẽ được <strong className="text-green-600">công khai tự động</strong> lên Cổng dữ liệu dùng chung và nền tảng chia sẻ LGSP/NDXP. Hành động này sẽ thông báo tới các đơn vị liên quan.
+            </p>
+            <div className="flex gap-2 justify-end">
+              <button type="button" onClick={() => { setShowPublishConfirm(false); setServiceToPublish(null); }} className="px-4 py-2 text-sm text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50">Huỷ</button>
               <button
-                onClick={() => setShowApprovalModal(false)}
-                className="text-white/80 hover:text-white hover:bg-white/10 p-2 rounded-lg transition-colors"
+                type="button"
+                onClick={() => {
+                  setServices(services.map(s => s.id === serviceToPublish.id ? { ...s, status: 'active' as any, visibility: 'public' as any } : s));
+                  setShowPublishConfirm(false);
+                  setServiceToPublish(null);
+                }}
+                className="px-4 py-2 text-sm text-white bg-green-600 rounded-lg hover:bg-green-700 font-medium flex items-center gap-1.5"
               >
-                <X className="w-5 h-5" />
+                <Globe className="w-4 h-4" /> Công khai ngay
               </button>
-            </div>
-
-            {/* Content */}
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
-              <div className="space-y-5">
-                {/* Thông tin yêu cầu */}
-                <div className="border border-slate-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h4 className="text-sm text-slate-900 flex items-center gap-2">
-                      <FileCheck className="w-4 h-4 text-green-600" />
-                      Thông tin yêu cầu
-                    </h4>
-                    <span className="px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded">
-                      Chờ duyệt
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div>
-                      <p className="text-xs text-slate-500 mb-1">Mã yêu cầu</p>
-                      <p className="text-slate-900 font-mono">REQ-2024-001</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-500 mb-1">Loại yêu cầu</p>
-                      <p className="text-slate-900">Xuất bản dịch vụ mới</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-500 mb-1">Người gửi</p>
-                      <p className="text-slate-900">Nguyễn Văn X - Chuyên viên CNTT</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-500 mb-1">Ngày gửi</p>
-                      <p className="text-slate-900">22/12/2024 14:30</p>
-                    </div>
-                    <div className="col-span-2">
-                      <p className="text-xs text-slate-500 mb-1">Độ ưu tiên</p>
-                      <span className="inline-flex px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded">
-                        Cao
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Thông tin dịch vụ */}
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <h4 className="text-sm text-green-900 mb-3 flex items-center gap-2">
-                    <Server className="w-4 h-4" />
-                    Thông tin dịch vụ
-                  </h4>
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div>
-                      <p className="text-xs text-green-700 mb-1">Mã dịch vụ</p>
-                      <p className="text-slate-900 font-mono">{selectedService.code}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-green-700 mb-1">Tên dịch vụ</p>
-                      <p className="text-slate-900">{selectedService.name}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-green-700 mb-1">Loại dịch vụ</p>
-                      <p className="text-slate-900">{selectedService.type}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-green-700 mb-1">Phiên bản</p>
-                      <p className="text-slate-900">{selectedService.version}</p>
-                    </div>
-                    <div className="col-span-2">
-                      <p className="text-xs text-green-700 mb-1">Endpoint</p>
-                      <p className="text-slate-900 font-mono text-xs break-all">{selectedService.endpoint}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Lý do trình duyệt */}
-                <div>
-                  <label className="block text-sm text-slate-700 mb-2">Lý do trình duyệt</label>
-                  <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
-                    <p className="text-sm text-slate-700 leading-relaxed">
-                      Dịch vụ này được phát triển để phục vụ việc tra cứu thông tin hồ sơ công chứng cho các đơn vị thuộc Bộ Tư pháp. 
-                      Dịch vụ đã được kiểm thử đầy đủ và cần được đưa vào vận hành để phục vụ công tác nghiệp vụ.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Tệp đính kèm */}
-                <div>
-                  <label className="block text-sm text-slate-700 mb-2">Tệp đính kèm</label>
-                  <div className="border border-slate-200 rounded-lg p-3">
-                    <div className="flex items-center gap-3 text-sm">
-                      <FileText className="w-5 h-5 text-blue-600" />
-                      <div className="flex-1">
-                        <p className="text-slate-900">De_xuat_dich_vu_cong_chung.pdf</p>
-                        <p className="text-xs text-slate-500">1.2 MB</p>
-                      </div>
-                      <button className="text-blue-600 hover:text-blue-700 text-sm">Tải xuống</button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Ý kiến phê duyệt */}
-                <div>
-                  <label className="block text-sm text-slate-700 mb-2">
-                    Ý kiến phê duyệt *
-                  </label>
-                  <textarea
-                    rows={4}
-                    placeholder="Nhập ý kiến, nhận xét về yêu cầu này..."
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
-                  />
-                </div>
-
-                {/* Phê duyệt 2 cấp */}
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <label className="block text-sm text-slate-900 mb-3 flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-600" />
-                    Phê duyệt 2 cấp *
-                  </label>
-                  <div className="space-y-3">
-                    <label className="flex items-start gap-3 cursor-pointer group">
-                      <input
-                        type="checkbox"
-                        id="approve-service"
-                        name="approveService"
-                        defaultChecked
-                        className="w-5 h-5 text-green-600 border-slate-300 rounded focus:ring-2 focus:ring-green-500 mt-0.5"
-                      />
-                      <div>
-                        <span className="text-sm text-slate-900 font-medium group-hover:text-green-700">
-                          Duyệt dịch vụ
-                        </span>
-                        <p className="text-xs text-slate-600 mt-0.5">
-                          Cho phép dịch vụ hoạt động và cung cấp dữ liệu
-                        </p>
-                      </div>
-                    </label>
-                    <label className="flex items-start gap-3 cursor-pointer group">
-                      <input
-                        type="checkbox"
-                        id="approve-public"
-                        name="approvePublic"
-                        className="w-5 h-5 text-green-600 border-slate-300 rounded focus:ring-2 focus:ring-green-500 mt-0.5"
-                      />
-                      <div>
-                        <span className="text-sm text-slate-900 font-medium group-hover:text-green-700">
-                          Duyệt công khai
-                        </span>
-                        <p className="text-xs text-slate-600 mt-0.5">
-                          Cho phép dịch vụ được công khai cho người dùng bên ngoài
-                        </p>
-                      </div>
-                    </label>
-                  </div>
-                  <p className="text-xs text-green-700 mt-3 flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" />
-                    Bạn có thể duyệt riêng từng cấp hoặc duyệt cả 2 cùng lúc
-                  </p>
-                </div>
-
-                {/* Quyết định */}
-                <div className="pt-3 border-t border-slate-200">
-                  <label className="block text-sm text-slate-700 mb-3">
-                    Quyết định *
-                  </label>
-                  <div className="flex gap-4">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="decision"
-                        value="approve"
-                        defaultChecked
-                        className="w-4 h-4 text-green-600 border-slate-300 focus:ring-2 focus:ring-green-500"
-                      />
-                      <span className="text-sm text-green-700 font-medium">Phê duyệt</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="decision"
-                        value="reject"
-                        className="w-4 h-4 text-red-600 border-slate-300 focus:ring-2 focus:ring-red-500"
-                      />
-                      <span className="text-sm text-red-700 font-medium">Từ chối</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="decision"
-                        value="request-change"
-                        className="w-4 h-4 text-orange-600 border-slate-300 focus:ring-2 focus:ring-orange-500"
-                      />
-                      <span className="text-sm text-orange-700 font-medium">Yêu cầu chỉnh sửa</span>
-                    </label>
-                  </div>
-                </div>
-
-                {/* Thông báo quyết định */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <label className="block text-sm text-slate-900 mb-3 flex items-center gap-2">
-                    <Mail className="w-4 h-4 text-blue-600" />
-                    Thông báo quyết định
-                  </label>
-                  <div className="space-y-2">
-                    <label className="flex items-start gap-3 cursor-pointer group">
-                      <input
-                        type="checkbox"
-                        id="notify-email"
-                        name="notifyEmail"
-                        defaultChecked
-                        className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 mt-0.5"
-                      />
-                      <div>
-                        <span className="text-sm text-slate-900 font-medium group-hover:text-blue-700">
-                          Gửi Email
-                        </span>
-                        <p className="text-xs text-slate-600 mt-0.5">
-                          Gửi thông báo quyết định phê duyệt tới email người gửi yêu cầu
-                        </p>
-                      </div>
-                    </label>
-                    <label className="flex items-start gap-3 cursor-pointer group">
-                      <input
-                        type="checkbox"
-                        id="notify-sms"
-                        name="notifySms"
-                        className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 mt-0.5"
-                      />
-                      <div>
-                        <span className="text-sm text-slate-900 font-medium group-hover:text-blue-700">
-                          Gửi SMS
-                        </span>
-                        <p className="text-xs text-slate-600 mt-0.5">
-                          Gửi tin nhắn SMS thông báo kết quả phê duyệt
-                        </p>
-                      </div>
-                    </label>
-                  </div>
-                  <p className="text-xs text-blue-700 mt-3 flex items-center gap-1">
-                    <MessageSquare className="w-3 h-3" />
-                    Thông báo sẽ được gửi ngay sau khi xác nhận quyết định
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
-              <p className="text-xs text-slate-500 flex items-center gap-1">
-                <Lock className="w-3.5 h-3.5" />
-                Quyết định sẽ được ghi nhận vào lịch sử
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowApprovalModal(false)}
-                  className="px-4 py-2.5 text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
-                >
-                  Hủy
-                </button>
-                <button
-                  onClick={() => {
-                    // Lấy giá trị quyết định từ radio button
-                    const decisionElement = document.querySelector('input[name="decision"]:checked') as HTMLInputElement;
-                    const decision = decisionElement?.value || 'approve';
-                    
-                    // Lấy giá trị checkbox phê duyệt 2 cấp
-                    const approveServiceCheckbox = document.getElementById('approve-service') as HTMLInputElement;
-                    const approvePublicCheckbox = document.getElementById('approve-public') as HTMLInputElement;
-                    
-                    // Lấy giá trị checkbox thông báo
-                    const notifyEmailCheckbox = document.getElementById('notify-email') as HTMLInputElement;
-                    const notifySmsCheckbox = document.getElementById('notify-sms') as HTMLInputElement;
-                    
-                    // Cập nhật trạng thái dịch vụ dựa trên quyết định
-                    if (decision === 'approve') {
-                      // Phê duyệt → Cập nhật theo checkbox
-                      const newStatus = approveServiceCheckbox?.checked ? 'active' : selectedService.status;
-                      const newVisibility = approvePublicCheckbox?.checked ? 'public' : 'private';
-                      
-                      setServices(services.map(s =>
-                        s.id === selectedService.id 
-                          ? { ...s, status: newStatus as any, visibility: newVisibility as any } 
-                          : s
-                      ));
-                    } else {
-                      // Từ chối hoặc yêu cầu chỉnh sửa → status = 'inactive', visibility = 'private'
-                      setServices(services.map(s =>
-                        s.id === selectedService.id 
-                          ? { ...s, status: 'inactive' as any, visibility: 'private' as any } 
-                          : s
-                      ));
-                    }
-                    
-                    // Hiển thị thông báo gửi email/SMS
-                    const notifications = [];
-                    if (notifyEmailCheckbox?.checked) notifications.push('Email');
-                    if (notifySmsCheckbox?.checked) notifications.push('SMS');
-                    
-                    if (notifications.length > 0) {
-                      alert(`✓ Quyết định đã được xác nhận!\n\n📧 Thông báo sẽ được gửi qua: ${notifications.join(' và ')}\n\nNgười nhận: Nguyễn Văn X (chuyenvien@botuphap.gov.vn | 0912345678)`);
-                    }
-                    
-                    setShowApprovalModal(false);
-                  }}
-                  className="px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
-                >
-                  <CheckCircle className="w-4 h-4" />
-                  Xác nhận quyết định
-                </button>
-              </div>
             </div>
           </div>
         </div>

@@ -622,14 +622,18 @@ export function APIManagementPage() {
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
+                  id="api-search-input"
                   type="text"
                   placeholder="Tìm kiếm theo tên, mã API, endpoint..."
+                  aria-label="Tìm kiếm API"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <select
+                id="api-type-filter"
+                aria-label="Lọc theo loại API"
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value)}
                 className="px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -639,6 +643,8 @@ export function APIManagementPage() {
                 <option value="passive">API thụ động</option>
               </select>
               <select
+                id="api-status-filter"
+                aria-label="Lọc theo trạng thái"
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
                 className="px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -746,6 +752,7 @@ export function APIManagementPage() {
                             <button 
                               className="p-1.5 text-blue-600 hover:bg-blue-50 rounded" 
                               title="Xem chi tiết"
+                              aria-label={`Xem chi tiết API ${api.name}`}
                               onClick={() => {
                                 setSelectedAPI(api);
                                 setShowViewModal(true);
@@ -756,6 +763,7 @@ export function APIManagementPage() {
                             <button 
                               className="p-1.5 text-amber-600 hover:bg-amber-50 rounded" 
                               title="Chỉnh sửa"
+                              aria-label={`Chỉnh sửa API ${api.name}`}
                               onClick={() => {
                                 setSelectedAPI(api);
                                 setFormData(api);
@@ -767,6 +775,7 @@ export function APIManagementPage() {
                             <button 
                               className="p-1.5 text-green-600 hover:bg-green-50 rounded" 
                               title="Giám sát"
+                              aria-label={`Giám sát API ${api.name}`}
                               onClick={() => {
                                 setSelectedAPI(api);
                                 setShowMonitorModal(true);
@@ -842,6 +851,7 @@ export function APIManagementPage() {
                               <button 
                                 className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded" 
                                 title="Công bố"
+                                aria-label={`Công bố API ${api.name}`}
                                 onClick={() => {
                                   setSelectedAPI(api);
                                   setShowPublishModal(true);
@@ -853,6 +863,7 @@ export function APIManagementPage() {
                             <button 
                               className="p-1.5 text-red-600 hover:bg-red-50 rounded" 
                               title="Xóa"
+                              aria-label={`Xóa API ${api.name}`}
                               onClick={() => {
                                 setSelectedAPI(api);
                                 setShowDeleteModal(true);
@@ -876,7 +887,12 @@ export function APIManagementPage() {
               <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
                 <div className="flex items-center justify-between p-6 border-b border-slate-200">
                   <h2 className="text-slate-900">Thêm API mới</h2>
-                  <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600">
+                  <button 
+                    onClick={() => setShowAddModal(false)} 
+                    className="text-slate-400 hover:text-slate-600"
+                    title="Đóng"
+                    aria-label="Đóng bảng thêm API"
+                  >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
@@ -938,7 +954,12 @@ export function APIManagementPage() {
               <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
                 <div className="flex items-center justify-between p-6 border-b border-slate-200">
                   <h2 className="text-slate-900">Chỉnh sửa API</h2>
-                  <button onClick={() => setShowEditModal(false)} className="text-slate-400 hover:text-slate-600">
+                  <button 
+                    onClick={() => setShowEditModal(false)} 
+                    className="text-slate-400 hover:text-slate-600"
+                    title="Đóng bản chỉnh sửa"
+                    aria-label="Đóng bản chỉnh sửa"
+                  >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
@@ -1048,7 +1069,12 @@ export function APIManagementPage() {
               <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
                 <div className="flex items-center justify-between p-6 border-b border-slate-200">
                   <h2 className="text-slate-900">Chi tiết API</h2>
-                  <button onClick={() => setShowViewModal(false)} className="text-slate-400 hover:text-slate-600">
+                  <button 
+                    onClick={() => setShowViewModal(false)} 
+                    className="text-slate-400 hover:text-slate-600"
+                    title="Đóng chi tiết"
+                    aria-label="Đóng bảng chi tiết API"
+                  >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
@@ -1224,7 +1250,12 @@ export function APIManagementPage() {
               <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
                 <div className="flex items-center justify-between p-6 border-b border-slate-200">
                   <h2 className="text-slate-900">Xác nhận xóa</h2>
-                  <button onClick={() => setShowDeleteModal(false)} className="text-slate-400 hover:text-slate-600">
+                  <button 
+                    onClick={() => setShowDeleteModal(false)} 
+                    className="text-slate-400 hover:text-slate-600"
+                    title="Hủy"
+                    aria-label="Đóng bảng xóa hồ sơ"
+                  >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
@@ -1260,7 +1291,12 @@ export function APIManagementPage() {
               <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
                 <div className="flex items-center justify-between p-6 border-b border-slate-200">
                   <h2 className="text-slate-900">Xác nhận công bố</h2>
-                  <button onClick={() => setShowPublishModal(false)} className="text-slate-400 hover:text-slate-600">
+                  <button 
+                    onClick={() => setShowPublishModal(false)} 
+                    className="text-slate-400 hover:text-slate-600"
+                    title="Đóng cửa sổ"
+                    aria-label="Đóng xác nhận công bố"
+                  >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
@@ -1313,7 +1349,12 @@ export function APIManagementPage() {
               <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
                 <div className="flex items-center justify-between p-6 border-b border-slate-200">
                   <h2 className="text-slate-900">Xác nhận hủy công bố</h2>
-                  <button onClick={() => setShowUnpublishModal(false)} className="text-slate-400 hover:text-slate-600">
+                  <button 
+                    onClick={() => setShowUnpublishModal(false)} 
+                    className="text-slate-400 hover:text-slate-600"
+                    title="Đóng cửa sổ"
+                    aria-label="Đóng xác nhận hủy công bố"
+                  >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
@@ -1391,7 +1432,12 @@ export function APIManagementPage() {
                 <h2 className="text-lg text-slate-900">Giám sát API</h2>
                 <p className="text-sm text-slate-600 mt-1">{selectedAPI.name}</p>
               </div>
-              <button onClick={() => setShowMonitorModal(false)} className="text-slate-400 hover:text-slate-600">
+              <button 
+                onClick={() => setShowMonitorModal(false)} 
+                className="text-slate-400 hover:text-slate-600"
+                title="Đóng cửa sổ"
+                aria-label="Đóng bảng giám sát"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -1498,10 +1544,17 @@ export function APIManagementPage() {
                       <span className="text-slate-600">Requests thành công</span>
                       <span className="text-green-600 font-medium">{Math.round(selectedAPI.requestCount * selectedAPI.successRate / 100)}</span>
                     </div>
-                    <div className="w-full bg-slate-200 rounded-full h-2">
+                    <div 
+                      className="w-full bg-slate-200 rounded-full h-2" 
+                      role="progressbar" 
+                      aria-valuenow={selectedAPI?.successRate ?? 0} 
+                      aria-valuemin={0} 
+                      aria-valuemax={100}
+                      aria-label="Requests thành công"
+                    >
                       <div 
-                        className="bg-green-500 h-2 rounded-full" 
-                        style={{ width: `${selectedAPI.successRate}%` }}
+                        style={{ '--progress-width': `${selectedAPI?.successRate ?? 0}%` } as React.CSSProperties}
+                        className="bg-green-500 h-2 rounded-full w-[var(--progress-width)]"
                       ></div>
                     </div>
                   </div>
@@ -1510,10 +1563,17 @@ export function APIManagementPage() {
                       <span className="text-slate-600">Requests thất bại</span>
                       <span className="text-red-600 font-medium">{selectedAPI.requestCount - Math.round(selectedAPI.requestCount * selectedAPI.successRate / 100)}</span>
                     </div>
-                    <div className="w-full bg-slate-200 rounded-full h-2">
+                    <div 
+                      className="w-full bg-slate-200 rounded-full h-2"
+                      role="progressbar"
+                      aria-valuenow={selectedAPI ? (100 - selectedAPI.successRate) : 0}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-label="Requests thất bại"
+                    >
                       <div 
-                        className="bg-red-500 h-2 rounded-full" 
-                        style={{ width: `${100 - selectedAPI.successRate}%` }}
+                        style={{ '--progress-width': `${selectedAPI ? (100 - selectedAPI.successRate) : 0}%` } as React.CSSProperties}
+                        className="bg-red-500 h-2 rounded-full w-[var(--progress-width)]"
                       ></div>
                     </div>
                   </div>

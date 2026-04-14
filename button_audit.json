@@ -1,0 +1,1970 @@
+[
+  {
+    "file": "CategoryApprovalPage.tsx",
+    "module": "category",
+    "buttons": [
+      {
+        "name": "Trình duyệt danh mục",
+        "hasPopup": true,
+        "action": "() => setShowSubmitModal(true)"
+      },
+      {
+        "name": "{tab === 'pending' && } {tab === 'approved' && } {",
+        "hasPopup": false,
+        "action": "() => setSelectedTab(tab)"
+      },
+      {
+        "name": "Gửi trình duyệt",
+        "hasPopup": true,
+        "action": "() => {\r\n                                setSelectedRequest(request);\r\n                                setShowSendToReviewerModal(true);\r\n                              "
+      },
+      {
+        "name": "Đóng",
+        "hasPopup": true,
+        "action": "() => {\r\n                  setShowSubmitModal(false);\r\n                  setSelectedCategories([]);\r\n                "
+      },
+      {
+        "name": "{selectedCategories.length === filteredCategories.",
+        "hasPopup": false,
+        "action": "handleSelectAll"
+      },
+      {
+        "name": "Tạo danh mục mới",
+        "hasPopup": true,
+        "action": "() => setShowCreateModal(true)"
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": true,
+        "action": "() => {\r\n                  setShowSubmitModal(false);\r\n                  setSelectedCategories([]);\r\n                "
+      },
+      {
+        "name": "Trình duyệt ({selectedCategories.length})",
+        "hasPopup": false,
+        "action": "handleSubmitSelected"
+      },
+      {
+        "name": "Đóng",
+        "hasPopup": true,
+        "action": "() => setShowCreateModal(false)"
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": true,
+        "action": "() => setShowCreateModal(false)"
+      },
+      {
+        "name": "Tạo và trình duyệt",
+        "hasPopup": false,
+        "action": "handleCreateAndSubmit"
+      },
+      {
+        "name": "Đóng",
+        "hasPopup": true,
+        "action": "() => {\r\n                  setShowSendToReviewerModal(false);\r\n                  setSelectedRecipient('');\r\n                  setSendNote('');\r\n                "
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": true,
+        "action": "() => {\r\n                  setShowSendToReviewerModal(false);\r\n                  setSelectedRecipient('');\r\n                  setSendNote('');\r\n                "
+      },
+      {
+        "name": "Gửi trình duyệt",
+        "hasPopup": false,
+        "action": "handleSendToReviewer"
+      }
+    ]
+  },
+  {
+    "file": "CategoryPage.tsx",
+    "module": "category",
+    "buttons": [
+      {
+        "name": "Danh sách",
+        "hasPopup": false,
+        "action": "() => setActiveTab('setup')"
+      },
+      {
+        "name": "Phê duyệt",
+        "hasPopup": false,
+        "action": "() => setActiveTab('approval')"
+      },
+      {
+        "name": "Thu thập số liệu thống kê",
+        "hasPopup": false,
+        "action": "() => setActiveTab('stats')"
+      },
+      {
+        "name": "Lịch sử cập nhật",
+        "hasPopup": false,
+        "action": "() => setActiveTab('version-history')"
+      },
+      {
+        "name": "Nhập từ Excel",
+        "hasPopup": true,
+        "action": "() => setShowImportModal(true)"
+      },
+      {
+        "name": "Thêm bản ghi mới",
+        "hasPopup": true,
+        "action": "() => setShowAddModal(true)"
+      },
+      {
+        "name": "Xem chi tiết",
+        "hasPopup": true,
+        "action": "() => {\r\n                                  setSelectedCategory(category);\r\n                                  setShowDetailModal(true);\r\n                                "
+      },
+      {
+        "name": "Thêm cột mới",
+        "hasPopup": true,
+        "action": "() => {\r\n                                  setSelectedCategory(category);\r\n                                  setShowAddFieldModal(true);\r\n                                "
+      },
+      {
+        "name": "Chỉnh sửa cấu trúc",
+        "hasPopup": false,
+        "action": "() => {\r\n                                  setSelectedCategory(category);\r\n                                  setEditedCategoryData({\r\n                                    code: category.code,\r\n                                    name: category.name,\r\n                                    type: category.type,\r\n                                    status: category.status,\r\n                                    description: category.description,\r\n                                    approver: ''\r\n                                  "
+      },
+      {
+        "name": "Ngừng áp dụng bản ghi",
+        "hasPopup": true,
+        "action": "() => {\r\n                                  setSelectedCategory(category);\r\n                                  setShowArchiveModal(true);\r\n                                "
+      },
+      {
+        "name": "Phê duyệt hàng loạt",
+        "hasPopup": false,
+        "action": "handleBulkApprove"
+      },
+      {
+        "name": "Từ chối hàng loạt",
+        "hasPopup": false,
+        "action": "handleBulkReject"
+      },
+      {
+        "name": "Xem chi tiết",
+        "hasPopup": false,
+        "action": "() => handleViewApprovalDetail(request)"
+      },
+      {
+        "name": "Phê duyệt",
+        "hasPopup": false,
+        "action": "() => handleApprove(request.id)"
+      },
+      {
+        "name": "Từ chối",
+        "hasPopup": false,
+        "action": "() => handleReject(request.id)"
+      },
+      {
+        "name": "Đóng",
+        "hasPopup": true,
+        "action": "() => setShowAddModal(false)"
+      },
+      {
+        "name": "Thêm trường",
+        "hasPopup": false,
+        "action": "() => {\r\n                      setNewFieldData({ name: '', dataType: 'TEXT', required: false, defaultValue: '', maxLength: 255, description: '', isPrimaryKey: false, isForeignKey: false, referenceTable: '', referenceField: '' "
+      },
+      {
+        "name": "Chỉnh sửa",
+        "hasPopup": false,
+        "action": "() => {\r\n                                setNewFieldData({\r\n                                  name: field.name,\r\n                                  dataType: field.dataType,\r\n                                  required: field.required,\r\n                                  defaultValue: field.defaultValue || '',\r\n                                  maxLength: field.maxLength || 255,\r\n                                  description: field.description || '',\r\n                                  isPrimaryKey: field.isPrimaryKey || false,\r\n                                  isForeignKey: field.isForeignKey || false,\r\n                                  referenceTable: field.referenceTable || '',\r\n                                  referenceField: field.referenceField || ''\r\n                                "
+      },
+      {
+        "name": "Xóa trường",
+        "hasPopup": false,
+        "action": "() => {\r\n                                setNewCategoryFields(newCategoryFields.filter((_, i) => i !== index));\r\n                              "
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": true,
+        "action": "() => setShowAddModal(false)"
+      },
+      {
+        "name": "Đóng",
+        "hasPopup": true,
+        "action": "() => {\r\n                  setShowDetailModal(false);\r\n                  setSelectedCategory(null);\r\n                "
+      },
+      {
+        "name": "Đóng",
+        "hasPopup": true,
+        "action": "() => {\r\n                  setShowDetailModal(false);\r\n                  setSelectedCategory(null);\r\n                "
+      },
+      {
+        "name": "Đóng",
+        "hasPopup": true,
+        "action": "() => {\r\n                  setShowEditModal(false);\r\n                  setSelectedCategory(null);\r\n                "
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": true,
+        "action": "() => {\r\n                  setShowEditModal(false);\r\n                  setSelectedCategory(null);\r\n                "
+      },
+      {
+        "name": "Lưu thay đổi",
+        "hasPopup": true,
+        "action": "() => {\r\n                    // Direct save for users with permission\r\n                    setShowEditModal(false);\r\n                    setSelectedCategory(null);\r\n                    // Show success message for direct save\r\n                  "
+      },
+      {
+        "name": "a.id === editedCategoryData.approver); setSuccessN",
+        "hasPopup": false,
+        "action": "() => {\r\n                    // Validate approver selection\r\n                    if (!editedCategoryData.approver) {\r\n                      alert('Vui lòng chọn người phê duyệt trước khi gửi yêu cầu');\r\n                      return;\r\n                    "
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": true,
+        "action": "() => setShowAddFieldModal(false)"
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": true,
+        "action": "() => setShowAddFieldModal(false)"
+      },
+      {
+        "name": "Thêm trường",
+        "hasPopup": false,
+        "action": "() => {\r\n                  setNewCategoryFields([...newCategoryFields, { ...newFieldData, id: Date.now().toString() "
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": true,
+        "action": "() => setShowFieldFormModal(false)"
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": true,
+        "action": "() => setShowFieldFormModal(false)"
+      },
+      {
+        "name": "field.name.toLowerCase() === newFieldData.name.toL",
+        "hasPopup": false,
+        "action": "() => {\r\n                  // Validation\r\n                  const errors: { [key: string]: string "
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": false,
+        "action": "handleCancelImport"
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": false,
+        "action": "handleCancelImport"
+      },
+      {
+        "name": "0} className=\"px-4 py-2 bg-green-600 text-white ro",
+        "hasPopup": false,
+        "action": "handleImportConfirm"
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": true,
+        "action": "() => setShowApprovalDetailModal(false)"
+      },
+      {
+        "name": "Đóng",
+        "hasPopup": true,
+        "action": "() => setShowApprovalDetailModal(false)"
+      },
+      {
+        "name": "Từ chối",
+        "hasPopup": true,
+        "action": "() => {\r\n                      handleReject(selectedApprovalRequest.id);\r\n                      setShowApprovalDetailModal(false);\r\n                    "
+      },
+      {
+        "name": "Phê duyệt",
+        "hasPopup": true,
+        "action": "() => {\r\n                      handleApprove(selectedApprovalRequest.id);\r\n                      setShowApprovalDetailModal(false);\r\n                    "
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": true,
+        "action": "() => {\r\n                  setShowApprovalModal(false);\r\n                  setApprovalComment('');\r\n                  setPendingApprovalIds([]);\r\n                "
+      },
+      {
+        "name": "Xác nhận phê duyệt",
+        "hasPopup": false,
+        "action": "confirmApproval"
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": true,
+        "action": "() => {\r\n                  setShowRejectModal(false);\r\n                  setApprovalComment('');\r\n                  setPendingApprovalIds([]);\r\n                "
+      },
+      {
+        "name": "Xác nhận từ chối",
+        "hasPopup": false,
+        "action": "confirmReject"
+      },
+      {
+        "name": "Đóng thông báo",
+        "hasPopup": true,
+        "action": "() => setShowSuccessNotification(false)"
+      }
+    ]
+  },
+  {
+    "file": "CategoryPublishedListPage.tsx",
+    "module": "category",
+    "buttons": [
+      {
+        "name": "Xem chi tiết",
+        "hasPopup": false,
+        "action": "() => handleViewDetail(item)"
+      },
+      {
+        "name": "{fmt}",
+        "hasPopup": false,
+        "action": "() => handleDownload(item, fmt)"
+      },
+      {
+        "name": "×",
+        "hasPopup": true,
+        "action": "() => setShowDetailModal(false)"
+      },
+      {
+        "name": "Tải {fmt}",
+        "hasPopup": false,
+        "action": "() => handleDownload(selectedData, fmt)"
+      },
+      {
+        "name": "Đóng",
+        "hasPopup": true,
+        "action": "() => setShowDetailModal(false)"
+      }
+    ]
+  },
+  {
+    "file": "CategoryReportPage.tsx",
+    "module": "category",
+    "buttons": [
+      {
+        "name": "Đặt lại",
+        "hasPopup": false,
+        "action": "() => {\r\n                      setSearchKeyword('');\r\n                      setFilterCategory('all');\r\n                      setValidityFilter('all');\r\n                      setPublicStatusFilter('all');\r\n                      setApprovalFilter('all');\r\n                    "
+      },
+      {
+        "name": "Xuất Excel",
+        "hasPopup": false,
+        "action": "handleExportExcel"
+      },
+      {
+        "name": "Xuất PDF",
+        "hasPopup": false,
+        "action": "handleExportPDF"
+      }
+    ]
+  },
+  {
+    "file": "CategorySetupPage.tsx",
+    "module": "category",
+    "buttons": [
+      {
+        "name": "{tab.label}",
+        "hasPopup": false,
+        "action": "() => setActiveTab(tab.id as TabType)"
+      }
+    ]
+  },
+  {
+    "file": "CategoryStatisticsPage.tsx",
+    "module": "category",
+    "buttons": [
+      {
+        "name": "Xuất PDF",
+        "hasPopup": false,
+        "action": "handleExportPDF"
+      }
+    ]
+  },
+  {
+    "file": "CategoryStatisticsReportPage.tsx",
+    "module": "category",
+    "buttons": [
+      {
+        "name": "Tìm kiếm và lọc",
+        "hasPopup": false,
+        "action": "() => setActiveTab('search')"
+      },
+      {
+        "name": "Báo cáo thống kê",
+        "hasPopup": false,
+        "action": "() => setActiveTab('statistics')"
+      },
+      {
+        "name": "Báo cáo phân loại",
+        "hasPopup": false,
+        "action": "() => setActiveTab('classification')"
+      },
+      {
+        "name": "Thống kê lượt truy cập",
+        "hasPopup": false,
+        "action": "() => setActiveTab('access')"
+      },
+      {
+        "name": "Đặt lại",
+        "hasPopup": false,
+        "action": "() => {\r\n                        setSearchKeyword('');\r\n                        setFilterCategory('all');\r\n                        setFilterAgency('all');\r\n                        setFilterFormat('all');\r\n                        setFilterLicense('all');\r\n                      "
+      },
+      {
+        "name": "Xuất Excel",
+        "hasPopup": false,
+        "action": "handleExportExcel"
+      },
+      {
+        "name": "Xuất PDF",
+        "hasPopup": false,
+        "action": "handleExportPDF"
+      },
+      {
+        "name": "Xuất Excel",
+        "hasPopup": false,
+        "action": "handleExportExcel"
+      },
+      {
+        "name": "Xuất Excel",
+        "hasPopup": false,
+        "action": "handleExportExcel"
+      },
+      {
+        "name": "Xuất PDF",
+        "hasPopup": false,
+        "action": "handleExportPDF"
+      },
+      {
+        "name": "Xuất PDF",
+        "hasPopup": false,
+        "action": "handleExportPDF"
+      }
+    ]
+  },
+  {
+    "file": "ApprovalTab.tsx",
+    "module": "master-data",
+    "buttons": [
+      {
+        "name": "Tất cả ({records.length})",
+        "hasPopup": false,
+        "action": "() => setFilterStatus('all')"
+      },
+      {
+        "name": "Chờ phê duyệt ({pendingCount})",
+        "hasPopup": false,
+        "action": "() => setFilterStatus('pending')"
+      },
+      {
+        "name": "Đã phê duyệt ({approvedCount})",
+        "hasPopup": false,
+        "action": "() => setFilterStatus('approved')"
+      },
+      {
+        "name": "Từ chối ({rejectedCount})",
+        "hasPopup": false,
+        "action": "() => setFilterStatus('rejected')"
+      },
+      {
+        "name": "Xem chi tiết",
+        "hasPopup": false,
+        "action": "() => handleViewDetail(record)"
+      },
+      {
+        "name": "Phê duyệt",
+        "hasPopup": false,
+        "action": "() => handleApprove(record)"
+      },
+      {
+        "name": "Từ chối",
+        "hasPopup": false,
+        "action": "() => handleReject(record)"
+      },
+      {
+        "name": "Lịch sử cập nhật ({record.history.length}) {isExpa",
+        "hasPopup": false,
+        "action": "() => setExpandedHistory(isExpanded ? null : record.id)"
+      },
+      {
+        "name": "Hành động",
+        "hasPopup": true,
+        "action": "() => setShowDetailModal(false)"
+      },
+      {
+        "name": "Đóng",
+        "hasPopup": true,
+        "action": "() => setShowDetailModal(false)"
+      },
+      {
+        "name": "Hành động",
+        "hasPopup": true,
+        "action": "() => setShowApprovalForm(false)"
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": true,
+        "action": "() => setShowApprovalForm(false)"
+      },
+      {
+        "name": "{approvalAction === 'approve' ? ( <> Xác nhận phê ",
+        "hasPopup": false,
+        "action": "handleSubmitApproval"
+      }
+    ]
+  },
+  {
+    "file": "AttributesManagementTab.tsx",
+    "module": "master-data",
+    "buttons": [
+      {
+        "name": "{selectedEntityData ? ( {selectedEntityData.code} ",
+        "hasPopup": false,
+        "action": "() => setComboboxOpen(!comboboxOpen)"
+      },
+      {
+        "name": "{entity.code} - {entity.name} {selectedEntity === ",
+        "hasPopup": false,
+        "action": "() => {\r\n                          setSelectedEntity(entity.id);\r\n                          setComboboxOpen(false);\r\n                          setComboboxSearch('');\r\n                        "
+      },
+      {
+        "name": "Thêm thuộc tính",
+        "hasPopup": true,
+        "action": "() => setShowForm(true)"
+      },
+      {
+        "name": "v{attribute.version}",
+        "hasPopup": false,
+        "action": "() => handleViewHistory(attribute.id)"
+      },
+      {
+        "name": "Chỉnh sửa",
+        "hasPopup": false,
+        "action": "() => handleEdit(attribute)"
+      },
+      {
+        "name": "Xóa",
+        "hasPopup": false,
+        "action": "() => handleDelete(attribute.id)"
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": false,
+        "action": "handleCloseForm"
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": false,
+        "action": "handleCloseForm"
+      },
+      {
+        "name": "{editingAttribute ? 'Cập nhật' : 'Tạo mới'}",
+        "hasPopup": false,
+        "action": "handleSubmit"
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": true,
+        "action": "() => setShowVersionHistory(false)"
+      },
+      {
+        "name": "Đóng",
+        "hasPopup": true,
+        "action": "() => setShowVersionHistory(false)"
+      }
+    ]
+  },
+  {
+    "file": "EntityRelationshipsTab.tsx",
+    "module": "master-data",
+    "buttons": [
+      {
+        "name": "Thêm quan hệ mới",
+        "hasPopup": true,
+        "action": "() => setShowForm(true)"
+      },
+      {
+        "name": "Chỉnh sửa",
+        "hasPopup": false,
+        "action": "() => handleEdit(relationship)"
+      },
+      {
+        "name": "Xóa",
+        "hasPopup": false,
+        "action": "() => handleDelete(relationship.id)"
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": false,
+        "action": "handleCloseForm"
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": false,
+        "action": "handleCloseForm"
+      },
+      {
+        "name": "{editingRelationship ? 'Cập nhật' : 'Lưu quan hệ'}",
+        "hasPopup": false,
+        "action": "handleSubmit"
+      }
+    ]
+  },
+  {
+    "file": "HistoryTab.tsx",
+    "module": "master-data",
+    "buttons": [
+      {
+        "name": "📋 Danh sách",
+        "hasPopup": false,
+        "action": "() => setViewMode('list')"
+      },
+      {
+        "name": "📅 Timeline",
+        "hasPopup": false,
+        "action": "() => setViewMode('timeline')"
+      },
+      {
+        "name": "Xuất báo cáo",
+        "hasPopup": false,
+        "action": "handleExportReport"
+      },
+      {
+        "name": "Xem chi tiết bản ghi",
+        "hasPopup": false,
+        "action": "() => {\r\n                          setSelectedDetailRecord({\r\n                            recordCode: record.recordCode,\r\n                            fullName: getRecordName(record.recordCode),\r\n                            version: record.version,\r\n                            action: record.action,\r\n                            date: record.date,\r\n                            user: record.user,\r\n                            changes: record.changes,\r\n                            note: record.note\r\n                          "
+      },
+      {
+        "name": "So sánh với phiên bản {selectedHistory[index - 1].",
+        "hasPopup": false,
+        "action": "() => {\r\n                                  setCompareVersions({ v1: item.version, v2: selectedHistory[index - 1].version "
+      },
+      {
+        "name": "Khôi phục version này",
+        "hasPopup": true,
+        "action": "() => {\r\n                                  setRestoreRecordCode(selectedRecordCode);\r\n                                  setSelectedRestoreVersion(item.version);\r\n                                  setShowRestoreModal(true);\r\n                                "
+      },
+      {
+        "name": "✕ Đóng",
+        "hasPopup": true,
+        "action": "() => {\r\n                  setShowCompareModal(false);\r\n                  setCompareVersions(null);\r\n                "
+      },
+      {
+        "name": "✕ Đóng",
+        "hasPopup": false,
+        "action": "() => setSelectedDetailRecord(null)"
+      },
+      {
+        "name": "📅 Xem Timeline",
+        "hasPopup": false,
+        "action": "() => {\r\n                  handleViewTimeline(selectedDetailRecord.recordCode);\r\n                  setSelectedDetailRecord(null);\r\n                "
+      },
+      {
+        "name": "Đóng",
+        "hasPopup": false,
+        "action": "() => setSelectedDetailRecord(null)"
+      },
+      {
+        "name": "✕ Đóng",
+        "hasPopup": true,
+        "action": "() => {\r\n                  setShowRestoreModal(false);\r\n                  setRestoreRecordCode('');\r\n                  setSelectedRestoreVersion(null);\r\n                "
+      },
+      {
+        "name": "Hủy bỏ",
+        "hasPopup": true,
+        "action": "() => {\r\n                    setShowRestoreModal(false);\r\n                    setRestoreRecordCode('');\r\n                    setSelectedRestoreVersion(null);\r\n                  "
+      },
+      {
+        "name": "h.version === selectedRestoreVersion)?.date}` ); s",
+        "hasPopup": false,
+        "action": "() => {\r\n                    const confirmed = window.confirm(\r\n                      `♻️ XÁC NHẬN KHÔI PHỤC PHIÊN BẢN\\n\\n` +\r\n                      `Mã bản ghi: ${restoreRecordCode"
+      }
+    ]
+  },
+  {
+    "file": "MasterDataAPage.tsx",
+    "module": "master-data",
+    "buttons": [
+      {
+        "name": "Danh sách dữ liệu",
+        "hasPopup": false,
+        "action": "() => setActiveTab('list')"
+      },
+      {
+        "name": "Phê duyệt dữ liệu",
+        "hasPopup": false,
+        "action": "() => setActiveTab('approval')"
+      },
+      {
+        "name": "Lịch sử xử lý",
+        "hasPopup": false,
+        "action": "() => setActiveTab('history')"
+      },
+      {
+        "name": "Trình duyệt",
+        "hasPopup": false,
+        "action": "() => {\r\n                  if (selectedRecords.size === 0) {\r\n                    alert('Vui lòng chọn ít nhất một bản ghi');\r\n                    return;\r\n                  "
+      },
+      {
+        "name": "Công khai",
+        "hasPopup": false,
+        "action": "() => {\r\n                  if (selectedRecords.size === 0) {\r\n                    alert('Vui lòng chọn ít nhất một bản ghi');\r\n                    return;\r\n                  "
+      },
+      {
+        "name": "Hủy công khai",
+        "hasPopup": false,
+        "action": "() => {\r\n                  if (selectedRecords.size === 0) {\r\n                    alert('Vui lòng chọn ít nhất một bản ghi');\r\n                    return;\r\n                  "
+      },
+      {
+        "name": "Khôi phục",
+        "hasPopup": false,
+        "action": "handleRestore"
+      },
+      {
+        "name": "Bỏ chọn tất cả",
+        "hasPopup": false,
+        "action": "() => setSelectedRecords(new Set())"
+      },
+      {
+        "name": "{getApprovalStatusText(record.approvalStatus)}",
+        "hasPopup": false,
+        "action": "() => {\r\n                          if (record.approvalStatus === 'pending') {\r\n                            setApprovalRecord(record);\r\n                          "
+      },
+      {
+        "name": "Xem chi tiết",
+        "hasPopup": false,
+        "action": "() => setSelectedRecord(record)"
+      },
+      {
+        "name": "Khôi phục",
+        "hasPopup": false,
+        "action": "() => handleRestore(record.id)"
+      },
+      {
+        "name": "Xóa",
+        "hasPopup": false,
+        "action": "() => handleDelete(record.id)"
+      },
+      {
+        "name": "Chi tiết nguồn",
+        "hasPopup": false,
+        "action": "() => setSelectedRecord(record)"
+      },
+      {
+        "name": "Phê duyệt",
+        "hasPopup": false,
+        "action": "() => setApprovalRecord(record)"
+      },
+      {
+        "name": "Từ chối",
+        "hasPopup": false,
+        "action": "() => setApprovalRecord(record)"
+      },
+      {
+        "name": "✕ Đóng",
+        "hasPopup": true,
+        "action": "() => {\r\n                  setShowSubmitModal(false);\r\n                  setSelectedApprover('');\r\n                  setApprovalNote('');\r\n                "
+      },
+      {
+        "name": "Hủy bỏ",
+        "hasPopup": true,
+        "action": "() => {\r\n                  setShowSubmitModal(false);\r\n                  setSelectedApprover('');\r\n                  setApprovalNote('');\r\n                "
+      },
+      {
+        "name": "Gửi phê duyệt ngay",
+        "hasPopup": false,
+        "action": "() => {\r\n                  if (!selectedApprover) {\r\n                    alert('⚠️ Vui lòng chọn người phê duyệt!');\r\n                    return;\r\n                  "
+      },
+      {
+        "name": "✕ Đóng",
+        "hasPopup": true,
+        "action": "() => setShowPublishModal(false)"
+      },
+      {
+        "name": "Hủy bỏ",
+        "hasPopup": true,
+        "action": "() => setShowPublishModal(false)"
+      },
+      {
+        "name": "{ const selectedData = data.filter(r => selectedRe",
+        "hasPopup": true,
+        "action": "() => {\r\n                  handlePublish();\r\n                  setShowPublishModal(false);\r\n                "
+      },
+      {
+        "name": "✕ Đóng",
+        "hasPopup": true,
+        "action": "() => setShowUnpublishModal(false)"
+      },
+      {
+        "name": "Hủy bỏ",
+        "hasPopup": true,
+        "action": "() => setShowUnpublishModal(false)"
+      },
+      {
+        "name": "Hủy công khai ngay",
+        "hasPopup": true,
+        "action": "() => {\r\n                  handleUnpublish();\r\n                  setShowUnpublishModal(false);\r\n                "
+      },
+      {
+        "name": "✕ Đóng",
+        "hasPopup": true,
+        "action": "() => {\r\n                  setShowRestoreModal(false);\r\n                  setRestoreRecords([]);\r\n                  setSelectedRestoreVersions(new Map());\r\n                "
+      },
+      {
+        "name": "v{version} {version === 4 && '25/12/2024'} {versio",
+        "hasPopup": false,
+        "action": "() => {\r\n                              const newVersions = new Map(selectedRestoreVersions);\r\n                              newVersions.set(record.id, version);\r\n                              setSelectedRestoreVersions(newVersions);\r\n                            "
+      },
+      {
+        "name": "Hủy bỏ",
+        "hasPopup": true,
+        "action": "() => {\r\n                    setShowRestoreModal(false);\r\n                    setRestoreRecords([]);\r\n                    setSelectedRestoreVersions(new Map());\r\n                  "
+      },
+      {
+        "name": "Khôi phục ngay",
+        "hasPopup": false,
+        "action": "() => {\r\n                    let summary = '♻️ XÁC NHẬN KHÔI PHỤC PHIÊN BẢN\\n\\n';\r\n                    restoreRecords.forEach(record => {\r\n                      const version = selectedRestoreVersions.get(record.id) || 4;\r\n                      summary += `• ${record.recordCode"
+      }
+    ]
+  },
+  {
+    "file": "MasterDataApprovalPage.tsx",
+    "module": "master-data",
+    "buttons": [
+      {
+        "name": "Trình duyệt mới",
+        "hasPopup": true,
+        "action": "() => setShowSubmitModal(true)"
+      },
+      {
+        "name": "Chờ duyệt ({stats.pending})",
+        "hasPopup": false,
+        "action": "() => setSelectedTab('pending')"
+      },
+      {
+        "name": "Đã duyệt ({stats.approved})",
+        "hasPopup": false,
+        "action": "() => setSelectedTab('approved')"
+      },
+      {
+        "name": "Từ chối ({stats.rejected})",
+        "hasPopup": false,
+        "action": "() => setSelectedTab('rejected')"
+      },
+      {
+        "name": "Tất cả ({stats.total})",
+        "hasPopup": false,
+        "action": "() => setSelectedTab('all')"
+      },
+      {
+        "name": "Xem chi tiết",
+        "hasPopup": true,
+        "action": "() => {\r\n                              setSelectedRecord(approval);\r\n                              setShowDetailModal(true);\r\n                            "
+      },
+      {
+        "name": "Gửi trình duyệt",
+        "hasPopup": true,
+        "action": "() => {\r\n                                  setSelectedRecord(approval);\r\n                                  setShowSendToReviewerModal(true);\r\n                                "
+      },
+      {
+        "name": "Phê duyệt",
+        "hasPopup": true,
+        "action": "() => {\r\n                                  setSelectedRecord(approval);\r\n                                  setApprovalType('approve');\r\n                                  setShowApprovalModal(true);\r\n                                "
+      },
+      {
+        "name": "Từ chối",
+        "hasPopup": true,
+        "action": "() => {\r\n                                  setSelectedRecord(approval);\r\n                                  setApprovalType('reject');\r\n                                  setShowApprovalModal(true);\r\n                                "
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": true,
+        "action": "() => setShowSubmitModal(false)"
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": true,
+        "action": "() => setShowSubmitModal(false)"
+      },
+      {
+        "name": "Trình duyệt",
+        "hasPopup": true,
+        "action": "() => setShowSubmitModal(false)"
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": true,
+        "action": "() => {\r\n                  setShowSendToReviewerModal(false);\r\n                  setSelectedRecipient('');\r\n                  setSendNote('');\r\n                "
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": true,
+        "action": "() => {\r\n                  setShowSendToReviewerModal(false);\r\n                  setSelectedRecipient('');\r\n                  setSendNote('');\r\n                "
+      },
+      {
+        "name": "Gửi trình duyệt",
+        "hasPopup": false,
+        "action": "handleSendToReviewer"
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": true,
+        "action": "() => setShowDetailModal(false)"
+      },
+      {
+        "name": "Đóng",
+        "hasPopup": true,
+        "action": "() => setShowDetailModal(false)"
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": true,
+        "action": "() => setShowApprovalModal(false)"
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": true,
+        "action": "() => setShowApprovalModal(false)"
+      },
+      {
+        "name": "{approvalType === 'approve' ? : } {approvalType ==",
+        "hasPopup": false,
+        "action": "() => {\r\n                  alert(`Đã ${approvalType === 'approve' ? 'phê duyệt' : 'từ chối'"
+      }
+    ]
+  },
+  {
+    "file": "MasterDataManagementPage.tsx",
+    "module": "master-data",
+    "buttons": [
+      {
+        "name": "Quản lý dữ liệu",
+        "hasPopup": false,
+        "action": "() => setActiveTab('management')"
+      },
+      {
+        "name": "Tra cứu",
+        "hasPopup": false,
+        "action": "() => setActiveTab('search')"
+      },
+      {
+        "name": "Báo cáo",
+        "hasPopup": false,
+        "action": "() => setActiveTab('report')"
+      },
+      {
+        "name": "Lịch sử",
+        "hasPopup": false,
+        "action": "() => setActiveTab('history')"
+      }
+    ]
+  },
+  {
+    "file": "MasterDataPublishPage.tsx",
+    "module": "master-data",
+    "buttons": [
+      {
+        "name": "Gỡ công khai",
+        "hasPopup": true,
+        "action": "() => {\r\n                              setSelectedData(data);\r\n                              setShowUnpublishModal(true);\r\n                            "
+      },
+      {
+        "name": "Công khai",
+        "hasPopup": true,
+        "action": "() => {\r\n                            setSelectedData(data);\r\n                            setShowPublishModal(true);\r\n                          "
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": true,
+        "action": "() => setShowPublishModal(false)"
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": true,
+        "action": "() => setShowPublishModal(false)"
+      },
+      {
+        "name": "Công khai",
+        "hasPopup": true,
+        "action": "() => setShowPublishModal(false)"
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": true,
+        "action": "() => setShowUnpublishModal(false)"
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": true,
+        "action": "() => setShowUnpublishModal(false)"
+      },
+      {
+        "name": "Gỡ công khai",
+        "hasPopup": true,
+        "action": "() => setShowUnpublishModal(false)"
+      }
+    ]
+  },
+  {
+    "file": "MasterDataReportsPage.tsx",
+    "module": "master-data",
+    "buttons": [
+      {
+        "name": "Tra cứu dữ liệu chủ",
+        "hasPopup": false,
+        "action": "() => setActiveTab('search')"
+      },
+      {
+        "name": "Báo cáo sử dụng dữ liệu chủ",
+        "hasPopup": false,
+        "action": "() => setActiveTab('usage')"
+      },
+      {
+        "name": "Báo cáo vòng đời dữ liệu",
+        "hasPopup": false,
+        "action": "() => setActiveTab('lifecycle')"
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": true,
+        "action": "() => setShowFilters(false)"
+      },
+      {
+        "name": "Xóa bộ lọc",
+        "hasPopup": false,
+        "action": "handleResetFilters"
+      },
+      {
+        "name": "Tìm kiếm",
+        "hasPopup": false,
+        "action": "handleSearch"
+      },
+      {
+        "name": "Hiển thị bộ lọc",
+        "hasPopup": true,
+        "action": "() => setShowFilters(true)"
+      },
+      {
+        "name": "In",
+        "hasPopup": false,
+        "action": "handlePrint"
+      },
+      {
+        "name": "Excel",
+        "hasPopup": false,
+        "action": "handleExportExcel"
+      },
+      {
+        "name": "PDF",
+        "hasPopup": false,
+        "action": "handleExportPDF"
+      },
+      {
+        "name": "Xem chi tiết",
+        "hasPopup": false,
+        "action": "() => handleViewDetail(record)"
+      },
+      {
+        "name": "Xuất Excel",
+        "hasPopup": false,
+        "action": "handleExportExcel"
+      },
+      {
+        "name": "Xuất PDF",
+        "hasPopup": false,
+        "action": "handleExportPDF"
+      },
+      {
+        "name": "Xuất Excel",
+        "hasPopup": false,
+        "action": "handleExportExcel"
+      },
+      {
+        "name": "Xuất PDF",
+        "hasPopup": false,
+        "action": "handleExportPDF"
+      }
+    ]
+  },
+  {
+    "file": "MasterDataScaleManagementPage.tsx",
+    "module": "master-data",
+    "buttons": [
+      {
+        "name": "Thiết lập DL chủ",
+        "hasPopup": false,
+        "action": "() => setActiveTab('setup')"
+      },
+      {
+        "name": "Thiết lập thuộc tính",
+        "hasPopup": false,
+        "action": "() => setActiveTab('attributes')"
+      },
+      {
+        "name": "Thiết lập quy tắc hợp nhất",
+        "hasPopup": false,
+        "action": "() => setActiveTab('merge-rules')"
+      },
+      {
+        "name": "Thiết lập quan hệ thực thể",
+        "hasPopup": false,
+        "action": "() => setActiveTab('relationships')"
+      },
+      {
+        "name": "Quy tắc định danh duy nhất",
+        "hasPopup": false,
+        "action": "() => setActiveTab('identifier-rules')"
+      },
+      {
+        "name": "Phê duyệt",
+        "hasPopup": false,
+        "action": "() => setActiveTab('approval')"
+      },
+      {
+        "name": "Tạo mới (Wizard 5 bước)",
+        "hasPopup": true,
+        "action": "() => setShowWizard(true)"
+      },
+      {
+        "name": "Thêm mới nhanh",
+        "hasPopup": true,
+        "action": "() => setShowForm(true)"
+      },
+      {
+        "name": "Nút bấm",
+        "hasPopup": false,
+        "action": "() => handleEdit(entity)"
+      },
+      {
+        "name": "Nút bấm",
+        "hasPopup": false,
+        "action": "() => handleDelete(entity.id)"
+      },
+      {
+        "name": "Nút bấm",
+        "hasPopup": false,
+        "action": "handleCloseForm"
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": false,
+        "action": "handleCloseForm"
+      },
+      {
+        "name": "{editingEntity ? 'Cập nhật' : 'Tạo mới'}",
+        "hasPopup": false,
+        "action": "handleSubmit"
+      }
+    ]
+  },
+  {
+    "file": "MasterDataSetupPage.tsx",
+    "module": "master-data",
+    "buttons": [
+      {
+        "name": "Thêm cấu hình mới",
+        "hasPopup": true,
+        "action": "() => setShowAddModal(true)"
+      },
+      {
+        "name": "Chỉnh sửa",
+        "hasPopup": true,
+        "action": "() => {\r\n                          setSelectedConfig(config);\r\n                          setFormData(config);\r\n                          setShowEditModal(true);\r\n                        "
+      },
+      {
+        "name": "Xóa",
+        "hasPopup": true,
+        "action": "() => {\r\n                          setSelectedConfig(config);\r\n                          setShowDeleteModal(true);\r\n                        "
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": true,
+        "action": "() => setShowAddModal(false)"
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": true,
+        "action": "() => setShowAddModal(false)"
+      },
+      {
+        "name": "Lưu",
+        "hasPopup": true,
+        "action": "() => setShowAddModal(false)"
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": true,
+        "action": "() => setShowEditModal(false)"
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": true,
+        "action": "() => setShowEditModal(false)"
+      },
+      {
+        "name": "Cập nhật",
+        "hasPopup": true,
+        "action": "() => setShowEditModal(false)"
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": true,
+        "action": "() => setShowDeleteModal(false)"
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": true,
+        "action": "() => setShowDeleteModal(false)"
+      },
+      {
+        "name": "Xóa",
+        "hasPopup": true,
+        "action": "() => setShowDeleteModal(false)"
+      }
+    ]
+  },
+  {
+    "file": "MasterDataUpdateReviewTab.tsx",
+    "module": "master-data",
+    "buttons": [
+      {
+        "name": "Danh sách dữ liệu",
+        "hasPopup": false,
+        "action": "() => setActiveTab('list')"
+      },
+      {
+        "name": "Cấu hình xử lý dữ liệu",
+        "hasPopup": false,
+        "action": "() => setActiveTab('config')"
+      },
+      {
+        "name": "Danh sách dữ liệu cảnh báo",
+        "hasPopup": false,
+        "action": "() => setActiveTab('warning')"
+      },
+      {
+        "name": "Lịch sử xử lý",
+        "hasPopup": false,
+        "action": "() => setActiveTab('history')"
+      },
+      {
+        "name": "Gửi phê duyệt",
+        "hasPopup": false,
+        "action": "handleSendApproval"
+      },
+      {
+        "name": "Công khai",
+        "hasPopup": false,
+        "action": "handlePublish"
+      },
+      {
+        "name": "Bỏ chọn tất cả",
+        "hasPopup": false,
+        "action": "() => setSelectedRecords(new Set())"
+      },
+      {
+        "name": "Xem chi tiết",
+        "hasPopup": false,
+        "action": "() => setSelectedRecord(record)"
+      },
+      {
+        "name": "Khôi phục",
+        "hasPopup": false,
+        "action": "() => handleRestore(record.id)"
+      },
+      {
+        "name": "Xóa",
+        "hasPopup": false,
+        "action": "() => handleDelete(record.id)"
+      }
+    ]
+  },
+  {
+    "file": "MasterDataUpdateTab.tsx",
+    "module": "master-data",
+    "buttons": [
+      {
+        "name": "Rà soát",
+        "hasPopup": false,
+        "action": "() => setActiveSubTab('review')"
+      },
+      {
+        "name": "Phê duyệt",
+        "hasPopup": false,
+        "action": "() => setActiveSubTab('approval')"
+      },
+      {
+        "name": "Theo dõi lịch sử thay đổi",
+        "hasPopup": false,
+        "action": "() => setActiveSubTab('history')"
+      },
+      {
+        "name": "Quản lý phiên bản",
+        "hasPopup": false,
+        "action": "() => setActiveSubTab('version')"
+      },
+      {
+        "name": "Công khai",
+        "hasPopup": false,
+        "action": "() => setActiveSubTab('publish')"
+      },
+      {
+        "name": "{isExpanded ? : }",
+        "hasPopup": false,
+        "action": "() => setExpandedHistory(isExpanded ? null : record.id)"
+      },
+      {
+        "name": "{record.visibility === 'public' ? ( <> Công khai )",
+        "hasPopup": false,
+        "action": "() => toggleVisibility(record)"
+      },
+      {
+        "name": "Gỡ công khai",
+        "hasPopup": false,
+        "action": "() => handlePublish(record)"
+      },
+      {
+        "name": "Công khai",
+        "hasPopup": false,
+        "action": "() => handlePublish(record)"
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": true,
+        "action": "() => setShowReviewModal(false)"
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": true,
+        "action": "() => setShowReviewModal(false)"
+      },
+      {
+        "name": "{reviewAction === 'approve' ? ( <> Xác nhận phê du",
+        "hasPopup": false,
+        "action": "handleSubmitReview"
+      }
+    ]
+  },
+  {
+    "file": "MergeRulesManagementTab.tsx",
+    "module": "master-data",
+    "buttons": [
+      {
+        "name": "Thêm quy tắc mới",
+        "hasPopup": true,
+        "action": "() => setShowForm(true)"
+      },
+      {
+        "name": "Kiểm thử",
+        "hasPopup": false,
+        "action": "() => handleTestRule(rule)"
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": false,
+        "action": "() => handleToggleStatus(rule.id)"
+      },
+      {
+        "name": "Chỉnh sửa",
+        "hasPopup": false,
+        "action": "() => handleEdit(rule)"
+      },
+      {
+        "name": "Xóa",
+        "hasPopup": false,
+        "action": "() => handleDelete(rule.id)"
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": false,
+        "action": "handleCloseForm"
+      },
+      {
+        "name": "Thêm nguồn",
+        "hasPopup": false,
+        "action": "handleAddSource"
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": false,
+        "action": "() => handleDeleteSource(index)"
+      },
+      {
+        "name": "Thêm quy tắc so khớp",
+        "hasPopup": false,
+        "action": "handleAddMatchRule"
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": false,
+        "action": "() => handleDeleteMatchRule(rule.id)"
+      },
+      {
+        "name": "Thêm quy tắc trích rút",
+        "hasPopup": false,
+        "action": "handleAddExtractRule"
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": false,
+        "action": "() => handleDeleteExtractRule(rule.id)"
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": false,
+        "action": "handleCloseForm"
+      },
+      {
+        "name": "{editingRule ? 'Cập nhật' : 'Lưu quy tắc'}",
+        "hasPopup": false,
+        "action": "handleSubmit"
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": true,
+        "action": "() => setShowTestModal(false)"
+      },
+      {
+        "name": "Đóng",
+        "hasPopup": true,
+        "action": "() => setShowTestModal(false)"
+      }
+    ]
+  },
+  {
+    "file": "UniqueIdentifierRulesTab.tsx",
+    "module": "master-data",
+    "buttons": [
+      {
+        "name": "Thêm quy tắc mới",
+        "hasPopup": true,
+        "action": "() => setShowForm(true)"
+      },
+      {
+        "name": "Sao chép",
+        "hasPopup": false,
+        "action": "() => copyToClipboard(rule.example)"
+      },
+      {
+        "name": "Chỉnh sửa",
+        "hasPopup": false,
+        "action": "() => handleEdit(rule)"
+      },
+      {
+        "name": "Xóa",
+        "hasPopup": false,
+        "action": "() => handleDelete(rule.id)"
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": false,
+        "action": "handleCloseForm"
+      },
+      {
+        "name": "Làm mới",
+        "hasPopup": false,
+        "action": "() => handleFormChange({ ...formData "
+      },
+      {
+        "name": "Sao chép",
+        "hasPopup": false,
+        "action": "() => copyToClipboard(generatedExample)"
+      },
+      {
+        "name": "{duplicateCheck.checking ? 'Đang kiểm tra...' : 'K",
+        "hasPopup": false,
+        "action": "handleCheckDuplicate"
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": false,
+        "action": "handleCloseForm"
+      },
+      {
+        "name": "{editingRule ? 'Cập nhật' : 'Lưu quy tắc'}",
+        "hasPopup": false,
+        "action": "handleSubmit"
+      }
+    ]
+  },
+  {
+    "file": "OpenDataApprovalPage.tsx",
+    "module": "open-data",
+    "buttons": [
+      {
+        "name": "Trình duyệt mới",
+        "hasPopup": true,
+        "action": "() => setShowSubmitModal(true)"
+      },
+      {
+        "name": "Chờ duyệt ({stats.pending})",
+        "hasPopup": false,
+        "action": "() => setSelectedTab('pending')"
+      },
+      {
+        "name": "Đã phê duyệt ({stats.approved})",
+        "hasPopup": false,
+        "action": "() => setSelectedTab('approved')"
+      },
+      {
+        "name": "Từ chối ({stats.rejected})",
+        "hasPopup": false,
+        "action": "() => setSelectedTab('rejected')"
+      },
+      {
+        "name": "Tất cả ({stats.total})",
+        "hasPopup": false,
+        "action": "() => setSelectedTab('all')"
+      },
+      {
+        "name": "Xem chi tiết",
+        "hasPopup": true,
+        "action": "() => {\r\n                              setSelectedRequest(request);\r\n                              setShowDetailModal(true);\r\n                            "
+      },
+      {
+        "name": "Gửi trình duyệt",
+        "hasPopup": true,
+        "action": "() => {\r\n                                  setSelectedRequest(request);\r\n                                  setShowSendToReviewerModal(true);\r\n                                "
+      },
+      {
+        "name": "Phê duyệt",
+        "hasPopup": true,
+        "action": "() => {\r\n                                  setSelectedRequest(request);\r\n                                  setApprovalType('approve');\r\n                                  setShowApprovalModal(true);\r\n                                "
+      },
+      {
+        "name": "Từ chối",
+        "hasPopup": true,
+        "action": "() => {\r\n                                  setSelectedRequest(request);\r\n                                  setApprovalType('reject');\r\n                                  setShowApprovalModal(true);\r\n                                "
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": true,
+        "action": "() => setShowSubmitModal(false)"
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": true,
+        "action": "() => setShowSubmitModal(false)"
+      },
+      {
+        "name": "Trình duyệt",
+        "hasPopup": true,
+        "action": "() => setShowSubmitModal(false)"
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": true,
+        "action": "() => {\r\n                  setShowSendToReviewerModal(false);\r\n                  setSelectedRecipient('');\r\n                  setSendNote('');\r\n                "
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": true,
+        "action": "() => {\r\n                  setShowSendToReviewerModal(false);\r\n                  setSelectedRecipient('');\r\n                  setSendNote('');\r\n                "
+      },
+      {
+        "name": "Gửi trình duyệt",
+        "hasPopup": false,
+        "action": "handleSendToReviewer"
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": true,
+        "action": "() => setShowDetailModal(false)"
+      },
+      {
+        "name": "Đóng",
+        "hasPopup": true,
+        "action": "() => setShowDetailModal(false)"
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": true,
+        "action": "() => setShowApprovalModal(false)"
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": true,
+        "action": "() => setShowApprovalModal(false)"
+      },
+      {
+        "name": "{approvalType === 'approve' ? : } {approvalType ==",
+        "hasPopup": false,
+        "action": "() => {\r\n                  alert(`Đã ${approvalType === 'approve' ? 'phê duyệt' : 'từ chối'"
+      }
+    ]
+  },
+  {
+    "file": "OpenDataPublishedListPage.tsx",
+    "module": "open-data",
+    "buttons": [
+      {
+        "name": "Xem chi tiết",
+        "hasPopup": false,
+        "action": "() => handleViewDetail(item)"
+      },
+      {
+        "name": "{fmt}",
+        "hasPopup": false,
+        "action": "() => handleDownload(item, fmt)"
+      },
+      {
+        "name": "×",
+        "hasPopup": true,
+        "action": "() => setShowDetailModal(false)"
+      },
+      {
+        "name": "Tải {fmt}",
+        "hasPopup": false,
+        "action": "() => handleDownload(selectedData, fmt)"
+      },
+      {
+        "name": "Đóng",
+        "hasPopup": true,
+        "action": "() => setShowDetailModal(false)"
+      }
+    ]
+  },
+  {
+    "file": "OpenDataPublishPage.tsx",
+    "module": "open-data",
+    "buttons": [
+      {
+        "name": "Xem chi tiết",
+        "hasPopup": true,
+        "action": "() => {\r\n                          setSelectedDataset(dataset);\r\n                          setShowDetailModal(true);\r\n                        "
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": true,
+        "action": "() => setShowDetailModal(false)"
+      },
+      {
+        "name": "Đóng",
+        "hasPopup": true,
+        "action": "() => setShowDetailModal(false)"
+      }
+    ]
+  },
+  {
+    "file": "OpenDataReportPage.tsx",
+    "module": "open-data",
+    "buttons": [
+      {
+        "name": "Tìm kiếm",
+        "hasPopup": false,
+        "action": "() => setActiveTab('search')"
+      },
+      {
+        "name": "Báo cáo",
+        "hasPopup": false,
+        "action": "() => setActiveTab('report')"
+      },
+      {
+        "name": "Đặt lại",
+        "hasPopup": false,
+        "action": "() => {\r\n                        setSearchKeyword('');\r\n                        setSearchCategory('all');\r\n                        setSearchFormat('all');\r\n                      "
+      }
+    ]
+  },
+  {
+    "file": "OpenDataSetupPage.tsx",
+    "module": "open-data",
+    "buttons": [
+      {
+        "name": "Quản lý danh mục {categories.length}",
+        "hasPopup": false,
+        "action": "() => setActiveTab('management')"
+      },
+      {
+        "name": "Phê duyệt {approvalList.length}",
+        "hasPopup": false,
+        "action": "() => setActiveTab('approval')"
+      },
+      {
+        "name": "Lịch sử thay đổi {historyList.length}",
+        "hasPopup": false,
+        "action": "() => setActiveTab('history')"
+      },
+      {
+        "name": "Tất cả {approvalList.length}",
+        "hasPopup": false,
+        "action": "() => setApprovalFilterTab('all')"
+      },
+      {
+        "name": "Chờ phê duyệt {approvalStats.pending}",
+        "hasPopup": false,
+        "action": "() => setApprovalFilterTab('pending')"
+      },
+      {
+        "name": "Đã phê duyệt {approvalStats.approved}",
+        "hasPopup": false,
+        "action": "() => setApprovalFilterTab('approved')"
+      },
+      {
+        "name": "Từ chối {approvalStats.rejected}",
+        "hasPopup": false,
+        "action": "() => setApprovalFilterTab('rejected')"
+      },
+      {
+        "name": "Xem chi tiết",
+        "hasPopup": false,
+        "action": "() => handleView(category)"
+      },
+      {
+        "name": "Từ chối",
+        "hasPopup": false,
+        "action": "() => handleReject(category)"
+      },
+      {
+        "name": "Phê duyệt",
+        "hasPopup": false,
+        "action": "() => handleApprove(category)"
+      },
+      {
+        "name": "Thêm danh mục mới",
+        "hasPopup": false,
+        "action": "handleAdd"
+      },
+      {
+        "name": "Xem chi tiết",
+        "hasPopup": false,
+        "action": "() => handleView(record as any)"
+      },
+      {
+        "name": "Tải xuống",
+        "hasPopup": false,
+        "action": "() => alert(`Tải xuống phiên bản ${record.version"
+      },
+      {
+        "name": "Khôi phục",
+        "hasPopup": false,
+        "action": "() => alert(`Khôi phục về phiên bản ${record.version"
+      },
+      {
+        "name": "{category.name} {category.description}",
+        "hasPopup": false,
+        "action": "() => handleCategoryClick(category)"
+      },
+      {
+        "name": "Xem chi tiết",
+        "hasPopup": false,
+        "action": "() => handleView(category)"
+      },
+      {
+        "name": "Chỉnh sửa",
+        "hasPopup": false,
+        "action": "() => handleEdit(category)"
+      },
+      {
+        "name": "Xóa",
+        "hasPopup": false,
+        "action": "() => handleDelete(category)"
+      },
+      {
+        "name": "Trình duyệt",
+        "hasPopup": false,
+        "action": "() => handleSubmitForApproval(category)"
+      },
+      {
+        "name": "Duyệt",
+        "hasPopup": false,
+        "action": "() => handleApprove(category)"
+      },
+      {
+        "name": "Từ chối duyệt",
+        "hasPopup": false,
+        "action": "() => handleReject(category)"
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": true,
+        "action": "() => setShowAddModal(false)"
+      },
+      {
+        "name": "Chọn tất cả",
+        "hasPopup": false,
+        "action": "() => {\r\n                          const allFieldIds = mockTableFields[formData.selectedTable]?.map(f => f.id) || [];\r\n                          setFormData({ ...formData, selectedFields: allFieldIds "
+      },
+      {
+        "name": "Bỏ chọn tất cả",
+        "hasPopup": false,
+        "action": "() => setFormData({ ...formData, selectedFields: [] "
+      },
+      {
+        "name": "Xóa file",
+        "hasPopup": false,
+        "action": "() => setAttachedFiles(attachedFiles.filter((_, i) => i !== index))"
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": true,
+        "action": "() => setShowAddModal(false)"
+      },
+      {
+        "name": "Lưu",
+        "hasPopup": false,
+        "action": "handleSaveAdd"
+      },
+      {
+        "name": "Gửi phê duyệt",
+        "hasPopup": false,
+        "action": "handleSendApproval"
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": true,
+        "action": "() => setShowViewModal(false)"
+      },
+      {
+        "name": "Đóng",
+        "hasPopup": true,
+        "action": "() => setShowViewModal(false)"
+      },
+      {
+        "name": "Gửi phê duyệt",
+        "hasPopup": false,
+        "action": "handleSendApproval"
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": true,
+        "action": "() => setShowEditModal(false)"
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": true,
+        "action": "() => setShowEditModal(false)"
+      },
+      {
+        "name": "Lưu",
+        "hasPopup": false,
+        "action": "handleSaveEdit"
+      },
+      {
+        "name": "Gửi phê duyệt",
+        "hasPopup": false,
+        "action": "handleSendApproval"
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": true,
+        "action": "() => setShowDeleteModal(false)"
+      },
+      {
+        "name": "Xóa",
+        "hasPopup": false,
+        "action": "confirmDelete"
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": true,
+        "action": "() => {\r\n                  setShowApprovalModal(false);\r\n                  setApprovalNote('');\r\n                "
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": true,
+        "action": "() => {\r\n                  setShowApprovalModal(false);\r\n                  setApprovalNote('');\r\n                "
+      },
+      {
+        "name": "Phê duyệt",
+        "hasPopup": false,
+        "action": "confirmApprovalAction"
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": true,
+        "action": "() => {\r\n                  setShowApprovalModal(false);\r\n                  setRejectReason('');\r\n                "
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": true,
+        "action": "() => {\r\n                  setShowApprovalModal(false);\r\n                  setRejectReason('');\r\n                "
+      },
+      {
+        "name": "Từ chối",
+        "hasPopup": false,
+        "action": "confirmApprovalAction"
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": true,
+        "action": "() => {\r\n                  setShowApprovalModal(false);\r\n                  setSelectedApprover('');\r\n                  setApprovalNote('');\r\n                "
+      },
+      {
+        "name": "Gửi phê duyệt",
+        "hasPopup": false,
+        "action": "confirmApprovalAction"
+      }
+    ]
+  },
+  {
+    "file": "OpenDataUpdateRulesPage.tsx",
+    "module": "open-data",
+    "buttons": [
+      {
+        "name": "Thêm quy tắc mới",
+        "hasPopup": false,
+        "action": "handleAdd"
+      },
+      {
+        "name": "Chạy ngay",
+        "hasPopup": false,
+        "action": "() => handleRunNow(rule)"
+      },
+      {
+        "name": "Lịch sử chạy",
+        "hasPopup": true,
+        "action": "() => {\r\n                            setSelectedRule(rule);\r\n                            setShowHistoryModal(true);\r\n                          "
+      },
+      {
+        "name": "Xem chi tiết",
+        "hasPopup": true,
+        "action": "() => {\r\n                            setSelectedRule(rule);\r\n                            setShowViewModal(true);\r\n                          "
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": true,
+        "action": "() => setShowAddModal(false)"
+      },
+      {
+        "name": "Chọn tất cả",
+        "hasPopup": false,
+        "action": "() => {\r\n                                const allFields = mockTableFields[formData.sourceTable] || [];\r\n                                setFormData({ ...formData, selectedFields: allFields "
+      },
+      {
+        "name": "Bỏ chọn tất cả",
+        "hasPopup": false,
+        "action": "() => setFormData({ ...formData, selectedFields: [] "
+      },
+      {
+        "name": "+ Thêm",
+        "hasPopup": false,
+        "action": "handleAddEmail"
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": false,
+        "action": "() => handleRemoveEmail(email)"
+      },
+      {
+        "name": "Xem trước",
+        "hasPopup": false,
+        "action": "handlePreview"
+      },
+      {
+        "name": "Hủy",
+        "hasPopup": true,
+        "action": "() => setShowAddModal(false)"
+      },
+      {
+        "name": "Lưu",
+        "hasPopup": false,
+        "action": "handleSaveDraft"
+      },
+      {
+        "name": "Lưu & Kích hoạt",
+        "hasPopup": false,
+        "action": "handleSaveAndActivate"
+      },
+      {
+        "name": "Icon Button",
+        "hasPopup": true,
+        "action": "() => setShowHistoryModal(false)"
+      }
+    ]
+  }
+]

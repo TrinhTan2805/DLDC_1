@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   Database,
@@ -72,6 +72,7 @@ import {
   FolderCog,
   Circle,
   History as HistoryIcon,
+  X,
 } from "lucide-react";
 import imgLogo from "figma:asset/0b9fbf72a74cf9ec02b7371d312e91e368f930d8.png";
 import imgImageLogo from "figma:asset/009541fc5d689d29107b655d2b8ecd57f6d4b3ff.png";
@@ -803,13 +804,23 @@ const menuItems: MenuItem[] = [
   },
 ];
 
+// Helper to normalize Vietnamese text for comparison
+const normalizeText = (text: string) => {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+};
+
 export function Sidebar({
   currentPage,
   onNavigate,
 }: SidebarProps) {
   const [expandedMenus, setExpandedMenus] = useState<
     Set<string>
-  >(new Set());
+  >(new Set(['orchestration'])); // Default expand orchestration as it's the main page for now
+  const [searchTerm, setSearchTerm] = useState("");
   const [showVersionHistory, setShowVersionHistory] = useState(false);
 
   const toggleMenu = (menuId: string) => {
@@ -821,6 +832,8 @@ export function Sidebar({
     }
     setExpandedMenus(newExpanded);
   };
+
+  useAutoExpand(searchTerm, menuItems, setExpandedMenus);
 
   return (
     <aside className="w-72 bg-white border-r border-slate-200 flex flex-col flex-shrink-0 z-20 relative">
@@ -842,11 +855,57 @@ export function Sidebar({
           </div>
         </div>
       </div>
+      
+      {/* Search Bar */}
+      <div className="px-4 py-3 border-b border-slate-100">
+        <div className="relative group">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+          <input
+            type="text"
+            placeholder="Tìm kiếm menu..."
+            title="Tìm kiếm menu..."
+            className="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm("")}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-slate-200 rounded-full transition-colors"
+              title="Xóa tìm kiếm"
+            >
+              <X className="w-3.5 h-3.5 text-slate-400" />
+            </button>
+          )}
+        </div>
+      </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-4 px-3">
-        <div className="space-y-1">
-          {menuItems.map((item) => {
+      <nav className="flex-1 overflow-y-auto py-2 px-3 custom-scrollbar">
+        <div className="space-y-0.5">
+          {(() => {
+            const term = normalizeText(searchTerm);
+            if (!term) return menuItems;
+
+            const filterItems = (items: any[]): any[] => {
+              return items
+                .map((item) => {
+                  const labelMatches = normalizeText(item.label).includes(term);
+                  const subItemsFiltered = item.subItems
+                    ? filterItems(item.subItems)
+                    : [];
+                  const hasMatchingChildren = subItemsFiltered.length > 0;
+
+                  if (labelMatches || hasMatchingChildren) {
+                    return { ...item, subItems: subItemsFiltered };
+                  }
+                  return null;
+                })
+                .filter((i) => i !== null);
+            };
+
+            return filterItems(menuItems);
+          })().map((item) => {
             const Icon = item.icon;
             const isActive = currentPage === item.id;
             const isExpanded = expandedMenus.has(item.id);
@@ -910,6 +969,8 @@ export function Sidebar({
                                 onNavigate(subItem.id);
                               }
                             }}
+                            title={subItem.label}
+                            aria-label={subItem.label}
                             className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-all text-sm ${isGroupHeader
                               ? "bg-slate-100 text-slate-700 font-medium hover:bg-slate-200"
                               : isSubActive
@@ -964,6 +1025,8 @@ export function Sidebar({
                                             );
                                           }
                                         }}
+                                        title={nestedItem.label}
+                                        aria-label={nestedItem.label}
                                         className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg transition-all ${isNestedActive
                                           ? "bg-blue-50 text-blue-700"
                                           : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
@@ -1005,6 +1068,8 @@ export function Sidebar({
                                                         level4Item.id,
                                                       )
                                                     }
+                                                    title={level4Item.label}
+                                                    aria-label={level4Item.label}
                                                     className={`w-full flex items-center gap-2 px-2 py-1 rounded-lg transition-all ${isLevel4Active
                                                       ? "bg-blue-50 text-blue-700"
                                                       : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
@@ -1036,6 +1101,25 @@ export function Sidebar({
               </div>
             );
           })}
+          
+          {searchTerm.trim() && (() => {
+            const term = normalizeText(searchTerm);
+            const filterRec = (items: any[]): any[] => {
+              return items.flatMap(item => {
+                const matches = normalizeText(item.label).includes(term);
+                const subMatches = item.subItems ? filterRec(item.subItems) : [];
+                return (matches || subMatches.length > 0) ? [item] : [];
+              });
+            };
+            return filterRec(menuItems);
+          })().length === 0 && (
+            <div className="py-10 text-center">
+              <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Search className="w-6 h-6 text-slate-300" />
+              </div>
+              <p className="text-xs text-slate-400">Không tìm thấy kết quả</p>
+            </div>
+          )}
         </div>
       </nav>
 
@@ -1061,4 +1145,39 @@ export function Sidebar({
       />
     </aside>
   );
+}
+
+// Effect to auto-expand during search
+function useAutoExpand(searchTerm: string, menuItems: any[], setExpandedMenus: (val: any) => void) {
+  useEffect(() => {
+    if (!searchTerm.trim()) return;
+
+    const term = normalizeText(searchTerm);
+    const allIdsToExpand = new Set<string>();
+
+    const checkItems = (items: any[]): boolean => {
+      let anyChildMatches = false;
+      for (const item of items) {
+        const matches = normalizeText(item.label).includes(term);
+        const childrenMatch = item.subItems ? checkItems(item.subItems) : false;
+        
+        if (matches || childrenMatch) {
+          if (item.subItems && item.subItems.length > 0) {
+            allIdsToExpand.add(item.id);
+          }
+          anyChildMatches = true;
+        }
+      }
+      return anyChildMatches;
+    };
+
+    checkItems(menuItems);
+    if (allIdsToExpand.size > 0) {
+      setExpandedMenus((prev: Set<string>) => {
+        const next = new Set(prev);
+        allIdsToExpand.forEach(id => next.add(id));
+        return next;
+      });
+    }
+  }, [searchTerm, menuItems, setExpandedMenus]);
 }

@@ -7,8 +7,27 @@ interface Service {
   name: string;
   description: string;
   type: 'REST' | 'SOAP' | 'GraphQL';
-  version: string;
+  status: 'active' | 'inactive' | 'maintenance' | 'pending' | 'approved' | 'published' | 'publishing' | 'rejected';
   endpoint: string;
+  version: string;
+  department: string;
+  createdDate: string;
+  lastModified: string;
+  visibility?: 'public' | 'private';
+  maxRequestsPerDay?: number;
+  baseUrl?: string;
+  httpMethod?: string;
+  contentType?: string;
+  authType?: string;
+  username?: string;
+  password?: string;
+  apiKey?: string;
+  headerName?: string;
+  unitCode?: string;
+  systemCode?: string;
+  isActive?: boolean;
+  assignedUnits?: string[];
+  accessStartDate?: string;
 }
 
 interface GrantPermissionModalProps {
@@ -99,7 +118,7 @@ export function GrantPermissionModal({
   const filteredServices = services.filter(service => {
     const matchesSearch = service.name.toLowerCase().includes(apiSearchTerm.toLowerCase()) ||
                          service.code.toLowerCase().includes(apiSearchTerm.toLowerCase()) ||
-                         service.description.toLowerCase().includes(apiSearchTerm.toLowerCase());
+                         (service.description && service.description.toLowerCase().includes(apiSearchTerm.toLowerCase()));
     const matchesType = apiTypeFilter === 'all' || service.type === apiTypeFilter;
     return matchesSearch && matchesType;
   });
@@ -223,7 +242,9 @@ export function GrantPermissionModal({
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <Search className="w-4 h-4 text-slate-500" />
+                  <label htmlFor="api-search-input" className="sr-only">Tìm kiếm API</label>
                   <input
+                    id="api-search-input"
                     type="text"
                     value={apiSearchTerm}
                     onChange={(e) => setApiSearchTerm(e.target.value)}
@@ -233,7 +254,9 @@ export function GrantPermissionModal({
                 </div>
                 <div className="flex items-center gap-2">
                   <Filter className="w-4 h-4 text-slate-500" />
+                  <label htmlFor="api-type-filter" className="sr-only">Lọc theo loại API</label>
                   <select
+                    id="api-type-filter"
                     value={apiTypeFilter}
                     onChange={(e) => setApiTypeFilter(e.target.value)}
                     className="px-2 py-1 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -336,7 +359,9 @@ export function GrantPermissionModal({
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <Search className="w-4 h-4 text-slate-500" />
+                  <label htmlFor="org-search-input" className="sr-only">Tìm kiếm đơn vị</label>
                   <input
+                    id="org-search-input"
                     type="text"
                     value={orgSearchTerm}
                     onChange={(e) => setOrgSearchTerm(e.target.value)}
@@ -346,7 +371,9 @@ export function GrantPermissionModal({
                 </div>
                 <div className="flex items-center gap-2">
                   <Filter className="w-4 h-4 text-slate-500" />
+                  <label htmlFor="org-parent-filter" className="sr-only">Lọc theo cơ quan chủ quản</label>
                   <select
+                    id="org-parent-filter"
                     value={orgParentFilter}
                     onChange={(e) => setOrgParentFilter(e.target.value)}
                     className="px-2 py-1 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -456,8 +483,9 @@ export function GrantPermissionModal({
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   {['read', 'write', 'update', 'delete'].map((perm) => (
-                    <label key={perm} className="flex items-center gap-2 p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer">
+                    <label key={perm} htmlFor={`perm-${perm}`} className="flex items-center gap-2 p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer">
                       <input
+                        id={`perm-${perm}`}
                         type="checkbox"
                         checked={permissions[perm as keyof typeof permissions]}
                         onChange={(e) => setPermissions({ ...permissions, [perm]: e.target.checked })}
@@ -473,11 +501,12 @@ export function GrantPermissionModal({
 
               {/* Max Calls */}
               <div>
-                <label className="block text-sm text-slate-700 mb-2">
+                <label htmlFor="max-calls-input" className="block text-sm text-slate-700 mb-2">
                   <Settings className="w-4 h-4 inline mr-1" />
                   Giới hạn request/ngày
                 </label>
                 <input
+                  id="max-calls-input"
                   type="number"
                   value={maxCallsPerDay}
                   onChange={(e) => setMaxCallsPerDay(e.target.value)}
@@ -494,6 +523,8 @@ export function GrantPermissionModal({
                 </label>
                 <div className="grid grid-cols-3 gap-3">
                   <input
+                    id="contact-name"
+                    aria-label="Họ tên người liên hệ"
                     type="text"
                     value={contactPerson.name}
                     onChange={(e) => setContactPerson({ ...contactPerson, name: e.target.value })}
@@ -501,6 +532,8 @@ export function GrantPermissionModal({
                     placeholder="Họ tên"
                   />
                   <input
+                    id="contact-email"
+                    aria-label="Email người liên hệ"
                     type="email"
                     value={contactPerson.email}
                     onChange={(e) => setContactPerson({ ...contactPerson, email: e.target.value })}
@@ -508,6 +541,8 @@ export function GrantPermissionModal({
                     placeholder="Email"
                   />
                   <input
+                    id="contact-phone"
+                    aria-label="Số điện thoại người liên hệ"
                     type="tel"
                     value={contactPerson.phone}
                     onChange={(e) => setContactPerson({ ...contactPerson, phone: e.target.value })}
@@ -541,6 +576,8 @@ export function GrantPermissionModal({
                         <button
                           onClick={() => setAllowedIPs(allowedIPs.filter((_, i) => i !== idx))}
                           className="p-2 text-red-600 hover:bg-red-50 rounded"
+                          title="Xóa IP"
+                          aria-label="Xóa địa chỉ IP này"
                         >
                           <X className="w-4 h-4" />
                         </button>
@@ -558,10 +595,11 @@ export function GrantPermissionModal({
 
               {/* Valid Until */}
               <div>
-                <label className="block text-sm text-slate-700 mb-2">
+                <label htmlFor="valid-until-date" className="block text-sm text-slate-700 mb-2">
                   Hiệu lực đến
                 </label>
                 <input
+                  id="valid-until-date"
                   type="date"
                   value={validUntil}
                   onChange={(e) => setValidUntil(e.target.value)}
@@ -645,6 +683,8 @@ export function GrantPermissionModal({
                   });
                 }}
                 className="text-white/80 hover:text-white hover:bg-white/10 p-2 rounded-lg transition-colors"
+                title="Đóng"
+                aria-label="Đóng bảng tạo đơn vị mới"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -686,10 +726,11 @@ export function GrantPermissionModal({
 
                 {/* Parent Organization */}
                 <div>
-                  <label className="block text-sm text-slate-700 mb-2">
+                  <label htmlFor="new-org-parent" className="block text-sm text-slate-700 mb-2">
                     Đơn vị cấp trên <span className="text-red-500">*</span>
                   </label>
                   <select
+                    id="new-org-parent"
                     value={newOrgForm.parent}
                     onChange={(e) => setNewOrgForm({ ...newOrgForm, parent: e.target.value })}
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"

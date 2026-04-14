@@ -315,17 +315,30 @@ export function ConnectionConfigSection({ dataClassification, resetTestState }: 
         <div className="space-y-4">
           <h3 className="text-sm font-medium text-slate-700 mb-3 pb-2 border-b border-slate-200">Cấu hình API SOAP</h3>
           <div>
-            <label className="block text-sm text-slate-600 mb-1">WSDL URL <span className="text-red-500">*</span></label>
-            <input type="url" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="https://api.example.com/service?wsdl" />
+            <input 
+              id="soap-wsdl-url" 
+              type="url" 
+              title="WSDL URL"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" 
+              placeholder="https://api.example.com/service?wsdl" 
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm text-slate-600 mb-1">SOAP Action</label>
-              <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="http://tempuri.org/Action" />
+              <input 
+                id="soap-action" 
+                type="text" 
+                title="SOAP Action"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                placeholder="http://tempuri.org/Action" 
+              />
             </div>
             <div>
-              <label className="block text-sm text-slate-600 mb-1">Loại Auth <span className="text-red-500">*</span></label>
-              <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <select 
+                id="soap-auth-type" 
+                title="Loại Auth"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
                 <option value="ws-security">WS-Security</option>
                 <option value="basic">Basic Auth</option>
                 <option value="bearer">Bearer Token</option>
@@ -334,17 +347,34 @@ export function ConnectionConfigSection({ dataClassification, resetTestState }: 
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm text-slate-600 mb-1">Username <span className="text-red-500">*</span></label>
-              <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập username" required />
+              <input 
+                id="soap-username" 
+                type="text" 
+                title="Username"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                placeholder="Nhập username" 
+                required 
+              />
             </div>
             <div>
-              <label className="block text-sm text-slate-600 mb-1">Password <span className="text-red-500">*</span></label>
-              <input type="password" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập password" required />
+              <input 
+                id="soap-password" 
+                type="password" 
+                title="Password"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                placeholder="Nhập password" 
+                required 
+              />
             </div>
           </div>
           <div>
-            <label className="block text-sm text-slate-600 mb-1">XML Payload</label>
-            <textarea className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" rows={4} placeholder="<soapenv:Envelope>..." />
+            <textarea 
+              id="soap-xml-payload" 
+              title="XML Payload"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" 
+              rows={4} 
+              placeholder="<soapenv:Envelope>..." 
+            />
           </div>
         </div>
       )}
@@ -354,27 +384,54 @@ export function ConnectionConfigSection({ dataClassification, resetTestState }: 
           <h3 className="text-sm font-medium text-slate-700 mb-3 pb-2 border-b border-slate-200">Cấu hình FTP/SFTP</h3>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm text-slate-600 mb-1">Host/IP <span className="text-red-500">*</span></label>
-              <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="192.168.1.100" />
+              <input 
+                id="ftp-host" 
+                type="text" 
+                title="Host/IP"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                placeholder="192.168.1.100" 
+              />
             </div>
             <div>
-              <label className="block text-sm text-slate-600 mb-1">Port <span className="text-red-500">*</span></label>
-              <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="21 / 22" />
+              <input 
+                id="ftp-port" 
+                type="text" 
+                title="Port"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                placeholder="21 / 22" 
+              />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm text-slate-600 mb-1">Username <span className="text-red-500">*</span></label>
-              <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập username" required />
+              <input 
+                id="ftp-username" 
+                type="text" 
+                title="Username"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                placeholder="Nhập username" 
+                required 
+              />
             </div>
             <div>
-              <label className="block text-sm text-slate-600 mb-1">Password <span className="text-red-500">*</span></label>
-              <input type="password" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập password" required />
+              <input 
+                id="ftp-password" 
+                type="password" 
+                title="Password"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                placeholder="Nhập password" 
+                required 
+              />
             </div>
           </div>
           <div>
-            <label className="block text-sm text-slate-600 mb-1">Đường dẫn thư mục (Tùy chọn)</label>
-            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="/data/uploads" />
+            <input 
+              id="ftp-path" 
+              type="text" 
+              title="Đường dẫn thư mục"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" 
+              placeholder="/data/uploads" 
+            />
           </div>
         </div>
       )}
@@ -383,12 +440,23 @@ export function ConnectionConfigSection({ dataClassification, resetTestState }: 
         <div className="space-y-4">
           <h3 className="text-sm font-medium text-slate-700 mb-3 pb-2 border-b border-slate-200">Cấu hình File Upload</h3>
           <div>
-            <label className="block text-sm text-slate-600 mb-1">Định dạng hỗ trợ</label>
-            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="VD: .csv, .xlsx, .json" />
+            <input 
+              id="file-formats" 
+              type="text" 
+              title="Định dạng hỗ trợ"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
+              placeholder="VD: .csv, .xlsx, .json" 
+            />
           </div>
           <div>
-            <label className="block text-sm text-slate-600 mb-1">Dung lượng tối đa (MB)</label>
-            <input type="number" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="50" defaultValue={50} />
+            <input 
+              id="file-max-size" 
+              type="number" 
+              title="Dung lượng tối đa (MB)"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
+              placeholder="50" 
+              defaultValue={50} 
+            />
           </div>
         </div>
       )}
@@ -398,40 +466,75 @@ export function ConnectionConfigSection({ dataClassification, resetTestState }: 
           <h3 className="text-sm font-medium text-slate-700 mb-3 pb-2 border-b border-slate-200">Cấu hình Database</h3>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm text-slate-600 mb-1">Loại Cơ sở dữ liệu <span className="text-red-500">*</span></label>
-              <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <select 
+                id="db-type" 
+                title="Loại Cơ sở dữ liệu"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
                 <option value="oracle">Oracle</option>
                 <option value="postgres">PostgreSql</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm text-slate-600 mb-1">Host/IP <span className="text-red-500">*</span></label>
-              <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="192.168.1.100" />
+              <input 
+                id="db-host" 
+                type="text" 
+                title="Host/IP"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                placeholder="192.168.1.100" 
+              />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm text-slate-600 mb-1">Port <span className="text-red-500">*</span></label>
-              <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="1521 / 5432" />
+              <input 
+                id="db-port" 
+                type="text" 
+                title="Port"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                placeholder="1521 / 5432" 
+              />
             </div>
             <div>
-              <label className="block text-sm text-slate-600 mb-1">Database Name / SID <span className="text-red-500">*</span></label>
-              <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="ORCL / db_name" />
+              <input 
+                id="db-name" 
+                type="text" 
+                title="Database Name / SID"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                placeholder="ORCL / db_name" 
+              />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm text-slate-600 mb-1">Username <span className="text-red-500">*</span></label>
-              <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập DB Username" required />
+              <input 
+                id="db-username" 
+                type="text" 
+                title="Username"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                placeholder="Nhập DB Username" 
+                required 
+              />
             </div>
             <div>
-              <label className="block text-sm text-slate-600 mb-1">Password <span className="text-red-500">*</span></label>
-              <input type="password" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập DB Password" required />
+              <input 
+                id="db-password" 
+                type="password" 
+                title="Password"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                placeholder="Nhập DB Password" 
+                required 
+              />
             </div>
           </div>
           <div>
-            <label className="block text-sm text-slate-600 mb-1">Schema (Optional)</label>
-            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="public / schema_name" />
+            <input 
+              id="db-schema" 
+              type="text" 
+              title="Schema"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" 
+              placeholder="public / schema_name" 
+            />
           </div>
         </div>
       )}

@@ -12,7 +12,9 @@ import {
   User,
   UsersRound,
   List,
-  ShieldCheck
+  ShieldCheck,
+  Search,
+  X
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
@@ -114,7 +116,8 @@ const menuItems: MenuItem[] = [
 ];
 
 export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
-  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set(['admin', 'admin-users-group']));
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set(['admin', 'admin-users-group', 'sharing-group', 'reconciliation-group', 'cleaning-group']));
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     // Auto-expand parent menus based on current page
@@ -197,15 +200,94 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
     );
   };
 
+  const filteredMenuItems = (() => {
+    if (!searchTerm.trim()) return menuItems;
+
+    const term = searchTerm.toLowerCase();
+    
+    const filterRec = (items: MenuItem[]): MenuItem[] => {
+      return items
+        .map(item => {
+          const titleMatches = item.title.toLowerCase().includes(term);
+          const filteredSubItems = item.subItems ? filterRec(item.subItems) : undefined;
+          const hasMatchingChildren = filteredSubItems && filteredSubItems.length > 0;
+
+          if (titleMatches || hasMatchingChildren) {
+            return {
+              ...item,
+              subItems: filteredSubItems
+            };
+          }
+          return null;
+        })
+        .filter((item): item is MenuItem => item !== null);
+    };
+
+    return filterRec(menuItems);
+  })();
+
+  // Auto-expand parents of matching items when searching
+  useEffect(() => {
+    if (searchTerm.trim()) {
+      const allIds = new Set<string>();
+      const collectIds = (items: MenuItem[]) => {
+        items.forEach(item => {
+          if (item.subItems && item.subItems.length > 0) {
+            allIds.add(item.id);
+            collectIds(item.subItems);
+          }
+        });
+      };
+      collectIds(filteredMenuItems);
+      setExpandedItems(prev => {
+        const next = new Set(prev);
+        allIds.forEach(id => next.add(id));
+        return next;
+      });
+    }
+  }, [searchTerm, filteredMenuItems]);
+
   return (
-    <aside className="w-72 bg-white border-r border-gray-200 h-[calc(100vh-73px)] overflow-y-auto sticky top-[73px]">
+    <aside className="w-72 bg-white border-r border-gray-200 h-[calc(100vh-73px)] overflow-y-auto sticky top-[73px] custom-scrollbar">
       <div className="p-4">
-        <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4 px-3">
+        {/* Search Bar */}
+        <div className="mb-6 px-1">
+          <div className="relative group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+            <input
+              type="text"
+              placeholder="Tìm kiếm chức năng..."
+              className="w-full pl-10 pr-9 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-200 rounded-full transition-colors"
+                title="Xóa tìm kiếm"
+              >
+                <X className="w-3.5 h-3.5 text-gray-400" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.1em] mb-3 px-3">
           Chức năng chính
         </h3>
 
-        <nav className="space-y-1">
-          {menuItems.map((item) => renderMenuItem(item))}
+        <nav className="space-y-0.5">
+          {filteredMenuItems.length > 0 ? (
+            filteredMenuItems.map((item) => renderMenuItem(item))
+          ) : (
+            <div className="py-8 text-center">
+              <div className="bg-gray-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Search className="w-6 h-6 text-gray-300" />
+              </div>
+              <p className="text-xs text-gray-400">Không tìm thấy chức năng phù hợp</p>
+            </div>
+          )}
         </nav>
       </div>
     </aside>
