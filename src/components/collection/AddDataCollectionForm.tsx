@@ -1,4 +1,4 @@
-import { ArrowLeft, Save, X, Eye, EyeOff, Server, Globe2, FileDown, Database, Plus } from 'lucide-react';
+import { ArrowLeft, Save, X, Eye, EyeOff, Server, Globe2, FileDown, Database, Plus, Upload, Download } from 'lucide-react';
 import { useState } from 'react';
 
 interface AddDataCollectionFormProps {
@@ -218,6 +218,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                     <option value="API RESTful">API RESTful</option>
                     <option value="API SOAP">API SOAP</option>
                     <option value="Giao thức File (FTP/SFTP)">Giao thức File (FTP/SFTP)</option>
+                    <option value="Upload File">Upload File (Thủ công)</option>
                     <option value="Database Oracle">Database (Oracle)</option>
                     <option value="Database Postgres">Database (PostgreSQL)</option>
                   </select>
@@ -401,20 +402,55 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
               {/* Sub-form API SOAP */}
               {formData.connectionType === 'API SOAP' && (
                 <div className="grid grid-cols-2 gap-6">
+                  <div className="grid grid-cols-2 gap-6 col-span-2">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Tên service <span className="text-red-500">*</span></label>
+                      <select className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                        <option value="">Chọn service</option>
+                        <option value="CitizenService">CitizenService</option>
+                        <option value="EnterpriseService">EnterpriseService</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Phương thức gọi <span className="text-red-500">*</span></label>
+                      <select className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                        <option value="">Chọn phương thức</option>
+                        <option value="GetCitizenInfo">GetCitizenInfo</option>
+                        <option value="UpdateCitizenInfo">UpdateCitizenInfo</option>
+                      </select>
+                    </div>
+                  </div>
                   <div className="col-span-2">
                     <label className="block text-sm font-medium text-slate-700 mb-2">WSDL URL / Endpoint <span className="text-red-500">*</span></label>
                     <input required type="text" value={formData.endpointUrl} onChange={(e) => setFormData({ ...formData, endpointUrl: e.target.value })} placeholder="http://server:port/service?wsdl" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">SOAP Action / Service Name <span className="text-red-500">*</span></label>
-                    <input required type="text" value={formData.soapAction} onChange={(e) => setFormData({ ...formData, soapAction: e.target.value })} placeholder="VD: GetCitizenInfo" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Timeout (ms)</label>
+                    <input type="number" defaultValue="30000" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">WS-Security Auth</label>
-                    <select value={formData.authMethod} onChange={(e) => setFormData({ ...formData, authMethod: e.target.value })} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                      <option value="No Auth">No Auth</option>
-                      <option value="WSS UsernameToken">WSS (UsernameToken)</option>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">SSL Required</label>
+                    <select className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                      <option value="true">Bật (true)</option>
+                      <option value="false">Tắt (false)</option>
                     </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Số lần thử</label>
+                    <input type="number" defaultValue="3" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Khoảng cách retry (ms)</label>
+                    <input type="number" defaultValue="5000" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                  </div>
+                  <div className="col-span-2 grid grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">WS-Security Auth</label>
+                      <select value={formData.authMethod} onChange={(e) => setFormData({ ...formData, authMethod: e.target.value })} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                        <option value="No Auth">No Auth</option>
+                        <option value="WSS UsernameToken">WSS (UsernameToken)</option>
+                      </select>
+                    </div>
                   </div>
                   
                   {formData.authMethod === 'WSS UsernameToken' && (
@@ -461,8 +497,30 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                     <input required type="text" value={formData.dbNameOrSid} onChange={(e) => setFormData({ ...formData, dbNameOrSid: e.target.value })} placeholder={formData.connectionType === 'Database Oracle' ? 'ORCL' : 'dldc_db'} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Schema</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Schema (Optional)</label>
                     <input type="text" value={formData.dbSchema} onChange={(e) => setFormData({ ...formData, dbSchema: e.target.value })} placeholder={formData.connectionType === 'Database Oracle' ? 'HR' : 'public'} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                  </div>
+
+                  <div className="col-span-2 grid grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Query/Table</label>
+                      <input type="text" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="VD: SELECT * FROM..." />
+                    </div>
+                  </div>
+
+                  <div className="col-span-2 grid grid-cols-3 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Connection Pool Size</label>
+                      <input type="number" defaultValue="10" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Timeout (giây)</label>
+                      <input type="number" defaultValue="30" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Batch Size</label>
+                      <input type="number" defaultValue="1000" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                    </div>
                   </div>
 
                   <div>
@@ -512,9 +570,39 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                       </button>
                     </div>
                   </div>
-                  <div className="col-span-2">
+                  <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">Đường dẫn thư mục (Directory Path) <span className="text-red-500">*</span></label>
                     <input required type="text" value={formData.directoryPath} onChange={(e) => setFormData({...formData, directoryPath: e.target.value})} placeholder="/files/export/" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Timeout (giây)</label>
+                    <input type="number" defaultValue="30" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                  </div>
+                </div>
+              )}
+
+              {/* Sub-form File Upload */}
+              {formData.connectionType === 'Upload File' && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-200">
+                     <h3 className="text-sm font-medium text-slate-700">Tải file dữ liệu lên hệ thống</h3>
+                     <button type="button" className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1 transition-colors">
+                       <Download className="w-4 h-4"/> Tải file mẫu (.xlsx)
+                     </button>
+                  </div>
+                  
+                  <div className="border-2 border-dashed border-slate-300 rounded-lg p-8 flex flex-col items-center justify-center bg-slate-50 hover:bg-blue-50 hover:border-blue-300 transition-colors cursor-pointer group">
+                    <div className="bg-white p-3 rounded-full shadow-sm mb-3 group-hover:scale-110 transition-transform">
+                      <Upload className="w-6 h-6 text-blue-500" />
+                    </div>
+                    <p className="text-sm font-semibold text-slate-700 mb-1">Kéo thả file dữ liệu vào đây</p>
+                    <p className="text-xs text-slate-500 mb-4">hoặc nhấn để chọn file từ máy tính</p>
+                    <span className="px-3 py-1 bg-slate-200 text-slate-600 text-[10px] rounded uppercase font-bold tracking-wider">Hỗ trợ: .xlsx, .xls (Tối đa 50MB)</span>
+                  </div>
+
+                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-100 flex items-start gap-2 mt-4 text-sm text-blue-700">
+                    <span className="font-semibold whitespace-nowrap">Lưu ý hệ thống:</span>
+                    <span>Chỉ cho phép định dạng file excel (.xlsx, .xls) và dung lượng tối đa là 50MB.</span>
                   </div>
                 </div>
               )}

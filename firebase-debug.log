@@ -1,0 +1,109 @@
+[debug] [2026-04-13T15:55:38.515Z] ----------------------------------------------------------------------
+[debug] [2026-04-13T15:55:38.525Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Admin\AppData\Local\npm-cache\_npx\7750544ccf494d8b\node_modules\firebase-tools\lib\bin\firebase.js deploy --debug
+[debug] [2026-04-13T15:55:38.526Z] CLI Version:   15.14.0
+[debug] [2026-04-13T15:55:38.527Z] Platform:      win32
+[debug] [2026-04-13T15:55:38.527Z] Node Version:  v24.14.1
+[debug] [2026-04-13T15:55:38.527Z] Time:          Mon Apr 13 2026 22:55:38 GMT+0700 (Indochina Time)
+[debug] [2026-04-13T15:55:38.528Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-04-13T15:55:42.172Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-04-13T15:55:42.176Z] > authorizing via signed-in user (phanphuong19799@gmail.com)
+[debug] [2026-04-13T15:55:42.177Z] [iam] checking project dldc-8c200 for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-04-13T15:55:42.180Z] Checked if tokens are valid: true, expires at: 1776098845188
+[debug] [2026-04-13T15:55:42.181Z] Checked if tokens are valid: true, expires at: 1776098845188
+[debug] [2026-04-13T15:55:42.183Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/dldc-8c200:testIamPermissions [none]
+[debug] [2026-04-13T15:55:42.184Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/dldc-8c200:testIamPermissions  x-goog-user-project=dldc-8c200
+[debug] [2026-04-13T15:55:42.184Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/dldc-8c200:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-04-13T15:55:44.648Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/dldc-8c200:testIamPermissions 200
+[debug] [2026-04-13T15:55:44.649Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/dldc-8c200:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-04-13T15:55:44.651Z] Checked if tokens are valid: true, expires at: 1776098845188
+[debug] [2026-04-13T15:55:44.651Z] Checked if tokens are valid: true, expires at: 1776098845188
+[debug] [2026-04-13T15:55:44.652Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/dldc-8c200 [none]
+[debug] [2026-04-13T15:55:45.580Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/dldc-8c200 200
+[debug] [2026-04-13T15:55:45.581Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/dldc-8c200 {"projectId":"dldc-8c200","projectNumber":"286052118084","displayName":"dldc","name":"projects/dldc-8c200","resources":{"hostingSite":"dldc-8c200"},"state":"ACTIVE","etag":"1_418421a9-5001-49e5-9aad-89f7d9ac784b"}
+[info] 
+[info] === Deploying to 'dldc-8c200'...
+[info] 
+[info] i  deploying hosting 
+[debug] [2026-04-13T15:55:45.617Z] Checked if tokens are valid: true, expires at: 1776098845188
+[debug] [2026-04-13T15:55:45.618Z] Checked if tokens are valid: true, expires at: 1776098845188
+[debug] [2026-04-13T15:55:45.618Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/dldc-8c200/versions [none]
+[debug] [2026-04-13T15:55:45.620Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/dldc-8c200/versions {"status":"CREATED","labels":{"deployment-tool":"cli-firebase"}}
+[debug] [2026-04-13T15:55:47.695Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/dldc-8c200/versions 200
+[debug] [2026-04-13T15:55:47.696Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/dldc-8c200/versions {"name":"projects/286052118084/sites/dldc-8c200/versions/5d13eaff2ec9a843","status":"CREATED","config":{},"labels":{"deployment-tool":"cli-firebase"}}
+[info] i  hosting[dldc-8c200]: beginning deploy... 
+[info] i  hosting[dldc-8c200]: found 5 files in build 
+[debug] [2026-04-13T15:55:47.746Z] [hosting] uploading with 200 concurrency
+[debug] [2026-04-13T15:55:48.301Z] Checked if tokens are valid: true, expires at: 1776098845188
+[debug] [2026-04-13T15:55:48.302Z] Checked if tokens are valid: true, expires at: 1776098845188
+[debug] [2026-04-13T15:55:48.305Z] [hosting] hash cache [YnVpbGQ] stored for 5 files
+[debug] [2026-04-13T15:55:48.307Z] [hosting][hash queue][FINAL] {"max":543,"min":6,"avg":125.4,"active":0,"complete":5,"success":5,"errored":0,"retried":0,"total":5,"elapsed":555}
+[debug] [2026-04-13T15:55:48.308Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/286052118084/sites/dldc-8c200/versions/5d13eaff2ec9a843:populateFiles [none]
+[debug] [2026-04-13T15:55:48.308Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/286052118084/sites/dldc-8c200/versions/5d13eaff2ec9a843:populateFiles {"files":{"/phieu_y_kien.pdf":"faf25b1fda85cea4ffa561b02fc210e1efc4e62f04e6ff33bbb0e025e7e1e2e5","/index.html":"100a3cc7968349803b66235d61bf1b1bb7d2ae25fabe171981fde913e349bfd7","/assets/index-Csbh8HK3.css":"3bea94bcc9afffa4814464161a1933d2212553d5e89edd569a6bde9c91d1a906","/assets/009541fc5d689d29107b655d2b8ecd57f6d4b3ff-CReF9N3M.png":"32d86df31436dcd7ae585cf31566223d9c1f639b842b45b1f0bc381d81517182","/assets/index-Bw59XMJk.js":"14ec0a608d4ab39800959d800ad8f27499a213c9064e2544735744ecc91e74ef"}}
+[debug] [2026-04-13T15:55:49.183Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/286052118084/sites/dldc-8c200/versions/5d13eaff2ec9a843:populateFiles 200
+[debug] [2026-04-13T15:55:49.183Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/286052118084/sites/dldc-8c200/versions/5d13eaff2ec9a843:populateFiles {"uploadRequiredHashes":["14ec0a608d4ab39800959d800ad8f27499a213c9064e2544735744ecc91e74ef","100a3cc7968349803b66235d61bf1b1bb7d2ae25fabe171981fde913e349bfd7"],"uploadUrl":"https://upload-firebasehosting.googleapis.com/upload/sites/dldc-8c200/versions/5d13eaff2ec9a843/files"}
+[debug] [2026-04-13T15:55:49.184Z] Checked if tokens are valid: true, expires at: 1776098845188
+[debug] [2026-04-13T15:55:49.185Z] Checked if tokens are valid: true, expires at: 1776098845188
+[debug] [2026-04-13T15:55:49.185Z] Checked if tokens are valid: true, expires at: 1776098845188
+[debug] [2026-04-13T15:55:49.185Z] Checked if tokens are valid: true, expires at: 1776098845188
+[debug] [2026-04-13T15:55:49.186Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/dldc-8c200/versions/5d13eaff2ec9a843/files/14ec0a608d4ab39800959d800ad8f27499a213c9064e2544735744ecc91e74ef [none]
+[debug] [2026-04-13T15:55:49.186Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/dldc-8c200/versions/5d13eaff2ec9a843/files/14ec0a608d4ab39800959d800ad8f27499a213c9064e2544735744ecc91e74ef [stream]
+[debug] [2026-04-13T15:55:49.189Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/dldc-8c200/versions/5d13eaff2ec9a843/files/100a3cc7968349803b66235d61bf1b1bb7d2ae25fabe171981fde913e349bfd7 [none]
+[debug] [2026-04-13T15:55:49.189Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/dldc-8c200/versions/5d13eaff2ec9a843/files/100a3cc7968349803b66235d61bf1b1bb7d2ae25fabe171981fde913e349bfd7 [stream]
+[debug] [2026-04-13T15:55:49.192Z] [hosting][populate queue][FINAL] {"max":885,"min":885,"avg":885,"active":0,"complete":1,"success":1,"errored":0,"retried":0,"total":1,"elapsed":891}
+[debug] [2026-04-13T15:55:49.192Z] [hosting] uploads queued: 2
+[info] i  hosting: uploading new files [0/2] (0%) 
+[info] i  hosting: uploading new files [0/2] (0%) 
+[debug] [2026-04-13T15:55:51.903Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/dldc-8c200/versions/5d13eaff2ec9a843/files/100a3cc7968349803b66235d61bf1b1bb7d2ae25fabe171981fde913e349bfd7 200
+[debug] [2026-04-13T15:55:51.903Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/dldc-8c200/versions/5d13eaff2ec9a843/files/100a3cc7968349803b66235d61bf1b1bb7d2ae25fabe171981fde913e349bfd7 [stream]
+[info] i  hosting: uploading new files [1/2] (50%) 
+[debug] [2026-04-13T15:55:55.061Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/dldc-8c200/versions/5d13eaff2ec9a843/files/14ec0a608d4ab39800959d800ad8f27499a213c9064e2544735744ecc91e74ef 200
+[debug] [2026-04-13T15:55:55.061Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/dldc-8c200/versions/5d13eaff2ec9a843/files/14ec0a608d4ab39800959d800ad8f27499a213c9064e2544735744ecc91e74ef [stream]
+[debug] [2026-04-13T15:55:55.062Z] [hosting][upload queue][FINAL] {"max":5879,"min":2718,"avg":4298.5,"active":0,"complete":2,"success":2,"errored":0,"retried":0,"total":2,"elapsed":5879}
+[info] i  hosting: upload complete 
+[info] +  hosting[dldc-8c200]: file upload complete 
+[debug] [2026-04-13T15:55:55.063Z] [hosting] deploy completed after 7358ms
+[debug] [2026-04-13T15:55:55.064Z] [
+  {
+    "config": {
+      "public": "build",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ],
+      "site": "dldc-8c200"
+    },
+    "version": "projects/286052118084/sites/dldc-8c200/versions/5d13eaff2ec9a843"
+  }
+]
+[info] i  hosting[dldc-8c200]: finalizing version... 
+[debug] [2026-04-13T15:55:55.067Z] Checked if tokens are valid: true, expires at: 1776098845188
+[debug] [2026-04-13T15:55:55.067Z] Checked if tokens are valid: true, expires at: 1776098845188
+[debug] [2026-04-13T15:55:55.070Z] >>> [apiv2][query] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/dldc-8c200/versions/5d13eaff2ec9a843 updateMask=status%2Cconfig
+[debug] [2026-04-13T15:55:55.071Z] >>> [apiv2][body] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/dldc-8c200/versions/5d13eaff2ec9a843 {"status":"FINALIZED","config":{"rewrites":[{"glob":"**","path":"/index.html"}]}}
+[debug] [2026-04-13T15:55:55.886Z] <<< [apiv2][status] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/dldc-8c200/versions/5d13eaff2ec9a843 200
+[debug] [2026-04-13T15:55:55.886Z] <<< [apiv2][body] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/dldc-8c200/versions/5d13eaff2ec9a843 {"name":"projects/286052118084/sites/dldc-8c200/versions/5d13eaff2ec9a843","status":"FINALIZED","config":{"rewrites":[{"glob":"**","path":"/index.html"}]},"labels":{"deployment-tool":"cli-firebase"},"createTime":"2026-04-13T15:55:47.874028Z","createUser":{"email":"phanphuong19799@gmail.com"},"finalizeTime":"2026-04-13T15:55:56.804407Z","finalizeUser":{"email":"phanphuong19799@gmail.com"}}
+[debug] [2026-04-13T15:55:55.886Z] [hosting] finalized version for dldc-8c200:[object Object]
+[info] +  hosting[dldc-8c200]: version finalized 
+[info] i  hosting[dldc-8c200]: releasing new version... 
+[debug] [2026-04-13T15:55:55.887Z] Checked if tokens are valid: true, expires at: 1776098845188
+[debug] [2026-04-13T15:55:55.887Z] Checked if tokens are valid: true, expires at: 1776098845188
+[debug] [2026-04-13T15:55:55.887Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/dldc-8c200/channels/live/releases versionName=projects%2F286052118084%2Fsites%2Fdldc-8c200%2Fversions%2F5d13eaff2ec9a843
+[debug] [2026-04-13T15:55:55.887Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/dldc-8c200/channels/live/releases {}
+[debug] [2026-04-13T15:55:56.733Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/dldc-8c200/channels/live/releases 200
+[debug] [2026-04-13T15:55:56.733Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/dldc-8c200/channels/live/releases {"name":"projects/286052118084/sites/dldc-8c200/channels/live/releases/1776095756858000","version":{"name":"projects/286052118084/sites/dldc-8c200/versions/5d13eaff2ec9a843","status":"FINALIZED","config":{"rewrites":[{"glob":"**","path":"/index.html"}]},"labels":{"deployment-tool":"cli-firebase"},"createTime":"2026-04-13T15:55:47.874028Z","createUser":{"email":"phanphuong19799@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocLk_X9i0qsed_e8hYKe6-QetAtZ8Sk-UKLd2lLpxi3Kb7PKXbl0"},"finalizeTime":"2026-04-13T15:55:56.804407Z","finalizeUser":{"email":"phanphuong19799@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocLk_X9i0qsed_e8hYKe6-QetAtZ8Sk-UKLd2lLpxi3Kb7PKXbl0"}},"type":"DEPLOY","releaseTime":"2026-04-13T15:55:56.858Z","releaseUser":{"email":"phanphuong19799@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocLk_X9i0qsed_e8hYKe6-QetAtZ8Sk-UKLd2lLpxi3Kb7PKXbl0"}}
+[debug] [2026-04-13T15:55:56.734Z] [hosting] release: {"name":"projects/286052118084/sites/dldc-8c200/channels/live/releases/1776095756858000","version":{"name":"projects/286052118084/sites/dldc-8c200/versions/5d13eaff2ec9a843","status":"FINALIZED","config":{"rewrites":[{"glob":"**","path":"/index.html"}]},"labels":{"deployment-tool":"cli-firebase"},"createTime":"2026-04-13T15:55:47.874028Z","createUser":{"email":"phanphuong19799@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocLk_X9i0qsed_e8hYKe6-QetAtZ8Sk-UKLd2lLpxi3Kb7PKXbl0"},"finalizeTime":"2026-04-13T15:55:56.804407Z","finalizeUser":{"email":"phanphuong19799@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocLk_X9i0qsed_e8hYKe6-QetAtZ8Sk-UKLd2lLpxi3Kb7PKXbl0"}},"type":"DEPLOY","releaseTime":"2026-04-13T15:55:56.858Z","releaseUser":{"email":"phanphuong19799@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocLk_X9i0qsed_e8hYKe6-QetAtZ8Sk-UKLd2lLpxi3Kb7PKXbl0"}}
+[info] +  hosting[dldc-8c200]: release complete 
+[info] 
+[info] +  Deploy complete! 
+[info] 
+[info] Project Console: https://console.firebase.google.com/project/dldc-8c200/overview
+[info] Hosting URL: https://dldc-8c200.web.app
+[debug] [2026-04-13T15:55:57.746Z] Analytics tracking failed during success path: Timed out. {}

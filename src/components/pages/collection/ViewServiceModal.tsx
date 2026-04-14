@@ -27,10 +27,6 @@ export function ViewServiceModal({ isOpen, onClose, service }: ViewServiceModalP
           <div className="flex items-center justify-between mb-4">
             <div className="text-sm text-slate-500">Danh sách dịch vụ / Chi tiết dịch vụ</div>
             <div className="flex items-center gap-2">
-              <button className="px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-50 font-medium">Bảo trì</button>
-              <button className="px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-50 font-medium text-red-600 hover:text-red-700">Ngưng hoạt động</button>
-              <button className="px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-50 font-medium">Chỉnh sửa</button>
-              <button className="px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-50 font-medium">Kiểm tra kết nối</button>
               <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full ml-2">
                 <X className="w-5 h-5" />
               </button>

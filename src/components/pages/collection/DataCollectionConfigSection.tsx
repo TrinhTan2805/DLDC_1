@@ -1,5 +1,6 @@
 import { Plus, X, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 import { Dispatch, SetStateAction } from 'react';
+import { AdvancedDataMapping } from './AdvancedDataMapping';
 
 interface DataCollectionConfigSectionProps {
   testState: 'idle' | 'testing_connection' | 'connection_error' | 'testing_data' | 'data_error' | 'success';
@@ -163,103 +164,8 @@ export function DataCollectionConfigSection({
 
       {/* ÁNH XẠ DỮ LIỆU */}
       {testState === 'success' && (
-        <div className="mt-6 pt-6 border-t border-slate-200 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          
-          {/* Mẫu Dữ liệu JSON */}
-          <div className="mb-6">
-             <h3 className="text-sm font-bold text-slate-800 mb-2 flex flex-col gap-1">
-                <span>1. Dữ liệu mẫu nhận được</span>
-                <span className="text-xs text-slate-500 font-normal">Minh họa cho Bộ hồ sơ cấp Giấy xác nhận tình trạng hôn nhân</span>
-             </h3>
-             <pre className="bg-slate-900 border border-slate-700 text-green-400 p-4 rounded-lg text-xs font-mono overflow-auto max-h-60 shadow-inner">
-{`{
-  "ma_ho_so": "HS001",
-  "so_dang_ky": "123",
-  "so_quyen": "Q1",
-  "trang_so": "Trang 10",
-  "nguoi_duoc_cap": {
-    "ho_ten": "Nguyễn Văn A",
-    "gioi_tinh": "Nam",
-    "ngay_sinh": "01/01/1990",
-    "noi_sinh": "Hà Nội",
-    "dan_toc": "Kinh",
-    "quoc_tich": "Việt Nam"
-  }
-}`}
-             </pre>
-          </div>
-
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-bold text-slate-800">2. Cấu hình Ánh xạ trường dữ liệu</h3>
-            <button
-              type="button"
-              onClick={() => {
-                const newId = mappings.length ? Math.max(...mappings.map(m=>m.id)) + 1 : 1;
-                setMappings([...mappings, { id: newId, source: '', dataType: 'string', targetSchema: 'public', targetTable: '', targetField: '' }]);
-              }}
-              className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs flex items-center gap-1 font-medium shadow-sm"
-            >
-              <Plus className="w-3 h-3" />
-              Thêm ánh xạ
-            </button>
-          </div>
-          
-          <div className="border border-slate-300 rounded-lg overflow-hidden shadow-sm">
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50">
-                <tr>
-                  <th className="px-3 py-2.5 text-left text-xs text-slate-700 font-semibold">Trường nguồn</th>
-                  <th className="px-3 py-2.5 text-left text-xs text-slate-700 font-semibold w-24">Kiểu DL</th>
-                  <th className="px-3 py-2.5 text-left text-xs text-slate-700 font-semibold border-l border-slate-200 bg-blue-100/50">Schema Đích</th>
-                  <th className="px-3 py-2.5 text-left text-xs text-slate-700 font-semibold bg-blue-100/50">Bảng Đích</th>
-                  <th className="px-3 py-2.5 text-left text-xs text-slate-700 font-semibold bg-blue-100/50">Trường Đích</th>
-                  <th className="px-3 py-2.5 text-center text-xs text-slate-700 font-semibold bg-slate-50 border-l border-slate-200">Xóa</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200 bg-white">
-                {mappings.map(mapping => (
-                  <tr key={mapping.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-3 py-2">
-                       <select value={mapping.source} onChange={e=>{setMappings(mappings.map(m=>m.id === mapping.id ? {...m, source: e.target.value} : m));}} className="w-full px-2 py-1.5 border border-slate-300 focus:border-blue-500 rounded text-xs focus:ring-1 focus:ring-blue-500 font-mono text-slate-800 bg-white">
-                         <option value="">-- Chọn trường nguồn --</option>
-                         {SAMPLE_FIELDS.map(f => (
-                           <option key={f} value={f}>{f}</option>
-                         ))}
-                       </select>
-                    </td>
-                    <td className="px-3 py-2">
-                      <select value={mapping.dataType} onChange={e=>{setMappings(mappings.map(m=>m.id === mapping.id ? {...m, dataType: e.target.value} : m));}} className="w-full px-2 py-1.5 border border-slate-300 focus:border-blue-500 rounded text-xs bg-white text-slate-800">
-                        <option value="string">string</option>
-                        <option value="number">number</option>
-                        <option value="boolean">boolean</option>
-                        <option value="date">date</option>
-                      </select>
-                    </td>
-                    <td className="px-3 py-2 border-l border-slate-200 bg-blue-50/20">
-                       <select value={mapping.targetSchema} onChange={e=>{setMappings(mappings.map(m=>m.id === mapping.id ? {...m, targetSchema: e.target.value} : m));}} className="w-full px-2 py-1.5 border border-slate-300 focus:border-blue-500 rounded text-xs bg-white font-mono text-blue-900">
-                         <option value="public">public</option>
-                         <option value="dvc">dvc</option>
-                       </select>
-                    </td>
-                    <td className="px-3 py-2 bg-blue-50/20">
-                       <input type="text" value={mapping.targetTable} onChange={e=>{setMappings(mappings.map(m=>m.id === mapping.id ? {...m, targetTable: e.target.value} : m));}} className="w-full px-2 py-1.5 border border-slate-300 focus:border-blue-500 rounded text-xs font-mono text-blue-900" placeholder="Tên bảng" />
-                    </td>
-                    <td className="px-3 py-2 bg-blue-50/20">
-                       <select value={mapping.targetField} onChange={e=>{setMappings(mappings.map(m=>m.id === mapping.id ? {...m, targetField: e.target.value} : m));}} className="w-full px-2 py-1.5 border border-slate-300 focus:border-blue-500 rounded text-xs bg-white font-mono text-blue-900">
-                         <option value="">-- Bỏ qua --</option>
-                         {TARGET_FIELDS_MOCK.map(f => (
-                           <option key={f} value={f}>{f}</option>
-                         ))}
-                       </select>
-                    </td>
-                    <td className="px-3 py-2 text-center border-l border-slate-200">
-                      <button type="button" onClick={()=>{setMappings(mappings.filter(m=>m.id !== mapping.id));}} className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded transition-colors"><X className="w-4 h-4" /></button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <div className="mt-6 pt-6 border-t border-slate-200 animate-in fade-in slide-in-from-bottom-4 duration-500 h-[800px]">
+          <AdvancedDataMapping />
         </div>
       )}
     </div>

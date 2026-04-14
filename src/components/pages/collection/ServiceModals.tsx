@@ -64,10 +64,6 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
   };
 
   const handleTestConnection = () => {
-    if (!unitName) {
-      alert("Vui lòng điền đủ các trường bắt buộc (VD: Tên đơn vị) trước khi Kiểm tra kết nối!");
-      return;
-    }
     setTestState('testing_connection');
     setTimeout(() => {
       if (mockMode === 'err_conn') {
@@ -428,26 +424,51 @@ export function EditServiceModal({ isOpen, onClose, service }: ServiceModalProps
               <div className="space-y-4">
                 <div>
                   <label htmlFor="edit-name" className="block text-sm text-slate-600 mb-1">Tên service <span className="text-red-500">*</span></label>
-                  <input id="edit-name" title="Tên service" type="text" defaultValue={service.name} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  <input id="edit-name" title="Tên service" type="text" defaultValue={service.name} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="VD: API dịch vụ dữ liệu quốc tịch" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label htmlFor="edit-unit" className="block text-sm text-slate-600 mb-1">Tên đơn vị <span className="text-red-500">*</span></label>
-                    <input id="edit-unit" title="Tên đơn vị" type="text" defaultValue={service.managingUnit} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <input id="edit-unit" title="Tên đơn vị" type="text" defaultValue={service.managingUnit} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tìm kiếm hoặc nhập tên đơn vị..." />
                   </div>
                   <div>
                     <label htmlFor="edit-system" className="block text-sm text-slate-600 mb-1">Hệ thống <span className="text-red-500">*</span></label>
-                    <input id="edit-system" title="Hệ thống" type="text" defaultValue={service.system || 'Hệ thống DLDC'} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <input id="edit-system" title="Hệ thống" type="text" defaultValue={service.system || 'Hệ thống DLDC'} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập tên hệ thống" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label htmlFor="edit-source" className="block text-sm text-slate-600 mb-1">Nguồn thu thập</label>
+                    <input id="edit-source" title="Nguồn thu thập" type="text" readOnly defaultValue="Hệ thống trong ngành" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-slate-50 text-slate-700 focus:outline-none" placeholder="Tự động hiển thị theo Đơn vị" />
+                  </div>
+                  <div>
+                    <label htmlFor="edit-security" className="block text-sm text-slate-600 mb-1">Mức độ bảo mật dữ liệu</label>
+                    <select id="edit-security" title="Mức độ bảo mật dữ liệu" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                      <option value="">Chọn mức độ bảo mật</option>
+                      <option value="Dữ liệu mở">Dữ liệu mở</option>
+                      <option value="Dữ liệu nội bộ">Dữ liệu nội bộ</option>
+                      <option value="Dữ liệu hạn chế">Dữ liệu hạn chế</option>
+                      <option value="Dữ liệu nhạy cảm">Dữ liệu nhạy cảm</option>
+                      <option value="Dữ liệu bảo mật">Dữ liệu bảo mật</option>
+                      <option value="Dữ liệu tuyệt mật">Dữ liệu tuyệt mật</option>
+                    </select>
                   </div>
                 </div>
                 <div>
                   <label htmlFor="edit-desc" className="block text-sm text-slate-600 mb-1">Mô tả</label>
-                  <textarea id="edit-desc" title="Mô tả" defaultValue={service.description} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" rows={3} />
+                  <textarea id="edit-desc" title="Mô tả" defaultValue={service.description} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" rows={3} placeholder="Mô tả chi tiết" />
+                </div>
+                <div>
+                  <label className="block text-sm text-slate-600 mb-2">Đính kèm văn bản</label>
+                  <div className="border border-slate-300 rounded-lg p-3 text-center py-6">
+                    <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                    <p className="text-sm text-slate-600">Click để chọn file PDF, DOCX</p>
+                  </div>
                 </div>
               </div>
             )}
             {activeTab === 'contact' && <ContactInfoSection />}
-            {activeTab === 'connection' && <ConnectionConfigSection dataClassification={dataClassification} resetTestState={resetTestState} />}
+            {activeTab === 'connection' && <ConnectionConfigSection dataClassification={dataClassification} resetTestState={resetTestState} isEdit={true} />}
             {activeTab === 'collection' && <DataCollectionConfigSection testState={testState} setTestState={setTestState} mockMode={mockMode} setMockMode={setMockMode} mappings={mappings} setMappings={setMappings} handleTestConnection={handleTestConnection} resetTestState={resetTestState} />}
           </div>
           <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
