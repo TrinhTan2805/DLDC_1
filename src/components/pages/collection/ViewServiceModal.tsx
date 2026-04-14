@@ -10,7 +10,7 @@ interface ViewServiceModalProps {
   service?: any;
 }
 
-type TabType = 'general' | 'contact' | 'connection' | 'collection' | 'mapping' | 'history';
+type TabType = 'general' | 'contact' | 'connection' | 'collection' | 'mapping' | 'history' | 'changelog';
 
 export function ViewServiceModal({ isOpen, onClose, service }: ViewServiceModalProps) {
   const [activeTab, setActiveTab] = useState<TabType>('general');
@@ -27,10 +27,6 @@ export function ViewServiceModal({ isOpen, onClose, service }: ViewServiceModalP
           <div className="flex items-center justify-between mb-4">
             <div className="text-sm text-slate-500">Danh sách dịch vụ / Chi tiết dịch vụ</div>
             <div className="flex items-center gap-2">
-              <button className="px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-50 font-medium">Bảo trì</button>
-              <button className="px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-50 font-medium text-red-600 hover:text-red-700">Ngưng hoạt động</button>
-              <button className="px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-50 font-medium">Chỉnh sửa</button>
-              <button className="px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-50 font-medium">Kiểm tra kết nối</button>
               <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full ml-2">
                 <X className="w-5 h-5" />
               </button>
@@ -42,6 +38,9 @@ export function ViewServiceModal({ isOpen, onClose, service }: ViewServiceModalP
           <div className="flex flex-wrap items-center gap-2 text-sm text-slate-600 mb-4">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium border border-green-200">
               <span className="w-1.5 h-1.5 rounded-full bg-green-600"></span> Đang hoạt động
+            </span>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded font-semibold text-xs">
+              <span className="text-blue-500">v</span>2.1
             </span>
             <span className="text-slate-300">•</span>
             <span>Cục Hộ tịch, Quốc tịch, Chứng thực</span>
@@ -89,7 +88,8 @@ export function ViewServiceModal({ isOpen, onClose, service }: ViewServiceModalP
             { id: 'connection', label: 'Cấu hình kết nối', icon: Plug },
             { id: 'collection', label: 'Cấu hình thu thập', icon: Settings },
             { id: 'mapping', label: 'Ánh xạ dữ liệu', icon: Database },
-            { id: 'history', label: 'Lịch sử kết nối', icon: Clock }
+            { id: 'history', label: 'Lịch sử kết nối', icon: Clock },
+            { id: 'changelog', label: 'Nhật ký thay đổi', icon: FileText }
           ].map(tab => (
             <button
               key={tab.id}
@@ -113,7 +113,8 @@ export function ViewServiceModal({ isOpen, onClose, service }: ViewServiceModalP
            {activeTab === 'connection' && <TabConnection showApiKey={showApiKey} setShowApiKey={setShowApiKey} />}
            {activeTab === 'collection' && <TabCollection />}
            {activeTab === 'mapping' && <TabMapping />}
-           {activeTab === 'history' && <TabHistory />}
+           { activeTab === 'history' && <TabHistory /> }
+           { activeTab === 'changelog' && <TabChangelog /> }
         </div>
 
       </div>
@@ -547,6 +548,103 @@ function TabHistory() {
            <button className="px-4 py-2 border border-slate-300 rounded text-sm text-slate-600 bg-white hover:bg-slate-50 font-medium">2</button>
            <button className="px-4 py-2 border border-slate-300 rounded text-sm text-slate-600 bg-white hover:bg-slate-50 font-medium">3</button>
            <button className="px-4 py-2 border border-slate-300 rounded text-sm text-slate-600 bg-white hover:bg-slate-50 font-medium">Trang sau</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TabChangelog() {
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  const changelogs = [
+    { id: 1, time: '14/04/2025 09:30:15', user: 'Nguyễn Văn Admin', type: 'Cập nhật', desc: 'Thay đổi API Key ở tab Cấu hình kết nối.' },
+    { id: 2, time: '12/04/2025 15:20:00', user: 'Trần Thị B', type: 'Bảo trì', desc: 'Chuyển trạng thái kết nối sang Bảo trì để cập nhật server.' },
+    { id: 3, time: '10/04/2025 11:05:40', user: 'Hệ thống', type: 'Kích hoạt lại', desc: 'Tự động kích hoạt lại kết nối sau quá trình bảo trì.' },
+    { id: 4, time: '05/04/2025 08:15:22', user: 'Lê Văn C', type: 'Cập nhật', desc: 'Thêm trường "so_dinh_danh" vào bảng ánh xạ dữ liệu (Mapping).' },
+    { id: 5, time: '01/04/2025 10:00:10', user: 'Nguyễn Văn Admin', type: 'Cập nhật', desc: 'Thay đổi tần suất đồng bộ từ hàng tuần sang hàng ngày lúc 09:00.' },
+    { id: 6, time: '15/03/2025 14:22:00', user: 'Nguyễn Văn Admin', type: 'Tạo mới', desc: 'Tạo mới thiết lập dịch vụ kết nối dữ liệu quốc tịch.' },
+  ];
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentItems = changelogs.slice(startIndex, startIndex + itemsPerPage);
+  const totalPages = Math.ceil(changelogs.length / itemsPerPage);
+
+  const getTypeStyle = (type: string) => {
+    switch (type) {
+      case 'Tạo mới': return 'bg-blue-100 text-blue-700 border-blue-200';
+      case 'Cập nhật': return 'bg-amber-100 text-amber-700 border-amber-200';
+      case 'Bảo trì': return 'bg-slate-200 text-slate-700 border-slate-300';
+      case 'Kích hoạt lại': return 'bg-green-100 text-green-700 border-green-200';
+      default: return 'bg-gray-100 text-gray-700 border-gray-200';
+    }
+  };
+
+  return (
+    <div className="animate-in fade-in duration-300">
+      <div className="flex items-center justify-between mb-6">
+         <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Nhật ký thay đổi thiết lập kết nối</h3>
+      </div>
+
+      <div className="border border-slate-200 rounded-lg overflow-hidden bg-white">
+        <table className="w-full text-left text-sm whitespace-nowrap">
+          <thead className="bg-[#f8f7f5] text-slate-600 font-medium border-b border-slate-200">
+            <tr>
+              <th className="px-6 py-4">Thời điểm</th>
+              <th className="px-6 py-4">Người thực hiện</th>
+              <th className="px-6 py-4 w-[15%]">Loại thay đổi</th>
+              <th className="px-6 py-4 w-1/2">Mô tả thay đổi</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {currentItems.map((log) => (
+              <tr key={log.id} className="hover:bg-slate-50 transition-colors">
+                <td className="px-6 py-4 font-mono text-[13px]">{log.time}</td>
+                <td className="px-6 py-4 text-slate-700">{log.user}</td>
+                <td className="px-6 py-4">
+                  <span className={`px-2.5 py-1 text-[12px] rounded font-medium border ${getTypeStyle(log.type)}`}>
+                    {log.type}
+                  </span>
+                </td>
+                <td className="px-6 py-4 text-slate-600 whitespace-normal leading-relaxed">{log.desc}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination control */}
+      <div className="flex items-center justify-between mt-6">
+        <div className="text-sm text-slate-500">
+          Hiển thị bản ghi <span className="font-medium">{startIndex + 1}</span> - <span className="font-medium">{Math.min(startIndex + itemsPerPage, changelogs.length)}</span> trong tổng số <span className="font-medium">{changelogs.length}</span>
+        </div>
+        <div className="flex items-center gap-2 ml-auto z-20">
+           <button 
+             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+             disabled={currentPage === 1}
+             className="px-4 py-2 border border-slate-300 rounded text-sm text-slate-600 bg-white hover:bg-slate-50 font-medium disabled:opacity-50"
+           >
+             Trang trước
+           </button>
+           
+           {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+             <button 
+               key={page}
+               onClick={() => setCurrentPage(page)}
+               className={`px-4 py-2 border rounded text-sm font-medium ${currentPage === page ? 'border-slate-900 text-white bg-slate-900' : 'border-slate-300 text-slate-600 bg-white hover:bg-slate-50'}`}
+             >
+               {page}
+             </button>
+           ))}
+           
+           <button 
+             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+             disabled={currentPage === totalPages}
+             className="px-4 py-2 border border-slate-300 rounded text-sm text-slate-600 bg-white hover:bg-slate-50 font-medium disabled:opacity-50"
+           >
+             Trang sau
+           </button>
         </div>
       </div>
     </div>

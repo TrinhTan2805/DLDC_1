@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Plus, Eye, Edit, Settings as SettingsIcon, Trash2, FileText, Activity, Settings, AlertCircle, X, Download, Send, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import { Search, Plus, Eye, Edit, Settings as SettingsIcon, Trash2, FileText, Activity, Settings, AlertCircle, X, Download, Send, ChevronLeft, ChevronRight, Calendar, Wrench } from 'lucide-react';
 import { AddServiceModal, EditServiceModal, DeleteServiceModal, SettingsServiceModal } from './ServiceModals';
 import { ViewServiceModal } from './ViewServiceModal';
 import { LogManagement } from './LogManagement';
@@ -421,13 +421,19 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                             </button>
                             <button
                               className="p-1.5 text-slate-600 hover:bg-slate-50 rounded transition-colors"
-                              title="Cài đặt"
+                              title="Kiểm tra kết nối / Cài đặt"
                               onClick={() => {
                                 setSelectedService(service);
                                 setShowSettingsModal(true);
                               }}
                             >
                               <SettingsIcon className="w-4 h-4" />
+                            </button>
+                            <button
+                              className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
+                              title="Bảo trì"
+                            >
+                              <Wrench className="w-4 h-4" />
                             </button>
                             <button
                               className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
