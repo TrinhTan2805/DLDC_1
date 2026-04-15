@@ -310,6 +310,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
               </select>
             </div>
           </div>
+          <div className="grid grid-cols-2 gap-3">
             <div>
               <label htmlFor="soap-retries" className="block text-sm text-slate-600 mb-1">Số lần thử</label>
               <input 
@@ -482,7 +483,6 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
         <div className="space-y-4">
           <h3 className="text-sm font-medium text-slate-700 mb-3 pb-2 border-b border-slate-200">Cấu hình Database</h3>
           <div className="grid grid-cols-2 gap-3">
-            <div>
             <div>
               <label htmlFor="db-type" className="block text-sm text-slate-600 mb-1">Loại Cơ sở dữ liệu <span className="text-red-500">*</span></label>
               <select 
