@@ -112,9 +112,10 @@ export function ViewServiceModal({ isOpen, onClose, service }: ViewServiceModalP
            {activeTab === 'contact' && <TabContact />}
            {activeTab === 'connection' && <TabConnection showApiKey={showApiKey} setShowApiKey={setShowApiKey} />}
            {activeTab === 'collection' && <TabCollection />}
-           {activeTab === 'mapping' && <TabMapping />}
-           { activeTab === 'history' && <TabHistory /> }
+           { activeTab === 'mapping' && <TabMapping /> }
+           { activeTab === 'history' && <TabHistory onGoToMapping={() => setActiveTab('mapping')} /> }
            { activeTab === 'changelog' && <TabChangelog /> }
+
         </div>
 
       </div>
@@ -472,14 +473,21 @@ function TabMapping() {
   )
 }
 
-function TabHistory() {
+function TabHistory({ onGoToMapping }: { onGoToMapping?: () => void }) {
+  const [selectedLogId, setSelectedLogId] = useState<number | null>(null);
+
   const historyLogs = [
-    { id: 1, runTime: '10/04/2025\n09:00:12', status: 'success', records: '4,218', duration: '1 phút 42 giây', errorCode: '—', note: 'Incremental từ 09/04' },
-    { id: 2, runTime: '09/04/2025\n09:00:08', status: 'success', records: '3,901', duration: '1 phút 28 giây', errorCode: '—', note: '' },
-    { id: 3, runTime: '08/04/2025\n09:00:15', status: 'success', records: '5,120', duration: '2 phút 01 giây', errorCode: '—', note: '' },
-    { id: 4, runTime: '03/04/2025\n09:00:22', status: 'error', records: '0', duration: '5 phút\n(timeout)', errorCode: 'D-04', note: 'Timeout đọc dữ liệu — Retry 3/3 thất bại ↗' },
-    { id: 5, runTime: '02/04/2025\n09:00:09', status: 'success', records: '2,847', duration: '58 giây', errorCode: '—', note: '' },
+    { id: 1, runTime: '10/04/2025\n09:00:12', status: 'success', records: '4,218', duration: '1 phút 42 giây', errorCode: '—', note: 'Incremental từ 09/04', hasDetails: false },
+    { id: 2, runTime: '09/04/2025\n09:00:08', status: 'partial_success', records: '3,901', duration: '1 phút 28 giây', errorCode: 'D-PARTIAL', note: 'Thành công một phần. Cảnh báo dữ liệu: Một vài bản ghi không khớp cấu trúc hoặc chứa trường dữ liệu mới.', hasDetails: true },
+    { id: 6, runTime: '08/04/2025\n09:00:15', status: 'error', records: '0 / 5,120', duration: '14 giây', errorCode: 'D-SCHEMA-FAIL', note: 'Thất bại: Toàn bộ bản ghi không khớp. Cấu trúc dữ liệu nguồn đã bị thay đổi (Schema Changed).', hasDetails: false },
+    { id: 3, runTime: '07/04/2025\n09:00:15', status: 'success', records: '5,120', duration: '2 phút 01 giây', errorCode: '—', note: '', hasDetails: false },
+    { id: 4, runTime: '03/04/2025\n09:00:22', status: 'error', records: '0', duration: '5 phút\n(timeout)', errorCode: 'D-04', note: 'Timeout đọc dữ liệu — Retry 3/3 thất bại ↗', hasDetails: false },
   ];
+
+  if (selectedLogId !== null) {
+    const selectedLog = historyLogs.find(l => l.id === selectedLogId);
+    return <ErrorDetailView log={selectedLog} onBack={() => setSelectedLogId(null)} onGoToMapping={onGoToMapping} />;
+  }
 
   return (
     <div className="animate-in fade-in duration-300">
@@ -519,17 +527,29 @@ function TabHistory() {
               <tr key={log.id}>
                 <td className="px-6 py-4 font-mono text-[13px] whitespace-pre-wrap">{log.runTime}</td>
                 <td className="px-6 py-4">
-                  {log.status === 'success' 
-                    ? <span className="px-2.5 py-1 text-[13px] bg-[#e8f5e9] text-[#2e7d32] rounded font-medium border border-[#c8e6c9]">Thành công</span>
-                    : <span className="px-2.5 py-1 text-[13px] bg-[#feeceb] text-[#d32f2f] rounded font-medium border border-[#ffcdd2]">Thất bại</span>
-                  }
+                  {log.status === 'success' ? (
+                    <span className="px-2.5 py-1 text-[13px] bg-[#e8f5e9] text-[#2e7d32] rounded font-medium border border-[#c8e6c9]">Thành công</span>
+                  ) : log.status === 'partial_success' ? (
+                    <span className="px-2.5 py-1 text-[13px] bg-amber-50 text-amber-700 rounded font-medium border border-amber-200">Một phần</span>
+                  ) : (
+                    <span className="px-2.5 py-1 text-[13px] bg-[#feeceb] text-[#d32f2f] rounded font-medium border border-[#ffcdd2]">Thất bại</span>
+                  )}
                 </td>
                 <td className="px-6 py-4 font-mono">{log.records}</td>
                 <td className="px-6 py-4 whitespace-pre-wrap">{log.duration}</td>
                 <td className={`px-6 py-4 ${log.errorCode !== '—' ? 'text-[#d32f2f] underline cursor-pointer hover:font-medium' : 'text-slate-400'}`}>
                   {log.errorCode}
                 </td>
-                <td className={`px-6 py-4 ${log.status === 'error' ? 'text-[#d32f2f]' : ''}`}>{log.note}</td>
+                <td className={`px-6 py-4 ${log.status === 'error' ? 'text-[#d32f2f]' : ''}`}>
+                  <div className="whitespace-pre-wrap">{log.note}</div>
+                  {log.hasDetails && (
+                    <button 
+                      onClick={() => setSelectedLogId(log.id)}
+                      className="mt-2 text-blue-600 hover:text-blue-700 text-[13px] font-medium flex items-center gap-1 transition-colors">
+                      <Eye className="w-3 h-3" /> Xem chi tiết
+                    </button>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -552,6 +572,127 @@ function TabHistory() {
       </div>
     </div>
   );
+}
+
+function ErrorDetailView({ log, onBack, onGoToMapping }: any) {
+  const missingRecords = [
+    { id: 'REC-001', raw: '{"ho_ten": "Nguyễn Văn A"}', missing: ['ngay_sinh', 'quoc_tich'] },
+    { id: 'REC-045', raw: '{"ho_ten": "Trần Thị B", "quoc_tich": "VN"}', missing: ['ngay_sinh'] }
+  ];
+
+  const unmappedFields = [
+    { fieldName: 'noi_cap_cccd', type: 'string', sample: 'C06', affectedRecords: 45 },
+    { fieldName: 'ton_giao', type: 'string', sample: 'Không', affectedRecords: 12 }
+  ];
+
+  return (
+    <div className="animate-in fade-in duration-300">
+      <div className="flex items-center gap-4 mb-6 pb-4 border-b border-slate-100">
+        <button onClick={onBack} className="p-2 -ml-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
+          <ArrowRight className="w-5 h-5 rotate-180" />
+        </button>
+        <div>
+          <h3 className="text-base font-bold text-slate-800">Chi tiết dữ liệu lỗi - Đợt chạy {log?.runTime.replace('\n', ' ')}</h3>
+          <p className="text-sm text-slate-500">Mã lỗi: {log?.errorCode} &mdash; {log?.status === 'partial_success' ? 'Hoàn thành một phần' : 'Thất bại'}</p>
+        </div>
+      </div>
+
+      <div className="space-y-8">
+        {/* Missing Fields Area */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+             <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center text-red-600 border border-red-100 shadow-sm">
+                   <Activity className="w-5 h-5" />
+                </div>
+                <div>
+                   <h4 className="font-semibold text-slate-800 text-sm">Bản ghi thiếu trường bắt buộc</h4>
+                   <p className="text-xs text-slate-500">2 bản ghi bị từ chối do thiếu dữ liệu mapping</p>
+                </div>
+             </div>
+             <button className="px-4 py-2 border border-slate-300 bg-white rounded text-sm text-slate-700 font-medium hover:bg-slate-50 flex items-center gap-2 shadow-sm transition-all focus:ring-2 focus:ring-slate-200">
+               <Download className="w-4 h-4" /> Xuất File Lỗi
+             </button>
+          </div>
+          
+          <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-[#f8f7f5] text-slate-700 font-medium border-b border-slate-200">
+                <tr>
+                  <th className="px-4 py-3 w-1/4">Record ID</th>
+                  <th className="px-4 py-3 w-1/2">Dữ liệu gốc (Raw)</th>
+                  <th className="px-4 py-3">Trường bị thiếu</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {missingRecords.map(rec => (
+                   <tr key={rec.id} className="hover:bg-slate-50 transition-colors">
+                     <td className="px-4 py-3 font-mono text-xs text-slate-600">{rec.id}</td>
+                     <td className="px-4 py-3 font-mono text-xs text-slate-600 bg-slate-50 p-2 rounded block mx-2 my-2 border border-slate-100">{rec.raw}</td>
+                     <td className="px-4 py-3">
+                       <div className="flex flex-wrap gap-1.5">
+                          {rec.missing.map(m => (
+                             <span key={m} className="px-2 py-1 bg-red-50 text-red-700 border border-red-200 rounded text-xs font-mono font-medium shadow-sm">{m}</span>
+                          ))}
+                       </div>
+                     </td>
+                   </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Unmapped Fields Area */}
+        <div>
+           <div className="flex items-center justify-between mb-4 mt-2">
+             <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600 border border-amber-100 shadow-sm">
+                   <Database className="w-5 h-5" />
+                </div>
+                <div>
+                   <h4 className="font-semibold text-slate-800 text-sm">Phát hiện dữ liệu mới / thay đổi</h4>
+                   <p className="text-xs text-slate-500">Một vài bản ghi trả về các trường dữ liệu bị thay đổi cấu trúc, không khớp với sơ đồ hiện tại</p>
+                </div>
+             </div>
+             <div className="flex gap-3">
+                 <button className="px-4 py-2 border border-slate-300 bg-white rounded text-sm text-slate-700 font-medium hover:bg-slate-50 shadow-sm transition-all focus:ring-2 focus:ring-slate-200">
+                   Bỏ qua
+                 </button>
+                 <button onClick={onGoToMapping} className="px-4 py-2 bg-blue-600 rounded text-sm text-white font-medium hover:bg-blue-700 flex items-center gap-2 shadow-sm transition-all focus:ring-2 focus:ring-blue-500">
+                   <Shield className="w-4 h-4" /> Cấu hình ánh xạ ngay
+                 </button>
+             </div>
+          </div>
+
+          <div className="border border-slate-200 rounded-xl overflow-hidden bg-[#fbfaf9] shadow-sm">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-[#fef7ec] text-[#bd6a1f] font-medium border-b border-[#fce8ce]">
+                <tr>
+                  <th className="px-4 py-3 w-1/3">Tên trường mới phát hiện</th>
+                  <th className="px-4 py-3">Định dạng suy đoán</th>
+                  <th className="px-4 py-3">Giá trị mẫu</th>
+                  <th className="px-4 py-3">Số bản ghi ảnh hưởng</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 bg-white">
+                 {unmappedFields.map(f => (
+                    <tr key={f.fieldName} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-4 py-3 font-mono text-[13px] text-slate-800 font-medium">{f.fieldName}</td>
+                      <td className="px-4 py-3">
+                         <span className="px-2.5 py-1 border rounded text-slate-500 font-mono text-[11px] bg-slate-50 font-medium">{f.type}</span>
+                      </td>
+                      <td className="px-4 py-3 text-slate-600 italic">"{f.sample}"</td>
+                      <td className="px-4 py-3 text-slate-600">{f.affectedRecords} bản ghi</td>
+                    </tr>
+                 ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 function TabChangelog() {
