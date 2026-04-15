@@ -1,5 +1,5 @@
 import { useState, ChangeEvent } from 'react';
-import { Search, Filter, FileText, Download, Printer } from 'lucide-react';
+import { Search, Filter, FileText, Download, Printer, ChevronDown } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const mockStatuses = [
@@ -19,9 +19,11 @@ export function CategoryReportStatusPage() {
       : mockStatuses.filter(s => s.name === 'Hết hiệu lực' || s.name === 'Tạm dừng');
 
   const total = filteredStatuses.reduce((acc, curr) => acc + curr.value, 0);
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
-  const handleExportWord = () => {
-    alert("Đang tạo và tải xuống file Báo_cáo_trạng_thái_danh_mục.docx...");
+  const handleExportFile = (format: string) => {
+    setShowExportMenu(false);
+    alert(`Đang xuất dữ liệu sang định dạng ${format}...`);
   };
 
   return (
@@ -57,13 +59,49 @@ export function CategoryReportStatusPage() {
               <Printer className="w-4 h-4" />
               In báo cáo
             </button>
-            <button 
-              onClick={handleExportWord}
-              className="px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-medium transition-colors flex items-center gap-2 shadow-sm shadow-blue-600/20"
-            >
-              <FileText className="w-4 h-4" />
-              Xuất tệp Word
-            </button>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowExportMenu(prev => !prev)}
+                className="px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-medium transition-colors flex items-center gap-2 shadow-sm shadow-blue-600/20"
+              >
+                <FileText className="w-4 h-4" />
+                Xuất File
+                <ChevronDown className="w-4 h-4" />
+              </button>
+              {showExportMenu && (
+                <div className="absolute right-0 mt-2 w-44 rounded-2xl border border-slate-200 bg-white shadow-xl z-20">
+                  <button
+                    type="button"
+                    onClick={() => handleExportFile('XLS')}
+                    className="w-full text-left px-4 py-3 hover:bg-slate-50 text-sm text-slate-700"
+                  >
+                    XLS
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleExportFile('DOCX')}
+                    className="w-full text-left px-4 py-3 hover:bg-slate-50 text-sm text-slate-700"
+                  >
+                    DOCX
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleExportFile('PDF')}
+                    className="w-full text-left px-4 py-3 hover:bg-slate-50 text-sm text-slate-700"
+                  >
+                    PDF
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleExportFile('CSV')}
+                    className="w-full text-left px-4 py-3 hover:bg-slate-50 text-sm text-slate-700"
+                  >
+                    CSV
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

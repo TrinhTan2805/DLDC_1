@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Search, Settings, Eye, Edit, Trash2, Save, X, CheckSquare, Share2, FileSearch, BarChart3, Filter, XCircle, Globe, Send, Check, Ban, Upload, Paperclip, RefreshCw, Clock, FileText, AlertCircle } from 'lucide-react';
+import { Plus, Search, Settings, Eye, Edit, Trash2, Save, X, CheckSquare, Share2, FileSearch, BarChart3, Filter, XCircle, Globe, Send, Check, Ban, Upload, Paperclip, RefreshCw, Clock, FileText, AlertCircle, Shield } from 'lucide-react';
 
 interface DataField {
   id: string;
@@ -208,7 +208,7 @@ interface HistoryRecord {
   version: string;
   code: string;
   name: string;
-  changeType: 'structure' | 'data' | 'relation' | 'rule';
+  changeType: 'create_category' | 'edit_category' | 'grant_permission' | 'add_metadata' | 'edit_metadata' | 'add_license';
   changeContent: string;
   user: string;
   timestamp: string;
@@ -221,19 +221,19 @@ const mockHistory: HistoryRecord[] = [
     version: 'v1.5',
     code: 'ODC001',
     name: 'Danh mục văn bản pháp luật',
-    changeType: 'structure',
-    changeContent: 'Thêm trường "ngay_het_hieu_luc" vào cấu trúc dữ liệu',
+    changeType: 'edit_metadata',
+    changeContent: 'Cập nhật tần suất từ "Hàng tháng" sang "Hàng ngày" cho metadata',
     user: 'Nguyễn Văn A',
     timestamp: '06/01/2025 14:30',
     status: 'applied'
   },
   {
     id: 'h2',
-    version: 'v2.1',
+    version: 'v1.0',
     code: 'ODC002',
     name: 'Danh mục đăng ký kinh doanh',
-    changeType: 'data',
-    changeContent: 'Cập nhật 1,250 bản ghi dữ liệu mới từ hệ thống ĐKKD',
+    changeType: 'create_category',
+    changeContent: 'Tạo mới danh mục "Danh mục đăng ký kinh doanh" trên hệ thống',
     user: 'Trần Thị B',
     timestamp: '06/01/2025 10:15',
     status: 'applied'
@@ -243,8 +243,8 @@ const mockHistory: HistoryRecord[] = [
     version: 'v1.3',
     code: 'ODC003',
     name: 'Danh mục công chứng',
-    changeType: 'relation',
-    changeContent: 'Thiết lập quan hệ với danh mục "Tổ chức hành nghề công chứng"',
+    changeType: 'grant_permission',
+    changeContent: 'Cấp quyền biên tập cho tài khoản tran_thi_c để quản lý metadata',
     user: 'Lê Văn C',
     timestamp: '05/01/2025 16:45',
     status: 'pending'
@@ -254,8 +254,8 @@ const mockHistory: HistoryRecord[] = [
     version: 'v1.8',
     code: 'ODC004',
     name: 'Danh mục TGPL',
-    changeType: 'rule',
-    changeContent: 'Cập nhật quy tắc tự động đồng bộ từ hàng quý sang hàng tháng',
+    changeType: 'add_license',
+    changeContent: 'Gán giấy phép ODC-BY cho tập dữ liệu',
     user: 'Phạm Thị D',
     timestamp: '05/01/2025 09:20',
     status: 'applied'
@@ -265,8 +265,8 @@ const mockHistory: HistoryRecord[] = [
     version: 'v2.0',
     code: 'ODC001',
     name: 'Danh mục văn bản pháp luật',
-    changeType: 'structure',
-    changeContent: 'Thay đổi kiểu dữ liệu trường "von_dieu_le" từ VARCHAR sang DECIMAL',
+    changeType: 'edit_category',
+    changeContent: 'Thay đổi lĩnh vực từ "Pháp luật chung" sang "Tư pháp"',
     user: 'Nguyễn Văn A',
     timestamp: '04/01/2025 11:00',
     status: 'applied'
@@ -276,8 +276,8 @@ const mockHistory: HistoryRecord[] = [
     version: 'v1.2',
     code: 'ODC005',
     name: 'Danh mục hộ tịch',
-    changeType: 'data',
-    changeContent: 'Import 3,450 bản ghi từ file Excel theo công văn số 125/CV-BTP',
+    changeType: 'add_metadata',
+    changeContent: 'Thêm mới metadata cho danh mục với từ khóa "khai sinh, đăng ký kết hôn"',
     user: 'Trần Thị B',
     timestamp: '03/01/2025 15:30',
     status: 'applied'
@@ -287,8 +287,8 @@ const mockHistory: HistoryRecord[] = [
     version: 'v1.4',
     code: 'ODC006',
     name: 'Danh mục luật sư',
-    changeType: 'relation',
-    changeContent: 'Liên kết với danh mục "Văn phòng luật sư" qua trường "ma_van_phong"',
+    changeType: 'edit_category',
+    changeContent: 'Cập nhật lại mô tả chi tiết của danh mục',
     user: 'Lê Văn C',
     timestamp: '02/01/2025 08:45',
     status: 'pending'
@@ -298,8 +298,8 @@ const mockHistory: HistoryRecord[] = [
     version: 'v1.1',
     code: 'ODC007',
     name: 'Danh mục giám định tư pháp',
-    changeType: 'rule',
-    changeContent: 'Thiết lập quy tắc validation cho trường "ket_qua_giam_dinh"',
+    changeType: 'grant_permission',
+    changeContent: 'Thu hồi quyền biên tập danh mục của người dùng pham_thi_d',
     user: 'Phạm Thị D',
     timestamp: '01/01/2025 13:20',
     status: 'applied'
@@ -309,21 +309,10 @@ const mockHistory: HistoryRecord[] = [
     version: 'v1.6',
     code: 'ODC002',
     name: 'Danh mục đăng ký kinh doanh',
-    changeType: 'data',
-    changeContent: 'Xóa 85 bản ghi trùng lặp theo mã doanh nghiệp',
+    changeType: 'edit_metadata',
+    changeContent: 'Xóa các từ khóa không còn hợp lệ',
     user: 'Nguyễn Văn A',
     timestamp: '31/12/2024 10:00',
-    status: 'applied'
-  },
-  {
-    id: 'h10',
-    version: 'v1.0',
-    code: 'ODC008',
-    name: 'Danh mục bồi thường nhà nước',
-    changeType: 'structure',
-    changeContent: 'Khởi tạo cấu trúc danh mục với 8 trường dữ liệu cơ bản',
-    user: 'Trần Thị B',
-    timestamp: '30/12/2024 14:15',
     status: 'applied'
   }
 ];
@@ -397,12 +386,77 @@ const mockCategoryList: OpenDataCategory[] = [
   },
 ];
 
+interface MetadataItem {
+  id: string;
+  categoryCodes: string[];
+  description: string;
+  keywords: string;
+  licenseId: string;
+  format: string;
+  source: string;
+  frequency: 'daily' | 'weekly' | 'monthly' | 'quarterly';
+  status: 'active' | 'inactive';
+}
+
+interface LicenseItem {
+  id: string;
+  name: string;
+  description: string;
+  terms: string;
+  referenceUrl: string;
+  status: 'active' | 'inactive';
+}
+
+const sampleMetadata: MetadataItem[] = [
+  {
+    id: 'm1',
+    categoryCodes: ['ODC001'],
+    description: 'Metadata cho dữ liệu mở A',
+    keywords: 'luật, mở, thống kê',
+    licenseId: 'l1',
+    format: 'CSV',
+    source: 'API nội bộ',
+    frequency: 'monthly',
+    status: 'active'
+  },
+  {
+    id: 'm2',
+    categoryCodes: ['ODC002'],
+    description: 'Metadata cho dữ liệu mở B',
+    keywords: 'doanh nghiệp, đăng ký',
+    licenseId: 'l2',
+    format: 'JSON',
+    source: 'Cổng dịch vụ công',
+    frequency: 'quarterly',
+    status: 'active'
+  }
+];
+
+const sampleLicenses: LicenseItem[] = [
+  {
+    id: 'l1',
+    name: 'Giấy phép dữ liệu mở công cộng',
+    description: 'Cho phép sử dụng và phân phối dữ liệu mở.',
+    terms: 'Ghi nguồn là bắt buộc.',
+    referenceUrl: 'https://example.com/license/cc0',
+    status: 'active'
+  },
+  {
+    id: 'l2',
+    name: 'Giấy phép ODC-BY',
+    description: 'Yêu cầu ghi nhận nguồn khi sử dụng.',
+    terms: 'Phải ghi rõ nguồn dữ liệu.',
+    referenceUrl: 'https://example.com/license/odc-by',
+    status: 'active'
+  }
+];
+
 interface OpenDataSetupPageProps {
   onNavigate?: (page: string) => void;
 }
 
 export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
-  const [activeTab, setActiveTab] = useState<'management' | 'approval' | 'history'>('management');
+  const [activeTab, setActiveTab] = useState<'management' | 'approval' | 'history' | 'metadata' | 'license'>('management');
   const [categories, setCategories] = useState<OpenDataCategory[]>(mockCategories);
   const [updateRules, setUpdateRules] = useState<OpenDataCategory[]>(mockUpdateRules);
   const [approvalList, setApprovalList] = useState<OpenDataCategory[]>(mockApprovalList);
@@ -410,12 +464,112 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
   const [categoryList, setCategoryList] = useState<OpenDataCategory[]>(mockCategoryList);
   const [searchTerm, setSearchTerm] = useState('');
   const [approvalFilterTab, setApprovalFilterTab] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
+  const [metadataEntries, setMetadataEntries] = useState<MetadataItem[]>(sampleMetadata);
+  const [licenseEntries, setLicenseEntries] = useState<LicenseItem[]>(sampleLicenses);
+  const [selectedMetadata, setSelectedMetadata] = useState<MetadataItem | null>(null);
+  const [showMetadataModal, setShowMetadataModal] = useState(false);
+  const [metadataFormData, setMetadataFormData] = useState<MetadataItem>({
+    id: '0',
+    categoryCodes: [],
+    description: '',
+    keywords: '',
+    licenseId: sampleLicenses[0]?.id || 'l1',
+    format: 'CSV',
+    source: '',
+    frequency: 'monthly',
+    status: 'active'
+  });
+  const [selectedLicense, setSelectedLicense] = useState<LicenseItem | null>(null);
+  const [showLicenseModal, setShowLicenseModal] = useState(false);
+  const [licenseFormData, setLicenseFormData] = useState<LicenseItem>({
+    id: '0',
+    name: '',
+    description: '',
+    terms: '',
+    referenceUrl: '',
+    status: 'active'
+  });
+  const [searchMetadata, setSearchMetadata] = useState('');
+  const [metadataFrequencyFilter, setMetadataFrequencyFilter] = useState('all');
+  const [metadataFieldFilter, setMetadataFieldFilter] = useState('all');
+  const [searchLicense, setSearchLicense] = useState('');
+  const [licenseStatusFilter, setLicenseStatusFilter] = useState('all');
+  
+  const allFields = Array.from(new Set(mockCategories.map(c => c.dataField)));
   
   // History filters
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [changeTypeFilter, setChangeTypeFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+
+  const getLicenseName = (licenseId: string) => {
+    const license = licenseEntries.find(l => l.id === licenseId);
+    return license ? license.name : 'Không xác định';
+  };
+
+  const openMetadataModal = (item?: MetadataItem) => {
+    if (item) {
+      setSelectedMetadata(item);
+      setMetadataFormData(item);
+    } else {
+      setSelectedMetadata(null);
+      setMetadataFormData({
+        id: '0',
+        categoryCodes: [],
+        description: '',
+        keywords: '',
+        licenseId: sampleLicenses[0]?.id || 'l1',
+        format: 'CSV',
+        source: '',
+        frequency: 'monthly',
+        status: 'active'
+      });
+    }
+    setShowMetadataModal(true);
+  };
+
+  const saveMetadata = () => {
+    if (metadataFormData.categoryCodes.length === 0 || !metadataFormData.description || !metadataFormData.source) {
+      return;
+    }
+    if (metadataFormData.id === '0') {
+      setMetadataEntries([...metadataEntries, { ...metadataFormData, id: String(Date.now()) }]);
+    } else {
+      setMetadataEntries(metadataEntries.map(item => item.id === metadataFormData.id ? metadataFormData : item));
+    }
+    setShowMetadataModal(false);
+  };
+
+  const openLicenseModal = (item?: LicenseItem) => {
+    if (item) {
+      setSelectedLicense(item);
+      setLicenseFormData(item);
+    } else {
+      setSelectedLicense(null);
+      setLicenseFormData({
+        id: '0',
+        name: '',
+        description: '',
+        terms: '',
+        referenceUrl: '',
+        status: 'active'
+      });
+    }
+    setShowLicenseModal(true);
+  };
+
+  const saveLicense = () => {
+    if (!licenseFormData.name || !licenseFormData.description || !licenseFormData.terms || !licenseFormData.referenceUrl) {
+      return;
+    }
+    if (licenseFormData.id === '0') {
+      setLicenseEntries([...licenseEntries, { ...licenseFormData, id: String(Date.now()) }]);
+    } else {
+      setLicenseEntries(licenseEntries.map(item => item.id === licenseFormData.id ? licenseFormData : item));
+    }
+    setShowLicenseModal(false);
+  };
   
   // Modals
   const [showAddModal, setShowAddModal] = useState(false);
@@ -557,6 +711,24 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
   };
 
   // Filter logic
+  const filteredMetadataEntries = metadataEntries.filter(m => {
+    const matchSearch = m.description.toLowerCase().includes(searchMetadata.toLowerCase()) || m.keywords.toLowerCase().includes(searchMetadata.toLowerCase());
+    const matchFreq = metadataFrequencyFilter === 'all' || m.frequency === metadataFrequencyFilter;
+    
+    let matchField = true;
+    if (metadataFieldFilter !== 'all') {
+      const linkedFields = m.categoryCodes.map(code => categories.find(c => c.code === code)?.dataField).filter(Boolean);
+      matchField = linkedFields.includes(metadataFieldFilter);
+    }
+    return matchSearch && matchFreq && matchField;
+  });
+
+  const filteredLicenseEntries = licenseEntries.filter(l => {
+    const matchSearch = l.name.toLowerCase().includes(searchLicense.toLowerCase()) || l.description.toLowerCase().includes(searchLicense.toLowerCase());
+    const matchStatus = licenseStatusFilter === 'all' || l.status === licenseStatusFilter;
+    return matchSearch && matchStatus;
+  });
+
   const filteredCategories = currentData.filter(cat => {
     const matchSearch = cat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                        cat.code.toLowerCase().includes(searchTerm.toLowerCase());
@@ -856,6 +1028,36 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
               </span>
             </button>
             <button
+              onClick={() => setActiveTab('metadata')}
+              className={`px-4 py-3 text-sm transition-all relative ${
+                activeTab === 'metadata'
+                  ? 'text-slate-700 border-b-2 border-slate-600'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Metadata
+              <span className={`ml-2 px-2 py-0.5 rounded text-xs ${
+                activeTab === 'metadata' ? 'bg-slate-100 text-slate-700' : 'bg-slate-100 text-slate-600'
+              }`}>
+                {metadataEntries.length}
+              </span>
+            </button>
+            <button
+              onClick={() => setActiveTab('license')}
+              className={`px-4 py-3 text-sm transition-all relative ${
+                activeTab === 'license'
+                  ? 'text-slate-700 border-b-2 border-slate-600'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Giấy phép
+              <span className={`ml-2 px-2 py-0.5 rounded text-xs ${
+                activeTab === 'license' ? 'bg-slate-100 text-slate-700' : 'bg-slate-100 text-slate-600'
+              }`}>
+                {licenseEntries.length}
+              </span>
+            </button>
+            <button
               onClick={() => setActiveTab('history')}
               className={`px-4 py-3 text-sm transition-all relative ${
                 activeTab === 'history'
@@ -1082,6 +1284,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
           ) : (
             <>
               {/* Search & Filter with Add Button */}
+
               <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-6">
                 {activeTab === 'history' ? (
                   <div className="grid grid-cols-5 gap-3">
@@ -1120,10 +1323,12 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                       >
                         <option value="">Tất cả loại thay đổi</option>
-                        <option value="structure">Cấu trúc</option>
-                        <option value="data">Dữ liệu</option>
-                        <option value="relation">Mối quan hệ</option>
-                        <option value="rule">Quy tắc</option>
+                        <option value="create_category">Tạo danh mục</option>
+                        <option value="edit_category">Chỉnh sửa DM</option>
+                        <option value="grant_permission">Cấp quyền</option>
+                        <option value="add_metadata">Thêm metadata</option>
+                        <option value="edit_metadata">Sửa metadata</option>
+                        <option value="add_license">Thêm giấy phép</option>
                       </select>
                     </div>
                     <div>
@@ -1136,6 +1341,89 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                         <option value="applied">Đã áp dụng</option>
                         <option value="pending">Chờ xử lý</option>
                       </select>
+                    </div>
+                  </div>
+                ) : activeTab === 'metadata' ? (
+                  <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-center">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <input
+                        type="text"
+                        placeholder="Tìm kiếm metadata..."
+                        value={searchMetadata}
+                        onChange={(e) => setSearchMetadata(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+                    <div>
+                      <select
+                        value={metadataFrequencyFilter}
+                        onChange={(e) => setMetadataFrequencyFilter(e.target.value)}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      >
+                        <option value="all">Tất cả tần suất</option>
+                        <option value="daily">Hàng ngày</option>
+                        <option value="weekly">Hàng tuần</option>
+                        <option value="monthly">Hàng tháng</option>
+                        <option value="quarterly">Hàng quý</option>
+                        <option value="yearly">Hàng năm</option>
+                      </select>
+                    </div>
+                    <div>
+                      <select
+                        value={metadataFieldFilter}
+                        onChange={(e) => setMetadataFieldFilter(e.target.value)}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      >
+                        <option value="all">Tất cả lĩnh vực</option>
+                        {allFields.map((field, idx) => (
+                          <option key={idx} value={field}>{field}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        className="px-4 py-2 w-full lg:w-auto bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 flex items-center justify-center gap-2"
+                        onClick={() => openMetadataModal()}
+                      >
+                        <Plus className="w-4 h-4" />
+                        Thêm mới
+                      </button>
+                    </div>
+                  </div>
+                ) : activeTab === 'license' ? (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <input
+                        type="text"
+                        placeholder="Tìm kiếm giấy phép..."
+                        value={searchLicense}
+                        onChange={(e) => setSearchLicense(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+                    <div>
+                      <select
+                        value={licenseStatusFilter}
+                        onChange={(e) => setLicenseStatusFilter(e.target.value)}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      >
+                        <option value="all">Tất cả trạng thái</option>
+                        <option value="active">Còn hiệu lực</option>
+                        <option value="inactive">Hết hiệu lực</option>
+                      </select>
+                    </div>
+                    <div className="flex justify-end md:col-start-3">
+                      <button
+                        type="button"
+                        className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 flex items-center gap-2"
+                        onClick={() => openLicenseModal()}
+                      >
+                        <Plus className="w-4 h-4" />
+                        Thêm mới
+                      </button>
                     </div>
                   </div>
                 ) : (
@@ -1182,6 +1470,24 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                       <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Trạng thái</th>
                       <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Thao tác</th>
                     </>
+                  ) : activeTab === 'metadata' ? (
+                    <>
+                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Tập dữ liệu</th>
+                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Mô tả</th>
+                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Giấy phép</th>
+                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Định dạng</th>
+                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Tần suất</th>
+                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Trạng thái</th>
+                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Thao tác</th>
+                    </>
+                  ) : activeTab === 'license' ? (
+                    <>
+                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Tên giấy phép</th>
+                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Mô tả</th>
+                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Điều kiện sử dụng</th>
+                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Trạng thái</th>
+                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Thao tác</th>
+                    </>
                   ) : (
                     <>
                       <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Mã danh mục</th>
@@ -1213,24 +1519,34 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        {record.changeType === 'structure' && (
+                        {record.changeType === 'create_category' && (
+                          <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">
+                            Tạo danh mục
+                          </span>
+                        )}
+                        {record.changeType === 'edit_category' && (
                           <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
-                            Cấu trúc
+                            Chỉnh sửa DM
                           </span>
                         )}
-                        {record.changeType === 'data' && (
-                          <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs font-medium">
-                            Dữ liệu
-                          </span>
-                        )}
-                        {record.changeType === 'relation' && (
+                        {record.changeType === 'grant_permission' && (
                           <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">
-                            Mối quan hệ
+                            Cấp quyền
                           </span>
                         )}
-                        {record.changeType === 'rule' && (
-                          <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs font-medium">
-                            Quy tắc
+                        {record.changeType === 'add_metadata' && (
+                          <span className="px-2 py-1 bg-indigo-100 text-indigo-700 rounded text-xs font-medium">
+                            Thêm metadata
+                          </span>
+                        )}
+                        {record.changeType === 'edit_metadata' && (
+                          <span className="px-2 py-1 bg-sky-100 text-sky-700 rounded text-xs font-medium">
+                            Sửa metadata
+                          </span>
+                        )}
+                        {record.changeType === 'add_license' && (
+                          <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs font-medium">
+                            Thêm giấy phép
                           </span>
                         )}
                       </td>
@@ -1271,6 +1587,84 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                             title="Khôi phục"
                           >
                             <RefreshCw className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : activeTab === 'metadata' ? (
+                  filteredMetadataEntries.map((item, index) => (
+                    <tr key={item.id} className="hover:bg-slate-50">
+                      <td className="px-4 py-3 text-sm">{index + 1}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex flex-wrap gap-1 mt-1 max-w-[200px]">
+                          {item.categoryCodes.map(code => (
+                            <code key={code} className="px-2 py-0.5 bg-slate-100 text-emerald-700 rounded text-xs">{code}</code>
+                          ))}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="text-sm text-slate-900">{item.description}</div>
+                        <div className="text-xs text-slate-500 mt-1 flex flex-wrap gap-1">
+                          Từ khóa: {item.keywords.split(',').map((k, i) => k.trim() && <span key={i} className="px-1.5 py-0.5 bg-slate-100 rounded text-[10px]">{k.trim()}</span>)}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-medium border border-blue-100">{getLicenseName(item.licenseId)}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="px-2 py-1 bg-slate-100 text-slate-700 rounded text-xs font-medium">{item.format}</span>
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        {item.frequency === 'daily' ? 'Hàng ngày' : item.frequency === 'weekly' ? 'Hàng tuần' : item.frequency === 'monthly' ? 'Hàng tháng' : 'Hàng quý'}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${item.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-700'}`}>
+                          {item.status === 'active' ? 'Hoạt động' : 'Ngừng'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1">
+                          <button 
+                            onClick={() => openMetadataModal(item)}
+                            className="p-1.5 text-amber-600 hover:bg-amber-50 rounded" 
+                            title="Chỉnh sửa"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : activeTab === 'license' ? (
+                  filteredLicenseEntries.map((item, index) => (
+                    <tr key={item.id} className="hover:bg-slate-50">
+                      <td className="px-4 py-3 text-sm">{index + 1}</td>
+                      <td className="px-4 py-3">
+                        <div className="text-sm font-medium text-slate-900">{item.name}</div>
+                        <a href={item.referenceUrl} target="_blank" rel="noreferrer" className="text-xs text-emerald-600 hover:underline flex items-center gap-1 mt-1 block w-max">
+                          <Globe className="w-3 h-3" /> Nguồn tham chiếu
+                        </a>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="text-sm text-slate-700">{item.description}</div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="text-sm text-slate-600 max-w-[200px] truncate" title={item.terms}>{item.terms}</div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${item.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-700'}`}>
+                          {item.status === 'active' ? 'Còn hiệu lực' : 'Hết hiệu lực'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1">
+                          <button 
+                            onClick={() => openLicenseModal(item)}
+                            className="p-1.5 text-amber-600 hover:bg-amber-50 rounded" 
+                            title="Chỉnh sửa"
+                          >
+                            <Edit className="w-4 h-4" />
                           </button>
                         </div>
                       </td>
@@ -1365,6 +1759,251 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
           )}
         </div>
       </div>
+
+      {/* Metadata Modal */}
+      {showMetadataModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4">
+            <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900">
+                  {selectedMetadata ? 'Chỉnh sửa Metadata' : 'Thêm mới Metadata'}
+                </h3>
+                <p className="text-sm text-slate-500 mt-1">
+                  Quản lý thông tin metadata cho dữ liệu mở, bao gồm giấy phép, định dạng và nguồn dữ liệu.
+                </p>
+              </div>
+              <button onClick={() => setShowMetadataModal(false)} className="text-slate-400 hover:text-slate-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm text-slate-700 mb-2">Danh mục *</label>
+                <div className="border border-slate-300 rounded-lg p-4 bg-slate-50 max-h-72 overflow-y-auto">
+                  {Object.entries(categoryList.reduce<Record<string, OpenDataCategory[]>>((groups, cat) => {
+                    if (!groups[cat.dataField]) {
+                      groups[cat.dataField] = [];
+                    }
+                    groups[cat.dataField].push(cat);
+                    return groups;
+                  }, {})).map(([system, items]) => (
+                    <div key={system} className="mb-4">
+                      <div className="text-sm font-semibold text-slate-900 mb-2">{system}</div>
+                      <div className="space-y-2 pl-4">
+                        {items.map((cat) => (
+                          <label key={cat.id} className="flex items-center gap-2 text-sm text-slate-700">
+                            <input
+                              type="checkbox"
+                              checked={metadataFormData.categoryCodes.includes(cat.code)}
+                              onChange={(e) => {
+                                const selectedCodes = metadataFormData.categoryCodes.includes(cat.code)
+                                  ? metadataFormData.categoryCodes.filter(code => code !== cat.code)
+                                  : [...metadataFormData.categoryCodes, cat.code];
+                                setMetadataFormData({ ...metadataFormData, categoryCodes: selectedCodes });
+                              }}
+                              className="h-4 w-4 text-emerald-600 border-slate-300 rounded"
+                            />
+                            <span>{cat.code} - {cat.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-slate-500 mt-2">Chọn một hoặc nhiều danh mục cho Metadata này.</p>
+              </div>
+              <div>
+                <label className="block text-sm text-slate-700 mb-2">Mô tả *</label>
+                <textarea
+                  value={metadataFormData.description}
+                  onChange={(e) => setMetadataFormData({ ...metadataFormData, description: e.target.value })}
+                  rows={4}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                  placeholder="Mô tả metadata cho danh mục"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-slate-700 mb-2">Từ khóa</label>
+                <input
+                  type="text"
+                  value={metadataFormData.keywords}
+                  onChange={(e) => setMetadataFormData({ ...metadataFormData, keywords: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                  placeholder="Ví dụ: luật, dữ liệu mở"
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-slate-700 mb-2">Giấy phép *</label>
+                  <select
+                    value={metadataFormData.licenseId}
+                    onChange={(e) => setMetadataFormData({ ...metadataFormData, licenseId: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                  >
+                    {licenseEntries.map((license) => (
+                      <option key={license.id} value={license.id}>
+                        {license.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm text-slate-700 mb-2">Định dạng</label>
+                  <select
+                    value={metadataFormData.format}
+                    onChange={(e) => setMetadataFormData({ ...metadataFormData, format: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                  >
+                    <option value="CSV">CSV</option>
+                    <option value="JSON">JSON</option>
+                    <option value="XML">XML</option>
+                    <option value="Excel">Excel</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm text-slate-700 mb-2">Nguồn dữ liệu *</label>
+                <input
+                  type="text"
+                  value={metadataFormData.source}
+                  onChange={(e) => setMetadataFormData({ ...metadataFormData, source: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                  placeholder="Nhập nguồn dữ liệu"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-slate-700 mb-2">Tần suất cập nhật</label>
+                  <select
+                    value={metadataFormData.frequency}
+                    onChange={(e) => setMetadataFormData({ ...metadataFormData, frequency: e.target.value as MetadataItem['frequency'] })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                  >
+                    <option value="daily">Hàng ngày</option>
+                    <option value="weekly">Hàng tuần</option>
+                    <option value="monthly">Hàng tháng</option>
+                    <option value="quarterly">Hàng quý</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm text-slate-700 mb-2">Trạng thái</label>
+                  <select
+                    value={metadataFormData.status}
+                    onChange={(e) => setMetadataFormData({ ...metadataFormData, status: e.target.value as MetadataItem['status'] })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                  >
+                    <option value="active">Hoạt động</option>
+                    <option value="inactive">Ngừng hoạt động</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div className="sticky bottom-0 bg-slate-50 border-t border-slate-200 px-6 py-4 flex items-center justify-end gap-3">
+              <button
+                onClick={() => setShowMetadataModal(false)}
+                className="px-4 py-2 text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={saveMetadata}
+                className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+              >
+                Lưu Metadata
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* License Modal */}
+      {showLicenseModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4">
+            <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900">
+                  {selectedLicense ? 'Chỉnh sửa giấy phép' : 'Thêm mới giấy phép'}
+                </h3>
+                <p className="text-sm text-slate-500 mt-1">
+                  Quản lý giấy phép chuẩn, điều kiện sử dụng và liên kết tham chiếu.
+                </p>
+              </div>
+              <button onClick={() => setShowLicenseModal(false)} className="text-slate-400 hover:text-slate-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm text-slate-700 mb-2">Tên giấy phép *</label>
+                <input
+                  type="text"
+                  value={licenseFormData.name}
+                  onChange={(e) => setLicenseFormData({ ...licenseFormData, name: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                  placeholder="Nhập tên giấy phép"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-slate-700 mb-2">Mô tả *</label>
+                <textarea
+                  value={licenseFormData.description}
+                  onChange={(e) => setLicenseFormData({ ...licenseFormData, description: e.target.value })}
+                  rows={4}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                  placeholder="Mô tả ngắn về giấy phép"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-slate-700 mb-2">Điều kiện sử dụng *</label>
+                <textarea
+                  value={licenseFormData.terms}
+                  onChange={(e) => setLicenseFormData({ ...licenseFormData, terms: e.target.value })}
+                  rows={4}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                  placeholder="Mô tả điều kiện sử dụng"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-slate-700 mb-2">Liên kết tham chiếu *</label>
+                <input
+                  type="text"
+                  value={licenseFormData.referenceUrl}
+                  onChange={(e) => setLicenseFormData({ ...licenseFormData, referenceUrl: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                  placeholder="https://example.com/license/cc0"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-slate-700 mb-2">Trạng thái</label>
+                <select
+                  value={licenseFormData.status}
+                  onChange={(e) => setLicenseFormData({ ...licenseFormData, status: e.target.value as LicenseItem['status'] })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                >
+                  <option value="active">Còn hiệu lực</option>
+                  <option value="inactive">Hết hiệu lực</option>
+                </select>
+              </div>
+            </div>
+            <div className="sticky bottom-0 bg-slate-50 border-t border-slate-200 px-6 py-4 flex items-center justify-end gap-3">
+              <button
+                onClick={() => setShowLicenseModal(false)}
+                className="px-4 py-2 text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={saveLicense}
+                className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+              >
+                Lưu giấy phép
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Add Modal */}
       {showAddModal && (

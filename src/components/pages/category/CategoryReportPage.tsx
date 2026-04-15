@@ -1,5 +1,5 @@
 import { useState, ChangeEvent } from 'react';
-import { Search, Filter, Download, FileText, SlidersHorizontal, X } from 'lucide-react';
+import { Search, Filter, Download, FileText, SlidersHorizontal, X, ChevronDown } from 'lucide-react';
 
 // Mock data for demonstration
 const mockDatasets = [
@@ -87,12 +87,11 @@ export function CategoryReportPage() {
     return true;
   });
 
-  const handleExportExcel = () => {
-    alert('Xuất dữ liệu ra Excel');
-  };
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
-  const handleExportPDF = () => {
-    alert('Xuất dữ liệu ra PDF');
+  const handleExportFile = (format: string) => {
+    setShowExportMenu(false);
+    alert(`Xuất dữ liệu ra ${format}`);
   };
 
   return (
@@ -246,21 +245,48 @@ export function CategoryReportPage() {
                 <div className="text-sm text-slate-600">
                   Tìm thấy <span className="text-emerald-600 font-semibold">{filteredDatasets.length}</span> kết quả
                 </div>
-                <div className="flex items-center gap-2">
-                  <button 
-                    onClick={handleExportExcel}
-                    className="px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2 text-sm"
+                <div className="relative flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowExportMenu(prev => !prev)}
+                    className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 flex items-center gap-2 text-sm"
                   >
                     <Download className="w-4 h-4" />
-                    Xuất Excel
+                    Xuất File
+                    <ChevronDown className="w-4 h-4" />
                   </button>
-                  <button 
-                    onClick={handleExportPDF}
-                    className="px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2 text-sm"
-                  >
-                    <FileText className="w-4 h-4" />
-                    Xuất PDF
-                  </button>
+                  {showExportMenu && (
+                    <div className="absolute right-0 top-full mt-2 w-40 rounded-2xl border border-slate-200 bg-white shadow-xl z-20">
+                      <button
+                        type="button"
+                        onClick={() => handleExportFile('XLS')}
+                        className="w-full text-left px-4 py-3 hover:bg-slate-50 text-sm text-slate-700"
+                      >
+                        XLS
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleExportFile('DOCX')}
+                        className="w-full text-left px-4 py-3 hover:bg-slate-50 text-sm text-slate-700"
+                      >
+                        DOCX
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleExportFile('PDF')}
+                        className="w-full text-left px-4 py-3 hover:bg-slate-50 text-sm text-slate-700"
+                      >
+                        PDF
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleExportFile('CSV')}
+                        className="w-full text-left px-4 py-3 hover:bg-slate-50 text-sm text-slate-700"
+                      >
+                        CSV
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

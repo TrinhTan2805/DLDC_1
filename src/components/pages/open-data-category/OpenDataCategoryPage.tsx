@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Plus, Edit2, Trash2, Download, Upload, Filter, FileText, Info, Edit, CheckCircle, XCircle, Eye, Clock, FileCheck, Shield, History as HistoryIcon, File } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Download, Upload, Filter, FileText, Info, Edit, CheckCircle, XCircle, Eye, Clock, FileCheck, Shield, History as HistoryIcon, File, ExternalLink } from 'lucide-react';
 
 interface OpenDataCategoryPageProps {
   categoryName: string;
@@ -47,6 +47,31 @@ interface CategoryOption {
   id: string;
   name: string;
   description: string;
+}
+
+interface MetadataItem {
+  id: number;
+  datasetCode: string;
+  datasetName: string;
+  description: string;
+  keywords: string;
+  licenseId: number;
+  format: string;
+  source: string;
+  frequency: 'daily' | 'weekly' | 'monthly' | 'quarterly';
+  status: 'active' | 'inactive';
+  approvalStatus: 'draft' | 'pending' | 'approved' | 'rejected';
+  updatedBy?: string;
+  updatedDate?: string;
+}
+
+interface LicenseItem {
+  id: number;
+  name: string;
+  description: string;
+  terms: string;
+  referenceUrl: string;
+  status: 'active' | 'inactive';
 }
 
 const sampleData: CategoryItem[] = [
@@ -133,8 +158,75 @@ const availableCategories: CategoryOption[] = [
   { id: 'cat_e', name: 'Danh mục E', description: 'Hộ tịch' },
 ];
 
+const sampleLicenses: LicenseItem[] = [
+  {
+    id: 1,
+    name: 'Giấy phép dữ liệu mở công cộng',
+    description: 'Cho phép sử dụng và phân phối dữ liệu mở mà không cần xin phép.',
+    terms: 'Sao chép, phân phối và sử dụng với ghi nguồn, không giới hạn mục đích.',
+    referenceUrl: 'https://example.com/license/cc0',
+    status: 'active'
+  },
+  {
+    id: 2,
+    name: 'Giấy phép ODC-BY',
+    description: 'Yêu cầu ghi nhận nguồn dữ liệu khi sử dụng.',
+    terms: 'Phải ghi rõ nguồn trong mọi trường hợp sử dụng.',
+    referenceUrl: 'https://example.com/license/odc-by',
+    status: 'active'
+  },
+];
+
+const sampleMetadata: MetadataItem[] = [
+  {
+    id: 1,
+    datasetCode: 'ODC001',
+    datasetName: 'Danh mục dữ liệu A',
+    description: 'Dữ liệu thống kê về lĩnh vực A',
+    keywords: 'văn bản, pháp luật, mở',
+    licenseId: 1,
+    format: 'CSV',
+    source: 'API nội bộ Bộ Tư pháp',
+    frequency: 'monthly',
+    status: 'active',
+    approvalStatus: 'approved',
+    updatedBy: 'Nguyễn Văn A',
+    updatedDate: '15/12/2024'
+  },
+  {
+    id: 2,
+    datasetCode: 'ODC002',
+    datasetName: 'Danh mục dữ liệu B',
+    description: 'Dữ liệu thống kê về lĩnh vực B',
+    keywords: 'đăng ký, doanh nghiệp',
+    licenseId: 2,
+    format: 'JSON',
+    source: 'Dịch vụ công Quốc gia',
+    frequency: 'quarterly',
+    status: 'active',
+    approvalStatus: 'pending',
+    updatedBy: 'Trần Thị B',
+    updatedDate: '10/12/2024'
+  },
+  {
+    id: 3,
+    datasetCode: 'ODC003',
+    datasetName: 'Danh mục dữ liệu C',
+    description: 'Dữ liệu thống kê về lĩnh vực C',
+    keywords: 'đăng ký, doanh nghiệp',
+    licenseId: 2,
+    format: 'JSON',
+    source: 'Dịch vụ công Quốc gia',
+    frequency: 'daily',
+    status: 'inactive',
+    approvalStatus: 'rejected',
+    updatedBy: 'Lê Văn C',
+    updatedDate: '05/12/2024'
+  }
+];
+
 export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCategoryPageProps) {
-  const [activeTab, setActiveTab] = useState<'category' | 'metadata' | 'license' | 'version' | 'schedule'>('category');
+  const [activeTab, setActiveTab] = useState<'category' | 'version' | 'schedule'>('category');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -327,27 +419,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
               }`}
           >
             <FileText className="w-4 h-4" />
-            Danh sách dữ liệu
-          </button>
-          <button
-            onClick={() => setActiveTab('metadata')}
-            className={`pb-3 pt-4 text-sm transition-colors border-b-2 flex items-center gap-2 ${activeTab === 'metadata'
-              ? 'border-emerald-600 text-emerald-600'
-              : 'border-transparent text-slate-600 hover:text-slate-900'
-              }`}
-          >
-            <Info className="w-4 h-4" />
-            Metadata
-          </button>
-          <button
-            onClick={() => setActiveTab('license')}
-            className={`pb-3 pt-4 text-sm transition-colors border-b-2 flex items-center gap-2 ${activeTab === 'license'
-              ? 'border-emerald-600 text-emerald-600'
-              : 'border-transparent text-slate-600 hover:text-slate-900'
-              }`}
-          >
-            <Shield className="w-4 h-4" />
-            Giấy phép
+            Thông tin danh mục
           </button>
           <button
             onClick={() => setActiveTab('version')}
@@ -357,24 +429,14 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
               }`}
           >
             <HistoryIcon className="w-4 h-4" />
-            Lịch sử phiên bản
-          </button>
-          <button
-            onClick={() => setActiveTab('schedule')}
-            className={`pb-3 pt-4 text-sm transition-colors border-b-2 flex items-center gap-2 ${activeTab === 'schedule'
-              ? 'border-emerald-600 text-emerald-600'
-              : 'border-transparent text-slate-600 hover:text-slate-900'
-              }`}
-          >
-            <Clock className="w-4 h-4" />
-            Thiết lập lịch công bố
+            Lịch sử thay đổi
           </button>
         </div>
       </div>
 
       {/* Tab Content */}
       <div className="flex-1 overflow-auto p-6">
-        {/* Tab 1: Danh sách dữ liệu */}
+        {/* Tab 1: Quản lý danh mục */}
         {activeTab === 'category' && (
           <div className="space-y-6">
             {/* Search and Filter */}
@@ -630,190 +692,19 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
           </div>
         )}
 
-        {/* Tab 2: Metadata */}
-        {activeTab === 'metadata' && (
-          <div className="bg-white rounded-lg border border-slate-200">
-            <div className="p-6">
-              <h2 className="text-slate-900 mb-6">Thông tin Metadata</h2>
-
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-slate-50 border-b border-slate-200">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider w-1/3">Trường thông tin</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Giá trị</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    <tr className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-600">Tên dữ liệu</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">{categoryName}</td>
-                    </tr>
-                    <tr className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-600">Mô tả</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">Thông tin chi tiết về {categoryName}</td>
-                    </tr>
-                    <tr className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-600">Lĩnh vực</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">
-                        <span className="px-2 py-1 text-xs bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-full">
-                          Dữ liệu mở
-                        </span>
-                      </td>
-                    </tr>
-                    <tr className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-600">Định dạng</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">
-                        <div className="flex items-center gap-2">
-                          <code className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-xs">CSV</code>
-                          <code className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-xs">JSON</code>
-                          <code className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-xs">API</code>
-                        </div>
-                      </td>
-                    </tr>
-                    <tr className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-600">Nguồn dữ liệu</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">Hệ thống DLDC - Bộ Tư pháp</td>
-                    </tr>
-                    <tr className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-600">Cơ quan công bố</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">Bộ Tư pháp</td>
-                    </tr>
-                    <tr className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-600">Giấy phép</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">Giấy phép dữ liệu mở công cộng</td>
-                    </tr>
-                    <tr className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-600">Tần suất cập nhật</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">Hàng tháng</td>
-                    </tr>
-                    <tr className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-600">Ngày tạo</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">01/12/2024</td>
-                    </tr>
-                    <tr className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-600">Ngày cập nhật gần nhất</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">15/12/2024</td>
-                    </tr>
-                    <tr className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-600">URL</td>
-                      <td className="px-4 py-3 text-sm">
-                        <a href="#" className="text-emerald-600 hover:text-emerald-700 hover:underline">
-                          https://dulieumobtp.gov.vn/api/{categoryId}
-                        </a>
-                      </td>
-                    </tr>
-                    <tr className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-600">Trạng thái</td>
-                      <td className="px-4 py-3 text-sm">
-                        <span className="px-2 py-1 text-xs bg-green-100 text-green-700 border border-green-200 rounded-full">
-                          Đang công bố
-                        </span>
-                      </td>
-                    </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={7} className="px-6 py-12 text-center">
+                          <div className="flex flex-col items-center gap-2 text-slate-400">
+                            <Search className="w-10 h-10 mb-2 opacity-20" />
+                            <p className="text-sm font-medium">Không tìm thấy giấy phép nào phù hợp</p>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
-              </div>
-
-              {/* Edit Button */}
-              <div className="flex gap-3 pt-6 mt-6 border-t border-slate-200">
-                <button className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center gap-2">
-                  <Edit className="w-4 h-4" />
-                  Chỉnh sửa Metadata
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Tab 3: License */}
-        {activeTab === 'license' && (
-          <div className="bg-white rounded-lg border border-slate-200">
-            <div className="p-6">
-              <h2 className="text-slate-900 mb-6">Thông tin Giấy phép</h2>
-
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-slate-50 border-b border-slate-200">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider w-1/3">Trường thông tin</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Giá trị</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    <tr className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-600">Tên giấy phép</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">Giấy phép dữ liệu mở công cộng</td>
-                    </tr>
-                    <tr className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-600">Số giấy phép</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">GPL-2024-001</td>
-                    </tr>
-                    <tr className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-600">Loại giấy phép</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">
-                        <span className="px-2 py-1 text-xs bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-full">
-                          Creative Commons CC0 1.0
-                        </span>
-                      </td>
-                    </tr>
-                    <tr className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-600">Mô tả</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">Giấy phép cho phép sử dụng, sao chép, phân phối và điều chỉnh dữ liệu mà không cần xin phép</td>
-                    </tr>
-                    <tr className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-600">Ngày cấp</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">01/12/2024</td>
-                    </tr>
-                    <tr className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-600">Ngày hết hạn</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">Không thời hạn</td>
-                    </tr>
-                    <tr className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-600">Cơ quan cấp</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">Bộ Tư pháp</td>
-                    </tr>
-                    <tr className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-600">Phạm vi sử dụng</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">Toàn quốc</td>
-                    </tr>
-                    <tr className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-600">Điều khoản sử dụng</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">
-                        <ul className="list-disc list-inside space-y-1">
-                          <li>Sử dụng tự do cho mục đích phi thương mại</li>
-                          <li>Phải ghi rõ nguồn khi sử dụng</li>
-                          <li>Không được thay đổi mục đích sử dụng</li>
-                        </ul>
-                      </td>
-                    </tr>
-                    <tr className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-600">Trạng thái</td>
-                      <td className="px-4 py-3 text-sm">
-                        <span className="px-2 py-1 text-xs bg-green-100 text-green-700 border border-green-200 rounded-full">
-                          Còn hiệu lực
-                        </span>
-                      </td>
-                    </tr>
-                    <tr className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-600">File giấy phép</td>
-                      <td className="px-4 py-3 text-sm">
-                        <button className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center gap-2">
-                          <File className="w-4 h-4" />
-                          Xem file PDF
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Edit Button */}
-              <div className="flex gap-3 pt-6 mt-6 border-t border-slate-200">
-                <button className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center gap-2">
-                  <Edit className="w-4 h-4" />
-                  Chỉnh sửa giấy phép
-                </button>
               </div>
             </div>
           </div>
@@ -1096,6 +987,259 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                   Lưu
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showMetadataModal && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[60] p-4 transition-all animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] scale-in-center">
+            {/* Modal Header */}
+            <div className="px-6 py-4 bg-emerald-600 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                {selectedMetadata ? <Edit className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+                {selectedMetadata ? 'Chỉnh sửa' : 'Thêm mới'} Metadata
+              </h2>
+              <button
+                onClick={() => setShowMetadataModal(false)}
+                className="text-white/80 hover:text-white p-1 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <XCircle className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {/* Dataset selection - Full width in grid */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-emerald-600" />
+                    Tập dữ liệu <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-slate-50 transition-all font-medium"
+                    value={metadataFormData.datasetCode}
+                    onChange={(e) => {
+                      const selected = data.find(item => item.code === e.target.value);
+                      setMetadataFormData({
+                        ...metadataFormData,
+                        datasetCode: e.target.value,
+                        datasetName: selected?.name || ''
+                      });
+                    }}
+                  >
+                    <option value="">Chọn tập dữ liệu mở...</option>
+                    {data.map(item => (
+                      <option key={item.id} value={item.code}>{item.code} - {item.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Description - Full width */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5">
+                    Mô tả Metadata <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-slate-50 transition-all text-sm min-h-[100px]"
+                    placeholder="Nhập mô tả chi tiết cho tập dữ liệu này..."
+                    value={metadataFormData.description}
+                    onChange={(e) => setMetadataFormData({ ...metadataFormData, description: e.target.value })}
+                  />
+                </div>
+
+                {/* Keywords - Full width */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-2">
+                    <Search className="w-4 h-4 text-emerald-600" />
+                    Từ khóa (cách nhau bởi dấu phẩy)
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-slate-50 transition-all"
+                    placeholder="Ví dụ: văn bản, pháp luật, đất đai..."
+                    value={metadataFormData.keywords}
+                    onChange={(e) => setMetadataFormData({ ...metadataFormData, keywords: e.target.value })}
+                  />
+                </div>
+
+                {/* License and Format */}
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-2">
+                    <Shield className="w-4 h-4 text-emerald-600" />
+                    Giấy phép <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-slate-50 transition-all"
+                    value={metadataFormData.licenseId}
+                    onChange={(e) => setMetadataFormData({ ...metadataFormData, licenseId: Number(e.target.value) })}
+                  >
+                    {licenseEntries.map(license => (
+                      <option key={license.id} value={license.id}>{license.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5">
+                    Định dạng dữ liệu
+                  </label>
+                  <select
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-slate-50 transition-all"
+                    value={metadataFormData.format}
+                    onChange={(e) => setMetadataFormData({ ...metadataFormData, format: e.target.value })}
+                  >
+                    <option value="CSV">CSV (Bảng)</option>
+                    <option value="JSON">JSON (Cấu trúc)</option>
+                    <option value="XML">XML</option>
+                    <option value="API">API (Dịch vụ)</option>
+                    <option value="RDF">RDF (Linked Data)</option>
+                  </select>
+                </div>
+
+                {/* Source */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5">
+                    Nguồn dữ liệu / Hệ thống cung cấp <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-slate-50 transition-all"
+                    placeholder="Ví dụ: Hệ thống thông tin pháp luật Bộ Tư pháp"
+                    value={metadataFormData.source}
+                    onChange={(e) => setMetadataFormData({ ...metadataFormData, source: e.target.value })}
+                  />
+                </div>
+
+                {/* Frequency and Status */}
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-emerald-600" />
+                    Tần suất cập nhật
+                  </label>
+                  <select
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-slate-50 transition-all"
+                    value={metadataFormData.frequency}
+                    onChange={(e) => setMetadataFormData({ ...metadataFormData, frequency: e.target.value as MetadataItem['frequency'] })}
+                  >
+                    <option value="daily">Hàng ngày</option>
+                    <option value="weekly">Hàng tuần</option>
+                    <option value="monthly">Hàng tháng</option>
+                    <option value="quarterly">Hàng quý</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5">
+                    Trạng thái hoạt động
+                  </label>
+                  <select
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-slate-50 transition-all"
+                    value={metadataFormData.status}
+                    onChange={(e) => setMetadataFormData({ ...metadataFormData, status: e.target.value as MetadataItem['status'] })}
+                  >
+                    <option value="active">Hoạt động</option>
+                    <option value="inactive">Tạm ngừng</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 bg-slate-50 flex flex-col md:flex-row justify-between items-center gap-4 border-t border-slate-100">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => saveMetadata(true)}
+                  className="px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all font-bold flex items-center gap-2 shadow-sm"
+                >
+                  <FileCheck className="w-4 h-4" />
+                  Lưu & Gửi Duyệt
+                </button>
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setShowMetadataModal(false)}
+                  className="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-all font-bold"
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={() => saveMetadata(false)}
+                  className="px-8 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-all font-bold shadow-sm"
+                >
+                  Lưu tạm (Nháp)
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showLicenseModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
+            <h2 className="text-slate-900 mb-4">{selectedLicense ? 'Chỉnh sửa' : 'Thêm mới'} giấy phép</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm text-slate-700 mb-2">Tên giấy phép <span className="text-red-500">*</span></label>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  value={licenseFormData.name}
+                  onChange={(e) => setLicenseFormData({ ...licenseFormData, name: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-slate-700 mb-2">Mô tả <span className="text-red-500">*</span></label>
+                <textarea
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  rows={3}
+                  value={licenseFormData.description}
+                  onChange={(e) => setLicenseFormData({ ...licenseFormData, description: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-slate-700 mb-2">Điều kiện sử dụng <span className="text-red-500">*</span></label>
+                <textarea
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  rows={3}
+                  value={licenseFormData.terms}
+                  onChange={(e) => setLicenseFormData({ ...licenseFormData, terms: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-slate-700 mb-2">Liên kết tham chiếu <span className="text-red-500">*</span></label>
+                <input
+                  type="url"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  value={licenseFormData.referenceUrl}
+                  onChange={(e) => setLicenseFormData({ ...licenseFormData, referenceUrl: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-slate-700 mb-2">Trạng thái</label>
+                <select
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  value={licenseFormData.status}
+                  onChange={(e) => setLicenseFormData({ ...licenseFormData, status: e.target.value as LicenseItem['status'] })}
+                >
+                  <option value="active">Còn hiệu lực</option>
+                  <option value="inactive">Không hiệu lực</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-200">
+              <button
+                onClick={() => setShowLicenseModal(false)}
+                className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={saveLicense}
+                className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+              >
+                Lưu giấy phép
+              </button>
             </div>
           </div>
         </div>

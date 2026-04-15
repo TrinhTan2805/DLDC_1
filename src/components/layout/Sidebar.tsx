@@ -510,7 +510,7 @@ const menuItems: MenuItem[] = [
     subItems: [
       {
         id: "open-data-setup",
-        label: "Quản lý danh mục",
+        label: "Thiết lập danh mục",
         icon: Settings,
       },
       {
