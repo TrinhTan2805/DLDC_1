@@ -1321,6 +1321,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                         value={changeTypeFilter}
                         onChange={(e) => setChangeTypeFilter(e.target.value)}
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        aria-label="Lọc theo loại thay đổi"
+                        title="Lọc theo loại thay đổi"
                       >
                         <option value="">Tất cả loại thay đổi</option>
                         <option value="create_category">Tạo danh mục</option>
@@ -1336,6 +1338,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        aria-label="Lọc theo trạng thái"
+                        title="Lọc theo trạng thái"
                       >
                         <option value="">Tất cả trạng thái</option>
                         <option value="applied">Đã áp dụng</option>
@@ -1360,6 +1364,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                         value={metadataFrequencyFilter}
                         onChange={(e) => setMetadataFrequencyFilter(e.target.value)}
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        aria-label="Lọc theo tần suất"
+                        title="Lọc theo tần suất"
                       >
                         <option value="all">Tất cả tần suất</option>
                         <option value="daily">Hàng ngày</option>
@@ -1374,6 +1380,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                         value={metadataFieldFilter}
                         onChange={(e) => setMetadataFieldFilter(e.target.value)}
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        aria-label="Lọc theo lĩnh vực"
+                        title="Lọc theo lĩnh vực"
                       >
                         <option value="all">Tất cả lĩnh vực</option>
                         {allFields.map((field, idx) => (
@@ -1409,6 +1417,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                         value={licenseStatusFilter}
                         onChange={(e) => setLicenseStatusFilter(e.target.value)}
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        aria-label="Lọc theo trạng thái giấy phép"
+                        title="Lọc theo trạng thái giấy phép"
                       >
                         <option value="all">Tất cả trạng thái</option>
                         <option value="active">Còn hiệu lực</option>
@@ -1773,7 +1783,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   Quản lý thông tin metadata cho dữ liệu mở, bao gồm giấy phép, định dạng và nguồn dữ liệu.
                 </p>
               </div>
-              <button onClick={() => setShowMetadataModal(false)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setShowMetadataModal(false)} className="text-slate-400 hover:text-slate-600" aria-label="Đóng" title="Đóng">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -1840,6 +1850,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                     value={metadataFormData.licenseId}
                     onChange={(e) => setMetadataFormData({ ...metadataFormData, licenseId: e.target.value })}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                    aria-label="Chọn giấy phép"
+                    title="Chọn giấy phép"
                   >
                     {licenseEntries.map((license) => (
                       <option key={license.id} value={license.id}>
@@ -1854,6 +1866,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                     value={metadataFormData.format}
                     onChange={(e) => setMetadataFormData({ ...metadataFormData, format: e.target.value })}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                    aria-label="Chọn định dạng"
+                    title="Chọn định dạng"
                   >
                     <option value="CSV">CSV</option>
                     <option value="JSON">JSON</option>
@@ -1879,6 +1893,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                     value={metadataFormData.frequency}
                     onChange={(e) => setMetadataFormData({ ...metadataFormData, frequency: e.target.value as MetadataItem['frequency'] })}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                    aria-label="Tần suất cập nhật"
+                    title="Tần suất cập nhật"
                   >
                     <option value="daily">Hàng ngày</option>
                     <option value="weekly">Hàng tuần</option>
@@ -1892,6 +1908,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                     value={metadataFormData.status}
                     onChange={(e) => setMetadataFormData({ ...metadataFormData, status: e.target.value as MetadataItem['status'] })}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                    aria-label="Trạng thái"
+                    title="Trạng thái"
                   >
                     <option value="active">Hoạt động</option>
                     <option value="inactive">Ngừng hoạt động</option>
@@ -1930,7 +1948,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   Quản lý giấy phép chuẩn, điều kiện sử dụng và liên kết tham chiếu.
                 </p>
               </div>
-              <button onClick={() => setShowLicenseModal(false)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setShowLicenseModal(false)} className="text-slate-400 hover:text-slate-600" aria-label="Đóng" title="Đóng">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -1981,6 +1999,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   value={licenseFormData.status}
                   onChange={(e) => setLicenseFormData({ ...licenseFormData, status: e.target.value as LicenseItem['status'] })}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                  aria-label="Trạng thái"
+                  title="Trạng thái"
                 >
                   <option value="active">Còn hiệu lực</option>
                   <option value="inactive">Hết hiệu lực</option>
@@ -2013,7 +2033,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
               <h3 className="text-lg text-slate-900">
                 {activeTab === 'management' ? 'Thêm danh mục mới' : 'Thêm quy tắc cập nhật mới'}
               </h3>
-              <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600" aria-label="Đóng" title="Đóng">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -2088,6 +2108,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   value={formData.updateFrequency}
                   onChange={(e) => setFormData({ ...formData, updateFrequency: e.target.value as any })}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                  aria-label="Tần suất cập nhật"
+                  title="Tần suất cập nhật"
                 >
                   <option value="monthly">Hàng tháng</option>
                   <option value="quarterly">Hàng quý</option>
@@ -2102,6 +2124,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   value={formData.selectedTable}
                   onChange={(e) => setFormData({ ...formData, selectedTable: e.target.value, selectedFields: [] })}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                  aria-label="Chọn bảng dữ liệu nguồn"
+                  title="Chọn bảng dữ liệu nguồn"
                 >
                   <option value="">-- Chọn bảng dữ liệu --</option>
                   {mockDatabaseTables.map((table) => (
@@ -2270,7 +2294,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
           <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4">
             <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
               <h3 className="text-lg text-slate-900">Chi tiết danh mục</h3>
-              <button onClick={() => setShowViewModal(false)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setShowViewModal(false)} className="text-slate-400 hover:text-slate-600" aria-label="Đóng" title="Đóng">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -2329,7 +2353,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
           <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4">
             <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
               <h3 className="text-lg text-slate-900">Chỉnh sửa danh mục</h3>
-              <button onClick={() => setShowEditModal(false)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setShowEditModal(false)} className="text-slate-400 hover:text-slate-600" aria-label="Đóng" title="Đóng">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -2341,6 +2365,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   value={formData.code}
                   onChange={(e) => setFormData({ ...formData, code: e.target.value })}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                  aria-label="Mã danh mục"
+                  title="Mã danh mục"
                 />
               </div>
               <div>
@@ -2350,6 +2376,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                  aria-label="Tên danh mục"
+                  title="Tên danh mục"
                 />
               </div>
               <div>
@@ -2359,6 +2387,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
                   rows={3}
+                  aria-label="Mô tả"
+                  title="Mô tả"
                 />
               </div>
               <div>
@@ -2368,6 +2398,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   value={formData.dataField}
                   onChange={(e) => setFormData({ ...formData, dataField: e.target.value })}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                  aria-label="Lĩnh vực"
+                  title="Lĩnh vực"
                 />
               </div>
               <div>
@@ -2376,6 +2408,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   value={formData.updateFrequency}
                   onChange={(e) => setFormData({ ...formData, updateFrequency: e.target.value as any })}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                  aria-label="Tần suất cập nhật"
+                  title="Tần suất cập nhật"
                 >
                   <option value="monthly">Hàng tháng</option>
                   <option value="quarterly">Hàng quý</option>
@@ -2449,6 +2483,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   setApprovalNote('');
                 }}
                 className="text-slate-400 hover:text-slate-600"
+                aria-label="Đóng"
+                title="Đóng"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -2524,6 +2560,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   setRejectReason('');
                 }}
                 className="text-slate-400 hover:text-slate-600"
+                aria-label="Đóng"
+                title="Đóng"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -2614,6 +2652,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   value={selectedApprover}
                   onChange={(e) => setSelectedApprover(e.target.value)}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                  aria-label="Chọn người phê duyệt"
+                  title="Chọn người phê duyệt"
                 >
                   <option value="">-- Chọn người phê duyệt --</option>
                   {approvers.map(approver => (

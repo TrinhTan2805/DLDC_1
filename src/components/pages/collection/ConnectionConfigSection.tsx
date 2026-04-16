@@ -22,7 +22,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
         <label htmlFor="conn-type" className="block text-sm text-slate-700 font-medium mb-2">
           Phương thức kết nối <span className="text-red-500">*</span>
         </label>
-        <select
+        <select aria-label="Select box"
           id="conn-type"
           title="Phương thức kết nối"
           className={`w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${isEdit ? 'bg-slate-100 text-slate-500 cursor-not-allowed' : ''}`}
@@ -44,7 +44,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
             <label htmlFor="conn-base-url" className="block text-sm text-slate-600 mb-1">
               Base URL <span className="text-red-500">*</span>
             </label>
-            <input
+            <input aria-label="Input field"
               id="conn-base-url"
               title="Base URL"
               type="text"
@@ -59,7 +59,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
               <label htmlFor="conn-content-type" className="block text-sm text-slate-600 mb-1">
                 Content Type <span className="text-red-500">*</span>
               </label>
-              <select 
+              <select aria-label="Select box" 
                 id="conn-content-type"
                 title="Content Type"
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -75,7 +75,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
               <label htmlFor="conn-method" className="block text-sm text-slate-600 mb-1">
                 Method <span className="text-red-500">*</span>
               </label>
-              <select 
+              <select aria-label="Select box" 
                 id="conn-method"
                 title="Method"
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -94,7 +94,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
               <label htmlFor="conn-api-type" className="block text-sm text-slate-600 mb-1">
                 Loại API <span className="text-red-500">*</span>
               </label>
-              <select 
+              <select aria-label="Select box" 
                 id="conn-api-type"
                 title="Loại API"
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -111,7 +111,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
                 <label htmlFor="conn-header-name" className="block text-sm text-slate-600 mb-1">
                   Header Name/ App code <span className="text-red-500">*</span>
                 </label>
-                <input
+                <input aria-label="Input field"
                   id="conn-header-name"
                   title="Header Name"
                   type="text"
@@ -126,7 +126,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
                 <label htmlFor="conn-auth" className="block text-sm text-slate-600 mb-1">
                   Authentication <span className="text-red-500">*</span>
                 </label>
-                <input
+                <input aria-label="Input field"
                   id="conn-auth"
                   title="Authentication"
                   type="text"
@@ -142,7 +142,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
                   <label htmlFor="conn-username" className="block text-sm text-slate-600 mb-1">
                     User Name <span className="text-red-500">*</span>
                   </label>
-                  <input
+                  <input aria-label="Input field"
                     id="conn-username"
                     title="User Name"
                     type="text"
@@ -155,7 +155,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
                   <label htmlFor="conn-auth-pwd" className="block text-sm text-slate-600 mb-1">
                     Password <span className="text-red-500">*</span>
                   </label>
-                  <input
+                  <input aria-label="Input field"
                     id="conn-auth-pwd"
                     title="Password"
                     type="password"
@@ -173,7 +173,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
               <label htmlFor="conn-api-key" className="block text-sm text-slate-600 mb-1">
                 API KEY <span className="text-red-500">*</span>
               </label>
-              <input
+              <input aria-label="Input field"
                 id="conn-api-key"
                 title="API KEY"
                 type="password"
@@ -188,7 +188,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
             <label htmlFor="conn-timeout" className="block text-sm text-slate-600 mb-1">
               Timeout (ms)
             </label>
-            <input
+            <input aria-label="Input field"
               id="conn-timeout"
               title="Timeout (ms)"
               type="number"
@@ -205,7 +205,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
               <label htmlFor="conn-retries" className="block text-sm text-slate-600 mb-1">
                 Số lần thử
               </label>
-              <input
+              <input aria-label="Input field"
                 id="conn-retries"
                 title="Số lần thử"
                 type="number"
@@ -218,7 +218,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
               <label htmlFor="conn-interval" className="block text-sm text-slate-600 mb-1">
                 Khoảng cách (ms)
               </label>
-              <input
+              <input aria-label="Input field"
                 id="conn-interval"
                 title="Khoảng cách"
                 type="number"
@@ -235,7 +235,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
               <label htmlFor="conn-request-sample" className="block text-sm text-slate-600 mb-1">
                 Request Sample
               </label>
-              <textarea
+              <textarea aria-label="Text input"
                 id="conn-request-sample"
                 title="Request Sample"
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -247,7 +247,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
               <label htmlFor="conn-response-sample" className="block text-sm text-slate-600 mb-1">
                 Response Sample
               </label>
-              <textarea
+              <textarea aria-label="Text input"
                 id="conn-response-sample"
                 title="Response Sample"
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -265,7 +265,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm text-slate-600 mb-1">Tên service <span className="text-red-500">*</span></label>
-              <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <select aria-label="Chọn service" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="">Chọn service</option>
                 <option value="CitizenService">CitizenService</option>
                 <option value="EnterpriseService">EnterpriseService</option>
@@ -273,7 +273,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
             </div>
             <div>
               <label className="block text-sm text-slate-600 mb-1">Phương thức gọi <span className="text-red-500">*</span></label>
-              <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <select aria-label="Chọn phương thức" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="">Chọn phương thức</option>
                 <option value="GetCitizenInfo">GetCitizenInfo</option>
                 <option value="UpdateCitizenInfo">UpdateCitizenInfo</option>
@@ -282,7 +282,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
           </div>
           <div>
             <label htmlFor="soap-endpoint-url" className="block text-sm text-slate-600 mb-1">Endpoint URL <span className="text-red-500">*</span></label>
-            <input 
+            <input aria-label="Input field" 
               id="soap-endpoint-url" 
               type="url" 
               title="Endpoint URL"
@@ -293,7 +293,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label htmlFor="soap-timeout" className="block text-sm text-slate-600 mb-1">Timeout (ms)</label>
-              <input 
+              <input aria-label="Input field" 
                 id="soap-timeout" 
                 type="number" 
                 title="Timeout"
@@ -303,7 +303,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
             </div>
             <div>
               <label htmlFor="soap-ssl" className="block text-sm text-slate-600 mb-1">SSL Required</label>
-              <select 
+              <select aria-label="Select box" 
                 id="soap-ssl" 
                 title="SSL Required"
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -317,7 +317,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label htmlFor="soap-retries" className="block text-sm text-slate-600 mb-1">Số lần thử</label>
-              <input 
+              <input aria-label="Input field" 
                 id="soap-retries" 
                 type="number" 
                 title="Số lần thử"
@@ -327,7 +327,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
             </div>
             <div>
               <label htmlFor="soap-interval" className="block text-sm text-slate-600 mb-1">Khoảng cách retry (ms)</label>
-              <input 
+              <input aria-label="Input field" 
                 id="soap-interval" 
                 type="number" 
                 title="Khoảng cách retry"
@@ -338,7 +338,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
           </div>
           <div>
             <label htmlFor="soap-auth-type" className="block text-sm text-slate-600 mb-1">Loại Auth <span className="text-red-500">*</span></label>
-            <select 
+            <select aria-label="Select box" 
               id="soap-auth-type" 
               title="Loại Auth"
               className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -351,7 +351,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label htmlFor="soap-username" className="block text-sm text-slate-600 mb-1">Username <span className="text-red-500">*</span></label>
-              <input 
+              <input aria-label="Input field" 
                 id="soap-username" 
                 type="text" 
                 title="Username"
@@ -362,7 +362,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
 
             </div>
             <div>
-              <input 
+              <input aria-label="Input field" 
                 id="soap-password" 
                 type="password" 
                 title="Password"
@@ -373,7 +373,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
             </div>
           </div>
           <div>
-            <textarea 
+            <textarea aria-label="Text input" 
               id="soap-xml-payload" 
               title="XML Payload"
               className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" 
@@ -389,7 +389,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
           <h3 className="text-sm font-medium text-slate-700 mb-3 pb-2 border-b border-slate-200">Cấu hình FTP/SFTP</h3>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <input 
+              <input aria-label="Input field" 
                 id="ftp-host" 
                 type="text" 
                 title="Host/IP"
@@ -398,7 +398,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
               />
             </div>
             <div>
-              <input 
+              <input aria-label="Input field" 
                 id="ftp-port" 
                 type="text" 
                 title="Port"
@@ -409,7 +409,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <input 
+              <input aria-label="Input field" 
                 id="ftp-username" 
                 type="text" 
                 title="Username"
@@ -419,7 +419,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
               />
             </div>
             <div>
-              <input 
+              <input aria-label="Input field" 
                 id="ftp-password" 
                 type="password" 
                 title="Password"
@@ -432,7 +432,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label htmlFor="ftp-path" className="block text-sm text-slate-600 mb-1">Đường dẫn thư mục (Tùy chọn)</label>
-              <input 
+              <input aria-label="Input field" 
                 id="ftp-path" 
                 type="text" 
                 title="Đường dẫn thư mục"
@@ -442,7 +442,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
             </div>
             <div>
               <label htmlFor="ftp-timeout" className="block text-sm text-slate-600 mb-1">Timeout (giây)</label>
-              <input 
+              <input aria-label="Input field" 
                 id="ftp-timeout" 
                 type="number" 
                 title="Timeout"
@@ -460,7 +460,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
           <h3 className="text-sm font-medium text-slate-700 mb-3 pb-2 border-b border-slate-200">Cấu hình File Upload</h3>
           <div>
             <label htmlFor="file-formats" className="block text-sm text-slate-600 mb-1">Định dạng hỗ trợ</label>
-            <input 
+            <input aria-label="Input field" 
               id="file-formats" 
               type="text" 
               title="Định dạng hỗ trợ"
@@ -470,7 +470,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
           </div>
           <div>
             <label htmlFor="file-max-size" className="block text-sm text-slate-600 mb-1">Dung lượng tối đa (MB)</label>
-            <input 
+            <input aria-label="Input field" 
               id="file-max-size" 
               type="number" 
               title="Dung lượng tối đa (MB)"
@@ -489,7 +489,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label htmlFor="db-type" className="block text-sm text-slate-600 mb-1">Loại Cơ sở dữ liệu <span className="text-red-500">*</span></label>
-              <select 
+              <select aria-label="Select box" 
                 id="db-type" 
                 title="Loại Cơ sở dữ liệu"
                 disabled={isEdit} 
@@ -502,7 +502,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
               </select>
             </div>
             <div>
-              <input 
+              <input aria-label="Input field" 
                 id="db-host" 
                 type="text" 
                 title="Host/IP"
@@ -513,7 +513,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <input 
+              <input aria-label="Input field" 
                 id="db-port" 
                 type="text" 
                 title="Port"
@@ -522,7 +522,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
               />
             </div>
             <div>
-              <input 
+              <input aria-label="Input field" 
                 id="db-name" 
                 type="text" 
                 title="Database Name / SID"
@@ -533,7 +533,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <input 
+              <input aria-label="Input field" 
                 id="db-username" 
                 type="text" 
                 title="Username"
@@ -543,7 +543,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
               />
             </div>
             <div>
-              <input 
+              <input aria-label="Input field" 
                 id="db-password" 
                 type="password" 
                 title="Password"
@@ -556,7 +556,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label htmlFor="db-schema" className="block text-sm text-slate-600 mb-1">Schema (Optional)</label>
-              <input 
+              <input aria-label="Input field" 
                 id="db-schema" 
                 type="text" 
                 title="Schema"
@@ -566,7 +566,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
             </div>
             <div>
               <label htmlFor="db-query" className="block text-sm text-slate-600 mb-1">Query/Table</label>
-              <input 
+              <input aria-label="Input field" 
                 id="db-query" 
                 type="text" 
                 title="Query/Table"
@@ -578,7 +578,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
           <div className="grid grid-cols-3 gap-3">
             <div>
               <label htmlFor="db-pool-size" className="block text-sm text-slate-600 mb-1">Conn Pool Size</label>
-              <input 
+              <input aria-label="Input field" 
                 id="db-pool-size" 
                 type="number" 
                 title="Connection Pool Size"
@@ -588,7 +588,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
             </div>
             <div>
               <label htmlFor="db-timeout" className="block text-sm text-slate-600 mb-1">Timeout (giây)</label>
-              <input 
+              <input aria-label="Input field" 
                 id="db-timeout" 
                 type="number" 
                 title="Timeout"
@@ -598,7 +598,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
             </div>
             <div>
               <label htmlFor="db-batch-size" className="block text-sm text-slate-600 mb-1">Batch Size</label>
-              <input 
+              <input aria-label="Input field" 
                 id="db-batch-size" 
                 type="number" 
                 title="Batch Size"
@@ -611,50 +611,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
         </div>
       )}
 
-      {/* KHỐI KIỂM TRA KẾT NỐI */}
-      <div className="pt-6 mt-6 border-t border-slate-200">
-        <div className="flex items-center gap-4">
-          <button
-            type="button"
-            onClick={handleTestConnection}
-            disabled={testState === 'testing_connection' || testState === 'testing_data'}
-            className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-70 transition-colors text-sm font-medium flex items-center gap-2"
-          >
-            {(testState === 'testing_connection' || testState === 'testing_data') && <Loader2 className="w-4 h-4 animate-spin" />}
-            Kiểm tra kết nối
-          </button>
-          
-          <div className="flex items-center gap-2 text-xs border border-orange-200 bg-orange-50 px-3 py-2 rounded-lg ml-auto">
-            <span className="font-semibold text-orange-800">Chế độ Test (Mockup):</span>
-            <label className="flex items-center gap-1 cursor-pointer"><input type="radio" checked={mockMode==='success'} onChange={()=>setMockMode && setMockMode('success')} name="mMode" /> Thành công</label>
-            <label className="flex items-center gap-1 cursor-pointer"><input type="radio" checked={mockMode==='err_conn'} onChange={()=>setMockMode && setMockMode('err_conn')} name="mMode" /> Lỗi Kết nối</label>
-            <label className="flex items-center gap-1 cursor-pointer"><input type="radio" checked={mockMode==='err_data'} onChange={()=>setMockMode && setMockMode('err_data')} name="mMode" /> Lỗi Dữ liệu</label>
-          </div>
-        </div>
 
-        {testState === 'testing_connection' && (
-           <div className="mt-4 p-3 bg-blue-50 text-blue-700 rounded-lg text-sm flex items-center gap-2 animate-pulse border border-blue-200">
-             <Loader2 className="w-4 h-4 animate-spin" /> Đang thực hiện kết nối tới hệ thống nguồn...
-           </div>
-        )}
-        
-        {testState === 'testing_data' && (
-          <div className="mt-4 space-y-3">
-             <div className="p-3 bg-green-50 text-green-700 rounded-lg text-sm flex items-center gap-2 border border-green-200">
-               <CheckCircle className="w-4 h-4" /> Kết nối thành công.
-             </div>
-             <div className="p-3 bg-blue-50 text-blue-700 rounded-lg text-sm flex items-center gap-2 animate-pulse border border-blue-200">
-               <Loader2 className="w-4 h-4 animate-spin" /> Đang tải mô hình dữ liệu mẫu (Data Schema/Payload)...
-             </div>
-          </div>
-        )}
-        
-        {testState === 'success' && (
-          <div className="mt-4 p-3 bg-green-50 text-green-700 rounded-lg text-sm flex items-center gap-2 border border-green-200 font-medium">
-            <CheckCircle className="w-5 h-5" /> Kết nối thành công! Đã nhận được dữ liệu mẫu, Sẵn sàng ánh xạ.
-          </div>
-        )}
-      </div>
     </div>
   );
 }

@@ -129,7 +129,7 @@ export function ExternalDataPage() {
           <div className="flex-1">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
+              <input aria-label="Input field"
                 type="text"
                 placeholder="Tìm kiếm theo tên nguồn, Bộ ngành..."
                 value={searchTerm}
@@ -139,7 +139,7 @@ export function ExternalDataPage() {
             </div>
           </div>
           <div className="w-full md:w-48">
-            <select
+            <select aria-label="Select box"
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
               className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"

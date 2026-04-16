@@ -307,7 +307,7 @@ export function DataCollectionList() {
       {/* Search bar */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-        <input
+        <input aria-label="Input field"
           type="text"
           placeholder="Tìm kiếm theo tên dữ liệu, cục, mô tả..."
           value={searchTerm}
@@ -318,7 +318,7 @@ export function DataCollectionList() {
 
       {/* Filters */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <select
+        <select aria-label="Select box"
           title="Bộ lọc Cục"
           value={filterDepartment}
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilterDepartment(e.target.value)}
@@ -329,7 +329,7 @@ export function DataCollectionList() {
             <option key={dept} value={dept}>{dept}</option>
           ))}
         </select>
-        <select
+        <select aria-label="Select box"
           title="Bộ lọc Trạng thái"
           value={filterStatus}
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilterStatus(e.target.value)}
@@ -340,7 +340,7 @@ export function DataCollectionList() {
           <option value="pending">Đang xử lý</option>
           <option value="not-started">Chưa bắt đầu</option>
         </select>
-        <select
+        <select aria-label="Select box"
           title="Bộ lọc Mức độ"
           value={filterPriority}
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilterPriority(e.target.value)}

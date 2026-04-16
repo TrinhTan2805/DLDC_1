@@ -185,7 +185,7 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                 <div className="flex items-center gap-3 flex-1">
                   <div className="relative flex-1 max-w-md">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <input
+                    <input aria-label="Input field"
                       type="text"
                       placeholder="Tìm kiếm theo họ tên, số giấy chứng nhận..."
                       className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -221,7 +221,7 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                   <div className="grid grid-cols-3 gap-4">
                     <div>
                       <label className="block text-xs text-slate-600 mb-1">Tình trạng</label>
-                      <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <select aria-label="Select box" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">Tất cả</option>
                         <option>Mới</option>
                         <option>Cập nhật</option>
@@ -229,7 +229,7 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                     </div>
                     <div>
                       <label className="block text-xs text-slate-600 mb-1">Trạng thái</label>
-                      <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <select aria-label="Select box" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">Tất cả</option>
                         <option>Đã duyệt</option>
                         <option>Chờ duyệt</option>
@@ -238,8 +238,8 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                     <div>
                       <label className="block text-xs text-slate-600 mb-1">Từ ngày - Đến ngày</label>
                       <div className="flex gap-2">
-                        <input type="date" className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                        <input type="date" className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <input aria-label="Input field" type="date" className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <input aria-label="Input field" type="date" className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                       </div>
                     </div>
                   </div>
@@ -529,7 +529,7 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                       <div className="space-y-4">
                         <div>
                           <label className="block text-sm text-slate-600 mb-1">Tên service</label>
-                          <input
+                          <input aria-label="Input field"
                             type="text"
                             placeholder="Ví dụ: API danh mục quốc tịch"
                             className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -537,7 +537,7 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                         </div>
                         <div>
                           <label className="block text-sm text-slate-600 mb-1">Mô tả</label>
-                          <textarea
+                          <textarea aria-label="Text input"
                             rows={3}
                             className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
@@ -550,7 +550,7 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                       <h4 className="text-sm text-slate-700 mb-3">Cấu hình Endpoint</h4>
                       <div>
                         <label className="block text-sm text-slate-600 mb-1">Base URL</label>
-                        <input
+                        <input aria-label="Input field"
                           type="text"
                           placeholder="https://example.com"
                           className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -564,14 +564,14 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm text-slate-600 mb-1">Content-Type</label>
-                          <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                          <select aria-label="Select box" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option>application/json</option>
                             <option>application/xml</option>
                           </select>
                         </div>
                         <div>
                           <label className="block text-sm text-slate-600 mb-1">Authorization</label>
-                          <input
+                          <input aria-label="Input field"
                             type="text"
                             placeholder="Bearer token"
                             className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -585,7 +585,7 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm text-slate-600 mb-1">Method</label>
-                          <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                          <select aria-label="Select box" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option>GET</option>
                             <option>POST</option>
                             <option>PUT</option>
@@ -594,7 +594,7 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                         </div>
                         <div>
                           <label className="block text-sm text-slate-600 mb-1">Loại API</label>
-                          <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                          <select aria-label="Select box" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option>API-KEY</option>
                             <option>CLIENT-SECRET</option>
                             <option>OAuth2</option>
@@ -609,7 +609,7 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                       <div className="grid grid-cols-3 gap-4">
                         <div>
                           <label className="block text-sm text-slate-600 mb-1">Số lần thử</label>
-                          <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                          <select aria-label="Select box" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option>1</option>
                             <option>2</option>
                             <option>3</option>
@@ -617,14 +617,14 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                         </div>
                         <div>
                           <label className="block text-sm text-slate-600 mb-1">API Key</label>
-                          <input
+                          <input aria-label="Input field"
                             type="text"
                             className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         </div>
                         <div>
                           <label className="block text-sm text-slate-600 mb-1">Khoảng cách</label>
-                          <input
+                          <input aria-label="Input field"
                             type="text"
                             placeholder="1 phút"
                             className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -636,7 +636,7 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                     {/* Request/Response Sample */}
                     <div className="border-t border-slate-200 pt-4">
                       <h4 className="text-sm text-slate-700 mb-3">Request Sample</h4>
-                      <textarea
+                      <textarea aria-label="Text input"
                         rows={3}
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
                         placeholder='{"key": "value"}'
@@ -645,7 +645,7 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
 
                     <div className="border-t border-slate-200 pt-4">
                       <h4 className="text-sm text-slate-700 mb-3">Response Sample</h4>
-                      <textarea
+                      <textarea aria-label="Text input"
                         rows={3}
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
                         placeholder="Chưa có query param nào"

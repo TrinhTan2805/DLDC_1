@@ -38,7 +38,7 @@ export function DataCollectionConfigSection({ resetTestState }: DataCollectionCo
               <label htmlFor="sync-method" className="block text-sm text-slate-600 mb-1">
                 Phương thức đồng bộ <span className="text-red-500">*</span>
               </label>
-              <select 
+              <select aria-label="Select box" 
                 id="sync-method"
                 title="Phương thức đồng bộ"
                 onChange={resetTestState}
@@ -54,7 +54,7 @@ export function DataCollectionConfigSection({ resetTestState }: DataCollectionCo
               <label htmlFor="collection-frequency" className="block text-sm text-slate-600 mb-1">
                 Tần suất thu thập
               </label>
-              <select 
+              <select aria-label="Select box" 
                 id="collection-frequency"
                 title="Tần suất thu thập"
                 onChange={resetTestState}

@@ -256,7 +256,7 @@ export function ResponseTracking() {
           <div className="space-y-4">
             <div>
               <label className="block text-gray-700 mb-2">Thời gian chờ phản hồi (phút)</label>
-              <input
+              <input aria-label="Input field"
                 type="number"
                 defaultValue="5"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
@@ -277,7 +277,7 @@ export function ResponseTracking() {
             </div>
             <div>
               <label className="block text-gray-700 mb-2">Số lần thử lại tối đa</label>
-              <input
+              <input aria-label="Input field"
                 type="number"
                 defaultValue="3"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"

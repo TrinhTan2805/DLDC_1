@@ -200,7 +200,7 @@ export function NotificationManagement() {
             </div>
             <div>
               <label className="block text-gray-700 mb-2">Email template thông báo thành công</label>
-              <textarea
+              <textarea aria-label="Text input"
                 rows={4}
                 title="Email template thông báo thành công"
                 placeholder="Nhập nội dung email mẫu..."
@@ -210,7 +210,7 @@ export function NotificationManagement() {
             </div>
             <div>
               <label className="block text-gray-700 mb-2">Email template thông báo lỗi</label>
-              <textarea
+              <textarea aria-label="Text input"
                 rows={4}
                 title="Email template thông báo lỗi"
                 placeholder="Nhập nội dung email mẫu..."

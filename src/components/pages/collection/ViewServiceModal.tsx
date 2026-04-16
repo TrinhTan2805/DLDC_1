@@ -489,15 +489,15 @@ function TabHistory({ onGoToMapping }: { onGoToMapping?: () => void }) {
     <div className="animate-in fade-in duration-300">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <select className="px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-200">
+          <select aria-label="Select box" className="px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-200">
             <option>Tất cả trạng thái</option>
             <option>Thành công</option>
             <option>Thất bại</option>
           </select>
           <div className="flex items-center border border-slate-300 rounded-lg overflow-hidden bg-white">
-            <input type="text" className="px-3 py-2 text-sm w-28 text-center focus:outline-none border-r border-slate-200" defaultValue="01/04/2025" />
+            <input aria-label="Input field" type="text" className="px-3 py-2 text-sm w-28 text-center focus:outline-none border-r border-slate-200" defaultValue="01/04/2025" />
             <div className="px-2 text-slate-400 bg-slate-50 border-r border-slate-200 h-full flex items-center"><Calendar className="w-4 h-4" /></div>
-            <input type="text" className="px-3 py-2 text-sm w-28 text-center focus:outline-none" defaultValue="10/04/2025" />
+            <input aria-label="Input field" type="text" className="px-3 py-2 text-sm w-28 text-center focus:outline-none" defaultValue="10/04/2025" />
             <div className="px-2 text-slate-400 bg-slate-50 border-l border-slate-200 h-full flex items-center"><Calendar className="w-4 h-4" /></div>
           </div>
         </div>

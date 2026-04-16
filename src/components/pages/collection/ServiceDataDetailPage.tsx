@@ -280,7 +280,7 @@ export function ServiceDataDetailPage({ isOpen, onClose, service }: ServiceDataD
             <div className="flex items-center gap-3">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input
+                <input aria-label="Input field"
                   type="text"
                   placeholder="Tìm kiếm theo mã bản ghi, họ tên, CMND/CCCD, số điện thoại..."
                   className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -305,7 +305,7 @@ export function ServiceDataDetailPage({ isOpen, onClose, service }: ServiceDataD
                 <Filter className="w-4 h-4 text-slate-500" />
                 <span className="text-sm text-slate-600">Lọc:</span>
               </div>
-              <select
+              <select aria-label="Select box"
                 title="Lọc trạng thái dữ liệu"
                 className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                 value={statusFilter}
@@ -315,7 +315,7 @@ export function ServiceDataDetailPage({ isOpen, onClose, service }: ServiceDataD
                 <option value="valid">Hợp lệ</option>
                 <option value="error">Lỗi định dạng</option>
               </select>
-              <select
+              <select aria-label="Select box"
                 title="Lọc loại bản ghi"
                 className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                 value={recordTypeFilter}
@@ -325,7 +325,7 @@ export function ServiceDataDetailPage({ isOpen, onClose, service }: ServiceDataD
                 <option value="Mới">Bản ghi mới</option>
                 <option value="Cập nhật">Bản ghi cập nhật</option>
               </select>
-              <select
+              <select aria-label="Select box"
                 title="Lọc xử lý lỗi"
                 className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                 value={errorProcessFilter}
@@ -453,7 +453,7 @@ export function ServiceDataDetailPage({ isOpen, onClose, service }: ServiceDataD
         <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-white">
           <div className="flex items-center gap-2">
             <span className="text-sm text-slate-600">Hiển thị</span>
-            <select
+            <select aria-label="Select box"
               title="Số bản ghi trên trang"
               className="px-2 py-1 border border-slate-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={itemsPerPage}

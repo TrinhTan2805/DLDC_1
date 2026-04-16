@@ -14,7 +14,7 @@ export function ContactInfoSection({ isEdit = false, defaultValues }: ContactInf
         <label htmlFor="contact-unit-name" className="block text-sm text-slate-600 mb-1">
           T├¬n ─æ╞ín vß╗ï
         </label>
-        <input
+        <input aria-label="Input field"
           id="contact-unit-name"
           title="T├¬n ─æ╞ín vß╗ï"
           type="text"
@@ -28,7 +28,7 @@ export function ContactInfoSection({ isEdit = false, defaultValues }: ContactInf
         <label htmlFor="contact-address" className="block text-sm text-slate-600 mb-1">
           ─Éß╗ïa chß╗ë
         </label>
-        <input
+        <input aria-label="Input field"
           id="contact-address"
           title="─Éß╗ïa chß╗ë"
           type="text"
@@ -42,7 +42,7 @@ export function ContactInfoSection({ isEdit = false, defaultValues }: ContactInf
         <label htmlFor="contact-phone" className="block text-sm text-slate-600 mb-1">
           Sß╗æ ─æiß╗çn thoß║íi
         </label>
-        <input
+        <input aria-label="Input field"
           id="contact-phone"
           title="Sß╗æ ─æiß╗çn thoß║íi"
           type="tel"
@@ -56,7 +56,7 @@ export function ContactInfoSection({ isEdit = false, defaultValues }: ContactInf
         <label htmlFor="contact-email" className="block text-sm text-slate-600 mb-1">
           ─Éß╗ïa chß╗ë email
         </label>
-        <input
+        <input aria-label="Input field"
           id="contact-email"
           title="─Éß╗ïa chß╗ë email"
           type="email"
@@ -70,7 +70,7 @@ export function ContactInfoSection({ isEdit = false, defaultValues }: ContactInf
         <label htmlFor="technical-contact" className="block text-sm text-slate-600 mb-1">
           Ng╞░ß╗¥i ─æß║ºu mß╗æi k├╜ thuß║¡t
         </label>
-        <input
+        <input aria-label="Input field"
           id="technical-contact"
           title="Ng╞░ß╗¥i ─æß║ºu mß╗æi k├╜ thuß║¡t"
           type="text"
@@ -84,7 +84,7 @@ export function ContactInfoSection({ isEdit = false, defaultValues }: ContactInf
         <label htmlFor="contact-note" className="block text-sm text-slate-600 mb-1">
           Ghi ch├║
         </label>
-        <textarea
+        <textarea aria-label="Text input"
           id="contact-note"
           title="Ghi ch├║"
           className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"

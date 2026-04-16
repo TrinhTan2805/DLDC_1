@@ -60,7 +60,7 @@ export function EditDataCollectionModal({ isOpen, onClose, onSave, initialData }
             <label className="block text-sm font-medium text-slate-700 mb-2">
               Cơ quan nguồn / Cục Vụ <span className="text-red-500">*</span>
             </label>
-            <input
+            <input aria-label="Input field"
               type="text"
               required
               title="Cơ quan nguồn / Cục Vụ"
@@ -74,7 +74,7 @@ export function EditDataCollectionModal({ isOpen, onClose, onSave, initialData }
             <label className="block text-sm font-medium text-slate-700 mb-2">
               Tên Dữ liệu <span className="text-red-500">*</span>
             </label>
-            <input
+            <input aria-label="Input field"
               type="text"
               required
               title="Tên Dữ liệu"
