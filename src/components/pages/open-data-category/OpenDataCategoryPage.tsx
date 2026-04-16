@@ -120,15 +120,7 @@ const sampleVersionHistory: VersionHistoryItem[] = [
     changes: 'Thêm trường địa chỉ chi tiết',
     status: 'Hiện tại'
   },
-  {
-    id: 2,
-    version: 'v1.2',
-    description: 'Bổ sung metadata',
-    updatedBy: 'Trần Thị B',
-    updatedDate: '10/12/2024',
-    changes: 'Cập nhật thông tin giấy phép',
-    status: 'Lịch sử'
-  },
+
   {
     id: 3,
     version: 'v1.1',
@@ -240,6 +232,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
   const [showBulkPublishModal, setShowBulkPublishModal] = useState(false);
   const [showBulkUnpublishModal, setShowBulkUnpublishModal] = useState(false);
   const [showBulkApprovalModal, setShowBulkApprovalModal] = useState(false);
+  const [showBulkSubmitApprovalModal, setShowBulkSubmitApprovalModal] = useState(false);
   const [showSubmitApprovalModal, setShowSubmitApprovalModal] = useState(false);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [showPublishFromModalModal, setShowPublishFromModalModal] = useState(false);
@@ -404,6 +397,16 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
     setSelectedIds(new Set());
   };
 
+  const handleBulkSubmitApproval = () => {
+    setData(data.map(item =>
+      selectedIds.has(item.id)
+        ? { ...item, approvalStatus: 'pending' as const }
+        : item
+    ));
+    setShowBulkSubmitApprovalModal(false);
+    setSelectedIds(new Set());
+  };
+
   return (
     <div className="h-full flex flex-col bg-slate-50">
       {/* Header removed */}
@@ -507,42 +510,52 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
             {/* Data Table */}
             <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
               {/* Bulk Actions Bar */}
-              {selectedIds.size > 0 && (
-                <div className="bg-emerald-50 border-b border-emerald-200 px-4 py-3 flex items-center justify-between">
-                  <span className="text-sm text-emerald-900">
-                    Đã chọn <strong>{selectedIds.size}</strong> mục
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setShowBulkPublishModal(true)}
-                      className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 flex items-center gap-2 text-sm"
-                    >
-                      <CheckCircle className="w-4 h-4" />
-                      Công bố
-                    </button>
-                    <button
-                      onClick={() => setShowBulkUnpublishModal(true)}
-                      className="px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2 text-sm"
-                    >
-                      <XCircle className="w-4 h-4" />
-                      Hủy công bố
-                    </button>
-                    <button
-                      onClick={() => setShowBulkApprovalModal(true)}
-                      className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm"
-                    >
-                      <FileCheck className="w-4 h-4" />
-                      Phê duyệt
-                    </button>
-                    <button
-                      onClick={() => setSelectedIds(new Set())}
-                      className="px-3 py-1.5 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 text-sm"
-                    >
-                      Bỏ chọn
-                    </button>
-                  </div>
+              <div className={`border-b px-4 py-3 flex items-center justify-between transition-colors ${selectedIds.size > 0 ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50 border-slate-200'}`}>
+                <span className={`text-sm ${selectedIds.size > 0 ? 'text-emerald-900' : 'text-slate-500'}`}>
+                  Đã chọn <strong>{selectedIds.size}</strong> mục
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setShowBulkPublishModal(true)}
+                    disabled={selectedIds.size === 0}
+                    className={`px-3 py-1.5 rounded-lg flex items-center gap-2 text-sm transition-colors ${selectedIds.size > 0 ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                    Công bố
+                  </button>
+                  <button
+                    onClick={() => setShowBulkUnpublishModal(true)}
+                    disabled={selectedIds.size === 0}
+                    className={`px-3 py-1.5 rounded-lg flex items-center gap-2 text-sm transition-colors ${selectedIds.size > 0 ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
+                  >
+                    <XCircle className="w-4 h-4" />
+                    Hủy công bố
+                  </button>
+                  <button
+                    onClick={() => setShowBulkSubmitApprovalModal(true)}
+                    disabled={selectedIds.size === 0}
+                    className={`px-3 py-1.5 rounded-lg flex items-center gap-2 text-sm transition-colors ${selectedIds.size > 0 ? 'bg-amber-500 text-white hover:bg-amber-600' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
+                  >
+                    <FileCheck className="w-4 h-4" />
+                    Trình duyệt
+                  </button>
+                  <button
+                    onClick={() => setShowBulkApprovalModal(true)}
+                    disabled={selectedIds.size === 0}
+                    className={`px-3 py-1.5 rounded-lg flex items-center gap-2 text-sm transition-colors ${selectedIds.size > 0 ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
+                  >
+                    <FileCheck className="w-4 h-4" />
+                    Phê duyệt
+                  </button>
+                  <button
+                    onClick={() => setSelectedIds(new Set())}
+                    disabled={selectedIds.size === 0}
+                    className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${selectedIds.size > 0 ? 'bg-slate-200 text-slate-700 hover:bg-slate-300' : 'bg-slate-100 text-slate-400 cursor-not-allowed'}`}
+                  >
+                    Bỏ chọn
+                  </button>
                 </div>
-              )}
+              </div>
 
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -693,6 +706,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
         )}
 
         {/* Tab 4: Version History */}
+
         {activeTab === 'version' && (
           <div className="bg-white rounded-lg border border-slate-200">
             <div className="p-6">
@@ -974,258 +988,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
         </div>
       )}
 
-      {showMetadataModal && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[60] p-4 transition-all animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] scale-in-center">
-            {/* Modal Header */}
-            <div className="px-6 py-4 bg-emerald-600 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                {selectedMetadata ? <Edit className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
-                {selectedMetadata ? 'Chỉnh sửa' : 'Thêm mới'} Metadata
-              </h2>
-              <button
-                onClick={() => setShowMetadataModal(false)}
-                className="text-white/80 hover:text-white p-1 hover:bg-white/10 rounded-lg transition-colors"
-              >
-                <XCircle className="w-6 h-6" />
-              </button>
-            </div>
 
-            <div className="flex-1 overflow-y-auto p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                {/* Dataset selection - Full width in grid */}
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-emerald-600" />
-                    Tập dữ liệu <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-slate-50 transition-all font-medium"
-                    value={metadataFormData.datasetCode}
-                    onChange={(e) => {
-                      const selected = data.find(item => item.code === e.target.value);
-                      setMetadataFormData({
-                        ...metadataFormData,
-                        datasetCode: e.target.value,
-                        datasetName: selected?.name || ''
-                      });
-                    }}
-                  >
-                    <option value="">Chọn tập dữ liệu mở...</option>
-                    {data.map(item => (
-                      <option key={item.id} value={item.code}>{item.code} - {item.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Description - Full width */}
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-bold text-slate-700 mb-1.5">
-                    Mô tả Metadata <span className="text-red-500">*</span>
-                  </label>
-                  <textarea
-                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-slate-50 transition-all text-sm min-h-[100px]"
-                    placeholder="Nhập mô tả chi tiết cho tập dữ liệu này..."
-                    value={metadataFormData.description}
-                    onChange={(e) => setMetadataFormData({ ...metadataFormData, description: e.target.value })}
-                  />
-                </div>
-
-                {/* Keywords - Full width */}
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-2">
-                    <Search className="w-4 h-4 text-emerald-600" />
-                    Từ khóa (cách nhau bởi dấu phẩy)
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-slate-50 transition-all"
-                    placeholder="Ví dụ: văn bản, pháp luật, đất đai..."
-                    value={metadataFormData.keywords}
-                    onChange={(e) => setMetadataFormData({ ...metadataFormData, keywords: e.target.value })}
-                  />
-                </div>
-
-                {/* License and Format */}
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-2">
-                    <Shield className="w-4 h-4 text-emerald-600" />
-                    Giấy phép <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-slate-50 transition-all"
-                    value={metadataFormData.licenseId}
-                    onChange={(e) => setMetadataFormData({ ...metadataFormData, licenseId: Number(e.target.value) })}
-                  >
-                    {licenseEntries.map(license => (
-                      <option key={license.id} value={license.id}>{license.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1.5">
-                    Định dạng dữ liệu
-                  </label>
-                  <select
-                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-slate-50 transition-all"
-                    value={metadataFormData.format}
-                    onChange={(e) => setMetadataFormData({ ...metadataFormData, format: e.target.value })}
-                  >
-                    <option value="CSV">CSV (Bảng)</option>
-                    <option value="JSON">JSON (Cấu trúc)</option>
-                    <option value="XML">XML</option>
-                    <option value="API">API (Dịch vụ)</option>
-                    <option value="RDF">RDF (Linked Data)</option>
-                  </select>
-                </div>
-
-                {/* Source */}
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-bold text-slate-700 mb-1.5">
-                    Nguồn dữ liệu / Hệ thống cung cấp <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-slate-50 transition-all"
-                    placeholder="Ví dụ: Hệ thống thông tin pháp luật Bộ Tư pháp"
-                    value={metadataFormData.source}
-                    onChange={(e) => setMetadataFormData({ ...metadataFormData, source: e.target.value })}
-                  />
-                </div>
-
-                {/* Frequency and Status */}
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-emerald-600" />
-                    Tần suất cập nhật
-                  </label>
-                  <select
-                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-slate-50 transition-all"
-                    value={metadataFormData.frequency}
-                    onChange={(e) => setMetadataFormData({ ...metadataFormData, frequency: e.target.value as MetadataItem['frequency'] })}
-                  >
-                    <option value="daily">Hàng ngày</option>
-                    <option value="weekly">Hàng tuần</option>
-                    <option value="monthly">Hàng tháng</option>
-                    <option value="quarterly">Hàng quý</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1.5">
-                    Trạng thái hoạt động
-                  </label>
-                  <select
-                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-slate-50 transition-all"
-                    value={metadataFormData.status}
-                    onChange={(e) => setMetadataFormData({ ...metadataFormData, status: e.target.value as MetadataItem['status'] })}
-                  >
-                    <option value="active">Hoạt động</option>
-                    <option value="inactive">Tạm ngừng</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* Modal Footer */}
-            <div className="px-6 py-4 bg-slate-50 flex flex-col md:flex-row justify-between items-center gap-4 border-t border-slate-100">
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => saveMetadata(true)}
-                  className="px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all font-bold flex items-center gap-2 shadow-sm"
-                >
-                  <FileCheck className="w-4 h-4" />
-                  Lưu & Gửi Duyệt
-                </button>
-              </div>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setShowMetadataModal(false)}
-                  className="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-all font-bold"
-                >
-                  Hủy
-                </button>
-                <button
-                  onClick={() => saveMetadata(false)}
-                  className="px-8 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-all font-bold shadow-sm"
-                >
-                  Lưu tạm (Nháp)
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showLicenseModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
-            <h2 className="text-slate-900 mb-4">{selectedLicense ? 'Chỉnh sửa' : 'Thêm mới'} giấy phép</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm text-slate-700 mb-2">Tên giấy phép <span className="text-red-500">*</span></label>
-                <input
-                  type="text"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  value={licenseFormData.name}
-                  onChange={(e) => setLicenseFormData({ ...licenseFormData, name: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-slate-700 mb-2">Mô tả <span className="text-red-500">*</span></label>
-                <textarea
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  rows={3}
-                  value={licenseFormData.description}
-                  onChange={(e) => setLicenseFormData({ ...licenseFormData, description: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-slate-700 mb-2">Điều kiện sử dụng <span className="text-red-500">*</span></label>
-                <textarea
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  rows={3}
-                  value={licenseFormData.terms}
-                  onChange={(e) => setLicenseFormData({ ...licenseFormData, terms: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-slate-700 mb-2">Liên kết tham chiếu <span className="text-red-500">*</span></label>
-                <input
-                  type="url"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  value={licenseFormData.referenceUrl}
-                  onChange={(e) => setLicenseFormData({ ...licenseFormData, referenceUrl: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-slate-700 mb-2">Trạng thái</label>
-                <select
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  value={licenseFormData.status}
-                  onChange={(e) => setLicenseFormData({ ...licenseFormData, status: e.target.value as LicenseItem['status'] })}
-                >
-                  <option value="active">Còn hiệu lực</option>
-                  <option value="inactive">Không hiệu lực</option>
-                </select>
-              </div>
-            </div>
-            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-200">
-              <button
-                onClick={() => setShowLicenseModal(false)}
-                className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={saveLicense}
-                className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
-              >
-                Lưu giấy phép
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Publish Modal Placeholder */}
       {showPublishModal && (
@@ -1533,12 +1296,40 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
             <h2 className="text-slate-900 mb-4">Chỉnh sửa {categoryName}</h2>
             <div className="space-y-4">
+              <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg flex items-center gap-2 mb-4">
+                <HistoryIcon className="w-4 h-4 text-blue-600" />
+                <span className="text-sm text-blue-800">
+                  Hệ thống đã tự động tạo nhánh phiên bản mới để bạn chỉnh sửa. Phiên bản gốc không bị ảnh hưởng cho đến khi phiên bản này được công bố.
+                </span>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-slate-700 mb-2">Phiên bản hiện tại</label>
+                  <input
+                    type="text"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-slate-50 text-slate-500"
+                    value="v1.3"
+                    readOnly
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-slate-700 mb-2">Phiên bản đang sửa</label>
+                  <div className="flex w-full px-3 py-2 border border-blue-300 rounded-lg bg-blue-50 text-blue-700 gap-2 items-center">
+                    <span className="font-medium">v1.4</span>
+                    <span className="px-2 py-0.5 text-[10px] bg-blue-100 border border-blue-200 rounded-full">Bản nháp mới</span>
+                  </div>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm text-slate-700 mb-2">Mã</label>
                 <input
                   type="text"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50"
                   defaultValue={selectedItem?.code}
+                  readOnly
+                  title="Mã danh mục không thể thay đổi sau khi khởi tạo"
                 />
               </div>
               <div>
@@ -1639,6 +1430,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                 </button>
                 <button
                   onClick={() => {
+                    alert('Hệ thống đã lưu thành công nhánh phiên bản mới đang chỉnh sửa (v1.4). Các thay đổi này cần được phê duyệt trước khi công bố!');
                     setShowEditModal(false);
                     setSelectedItem(null);
                   }}
@@ -1724,6 +1516,32 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
                 Xác nhận phê duyệt
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Submit Approval Modal */}
+      {showBulkSubmitApprovalModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-slate-900 mb-4">Trình duyệt hàng loạt</h2>
+            <p className="text-slate-600 mb-6">
+              Bạn có chắc chắn muốn gửi yêu cầu phê duyệt cho <strong>{selectedIds.size}</strong> mục đã chọn?
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowBulkSubmitApprovalModal(false)}
+                className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleBulkSubmitApproval}
+                className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600"
+              >
+                Gửi phê duyệt
               </button>
             </div>
           </div>
