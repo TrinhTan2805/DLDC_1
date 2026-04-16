@@ -15,32 +15,32 @@ import { AdvancedDataMapping } from './AdvancedDataMapping';
 const ConnectionErrorModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-[450px] overflow-hidden flex flex-col relative">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white rounded-xl shadow-xl overflow-hidden flex flex-col relative" style={{ width: '380px', maxWidth: '100%' }}>
         <button onClick={onClose} className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 transition-colors z-10"><X className="w-4 h-4"/></button>
-        <div className="p-6 pb-4 flex flex-col items-center">
-          <div className="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center mb-3">
-            <AlertCircle className="w-6 h-6" strokeWidth={2.5} />
+        <div className="p-5 flex flex-col items-center">
+          <div className="w-10 h-10 bg-red-50 text-red-600 rounded-full flex items-center justify-center mb-2.5">
+            <AlertCircle className="w-5 h-5" strokeWidth={2.5} />
           </div>
-          <h3 className="text-lg font-bold text-slate-900 mb-1">Kết nối thất bại</h3>
-          <p className="text-slate-500 text-sm mb-5 text-center">Không thể kết nối đến Hệ thống đích (Destination API).</p>
+          <h3 className="text-base font-bold text-slate-900 mb-1">Kết nối thất bại</h3>
+          <p className="text-slate-500 text-[12px] mb-4 text-center px-4 leading-relaxed">Không thể kết nối đến Hệ thống đích (Destination API).</p>
           
-          <div className="w-full text-left">
-            <p className="text-sm font-semibold text-slate-600 mb-1.5">Lỗi trả về từ hệ thống</p>
-            <div className="bg-red-50 text-red-600 px-3 py-2 rounded-lg text-[13px] mb-4">
+          <div className="w-full text-left px-5">
+            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-tight mb-1.5">Lỗi trả về</p>
+            <div className="bg-red-50/50 text-red-600 px-3 py-2 rounded-lg text-[11px] mb-4 font-medium border border-red-100">
               Error 401 Unauthorized: Invalid API Key.
             </div>
 
-            <p className="text-sm font-semibold text-slate-800 mb-2">Hướng dẫn khắc phục</p>
-            <ul className="text-[13px] text-slate-600 space-y-2 mb-4 ml-5 list-disc marker:text-slate-700">
-              <li>Kiểm tra lại giá trị <strong>API Key</strong> trong phần cấu hình bảo mật xem có bị sai lệch hoặc nhập dư khoảng trắng không.</li>
-              <li><strong>Xác nhận với Đơn vị nhận</strong> (nhà phát triển hệ thống đích) xem API Key đã hết hạn hoặc bị thu hồi hay chưa.</li>
-              <li>Nếu API yêu cầu whitelist IP, hãy đảm bảo IP của hệ thống LGSP này đã được allow.</li>
+            <p className="text-[11px] font-bold text-slate-800 mb-1.5 uppercase tracking-tight">Hướng dẫn khắc phục</p>
+            <ul className="text-[11px] text-slate-600 space-y-1.5 mb-2 ml-4 list-disc marker:text-slate-400">
+              <li>Kiểm tra lại giá trị <strong>API Key</strong> (tránh dư khoảng trắng).</li>
+              <li>Xác nhận API Key còn hạn hoặc chưa bị thu hồi.</li>
+              <li>Đảm bảo IP hệ thống đã được cấp phép (whitelist).</li>
             </ul>
           </div>
         </div>
-        <div className="px-6 py-3 flex justify-end">
-          <button onClick={onClose} className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 text-sm rounded-lg font-medium transition-colors">Đã hiểu & Đóng</button>
+        <div className="px-5 py-3 flex justify-center bg-slate-50 border-t border-slate-100">
+          <button onClick={onClose} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg font-bold transition-colors shadow-sm">Đã hiểu & Đóng</button>
         </div>
       </div>
     </div>
@@ -50,38 +50,32 @@ const ConnectionErrorModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: (
 const DataErrorModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-[450px] overflow-hidden flex flex-col relative">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white rounded-xl shadow-xl overflow-hidden flex flex-col relative" style={{ width: '380px', maxWidth: '100%' }}>
         <button onClick={onClose} className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 transition-colors z-10"><X className="w-4 h-4"/></button>
-        <div className="p-6 pb-4 flex flex-col items-center">
-          <div className="w-12 h-12 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center mb-3">
-            <FileX className="w-6 h-6" strokeWidth={2} />
+        <div className="p-5 flex flex-col items-center">
+          <div className="w-10 h-10 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center mb-2.5">
+            <FileX className="w-5 h-5" strokeWidth={2} />
           </div>
-          <h3 className="text-lg font-bold text-slate-900 mb-1">Không có dữ liệu</h3>
-          <p className="text-slate-500 text-sm mb-5 text-center px-2">Kết nối đến hệ thống đích thành công, tuy nhiên không nhận được dữ liệu trả về.</p>
+          <h3 className="text-base font-bold text-slate-900 mb-1">Không có dữ liệu</h3>
+          <p className="text-slate-500 text-[12px] mb-4 text-center px-4 leading-relaxed">Kết nối thành công, nhưng không nhận được dữ liệu trả về.</p>
           
-          <div className="w-full text-left">
-            <p className="text-sm font-semibold text-slate-600 mb-1.5">Trạng thái kết nối</p>
-            <div className="bg-green-50/50 text-green-600 px-3 py-2 rounded-lg text-[13px] mb-4 flex items-center gap-1.5">
-              <Check className="w-3.5 h-3.5"/> Kết nối thành công (HTTP 200 OK)
+          <div className="w-full text-left px-5">
+            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-tight mb-1.5">Trạng thái kết nối</p>
+            <div className="bg-green-50/30 text-green-700 px-3 py-1.5 rounded-lg text-[11px] mb-4 flex items-center gap-1.5 border border-green-100">
+              <Check className="w-3 h-3"/> HTTP 200 OK (Thành công)
             </div>
 
-            <p className="text-sm font-semibold text-slate-600 mb-1.5">Kết quả dữ liệu</p>
-            <div className="bg-orange-50 text-orange-800 px-3 py-2 rounded-lg text-[13px] mb-4 flex items-start gap-1.5">
-              <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0 text-orange-500" /> 
-              <span>Response trả về rỗng hoặc không chứa dữ liệu hợp lệ.</span>
-            </div>
-
-            <p className="text-sm font-semibold text-slate-800 mb-2">Hướng dẫn khắc phục</p>
-            <ul className="text-[13px] text-slate-600 space-y-2 mb-4 ml-5 list-disc marker:text-slate-700">
-              <li>Kiểm tra lại <strong>Request Sample</strong> và các tham số truyền vào có đúng format không.</li>
-              <li>Xác nhận hệ thống nguồn có dữ liệu trong khoảng thời gian được yêu cầu.</li>
-              <li>Liên hệ đơn vị cung cấp để kiểm tra endpoint hoạt động bình thường.</li>
+            <p className="text-[11px] font-bold text-slate-800 mb-1.5 uppercase tracking-tight">Hướng dẫn khắc phục</p>
+            <ul className="text-[11px] text-slate-600 space-y-1.5 mb-2 ml-4 list-disc marker:text-slate-400">
+              <li>Kiểm tra lại format của <strong>Request Sample</strong>.</li>
+              <li>Xác nhận thời điểm yêu cầu có dữ liệu trên nguồn.</li>
+              <li>Đảm bảo các tham số (Params) được truyền đúng.</li>
             </ul>
           </div>
         </div>
-        <div className="px-6 py-3 flex justify-end">
-          <button onClick={onClose} className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 text-sm rounded-lg font-medium transition-colors">Đã hiểu & Đóng</button>
+        <div className="px-5 py-3 flex justify-center bg-slate-50 border-t border-slate-100">
+          <button onClick={onClose} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg font-bold transition-colors shadow-sm">Đã hiểu & Đóng</button>
         </div>
       </div>
     </div>
