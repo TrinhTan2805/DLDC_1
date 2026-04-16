@@ -692,24 +692,6 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
           </div>
         )}
 
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={7} className="px-6 py-12 text-center">
-                          <div className="flex flex-col items-center gap-2 text-slate-400">
-                            <Search className="w-10 h-10 mb-2 opacity-20" />
-                            <p className="text-sm font-medium">Không tìm thấy giấy phép nào phù hợp</p>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Tab 4: Version History */}
         {activeTab === 'version' && (
           <div className="bg-white rounded-lg border border-slate-200">
