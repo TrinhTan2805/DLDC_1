@@ -10,7 +10,7 @@ interface ViewServiceModalProps {
   service?: any;
 }
 
-type TabType = 'general' | 'contact' | 'connection' | 'collection' | 'mapping' | 'history' | 'changelog';
+type TabType = 'general' | 'contact' | 'connection' | 'collection' | 'mapping';
 
 export function ViewServiceModal({ isOpen, onClose, service }: ViewServiceModalProps) {
   const [activeTab, setActiveTab] = useState<TabType>('general');
@@ -88,8 +88,6 @@ export function ViewServiceModal({ isOpen, onClose, service }: ViewServiceModalP
             { id: 'connection', label: 'Cấu hình kết nối', icon: Plug },
             { id: 'collection', label: 'Cấu hình thu thập', icon: Settings },
             { id: 'mapping', label: 'Ánh xạ dữ liệu', icon: Database },
-            { id: 'history', label: 'Lịch sử kết nối', icon: Clock },
-            { id: 'changelog', label: 'Nhật ký thay đổi', icon: FileText }
           ].map(tab => (
             <button
               key={tab.id}
@@ -113,8 +111,6 @@ export function ViewServiceModal({ isOpen, onClose, service }: ViewServiceModalP
            {activeTab === 'connection' && <TabConnection showApiKey={showApiKey} setShowApiKey={setShowApiKey} />}
            {activeTab === 'collection' && <TabCollection />}
            { activeTab === 'mapping' && <TabMapping /> }
-           { activeTab === 'history' && <TabHistory onGoToMapping={() => setActiveTab('mapping')} /> }
-           { activeTab === 'changelog' && <TabChangelog /> }
 
         </div>
 

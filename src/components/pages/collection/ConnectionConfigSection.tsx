@@ -1,13 +1,17 @@
-import { Search, Upload, Download } from 'lucide-react';
+import { Search, Upload, Download, Loader2, CheckCircle } from 'lucide-react';
 import { useState } from 'react';
 
 interface ConnectionConfigSectionProps {
   dataClassification?: string;
   resetTestState: () => void;
   isEdit?: boolean;
+  testState?: 'idle' | 'testing_connection' | 'connection_error' | 'testing_data' | 'data_error' | 'success';
+  handleTestConnection?: () => void;
+  mockMode?: 'success' | 'err_conn' | 'err_data';
+  setMockMode?: (mode: 'success' | 'err_conn' | 'err_data') => void;
 }
 
-export function ConnectionConfigSection({ dataClassification, resetTestState, isEdit = false }: ConnectionConfigSectionProps) {
+export function ConnectionConfigSection({ dataClassification, resetTestState, isEdit = false, testState = 'idle', handleTestConnection, mockMode = 'success', setMockMode }: ConnectionConfigSectionProps) {
   const [connectionType, setConnectionType] = useState('REST');
   const [apiType, setApiType] = useState('API KEY');
 
@@ -606,6 +610,51 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
           </div>
         </div>
       )}
+
+      {/* KHỐI KIỂM TRA KẾT NỐI */}
+      <div className="pt-6 mt-6 border-t border-slate-200">
+        <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={handleTestConnection}
+            disabled={testState === 'testing_connection' || testState === 'testing_data'}
+            className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-70 transition-colors text-sm font-medium flex items-center gap-2"
+          >
+            {(testState === 'testing_connection' || testState === 'testing_data') && <Loader2 className="w-4 h-4 animate-spin" />}
+            Kiểm tra kết nối
+          </button>
+          
+          <div className="flex items-center gap-2 text-xs border border-orange-200 bg-orange-50 px-3 py-2 rounded-lg ml-auto">
+            <span className="font-semibold text-orange-800">Chế độ Test (Mockup):</span>
+            <label className="flex items-center gap-1 cursor-pointer"><input type="radio" checked={mockMode==='success'} onChange={()=>setMockMode && setMockMode('success')} name="mMode" /> Thành công</label>
+            <label className="flex items-center gap-1 cursor-pointer"><input type="radio" checked={mockMode==='err_conn'} onChange={()=>setMockMode && setMockMode('err_conn')} name="mMode" /> Lỗi Kết nối</label>
+            <label className="flex items-center gap-1 cursor-pointer"><input type="radio" checked={mockMode==='err_data'} onChange={()=>setMockMode && setMockMode('err_data')} name="mMode" /> Lỗi Dữ liệu</label>
+          </div>
+        </div>
+
+        {testState === 'testing_connection' && (
+           <div className="mt-4 p-3 bg-blue-50 text-blue-700 rounded-lg text-sm flex items-center gap-2 animate-pulse border border-blue-200">
+             <Loader2 className="w-4 h-4 animate-spin" /> Đang thực hiện kết nối tới hệ thống nguồn...
+           </div>
+        )}
+        
+        {testState === 'testing_data' && (
+          <div className="mt-4 space-y-3">
+             <div className="p-3 bg-green-50 text-green-700 rounded-lg text-sm flex items-center gap-2 border border-green-200">
+               <CheckCircle className="w-4 h-4" /> Kết nối thành công.
+             </div>
+             <div className="p-3 bg-blue-50 text-blue-700 rounded-lg text-sm flex items-center gap-2 animate-pulse border border-blue-200">
+               <Loader2 className="w-4 h-4 animate-spin" /> Đang tải mô hình dữ liệu mẫu (Data Schema/Payload)...
+             </div>
+          </div>
+        )}
+        
+        {testState === 'success' && (
+          <div className="mt-4 p-3 bg-green-50 text-green-700 rounded-lg text-sm flex items-center gap-2 border border-green-200 font-medium">
+            <CheckCircle className="w-5 h-5" /> Kết nối thành công! Đã nhận được dữ liệu mẫu, Sẵn sàng ánh xạ.
+          </div>
+        )}
+      </div>
     </div>
   );
 }

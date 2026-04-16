@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { 
   X, AlertCircle, CheckCircle, Upload, Eye, EyeOff, 
   Database, FileText, User, Plug, Settings, Plus,
-  Calendar, Clock
+  Calendar, Clock, FileX, AlertTriangle, Check
 } from 'lucide-react';
 import { DataCollectionConfigSection } from './DataCollectionConfigSection';
 import { ConnectionConfigSection } from './ConnectionConfigSection';
@@ -10,7 +10,100 @@ import { ContactInfoSection } from './ContactInfoSection';
 import { DataDetailModal } from '../../DataDetailModal';
 import { ConfirmModal } from '../../common/ConfirmModal';
 import { BaseModal } from '../../common/BaseModal';
+import { AdvancedDataMapping } from './AdvancedDataMapping';
 
+const ConnectionErrorModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-[450px] overflow-hidden flex flex-col relative">
+        <button onClick={onClose} className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 transition-colors z-10"><X className="w-4 h-4"/></button>
+        <div className="p-6 pb-4 flex flex-col items-center">
+          <div className="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center mb-3">
+            <AlertCircle className="w-6 h-6" strokeWidth={2.5} />
+          </div>
+          <h3 className="text-lg font-bold text-slate-900 mb-1">Kết nối thất bại</h3>
+          <p className="text-slate-500 text-sm mb-5 text-center">Không thể kết nối đến Hệ thống đích (Destination API).</p>
+          
+          <div className="w-full text-left">
+            <p className="text-sm font-semibold text-slate-600 mb-1.5">Lỗi trả về từ hệ thống</p>
+            <div className="bg-red-50 text-red-600 px-3 py-2 rounded-lg text-[13px] mb-4">
+              Error 401 Unauthorized: Invalid API Key.
+            </div>
+
+            <p className="text-sm font-semibold text-slate-800 mb-2">Hướng dẫn khắc phục</p>
+            <ul className="text-[13px] text-slate-600 space-y-2 mb-4 ml-5 list-disc marker:text-slate-700">
+              <li>Kiểm tra lại giá trị <strong>API Key</strong> trong phần cấu hình bảo mật xem có bị sai lệch hoặc nhập dư khoảng trắng không.</li>
+              <li><strong>Xác nhận với Đơn vị nhận</strong> (nhà phát triển hệ thống đích) xem API Key đã hết hạn hoặc bị thu hồi hay chưa.</li>
+              <li>Nếu API yêu cầu whitelist IP, hãy đảm bảo IP của hệ thống LGSP này đã được allow.</li>
+            </ul>
+          </div>
+        </div>
+        <div className="px-6 py-3 flex justify-end">
+          <button onClick={onClose} className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 text-sm rounded-lg font-medium transition-colors">Đã hiểu & Đóng</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const DataErrorModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-[450px] overflow-hidden flex flex-col relative">
+        <button onClick={onClose} className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 transition-colors z-10"><X className="w-4 h-4"/></button>
+        <div className="p-6 pb-4 flex flex-col items-center">
+          <div className="w-12 h-12 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center mb-3">
+            <FileX className="w-6 h-6" strokeWidth={2} />
+          </div>
+          <h3 className="text-lg font-bold text-slate-900 mb-1">Không có dữ liệu</h3>
+          <p className="text-slate-500 text-sm mb-5 text-center px-2">Kết nối đến hệ thống đích thành công, tuy nhiên không nhận được dữ liệu trả về.</p>
+          
+          <div className="w-full text-left">
+            <p className="text-sm font-semibold text-slate-600 mb-1.5">Trạng thái kết nối</p>
+            <div className="bg-green-50/50 text-green-600 px-3 py-2 rounded-lg text-[13px] mb-4 flex items-center gap-1.5">
+              <Check className="w-3.5 h-3.5"/> Kết nối thành công (HTTP 200 OK)
+            </div>
+
+            <p className="text-sm font-semibold text-slate-600 mb-1.5">Kết quả dữ liệu</p>
+            <div className="bg-orange-50 text-orange-800 px-3 py-2 rounded-lg text-[13px] mb-4 flex items-start gap-1.5">
+              <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0 text-orange-500" /> 
+              <span>Response trả về rỗng hoặc không chứa dữ liệu hợp lệ.</span>
+            </div>
+
+            <p className="text-sm font-semibold text-slate-800 mb-2">Hướng dẫn khắc phục</p>
+            <ul className="text-[13px] text-slate-600 space-y-2 mb-4 ml-5 list-disc marker:text-slate-700">
+              <li>Kiểm tra lại <strong>Request Sample</strong> và các tham số truyền vào có đúng format không.</li>
+              <li>Xác nhận hệ thống nguồn có dữ liệu trong khoảng thời gian được yêu cầu.</li>
+              <li>Liên hệ đơn vị cung cấp để kiểm tra endpoint hoạt động bình thường.</li>
+            </ul>
+          </div>
+        </div>
+        <div className="px-6 py-3 flex justify-end">
+          <button onClick={onClose} className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 text-sm rounded-lg font-medium transition-colors">Đã hiểu & Đóng</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const DataMappingModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-slate-50 rounded-xl shadow-2xl w-full max-w-[1000px] h-full max-h-[90vh] overflow-hidden flex flex-col relative border border-slate-200">
+        <div className="px-6 py-4 border-b border-slate-200 bg-white flex justify-between items-center z-10 shrink-0">
+          <h2 className="text-lg font-bold text-slate-800">Cấu hình ánh xạ dữ liệu đích (Data Mapping)</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors"><X className="w-5 h-5"/></button>
+        </div>
+        <div className="flex-1 flex flex-col overflow-hidden bg-[#fafafa]">
+           <AdvancedDataMapping onClose={onClose} />
+        </div>
+      </div>
+    </div>
+  );
+};
 interface ServiceModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -59,6 +152,10 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
     SAMPLE_FIELDS.map((f, idx) => ({ id: idx + 1, source: f, dataType: 'string', targetSchema: 'public', targetTable: 'hs_dang_ky_ket_hon', targetField: '' }))
   );
 
+  const [showConnError, setShowConnError] = useState(false);
+  const [showDataError, setShowDataError] = useState(false);
+  const [showMapping, setShowMapping] = useState(false);
+
   const resetTestState = () => {
     if (testState !== 'idle') setTestState('idle');
   };
@@ -68,14 +165,17 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
     setTimeout(() => {
       if (mockMode === 'err_conn') {
         setTestState('connection_error');
+        setShowConnError(true);
         return;
       }
       setTestState('testing_data');
       setTimeout(() => {
         if (mockMode === 'err_data') {
           setTestState('data_error');
+          setShowDataError(true);
         } else {
           setTestState('success');
+          setShowMapping(true);
         }
       }, 1500);
     }, 1500);
@@ -233,8 +333,8 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
               </div>
             )}
             {activeTab === 'contact' && <ContactInfoSection unitName={unitName} onUnitNameChange={setUnitName} />}
-            {activeTab === 'connection' && <ConnectionConfigSection dataClassification={dataClassification} resetTestState={resetTestState} />}
-            {activeTab === 'collection' && <DataCollectionConfigSection testState={testState} setTestState={setTestState} mockMode={mockMode} setMockMode={setMockMode} mappings={mappings} setMappings={setMappings} handleTestConnection={handleTestConnection} resetTestState={resetTestState} />}
+            {activeTab === 'connection' && <ConnectionConfigSection dataClassification={dataClassification} resetTestState={resetTestState} testState={testState} handleTestConnection={handleTestConnection} mockMode={mockMode} setMockMode={setMockMode} />}
+            {activeTab === 'collection' && <DataCollectionConfigSection resetTestState={resetTestState} />}
           </div>
           <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
             <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50">Hủy</button>
@@ -322,6 +422,11 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
         </div>
       </div>
     )}
+    
+    {/* Modals cho các trạng thái Test Kết nối */}
+    <ConnectionErrorModal isOpen={showConnError} onClose={() => setShowConnError(false)} />
+    <DataErrorModal isOpen={showDataError} onClose={() => setShowDataError(false)} />
+    <DataMappingModal isOpen={showMapping} onClose={() => setShowMapping(false)} />
     </>
   );
 }
@@ -353,6 +458,10 @@ export function EditServiceModal({ isOpen, onClose, service }: ServiceModalProps
     SAMPLE_FIELDS.map((f, idx) => ({ id: idx + 1, source: f, dataType: 'string', targetSchema: 'public', targetTable: 'hs_dang_ky_ket_hon', targetField: '' }))
   );
 
+  const [showConnError, setShowConnError] = useState(false);
+  const [showDataError, setShowDataError] = useState(false);
+  const [showMapping, setShowMapping] = useState(false);
+
   const resetTestState = () => {
     if (testState !== 'idle') setTestState('idle');
   };
@@ -362,14 +471,17 @@ export function EditServiceModal({ isOpen, onClose, service }: ServiceModalProps
     setTimeout(() => {
       if (mockMode === 'err_conn') {
         setTestState('connection_error');
+        setShowConnError(true);
         return;
       }
       setTestState('testing_data');
       setTimeout(() => {
         if (mockMode === 'err_data') {
           setTestState('data_error');
+          setShowDataError(true);
         } else {
           setTestState('success');
+          setShowMapping(true);
         }
       }, 1500);
     }, 1500);
@@ -468,8 +580,8 @@ export function EditServiceModal({ isOpen, onClose, service }: ServiceModalProps
               </div>
             )}
             {activeTab === 'contact' && <ContactInfoSection />}
-            {activeTab === 'connection' && <ConnectionConfigSection dataClassification={dataClassification} resetTestState={resetTestState} isEdit={true} />}
-            {activeTab === 'collection' && <DataCollectionConfigSection testState={testState} setTestState={setTestState} mockMode={mockMode} setMockMode={setMockMode} mappings={mappings} setMappings={setMappings} handleTestConnection={handleTestConnection} resetTestState={resetTestState} />}
+            {activeTab === 'connection' && <ConnectionConfigSection dataClassification={dataClassification} resetTestState={resetTestState} isEdit={true} testState={testState} handleTestConnection={handleTestConnection} mockMode={mockMode} setMockMode={setMockMode} />}
+            {activeTab === 'collection' && <DataCollectionConfigSection resetTestState={resetTestState} />}
           </div>
           <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
             <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50">Hủy</button>
@@ -477,6 +589,10 @@ export function EditServiceModal({ isOpen, onClose, service }: ServiceModalProps
           </div>
         </form>
       </div>
+
+      <ConnectionErrorModal isOpen={showConnError} onClose={() => setShowConnError(false)} />
+      <DataErrorModal isOpen={showDataError} onClose={() => setShowDataError(false)} />
+      <DataMappingModal isOpen={showMapping} onClose={() => setShowMapping(false)} />
     </div>
   );
 }

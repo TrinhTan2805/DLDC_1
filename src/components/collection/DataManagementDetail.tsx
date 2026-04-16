@@ -12,6 +12,8 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
   const [showAddApiModal, setShowAddApiModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<any>(null);
+  const [showSyncErrorModal, setShowSyncErrorModal] = useState(false);
+  const [selectedSyncRecord, setSelectedSyncRecord] = useState<any>(null);
 
   // Mock data for list tab
   const mockData = [
@@ -708,6 +710,7 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                     <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Lỗi</th>
                     <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Tổng số</th>
                     <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Thời lượng</th>
+                    <th className="px-4 py-3 text-center text-xs text-slate-600 uppercase">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -748,6 +751,22 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                         </div>
                       </td>
                       <td className="px-4 py-3 text-sm text-slate-600">{item.duration}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-center gap-2">
+                          {item.status === 'Mất phần' && (
+                            <button
+                              onClick={() => {
+                                setSelectedSyncRecord(item);
+                                setShowSyncErrorModal(true);
+                              }}
+                              className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                              title="Xem chi tiết lỗi"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -935,6 +954,111 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                   Đóng
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Sync Error Modal */}
+      {showSyncErrorModal && selectedSyncRecord && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+              <h2 className="text-lg text-slate-900">Chi tiết lỗi đồng bộ</h2>
+              <button
+                onClick={() => setShowSyncErrorModal(false)}
+                className="p-1 hover:bg-slate-100 rounded transition-colors"
+              >
+                <XCircle className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+              <div className="grid grid-cols-2 gap-4 border-b border-slate-100 pb-4">
+                <div>
+                  <label className="block text-xs text-slate-500 mb-1">Thời điểm chạy</label>
+                  <p className="text-sm font-mono text-slate-900">{selectedSyncRecord.syncTime}</p>
+                </div>
+                <div>
+                  <label className="block text-xs text-slate-500 mb-1">Trạng thái</label>
+                  <span className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-amber-100 text-amber-700 rounded font-medium">
+                    Mất phần
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4 pb-4 border-b border-slate-100">
+                <div>
+                  <label className="block text-xs text-slate-500 mb-1">Số lượng lỗi</label>
+                  <p className="text-sm font-mono text-red-600 font-bold">{selectedSyncRecord.errors}</p>
+                </div>
+                <div>
+                  <label className="block text-xs text-slate-500 mb-1">Thời gian xử lý</label>
+                  <p className="text-sm text-slate-900">{selectedSyncRecord.duration}</p>
+                </div>
+                <div>
+                  <label className="block text-xs text-slate-500 mb-1">Mã lỗi</label>
+                  <p className="text-sm text-red-600 font-medium">D-PARTIAL</p>
+                </div>
+              </div>
+
+              <div className="mt-6 border border-slate-200 rounded-lg overflow-hidden bg-white shadow-sm">
+                <div className="bg-amber-50 border-b border-amber-100 px-4 py-3 flex items-center justify-between">
+                   <div className="flex items-center gap-2 text-amber-800">
+                      <Info className="w-4 h-4" />
+                      <h4 className="font-semibold text-sm">Chi tiết lỗi dữ liệu: Bản ghi thiếu trường bắt buộc</h4>
+                   </div>
+                </div>
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-[#f8f7f5] text-slate-700 font-medium border-b border-slate-200">
+                    <tr>
+                      <th className="px-4 py-2 w-1/4">ID bản ghi</th>
+                      <th className="px-4 py-2 w-1/2">Dữ liệu gốc (Raw JSON)</th>
+                      <th className="px-4 py-2">Lỗi / Trường bị thiếu</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    <tr className="hover:bg-slate-50 transition-colors">
+                      <td className="px-4 py-3 font-mono text-xs text-slate-600">REC-001</td>
+                      <td className="px-4 py-3 font-mono text-xs text-slate-600 bg-slate-50 rounded border border-slate-100">{"{\"fullName\": \"Nguyễn Văn A\"}"}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex flex-wrap gap-1.5">
+                           <span className="px-2 py-1 bg-red-50 text-red-700 border border-red-200 rounded text-xs font-mono font-medium">birthDate</span>
+                           <span className="px-2 py-1 bg-red-50 text-red-700 border border-red-200 rounded text-xs font-mono font-medium">nationality</span>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr className="hover:bg-slate-50 transition-colors">
+                      <td className="px-4 py-3 font-mono text-xs text-slate-600">REC-045</td>
+                      <td className="px-4 py-3 font-mono text-xs text-slate-600 bg-slate-50 rounded border border-slate-100">{"{\"fullName\": \"Trần Thị B\", \"nationality\": \"VN\"}"}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex flex-wrap gap-1.5">
+                           <span className="px-2 py-1 bg-red-50 text-red-700 border border-red-200 rounded text-xs font-mono font-medium">birthDate</span>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr className="hover:bg-slate-50 transition-colors">
+                      <td className="px-4 py-3 font-mono text-xs text-slate-600">REC-112</td>
+                      <td className="px-4 py-3 font-mono text-xs text-slate-600 bg-slate-50 rounded border border-slate-100">{"{\"fullName\": \"\"}"}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex flex-wrap gap-1.5">
+                           <span className="px-2 py-1 bg-red-50 text-red-700 border border-red-200 rounded text-xs font-mono font-medium">fullName.EMPTY</span>
+                           <span className="px-2 py-1 bg-red-50 text-red-700 border border-red-200 rounded text-xs font-mono font-medium">certNumber</span>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200">
+              <button
+                onClick={() => setShowSyncErrorModal(false)}
+                className="px-4 py-2 text-sm text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+              >
+                Đóng
+              </button>
             </div>
           </div>
         </div>
