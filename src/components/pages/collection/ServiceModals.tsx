@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { 
   X, AlertCircle, CheckCircle, Upload, Eye, EyeOff, 
   Database, FileText, User, Plug, Settings, Plus,
-  Calendar, Clock, FileX, AlertTriangle, Check
+  Calendar, Clock, FileX, AlertTriangle, Check, LayoutTemplate
 } from 'lucide-react';
 import { DataCollectionConfigSection } from './DataCollectionConfigSection';
 import { ConnectionConfigSection } from './ConnectionConfigSection';
@@ -15,12 +15,12 @@ import { AdvancedDataMapping } from './AdvancedDataMapping';
 const ConnectionErrorModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-xl shadow-xl overflow-hidden flex flex-col relative" style={{ width: '380px', maxWidth: '100%' }}>
-        <button onClick={onClose} className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 transition-colors z-10"><X className="w-4 h-4"/></button>
-        <div className="p-5 flex flex-col items-center">
-          <div className="w-10 h-10 bg-red-50 text-red-600 rounded-full flex items-center justify-center mb-2.5">
-            <AlertCircle className="w-5 h-5" strokeWidth={2.5} />
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-[450px] overflow-hidden flex flex-col relative">
+        <button onClick={onClose} aria-label="Đóng" className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 transition-colors z-10"><X className="w-4 h-4"/></button>
+        <div className="p-6 pb-4 flex flex-col items-center">
+          <div className="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center mb-3">
+            <AlertCircle className="w-6 h-6" strokeWidth={2.5} />
           </div>
           <h3 className="text-base font-bold text-slate-900 mb-1">Kết nối thất bại</h3>
           <p className="text-slate-500 text-[12px] mb-4 text-center px-4 leading-relaxed">Không thể kết nối đến Hệ thống đích (Destination API).</p>
@@ -50,12 +50,12 @@ const ConnectionErrorModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: (
 const DataErrorModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-xl shadow-xl overflow-hidden flex flex-col relative" style={{ width: '380px', maxWidth: '100%' }}>
-        <button onClick={onClose} className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 transition-colors z-10"><X className="w-4 h-4"/></button>
-        <div className="p-5 flex flex-col items-center">
-          <div className="w-10 h-10 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center mb-2.5">
-            <FileX className="w-5 h-5" strokeWidth={2} />
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-[450px] overflow-hidden flex flex-col relative">
+        <button onClick={onClose} aria-label="Đóng" className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 transition-colors z-10"><X className="w-4 h-4"/></button>
+        <div className="p-6 pb-4 flex flex-col items-center">
+          <div className="w-12 h-12 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center mb-3">
+            <FileX className="w-6 h-6" strokeWidth={2} />
           </div>
           <h3 className="text-base font-bold text-slate-900 mb-1">Không có dữ liệu</h3>
           <p className="text-slate-500 text-[12px] mb-4 text-center px-4 leading-relaxed">Kết nối thành công, nhưng không nhận được dữ liệu trả về.</p>
@@ -89,7 +89,7 @@ const DataMappingModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () =>
       <div className="bg-slate-50 rounded-xl shadow-2xl w-full max-w-[1000px] h-full max-h-[90vh] overflow-hidden flex flex-col relative border border-slate-200">
         <div className="px-6 py-4 border-b border-slate-200 bg-white flex justify-between items-center z-10 shrink-0">
           <h2 className="text-lg font-bold text-slate-800">Cấu hình ánh xạ dữ liệu đích (Data Mapping)</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors"><X className="w-5 h-5"/></button>
+          <button onClick={onClose} aria-label="Đóng" className="text-slate-400 hover:text-slate-600 transition-colors"><X className="w-5 h-5"/></button>
         </div>
         <div className="flex-1 flex flex-col overflow-hidden bg-[#fafafa]">
            <AdvancedDataMapping onClose={onClose} />
@@ -105,7 +105,7 @@ interface ServiceModalProps {
   onViewData?: (pageId?: string) => void;
 }
 
-type TabType = 'general' | 'contact' | 'connection' | 'collection';
+type TabType = 'general' | 'contact' | 'connection' | 'mapping' | 'collection';
 
 // Modal Thêm mới phương thức
 export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
@@ -169,7 +169,7 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
           setShowDataError(true);
         } else {
           setTestState('success');
-          setShowMapping(true);
+          setActiveTab('mapping');
         }
       }, 1500);
     }, 1500);
@@ -190,13 +190,14 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
     { id: 'general' as TabType, label: 'Thông tin chung', icon: <FileText className="w-4 h-4" /> },
     { id: 'contact' as TabType, label: 'Thông tin đơn vị cung cấp', icon: <User className="w-4 h-4" /> },
     { id: 'connection' as TabType, label: 'Cấu hình kết nối', icon: <Plug className="w-4 h-4" /> },
+    { id: 'mapping' as TabType, label: 'Cấu hình ánh xạ', icon: <LayoutTemplate className="w-4 h-4" /> },
     { id: 'collection' as TabType, label: 'Cấu hình thu thập', icon: <Settings className="w-4 h-4" /> },
   ];
 
   return (
     <>
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="bg-white rounded-lg shadow-xl w-2/3 max-h-[95vh] overflow-hidden flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
           <h2 className="text-lg text-slate-900 font-medium">Thông tin kết nối</h2>
           <button onClick={onClose} title="Đóng" className="p-1 hover:bg-slate-100 rounded transition-colors">
@@ -229,12 +230,12 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
               <div className="space-y-4">
                 <div>
                   <label htmlFor="add-name" className="block text-sm text-slate-600 mb-1">Tên service <span className="text-red-500">*</span></label>
-                  <input id="add-name" title="Tên service" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="VD: API dịch vụ dữ liệu quốc tịch" />
+                  <input aria-label="Input field" id="add-name" title="Tên service" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="VD: API dịch vụ dữ liệu quốc tịch" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="relative">
                     <label htmlFor="add-unit" className="block text-sm text-slate-600 mb-1">Tên đơn vị <span className="text-red-500">*</span></label>
-                    <input 
+                    <input aria-label="Input field" 
                       id="add-unit" 
                       title="Tên đơn vị" 
                       type="text" 
@@ -284,13 +285,13 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
                   </div>
                   <div>
                     <label htmlFor="add-system" className="block text-sm text-slate-600 mb-1">Hệ thống <span className="text-red-500">*</span></label>
-                    <input id="add-system" title="Hệ thống" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập tên hệ thống" />
+                    <input aria-label="Input field" id="add-system" title="Hệ thống" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập tên hệ thống" />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label htmlFor="add-source" className="block text-sm text-slate-600 mb-1">Nguồn thu thập</label>
-                    <input 
+                    <input aria-label="Input field" 
                       id="add-source" 
                       title="Nguồn thu thập" 
                       type="text"
@@ -302,7 +303,7 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
                   </div>
                   <div>
                     <label htmlFor="add-security" className="block text-sm text-slate-600 mb-1">Mức độ bảo mật dữ liệu</label>
-                    <select id="add-security" title="Mức độ bảo mật dữ liệu" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                    <select aria-label="Select box" id="add-security" title="Mức độ bảo mật dữ liệu" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
                       <option value="">Chọn mức độ bảo mật</option>
                       <option value="Dữ liệu mở">Dữ liệu mở</option>
                       <option value="Dữ liệu nội bộ">Dữ liệu nội bộ</option>
@@ -315,7 +316,7 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
                 </div>
                 <div>
                   <label htmlFor="desc" className="block text-sm text-slate-600 mb-1">Mô tả</label>
-                  <textarea id="desc" title="Mô tả" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" rows={3} placeholder="Mô tả chi tiết" />
+                  <textarea aria-label="Text input" id="desc" title="Mô tả" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" rows={3} placeholder="Mô tả chi tiết" />
                 </div>
                 <div>
                   <label className="block text-sm text-slate-600 mb-2">Đính kèm văn bản</label>
@@ -328,6 +329,11 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
             )}
             {activeTab === 'contact' && <ContactInfoSection unitName={unitName} onUnitNameChange={setUnitName} />}
             {activeTab === 'connection' && <ConnectionConfigSection dataClassification={dataClassification} resetTestState={resetTestState} testState={testState} handleTestConnection={handleTestConnection} mockMode={mockMode} setMockMode={setMockMode} />}
+            {activeTab === 'mapping' && (
+              <div className="h-[600px] -mx-6 -my-4">
+                <AdvancedDataMapping />
+              </div>
+            )}
             {activeTab === 'collection' && <DataCollectionConfigSection resetTestState={resetTestState} />}
           </div>
           <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
@@ -344,7 +350,7 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
         <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 border border-slate-200">
           <div className="flex items-center justify-between mb-5 pb-4 border-b border-slate-100">
             <h3 className="text-lg font-bold text-slate-900">Thêm mới Đơn vị</h3>
-            <button type="button" onClick={() => setShowCreateDonViModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+            <button type="button" aria-label="Đóng" onClick={() => setShowCreateDonViModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -352,7 +358,7 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
           <div className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">Tên đơn vị <span className="text-red-500">*</span></label>
-              <input
+              <input aria-label="Input field"
                 type="text"
                 value={unitName}
                 onChange={(e) => setUnitName(e.target.value)}
@@ -475,7 +481,7 @@ export function EditServiceModal({ isOpen, onClose, service }: ServiceModalProps
           setShowDataError(true);
         } else {
           setTestState('success');
-          setShowMapping(true);
+          setActiveTab('mapping');
         }
       }, 1500);
     }, 1500);
@@ -492,12 +498,13 @@ export function EditServiceModal({ isOpen, onClose, service }: ServiceModalProps
     { id: 'general' as TabType, label: 'Thông tin chung', icon: <FileText className="w-4 h-4" /> },
     { id: 'contact' as TabType, label: 'Thông tin đơn vị cung cấp', icon: <User className="w-4 h-4" /> },
     { id: 'connection' as TabType, label: 'Cấu hình kết nối', icon: <Plug className="w-4 h-4" /> },
+    { id: 'mapping' as TabType, label: 'Cấu hình ánh xạ', icon: <LayoutTemplate className="w-4 h-4" /> },
     { id: 'collection' as TabType, label: 'Cấu hình thu thập', icon: <Settings className="w-4 h-4" /> },
   ];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="bg-white rounded-lg shadow-xl w-2/3 max-h-[95vh] overflow-hidden flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
           <h2 className="text-lg text-slate-900 font-medium">Chỉnh sửa kết nối API - {service.name}</h2>
           <button onClick={onClose} title="Đóng" className="p-1 hover:bg-slate-100 rounded transition-colors">
@@ -530,26 +537,26 @@ export function EditServiceModal({ isOpen, onClose, service }: ServiceModalProps
               <div className="space-y-4">
                 <div>
                   <label htmlFor="edit-name" className="block text-sm text-slate-600 mb-1">Tên service <span className="text-red-500">*</span></label>
-                  <input id="edit-name" title="Tên service" type="text" defaultValue={service.name} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="VD: API dịch vụ dữ liệu quốc tịch" />
+                  <input aria-label="Input field" id="edit-name" title="Tên service" type="text" defaultValue={service.name} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="VD: API dịch vụ dữ liệu quốc tịch" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label htmlFor="edit-unit" className="block text-sm text-slate-600 mb-1">Tên đơn vị <span className="text-red-500">*</span></label>
-                    <input id="edit-unit" title="Tên đơn vị" type="text" defaultValue={service.managingUnit} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tìm kiếm hoặc nhập tên đơn vị..." />
+                    <input aria-label="Input field" id="edit-unit" title="Tên đơn vị" type="text" defaultValue={service.managingUnit} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tìm kiếm hoặc nhập tên đơn vị..." />
                   </div>
                   <div>
                     <label htmlFor="edit-system" className="block text-sm text-slate-600 mb-1">Hệ thống <span className="text-red-500">*</span></label>
-                    <input id="edit-system" title="Hệ thống" type="text" defaultValue={service.system || 'Hệ thống DLDC'} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập tên hệ thống" />
+                    <input aria-label="Input field" id="edit-system" title="Hệ thống" type="text" defaultValue={service.system || 'Hệ thống DLDC'} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập tên hệ thống" />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label htmlFor="edit-source" className="block text-sm text-slate-600 mb-1">Nguồn thu thập</label>
-                    <input id="edit-source" title="Nguồn thu thập" type="text" readOnly defaultValue="Hệ thống trong ngành" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-slate-50 text-slate-700 focus:outline-none" placeholder="Tự động hiển thị theo Đơn vị" />
+                    <input aria-label="Input field" id="edit-source" title="Nguồn thu thập" type="text" readOnly defaultValue="Hệ thống trong ngành" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-slate-50 text-slate-700 focus:outline-none" placeholder="Tự động hiển thị theo Đơn vị" />
                   </div>
                   <div>
                     <label htmlFor="edit-security" className="block text-sm text-slate-600 mb-1">Mức độ bảo mật dữ liệu</label>
-                    <select id="edit-security" title="Mức độ bảo mật dữ liệu" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                    <select aria-label="Select box" id="edit-security" title="Mức độ bảo mật dữ liệu" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
                       <option value="">Chọn mức độ bảo mật</option>
                       <option value="Dữ liệu mở">Dữ liệu mở</option>
                       <option value="Dữ liệu nội bộ">Dữ liệu nội bộ</option>
@@ -562,7 +569,7 @@ export function EditServiceModal({ isOpen, onClose, service }: ServiceModalProps
                 </div>
                 <div>
                   <label htmlFor="edit-desc" className="block text-sm text-slate-600 mb-1">Mô tả</label>
-                  <textarea id="edit-desc" title="Mô tả" defaultValue={service.description} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" rows={3} placeholder="Mô tả chi tiết" />
+                  <textarea aria-label="Text input" id="edit-desc" title="Mô tả" defaultValue={service.description} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" rows={3} placeholder="Mô tả chi tiết" />
                 </div>
                 <div>
                   <label className="block text-sm text-slate-600 mb-2">Đính kèm văn bản</label>
@@ -575,6 +582,11 @@ export function EditServiceModal({ isOpen, onClose, service }: ServiceModalProps
             )}
             {activeTab === 'contact' && <ContactInfoSection />}
             {activeTab === 'connection' && <ConnectionConfigSection dataClassification={dataClassification} resetTestState={resetTestState} isEdit={true} testState={testState} handleTestConnection={handleTestConnection} mockMode={mockMode} setMockMode={setMockMode} />}
+            {activeTab === 'mapping' && (
+              <div className="h-[600px] -mx-6 -my-4">
+                <AdvancedDataMapping />
+              </div>
+            )}
             {activeTab === 'collection' && <DataCollectionConfigSection resetTestState={resetTestState} />}
           </div>
           <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
@@ -655,7 +667,7 @@ export function SettingsServiceModal({ isOpen, onClose, service }: ServiceModalP
         </div>
         <div className="pt-3 border-t border-slate-100">
           <label className="block text-sm font-medium text-slate-700 mb-1">Cảnh báo khi số bản ghi lỗi vượt quá (%)</label>
-          <input type="number" defaultValue="10" title="Tỉ lệ lỗi (%)" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-slate-50" />
+          <input aria-label="Input field" type="number" defaultValue="10" title="Tỉ lệ lỗi (%)" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-slate-50" />
         </div>
       </div>
     </BaseModal>

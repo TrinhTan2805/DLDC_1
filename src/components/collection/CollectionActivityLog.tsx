@@ -95,7 +95,7 @@ export function CollectionActivityLog() {
           <div className="lg:col-span-2">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <input
+              <input aria-label="Input field"
                 type="text"
                 placeholder="Tìm kiếm theo người dùng, hành động, phương thức..."
                 className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -107,7 +107,7 @@ export function CollectionActivityLog() {
           <div>
             <div className="relative">
               <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <select className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none">
+              <select aria-label="Select box" className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none">
                 <option value="">Tất cả hành động</option>
                 <option value="add">Thêm mới</option>
                 <option value="edit">Chỉnh sửa</option>
@@ -120,7 +120,7 @@ export function CollectionActivityLog() {
 
           {/* Filter Ministry */}
           <div>
-            <select className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select aria-label="Select box" className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="">Tất cả bộ ban ngành</option>
               <option value="moha">Bộ Nội vụ</option>
               <option value="moet">Bộ Giáo dục và Đào tạo</option>
@@ -133,7 +133,7 @@ export function CollectionActivityLog() {
             <div className="flex gap-2">
               <div className="relative flex-1">
                 <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                <input
+                <input aria-label="Input field"
                   type="date"
                   className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -141,7 +141,7 @@ export function CollectionActivityLog() {
               <span className="flex items-center text-slate-400">-</span>
               <div className="relative flex-1">
                 <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                <input
+                <input aria-label="Input field"
                   type="date"
                   className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -151,7 +151,7 @@ export function CollectionActivityLog() {
 
           {/* Filter Status */}
           <div>
-            <select className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select aria-label="Select box" className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="">Tất cả trạng thái</option>
               <option value="success">Thành công</option>
               <option value="failed">Thất bại</option>

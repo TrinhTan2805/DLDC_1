@@ -211,7 +211,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                 <div className="flex items-center gap-3">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <input
+                    <input aria-label="Input field"
                       type="text"
                       placeholder="Tìm kiếm theo tên, mã dịch vụ, đơn vị..."
                       className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -222,14 +222,14 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                   <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-300">
                     <Calendar className="w-4 h-4 text-slate-500" />
                     <span className="text-sm text-slate-600">Thời gian:</span>
-                    <input
+                    <input aria-label="Input field"
                       type="date"
                       className="px-2 py-0.5 border-0 bg-transparent text-sm focus:outline-none focus:ring-0 text-slate-700"
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
                     />
                     <span className="text-slate-400">-</span>
-                    <input
+                    <input aria-label="Input field"
                       type="date"
                       className="px-2 py-0.5 border-0 bg-transparent text-sm focus:outline-none focus:ring-0 text-slate-700"
                       value={endDate}
@@ -240,7 +240,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                 
                 {/* Row 2: Filter Dropdowns, Search and Reset Button */}
                 <div className="flex items-center gap-3">
-                  <select
+                  <select aria-label="Select box"
                     className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white flex-1"
                     value={sourceFilter}
                     onChange={(e) => setSourceFilter(e.target.value)}
@@ -249,7 +249,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                     <option value="Trong ngành">Trong ngành</option>
                     <option value="Ngoài ngành">Ngoài ngành</option>
                   </select>
-                  <select
+                  <select aria-label="Select box"
                     className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white flex-1"
                     value={departmentFilter}
                     onChange={(e) => setDepartmentFilter(e.target.value)}
@@ -264,7 +264,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                     <option value="Vụ Hợp tác quốc tế">Vụ Hợp tác quốc tế</option>
                     <option value="Cục Kế hoạch - Tài chính">Cục Kế hoạch - Tài chính</option>
                   </select>
-                  <select
+                  <select aria-label="Select box"
                     className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white flex-1"
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
@@ -274,7 +274,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                     <option value="format_error">Lỗi định dạng</option>
                     <option value="structure_error">Lỗi cấu trúc</option>
                   </select>
-                  <select
+                  <select aria-label="Select box"
                     className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white flex-1"
                     value={typeFilter}
                     onChange={(e) => setTypeFilter(e.target.value)}

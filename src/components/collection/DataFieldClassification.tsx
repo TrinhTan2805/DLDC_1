@@ -232,7 +232,7 @@ export function DataFieldClassification({ tableName, tableSecurityLevel = 'noi-b
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  <select
+                  <select aria-label="Select box"
                     value={field.publicLevel}
                     onChange={(e) => handleFieldChange(index, 'publicLevel', e.target.value)}
                     className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${publicLevelColors[field.publicLevel] || 'bg-white text-slate-700 border-slate-300'}`}
@@ -245,7 +245,7 @@ export function DataFieldClassification({ tableName, tableSecurityLevel = 'noi-b
                   </select>
                 </td>
                 <td className="px-6 py-4">
-                  <select
+                  <select aria-label="Select box"
                     value={field.sensitivityLevel}
                     onChange={(e) => handleFieldChange(index, 'sensitivityLevel', e.target.value)}
                     className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${sensitivityLevelColors[field.sensitivityLevel] || 'bg-white text-slate-700 border-slate-300'}`}

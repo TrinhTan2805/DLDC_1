@@ -612,7 +612,7 @@ export function MarriageDetailModal({
           
           {/* Record Detail Modal */}
           <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[80vh] flex flex-col">
+            <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden">
               {/* Header */}
               <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0">
                 <h3 className="text-lg font-semibold text-slate-900">Chi tiết bản ghi</h3>
@@ -631,9 +631,7 @@ export function MarriageDetailModal({
                   <button
                     onClick={() => setDetailTab('record')}
                     className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                      detailTab === 'record'
-                        ? 'border-blue-600 text-blue-600'
-                        : 'border-transparent text-slate-600 hover:text-slate-900'
+                      detailTab === 'record' ? 'border-orange-600 text-orange-600' : 'border-transparent text-slate-600 hover:text-slate-900'
                     }`}
                   >
                     📄 Thông tin hồ sơ
@@ -641,9 +639,7 @@ export function MarriageDetailModal({
                   <button
                     onClick={() => setDetailTab('husband')}
                     className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                      detailTab === 'husband'
-                        ? 'border-blue-600 text-blue-600'
-                        : 'border-transparent text-slate-600 hover:text-slate-900'
+                      detailTab === 'husband' ? 'border-orange-600 text-orange-600' : 'border-transparent text-slate-600 hover:text-slate-900'
                     }`}
                   >
                     👨 Bên chồng
@@ -651,9 +647,7 @@ export function MarriageDetailModal({
                   <button
                     onClick={() => setDetailTab('wife')}
                     className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                      detailTab === 'wife'
-                        ? 'border-blue-600 text-blue-600'
-                        : 'border-transparent text-slate-600 hover:text-slate-900'
+                      detailTab === 'wife' ? 'border-orange-600 text-orange-600' : 'border-transparent text-slate-600 hover:text-slate-900'
                     }`}
                   >
                     👩 Bên vợ
@@ -661,9 +655,7 @@ export function MarriageDetailModal({
                   <button
                     onClick={() => setDetailTab('other')}
                     className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                      detailTab === 'other'
-                        ? 'border-blue-600 text-blue-600'
-                        : 'border-transparent text-slate-600 hover:text-slate-900'
+                      detailTab === 'other' ? 'border-orange-600 text-orange-600' : 'border-transparent text-slate-600 hover:text-slate-900'
                     }`}
                   >
                     📋 Thông tin khác
@@ -676,7 +668,7 @@ export function MarriageDetailModal({
                 {/* Tab: Thông tin hồ sơ */}
                 {detailTab === 'record' && (
                 <div className="mb-6">
-                  <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-blue-600">Bộ dữ liệu hồ sơ đăng ký kết hôn</h4>
+                  <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-orange-600">Bộ dữ liệu hồ sơ đăng ký kết hôn</h4>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="border border-slate-200 p-2 rounded">
                       <div className="text-xs text-slate-600 mb-1">Mã hồ sơ</div>
@@ -705,7 +697,7 @@ export function MarriageDetailModal({
                 {/* Tab: Thông tin bên chồng */}
                 {detailTab === 'husband' && (
                 <div className="mb-6">
-                  <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-blue-600">Thông tin bên chồng</h4>
+                  <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-orange-600">Thông tin bên chồng</h4>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="border border-slate-200 p-2 rounded">
                       <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên chồng</div>
@@ -754,7 +746,7 @@ export function MarriageDetailModal({
                 {/* Tab: Thông tin bên vợ */}
                 {detailTab === 'wife' && (
                 <div className="mb-6">
-                  <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-blue-600">Thông tin bên vợ</h4>
+                  <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-orange-600">Thông tin bên vợ</h4>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="border border-slate-200 p-2 rounded">
                       <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên vợ</div>
@@ -803,7 +795,7 @@ export function MarriageDetailModal({
                 {/* Tab: Thông tin khác */}
                 {detailTab === 'other' && (
                 <div className="mb-6">
-                  <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-blue-600">Thông tin khác</h4>
+                  <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-orange-600">Thông tin khác</h4>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="border border-slate-200 p-2 rounded">
                       <div className="text-xs text-slate-600 mb-1">Nơi đăng ký</div>
@@ -881,7 +873,7 @@ export function MarriageDetailModal({
                   onClick={() => setSelectedRecord(null)}
                   className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 flex items-center gap-2 text-sm"
                 >
-                  <X className="w-4 h-4" />
+                  <XCircle className="w-4 h-4" />
                   Đóng
                 </button>
                 <button

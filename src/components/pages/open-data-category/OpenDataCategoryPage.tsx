@@ -461,6 +461,8 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 appearance-none bg-white"
+                    aria-label="Lọc theo trạng thái"
+                    title="Lọc theo trạng thái"
                   >
                     <option value="all">Tất cả trạng thái</option>
                     <option value="active">Hoạt động</option>
@@ -567,6 +569,8 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                           checked={selectedIds.size === filteredData.length && filteredData.length > 0}
                           onChange={toggleSelectAll}
                           className="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500"
+                          aria-label="Chọn tất cả danh mục"
+                          title="Chọn tất cả danh mục"
                         />
                       </th>
                       <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">STT</th>
@@ -590,6 +594,8 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                               checked={selectedIds.has(item.id)}
                               onChange={() => toggleSelectItem(item.id)}
                               className="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500"
+                              aria-label={`Chọn mục ${item.name}`}
+                              title={`Chọn mục ${item.name}`}
                             />
                           </td>
                           <td className="px-4 py-3 text-sm text-slate-700">{index + 1}</td>
@@ -905,6 +911,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
               <div>
                 <label className="block text-sm text-slate-700 mb-2">Trạng thái</label>
                 <select
+                  aria-label="Trạng thái"
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value as 'active' | 'inactive' })}
@@ -1112,6 +1119,8 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                   type="text"
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-slate-50"
                   value={selectedItem?.code}
+                  aria-label="Mã"
+                  title="Mã"
                   readOnly
                 />
               </div>
@@ -1121,6 +1130,8 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                   type="text"
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-slate-50"
                   value={selectedItem?.name}
+                  aria-label="Tên"
+                  title="Tên"
                   readOnly
                 />
               </div>
@@ -1130,6 +1141,8 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-slate-50"
                   rows={3}
                   value={selectedItem?.description}
+                  aria-label="Mô tả"
+                  title="Mô tả"
                   readOnly
                 />
               </div>
@@ -1139,6 +1152,8 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                   type="text"
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-slate-50"
                   value={selectedItem?.status === 'active' ? 'Hoạt động' : 'Không hoạt động'}
+                  aria-label="Trạng thái"
+                  title="Trạng thái"
                   readOnly
                 />
               </div>
@@ -1184,6 +1199,8 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                   type="text"
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-slate-50"
                   value={selectedItem?.createdDate}
+                  aria-label="Ngày tạo"
+                  title="Ngày tạo"
                   readOnly
                 />
               </div>
@@ -1193,6 +1210,8 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                   type="text"
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-slate-50"
                   value={selectedItem?.updatedBy}
+                  aria-label="Người cập nhật"
+                  title="Người cập nhật"
                   readOnly
                 />
               </div>
@@ -1310,6 +1329,8 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                     type="text"
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-slate-50 text-slate-500"
                     value="v1.3"
+                    aria-label="Phiên bản hiện tại"
+                    title="Phiên bản hiện tại"
                     readOnly
                   />
                 </div>
@@ -1328,6 +1349,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                   type="text"
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50"
                   defaultValue={selectedItem?.code}
+                  aria-label="Mã"
                   readOnly
                   title="Mã danh mục không thể thay đổi sau khi khởi tạo"
                 />
@@ -1338,6 +1360,8 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                   type="text"
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   defaultValue={selectedItem?.name}
+                  aria-label="Tên"
+                  title="Tên"
                 />
               </div>
               <div>
@@ -1346,6 +1370,8 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   rows={3}
                   defaultValue={selectedItem?.description}
+                  aria-label="Mô tả"
+                  title="Mô tả"
                 />
               </div>
               <div>
@@ -1353,6 +1379,8 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                 <select
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   defaultValue={selectedItem?.status}
+                  aria-label="Trạng thái"
+                  title="Trạng thái"
                 >
                   <option value="active">Hoạt động</option>
                   <option value="inactive">Không hoạt động</option>
@@ -1572,6 +1600,8 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                 <select
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={selectedApprover}
+                  aria-label="Chọn người phê duyệt"
+                  title="Chọn người phê duyệt"
                   onChange={(e) => setSelectedApprover(e.target.value)}
                 >
                   <option value="">-- Chọn người phê duyệt --</option>
@@ -1592,6 +1622,8 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                   rows={4}
                   placeholder="Nhập nội dung gửi kèm (không bắt buộc)..."
                   value={submitApprovalNote}
+                  aria-label="Nội dung gửi kèm"
+                  title="Nội dung gửi kèm"
                   onChange={(e) => setSubmitApprovalNote(e.target.value)}
                 />
               </div>
@@ -1746,6 +1778,8 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                   rows={4}
                   placeholder="Nhập nội dung phê duyệt (không bắt buộc)..."
                   value={approvalNote}
+                  aria-label="Nội dung phê duyệt"
+                  title="Nội dung phê duyệt"
                   onChange={(e) => setApprovalNote(e.target.value)}
                 />
               </div>
@@ -1809,6 +1843,8 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                   rows={4}
                   placeholder="Nhập lý do từ chối phê duyệt..."
                   value={rejectReason}
+                  aria-label="Lý do từ chối"
+                  title="Lý do từ chối"
                   onChange={(e) => setRejectReason(e.target.value)}
                 />
               </div>
@@ -2036,6 +2072,8 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                   <select
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     value={scheduleFormData.frequency}
+                    aria-label="Tần suất cập nhật"
+                    title="Tần suất cập nhật"
                     onChange={(e) => setScheduleFormData({ ...scheduleFormData, frequency: e.target.value as any })}
                   >
                     <option value="daily">Hàng ngày</option>
@@ -2060,6 +2098,8 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                     type="time"
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     value={scheduleFormData.startTime}
+                    aria-label="Thời gian bắt đầu"
+                    title="Thời gian bắt đầu"
                     onChange={(e) => setScheduleFormData({ ...scheduleFormData, startTime: e.target.value })}
                   />
                 )}
@@ -2130,6 +2170,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                   <div>
                     <label className="block text-sm text-slate-700 mb-2">Trạng thái</label>
                     <select
+                      aria-label="Trạng thái"
                       className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                       value={selectedSchedule.status}
                       onChange={(e) => {

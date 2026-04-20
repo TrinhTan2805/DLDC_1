@@ -448,9 +448,7 @@ export function DataDetailModal({
               <button
                 onClick={() => setActiveTab('list')}
                 className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === 'list'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-slate-600 hover:text-slate-900'
+                  activeTab === 'list' ? 'border-orange-600 text-orange-600' : 'border-transparent text-slate-600 hover:text-slate-900'
                 }`}
               >
                 📋 Danh sách đối tượng
@@ -459,9 +457,7 @@ export function DataDetailModal({
               <button
                 onClick={() => setActiveTab('history')}
                 className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === 'history'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-slate-600 hover:text-slate-900'
+                  activeTab === 'history' ? 'border-orange-600 text-orange-600' : 'border-transparent text-slate-600 hover:text-slate-900'
                 }`}
               >
                 🕐 Lịch sử đồng bộ
@@ -944,9 +940,7 @@ export function DataDetailModal({
                   <button
                     onClick={() => setDetailTab('person')}
                     className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                      detailTab === 'person'
-                        ? 'border-blue-600 text-blue-600'
-                        : 'border-transparent text-slate-600 hover:text-slate-900'
+                      detailTab === 'person' ? 'border-orange-600 text-orange-600' : 'border-transparent text-slate-600 hover:text-slate-900'
                     }`}
                     title="Thông tin người được khai sinh"
                   >
@@ -955,9 +949,7 @@ export function DataDetailModal({
                   <button
                     onClick={() => setDetailTab('father')}
                     className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                      detailTab === 'father'
-                        ? 'border-blue-600 text-blue-600'
-                        : 'border-transparent text-slate-600 hover:text-slate-900'
+                      detailTab === 'father' ? 'border-orange-600 text-orange-600' : 'border-transparent text-slate-600 hover:text-slate-900'
                     }`}
                     title="Thông tin người cha"
                   >
@@ -966,9 +958,7 @@ export function DataDetailModal({
                   <button
                     onClick={() => setDetailTab('mother')}
                     className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                      detailTab === 'mother'
-                        ? 'border-blue-600 text-blue-600'
-                        : 'border-transparent text-slate-600 hover:text-slate-900'
+                      detailTab === 'mother' ? 'border-orange-600 text-orange-600' : 'border-transparent text-slate-600 hover:text-slate-900'
                     }`}
                     title="Thông tin người mẹ"
                   >
@@ -977,9 +967,7 @@ export function DataDetailModal({
                   <button
                     onClick={() => setDetailTab('other')}
                     className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                      detailTab === 'other'
-                        ? 'border-blue-600 text-blue-600'
-                        : 'border-transparent text-slate-600 hover:text-slate-900'
+                      detailTab === 'other' ? 'border-orange-600 text-orange-600' : 'border-transparent text-slate-600 hover:text-slate-900'
                     }`}
                     title="Thông tin khác"
                   >
@@ -989,235 +977,195 @@ export function DataDetailModal({
               </div>
 
               {/* Content */}
-              <div className="p-6 flex-1 overflow-auto">
+              <div className="p-6 flex-1 overflow-auto bg-white text-slate-900">
                 {/* Tab: Thông tin về người được khai sinh */}
                 {detailTab === 'person' && (
-                <div className="mb-6">
-                  <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-blue-600">Thông tin về người được khai sinh</h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.name}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Giới tính</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.gender}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Ngày, tháng, năm sinh</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.birthDate}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Ngày sinh bằng chữ</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.birthDateInWords}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Nơi sinh</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.birthPlace}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Quê quán</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.hometown}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Dân tộc</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.ethnicity}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Quốc tịch</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.nationality}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded col-span-2">
-                      <div className="text-xs text-slate-600 mb-1">Số định danh cá nhân</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.personalId}</div>
+                  <div className="space-y-6">
+                    <div className="mb-6">
+                      <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-orange-600">Thông tin người được khai sinh</h4>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="border border-slate-200 p-2 rounded col-span-2">
+                          <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên</div>
+                          <div className="text-sm text-slate-900 font-medium">{selectedRecord.name}</div>
+                        </div>
+                        <div className="border border-slate-200 p-2 rounded">
+                          <div className="text-xs text-slate-600 mb-1">Giới tính</div>
+                          <div className="text-sm text-slate-900 font-medium">{selectedRecord.gender}</div>
+                        </div>
+                        <div className="border border-slate-200 p-2 rounded">
+                          <div className="text-xs text-slate-600 mb-1">Ngày, tháng, năm sinh</div>
+                          <div className="text-sm text-slate-900 font-medium">{selectedRecord.birthDate}</div>
+                        </div>
+                        <div className="border border-slate-200 p-2 rounded col-span-2">
+                          <div className="text-xs text-slate-600 mb-1">Ngày sinh bằng chữ</div>
+                          <div className="text-sm text-slate-900 font-medium italic">{selectedRecord.birthDateInWords}</div>
+                        </div>
+                        <div className="border border-slate-200 p-2 rounded">
+                          <div className="text-xs text-slate-600 mb-1">Nơi sinh</div>
+                          <div className="text-sm text-slate-900 font-medium">{selectedRecord.birthPlace}</div>
+                        </div>
+                        <div className="border border-slate-200 p-2 rounded">
+                          <div className="text-xs text-slate-600 mb-1">Quê quán</div>
+                          <div className="text-sm text-slate-900 font-medium">{selectedRecord.hometown}</div>
+                        </div>
+                        <div className="border border-slate-200 p-2 rounded">
+                          <div className="text-xs text-slate-600 mb-1">Dân tộc</div>
+                          <div className="text-sm text-slate-900 font-medium">{selectedRecord.ethnicity}</div>
+                        </div>
+                        <div className="border border-slate-200 p-2 rounded">
+                          <div className="text-xs text-slate-600 mb-1">Quốc tịch</div>
+                          <div className="text-sm text-slate-900 font-medium">{selectedRecord.nationality}</div>
+                        </div>
+                        <div className="border border-slate-200 p-2 rounded col-span-2">
+                          <div className="text-xs text-slate-600 mb-1">Số định danh cá nhân</div>
+                          <div className="text-sm text-slate-900 font-medium">{selectedRecord.personalId}</div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
                 )}
 
                 {/* Tab: Thông tin về người cha */}
                 {detailTab === 'father' && (
-                <div className="mb-6">
-                  <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-blue-600">Thông tin về người cha</h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.fatherName || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Ngày, tháng, năm sinh</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.fatherBirthDate || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Dân tộc</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.fatherEthnicity || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Quốc tịch</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.fatherNationality || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded col-span-2">
-                      <div className="text-xs text-slate-600 mb-1">Nơi cư trú</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.fatherAddress || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Ngày cấp giấy tờ tùy thân</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.fatherIdIssueDate || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Nơi cấp giấy tờ tùy thân</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.fatherIdIssuePlace || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Số giấy tờ tùy thân</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.fatherIdNumber || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Số định danh cá nhân</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.fatherPersonalId || '-'}</div>
+                  <div className="space-y-6">
+                    <div className="mb-6">
+                      <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-orange-600">Thông tin người cha</h4>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="border border-slate-200 p-2 rounded col-span-2">
+                          <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên</div>
+                          <div className="text-sm text-slate-900 font-medium">{selectedRecord.fatherName || '-'}</div>
+                        </div>
+                        <div className="border border-slate-200 p-2 rounded">
+                          <div className="text-xs text-slate-600 mb-1">Ngày, tháng, năm sinh</div>
+                          <div className="text-sm text-slate-900 font-medium">{selectedRecord.fatherBirthDate || '-'}</div>
+                        </div>
+                        <div className="border border-slate-200 p-2 rounded">
+                          <div className="text-xs text-slate-600 mb-1">Dân tộc</div>
+                          <div className="text-sm text-slate-900 font-medium">{selectedRecord.fatherEthnicity || '-'}</div>
+                        </div>
+                        <div className="border border-slate-200 p-2 rounded">
+                          <div className="text-xs text-slate-600 mb-1">Quốc tịch</div>
+                          <div className="text-sm text-slate-900 font-medium">{selectedRecord.fatherNationality || '-'}</div>
+                        </div>
+                        <div className="border border-slate-200 p-2 rounded col-span-2">
+                          <div className="text-xs text-slate-600 mb-1">Nơi cư trú</div>
+                          <div className="text-sm text-slate-900 font-medium">{selectedRecord.fatherAddress || '-'}</div>
+                        </div>
+                        <div className="border border-slate-200 p-2 rounded">
+                          <div className="text-xs text-slate-600 mb-1">Số GTTT</div>
+                          <div className="text-sm text-slate-900 font-medium">{selectedRecord.fatherIdNumber || '-'}</div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
                 )}
 
                 {/* Tab: Thông tin về người mẹ */}
                 {detailTab === 'mother' && (
-                <div className="mb-6">
-                  <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-blue-600">Thông tin về người mẹ</h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.motherName || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Ngày, tháng, năm sinh</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.motherBirthDate || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Dân tộc</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.motherEthnicity || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Quốc tịch</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.motherNationality || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded col-span-2">
-                      <div className="text-xs text-slate-600 mb-1">Nơi cư trú</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.motherAddress || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Ngày cấp giấy tờ tùy thân</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.motherIdIssueDate || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Nơi cấp giấy tờ tùy thân</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.motherIdIssuePlace || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Số giấy tờ tùy thân</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.motherIdNumber || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Số định danh cá nhân</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.motherPersonalId || '-'}</div>
+                  <div className="space-y-6">
+                    <div className="mb-6">
+                      <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-orange-600">Thông tin người mẹ</h4>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="border border-slate-200 p-2 rounded col-span-2">
+                          <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên</div>
+                          <div className="text-sm text-slate-900 font-medium">{selectedRecord.motherName || '-'}</div>
+                        </div>
+                        <div className="border border-slate-200 p-2 rounded">
+                          <div className="text-xs text-slate-600 mb-1">Ngày, tháng, năm sinh</div>
+                          <div className="text-sm text-slate-900 font-medium">{selectedRecord.motherBirthDate || '-'}</div>
+                        </div>
+                        <div className="border border-slate-200 p-2 rounded">
+                          <div className="text-xs text-slate-600 mb-1">Dân tộc</div>
+                          <div className="text-sm text-slate-900 font-medium">{selectedRecord.motherEthnicity || '-'}</div>
+                        </div>
+                        <div className="border border-slate-200 p-2 rounded">
+                          <div className="text-xs text-slate-600 mb-1">Quốc tịch</div>
+                          <div className="text-sm text-slate-900 font-medium">{selectedRecord.motherNationality || '-'}</div>
+                        </div>
+                        <div className="border border-slate-200 p-2 rounded col-span-2">
+                          <div className="text-xs text-slate-600 mb-1">Nơi cư trú</div>
+                          <div className="text-sm text-slate-900 font-medium">{selectedRecord.motherAddress || '-'}</div>
+                        </div>
+                        <div className="border border-slate-200 p-2 rounded">
+                          <div className="text-xs text-slate-600 mb-1">Số GTTT</div>
+                          <div className="text-sm text-slate-900 font-medium">{selectedRecord.motherIdNumber || '-'}</div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
                 )}
 
                 {/* Tab: Thông tin khác */}
                 {detailTab === 'other' && (
-                <div className="mb-6">
-                  <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-blue-600">Thông tin khác</h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Nơi đăng ký</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.registrationPlace || '-'}</div>
+                  <div className="space-y-6">
+                    <div className="mb-6">
+                      <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-orange-600">Thông tin chi tiết khác</h4>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="border border-slate-200 p-2 rounded">
+                          <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên người đi khai sinh</div>
+                          <div className="text-sm text-slate-900 font-medium">{selectedRecord.declarantName || '-'}</div>
+                        </div>
+                        <div className="border border-slate-200 p-2 rounded">
+                          <div className="text-xs text-slate-600 mb-1">Quan hệ với người được khai sinh</div>
+                          <div className="text-sm text-slate-900 font-medium">{selectedRecord.declarantRelation || '-'}</div>
+                        </div>
+                        <div className="border border-slate-200 p-2 rounded">
+                          <div className="text-xs text-slate-600 mb-1">Nơi cấp giấy tờ tùy thân</div>
+                          <div className="text-sm text-slate-900 font-medium">{selectedRecord.declarantIdIssuePlace || '-'}</div>
+                        </div>
+                        <div className="border border-slate-200 p-2 rounded">
+                          <div className="text-xs text-slate-600 mb-1">Ngày cấp giấy tờ tùy thân</div>
+                          <div className="text-sm text-slate-900 font-medium">{selectedRecord.declarantIdIssueDate || '-'}</div>
+                        </div>
+                        <div className="border border-slate-200 p-2 rounded">
+                          <div className="text-xs text-slate-600 mb-1">Số giấy tờ tùy thân</div>
+                          <div className="text-sm text-slate-900 font-medium">{selectedRecord.declarantIdNumber || '-'}</div>
+                        </div>
+                        <div className="border border-slate-200 p-2 rounded">
+                          <div className="text-xs text-slate-600 mb-1">Số định danh cá nhân</div>
+                          <div className="text-sm text-slate-900 font-medium">{selectedRecord.declarantPersonalId || '-'}</div>
+                        </div>
+                        <div className="border border-slate-200 p-2 rounded">
+                          <div className="text-xs text-slate-600 mb-1">Ngày ký</div>
+                          <div className="text-sm text-slate-900 font-medium">{selectedRecord.signDate || '-'}</div>
+                        </div>
+                        <div className="border border-slate-200 p-2 rounded">
+                          <div className="text-xs text-slate-600 mb-1">Chức vụ người ký</div>
+                          <div className="text-sm text-slate-900 font-medium">{selectedRecord.signerPosition || '-'}</div>
+                        </div>
+                        <div className="border border-slate-200 p-2 rounded">
+                          <div className="text-xs text-slate-600 mb-1">Người thực hiện</div>
+                          <div className="text-sm text-slate-900 font-medium">{selectedRecord.implementer || '-'}</div>
+                        </div>
+                        <div className="border border-slate-200 p-2 rounded col-span-2">
+                          <div className="text-xs text-slate-600 mb-1">Ghi chú ghi những nội dung thay đổi sau này</div>
+                          <div className="text-sm text-slate-900 font-medium">{selectedRecord.notes || '-'}</div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Ngày đăng ký</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.registrationDate}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Loại đăng ký</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.registrationType || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Số giấy khai sinh do cơ quan nước ngoài cấp</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.foreignCertificateNo || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Ngày cấp giấy khai sinh do cơ quan nước ngoài cấp</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.foreignCertificateDate || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Tên cơ quan nước ngoài cấp giấy khai sinh</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.foreignOrganization || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Quốc gia đã cấp giấy khai sinh</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.foreignCountry || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên người đi khai sinh</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.declarantName || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Quan hệ với người được khai sinh</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.declarantRelation || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Nơi cấp giấy tờ tùy thân</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.declarantIdIssuePlace || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Ngày cấp giấy tờ tùy thân</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.declarantIdIssueDate || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Số giấy tờ tùy thân</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.declarantIdNumber || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Số định danh cá nhân</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.declarantPersonalId || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Ngày ký</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.signDate || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Chức vụ người ký</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.signerPosition || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Người thực hiện</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.implementer || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded col-span-2">
-                      <div className="text-xs text-slate-600 mb-1">Ghi chú ghi những nội dung thay đổi sau này</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.notes || '-'}</div>
-                    </div>
+
                     {selectedRecord.pdfUrl && (
-                      <div className="border border-blue-200 p-3 rounded col-span-2 bg-blue-50/50">
-                        <div className="text-xs text-slate-600 mb-1 font-medium text-blue-600 uppercase tracking-wider">Văn bản đính kèm</div>
+                      <div className="border border-orange-200 p-4 rounded-xl col-span-2 bg-orange-50/50 mt-4">
+                        <div className="text-xs text-slate-600 mb-2 font-bold text-orange-600 uppercase tracking-widest">Văn bản đính kèm</div>
                         <button
                           onClick={() => setViewingPdfUrl(selectedRecord.pdfUrl!)}
-                          className="flex items-center gap-3 text-blue-700 font-bold hover:text-blue-800 transition-colors py-1 group"
+                          className="flex items-center gap-4 text-orange-800 font-bold hover:text-orange-950 transition-all py-1 group"
                           title="Click để xem văn bản PDF"
                         >
-                          <div className="bg-blue-100 p-2 rounded group-hover:bg-blue-200 transition-colors">
-                            <FileText className="w-5 h-5 text-blue-600" />
+                          <div className="bg-orange-100 p-2.5 rounded-lg group-hover:bg-orange-200 transition-colors shadow-sm">
+                            <FileText className="w-5 h-5 text-orange-600" />
                           </div>
-                          <div className="flex flex-col items-start border-b border-blue-200 group-hover:border-blue-400">
-                             <span>Chi tiết hồ sơ đính kèm.pdf</span>
-                             <span className="text-[10px] text-blue-500 font-normal mt-0.5">Nhấn để xem trực tiếp</span>
+                          <div className="flex flex-col items-start border-b-2 border-orange-200 group-hover:border-orange-400 pb-0.5">
+                             <span className="text-sm">Chi tiết hồ sơ đính kèm.pdf</span>
+                             <span className="text-[11px] text-orange-600/70 font-medium mt-0.5 flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse"></span>
+                                Nhấn để xem trực tiếp văn bản
+                             </span>
                           </div>
                         </button>
                       </div>
                     )}
                   </div>
-                </div>
                 )}
 
                 {/* Trạng thái lỗi - hiển thị ở tất cả các tab */}
@@ -1329,7 +1277,7 @@ export function DataDetailModal({
                   className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 flex items-center gap-2 text-sm"
                   title="Đóng chi tiết"
                 >
-                  <X className="w-4 h-4" />
+                  <XCircle className="w-4 h-4" />
                   Đóng
                 </button>
                 <button

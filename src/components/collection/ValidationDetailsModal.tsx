@@ -106,7 +106,7 @@ export function ValidationDetailsModal({
           <div className="p-6 border-b border-slate-200 bg-slate-50">
             <div className="relative">
               <Search className="w-5 h-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
+              <input aria-label="Input field"
                 type="text"
                 placeholder="Tìm kiếm..."
                 value={searchTerm}

@@ -160,7 +160,7 @@ export function AddDataCollectionModal({ isOpen, onClose, onSave }: AddDataColle
             <label className="block text-sm font-medium text-slate-700 mb-2">
               Tên Dữ liệu <span className="text-red-500">*</span>
             </label>
-            <input
+            <input aria-label="Input field"
               type="text"
               required
               value={formData.dataName}

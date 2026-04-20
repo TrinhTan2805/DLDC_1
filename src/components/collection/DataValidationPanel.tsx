@@ -350,7 +350,7 @@ export function DataValidationPanel() {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-gray-700 mb-2">Dung lượng file tối đa (MB)</label>
-                    <input
+                    <input aria-label="Input field"
                       type="number"
                       defaultValue="100"
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
@@ -358,7 +358,7 @@ export function DataValidationPanel() {
                   </div>
                   <div>
                     <label className="block text-gray-700 mb-2">Số lượng bản ghi tối đa mỗi lần</label>
-                    <input
+                    <input aria-label="Input field"
                       type="number"
                       defaultValue="10000"
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
@@ -366,7 +366,7 @@ export function DataValidationPanel() {
                   </div>
                   <div>
                     <label className="block text-gray-700 mb-2">Mã hóa ký tự mặc định</label>
-                    <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                    <select aria-label="Select box" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
                       <option>UTF-8</option>
                       <option>UTF-16</option>
                       <option>ISO-8859-1</option>

@@ -161,7 +161,7 @@ export function CollectionLogs() {
           <div className="flex-1 min-w-[300px]">
             <div className="relative">
               <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
+              <input aria-label="Input field"
                 type="text"
                 placeholder="Tìm kiếm theo nguồn, nội dung..."
                 value={searchQuery}
@@ -172,7 +172,7 @@ export function CollectionLogs() {
           </div>
           <div className="flex items-center gap-2">
             <span className="text-gray-600 text-sm">Trạng thái:</span>
-            <select
+            <select aria-label="Select box"
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"

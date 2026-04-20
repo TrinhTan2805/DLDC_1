@@ -210,7 +210,7 @@ export function CategoryManagementDetail({ categoryName, categoryId }: CategoryM
                 <div className="flex items-center gap-3 flex-1">
                   <div className="relative flex-1 max-w-md">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <input
+                    <input aria-label="Input field"
                       type="text"
                       title="Tìm kiếm"
                       placeholder="Tìm kiếm theo họ tên, số giấy chứng nhận..."
@@ -328,7 +328,7 @@ export function CategoryManagementDetail({ categoryName, categoryId }: CategoryM
               <div className="grid grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm text-slate-700 mb-2">Tên kết nối <span className="text-red-500">*</span></label>
-                  <input
+                  <input aria-label="Input field"
                     type="text"
                     title="Tên kết nối"
                     defaultValue={`Kết nối LGSP - ${categoryName}`}
@@ -337,7 +337,7 @@ export function CategoryManagementDetail({ categoryName, categoryId }: CategoryM
                 </div>
                 <div>
                   <label className="block text-sm text-slate-700 mb-2">Mã dịch vụ <span className="text-red-500">*</span></label>
-                  <input
+                  <input aria-label="Input field"
                     type="text"
                     title="Mã dịch vụ"
                     defaultValue="LGSP_DV_001"
@@ -352,7 +352,7 @@ export function CategoryManagementDetail({ categoryName, categoryId }: CategoryM
                 <div className="grid grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm text-slate-700 mb-2">Endpoint URL <span className="text-red-500">*</span></label>
-                    <input
+                    <input aria-label="Input field"
                       type="text"
                       title="Endpoint URL"
                       defaultValue="https://lgsp.gov.vn/api/v2/data-sync"
@@ -361,7 +361,7 @@ export function CategoryManagementDetail({ categoryName, categoryId }: CategoryM
                   </div>
                   <div>
                     <label className="block text-sm text-slate-700 mb-2">Phương thức <span className="text-red-500">*</span></label>
-                    <select title="Phương thức" className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select aria-label="Select box" title="Phương thức" className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                       <option>POST</option>
                       <option>GET</option>
                       <option>PUT</option>
@@ -369,7 +369,7 @@ export function CategoryManagementDetail({ categoryName, categoryId }: CategoryM
                   </div>
                   <div>
                     <label className="block text-sm text-slate-700 mb-2">Client ID <span className="text-red-500">*</span></label>
-                    <input
+                    <input aria-label="Input field"
                       type="text"
                       title="Client ID"
                       defaultValue="MOJ_DLDC_CLIENT_2024"
@@ -378,7 +378,7 @@ export function CategoryManagementDetail({ categoryName, categoryId }: CategoryM
                   </div>
                   <div>
                     <label className="block text-sm text-slate-700 mb-2">Client Secret <span className="text-red-500">*</span></label>
-                    <input
+                    <input aria-label="Input field"
                       type="password"
                       title="Client Secret"
                       defaultValue="••••••••••••••••"
@@ -414,7 +414,7 @@ export function CategoryManagementDetail({ categoryName, categoryId }: CategoryM
               <div className="flex gap-3">
                 <div className="flex-1 relative">
                   <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <input
+                  <input aria-label="Input field"
                     type="date"
                     title="Từ ngày"
                     className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -422,7 +422,7 @@ export function CategoryManagementDetail({ categoryName, categoryId }: CategoryM
                 </div>
                 <div className="flex-1 relative">
                   <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <input
+                  <input aria-label="Input field"
                     type="date"
                     title="Đến ngày"
                     className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"

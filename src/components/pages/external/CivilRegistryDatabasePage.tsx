@@ -3,6 +3,15 @@ import { useState } from 'react';
 import { Calendar, Download, FileUser, UserCheck, Users, Baby, Heart, UserX, UsersRound, FileEdit, BarChart3, FileCheck, FileX, X, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { DataDetailModal } from '../../DataDetailModal';
 import { MarriageDetailModal } from '../../MarriageDetailModal';
+import { MaritalStatusCertModal } from '../../MaritalStatusCertModal';
+import { DeathCertModal } from '../../DeathCertModal';
+import { ParentChildRecognitionModal } from '../../ParentChildRecognitionModal';
+import { AdoptionCertModal } from '../../AdoptionCertModal';
+import { GuardianshipCertModal } from '../../GuardianshipCertModal';
+import { TerminationGuardianshipCertModal } from '../../TerminationGuardianshipCertModal';
+import { CivilRegistryChangeModal } from '../../CivilRegistryChangeModal';
+import { GuardianshipMonitoringModal } from '../../GuardianshipMonitoringModal';
+import { TerminationGuardianshipMonitoringModal } from '../../TerminationGuardianshipMonitoringModal';
 
 interface StatCard {
   id: string;
@@ -49,7 +58,7 @@ export function CivilRegistryDatabasePage({ mode = 'thu thập', context = 'thu 
       { id: '7', title: 'Hồ sơ đăng ký giám hộ', icon: FileUser, color: 'purple', lastMonth: 2234567, thisMonth: 1190311, collected: 3456, processed: 3298, shared: 2987 },
       { id: '8', title: 'Hồ sơ DK chấm dứt giám hộ', icon: UserX, color: 'orange', lastMonth: 1723456, thisMonth: 1701422, collected: 2345, processed: 2198, shared: 1976 },
       { id: '9', title: 'Hồ sơ DK thay đổi TT hộ tịch, văn danh dự dân tộc', icon: FileEdit, color: 'blue', lastMonth: 2156789, thisMonth: 1268089, collected: 4876, processed: 4632, shared: 4123 },
-      { id: '10', title: 'Hồ sơ đăng ký kiểm sắc việc giám hộ', icon: FileCheck, color: 'green', lastMonth: 1934567, thisMonth: 1490311, collected: 3765, processed: 3543, shared: 3198 },
+      { id: '10', title: 'Hồ sơ đăng ký chấm dứt giám sát việc giám hộ', icon: FileCheck, color: 'green', lastMonth: 1934567, thisMonth: 1490311, collected: 3765, processed: 3543, shared: 3198 },
       { id: '11', title: 'Hồ sơ đăng ký giám sát việc giám hộ', icon: FileCheck, color: 'purple', lastMonth: 1456789, thisMonth: 1968089, collected: 5432, processed: 5187, shared: 4876 },
       { id: '12', title: 'Hồ sơ ly hôn/hủy kết hôn ở nước ngoài', icon: UsersRound, color: 'orange', lastMonth: 1889234, thisMonth: 1535644, collected: 2654, processed: 2487, shared: 2198 },
     ];
@@ -58,12 +67,12 @@ export function CivilRegistryDatabasePage({ mode = 'thu thập', context = 'thu 
       const total = item.lastMonth + item.thisMonth;
       const change = ((item.thisMonth - item.lastMonth) / item.lastMonth * 100).toFixed(1);
       const changeStr = change.startsWith('-') ? change : `+${change}`;
-      
+
       // For processing mode: calculate collected vs processed
       const totalCollected = total;
       const totalProcessed = Math.floor(total * (0.95 + Math.random() * 0.04)); // 95-99% processed
       const processingRate = Math.floor((totalProcessed / totalCollected) * 100);
-      
+
       return {
         id: item.id,
         title: item.title,
@@ -125,7 +134,7 @@ export function CivilRegistryDatabasePage({ mode = 'thu thập', context = 'thu 
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDateRange(e.target.value)}
             className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          <button 
+          <button
             className="p-2 border border-slate-300 rounded-lg hover:bg-slate-50"
             title="Chọn ngày"
           >
@@ -139,8 +148,8 @@ export function CivilRegistryDatabasePage({ mode = 'thu thập', context = 'thu 
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <div 
-              key={stat.id} 
+            <div
+              key={stat.id}
               className={`p-4 rounded-lg border border-slate-200 ${getStatColor(stat.color)} cursor-pointer hover:shadow-md transition-shadow`}
               onClick={() => setSelectedStat(stat)}
             >
@@ -149,14 +158,14 @@ export function CivilRegistryDatabasePage({ mode = 'thu thập', context = 'thu 
                 <div className={`w-10 h-10 rounded-lg ${getStatIconBg(stat.color)} flex items-center justify-center flex-shrink-0`}>
                   <Icon className="w-5 h-5" />
                 </div>
-                
+
                 {/* Content on the right */}
                 <div className="flex-1 min-w-0">
                   {/* Title - normal weight on top */}
                   <div className="text-base text-slate-700 mb-1 leading-tight">
                     {stat.title}
                   </div>
-                  
+
                   {/* Conditional rendering based on context */}
                   {context === 'chia sẻ' ? (
                     // Hiển thị số liệu thu thập/xử lý/chia sẻ cho context "chia sẻ"
@@ -169,12 +178,12 @@ export function CivilRegistryDatabasePage({ mode = 'thu thập', context = 'thu 
                       </div>
                       <div className="flex items-center gap-2 text-xs text-slate-500">
                         <span>
-                          Tỉ lệ xử lý: {stat.processed && stat.collected ? 
+                          Tỉ lệ xử lý: {stat.processed && stat.collected ?
                             ((stat.processed / stat.collected) * 100).toFixed(1) : '0'}%
                         </span>
                         <span className="text-slate-300">|</span>
                         <span>
-                          Tỉ lệ chia sẻ: {stat.shared && stat.processed ? 
+                          Tỉ lệ chia sẻ: {stat.shared && stat.processed ?
                             ((stat.shared / stat.processed) * 100).toFixed(1) : '0'}%
                         </span>
                       </div>
@@ -234,7 +243,7 @@ export function CivilRegistryDatabasePage({ mode = 'thu thập', context = 'thu 
 
         {/* Month Filter */}
         <div className="mb-6">
-          <select 
+          <select
             className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             title="Lọc theo thời gian"
           >
@@ -274,7 +283,7 @@ export function CivilRegistryDatabasePage({ mode = 'thu thập', context = 'thu 
               const totalPercent = (totalValue / maxValue) * 100;
               const lastMonthPercent = (data.lastMonth / maxValue) * 100;
               const thisMonthPercent = (data.thisMonth / maxValue) * 100;
-              
+
               return (
                 <div key={index} className="flex-1 flex flex-col items-center relative h-full">
                   <div className="w-full flex flex-col items-center justify-end h-full">
@@ -287,18 +296,18 @@ export function CivilRegistryDatabasePage({ mode = 'thu thập', context = 'thu 
                             <span className="absolute -top-6 text-xs font-semibold text-slate-700 whitespace-nowrap">
                               {data.thisMonth.toLocaleString()}
                             </span>
-                            <div 
+                            <div
                               className="w-full bg-orange-400 h-full min-h-[4px]"
                             />
                           </>
                         )}
                       </div>
-                      
+
                       {/* Last Month (Blue) - Bottom portion */}
                       <div className="relative flex flex-col items-center flex-1">
                         {data.lastMonth > 0 && (
                           <>
-                            <div 
+                            <div
                               className="w-full bg-blue-400 h-full min-h-[4px]"
                             />
                             <span className="absolute top-1/2 -translate-y-1/2 text-xs font-semibold text-white whitespace-nowrap">
@@ -309,7 +318,7 @@ export function CivilRegistryDatabasePage({ mode = 'thu thập', context = 'thu 
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Label */}
                   <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 -rotate-45 origin-center whitespace-nowrap text-xs text-slate-600">
                     {data.name}
@@ -338,7 +347,7 @@ export function CivilRegistryDatabasePage({ mode = 'thu thập', context = 'thu 
         <div className="px-6 py-4 border-b border-slate-200">
           <h3 className="text-slate-900">Danh sách CSDL {mode}</h3>
         </div>
-        
+
         <table className="w-full">
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50">
@@ -373,8 +382,116 @@ export function CivilRegistryDatabasePage({ mode = 'thu thập', context = 'thu 
           errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
         />
       )}
+
+      {selectedStat && selectedStat.id === '3' && (
+        <MaritalStatusCertModal
+          isOpen={true}
+          onClose={() => setSelectedStat(null)}
+          title={selectedStat.title}
+          totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
+          newRecords={selectedStat.thisMonth}
+          updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
+          errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
+        />
+      )}
+
+      {selectedStat && selectedStat.id === '4' && (
+        <DeathCertModal
+          isOpen={true}
+          onClose={() => setSelectedStat(null)}
+          title={selectedStat.title}
+          totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
+          newRecords={selectedStat.thisMonth}
+          updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
+          errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
+        />
+      )}
+
+      {selectedStat && selectedStat.id === '5' && (
+        <ParentChildRecognitionModal
+          isOpen={true}
+          onClose={() => setSelectedStat(null)}
+          title={selectedStat.title}
+          totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
+          newRecords={selectedStat.thisMonth}
+          updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
+          errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
+        />
+      )}
+
+      {selectedStat && selectedStat.id === '6' && (
+        <AdoptionCertModal
+          isOpen={true}
+          onClose={() => setSelectedStat(null)}
+          title={selectedStat.title}
+          totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
+          newRecords={selectedStat.thisMonth}
+          updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
+          errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
+        />
+      )}
+
+      {selectedStat && selectedStat.id === '7' && (
+        <GuardianshipCertModal
+          isOpen={true}
+          onClose={() => setSelectedStat(null)}
+          title={selectedStat.title}
+          totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
+          newRecords={selectedStat.thisMonth}
+          updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
+          errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
+        />
+      )}
+
+      {selectedStat && selectedStat.id === '8' && (
+        <TerminationGuardianshipCertModal
+          isOpen={true}
+          onClose={() => setSelectedStat(null)}
+          title={selectedStat.title}
+          totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
+          newRecords={selectedStat.thisMonth}
+          updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
+          errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
+        />
+      )}
+
+      {selectedStat && selectedStat.id === '9' && (
+        <CivilRegistryChangeModal
+          isOpen={true}
+          onClose={() => setSelectedStat(null)}
+          title={selectedStat.title}
+          totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
+          newRecords={selectedStat.thisMonth}
+          updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
+          errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
+        />
+      )}
+
+      {selectedStat && selectedStat.id === '10' && (
+        <TerminationGuardianshipMonitoringModal
+          isOpen={true}
+          onClose={() => setSelectedStat(null)}
+          title={selectedStat.title}
+          totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
+          newRecords={selectedStat.thisMonth}
+          updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
+          errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
+        />
+      )}
       
-      {selectedStat && selectedStat.id !== '2' && (
+      {selectedStat && selectedStat.id === '11' && (
+        <GuardianshipMonitoringModal
+          isOpen={true}
+          onClose={() => setSelectedStat(null)}
+          title={selectedStat.title}
+          totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
+          newRecords={selectedStat.thisMonth}
+          updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
+          errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
+        />
+      )}
+
+      {selectedStat && selectedStat.id !== '2' && selectedStat.id !== '3' && selectedStat.id !== '4' && selectedStat.id !== '5' && selectedStat.id !== '6' && selectedStat.id !== '7' && selectedStat.id !== '8' && selectedStat.id !== '9' && selectedStat.id !== '10' && selectedStat.id !== '11' && (
         <DataDetailModal
           isOpen={true}
           onClose={() => setSelectedStat(null)}

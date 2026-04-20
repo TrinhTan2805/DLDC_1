@@ -16,7 +16,7 @@ export function ContactInfoSection({ isEdit = false, defaultValues, unitName, on
         <label htmlFor="contact-unit-name" className="block text-sm text-slate-600 mb-1">
           Tên đơn vị
         </label>
-        <input
+        <input aria-label="Input field"
           id="contact-unit-name"
           title="Tên đơn vị"
           type="text"
@@ -31,7 +31,7 @@ export function ContactInfoSection({ isEdit = false, defaultValues, unitName, on
         <label htmlFor="contact-address" className="block text-sm text-slate-600 mb-1">
           Địa chỉ
         </label>
-        <input
+        <input aria-label="Input field"
           id="contact-address"
           title="Địa chỉ"
           type="text"
@@ -45,7 +45,7 @@ export function ContactInfoSection({ isEdit = false, defaultValues, unitName, on
         <label htmlFor="contact-phone" className="block text-sm text-slate-600 mb-1">
           Số điện thoại
         </label>
-        <input
+        <input aria-label="Input field"
           id="contact-phone"
           title="Số điện thoại"
           type="tel"
@@ -59,7 +59,7 @@ export function ContactInfoSection({ isEdit = false, defaultValues, unitName, on
         <label htmlFor="contact-email" className="block text-sm text-slate-600 mb-1">
           Địa chỉ email
         </label>
-        <input
+        <input aria-label="Input field"
           id="contact-email"
           title="Địa chỉ email"
           type="email"
@@ -73,7 +73,7 @@ export function ContactInfoSection({ isEdit = false, defaultValues, unitName, on
         <label htmlFor="technical-contact" className="block text-sm text-slate-600 mb-1">
           Người đầu mối ký thuật
         </label>
-        <input
+        <input aria-label="Input field"
           id="technical-contact"
           title="Người đầu mối ký thuật"
           type="text"
@@ -87,7 +87,7 @@ export function ContactInfoSection({ isEdit = false, defaultValues, unitName, on
         <label htmlFor="contact-note" className="block text-sm text-slate-600 mb-1">
           Ghi chú
         </label>
-        <textarea
+        <textarea aria-label="Text input"
           id="contact-note"
           title="Ghi chú"
           className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"

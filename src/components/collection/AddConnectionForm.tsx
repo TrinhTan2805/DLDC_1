@@ -51,7 +51,7 @@ export function AddConnectionForm({ onClose, onSave }: AddConnectionFormProps) {
               <label className="block text-sm text-slate-700 mb-2">
                 Tên nguồn dữ liệu
               </label>
-              <input
+              <input aria-label="Input field"
                 type="text"
                 placeholder="Ví dụ: CSDL Đăng ký kinh doanh"
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -61,7 +61,7 @@ export function AddConnectionForm({ onClose, onSave }: AddConnectionFormProps) {
               <label className="block text-sm text-slate-700 mb-2">
                 Loại kết nối
               </label>
-              <select className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <select aria-label="Select box" className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="">Chọn loại kết nối</option>
                 <option value="api">API REST</option>
                 <option value="database">Database</option>
@@ -77,7 +77,7 @@ export function AddConnectionForm({ onClose, onSave }: AddConnectionFormProps) {
             <label className="block text-sm text-slate-700 mb-2">
               Endpoint / URL
             </label>
-            <input
+            <input aria-label="Input field"
               type="text"
               placeholder="https://api.example.moj.gov.vn/v1/data"
               className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -90,7 +90,7 @@ export function AddConnectionForm({ onClose, onSave }: AddConnectionFormProps) {
               <label className="block text-sm text-slate-700 mb-2">
                 Định dạng dữ liệu
               </label>
-              <select className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <select aria-label="Select box" className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="json">JSON</option>
                 <option value="xml">XML</option>
                 <option value="csv">CSV</option>
@@ -101,7 +101,7 @@ export function AddConnectionForm({ onClose, onSave }: AddConnectionFormProps) {
               <label className="block text-sm text-slate-700 mb-2">
                 Giao thức
               </label>
-              <select className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <select aria-label="Select box" className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="https">HTTPS</option>
                 <option value="http">HTTP</option>
                 <option value="sftp">SFTP</option>
@@ -112,7 +112,7 @@ export function AddConnectionForm({ onClose, onSave }: AddConnectionFormProps) {
               <label className="block text-sm text-slate-700 mb-2">
                 Port
               </label>
-              <input
+              <input aria-label="Input field"
                 type="number"
                 placeholder="443"
                 defaultValue="443"
@@ -127,7 +127,7 @@ export function AddConnectionForm({ onClose, onSave }: AddConnectionFormProps) {
               <label className="block text-sm text-slate-700 mb-2">
                 API Key / Username
               </label>
-              <input
+              <input aria-label="Input field"
                 type="text"
                 placeholder="Nhập API Key hoặc Username"
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -137,7 +137,7 @@ export function AddConnectionForm({ onClose, onSave }: AddConnectionFormProps) {
               <label className="block text-sm text-slate-700 mb-2">
                 Secret / Password
               </label>
-              <input
+              <input aria-label="Input field"
                 type="password"
                 placeholder="Nhập Secret hoặc Password"
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -150,7 +150,7 @@ export function AddConnectionForm({ onClose, onSave }: AddConnectionFormProps) {
             <label className="block text-sm text-slate-700 mb-2">
               Mô tả
             </label>
-            <textarea
+            <textarea aria-label="Text input"
               rows={4}
               placeholder="Mô tả về nguồn dữ liệu và mục đích kết nối..."
               className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"

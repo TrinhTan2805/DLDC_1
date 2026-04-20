@@ -64,7 +64,7 @@ function ChartCard({ title, total, data }: ChartCardProps) {
 
       {/* Controls */}
       <div className="flex items-center gap-3 mb-4">
-        <select 
+        <select aria-label="Select box" 
           className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-green-500"
           title="Chọn khoảng thời gian"
         >

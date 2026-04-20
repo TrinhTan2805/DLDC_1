@@ -320,7 +320,7 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
           <div className="grid grid-cols-4 gap-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
+              <input aria-label="Input field"
                 type="text"
                 placeholder="Tìm kiếm người dùng, hành động, IP..."
                 className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -328,7 +328,7 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
                 onChange={(e) => setLogSearchText(e.target.value)}
               />
             </div>
-            <select
+            <select aria-label="Select box"
               className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={logUserFilter}
               onChange={(e) => setLogUserFilter(e.target.value)}
@@ -338,7 +338,7 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
               <option value="user1">user1</option>
               <option value="user2">user2</option>
             </select>
-            <select
+            <select aria-label="Select box"
               className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={logActionFilter}
               onChange={(e) => setLogActionFilter(e.target.value)}
@@ -380,7 +380,7 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
           <div className="grid grid-cols-4 gap-3">
             <div>
               <label className="block text-xs text-slate-600 mb-1">Từ ngày</label>
-              <input
+              <input aria-label="Input field"
                 type="datetime-local"
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={logDateFrom}
@@ -389,7 +389,7 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
             </div>
             <div>
               <label className="block text-xs text-slate-600 mb-1">Đến ngày</label>
-              <input
+              <input aria-label="Input field"
                 type="datetime-local"
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={logDateTo}

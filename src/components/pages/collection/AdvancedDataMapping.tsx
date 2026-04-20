@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   ChevronDown, ChevronRight, X, User, Calendar, Users,
   Database, Plus, Search, Check, FileJson, Trash2, LayoutTemplate,
-  CheckCircle
+  CheckCircle, Send
 } from 'lucide-react';
 
 export function AdvancedDataMapping({ onClose }: { onClose?: () => void }) {
@@ -105,7 +105,9 @@ export function AdvancedDataMapping({ onClose }: { onClose?: () => void }) {
 
   const [showTableSelect, setShowTableSelect] = useState(false);
   const [tableSearch, setTableSearch] = useState('');
-  const selRef = useRef<HTMLDivElement>(null);
+  const [endpointUrl, setEndpointUrl] = useState('https://api.example.com/data');
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const selRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     // Khởi tạo ban đầu
@@ -178,9 +180,8 @@ export function AdvancedDataMapping({ onClose }: { onClose?: () => void }) {
       isExpanded: true,
       mappings: autoMappings
     };
-    setActiveTables(prev => [newInstance, ...prev]);
-    setShowTableSelect(false);
-    setTableSearch('');
+    setActiveTables(prev => [...prev, newInstance]);
+    // Do not close dropdown or clear search to allow multiple selections
   };
 
   const updateMapping = (tableInstanceId: string, targetField: string, sourcePath: string) => {
@@ -228,20 +229,40 @@ export function AdvancedDataMapping({ onClose }: { onClose?: () => void }) {
     <div className="flex flex-col w-full h-full bg-slate-50">
 
       {/* HEADER INFO SECTION */}
-      <div className="px-6 pt-5 pb-3 bg-white border-b border-slate-200 shrink-0">
-        <div className="bg-blue-50 border border-blue-200 text-blue-800 rounded-lg p-3 text-sm flex items-center gap-2 mb-4 font-medium">
-          <CheckCircle className="w-5 h-5 text-blue-600" />
-          Kết nối thành công! Đã nhận được dữ liệu mẫu. Vui lòng chọn bảng đích để thực hiện ánh xạ.
-        </div>
-
-        <div className="flex justify-between items-end">
-          <span className="text-sm text-slate-500 font-medium">
-            Cấu hình ánh xạ dữ liệu chi tiết
-          </span>
+      <div className="px-6 pt-5 pb-4 bg-white border-b border-slate-200 shrink-0">
+        <div className="flex gap-4 items-end">
+          <div className="flex-1">
+            <label htmlFor="url-endpoint" className="block text-sm text-slate-700 font-medium mb-1">
+              URL Endpoint <span className="text-red-500">*</span>
+            </label>
+            <input aria-label="Input field"
+              id="url-endpoint"
+              type="text"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="https://api.example.com/data"
+              value={endpointUrl}
+              onChange={(e) => setEndpointUrl(e.target.value)}
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              if (endpointUrl) setIsDataLoaded(true);
+            }}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center gap-2 h-[38px]"
+          >
+            <Send className="w-4 h-4" />
+            Send
+          </button>
         </div>
       </div>
 
-      <div className="flex flex-1 overflow-hidden px-6 py-6 gap-6">
+      {isDataLoaded ? (
+        <>
+          <div className="flex justify-between items-center px-6 pt-4 shrink-0">
+             <div className="text-sm text-slate-500 font-medium">Bản tin trả về hợp lệ. Bắt đầu thực hiện cấu hình ánh xạ bảng đích chi tiết.</div>
+          </div>
+          <div className="flex flex-1 overflow-hidden px-6 py-4 gap-6">
 
         {/* ================= LEFT COLUMN: SOURCE (XML) ================= */}
         <div className="w-[35%] lg:w-[32%] bg-white border border-slate-200 rounded-xl flex flex-col shadow-sm overflow-hidden z-10">
@@ -309,17 +330,71 @@ export function AdvancedDataMapping({ onClose }: { onClose?: () => void }) {
 
             {/* Giả lập ROOT Node Tree */}
             <div className="flex border-l border-slate-200 ml-2 pl-3 flex-col space-y-1 relative">
-              <h4 className="text-sm font-bold text-slate-700 py-2 border-b border-slate-100 mb-2 uppercase">Hệ thống Đích</h4>
+              <div className="flex items-center justify-between py-2 border-b border-slate-100 mb-3 gap-4" ref={selRef}>
+                <h4 className="text-sm font-bold text-slate-700 uppercase leading-none whitespace-nowrap">Hệ thống Đích</h4>
+                <div className="relative flex-1 max-w-md">
+                  <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input aria-label="Input field"
+                    type="text"
+                    placeholder="Tìm và thiết lập bảng dữ liệu..."
+                    value={tableSearch}
+                    onFocus={() => setShowTableSelect(true)}
+                    onChange={(e) => {
+                      setTableSearch(e.target.value);
+                      setShowTableSelect(true);
+                    }}
+                    className="w-full pl-8 pr-3 py-1.5 text-[13px] border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                  {/* Combobox Dropdown */}
+                  {showTableSelect && (
+                    <div className="absolute z-50 w-full right-0 mt-1 bg-white border border-slate-200 rounded-md shadow-lg max-h-64 overflow-y-auto">
+                      {availableDBTables
+                        .filter(t => t.name.toLowerCase().includes(tableSearch.toLowerCase()) || t.schemaTable.toLowerCase().includes(tableSearch.toLowerCase()))
+                        .map(t => {
+                          const Icon = t.icon;
+                          const activeInstance = activeTables.find(at => at.id === t.id);
+                          const isChecked = !!activeInstance;
 
-              {availableDBTables.map((tableDef) => {
-                const Icon = tableDef.icon;
-                const activeInstance = activeTables.find(t => t.id === tableDef.id);
-                const isSelected = !!activeInstance;
-                const table = isSelected ? activeInstance : tableDef;
+                          return (
+                            <div
+                              key={t.id}
+                              className={`px-3 py-2 cursor-pointer flex items-center gap-3 border-b border-slate-100 last:border-b-0 transition-colors ${isChecked ? 'bg-blue-50/50 hover:bg-blue-50' : 'hover:bg-slate-50'}`}
+                              onMouseDown={(e) => {
+                                e.preventDefault(); // keep focus on input
+                                if (isChecked) {
+                                  if (activeInstance) removeActiveTable(activeInstance.instanceId);
+                                } else {
+                                  addTableToMapping(t);
+                                }
+                              }}
+                            >
+                              <div className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${isChecked ? 'bg-blue-500 border-blue-500' : 'bg-white border-slate-300'}`}>
+                                {isChecked && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
+                              </div>
+                              <Icon className={`w-4 h-4 ${isChecked ? 'text-blue-500' : 'text-slate-400'}`} />
+                              <div className="flex flex-col">
+                                <span className={`text-[12px] font-bold ${isChecked ? 'text-slate-800' : 'text-slate-600'}`}>{t.name}</span>
+                                <span className="text-[10px] font-mono text-slate-500 leading-none mt-0.5">{t.schemaTable}</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      {availableDBTables.filter(t => t.name.toLowerCase().includes(tableSearch.toLowerCase()) || t.schemaTable.toLowerCase().includes(tableSearch.toLowerCase())).length === 0 && (
+                        <div className="px-3 py-4 text-center text-xs text-slate-500">
+                          Không tìm thấy bảng hoặc đã được thêm hết.
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {activeTables.map((table) => {
+                const Icon = table.icon;
                 const isExpanded = table.isExpanded !== false;
 
                 return (
-                  <div key={tableDef.id} className="mb-2 relative pl-3 border-l border-slate-200 ml-1 transition-all">
+                  <div key={table.instanceId} className="mb-2 relative pl-3 border-l border-slate-200 ml-1 transition-all">
                     {/* Tree line connector */}
                     <div className="absolute -left-[1px] top-4 w-3 border-t border-slate-200"></div>
 
@@ -327,27 +402,38 @@ export function AdvancedDataMapping({ onClose }: { onClose?: () => void }) {
                     <div className="flex items-center justify-between p-2 rounded-md hover:bg-slate-50 border border-transparent transition-colors group">
                       <div className="flex items-center gap-3">
                         <div
-                          className={`w-4 h-4 border rounded shadow-sm flex items-center justify-center cursor-pointer transition-colors ${isSelected ? 'bg-blue-500 border-blue-500' : 'bg-white border-slate-300'}`}
-                          onClick={() => isSelected ? removeActiveTable(table.instanceId) : addTableToMapping(tableDef)}
+                          className="w-4 h-4 border border-blue-500 bg-blue-500 rounded shadow-sm flex items-center justify-center cursor-pointer transition-colors"
+                          onClick={() => removeActiveTable(table.instanceId)}
+                          title="Gỡ bỏ bảng"
                         >
-                          {isSelected && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
+                          <Check className="w-3 h-3 text-white" strokeWidth={3} />
                         </div>
 
-                        <div className="flex items-center gap-1.5 cursor-pointer" onClick={() => isSelected ? toggleActiveTable(table.instanceId) : addTableToMapping(tableDef)}>
-                          <button type="button" className={`p-0.5 text-slate-400 hover:text-slate-700 rounded focus:outline-none ${!isSelected ? 'opacity-30 cursor-default' : ''}`}>
-                            <ChevronRight className={`w-3.5 h-3.5 transition-transform ${isSelected && isExpanded ? 'rotate-90' : ''}`} />
+                        <div className="flex items-center gap-1.5 cursor-pointer" onClick={() => toggleActiveTable(table.instanceId)}>
+                          <button type="button" aria-label="Mở rộng/Thu gọn" className="p-0.5 text-slate-400 hover:text-slate-700 rounded focus:outline-none">
+                            <ChevronRight className={`w-3.5 h-3.5 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
                           </button>
-                          <Icon className={`w-4 h-4 ${isSelected ? 'text-blue-500' : 'text-slate-400'}`} />
+                          <Icon className="w-4 h-4 text-blue-500" />
                           <div className="flex flex-col">
-                            <span className={`text-[13px] font-bold ${isSelected ? 'text-slate-800' : 'text-slate-600'}`}>{tableDef.name}</span>
-                            <span className="text-[10px] font-mono text-slate-400 leading-none">{tableDef.schemaTable}</span>
+                            <span className="text-[13px] font-bold text-slate-800">{table.name}</span>
+                            <span className="text-[10px] font-mono text-slate-400 leading-none">{table.schemaTable}</span>
                           </div>
                         </div>
                       </div>
+                      
+                      {/* Xoá nhanh bảng trên Header */}
+                      <button 
+                        type="button" 
+                        onClick={() => removeActiveTable(table.instanceId)}
+                        className="text-slate-300 hover:text-red-500 hover:bg-red-50 p-1 rounded transition-colors opacity-0 group-hover:opacity-100"
+                        title="Xóa cấu hình bảng này"
+                      >
+                         <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
 
                     {/* Target Fields Inner Grid (Child of Tree) */}
-                    {isSelected && isExpanded && (
+                    {isExpanded && (
                       <div className="ml-6 pl-4 border-l border-slate-100 mt-1 mb-3">
                         <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden w-full">
                           <div className="flex items-center gap-3 px-4 py-2 bg-[#f8f9fa] border-b border-slate-200">
@@ -382,6 +468,7 @@ export function AdvancedDataMapping({ onClose }: { onClose?: () => void }) {
                                   <div className="flex-1 relative">
                                     <div className={`relative w-full border ${isMapped ? 'border-green-500/60 bg-green-50/50 ring-1 ring-green-500/20 shadow-[0_1px_2px_rgba(34,197,94,0.1)]' : 'border-slate-300 bg-slate-50 hover:bg-white'} rounded transition-all`}>
                                       <select
+                                        aria-label="Chọn trường nguồn"
                                         className={`w-full pl-3 pr-8 py-1.5 text-[11px] font-bold appearance-none focus:outline-none bg-transparent cursor-pointer z-10 relative ${isMapped ? 'text-green-800' : 'text-slate-400 font-medium'}`}
                                         value={currentMappedPath}
                                         onChange={(e) => updateMapping(table.instanceId, field.name, e.target.value)}
@@ -420,20 +507,15 @@ export function AdvancedDataMapping({ onClose }: { onClose?: () => void }) {
           </div>
         </div>
       </div>
+      </>
+      ) : (
+        <div className="flex-1 flex flex-col items-center justify-center text-slate-500 gap-4 mt-[-10vh]">
+          <Database className="w-16 h-16 text-slate-200 stroke-[1.5]" />
+          <p className="text-sm">Vui lòng nhập URL Endpoint và nhấn Send để kiểm tra dữ liệu, sau đó thực hiện cấu hình ánh xạ.</p>
+        </div>
+      )}
 
-      {/* FOOTER VIEW */}
-      <div className="px-6 py-4 bg-white border-t border-slate-200 shrink-0 flex justify-end">
-        <button
-          type="button"
-          onClick={() => {
-            alert('Cấu hình đã được lưu thành công!');
-            if (onClose) onClose();
-          }}
-          className="px-6 py-2 bg-slate-900 border border-slate-900 rounded-lg text-sm font-medium text-white hover:bg-slate-800 transition-colors shadow-sm"
-        >
-          Lưu cấu hình
-        </button>
-      </div>
+      {/* Removed FOOTER VIEW since this will be in a tab */}
 
       {/* GLOBAL STYLES FOR SCROLLBAR IN THIS COMPONENT */}
       <style dangerouslySetInnerHTML={{

@@ -73,21 +73,21 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
               <div className="space-y-4">
                 <div>
                   <label htmlFor="add-name" className="block text-sm text-slate-600 mb-1">T├¬n service <span className="text-red-500">*</span></label>
-                  <input id="add-name" title="T├¬n service" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="VD: API dß╗ïch vß╗Ñ dß╗» liß╗çu quß╗æc tß╗ïch" />
+                  <input aria-label="Input field" id="add-name" title="T├¬n service" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="VD: API dß╗ïch vß╗Ñ dß╗» liß╗çu quß╗æc tß╗ïch" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label htmlFor="add-unit" className="block text-sm text-slate-600 mb-1">T├¬n ─æ╞ín vß╗ï <span className="text-red-500">*</span></label>
-                    <input id="add-unit" title="T├¬n ─æ╞ín vß╗ï" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhß║¡p t├¬n ─æ╞ín vß╗ï" />
+                    <input aria-label="Input field" id="add-unit" title="T├¬n ─æ╞ín vß╗ï" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhß║¡p t├¬n ─æ╞ín vß╗ï" />
                   </div>
                   <div>
                     <label htmlFor="add-system" className="block text-sm text-slate-600 mb-1">Hß╗ç thß╗æng <span className="text-red-500">*</span></label>
-                    <input id="add-system" title="Hß╗ç thß╗æng" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhß║¡p t├¬n hß╗ç thß╗æng" />
+                    <input aria-label="Input field" id="add-system" title="Hß╗ç thß╗æng" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhß║¡p t├¬n hß╗ç thß╗æng" />
                   </div>
                 </div>
                 <div>
                   <label htmlFor="desc" className="block text-sm text-slate-600 mb-1">M├┤ tß║ú</label>
-                  <textarea id="desc" title="M├┤ tß║ú" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" rows={3} placeholder="M├┤ tß║ú chi tiß║┐t" />
+                  <textarea aria-label="Text input" id="desc" title="M├┤ tß║ú" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" rows={3} placeholder="M├┤ tß║ú chi tiß║┐t" />
                 </div>
                 <div>
                   <label className="block text-sm text-slate-600 mb-2">─É├¡nh k├¿m v─ân bß║ún</label>

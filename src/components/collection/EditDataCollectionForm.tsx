@@ -88,7 +88,7 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
                 {data.category === 'external' ? 'Cơ quan nguồn' : 'Cục/Vụ'} <span className="text-red-500">*</span>
               </label>
               {data.category === 'external' ? (
-                <select
+                <select aria-label="Select box"
                   required
                   value={formData.department}
                   onChange={(e) => setFormData({ ...formData, department: e.target.value })}
@@ -106,7 +106,7 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
                   <option value="Bộ Y tế">Bộ Y tế</option>
                 </select>
               ) : (
-                <select
+                <select aria-label="Select box"
                   required
                   value={formData.department}
                   onChange={(e) => setFormData({ ...formData, department: e.target.value })}
@@ -128,7 +128,7 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
               <label className="block text-sm text-slate-700 mb-2">
                 Loại dữ liệu <span className="text-red-500">*</span>
               </label>
-              <input
+              <input aria-label="Input field"
                 type="text"
                 required
                 value={formData.dataType}
@@ -144,7 +144,7 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
             <label className="block text-sm text-slate-700 mb-2">
               Tên dữ liệu <span className="text-red-500">*</span>
             </label>
-            <input
+            <input aria-label="Input field"
               type="text"
               required
               value={formData.dataName}
@@ -159,7 +159,7 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
             <label className="block text-sm text-slate-700 mb-2">
               Mô tả
             </label>
-            <textarea
+            <textarea aria-label="Text input"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Mô tả chi tiết về dữ liệu này"
@@ -174,7 +174,7 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
               <label className="block text-sm text-slate-700 mb-2">
                 Tần suất thu thập <span className="text-red-500">*</span>
               </label>
-              <select
+              <select aria-label="Select box"
                 required
                 value={formData.frequency}
                 onChange={(e) => setFormData({ ...formData, frequency: e.target.value })}
@@ -193,7 +193,7 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
               <label className="block text-sm text-slate-700 mb-2">
                 Định dạng <span className="text-red-500">*</span>
               </label>
-              <select
+              <select aria-label="Select box"
                 required
                 value={formData.format}
                 onChange={(e) => setFormData({ ...formData, format: e.target.value })}
@@ -213,7 +213,7 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
               <label className="block text-sm text-slate-700 mb-2">
                 Mức độ ưu tiên <span className="text-red-500">*</span>
               </label>
-              <select
+              <select aria-label="Select box"
                 required
                 value={formData.priority}
                 onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
@@ -230,7 +230,7 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
               <label className="block text-sm text-slate-700 mb-2">
                 Trạng thái <span className="text-red-500">*</span>
               </label>
-              <select
+              <select aria-label="Select box"
                 required
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
@@ -250,7 +250,7 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
                 <label className="block text-sm text-slate-700 mb-2">
                   Phương thức kết nối <span className="text-red-500">*</span>
                 </label>
-                <select
+                <select aria-label="Select box"
                   required
                   value={formData.connectionMethod}
                   onChange={(e) => setFormData({ ...formData, connectionMethod: e.target.value })}
@@ -266,7 +266,7 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
                 <label className="block text-sm text-slate-700 mb-2">
                   Endpoint <span className="text-red-500">*</span>
                 </label>
-                <input
+                <input aria-label="Input field"
                   type="text"
                   required
                   value={formData.endpoint}
@@ -281,7 +281,7 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
                 <label className="block text-sm text-slate-700 mb-2">
                   Phương thức xác thực <span className="text-red-500">*</span>
                 </label>
-                <select
+                <select aria-label="Select box"
                   required
                   value={formData.authMethod}
                   onChange={(e) => setFormData({ ...formData, authMethod: e.target.value })}
@@ -296,7 +296,7 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
                 <label className="block text-sm text-slate-700 mb-2">
                   API Key
                 </label>
-                <input
+                <input aria-label="Input field"
                   type="text"
                   value={formData.apiKey}
                   onChange={(e) => setFormData({ ...formData, apiKey: e.target.value })}
@@ -310,7 +310,7 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
                 <label className="block text-sm text-slate-700 mb-2">
                   Username
                 </label>
-                <input
+                <input aria-label="Input field"
                   type="text"
                   value={formData.username}
                   onChange={(e) => setFormData({ ...formData, username: e.target.value })}
@@ -322,7 +322,7 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
                 <label className="block text-sm text-slate-700 mb-2">
                   Password
                 </label>
-                <input
+                <input aria-label="Input field"
                   type="password"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -336,7 +336,7 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
                 <label className="block text-sm text-slate-700 mb-2">
                   Port
                 </label>
-                <input
+                <input aria-label="Input field"
                   type="text"
                   value={formData.port}
                   onChange={(e) => setFormData({ ...formData, port: e.target.value })}
@@ -348,7 +348,7 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
                 <label className="block text-sm text-slate-700 mb-2">
                   Ghi chú kỹ thuật
                 </label>
-                <textarea
+                <textarea aria-label="Text input"
                   value={formData.technicalNote}
                   onChange={(e) => setFormData({ ...formData, technicalNote: e.target.value })}
                   placeholder="Nhập ghi chú kỹ thuật"

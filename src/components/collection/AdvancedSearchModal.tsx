@@ -58,7 +58,7 @@ export function AdvancedSearchModal({ onClose, onSearch, currentFilters }: Advan
             {/* Cơ quan */}
             <div>
               <label className="block text-sm text-slate-700 mb-2">Cơ quan</label>
-              <select
+              <select aria-label="Select box"
                 value={filters.department}
                 onChange={(e) => setFilters({ ...filters, department: e.target.value })}
                 className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -88,7 +88,7 @@ export function AdvancedSearchModal({ onClose, onSearch, currentFilters }: Advan
             {/* Loại dữ liệu */}
             <div>
               <label className="block text-sm text-slate-700 mb-2">Loại dữ liệu</label>
-              <select
+              <select aria-label="Select box"
                 value={filters.dataType}
                 onChange={(e) => setFilters({ ...filters, dataType: e.target.value })}
                 className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -116,7 +116,7 @@ export function AdvancedSearchModal({ onClose, onSearch, currentFilters }: Advan
             {/* Tần suất */}
             <div>
               <label className="block text-sm text-slate-700 mb-2">Tần suất</label>
-              <select
+              <select aria-label="Select box"
                 value={filters.frequency}
                 onChange={(e) => setFilters({ ...filters, frequency: e.target.value })}
                 className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -133,7 +133,7 @@ export function AdvancedSearchModal({ onClose, onSearch, currentFilters }: Advan
             {/* Định dạng */}
             <div>
               <label className="block text-sm text-slate-700 mb-2">Định dạng</label>
-              <select
+              <select aria-label="Select box"
                 value={filters.format}
                 onChange={(e) => setFilters({ ...filters, format: e.target.value })}
                 className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -149,7 +149,7 @@ export function AdvancedSearchModal({ onClose, onSearch, currentFilters }: Advan
             {/* Trạng thái */}
             <div>
               <label className="block text-sm text-slate-700 mb-2">Trạng thái</label>
-              <select
+              <select aria-label="Select box"
                 value={filters.status}
                 onChange={(e) => setFilters({ ...filters, status: e.target.value })}
                 className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -164,7 +164,7 @@ export function AdvancedSearchModal({ onClose, onSearch, currentFilters }: Advan
             {/* Mức độ ưu tiên */}
             <div>
               <label className="block text-sm text-slate-700 mb-2">Mức độ ưu tiên</label>
-              <select
+              <select aria-label="Select box"
                 value={filters.priority}
                 onChange={(e) => setFilters({ ...filters, priority: e.target.value })}
                 className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -183,7 +183,7 @@ export function AdvancedSearchModal({ onClose, onSearch, currentFilters }: Advan
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs text-slate-500 mb-1">Từ ngày</label>
-                <input
+                <input aria-label="Input field"
                   type="date"
                   value={filters.dateFrom}
                   onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}
@@ -192,7 +192,7 @@ export function AdvancedSearchModal({ onClose, onSearch, currentFilters }: Advan
               </div>
               <div>
                 <label className="block text-xs text-slate-500 mb-1">Đến ngày</label>
-                <input
+                <input aria-label="Input field"
                   type="date"
                   value={filters.dateTo}
                   onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}

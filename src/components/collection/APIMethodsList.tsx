@@ -298,7 +298,7 @@ export function APIMethodsList({ onAddNew }: APIMethodsListProps) {
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-          <input
+          <input aria-label="Input field"
             type="text"
             placeholder="Tìm kiếm theo tên dữ liệu, cục..."
             value={searchData}
@@ -309,7 +309,7 @@ export function APIMethodsList({ onAddNew }: APIMethodsListProps) {
 
         {/* Filters */}
         <div className="flex gap-3">
-          <select
+          <select aria-label="Select box"
             title="Bộ lọc cơ quan"
             value={departmentFilter}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setDepartmentFilter(e.target.value)}

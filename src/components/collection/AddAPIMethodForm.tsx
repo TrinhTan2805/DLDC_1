@@ -45,7 +45,7 @@ export function AddAPIMethodForm({ onBack }: AddAPIMethodFormProps) {
                 <label className="block text-sm text-slate-700 mb-2">
                   Tên phương thức <span className="text-red-500">*</span>
                 </label>
-                <input
+                <input aria-label="Input field"
                   type="text"
                   placeholder="Nhập tên phương thức"
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -55,7 +55,7 @@ export function AddAPIMethodForm({ onBack }: AddAPIMethodFormProps) {
                 <label className="block text-sm text-slate-700 mb-2">
                   Bộ ban ngành <span className="text-red-500">*</span>
                 </label>
-                <input
+                <input aria-label="Input field"
                   type="text"
                   placeholder="Nhập tên bộ ban ngành"
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -68,7 +68,7 @@ export function AddAPIMethodForm({ onBack }: AddAPIMethodFormProps) {
                 <label className="block text-sm text-slate-700 mb-2">
                   Cơ sở dữ liệu <span className="text-red-500">*</span>
                 </label>
-                <input
+                <input aria-label="Input field"
                   type="text"
                   placeholder="Nhập tên cơ sở dữ liệu"
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -78,7 +78,7 @@ export function AddAPIMethodForm({ onBack }: AddAPIMethodFormProps) {
                 <label className="block text-sm text-slate-700 mb-2">
                   Tần suất thu thập <span className="text-red-500">*</span>
                 </label>
-                <input
+                <input aria-label="Input field"
                   type="text"
                   placeholder="Ví dụ: Hằng ngày, Hằng tuần, Hằng tháng"
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -88,7 +88,7 @@ export function AddAPIMethodForm({ onBack }: AddAPIMethodFormProps) {
 
             <div className="mt-4">
               <label className="block text-sm text-slate-700 mb-2">Mô tả</label>
-              <textarea
+              <textarea aria-label="Text input"
                 rows={3}
                 placeholder="Nhập mô tả chi tiết về phương thức thu thập dữ liệu"
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -133,7 +133,7 @@ export function AddAPIMethodForm({ onBack }: AddAPIMethodFormProps) {
                 <label className="block text-sm text-slate-700 mb-2">
                   API Endpoint <span className="text-red-500">*</span>
                 </label>
-                <input
+                <input aria-label="Input field"
                   type="text"
                   placeholder="https://api.example.gov.vn/v1/data"
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -144,7 +144,7 @@ export function AddAPIMethodForm({ onBack }: AddAPIMethodFormProps) {
                 <label className="block text-sm text-slate-700 mb-2">
                   Phương thức HTTP <span className="text-red-500">*</span>
                 </label>
-                <select className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select aria-label="Select box" className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                   <option value="GET">GET</option>
                   <option value="POST">POST</option>
                   <option value="PUT">PUT</option>
@@ -168,12 +168,12 @@ export function AddAPIMethodForm({ onBack }: AddAPIMethodFormProps) {
                 <div className="space-y-2">
                   {headers.map((header, index) => (
                     <div key={index} className="flex gap-2">
-                      <input
+                      <input aria-label="Input field"
                         type="text"
                         placeholder="Key"
                         className="flex-1 px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
-                      <input
+                      <input aria-label="Input field"
                         type="text"
                         placeholder="Value"
                         className="flex-1 px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -208,12 +208,12 @@ export function AddAPIMethodForm({ onBack }: AddAPIMethodFormProps) {
                 <div className="space-y-2">
                   {parameters.map((param, index) => (
                     <div key={index} className="flex gap-2">
-                      <input
+                      <input aria-label="Input field"
                         type="text"
                         placeholder="Key"
                         className="flex-1 px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
-                      <input
+                      <input aria-label="Input field"
                         type="text"
                         placeholder="Value"
                         className="flex-1 px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -242,7 +242,7 @@ export function AddAPIMethodForm({ onBack }: AddAPIMethodFormProps) {
                 <label className="block text-sm text-slate-700 mb-2">
                   Phương thức xác thực <span className="text-red-500">*</span>
                 </label>
-                <select className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select aria-label="Select box" className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                   <option value="">Không xác thực</option>
                   <option value="api-key">API Key</option>
                   <option value="bearer">Bearer Token</option>
@@ -253,7 +253,7 @@ export function AddAPIMethodForm({ onBack }: AddAPIMethodFormProps) {
 
               <div>
                 <label className="block text-sm text-slate-700 mb-2">API Key / Token</label>
-                <input
+                <input aria-label="Input field"
                   type="password"
                   placeholder="Nhập API key hoặc token"
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -268,7 +268,7 @@ export function AddAPIMethodForm({ onBack }: AddAPIMethodFormProps) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm text-slate-700 mb-2">Timeout (ms)</label>
-                <input
+                <input aria-label="Input field"
                   type="number"
                   defaultValue="30000"
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -277,7 +277,7 @@ export function AddAPIMethodForm({ onBack }: AddAPIMethodFormProps) {
               </div>
               <div>
                 <label className="block text-sm text-slate-700 mb-2">Số lần thử lại</label>
-                <input
+                <input aria-label="Input field"
                   type="number"
                   defaultValue="3"
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -286,7 +286,7 @@ export function AddAPIMethodForm({ onBack }: AddAPIMethodFormProps) {
               </div>
               <div>
                 <label className="block text-sm text-slate-700 mb-2">Delay giữa các lần thử (ms)</label>
-                <input
+                <input aria-label="Input field"
                   type="number"
                   defaultValue="5000"
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"

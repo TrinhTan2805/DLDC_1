@@ -112,7 +112,7 @@ export function SendDataForm() {
           <div className="space-y-4">
             <div>
               <label className="block text-gray-700 mb-2">Nguồn dữ liệu</label>
-              <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+              <select aria-label="Select box" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
                 <option value="">Chọn nguồn dữ liệu</option>
                 <option value="hotich">Hộ tịch điện tử</option>
                 <option value="quoctich">Hộ sơ quốc tịch</option>
@@ -123,7 +123,7 @@ export function SendDataForm() {
 
             <div>
               <label className="block text-gray-700 mb-2">API Endpoint</label>
-              <input
+              <input aria-label="Input field"
                 type="text"
                 value="https://api.moj.gov.vn/kdldc/v1/collect"
                 readOnly
@@ -133,7 +133,7 @@ export function SendDataForm() {
 
             <div>
               <label className="block text-gray-700 mb-2">API Key</label>
-              <input
+              <input aria-label="Input field"
                 type="password"
                 placeholder="Nhập API Key của nguồn dữ liệu"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
@@ -142,7 +142,7 @@ export function SendDataForm() {
 
             <div>
               <label className="block text-gray-700 mb-2">Định dạng dữ liệu</label>
-              <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+              <select aria-label="Select box" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
                 <option value="json">JSON</option>
                 <option value="xml">XML</option>
               </select>
@@ -150,7 +150,7 @@ export function SendDataForm() {
 
             <div>
               <label className="block text-gray-700 mb-2">Dữ liệu gửi (JSON/XML)</label>
-              <textarea
+              <textarea aria-label="Text input"
                 rows={10}
                 placeholder='{"records": [{"cccd": "001234567890", "ho_ten": "Nguyen Van A", ...}]}'
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 font-mono text-sm"
@@ -180,7 +180,7 @@ export function SendDataForm() {
           <div className="space-y-4">
             <div>
               <label className="block text-gray-700 mb-2">Nguồn dữ liệu</label>
-              <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+              <select aria-label="Select box" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
                 <option value="">Chọn nguồn dữ liệu</option>
                 <option value="hotich">Hộ tịch điện tử</option>
                 <option value="quoctich">Hộ sơ quốc tịch</option>
@@ -191,7 +191,7 @@ export function SendDataForm() {
 
             <div>
               <label className="block text-gray-700 mb-2">Loại file</label>
-              <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+              <select aria-label="Select box" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
                 <option value="json">JSON (.json)</option>
                 <option value="xml">XML (.xml)</option>
                 <option value="csv">CSV (.csv)</option>
@@ -225,7 +225,7 @@ export function SendDataForm() {
           <div className="space-y-4">
             <div>
               <label className="block text-gray-700 mb-2">Nguồn dữ liệu</label>
-              <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+              <select aria-label="Select box" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
                 <option value="">Chọn nguồn dữ liệu</option>
                 <option value="hotich">Hộ tịch điện tử</option>
                 <option value="quoctich">Hộ sơ quốc tịch</option>
@@ -236,7 +236,7 @@ export function SendDataForm() {
 
             <div>
               <label className="block text-gray-700 mb-2">SFTP Server</label>
-              <input
+              <input aria-label="Input field"
                 type="text"
                 placeholder="sftp.example.moj.gov.vn"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
@@ -246,7 +246,7 @@ export function SendDataForm() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-gray-700 mb-2">Port</label>
-                <input
+                <input aria-label="Input field"
                   type="number"
                   placeholder="22"
                   defaultValue="22"
@@ -255,7 +255,7 @@ export function SendDataForm() {
               </div>
               <div>
                 <label className="block text-gray-700 mb-2">Username</label>
-                <input
+                <input aria-label="Input field"
                   type="text"
                   placeholder="Nhập username SFTP"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
@@ -265,7 +265,7 @@ export function SendDataForm() {
 
             <div>
               <label className="block text-gray-700 mb-2">Password</label>
-              <input
+              <input aria-label="Input field"
                 type="password"
                 placeholder="Nhập password SFTP"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
@@ -274,7 +274,7 @@ export function SendDataForm() {
 
             <div>
               <label className="block text-gray-700 mb-2">Thư mục đích</label>
-              <input
+              <input aria-label="Input field"
                 type="text"
                 placeholder="/upload/data"
                 defaultValue="/upload/data"
@@ -284,7 +284,7 @@ export function SendDataForm() {
 
             <div>
               <label className="block text-gray-700 mb-2">Tên file</label>
-              <input
+              <input aria-label="Input field"
                 type="text"
                 placeholder="data_YYYYMMDD.json"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"

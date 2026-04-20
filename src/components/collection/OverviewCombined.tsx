@@ -337,7 +337,7 @@ export function OverviewCombined() {
         <div className="flex gap-4">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-            <input
+            <input aria-label="Input field"
               type="text"
               placeholder="Tìm kiếm API theo tên hoặc endpoint..."
               value={searchAPI}
@@ -345,7 +345,7 @@ export function OverviewCombined() {
               className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          <select
+          <select aria-label="Select box"
             title="Bộ lọc trạng thái"
             value={filterStatus}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilterStatus(e.target.value)}
