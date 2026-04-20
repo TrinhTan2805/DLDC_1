@@ -53,32 +53,7 @@ export function ViewServiceModal({ isOpen, onClose, service }: ViewServiceModalP
           <div className="text-sm text-slate-500">Cập nhật: 10/04/2025 09:14</div>
         </div>
 
-        {/* KPI CARDS */}
-        <div className="px-8 pb-6 grid grid-cols-4 gap-4">
-          <div className="bg-white border text-left border-slate-200 p-4 rounded-xl shadow-sm">
-            <p className="text-sm text-slate-500 mb-2">Lần chạy gần nhất</p>
-            <p className="text-2xl font-bold text-slate-900">10/04/2025</p>
-            <p className="text-sm text-slate-500 mt-1">09:00 — <span className="text-slate-700">Thành công</span></p>
-          </div>
-          <div className="bg-white border text-left border-slate-200 p-4 rounded-xl shadow-sm">
-            <p className="text-sm text-slate-500 mb-2">Tổng bản ghi đã đồng bộ</p>
-            <p className="text-2xl font-bold text-emerald-600">1,248,302</p>
-            <p className="text-sm text-slate-500 mt-1">+4,218 trong 24h qua</p>
-          </div>
-          <div className="bg-white border text-left border-slate-200 p-4 rounded-xl shadow-sm">
-            <p className="text-sm text-slate-500 mb-2">Tỷ lệ thành công (30 ngày)</p>
-            <p className="text-2xl font-bold text-emerald-600 mb-2">98.6%</p>
-            <div className="w-full bg-slate-100 rounded-full h-1.5 relative overflow-hidden">
-               <div className="bg-emerald-600 h-1.5 absolute left-0 top-0" style={{ width: '98.6%' }}></div>
-               <div className="bg-red-500 h-1.5 absolute right-0 top-0" style={{ width: '1.4%' }}></div>
-            </div>
-          </div>
-          <div className="bg-white border text-left border-slate-200 p-4 rounded-xl shadow-sm">
-             <p className="text-sm text-slate-500 mb-2">Lần lỗi gần nhất</p>
-             <p className="text-2xl font-bold text-slate-900">03/04/2025</p>
-             <p className="text-sm text-red-600 mt-1">D-04 — Timeout đọc dữ liệu</p>
-          </div>
-        </div>
+
 
         {/* TABS HEADER */}
         <div className="flex border-b border-gray-200 px-8">
