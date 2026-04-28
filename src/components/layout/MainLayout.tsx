@@ -7,6 +7,7 @@ import { DataCollectionPage } from '../pages/DataCollectionPage';
 import { ExternalDataPage } from '../pages/collection/ExternalDataPage';
 import { InternalDataPage } from '../pages/collection/InternalDataPage';
 import { CollectionSetupPage } from '../pages/collection/CollectionSetupPage';
+import { SourceSystemManagementPage } from '../pages/collection/SourceSystemManagementPage';
 import { DataProcessingPage } from '../pages/DataProcessingPage';
 import { ProcessedDataPage } from '../pages/processing/ProcessedDataPage';
 import { CategoryManagementPage } from '../pages/CategoryManagementPage';
@@ -202,6 +203,10 @@ const pageConfig: Record<string, { title: string; description: string }> = {
     title: 'Thiết lập thu thập',
     description: 'Thiết lập thu thập CSDL trong và ngoài ngành'
   },
+  'collection-source-system': {
+    title: 'Quản lý hệ thống nguồn',
+    description: 'Quản lý danh sách và thông tin các hệ thống nguồn cung cấp dữ liệu'
+  },
   'collection-reconciliation-setup': {
     title: 'Thiết lập đối soát',
     description: 'Thiết lập các quy tắc và cấu hình đối soát dữ liệu thu thập'
@@ -334,6 +339,7 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'collection-external' && <ExternalDataPage />}
             {currentPage === 'collection-internal' && <InternalDataPage />}
             {currentPage === 'collection-setup' && <CollectionSetupPage onNavigate={setCurrentPage} />}
+            {currentPage === 'collection-source-system' && <SourceSystemManagementPage />}
             {currentPage === 'collection-reconciliation' && <ReconciliationSetupPage />}
             {currentPage === 'collection-reconciliation-setup' && <ReconciliationSetupPage />}
             {currentPage === 'collection-reconciliation-management' && <DataReconciliationPage />}
@@ -670,6 +676,7 @@ const getBreadcrumbPath = (pageId: string): string[] => {
     // Collection
     'collection-dashboard': ['Quản lý thu thập', 'Dashboard'],
     'collection-setup': ['Quản lý thu thập', 'Thiết lập thu thập'],
+    'collection-source-system': ['Quản lý thu thập', 'Quản lý hệ thống nguồn'],
     'collection-external': ['Quản lý thu thập', 'CSDL Trong ngành'],
     'data-info': ['Quản lý thu thập', 'CSDL Trong ngành'],
     'data-info-civil-registry': ['Quản lý thu thập', 'CSDL Trong ngành', 'CSDL Hộ tịch điện tử'],

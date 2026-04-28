@@ -6,11 +6,33 @@ import {
 } from 'lucide-react';
 import { DataCollectionConfigSection } from './DataCollectionConfigSection';
 import { ConnectionConfigSection } from './ConnectionConfigSection';
-import { ContactInfoSection } from './ContactInfoSection';
 import { DataDetailModal } from '../../DataDetailModal';
 import { ConfirmModal } from '../../common/ConfirmModal';
 import { BaseModal } from '../../common/BaseModal';
-import { AdvancedDataMapping } from './AdvancedDataMapping';
+import { StructureLoadingConfig } from './StructureLoadingConfig';
+import { initialSourceSystems } from './mockSourceSystems';
+
+const ConnectionSuccessModal = ({ isOpen, onClose, onContinue }: { isOpen: boolean, onClose: () => void, onContinue: () => void }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-[450px] overflow-hidden flex flex-col relative">
+        <button onClick={onClose} aria-label="Đóng" className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 transition-colors z-10"><X className="w-4 h-4"/></button>
+        <div className="p-6 pb-4 flex flex-col items-center">
+          <div className="w-12 h-12 bg-green-50 text-green-600 rounded-full flex items-center justify-center mb-3">
+            <CheckCircle className="w-6 h-6" strokeWidth={2.5} />
+          </div>
+          <h3 className="text-base font-bold text-slate-900 mb-1">Kết nối thành công</h3>
+          <p className="text-slate-500 text-[13px] mb-4 text-center px-4 leading-relaxed">Kết nối thành công, vui lòng thực hiện Nạp cấu trúc.</p>
+        </div>
+        <div className="px-5 py-3 flex justify-center gap-3 bg-slate-50 border-t border-slate-100">
+          <button onClick={onClose} className="px-6 py-2 bg-white border border-slate-300 text-slate-700 text-xs rounded-lg font-bold transition-colors shadow-sm hover:bg-slate-50">Đóng</button>
+          <button onClick={onContinue} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg font-bold transition-colors shadow-sm">Tiếp tục</button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const ConnectionErrorModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
   if (!isOpen) return null;
@@ -113,19 +135,15 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
 
   const [activeTab, setActiveTab] = useState<TabType>('general');
   const [dataClassification, setDataClassification] = useState('');
-  const [unitName, setUnitName] = useState('');
   
-  // Combobox State
-  const [showDonViDropdown, setShowDonViDropdown] = useState(false);
-  const [donViList, setDonViList] = useState([
-    { id: '1', name: 'Tòa án nhân dân tối cao', classification: 'Ngoài ngành' },
-    { id: '2', name: 'Cục Thống kê Trung ương', classification: 'Ngoài ngành' },
-    { id: '3', name: 'Cục Hành chính tư pháp', classification: 'Trong ngành' },
-  ]);
-  const [showCreateDonViModal, setShowCreateDonViModal] = useState(false);
-  const [newDonViClassification, setNewDonViClassification] = useState('Trong ngành');
+  // Source System State
+  const [showSourceDropdown, setShowSourceDropdown] = useState(false);
+  const [sourceSystemName, setSourceSystemName] = useState('');
 
-  const filteredDonVi = donViList.filter(dv => dv.name.toLowerCase().includes(unitName.toLowerCase()));
+  const filteredSourceSystems = initialSourceSystems.filter(ss => 
+    ss.systemName.toLowerCase().includes(sourceSystemName.toLowerCase()) ||
+    ss.unitName.toLowerCase().includes(sourceSystemName.toLowerCase())
+  );
 
   const SAMPLE_FIELDS = [
     'ma_ho_so', 'so_dang_ky', 'so_quyen', 'trang_so',
@@ -148,6 +166,7 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
 
   const [showConnError, setShowConnError] = useState(false);
   const [showDataError, setShowDataError] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showMapping, setShowMapping] = useState(false);
 
   const resetTestState = () => {
@@ -169,15 +188,14 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
           setShowDataError(true);
         } else {
           setTestState('success');
-          setActiveTab('mapping');
+          setShowSuccessModal(true);
         }
       }, 1500);
     }, 1500);
   };
 
-  // Lấy giá trị nguồn thu thập dựa vào đơn vị đang được chọn
-  const selectedUnit = donViList.find(dv => dv.name === unitName);
-  const currentClassification = selectedUnit?.classification || '';
+  const selectedSource = initialSourceSystems.find(ss => ss.systemName === sourceSystemName);
+  const currentClassification = selectedSource?.sourceType || '';
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -188,9 +206,8 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
 
   const tabs = [
     { id: 'general' as TabType, label: 'Thông tin chung', icon: <FileText className="w-4 h-4" /> },
-    { id: 'contact' as TabType, label: 'Thông tin đơn vị cung cấp', icon: <User className="w-4 h-4" /> },
     { id: 'connection' as TabType, label: 'Cấu hình kết nối', icon: <Plug className="w-4 h-4" /> },
-    { id: 'mapping' as TabType, label: 'Cấu hình ánh xạ', icon: <LayoutTemplate className="w-4 h-4" /> },
+    { id: 'mapping' as TabType, label: 'Nạp cấu trúc', icon: <LayoutTemplate className="w-4 h-4" /> },
     { id: 'collection' as TabType, label: 'Cấu hình thu thập', icon: <Settings className="w-4 h-4" /> },
   ];
 
@@ -224,7 +241,7 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto">
           <div className="px-6 py-4">
             {activeTab === 'general' && (
               <div className="space-y-4">
@@ -233,75 +250,48 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
                   <input aria-label="Input field" id="add-name" title="Tên service" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="VD: API dịch vụ dữ liệu quốc tịch" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="relative">
-                    <label htmlFor="add-unit" className="block text-sm text-slate-600 mb-1">Tên đơn vị <span className="text-red-500">*</span></label>
+                  <div className="col-span-2 relative">
+                    <label htmlFor="add-source-system" className="block text-sm text-slate-600 mb-1">Tên hệ thống nguồn <span className="text-red-500">*</span></label>
                     <input aria-label="Input field" 
-                      id="add-unit" 
-                      title="Tên đơn vị" 
+                      id="add-source-system" 
+                      title="Tên hệ thống nguồn" 
                       type="text" 
-                      value={unitName} 
+                      value={sourceSystemName} 
                       onChange={(e) => {
-                        setUnitName(e.target.value);
-                        setShowDonViDropdown(true);
-                        // Default to something if needed, or clear it
+                        setSourceSystemName(e.target.value);
+                        setShowSourceDropdown(true);
                       }} 
-                      onFocus={() => setShowDonViDropdown(true)}
-                      onBlur={() => setTimeout(() => setShowDonViDropdown(false), 200)}
+                      onFocus={() => setShowSourceDropdown(true)}
+                      onBlur={() => setTimeout(() => setShowSourceDropdown(false), 200)}
                       className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                      placeholder="Tìm kiếm hoặc nhập tên đơn vị..." 
+                      placeholder="Tìm kiếm hoặc chọn hệ thống nguồn..." 
                     />
                     
-                    {showDonViDropdown && (
+                    {showSourceDropdown && (
                       <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                        {filteredDonVi.map(dv => (
+                        {filteredSourceSystems.map(ss => (
                           <div
-                            key={dv.id}
+                            key={ss.id}
                             className="px-4 py-2 hover:bg-slate-50 cursor-pointer text-sm flex items-center justify-between"
                             onMouseDown={(e) => {
                               e.preventDefault(); 
-                              setUnitName(dv.name);
-                              setShowDonViDropdown(false);
+                              setSourceSystemName(ss.systemName);
+                              setShowSourceDropdown(false);
                             }}
                           >
-                            <span className="font-medium text-slate-700">{dv.name}</span>
-                            <span className="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">{dv.classification}</span>
+                            <div className="flex flex-col">
+                              <span className="font-medium text-slate-700">{ss.systemName}</span>
+                              <span className="text-xs text-slate-500">{ss.unitName}</span>
+                            </div>
+                            <span className="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">{ss.sourceType}</span>
                           </div>
                         ))}
-                        {unitName && filteredDonVi.length === 0 && (
-                          <div 
-                            className="px-4 py-3 hover:bg-blue-50 cursor-pointer text-sm text-blue-600 font-medium flex items-center gap-2 border-t border-slate-100"
-                            onMouseDown={(e) => {
-                              e.preventDefault(); 
-                              setShowDonViDropdown(false);
-                              setShowCreateDonViModal(true);
-                            }}
-                          >
-                            <Plus className="w-4 h-4" />
-                            Thêm mới đơn vị "{unitName}"
-                          </div>
-                        )}
                       </div>
                     )}
                   </div>
-                  <div>
-                    <label htmlFor="add-system" className="block text-sm text-slate-600 mb-1">Hệ thống <span className="text-red-500">*</span></label>
-                    <input aria-label="Input field" id="add-system" title="Hệ thống" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập tên hệ thống" />
-                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label htmlFor="add-source" className="block text-sm text-slate-600 mb-1">Nguồn thu thập</label>
-                    <input aria-label="Input field" 
-                      id="add-source" 
-                      title="Nguồn thu thập" 
-                      type="text"
-                      readOnly
-                      value={currentClassification === 'Trong ngành' ? 'Hệ thống trong ngành' : currentClassification === 'Ngoài ngành' ? 'Hệ thống ngoài ngành' : ''}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-slate-50 text-slate-700 focus:outline-none" 
-                      placeholder="Tự động hiển thị theo Đơn vị" 
-                    />
-                  </div>
-                  <div>
+                  <div className="col-span-2">
                     <label htmlFor="add-security" className="block text-sm text-slate-600 mb-1">Mức độ bảo mật dữ liệu</label>
                     <select aria-label="Select box" id="add-security" title="Mức độ bảo mật dữ liệu" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
                       <option value="">Chọn mức độ bảo mật</option>
@@ -327,106 +317,53 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
                 </div>
               </div>
             )}
-            {activeTab === 'contact' && <ContactInfoSection unitName={unitName} onUnitNameChange={setUnitName} />}
             {activeTab === 'connection' && <ConnectionConfigSection dataClassification={dataClassification} resetTestState={resetTestState} testState={testState} handleTestConnection={handleTestConnection} mockMode={mockMode} setMockMode={setMockMode} />}
             {activeTab === 'mapping' && (
               <div className="h-[600px] -mx-6 -my-4">
-                <AdvancedDataMapping />
+                <StructureLoadingConfig />
               </div>
             )}
             {activeTab === 'collection' && <DataCollectionConfigSection resetTestState={resetTestState} />}
           </div>
-          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
-            <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50">Hủy</button>
-            <button type="submit" className="px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700">Lưu lại</button>
-          </div>
-        </form>
-      </div>
-    </div>
-    
-    {/* Modal Thêm mới đơn vị inline in ServiceModals */}
-    {showCreateDonViModal && (
-      <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-[60] animate-in fade-in duration-200">
-        <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 border border-slate-200">
-          <div className="flex items-center justify-between mb-5 pb-4 border-b border-slate-100">
-            <h3 className="text-lg font-bold text-slate-900">Thêm mới Đơn vị</h3>
-            <button type="button" aria-label="Đóng" onClick={() => setShowCreateDonViModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-          
-          <div className="space-y-5">
+          <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Tên đơn vị <span className="text-red-500">*</span></label>
-              <input aria-label="Input field"
-                type="text"
-                value={unitName}
-                onChange={(e) => setUnitName(e.target.value)}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg bg-white text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+              {activeTab === 'connection' && (
+                <button type="button" onClick={handleTestConnection} style={{ backgroundColor: '#0dcaf0', color: '#fff' }} className="px-4 py-2 text-sm font-medium rounded-lg hover:opacity-90 transition-colors">Kiểm tra kết nối</button>
+              )}
             </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Nguồn thu thập <span className="text-red-500">*</span></label>
-              <div className="flex gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
-                <label className="flex items-center gap-2 cursor-pointer relative">
-                  <input
-                    type="radio"
-                    name="newModalClassification"
-                    value="Trong ngành"
-                    checked={newDonViClassification === 'Trong ngành'}
-                    onChange={() => setNewDonViClassification('Trong ngành')}
-                    className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-slate-300"
-                  />
-                  <span className="text-sm font-medium text-slate-700">Trong ngành</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer relative">
-                  <input
-                    type="radio"
-                    name="newModalClassification"
-                    value="Ngoài ngành"
-                    checked={newDonViClassification === 'Ngoài ngành'}
-                    onChange={() => setNewDonViClassification('Ngoài ngành')}
-                    className="w-4 h-4 text-orange-600 focus:ring-orange-500 border-slate-300"
-                  />
-                  <span className="text-sm font-medium text-slate-700">Ngoài ngành</span>
-                </label>
-              </div>
+            <div className="flex items-center gap-3">
+              <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors">Hủy</button>
+              {activeTab !== 'collection' ? (
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    const currentIndex = tabs.findIndex(t => t.id === activeTab);
+                    if (currentIndex < tabs.length - 1) setActiveTab(tabs[currentIndex + 1].id);
+                  }} 
+                  className="px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Tiếp tục
+                </button>
+              ) : (
+                <button type="button" onClick={handleSubmit} className="px-6 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">Thêm</button>
+              )}
             </div>
-          </div>
-          
-          <div className="flex justify-end gap-3 mt-8 pt-4 border-t border-slate-100">
-            <button
-              type="button"
-              onClick={() => setShowCreateDonViModal(false)}
-              className="px-4 py-2 text-slate-700 hover:bg-slate-100 border border-slate-300 rounded-lg text-sm font-medium transition-colors"
-            >
-              Hủy bỏ
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                if (!unitName.trim()) {
-                  alert('Vui lòng nhập Tên đơn vị');
-                  return;
-                }
-                const newDv = { id: Date.now().toString(), name: unitName, classification: newDonViClassification };
-                setDonViList([...donViList, newDv]);
-                setUnitName(newDv.name);
-                setShowCreateDonViModal(false);
-              }}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
-            >
-              Xác nhận lưu
-            </button>
           </div>
         </div>
       </div>
-    )}
+    </div>
     
     {/* Modals cho các trạng thái Test Kết nối */}
     <ConnectionErrorModal isOpen={showConnError} onClose={() => setShowConnError(false)} />
     <DataErrorModal isOpen={showDataError} onClose={() => setShowDataError(false)} />
-    <DataMappingModal isOpen={showMapping} onClose={() => setShowMapping(false)} />
+    <ConnectionSuccessModal 
+      isOpen={showSuccessModal} 
+      onClose={() => setShowSuccessModal(false)} 
+      onContinue={() => {
+        setShowSuccessModal(false);
+        setActiveTab('mapping');
+      }} 
+    />
     </>
   );
 }
@@ -437,7 +374,14 @@ export function EditServiceModal({ isOpen, onClose, service }: ServiceModalProps
 
   const [activeTab, setActiveTab] = useState<TabType>('general');
   const [dataClassification, setDataClassification] = useState('');
-  const [unitName, setUnitName] = useState(service.managingUnit || '');
+  
+  const [showSourceDropdown, setShowSourceDropdown] = useState(false);
+  const [sourceSystemName, setSourceSystemName] = useState(service.system || 'Hệ thống Quản lý Hộ tịch điện tử');
+
+  const filteredSourceSystems = initialSourceSystems.filter(ss => 
+    ss.systemName.toLowerCase().includes(sourceSystemName.toLowerCase()) ||
+    ss.unitName.toLowerCase().includes(sourceSystemName.toLowerCase())
+  );
 
   const SAMPLE_FIELDS = [
     'ma_ho_so', 'so_dang_ky', 'so_quyen', 'trang_so',
@@ -460,6 +404,7 @@ export function EditServiceModal({ isOpen, onClose, service }: ServiceModalProps
 
   const [showConnError, setShowConnError] = useState(false);
   const [showDataError, setShowDataError] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showMapping, setShowMapping] = useState(false);
 
   const resetTestState = () => {
@@ -481,7 +426,7 @@ export function EditServiceModal({ isOpen, onClose, service }: ServiceModalProps
           setShowDataError(true);
         } else {
           setTestState('success');
-          setActiveTab('mapping');
+          setShowSuccessModal(true);
         }
       }, 1500);
     }, 1500);
@@ -496,9 +441,8 @@ export function EditServiceModal({ isOpen, onClose, service }: ServiceModalProps
 
   const tabs = [
     { id: 'general' as TabType, label: 'Thông tin chung', icon: <FileText className="w-4 h-4" /> },
-    { id: 'contact' as TabType, label: 'Thông tin đơn vị cung cấp', icon: <User className="w-4 h-4" /> },
     { id: 'connection' as TabType, label: 'Cấu hình kết nối', icon: <Plug className="w-4 h-4" /> },
-    { id: 'mapping' as TabType, label: 'Cấu hình ánh xạ', icon: <LayoutTemplate className="w-4 h-4" /> },
+    { id: 'mapping' as TabType, label: 'Nạp cấu trúc', icon: <LayoutTemplate className="w-4 h-4" /> },
     { id: 'collection' as TabType, label: 'Cấu hình thu thập', icon: <Settings className="w-4 h-4" /> },
   ];
 
@@ -531,7 +475,7 @@ export function EditServiceModal({ isOpen, onClose, service }: ServiceModalProps
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto">
           <div className="px-6 py-4">
             {activeTab === 'general' && (
               <div className="space-y-4">
@@ -540,21 +484,48 @@ export function EditServiceModal({ isOpen, onClose, service }: ServiceModalProps
                   <input aria-label="Input field" id="edit-name" title="Tên service" type="text" defaultValue={service.name} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="VD: API dịch vụ dữ liệu quốc tịch" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label htmlFor="edit-unit" className="block text-sm text-slate-600 mb-1">Tên đơn vị <span className="text-red-500">*</span></label>
-                    <input aria-label="Input field" id="edit-unit" title="Tên đơn vị" type="text" defaultValue={service.managingUnit} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tìm kiếm hoặc nhập tên đơn vị..." />
-                  </div>
-                  <div>
-                    <label htmlFor="edit-system" className="block text-sm text-slate-600 mb-1">Hệ thống <span className="text-red-500">*</span></label>
-                    <input aria-label="Input field" id="edit-system" title="Hệ thống" type="text" defaultValue={service.system || 'Hệ thống DLDC'} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập tên hệ thống" />
+                  <div className="col-span-2 relative">
+                    <label htmlFor="edit-source-system" className="block text-sm text-slate-600 mb-1">Tên hệ thống nguồn <span className="text-red-500">*</span></label>
+                    <input aria-label="Input field" 
+                      id="edit-source-system" 
+                      title="Tên hệ thống nguồn" 
+                      type="text" 
+                      value={sourceSystemName} 
+                      onChange={(e) => {
+                        setSourceSystemName(e.target.value);
+                        setShowSourceDropdown(true);
+                      }} 
+                      onFocus={() => setShowSourceDropdown(true)}
+                      onBlur={() => setTimeout(() => setShowSourceDropdown(false), 200)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                      placeholder="Tìm kiếm hoặc chọn hệ thống nguồn..." 
+                    />
+                    
+                    {showSourceDropdown && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                        {filteredSourceSystems.map(ss => (
+                          <div
+                            key={ss.id}
+                            className="px-4 py-2 hover:bg-slate-50 cursor-pointer text-sm flex items-center justify-between"
+                            onMouseDown={(e) => {
+                              e.preventDefault(); 
+                              setSourceSystemName(ss.systemName);
+                              setShowSourceDropdown(false);
+                            }}
+                          >
+                            <div className="flex flex-col">
+                              <span className="font-medium text-slate-700">{ss.systemName}</span>
+                              <span className="text-xs text-slate-500">{ss.unitName}</span>
+                            </div>
+                            <span className="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">{ss.sourceType}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label htmlFor="edit-source" className="block text-sm text-slate-600 mb-1">Nguồn thu thập</label>
-                    <input aria-label="Input field" id="edit-source" title="Nguồn thu thập" type="text" readOnly defaultValue="Hệ thống trong ngành" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-slate-50 text-slate-700 focus:outline-none" placeholder="Tự động hiển thị theo Đơn vị" />
-                  </div>
-                  <div>
+                  <div className="col-span-2">
                     <label htmlFor="edit-security" className="block text-sm text-slate-600 mb-1">Mức độ bảo mật dữ liệu</label>
                     <select aria-label="Select box" id="edit-security" title="Mức độ bảo mật dữ liệu" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
                       <option value="">Chọn mức độ bảo mật</option>
@@ -580,25 +551,51 @@ export function EditServiceModal({ isOpen, onClose, service }: ServiceModalProps
                 </div>
               </div>
             )}
-            {activeTab === 'contact' && <ContactInfoSection />}
             {activeTab === 'connection' && <ConnectionConfigSection dataClassification={dataClassification} resetTestState={resetTestState} isEdit={true} testState={testState} handleTestConnection={handleTestConnection} mockMode={mockMode} setMockMode={setMockMode} />}
             {activeTab === 'mapping' && (
               <div className="h-[600px] -mx-6 -my-4">
-                <AdvancedDataMapping />
+                <StructureLoadingConfig />
               </div>
             )}
             {activeTab === 'collection' && <DataCollectionConfigSection resetTestState={resetTestState} />}
           </div>
-          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
-            <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50">Hủy</button>
-            <button type="submit" className="px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700">Cập nhật nội dung</button>
+          <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50">
+            <div>
+              {activeTab === 'connection' && (
+                <button type="button" onClick={handleTestConnection} style={{ backgroundColor: '#0dcaf0', color: '#fff' }} className="px-4 py-2 text-sm font-medium rounded-lg hover:opacity-90 transition-colors">Kiểm tra kết nối</button>
+              )}
+            </div>
+            <div className="flex items-center gap-3">
+              <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors">Hủy</button>
+              {activeTab !== 'collection' ? (
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    const currentIndex = tabs.findIndex(t => t.id === activeTab);
+                    if (currentIndex < tabs.length - 1) setActiveTab(tabs[currentIndex + 1].id);
+                  }} 
+                  className="px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Tiếp tục
+                </button>
+              ) : (
+                <button type="button" onClick={handleSubmit} className="px-6 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">Cập nhật</button>
+              )}
+            </div>
           </div>
-        </form>
+        </div>
       </div>
 
       <ConnectionErrorModal isOpen={showConnError} onClose={() => setShowConnError(false)} />
       <DataErrorModal isOpen={showDataError} onClose={() => setShowDataError(false)} />
-      <DataMappingModal isOpen={showMapping} onClose={() => setShowMapping(false)} />
+      <ConnectionSuccessModal 
+        isOpen={showSuccessModal} 
+        onClose={() => setShowSuccessModal(false)} 
+        onContinue={() => {
+          setShowSuccessModal(false);
+          setActiveTab('mapping');
+        }} 
+      />
     </div>
   );
 }

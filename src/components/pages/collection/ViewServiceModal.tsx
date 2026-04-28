@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { 
   X, CheckCircle, Search, Calendar, Eye, Activity, Shield, FileText, Download,
-  ArrowRight, ExternalLink, RefreshCw, ChevronDown, User, Plug, Settings, Database, Clock
+  ArrowRight, ExternalLink, RefreshCw, ChevronDown, ChevronRight, User, Plug, Settings, Database, Clock,
+  LayoutTemplate, Check, AlertCircle, AlertTriangle
 } from 'lucide-react';
 
 interface ViewServiceModalProps {
@@ -59,10 +60,10 @@ export function ViewServiceModal({ isOpen, onClose, service }: ViewServiceModalP
         <div className="flex border-b border-gray-200 px-8">
           {[
             { id: 'general', label: 'Thông tin chung', icon: FileText },
-            { id: 'contact', label: 'Đơn vị cung cấp', icon: User },
+            { id: 'contact', label: 'Thông tin hệ thống nguồn', icon: User },
             { id: 'connection', label: 'Cấu hình kết nối', icon: Plug },
             { id: 'collection', label: 'Cấu hình thu thập', icon: Settings },
-            { id: 'mapping', label: 'Ánh xạ dữ liệu', icon: Database },
+            { id: 'mapping', label: 'Nạp cấu trúc', icon: LayoutTemplate },
           ].map(tab => (
             <button
               key={tab.id}
@@ -175,7 +176,7 @@ function TabGeneral() {
 function TabContact() {
   return (
     <div className="animate-in fade-in duration-300">
-      <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-6 pb-2 border-b border-slate-100">Thông tin đơn vị cung cấp dữ liệu</h3>
+      <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-6 pb-2 border-b border-slate-100">Thông tin hệ thống nguồn</h3>
       <div className="grid grid-cols-2 gap-x-12 gap-y-6 max-w-4xl">
         
         <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
@@ -383,65 +384,163 @@ function TabCollection() {
 }
 
 function TabMapping() {
-  const mappings = [
-    { src: 'quoctich_id', stype: 'str', arrow: '→', dest: 'ma_quoctich', dtype: 'str', note: 'Khóa chính' },
-    { src: 'ho_ten', stype: 'str', arrow: '→', dest: 'ho_ten_day_du', dtype: 'str', note: '' },
-    { src: 'ngay_sinh', stype: 'date', arrow: '→', dest: 'ngay_sinh', dtype: 'date', note: 'Format: YYYY-MM-DD' },
-    { src: 'quoc_tich', stype: 'str', arrow: '→', dest: 'quoc_tich_hien_tai', dtype: 'str', note: '' },
-    { src: 'so_dinh_danh', stype: 'str', arrow: '→', dest: 'cccd_cmnd', dtype: 'str', note: 'Mã hóa tại đích' },
-    { src: 'ngay_cap_nhat', stype: 'ts', arrow: '→', dest: 'updated_at', dtype: 'ts', note: 'Watermark field' },
-    { src: 'trang_thai', stype: 'str', arrow: '→', dest: 'trang_thai_ho_so', dtype: 'str', note: '' },
-    { src: 'ghi_chu_them', stype: 'str', arrow: '—', dest: 'Chưa ánh xạ', dtype: '-', note: 'Cần cấu hình trường đích', unmapped: true },
+  const [activeTableId, setActiveTableId] = useState('citizen_info');
+  const [searchTable, setSearchTable] = useState('');
+  const [searchField, setSearchField] = useState('');
+
+  const mockTables = [
+    {
+      id: 'citizen_info',
+      name: 'citizen_info',
+      label: 'Thông tin công dân',
+      fields: [
+        { id: 'f1', name: 'id', dataType: 'uuid', allowNull: false, isPath: false, hostPath: '-', displayName: 'ID' },
+        { id: 'f2', name: 'full_name', dataType: 'varchar(255)', allowNull: false, isPath: false, hostPath: '-', displayName: 'Họ và tên' },
+        { id: 'f3', name: 'citizen_pin', dataType: 'varchar(12)', allowNull: false, isPath: false, hostPath: '-', displayName: 'Số định danh' },
+        { id: 'f4', name: 'identify_no', dataType: 'varchar(12)', allowNull: true, isPath: false, hostPath: '-', displayName: 'Số CCCD' },
+        { id: 'f5', name: 'passport_no', dataType: 'varchar(20)', allowNull: true, isPath: false, hostPath: '-', displayName: 'Số hộ chiếu' },
+        { id: 'f6', name: 'birth_date', dataType: 'date', allowNull: true, isPath: false, hostPath: '-', displayName: 'Ngày sinh' },
+      ]
+    },
+    {
+      id: 'birth_registrations',
+      name: 'birth_registrations',
+      label: 'Đăng ký khai sinh',
+      fields: [
+        { id: 'f7', name: 'id', dataType: 'uuid', allowNull: false, isPath: false, hostPath: '-', displayName: 'ID' },
+        { id: 'f8', name: 'number_no', dataType: 'varchar(50)', allowNull: false, isPath: false, hostPath: '-', displayName: 'Số hiệu' },
+        { id: 'f9', name: 'book_no', dataType: 'varchar(50)', allowNull: false, isPath: false, hostPath: '-', displayName: 'Số quyển' },
+        { id: 'f10', name: 'mother_full_name', dataType: 'varchar(255)', allowNull: false, isPath: false, hostPath: '-', displayName: 'Họ tên mẹ' },
+        { id: 'f11', name: 'father_full_name', dataType: 'varchar(255)', allowNull: false, isPath: false, hostPath: '-', displayName: 'Họ tên cha' },
+        { id: 'f12', name: 'reg_date', dataType: 'date', allowNull: false, isPath: false, hostPath: '-', displayName: 'Ngày đăng ký' },
+      ]
+    },
+    {
+      id: 'marriage_registrations',
+      name: 'marriage_registrations',
+      label: 'Đăng ký kết hôn',
+      fields: [
+        { id: 'f14', name: 'id', dataType: 'uuid', allowNull: false, isPath: false, hostPath: '-', displayName: 'ID' },
+        { id: 'f15', name: 'cert_number', dataType: 'varchar(50)', allowNull: false, isPath: false, hostPath: '-', displayName: 'Số chứng nhận' },
+        { id: 'f16', name: 'husband_name', dataType: 'varchar(255)', allowNull: false, isPath: false, hostPath: '-', displayName: 'Họ tên chồng' },
+        { id: 'f17', name: 'wife_name', dataType: 'varchar(255)', allowNull: false, isPath: false, hostPath: '-', displayName: 'Họ tên vợ' },
+        { id: 'f18', name: 'reg_date', dataType: 'date', allowNull: false, isPath: false, hostPath: '-', displayName: 'Ngày đăng ký' },
+      ]
+    }
   ];
 
+  const filteredTables = mockTables.filter(t => t.name.toLowerCase().includes(searchTable.toLowerCase()));
+  const activeTable = mockTables.find(t => t.id === activeTableId);
+  const filteredFields = activeTable?.fields.filter(f => f.name.toLowerCase().includes(searchField.toLowerCase())) || [];
+
   return (
-    <div className="animate-in fade-in duration-300">
-       <div className="flex items-center justify-between mb-6">
-          <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Cấu hình ánh xạ (8 trường — 7 đã ánh xạ)</h3>
-          <button className="px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 font-medium hover:bg-slate-50 transition-colors">
-            Cập nhật ánh xạ
-          </button>
-       </div>
+    <div className="flex h-[550px] border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm animate-in fade-in duration-300">
+      {/* Left Column: Tables */}
+      <div className="w-1/3 border-r border-slate-200 flex flex-col bg-slate-50/50">
+        <div className="p-4 border-b border-slate-200 bg-white">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Tìm kiếm bảng..."
+              className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
+              value={searchTable}
+              onChange={(e) => setSearchTable(e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-2 space-y-1">
+            {filteredTables.map(table => (
+              <button
+                key={table.id}
+                onClick={() => setActiveTableId(table.id)}
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-left transition-all ${
+                  activeTableId === table.id 
+                    ? 'bg-blue-50 text-blue-700 shadow-sm' 
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg ${activeTableId === table.id ? 'bg-blue-100' : 'bg-slate-200'}`}>
+                    <Database className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-bold">{table.name}</div>
+                    <div className="text-[11px] opacity-70">{table.label}</div>
+                  </div>
+                </div>
+                {activeTableId === table.id && <ChevronRight className="w-4 h-4" />}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
 
-       <div className="border border-slate-200 rounded-lg overflow-hidden bg-[#fbfaf9]">
-         <table className="w-full text-left text-sm whitespace-nowrap">
-           <thead className="bg-[#f8f7f5] text-slate-600 font-medium border-b border-slate-200">
-             <tr>
-               <th className="px-6 py-4 w-1/5">Trường nguồn</th>
-               <th className="px-6 py-4 w-[10%]">Kiểu</th>
-               <th className="px-4 py-4 w-[5%] text-center"></th>
-               <th className="px-6 py-4 w-1/5">Trường đích</th>
-               <th className="px-6 py-4 w-[10%]">Kiểu</th>
-               <th className="px-6 py-4">Ghi chú</th>
-             </tr>
-           </thead>
-           <tbody className="divide-y divide-slate-100">
-             {mappings.map((m, idx) => (
-               <tr key={idx} className={m.unmapped ? 'bg-[#fef7ec] text-[#bd6a1f]' : 'bg-white'}>
-                 <td className="px-6 py-4 font-mono">{m.src}</td>
-                 <td className="px-6 py-4">
-                   <span className="px-2 border rounded text-slate-500 font-mono text-[11px] bg-slate-50">{m.stype}</span>
-                 </td>
-                 <td className="px-4 py-4 text-center text-slate-300">{m.arrow}</td>
-                 <td className={`px-6 py-4 font-mono ${m.unmapped ? 'italic' : ''}`}>{m.dest}</td>
-                 <td className="px-6 py-4">
-                   {m.dtype !== '-' && <span className="px-2 border rounded text-slate-500 font-mono text-[11px] bg-slate-50">{m.dtype}</span>}
-                 </td>
-                 <td className="px-6 py-4 leading-tight whitespace-normal">{m.note}</td>
-               </tr>
-             ))}
-           </tbody>
-         </table>
-       </div>
+      {/* Right Column: Fields */}
+      <div className="flex-1 flex flex-col bg-white">
+        <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h4 className="font-bold text-slate-800 text-sm">Danh sách trường:</h4>
+            <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-mono">{activeTable?.name}</span>
+          </div>
+          <div className="relative w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Tìm kiếm trường..."
+              className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
+              value={searchField}
+              onChange={(e) => setSearchField(e.target.value)}
+            />
+          </div>
+        </div>
 
-       <div className="flex justify-center mt-6">
-          <button className="p-2 bg-white border border-slate-200 rounded-full text-slate-500 shadow-sm hover:shadow hover:bg-slate-50 transition-all">
-            <ChevronDown className="w-4 h-4" />
-          </button>
-       </div>
-       <div className="text-sm text-slate-500 mt-6">Cập nhật lần cuối: 01/03/2025 &mdash; Nguyễn Văn Admin</div>
+        <div className="flex-1 overflow-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-slate-50 sticky top-0 z-10 border-b border-slate-200">
+              <tr>
+                <th className="px-4 py-3 font-semibold text-slate-700">Tên trường</th>
+                <th className="px-4 py-3 font-semibold text-slate-700">Kiểu dữ liệu</th>
+                <th className="px-4 py-3 font-semibold text-slate-700">Allow null</th>
+                <th className="px-4 py-3 font-semibold text-slate-700">Is path file</th>
+                <th className="px-4 py-3 font-semibold text-slate-700">Host path file</th>
+                <th className="px-4 py-3 font-semibold text-slate-700">Tên hiển thị</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {filteredFields.map(field => (
+                <tr key={field.id} className="hover:bg-slate-50 transition-colors">
+                  <td className="px-4 py-3 font-medium text-slate-900">{field.name}</td>
+                  <td className="px-4 py-3">
+                    <span className="px-2 py-0.5 bg-slate-100 border border-slate-200 rounded text-[11px] font-mono text-slate-600">
+                      {field.dataType}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <div className="flex justify-center">
+                      <div className={`w-4 h-4 rounded border flex items-center justify-center ${field.allowNull ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-300 bg-white'}`}>
+                        {field.allowNull && <Check className="w-3 h-3" />}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <div className="flex justify-center">
+                      <div className={`w-4 h-4 rounded border flex items-center justify-center ${field.isPath ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-300 bg-white'}`}>
+                        {field.isPath && <Check className="w-3 h-3" />}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-slate-500 font-mono text-xs">{field.hostPath}</td>
+                  <td className="px-4 py-3 text-slate-900">{field.displayName}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
-  )
+  );
 }
 
 function TabHistory({ onGoToMapping }: { onGoToMapping?: () => void }) {

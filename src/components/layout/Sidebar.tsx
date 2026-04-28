@@ -136,6 +136,11 @@ const menuItems: MenuItem[] = [
         icon: Settings,
       },
       {
+        id: "collection-source-system",
+        label: "Quản lý hệ thống nguồn",
+        icon: Server,
+      },
+      {
         id: "collection-external",
         label: "CSDL Trong ngành",
         icon: Building2,

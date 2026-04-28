@@ -1,4 +1,4 @@
-import { Search, Upload, Download, Loader2, CheckCircle } from 'lucide-react';
+import { Plus, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 
 interface ConnectionConfigSectionProps {
@@ -11,9 +11,42 @@ interface ConnectionConfigSectionProps {
   setMockMode?: (mode: 'success' | 'err_conn' | 'err_data') => void;
 }
 
-export function ConnectionConfigSection({ dataClassification, resetTestState, isEdit = false, testState = 'idle', handleTestConnection, mockMode = 'success', setMockMode }: ConnectionConfigSectionProps) {
-  const [connectionType, setConnectionType] = useState('REST');
-  const [apiType, setApiType] = useState('API KEY');
+interface HeaderItem {
+  id: string;
+  key: string;
+  value: string;
+}
+
+export function ConnectionConfigSection({ resetTestState, isEdit = false }: ConnectionConfigSectionProps) {
+  const [connectionType, setConnectionType] = useState('API');
+  const [authorization, setAuthorization] = useState('No Authen');
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [tokenType, setTokenType] = useState('api');
+  
+  const [headers1, setHeaders1] = useState<HeaderItem[]>([
+    { id: '1', key: '', value: '' },
+    { id: '2', key: '', value: '' }
+  ]);
+  
+  const [headers2, setHeaders2] = useState<HeaderItem[]>([
+    { id: '1', key: '', value: '' }
+  ]);
+
+  const addHeader1 = () => {
+    setHeaders1([...headers1, { id: Date.now().toString(), key: '', value: '' }]);
+  };
+
+  const removeHeader1 = (id: string) => {
+    setHeaders1(headers1.filter(h => h.id !== id));
+  };
+
+  const addHeader2 = () => {
+    setHeaders2([...headers2, { id: Date.now().toString(), key: '', value: '' }]);
+  };
+
+  const removeHeader2 = (id: string) => {
+    setHeaders2(headers2.filter(h => h.id !== id));
+  };
 
   return (
     <div className="space-y-5" onChange={resetTestState}>
@@ -30,427 +63,214 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
           onChange={(e) => setConnectionType(e.target.value)}
           disabled={isEdit}
         >
-          <option value="REST">API RESTful</option>
-          <option value="SOAP">API SOAP</option>
-          <option value="FTP">FTP/SFTP</option>
-          <option value="DB">Database</option>
+          <option value="API">API</option>
+          <option value="DB">Cơ sở dữ liệu</option>
+          <option value="FILE">Tải file</option>
         </select>
       </div>
 
-      {connectionType === 'REST' && (
-        <div className="space-y-5">
-          {/* Base URL */}
-          <div>
-            <label htmlFor="conn-base-url" className="block text-sm text-slate-600 mb-1">
-              Base URL <span className="text-red-500">*</span>
-            </label>
-            <input aria-label="Input field"
-              id="conn-base-url"
-              title="Base URL"
-              type="text"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="https://api.example.com"
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label htmlFor="conn-content-type" className="block text-sm text-slate-600 mb-1">
-                Content Type <span className="text-red-500">*</span>
-              </label>
-              <select aria-label="Select box" 
-                id="conn-content-type"
-                title="Content Type"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                defaultValue="application/json"
-              >
-                <option value="application/json">application/json</option>
-                <option value="application/xml">application/xml</option>
-                <option value="text/plain">text/plain</option>
-                <option value="multipart/form-data">multipart/form-data</option>
-              </select>
-            </div>
-            <div>
-              <label htmlFor="conn-method" className="block text-sm text-slate-600 mb-1">
-                Method <span className="text-red-500">*</span>
-              </label>
-              <select aria-label="Select box" 
-                id="conn-method"
-                title="Method"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                defaultValue="GET"
-              >
-                <option value="GET">GET</option>
-                <option value="POST">POST</option>
-                <option value="PUT">PUT</option>
-                <option value="DELETE">DELETE</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label htmlFor="conn-api-type" className="block text-sm text-slate-600 mb-1">
-                Loại API <span className="text-red-500">*</span>
-              </label>
-              <select aria-label="Select box" 
-                id="conn-api-type"
-                title="Loại API"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={apiType}
-                onChange={(e) => setApiType(e.target.value)}
-              >
-                <option value="API KEY">API KEY</option>
-                <option value="OAuth 2.0">OAuth 2.0</option>
-                <option value="Basic Auth">Basic Auth</option>
-              </select>
-            </div>
-            {apiType === 'API KEY' && (
-              <div>
-                <label htmlFor="conn-header-name" className="block text-sm text-slate-600 mb-1">
-                  Header Name/ App code <span className="text-red-500">*</span>
-                </label>
-                <input aria-label="Input field"
-                  id="conn-header-name"
-                  title="Header Name"
-                  type="text"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="X-API-Key"
-                  required={apiType === 'API KEY'}
-                />
-              </div>
-            )}
-            {apiType === 'OAuth 2.0' && (
-              <div>
-                <label htmlFor="conn-auth" className="block text-sm text-slate-600 mb-1">
-                  Authentication <span className="text-red-500">*</span>
-                </label>
-                <input aria-label="Input field"
-                  id="conn-auth"
-                  title="Authentication"
-                  type="text"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Bearer token"
-                  required
-                />
-              </div>
-            )}
-            {apiType === 'Basic Auth' && (
-              <>
-                <div>
-                  <label htmlFor="conn-username" className="block text-sm text-slate-600 mb-1">
-                    User Name <span className="text-red-500">*</span>
-                  </label>
-                  <input aria-label="Input field"
-                    id="conn-username"
-                    title="User Name"
-                    type="text"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter user name"
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="conn-auth-pwd" className="block text-sm text-slate-600 mb-1">
-                    Password <span className="text-red-500">*</span>
-                  </label>
-                  <input aria-label="Input field"
-                    id="conn-auth-pwd"
-                    title="Password"
-                    type="password"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter password"
-                    required
-                  />
-                </div>
-              </>
-            )}
-          </div>
-
-          {apiType === 'API KEY' && (
-            <div>
-              <label htmlFor="conn-api-key" className="block text-sm text-slate-600 mb-1">
-                API KEY <span className="text-red-500">*</span>
-              </label>
-              <input aria-label="Input field"
-                id="conn-api-key"
-                title="API KEY"
-                type="password"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Nhập API Key"
-                required={apiType === 'API KEY'}
-              />
-            </div>
-          )}
-
-          <div>
-            <label htmlFor="conn-timeout" className="block text-sm text-slate-600 mb-1">
-              Timeout (ms)
-            </label>
-            <input aria-label="Input field"
-              id="conn-timeout"
-              title="Timeout (ms)"
-              type="number"
-              min="100"
-              max="300000"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="1000"
-              defaultValue="1000"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label htmlFor="conn-retries" className="block text-sm text-slate-600 mb-1">
-                Số lần thử
-              </label>
-              <input aria-label="Input field"
-                id="conn-retries"
-                title="Số lần thử"
-                type="number"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="3"
-                defaultValue="3"
-              />
-            </div>
-            <div>
-              <label htmlFor="conn-interval" className="block text-sm text-slate-600 mb-1">
-                Khoảng cách (ms)
-              </label>
-              <input aria-label="Input field"
-                id="conn-interval"
-                title="Khoảng cách"
-                type="number"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="5000"
-                defaultValue="5000"
-              />
-            </div>
-          </div>
-
-          {/* Request/Response Sample */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label htmlFor="conn-request-sample" className="block text-sm text-slate-600 mb-1">
-                Request Sample
-              </label>
-              <textarea aria-label="Text input"
-                id="conn-request-sample"
-                title="Request Sample"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
-                rows={4}
-                placeholder='{"key": "value"}'
-              />
-            </div>
-            <div>
-              <label htmlFor="conn-response-sample" className="block text-sm text-slate-600 mb-1">
-                Response Sample
-              </label>
-              <textarea aria-label="Text input"
-                id="conn-response-sample"
-                title="Response Sample"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
-                rows={4}
-                placeholder="{}"
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {connectionType === 'SOAP' && (
+      {connectionType === 'API' && (
         <div className="space-y-4">
-          <h3 className="text-sm font-medium text-slate-700 mb-3 pb-2 border-b border-slate-200">Cấu hình API SOAP</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm text-slate-600 mb-1">Tên service <span className="text-red-500">*</span></label>
-              <select aria-label="Chọn service" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="">Chọn service</option>
-                <option value="CitizenService">CitizenService</option>
-                <option value="EnterpriseService">EnterpriseService</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm text-slate-600 mb-1">Phương thức gọi <span className="text-red-500">*</span></label>
-              <select aria-label="Chọn phương thức" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="">Chọn phương thức</option>
-                <option value="GetCitizenInfo">GetCitizenInfo</option>
-                <option value="UpdateCitizenInfo">UpdateCitizenInfo</option>
-              </select>
-            </div>
+          <div>
+            <label className="block text-sm text-slate-700 mb-1">Tên api<span className="text-red-500">*</span></label>
+            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tên api" />
           </div>
           <div>
-            <label htmlFor="soap-endpoint-url" className="block text-sm text-slate-600 mb-1">Endpoint URL <span className="text-red-500">*</span></label>
-            <input aria-label="Input field" 
-              id="soap-endpoint-url" 
-              type="url" 
-              title="Endpoint URL"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" 
-              placeholder="https://api.example.com/service?wsdl" 
-            />
+            <label className="block text-sm text-slate-700 mb-1">Tên alias<span className="text-red-500">*</span></label>
+            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tên alias" />
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label htmlFor="soap-timeout" className="block text-sm text-slate-600 mb-1">Timeout (ms)</label>
-              <input aria-label="Input field" 
-                id="soap-timeout" 
-                type="number" 
-                title="Timeout"
-                defaultValue="30000" 
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
-              />
-            </div>
-            <div>
-              <label htmlFor="soap-ssl" className="block text-sm text-slate-600 mb-1">SSL Required</label>
-              <select aria-label="Select box" 
-                id="soap-ssl" 
-                title="SSL Required"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="true">Bật (true)</option>
-                <option value="false">Tắt (false)</option>
+          <div>
+            <label className="block text-sm text-slate-700 mb-1">URL<span className="text-red-500">*</span></label>
+            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="URL" />
+          </div>
 
-              </select>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label htmlFor="soap-retries" className="block text-sm text-slate-600 mb-1">Số lần thử</label>
-              <input aria-label="Input field" 
-                id="soap-retries" 
-                type="number" 
-                title="Số lần thử"
-                defaultValue="3" 
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
-              />
-            </div>
-            <div>
-              <label htmlFor="soap-interval" className="block text-sm text-slate-600 mb-1">Khoảng cách retry (ms)</label>
-              <input aria-label="Input field" 
-                id="soap-interval" 
-                type="number" 
-                title="Khoảng cách retry"
-                defaultValue="5000" 
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
-              />
-            </div>
-          </div>
           <div>
-            <label htmlFor="soap-auth-type" className="block text-sm text-slate-600 mb-1">Loại Auth <span className="text-red-500">*</span></label>
-            <select aria-label="Select box" 
-              id="soap-auth-type" 
-              title="Loại Auth"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="ws-security">WS-Security</option>
-              <option value="basic">Basic Auth</option>
-              <option value="bearer">Bearer Token</option>
+            <label className="block text-sm text-slate-700 mb-2">Headers1</label>
+            <div className="border border-slate-200 rounded-lg overflow-hidden mb-3">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-slate-50 border-b border-slate-200">
+                  <tr>
+                    <th className="px-4 py-3 font-bold text-slate-800 w-16">STT</th>
+                    <th className="px-4 py-3 font-bold text-slate-800 w-1/3">Key</th>
+                    <th className="px-4 py-3 font-bold text-slate-800 w-1/3">Value</th>
+                    <th className="px-4 py-3 font-bold text-slate-800">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {headers1.map((h, index) => (
+                    <tr key={h.id} className="bg-white">
+                      <td className="px-4 py-3 text-slate-700 font-medium">{index + 1}</td>
+                      <td className="px-4 py-3"><input type="text" className="w-full px-3 py-1.5 border border-slate-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" placeholder="KeyHeader" /></td>
+                      <td className="px-4 py-3"><input type="text" className="w-full px-3 py-1.5 border border-slate-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" placeholder="ValueHeader" /></td>
+                      <td className="px-4 py-3">
+                        <button type="button" onClick={() => removeHeader1(h.id)} className="px-4 py-1.5 bg-red-500 text-white text-sm font-medium rounded hover:bg-red-600 transition-colors">Xóa</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="flex justify-end">
+              <button type="button" onClick={addHeader1} className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition-colors">Thêm mới</button>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm text-slate-700 mb-1">Worker<span className="text-red-500">*</span></label>
+            <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+              <option value="">Chọn Worker</option>
+              <option value="worker1">Worker 1</option>
+              <option value="worker2">Worker 2</option>
             </select>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label htmlFor="soap-username" className="block text-sm text-slate-600 mb-1">Username <span className="text-red-500">*</span></label>
-              <input aria-label="Input field" 
-                id="soap-username" 
-                type="text" 
-                title="Username"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                placeholder="Nhập username" 
-                required 
-              />
-
-            </div>
-            <div>
-              <input aria-label="Input field" 
-                id="soap-password" 
-                type="password" 
-                title="Password"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                placeholder="Nhập password" 
-                required 
-              />
-            </div>
+          <div>
+            <label className="block text-sm text-slate-700 mb-1">Agent<span className="text-red-500">*</span></label>
+            <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+              <option value="">Chọn Agent</option>
+              <option value="agent1">Agent 1</option>
+              <option value="agent2">Agent 2</option>
+            </select>
           </div>
           <div>
-            <textarea aria-label="Text input" 
-              id="soap-xml-payload" 
-              title="XML Payload"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" 
-              rows={4} 
-              placeholder="<soapenv:Envelope>..." 
-            />
+            <label className="block text-sm text-slate-700 mb-1">Method<span className="text-red-500">*</span></label>
+            <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" defaultValue="POST">
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+              <option value="PUT">PUT</option>
+              <option value="DELETE">DELETE</option>
+            </select>
           </div>
-        </div>
-      )}
+          
+          <div>
+            <label className="block text-sm text-slate-700 mb-1">Authorization</label>
+            <select 
+              value={authorization}
+              onChange={(e) => {
+                setAuthorization(e.target.value);
+                if (e.target.value === 'Basic Authen' || e.target.value === 'Bearer Token') {
+                  setIsExpanded(true);
+                }
+              }}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            >
+              <option value="No Authen">No Authen</option>
+              <option value="Basic Authen">Basic Authen</option>
+              <option value="Bearer Token">Bearer Token</option>
+            </select>
+          </div>
 
-      {connectionType === 'FTP' && (
-        <div className="space-y-4">
-          <h3 className="text-sm font-medium text-slate-700 mb-3 pb-2 border-b border-slate-200">Cấu hình FTP/SFTP</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <input aria-label="Input field" 
-                id="ftp-host" 
-                type="text" 
-                title="Host/IP"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                placeholder="192.168.1.100" 
-              />
-            </div>
-            <div>
-              <input aria-label="Input field" 
-                id="ftp-port" 
-                type="text" 
-                title="Port"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                placeholder="21 / 22" 
-              />
-            </div>
+          <div>
+            <label className="block text-sm text-slate-700 mb-1">Body</label>
+            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Body" />
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <input aria-label="Input field" 
-                id="ftp-username" 
-                type="text" 
-                title="Username"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                placeholder="Nhập username" 
-                required 
-              />
-            </div>
-            <div>
-              <input aria-label="Input field" 
-                id="ftp-password" 
-                type="password" 
-                title="Password"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                placeholder="Nhập password" 
-                required 
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label htmlFor="ftp-path" className="block text-sm text-slate-600 mb-1">Đường dẫn thư mục (Tùy chọn)</label>
-              <input aria-label="Input field" 
-                id="ftp-path" 
-                type="text" 
-                title="Đường dẫn thư mục"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                placeholder="/data/uploads" 
-              />
-            </div>
-            <div>
-              <label htmlFor="ftp-timeout" className="block text-sm text-slate-600 mb-1">Timeout (giây)</label>
-              <input aria-label="Input field" 
-                id="ftp-timeout" 
-                type="number" 
-                title="Timeout"
-                defaultValue="30" 
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
-              />
-            </div>
 
+          <div className="pt-2">
+            <button 
+              type="button" 
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="flex items-center gap-2 text-base font-bold text-[#5c6e81] hover:text-slate-900 transition-colors"
+            >
+              Thông tin mở rộng {isExpanded ? <ChevronUp className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+            </button>
+            
+            {isExpanded && (
+              <div className="mt-4 p-5 bg-white border border-slate-200 shadow-sm rounded-lg space-y-4 animate-in slide-in-from-top-2 duration-200">
+                {authorization === 'Basic Authen' && (
+                  <div className="grid grid-cols-2 gap-3 animate-in fade-in duration-200">
+                    <div>
+                      <label className="block text-sm text-slate-700 mb-1">Tài khoản</label>
+                      <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tài khoản" />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-slate-700 mb-1">Mật khẩu</label>
+                      <input type="password" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Mật khẩu" />
+                    </div>
+                  </div>
+                )}
+                
+                {authorization === 'Bearer Token' && (
+                  <>
+                    <div>
+                      <label className="block text-sm text-slate-700 mb-1">Loại token</label>
+                      <select 
+                        value={tokenType}
+                        onChange={(e) => setTokenType(e.target.value)}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                      >
+                        <option value="api">Lấy token từ API</option>
+                        <option value="static">Token cố định</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm text-slate-700 mb-1">Nhập token</label>
+                      <input 
+                        type="text" 
+                        disabled={tokenType !== 'static'} 
+                        className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${tokenType !== 'static' ? 'border-slate-200 bg-slate-100 text-slate-500' : 'border-slate-300 bg-white'}`} 
+                        placeholder={tokenType === 'static' ? "Nhập token..." : ""} 
+                      />
+                    </div>
+                    
+                    {tokenType === 'api' && (
+                      <div className="space-y-4 animate-in fade-in duration-200 mt-4">
+                        <div>
+                          <label className="block text-sm text-slate-700 mb-1">URL</label>
+                          <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" placeholder="" />
+                        </div>
+                        <div>
+                          <label className="block text-sm text-slate-700 mb-2">Headers2</label>
+                          <div className="border border-slate-200 rounded-lg overflow-hidden mb-3 bg-white">
+                            <table className="w-full text-left text-sm">
+                              <thead className="bg-slate-50 border-b border-slate-200">
+                                <tr>
+                                  <th className="px-4 py-3 font-bold text-slate-800 w-16">STT</th>
+                                  <th className="px-4 py-3 font-bold text-slate-800 w-1/3">Key</th>
+                                  <th className="px-4 py-3 font-bold text-slate-800 w-1/3">Value</th>
+                                  <th className="px-4 py-3 font-bold text-slate-800">Thao tác</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-100">
+                                {headers2.map((h, index) => (
+                                  <tr key={h.id} className="bg-white">
+                                    <td className="px-4 py-3 text-slate-700 font-medium">{index + 1}</td>
+                                    <td className="px-4 py-3"><input type="text" className="w-full px-3 py-1.5 border border-slate-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" placeholder="KeyToken" /></td>
+                                    <td className="px-4 py-3"><input type="text" className="w-full px-3 py-1.5 border border-slate-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" placeholder="ValueToken" /></td>
+                                    <td className="px-4 py-3">
+                                      <button type="button" onClick={() => removeHeader2(h.id)} className="px-4 py-1.5 bg-red-500 text-white text-sm font-medium rounded hover:bg-red-600 transition-colors">Xóa</button>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                          <div className="flex justify-end">
+                            <button type="button" onClick={addHeader2} className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition-colors">Thêm mới</button>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm text-slate-700 mb-1">Phương thức</label>
+                          <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" defaultValue="POST">
+                            <option value="POST">POST</option>
+                            <option value="GET">GET</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm text-slate-700 mb-1">Body</label>
+                          <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" placeholder="" />
+                        </div>
+                        <div className="pt-2">
+                          <button type="button" className="px-6 py-2.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition-colors">Lấy token</button>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+                
+                {authorization === 'No Authen' && (
+                  <div className="text-sm text-slate-500 italic">Không có cấu hình mở rộng cho loại xác thực hiện tại. Chọn Bearer Token hoặc Basic Authen để xem.</div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -502,6 +322,7 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
               </select>
             </div>
             <div>
+              <label className="block text-sm text-slate-600 mb-1 opacity-0">Hidden Label</label>
               <input aria-label="Input field" 
                 id="db-host" 
                 type="text" 
@@ -610,8 +431,6 @@ export function ConnectionConfigSection({ dataClassification, resetTestState, is
           </div>
         </div>
       )}
-
-
     </div>
   );
 }

@@ -1,81 +1,254 @@
-import { Plus, X, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
-import { Dispatch, SetStateAction } from 'react';
-import { AdvancedDataMapping } from './AdvancedDataMapping';
+import { useState, useEffect } from 'react';
+import { Clock } from 'lucide-react';
 
 interface DataCollectionConfigSectionProps {
   resetTestState: () => void;
 }
 
 export function DataCollectionConfigSection({ resetTestState }: DataCollectionConfigSectionProps) {
+  const [frequencyType, setFrequencyType] = useState('Cập nhật');
+  const [repeatMode, setRepeatMode] = useState('Hằng ngày');
+  const [repeatInterval, setRepeatInterval] = useState('1');
+  const [repeatDays, setRepeatDays] = useState<string[]>([]);
+  const [executeTime, setExecuteTime] = useState('12:00');
+  const [description, setDescription] = useState('');
+  const [isManualDesc, setIsManualDesc] = useState(false);
 
-  const SAMPLE_FIELDS = [
-    'ma_ho_so', 'so_dang_ky', 'so_quyen', 'trang_so',
-    'nguoi_duoc_cap.ho_ten', 'nguoi_duoc_cap.gioi_tinh', 'nguoi_duoc_cap.ngay_sinh',
-    'nguoi_duoc_cap.noi_sinh', 'nguoi_duoc_cap.dan_toc', 'nguoi_duoc_cap.quoc_tich',
-    'nguoi_duoc_cap.ngay_cap_giay_to_tuy_than', 'nguoi_duoc_cap.noi_cap_giay_to',
-    'nguoi_duoc_cap.so_giay_to', 'nguoi_duoc_cap.so_dinh_danh_ca_nhan',
-    'nguoi_duoc_cap.trong_thoi_gian_cu_tru_tai', 'nguoi_duoc_cap.thoi_gian_cu_tru_tu_ngay',
-    'nguoi_duoc_cap.thoi_gian_cu_tru_den_ngay', 'nguoi_duoc_cap.tinh_trang_hon_nhan',
-    'nguoi_duoc_cap.muc_dich_su_dung', 'nguoi_duoc_cap.noi_dung_muc_dich',
-    'thong_tin_khac.nguoi_de_nghi', 'thong_tin_khac.quan_he', 'thong_tin_khac.ngay_cap_giay_to'
+  const [monthOption, setMonthOption] = useState('date'); // 'date' or 'day'
+  const [monthDate, setMonthDate] = useState('1');
+  const [monthWeek, setMonthWeek] = useState('Đầu tiên');
+  const [monthDay, setMonthDay] = useState('Thứ hai');
+
+  const DAYS_OF_WEEK = [
+    { id: 'T2', label: 'Thứ hai' },
+    { id: 'T3', label: 'Thứ ba' },
+    { id: 'T4', label: 'Thứ tư' },
+    { id: 'T5', label: 'Thứ năm' },
+    { id: 'T6', label: 'Thứ sáu' },
+    { id: 'T7', label: 'Thứ 7' },
+    { id: 'CN', label: 'Chủ Nhật' },
   ];
 
-  const TARGET_FIELDS_MOCK = [
-    'id', 'ma_ho_so', 'so_dang_ky', 'so_quyen', 'trang_so', 
-    'ho_ten_nguoi_duoc_cap', 'ngay_sinh', 'gioi_tinh', 'noi_sinh', 
-    'ma_dan_toc', 'ma_quoc_tich', 'so_cmnd', 'so_cccd', 
-    'dia_chi_cu_tru', 'tinh_trang_hon_nhan', 'nguoi_de_nghi', 
-    'quan_he_nguoi_de_nghi', 'ly_do', 'ngay_cap'
-  ];
+  // Auto generate description
+  useEffect(() => {
+    if (isManualDesc) return;
+
+    let desc = '';
+    const interval = parseInt(repeatInterval) || 1;
+    const timeStr = executeTime ? `lúc ${executeTime}` : '';
+
+    if (repeatMode === 'Hàng phút') {
+      desc = `Lặp lại mỗi ${interval} phút`;
+    } else if (repeatMode === 'Hàng giờ') {
+      desc = `Lặp lại mỗi ${interval} giờ`;
+    } else if (repeatMode === 'Hằng ngày') {
+      desc = `Lặp lại mỗi ${interval} ngày ${timeStr}`;
+    } else if (repeatMode === 'Hằng tuần') {
+      const daysStr = repeatDays.length > 0 ? `vào ${repeatDays.map(d => DAYS_OF_WEEK.find(x => x.id === d)?.label).join(', ')}` : '';
+      desc = `Lặp lại mỗi ${interval} tuần ${daysStr} ${timeStr}`;
+    } else if (repeatMode === 'Hằng tháng') {
+      if (monthOption === 'date') {
+        desc = `Lặp lại mỗi ${interval} tháng vào ngày ${monthDate} ${timeStr}`;
+      } else {
+        desc = `Lặp lại mỗi ${interval} tháng vào ${monthWeek.toLowerCase()} ${monthDay.toLowerCase()} ${timeStr}`;
+      }
+    }
+
+    setDescription(desc.trim());
+  }, [repeatMode, repeatInterval, repeatDays, executeTime, monthOption, monthDate, monthWeek, monthDay, isManualDesc]);
+
+  const handleDayToggle = (dayId: string) => {
+    setRepeatDays(prev => 
+      prev.includes(dayId) ? prev.filter(id => id !== dayId) : [...prev, dayId]
+    );
+  };
+
+  const getIntervalLabel = () => {
+    switch (repeatMode) {
+      case 'Hàng phút': return 'phút';
+      case 'Hàng giờ': return 'giờ';
+      case 'Hằng ngày': return 'ngày';
+      case 'Hằng tuần': return 'tuần vào';
+      case 'Hằng tháng': return 'tháng vào';
+      default: return '';
+    }
+  };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-sm text-slate-700 mb-3">Cấu hình thu thập dữ liệu</h3>
-        <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label htmlFor="sync-method" className="block text-sm text-slate-600 mb-1">
-                Phương thức đồng bộ <span className="text-red-500">*</span>
-              </label>
-              <select aria-label="Select box" 
-                id="sync-method"
-                title="Phương thức đồng bộ"
-                onChange={resetTestState}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800"
-              >
-                <option value="">Chọn phương thức</option>
-                <option value="realtime">Real-time (Thời gian thực)</option>
-                <option value="batch">Batch (Theo lô)</option>
-                <option value="scheduled">Scheduled (Theo lịch)</option>
-              </select>
-            </div>
-            <div>
-              <label htmlFor="collection-frequency" className="block text-sm text-slate-600 mb-1">
-                Tần suất thu thập
-              </label>
-              <select aria-label="Select box" 
-                id="collection-frequency"
-                title="Tần suất thu thập"
-                onChange={resetTestState}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800"
-              >
-                <option value="">Chọn tần suất</option>
-                <option value="manual">Theo yêu cầu (Thủ công)</option>
-                <option value="hourly">Mỗi giờ</option>
-                <option value="daily">Hàng ngày</option>
-                <option value="weekly">Hàng tuần</option>
-                <option value="monthly">Hàng tháng</option>
-              </select>
-            </div>
+    <div className="w-full max-w-4xl mx-auto px-6 py-4 space-y-6">
+      
+      {/* Loại tần suất */}
+      <div className="flex items-center gap-6">
+        <label className="w-32 text-[13px] text-slate-700 font-medium shrink-0">Loại tần suất</label>
+        <select 
+          value={frequencyType}
+          onChange={e => setFrequencyType(e.target.value)}
+          className="flex-1 max-w-2xl px-3 py-1.5 text-sm border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+        >
+          <option value="Tạo mới">Tạo mới</option>
+          <option value="Cập nhật">Cập nhật</option>
+        </select>
+      </div>
+
+      {/* Divider Tần suất */}
+      <div className="flex items-center gap-2">
+        <span className="text-[13px] font-bold text-slate-800">Tần suất</span>
+        <div className="flex-1 border-t border-slate-200 mt-1"></div>
+      </div>
+
+      {/* Lặp lại */}
+      <div className="flex items-center gap-6">
+        <label className="w-32 text-[13px] text-slate-700 font-medium shrink-0">Lặp lại</label>
+        <select 
+          value={repeatMode}
+          onChange={e => {
+            setRepeatMode(e.target.value);
+            setRepeatInterval('1');
+            setRepeatDays([]);
+          }}
+          className="flex-1 max-w-2xl px-3 py-1.5 text-sm border border-blue-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 bg-blue-50/30"
+        >
+          <option value="Hàng phút">Hàng phút</option>
+          <option value="Hàng giờ">Hàng giờ</option>
+          <option value="Hằng ngày">Hằng ngày</option>
+          <option value="Hằng tuần">Hằng tuần</option>
+          <option value="Hằng tháng">Hằng tháng</option>
+        </select>
+      </div>
+
+      {/* Lặp lại trong */}
+      <div className="flex items-start gap-6">
+        <label className="w-32 text-[13px] text-slate-700 font-medium shrink-0 pt-1.5">Lặp lại trong</label>
+        <div className="flex-1 max-w-2xl flex flex-col gap-3">
+          <div className="flex items-center gap-3">
+            <input 
+              type="number" 
+              min="1"
+              value={repeatInterval}
+              onChange={e => setRepeatInterval(e.target.value)}
+              className="w-20 px-3 py-1.5 text-sm border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+            />
+            <span className="text-[13px] text-slate-700">{getIntervalLabel()}</span>
           </div>
 
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-2">
-            <p className="text-xs text-blue-700">
-              <strong>Lưu ý:</strong> Lịch thu thập sẽ tự động chạy theo cấu hình. Hệ thống sẽ gửi thông báo khi có lỗi xảy ra trong quá trình thu thập.
-            </p>
-          </div>
+          {/* Extracted controls based on mode */}
+          {repeatMode === 'Hằng tuần' && (
+            <div className="flex flex-wrap gap-x-6 gap-y-3 mt-1">
+              {DAYS_OF_WEEK.map(day => (
+                <label key={day.id} className="flex items-center gap-2 cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    checked={repeatDays.includes(day.id)}
+                    onChange={() => handleDayToggle(day.id)}
+                    className="w-3.5 h-3.5 border-slate-300 rounded text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-[13px] text-slate-700">{day.label}</span>
+                </label>
+              ))}
+            </div>
+          )}
+
+          {repeatMode === 'Hằng tháng' && (
+            <div className="flex flex-col gap-3 mt-1">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input 
+                  type="radio" 
+                  checked={monthOption === 'date'}
+                  onChange={() => setMonthOption('date')}
+                  className="w-3.5 h-3.5 text-blue-600 border-slate-300 focus:ring-blue-500"
+                />
+                <span className="text-[13px] text-slate-700 whitespace-nowrap">ngày</span>
+                <input 
+                  type="number" 
+                  min="1" max="31"
+                  value={monthDate}
+                  onChange={e => setMonthDate(e.target.value)}
+                  disabled={monthOption !== 'date'}
+                  className="w-16 px-2 py-1 text-sm border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-400"
+                />
+              </label>
+
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input 
+                  type="radio" 
+                  checked={monthOption === 'day'}
+                  onChange={() => setMonthOption('day')}
+                  className="w-3.5 h-3.5 text-blue-600 border-slate-300 focus:ring-blue-500"
+                />
+                <select 
+                  value={monthWeek}
+                  onChange={e => setMonthWeek(e.target.value)}
+                  disabled={monthOption !== 'day'}
+                  className="px-2 py-1 text-sm border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-400"
+                >
+                  <option value="Đầu tiên">Đầu tiên</option>
+                  <option value="Thứ hai">Thứ hai</option>
+                  <option value="Thứ ba">Thứ ba</option>
+                  <option value="Thứ tư">Thứ tư</option>
+                  <option value="Cuối cùng">Cuối cùng</option>
+                </select>
+                <select 
+                  value={monthDay}
+                  onChange={e => setMonthDay(e.target.value)}
+                  disabled={monthOption !== 'day'}
+                  className="px-2 py-1 text-sm border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-400"
+                >
+                  <option value="Thứ hai">Thứ hai</option>
+                  <option value="Thứ ba">Thứ ba</option>
+                  <option value="Thứ tư">Thứ tư</option>
+                  <option value="Thứ năm">Thứ năm</option>
+                  <option value="Thứ sáu">Thứ sáu</option>
+                  <option value="Thứ 7">Thứ 7</option>
+                  <option value="Chủ Nhật">Chủ Nhật</option>
+                </select>
+              </label>
+            </div>
+          )}
         </div>
+      </div>
+
+      {/* Divider Thời gian */}
+      {repeatMode !== 'Hàng phút' && repeatMode !== 'Hàng giờ' && (
+        <>
+          <div className="flex items-center gap-2 pt-2">
+            <span className="text-[13px] font-bold text-slate-800">Thời gian</span>
+            <div className="flex-1 border-t border-slate-200 mt-1"></div>
+          </div>
+
+          <div className="flex items-center gap-6">
+            <label className="w-32 text-[13px] text-slate-700 font-medium shrink-0">Thực hiện lúc</label>
+            <div className="flex items-center max-w-[200px] border border-slate-300 rounded overflow-hidden">
+              <input 
+                type="time" 
+                value={executeTime}
+                onChange={e => setExecuteTime(e.target.value)}
+                className="flex-1 px-3 py-1.5 text-sm focus:outline-none bg-white"
+              />
+              <div className="px-3 py-1.5 bg-slate-100 border-l border-slate-300 text-slate-500 shrink-0">
+                <Clock className="w-4 h-4" />
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Divider Tóm lược */}
+      <div className="flex items-center gap-2 pt-2">
+        <span className="text-[13px] font-bold text-slate-800">Tóm lược</span>
+        <div className="flex-1 border-t border-slate-200 mt-1"></div>
+      </div>
+
+      <div className="flex items-start gap-6">
+        <label className="w-32 text-[13px] text-slate-700 font-medium shrink-0 pt-1.5">Mô Tả</label>
+        <textarea 
+          value={description}
+          onChange={e => {
+            setDescription(e.target.value);
+            setIsManualDesc(true);
+          }}
+          rows={3}
+          className="flex-1 max-w-2xl px-3 py-2 text-[13px] border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white resize-y"
+        />
       </div>
 
     </div>
