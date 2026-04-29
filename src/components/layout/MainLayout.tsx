@@ -180,6 +180,10 @@ import { ChangeBackgroundModal } from '../modals/ChangeBackgroundModal';
 import { AccessHistoryModal } from '../modals/AccessHistoryModal';
 import { ActionHistoryModal } from '../modals/ActionHistoryModal';
 import { LogoutModal } from '../modals/LogoutModal';
+import { DataProvisionServiceSetupPage } from '../pages/provisioning/DataProvisionServiceSetupPage';
+import { DataProvisionApiManagementPage } from '../pages/provisioning/DataProvisionApiManagementPage';
+import { DataProvisionRequestPage } from '../pages/provisioning/DataProvisionRequestPage';
+import { DataProvisionMonitoringPage } from '../pages/provisioning/DataProvisionMonitoringPage';
 
 // Page configuration for titles and descriptions
 const pageConfig: Record<string, { title: string; description: string }> = {
@@ -190,6 +194,22 @@ const pageConfig: Record<string, { title: string; description: string }> = {
   dashboard: {
     title: 'Tổng quan hệ thống',
     description: 'Theo dõi tổng quan hoạt động và thống kê hệ thống kho dữ liệu DLDC'
+  },
+  'provisioning-service-setup': {
+    title: 'Quy trình điều phối dữ liệu',
+    description: 'Thiết lập, phê duyệt và công khai dịch vụ cung cấp dữ liệu'
+  },
+  'provisioning-api-management': {
+    title: 'Quản lý API cung cấp & đối soát',
+    description: 'Danh mục API, Phân quyền truy cập và Quản lý phiên bản'
+  },
+  'provisioning-data-request': {
+    title: 'Cung cấp dữ liệu theo yêu cầu',
+    description: 'Tiếp nhận yêu cầu, kết xuất và công bố dữ liệu thụ động'
+  },
+  'provisioning-monitoring': {
+    title: 'Kiểm soát & giám sát cung cấp',
+    description: 'Giám sát luồng dữ liệu và Báo cáo thống kê dịch vụ'
   },
   'collection-dashboard': {
     title: 'Dashboard - Quản lý thu thập',
@@ -402,6 +422,10 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'master-data-update-b' && <ProcessingNationalityPage />}
             {currentPage === 'master-data-update-c' && <ProcessingJudgmentPage />}
             {currentPage === 'master-data-reports' && <MasterDataReportsPage />}
+            {currentPage === 'provisioning-service-setup' && <DataProvisionServiceSetupPage />}
+            {currentPage === 'provisioning-api-management' && <DataProvisionApiManagementPage />}
+            {currentPage === 'provisioning-data-request' && <DataProvisionRequestPage />}
+            {currentPage === 'provisioning-monitoring' && <DataProvisionMonitoringPage />}
             {currentPage === 'orchestration' && <DataCoordinationPage />}
             {currentPage === 'orchestration-service-setup' && <ServiceSetupPage />}
             {currentPage === 'orchestration-api-management' && <APIManagementPage />}
@@ -670,6 +694,11 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
 // Helper function to get breadcrumb path
 const getBreadcrumbPath = (pageId: string): string[] => {
   const breadcrumbMap: Record<string, string[]> = {
+    // Provisioning
+    'provisioning-service-setup': ['Cung cấp dữ liệu', 'Quy trình điều phối dữ liệu'],
+    'provisioning-api-management': ['Cung cấp dữ liệu', 'Quản lý API cung cấp & đối soát'],
+    'provisioning-data-request': ['Cung cấp dữ liệu', 'Cung cấp dữ liệu theo yêu cầu'],
+    'provisioning-monitoring': ['Cung cấp dữ liệu', 'Kiểm soát & giám sát cung cấp'],
     // Dashboard
     'dashboard': ['Tổng quan hệ thống'],
 
@@ -781,7 +810,7 @@ const getBreadcrumbPath = (pageId: string): string[] => {
     'open-data-setup': ['Dữ liệu mở', 'Quản lý danh mục'],
     'open-data-category-list': ['Dữ liệu mở', 'Biên tập danh mục'],
     'open-data-category-a': ['Dữ liệu mở', 'Biên tập danh mục', 'Biên tập danh mục A'],
-    'open-data-published-list': ['Dữ liệu mở', 'Dữ liệu mở công bố'],
+    'open-data-published-list': ['Dữ liệu mở', 'Công bố dữ liệu mở'],
     'open-data-report': ['Dữ liệu mở', 'Thống kê dữ liệu mở'],
 
     // Master Data
