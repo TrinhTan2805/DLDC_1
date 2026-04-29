@@ -443,7 +443,7 @@ const menuItems: MenuItem[] = [
       },
       {
         id: "open-data-published-list",
-        label: "Dữ liệu mở công bố",
+        label: "Công bố dữ liệu mở",
         icon: FileText,
       },
       {
@@ -612,6 +612,34 @@ const menuItems: MenuItem[] = [
     ],
   },
   {
+    id: "data-provisioning",
+    icon: Share2,
+    label: "Cung cấp dữ liệu",
+    color: "text-amber-600",
+    subItems: [
+      {
+        id: "provisioning-service-setup",
+        label: "Quy trình điều phối dữ liệu",
+        icon: Settings,
+      },
+      {
+        id: "provisioning-api-management",
+        label: "Quản lý API cung cấp & đối soát",
+        icon: Server,
+      },
+      {
+        id: "provisioning-data-request",
+        label: "Cung cấp dữ liệu theo yêu cầu",
+        icon: FileText,
+      },
+      {
+        id: "provisioning-monitoring",
+        label: "Kiểm soát & giám sát cung cấp",
+        icon: Activity,
+      },
+    ],
+  },
+  {
     id: "admin",
     icon: Shield,
     label: "Quản trị & vận hành",
@@ -771,7 +799,7 @@ export function Sidebar({
           </div>
         </div>
       </div>
-      
+
       {/* Search Bar */}
       <div className="px-4 py-3 border-b border-slate-100">
         <div className="relative group">
@@ -1017,7 +1045,7 @@ export function Sidebar({
               </div>
             );
           })}
-          
+
           {searchTerm.trim() && (() => {
             const term = normalizeText(searchTerm);
             const filterRec = (items: any[]): any[] => {
@@ -1029,19 +1057,19 @@ export function Sidebar({
             };
             return filterRec(menuItems);
           })().length === 0 && (
-            <div className="py-10 text-center">
-              <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Search className="w-6 h-6 text-slate-300" />
+              <div className="py-10 text-center">
+                <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Search className="w-6 h-6 text-slate-300" />
+                </div>
+                <p className="text-xs text-slate-400">Không tìm thấy kết quả</p>
               </div>
-              <p className="text-xs text-slate-400">Không tìm thấy kết quả</p>
-            </div>
-          )}
+            )}
         </div>
       </nav>
 
       {/* Footer */}
       <div className="p-4 border-t border-slate-200">
-        <button 
+        <button
           onClick={() => setShowVersionHistory(true)}
           className="w-full bg-slate-50 rounded-lg p-3 text-left hover:bg-slate-100 transition-colors shadow-sm cursor-pointer"
         >
@@ -1055,7 +1083,7 @@ export function Sidebar({
         </button>
       </div>
 
-      <VersionHistoryModal 
+      <VersionHistoryModal
         isOpen={showVersionHistory}
         onClose={() => setShowVersionHistory(false)}
       />
@@ -1076,7 +1104,7 @@ function useAutoExpand(searchTerm: string, menuItems: any[], setExpandedMenus: (
       for (const item of items) {
         const matches = normalizeText(item.label).includes(term);
         const childrenMatch = item.subItems ? checkItems(item.subItems) : false;
-        
+
         if (matches || childrenMatch) {
           if (item.subItems && item.subItems.length > 0) {
             allIdsToExpand.add(item.id);
