@@ -2,8 +2,11 @@ import React, { useState } from 'react';
 import { 
   X, CheckCircle, Search, Calendar, Eye, Activity, Shield, FileText, Download,
   ArrowRight, ExternalLink, RefreshCw, ChevronDown, ChevronRight, User, Plug, Settings, Database, Clock,
-  LayoutTemplate, Check, AlertCircle, AlertTriangle
+  LayoutTemplate, Check, AlertCircle, AlertTriangle, EyeOff,
+  Trash2, History, Zap, PlusCircle, Edit, Code, Layers, List, Eraser, Upload, Power
 } from 'lucide-react';
+import { initialSourceSystems } from './mockSourceSystems';
+import { Portal } from '../../common/Portal';
 
 interface ViewServiceModalProps {
   isOpen: boolean;
@@ -16,156 +19,262 @@ type TabType = 'general' | 'contact' | 'connection' | 'collection' | 'mapping';
 export function ViewServiceModal({ isOpen, onClose, service }: ViewServiceModalProps) {
   const [activeTab, setActiveTab] = useState<TabType>('general');
   const [showApiKey, setShowApiKey] = useState(false);
+  const [showInactiveModal, setShowInactiveModal] = useState(false);
+  const [inactiveReason, setInactiveReason] = useState('');
 
   if (!isOpen || !service) return null;
 
+  // Find source system details
+  const sourceSystem = initialSourceSystems.find(ss => ss.systemName === service.system) || initialSourceSystems[0];
+
   return (
-    <div className="fixed inset-0 z-50 flex overflow-y-auto bg-black/50 py-10 px-4 items-start">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-5xl mx-auto flex flex-col flex-shrink-0 mb-auto overflow-hidden">
-        
-        {/* HEADER */}
-        <div className="px-8 py-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="text-sm text-slate-500">Danh sách dịch vụ / Chi tiết dịch vụ</div>
-            <div className="flex items-center gap-2">
-              <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full ml-2">
+    <>
+      <div className="fixed inset-0 z-50 flex overflow-y-auto bg-black/50 py-10 px-4 items-start font-sans">
+        <div className="bg-white rounded-xl shadow-xl w-full max-w-5xl mx-auto flex flex-col flex-shrink-0 mb-auto overflow-hidden">
+          
+          {/* HEADER */}
+          <div className="px-8 py-6 bg-slate-50/50 border-b border-slate-100">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <span>Danh sách dịch vụ</span>
+                <ChevronRight className="w-3 h-3" />
+                <span className="text-blue-600">Chi tiết dịch vụ</span>
+              </div>
+              <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
+
+            <div className="flex items-start justify-between">
+              <div>
+                <h1 className="text-2xl font-bold text-slate-900 mb-3 leading-tight">
+                  {service.name || 'Dịch vụ chưa đặt tên'}
+                </h1>
+                
+                <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600">
+                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${
+                    service.status === 'success' ? 'bg-green-50 text-green-700 border-green-200' : 
+                    service.status?.startsWith('failed_') ? 'bg-red-50 text-red-700 border-red-200' :
+                    service.status === 'inactive' ? 'bg-gray-100 text-gray-500 border-gray-200' :
+                    'bg-slate-50 text-slate-700 border-slate-200'
+                  }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${
+                      service.status === 'success' ? 'bg-green-600' : 
+                      service.status?.startsWith('failed_') ? 'bg-red-600' : 
+                      service.status === 'inactive' ? 'bg-gray-400' :
+                      'bg-slate-400'
+                    }`}></span> 
+                    {service.statusText || 'Bản nháp'}
+                  </span>
+                  <span className="text-slate-300">|</span>
+                  <span className="font-medium text-slate-700">{service.managingUnit || sourceSystem.unitName}</span>
+                  <span className="text-slate-300">|</span>
+                  <span className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded text-[11px] font-bold">
+                    {service.version || 'v1.0.0'}
+                  </span>
+                  <span className="text-slate-300">|</span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5" />
+                    Cập nhật: {service.updatedAt || 'N/A'}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="flex gap-2">
+                 <button className="px-3 py-1.5 bg-purple-600 text-white rounded-lg text-[13px] font-semibold shadow-sm hover:bg-purple-700 transition-colors flex items-center gap-1.5">
+                   <Layers className="w-3.5 h-3.5" /> Xem dữ liệu tích hợp
+                 </button>
+                 <button className="px-3 py-1.5 bg-teal-600 text-white rounded-lg text-[13px] font-semibold shadow-sm hover:bg-teal-700 transition-colors flex items-center gap-1.5">
+                   <RefreshCw className="w-3.5 h-3.5" /> Cập nhật dữ liệu
+                 </button>
+                 <button 
+                   onClick={(e) => {
+                     e.stopPropagation();
+                     setShowInactiveModal(true);
+                   }}
+                   className="px-3 py-1.5 bg-amber-600 text-white rounded-lg text-[13px] font-semibold shadow-sm hover:bg-amber-700 transition-colors flex items-center gap-1.5"
+                 >
+                   <Power className="w-3.5 h-3.5" /> Ngừng kết nối
+                 </button>
+                 <button className="px-3 py-1.5 bg-red-600 text-white rounded-lg text-[13px] font-semibold shadow-sm hover:bg-red-700 transition-colors flex items-center gap-1.5">
+                   <Trash2 className="w-3.5 h-3.5" /> Xóa dữ liệu
+                 </button>
+              </div>
+            </div>
           </div>
 
-          <h1 className="text-2xl font-bold text-slate-900 mb-3 leading-tight max-w-lg">API dịch vụ dữ liệu quốc tịch</h1>
-          
-          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-600 mb-4">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium border border-green-200">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-600"></span> Đang hoạt động
-            </span>
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded font-semibold text-xs">
-              <span className="text-blue-500">v</span>2.1
-            </span>
-            <span className="text-slate-300">•</span>
-            <span>Cục Hộ tịch, Quốc tịch, Chứng thực</span>
-            <span className="text-slate-300">•</span>
-            <span>RESTful API</span>
-            <span className="text-slate-300">•</span>
-            <span className="px-2 py-0.5 bg-slate-100 rounded border border-slate-200 text-xs">Bảo mật: Nội bộ</span>
+          {/* TABS HEADER */}
+          <div className="flex border-b border-slate-200 px-8 bg-white sticky top-0 z-10">
+            {[
+              { id: 'general', label: 'Thông tin chung', icon: FileText },
+              { id: 'contact', label: 'Hệ thống nguồn', icon: Database },
+              { id: 'connection', label: 'Cấu hình kết nối', icon: Plug },
+              { id: 'collection', label: 'Cấu hình thu thập', icon: Settings },
+              { id: 'mapping', label: 'Nạp cấu trúc', icon: LayoutTemplate },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as TabType)}
+                className={`flex items-center gap-2 px-6 py-4 border-b-2 font-bold text-sm transition-all relative ${
+                  activeTab === tab.id
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-gray-300'
+                }`}
+              >
+                <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-blue-600' : 'text-slate-400'}`} />
+                {tab.label}
+                {activeTab === tab.id && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />}
+              </button>
+            ))}
           </div>
-          
-          <div className="text-sm text-slate-500">Cập nhật: 10/04/2025 09:14</div>
+
+          {/* TABS CONTENT */}
+          <div className="px-8 py-8 flex-1 bg-[#fcfcfc] overflow-y-auto min-h-[500px]">
+             {activeTab === 'general' && <TabGeneral service={service} sourceSystem={sourceSystem} />}
+             {activeTab === 'contact' && <TabContact sourceSystem={sourceSystem} />}
+             {activeTab === 'connection' && <TabConnection service={service} showApiKey={showApiKey} setShowApiKey={setShowApiKey} />}
+             {activeTab === 'collection' && <TabCollection service={service} />}
+             {activeTab === 'mapping' && <TabMapping /> }
+          </div>
         </div>
 
-
-
-        {/* TABS HEADER */}
-        <div className="flex border-b border-gray-200 px-8">
-          {[
-            { id: 'general', label: 'Thông tin chung', icon: FileText },
-            { id: 'contact', label: 'Thông tin hệ thống nguồn', icon: User },
-            { id: 'connection', label: 'Cấu hình kết nối', icon: Plug },
-            { id: 'collection', label: 'Cấu hình thu thập', icon: Settings },
-            { id: 'mapping', label: 'Nạp cấu trúc', icon: LayoutTemplate },
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as TabType)}
-              className={`flex items-center gap-2 px-6 py-4 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === tab.id
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <tab.icon className="w-4 h-4" />
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {/* TABS CONTENT */}
-        <div className="px-8 py-8 flex-1 bg-white">
-           {activeTab === 'general' && <TabGeneral />}
-           {activeTab === 'contact' && <TabContact />}
-           {activeTab === 'connection' && <TabConnection showApiKey={showApiKey} setShowApiKey={setShowApiKey} />}
-           {activeTab === 'collection' && <TabCollection />}
-           { activeTab === 'mapping' && <TabMapping /> }
-
-        </div>
-
+        {/* INACTIVE CONFIRMATION MODAL - INSIDE SAME BACKDROP FOR BETTER STACKING */}
+        {showInactiveModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-200">
+              <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/80 backdrop-blur-md">
+                <h3 className="text-xl font-bold text-slate-900 flex items-center gap-3">
+                  <div className="p-2 bg-amber-100 rounded-lg">
+                    <Power className="w-5 h-5 text-amber-600" />
+                  </div> 
+                  Ngừng kết nối
+                </h3>
+                <button onClick={() => setShowInactiveModal(false)} className="text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-200 transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="p-8 space-y-6">
+                <div className="bg-red-50 border border-red-100 p-5 rounded-2xl flex gap-4 shadow-inner">
+                  <div className="p-2 bg-red-100 rounded-full h-fit">
+                    <AlertTriangle className="w-6 h-6 text-red-600 shrink-0" />
+                  </div>
+                  <div>
+                    <div className="text-md font-bold text-red-900 mb-1">Cảnh báo gián đoạn dữ liệu</div>
+                    <p className="text-sm text-red-800/80 leading-relaxed font-medium">
+                      Bạn có chắc muốn ngừng kết nối này? Hành động này sẽ khiến luồng dữ liệu bị gián đoạn cho đến khi được kích hoạt lại thủ công.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="space-y-3">
+                  <label className="block text-sm font-bold text-slate-700 ml-1">
+                    Lý do ngừng kết nối <span className="text-red-500 font-black">*</span>
+                  </label>
+                  <textarea
+                    className="w-full px-5 py-4 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 min-h-[140px] text-sm bg-slate-50/30 outline-none transition-all placeholder:text-slate-400 resize-none"
+                    placeholder="Vui lòng nhập lý do cụ thể (ví dụ: Thay đổi cấu hình Worker, bảo trì định kỳ hệ thống nguồn...)"
+                    value={inactiveReason}
+                    onChange={(e) => setInactiveReason(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="px-8 py-5 bg-slate-50/50 border-t border-slate-100 flex justify-end gap-4">
+                <button
+                  onClick={() => setShowInactiveModal(false)}
+                  className="px-6 py-2.5 text-sm font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded-xl transition-all"
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  disabled={!inactiveReason.trim()}
+                  onClick={() => {
+                    alert(`Đã yêu cầu ngừng kết nối.\nLý do: ${inactiveReason}`);
+                    setShowInactiveModal(false);
+                    setInactiveReason('');
+                  }}
+                  className="px-8 py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-xl text-sm font-bold hover:from-amber-700 hover:to-orange-700 transition-all shadow-lg shadow-amber-200 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed transform active:scale-95"
+                >
+                  Xác nhận ngừng
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-    </div>
+    </>
   );
 }
 
 // ------ TAB COMPONENTS ------
 
-function TabGeneral() {
+function TabGeneral({ service, sourceSystem }: any) {
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
-      <div>
-        <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-6 pb-2 border-b border-slate-100">Thông tin dịch vụ</h3>
+      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+          <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
+          Thông tin dịch vụ
+        </h3>
         <div className="grid grid-cols-2 gap-x-12 gap-y-6">
           
-          <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-            <div className="text-sm text-slate-600">Tên service</div>
-            <div className="col-span-2 text-sm text-slate-900 font-medium">API dịch vụ dữ liệu quốc tịch</div>
+          <div className="space-y-1">
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Tên service</div>
+            <div className="text-sm text-slate-900 font-bold leading-relaxed">{service.name || '-'}</div>
           </div>
-          <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-            <div className="text-sm text-slate-600">Mức độ bảo mật</div>
-            <div className="col-span-2">
-              <span className="px-2.5 py-1 text-xs bg-blue-100 text-blue-700 rounded font-medium">Nội bộ</span>
+
+          <div className="space-y-1">
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Hệ thống nguồn</div>
+            <div className="text-sm text-slate-900 font-bold leading-relaxed flex items-center gap-2">
+              <Database className="w-4 h-4 text-blue-500" />
+              {service.system || sourceSystem.systemName}
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-            <div className="text-sm text-slate-600">Tên đơn vị</div>
-            <div className="col-span-2 text-sm text-slate-900 font-medium">Cục Hộ tịch, Quốc tịch, Chứng thực</div>
-          </div>
-          <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-             <div className="text-sm text-slate-600">Trạng thái</div>
-             <div className="col-span-2">
-               <span className="px-2.5 py-1 text-xs bg-green-100 text-green-700 rounded font-medium">Đang hoạt động</span>
-             </div>
+          <div className="space-y-1">
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Mức độ bảo mật dữ liệu</div>
+            <div>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold bg-blue-50 text-blue-700 border border-blue-100">
+                {service.securityLevel || 'Nội bộ'}
+              </span>
+            </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-            <div className="text-sm text-slate-600">Hệ thống</div>
-            <div className="col-span-2 text-sm text-slate-900 font-medium">HTTT Quản lý Quốc tịch v2.1</div>
-          </div>
-          <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-             <div className="text-sm text-slate-600">Ngày tạo</div>
-             <div className="col-span-2 text-sm text-slate-900 font-medium">01/03/2025 &mdash; Nguyễn Văn Admin</div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-            <div className="text-sm text-slate-600">Nguồn thu thập</div>
-            <div className="col-span-2 text-sm text-slate-900 font-medium">Cục Hộ tịch, Quốc tịch, Chứng thực</div>
-          </div>
-          <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-             <div className="text-sm text-slate-600">Cập nhật lần cuối</div>
-             <div className="col-span-2 text-sm text-slate-900 font-medium">10/04/2025 09:14</div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-4 col-span-2">
-            <div className="text-sm text-slate-600">Mô tả</div>
-            <div className="col-span-2 text-sm text-slate-900 leading-relaxed font-medium">
-               Dịch vụ thu thập dữ liệu quốc tịch từ hệ thống quản lý hộ tịch của Cục Hộ tịch, phục vụ tra cứu và tổng hợp báo cáo tại CSDL Bộ Tư pháp. Đồng bộ định kỳ hàng ngày lúc 09:00.
+          <div className="space-y-1 col-span-2">
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Mô tả</div>
+            <div className="text-sm text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-100 italic">
+              {service.description || 'Chưa có mô tả cho dịch vụ này.'}
             </div>
           </div>
 
         </div>
       </div>
 
-      <div>
-        <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-6 pb-2 border-b border-slate-100">Văn bản đính kèm</h3>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 border border-slate-200 rounded-lg px-4 py-2 bg-white shadow-sm hover:shadow transition-shadow cursor-pointer">
-            <FileText className="w-4 h-4 text-slate-500" />
-            <span className="text-sm text-slate-700 font-medium">QĐ_Ketno_QuocTich_2025.pdf</span>
-            <span className="text-xs text-slate-400">245 KB</span>
+      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+          <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
+          Văn bản đính kèm
+        </h3>
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-3 border border-slate-200 rounded-xl px-4 py-3 bg-white hover:border-blue-300 hover:bg-blue-50/30 transition-all cursor-pointer group shadow-sm">
+            <div className="p-2 bg-red-50 text-red-500 rounded-lg group-hover:bg-red-100">
+              <FileText className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-sm text-slate-800 font-bold">QĐ_Ketno_QuocTich_2025.pdf</div>
+              <div className="text-[11px] text-slate-400 font-medium">245 KB • 10/04/2025</div>
+            </div>
+            <Download className="w-4 h-4 text-slate-400 ml-4 group-hover:text-blue-600" />
           </div>
-          <div className="flex items-center gap-2 border border-slate-200 rounded-lg px-4 py-2 bg-white shadow-sm hover:shadow transition-shadow cursor-pointer">
-            <FileText className="w-4 h-4 text-slate-500" />
-            <span className="text-sm text-slate-700 font-medium">BienBan_Nghiemthu_API.docx</span>
-            <span className="text-xs text-slate-400">118 KB</span>
+          
+          <div className="flex items-center gap-3 border border-slate-200 rounded-xl px-4 py-3 bg-white hover:border-blue-300 hover:bg-blue-50/30 transition-all cursor-pointer group shadow-sm">
+            <div className="p-2 bg-blue-50 text-blue-500 rounded-lg group-hover:bg-blue-100">
+              <FileText className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-sm text-slate-800 font-bold">BienBan_Nghiemthu_API.docx</div>
+              <div className="text-[11px] text-slate-400 font-medium">118 KB • 10/04/2025</div>
+            </div>
+            <Download className="w-4 h-4 text-slate-400 ml-4 group-hover:text-blue-600" />
           </div>
         </div>
       </div>
@@ -173,209 +282,296 @@ function TabGeneral() {
   );
 }
 
-function TabContact() {
+function TabContact({ sourceSystem }: any) {
   return (
-    <div className="animate-in fade-in duration-300">
-      <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-6 pb-2 border-b border-slate-100">Thông tin hệ thống nguồn</h3>
-      <div className="grid grid-cols-2 gap-x-12 gap-y-6 max-w-4xl">
-        
-        <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-          <div className="text-sm text-slate-600">Tên đơn vị</div>
-          <div className="col-span-2 text-sm text-slate-900 font-medium">Cục Hộ tịch, Quốc tịch, Chứng thực</div>
-        </div>
-        <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-          <div className="text-sm text-slate-600">Địa chỉ email</div>
-          <div className="col-span-2 text-sm text-slate-900 font-medium">hotich@moj.gov.vn</div>
-        </div>
+    <div className="animate-in fade-in duration-300 space-y-6">
+      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+          <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
+          Thông tin hệ thống nguồn
+        </h3>
+        <div className="grid grid-cols-2 gap-x-12 gap-y-8 max-w-5xl">
+          
+          <div className="space-y-1">
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Tên hệ thống</div>
+            <div className="text-sm text-slate-900 font-bold leading-relaxed">{sourceSystem.systemName}</div>
+          </div>
 
-        <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-          <div className="text-sm text-slate-600">Địa chỉ</div>
-          <div className="col-span-2 text-sm text-slate-900 font-medium leading-relaxed">60 Trần Phú, Ba Đình,<br/>Hà Nội</div>
-        </div>
-        <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-          <div className="text-sm text-slate-600">Người đầu mối kỹ thuật</div>
-          <div className="col-span-2 text-sm text-slate-900 font-medium leading-relaxed">Nguyễn Văn A &mdash;<br/>0987 654 321</div>
-        </div>
+          <div className="space-y-1">
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Tên đơn vị</div>
+            <div className="text-sm text-slate-900 font-bold leading-relaxed">{sourceSystem.unitName}</div>
+          </div>
 
-        <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-          <div className="text-sm text-slate-600">Số điện thoại</div>
-          <div className="col-span-2 text-sm text-slate-900 font-medium">024 3733 9999</div>
-        </div>
-        <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-           <div className="text-sm text-slate-600">Ghi chú</div>
-           <div className="col-span-2 text-sm text-slate-900 font-medium leading-relaxed">Liên hệ qua email trước khi gọi điện trong giờ hành chính.</div>
-        </div>
+          <div className="space-y-1">
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Loại nguồn</div>
+            <div>
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold ${
+                sourceSystem.sourceType === 'Trong ngành' ? 'bg-indigo-50 text-indigo-700 border border-indigo-100' : 'bg-orange-50 text-orange-700 border border-orange-100'
+              }`}>
+                {sourceSystem.sourceType}
+              </span>
+            </div>
+          </div>
 
+          <div className="space-y-1">
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Đầu mối liên hệ</div>
+            <div className="text-sm text-slate-900 font-bold leading-relaxed flex items-center gap-2">
+              <User className="w-4 h-4 text-slate-400" />
+              {sourceSystem.contactPerson}
+            </div>
+          </div>
+
+          <div className="space-y-1 col-span-2">
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Địa chỉ</div>
+            <div className="text-sm text-slate-900 font-medium leading-relaxed italic">{sourceSystem.address}</div>
+          </div>
+
+          <div className="space-y-1">
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Số điện thoại</div>
+            <div className="text-sm text-slate-900 font-bold leading-relaxed">{sourceSystem.phone}</div>
+          </div>
+
+          <div className="space-y-1">
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Email</div>
+            <div className="text-sm text-slate-900 font-bold leading-relaxed text-blue-600 underline underline-offset-4">{sourceSystem.email}</div>
+          </div>
+
+          <div className="space-y-1 col-span-2">
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Ghi chú</div>
+            <div className="text-sm text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-100">
+              {sourceSystem.note || 'Không có ghi chú.'}
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
   );
 }
 
-function TabConnection({ showApiKey, setShowApiKey }: any) {
+function TabConnection({ service, showApiKey, setShowApiKey }: any) {
+  // Mock connection type if not in service
+  const connectionType = service.connectionType || 'API';
+  
   return (
     <div className="animate-in fade-in duration-300 space-y-8">
-      {/* SUCCESS BANNER */}
-      <div className="bg-[#e8f5e9] border border-[#a5d6a7] rounded-lg p-4 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-[#2e7d32] font-semibold text-sm">
-          <div className="w-2 h-2 rounded-full bg-[#2e7d32]"></div> 
-          Kết nối đang hoạt động tốt
+      {/* STATUS BANNER */}
+      <div className={`rounded-xl p-5 border ${
+        service.status === 'success' ? 'bg-green-50 border-green-200 text-green-800' : 
+        service.status?.startsWith('failed_') ? 'bg-red-50 border-red-200 text-red-800' :
+        service.status === 'inactive' ? 'bg-gray-50 border-gray-200 text-gray-700' :
+        'bg-slate-50 border-slate-200 text-slate-700'
+      }`}>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3 font-bold text-sm uppercase tracking-tight">
+            <div className={`w-2.5 h-2.5 rounded-full ${
+              service.status === 'success' ? 'bg-green-600 animate-pulse' : 
+              service.status?.startsWith('failed_') ? 'bg-red-600' : 
+              'bg-gray-400'
+            }`}></div> 
+            {service.status === 'success' ? 'Kết nối đang hoạt động tốt' : 
+             service.status?.startsWith('failed_') ? 'Kết nối thất bại' :
+             service.status === 'inactive' ? 'Kết nối đang tạm ngưng' : 'Trạng thái bản nháp'}
+          </div>
+          <div className="text-xs font-medium opacity-70 flex items-center gap-2">
+            <Clock className="w-3.5 h-3.5" />
+            Kiểm tra lần cuối: {service.lastReceived || 'Vừa xong'}
+          </div>
         </div>
-        <div className="text-[#388e3c] text-sm font-medium">Kiểm tra lần cuối: 10/04/2025 09:00 &mdash; 142ms</div>
+        
+        {(service.status?.startsWith('failed_') || service.status === 'inactive') && (
+          <div className="bg-white/60 backdrop-blur-sm p-4 rounded-lg border border-black/5 mt-2 flex items-start gap-3">
+            <AlertCircle className={`w-5 h-5 shrink-0 mt-0.5 ${service.status?.startsWith('failed_') ? 'text-red-500' : 'text-gray-500'}`} />
+            <div>
+              <div className="text-sm font-bold mb-1">
+                {service.status === 'failed_agent' ? 'Lỗi từ Agent' :
+                 service.status === 'failed_worker' ? 'Lỗi từ Worker' :
+                 service.status === 'failed_auth' ? 'Lỗi xác thực' :
+                 service.status === 'inactive' ? 'Lý do ngưng hoạt động' : 'Thông tin chi tiết'}
+              </div>
+              <div className="text-sm leading-relaxed">
+                {service.failureReason || service.inactiveReason || 'Không có thông tin chi tiết.'}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
-      <div>
-        <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-6 pb-2 border-b border-slate-100">Cấu hình RESTful API</h3>
-        <div className="grid grid-cols-2 gap-x-12 gap-y-6">
-          
-          <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-            <div className="text-sm text-slate-600">Phương thức kết nối</div>
-            <div className="col-span-2 text-sm text-slate-900 font-medium">RESTful API</div>
+      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+          <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
+          Cấu hình {connectionType === 'API' ? 'RESTful API' : connectionType === 'DB' ? 'Cơ sở dữ liệu' : 'File Upload'}
+        </h3>
+        
+        {connectionType === 'API' && (
+          <div className="grid grid-cols-2 gap-x-12 gap-y-6">
+            <div className="space-y-1">
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Phương thức kết nối</div>
+              <div className="text-sm text-slate-900 font-bold">API</div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Authorization</div>
+              <div className="text-sm text-slate-900 font-bold">API KEY</div>
+            </div>
+            <div className="space-y-1 col-span-2">
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">URL / Endpoint</div>
+              <div className="text-sm text-slate-900 font-mono font-bold truncate bg-slate-50 px-3 py-2 rounded border border-slate-100">
+                https://api.hotich.moj.gov.vn/api/v1/quoctich
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Method</div>
+              <div className="text-sm text-slate-900 font-mono font-bold bg-orange-50 text-orange-700 px-2 py-0.5 rounded border border-orange-100 inline-block">
+                GET
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Content Type</div>
+              <div className="text-sm text-slate-900 font-mono font-bold">application/json</div>
+            </div>
+            <div className="space-y-1 col-span-2">
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">API Key / Token</div>
+              <div className="flex items-center gap-3 bg-slate-900 p-3 rounded-lg border border-slate-800 mt-1">
+                <span className="font-mono text-lg tracking-[0.2em] text-blue-400 flex-1 leading-none">
+                   {showApiKey ? "A5D9-2X8K-Q7P1-B9M4" : "••••••••••••••••"}
+                </span>
+                <button 
+                   onClick={() => setShowApiKey(!showApiKey)}
+                   className="p-1.5 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 transition-colors">
+                  {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+            
+            <div className="space-y-1">
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Worker / Agent</div>
+              <div className="text-sm text-slate-900 font-bold">Worker 1 &mdash; Agent 02</div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Timeout</div>
+              <div className="text-sm text-slate-900 font-bold">5,000 ms</div>
+            </div>
           </div>
-          <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-            <div className="text-sm text-slate-600">Loại API</div>
-            <div className="col-span-2 text-sm text-slate-900 font-medium">API KEY</div>
-          </div>
+        )}
 
-          <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-            <div className="text-sm text-slate-600 items-center flex">Base URL</div>
-            <div className="col-span-2 text-sm text-slate-900 font-mono font-medium truncate">https://api.hotich.moj.gov.vn</div>
+        {connectionType === 'DB' && (
+          <div className="grid grid-cols-2 gap-x-12 gap-y-6">
+            <div className="space-y-1">
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Loại CSDL</div>
+              <div className="text-sm text-slate-900 font-bold">PostgreSQL</div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Host / Port</div>
+              <div className="text-sm text-slate-900 font-bold font-mono">192.168.1.100 : 5432</div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Database Name</div>
+              <div className="text-sm text-slate-900 font-bold font-mono">db_national_citizens</div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Username</div>
+              <div className="text-sm text-slate-900 font-bold">dldc_admin</div>
+            </div>
+            <div className="space-y-1 col-span-2">
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Query / Table</div>
+              <div className="text-sm text-slate-900 font-mono bg-slate-900 text-green-400 p-4 rounded-lg mt-1 border border-slate-800 shadow-inner overflow-x-auto">
+                SELECT * FROM public.citizen_info WHERE updated_at &gt; :last_sync
+              </div>
+            </div>
           </div>
-          <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-            <div className="text-sm text-slate-600 items-center flex">Header Name</div>
-            <div className="col-span-2 text-sm text-slate-900 font-mono font-medium">X-API-Key</div>
-          </div>
+        )}
 
-          <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-             <div className="text-sm text-slate-600 items-center flex">Content Type</div>
-             <div className="col-span-2 text-sm text-slate-900 font-mono font-medium">application/json</div>
+        {/* Custom Headers Table */}
+        <div className="mt-8">
+          <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight mb-3">Custom Headers</div>
+          <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th className="px-4 py-3 font-bold text-slate-700 w-16">STT</th>
+                  <th className="px-4 py-3 font-bold text-slate-700">Key</th>
+                  <th className="px-4 py-3 font-bold text-slate-700">Value</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                <tr className="hover:bg-slate-50 transition-colors">
+                  <td className="px-4 py-3 text-slate-500 font-medium text-center">1</td>
+                  <td className="px-4 py-3 font-mono text-slate-700">X-API-Key</td>
+                  <td className="px-4 py-3 font-mono text-slate-700 italic">****************</td>
+                </tr>
+                <tr className="hover:bg-slate-50 transition-colors">
+                  <td className="px-4 py-3 text-slate-500 font-medium text-center">2</td>
+                  <td className="px-4 py-3 font-mono text-slate-700">Accept</td>
+                  <td className="px-4 py-3 font-mono text-slate-700">application/json</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-          <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4 items-center">
-             <div className="text-sm text-slate-600">API Key</div>
-             <div className="col-span-2 flex items-center gap-3">
-               <span className="font-mono text-xl tracking-widest leading-none mt-1 text-slate-700">
-                  {showApiKey ? "A5D9-2X8K-Q7P1-B9M4" : "••••••••••••••••"}
-               </span>
-               <button 
-                  onClick={() => setShowApiKey(!showApiKey)}
-                  className="px-3 py-1 border border-slate-300 rounded text-xs font-medium bg-white text-slate-700 hover:bg-slate-50">
-                 {showApiKey ? 'Ẩn' : 'Hiện'}
-               </button>
-             </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-             <div className="text-sm text-slate-600 items-center flex">Method</div>
-             <div className="col-span-2 text-sm text-slate-900 font-mono font-medium">GET</div>
-          </div>
-          <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-             <div className="text-sm text-slate-600">Timeout (ms)</div>
-             <div className="col-span-2 text-sm text-slate-900 font-medium">5000</div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-             <div className="text-sm text-slate-600 items-center flex">Endpoint Path</div>
-             <div className="col-span-2 text-sm text-slate-900 font-mono font-medium">/api/v1/quoctich</div>
-          </div>
-          <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-             <div className="text-sm text-slate-600">Page Size</div>
-             <div className="col-span-2 text-sm text-slate-900 font-medium">200</div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-             <div className="text-sm text-slate-600 items-center flex">Query Parameters</div>
-             <div className="col-span-2 text-sm text-slate-900 font-mono font-medium">fromDate, toDate, pageSize</div>
-          </div>
-          <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-             <div className="text-sm text-slate-600">HTTP Success Codes</div>
-             <div className="col-span-2 text-sm text-slate-900 font-mono font-medium">200, 201</div>
-          </div>
-
-          <div></div>
-          <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-             <div className="text-sm text-slate-600">Số lần thử lại</div>
-             <div className="col-span-2 text-sm text-slate-900 font-medium">3 lần &mdash; cách 5 phút</div>
-          </div>
-
-          <div></div>
-          <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-             <div className="text-sm text-slate-600 items-center flex">SSL Required</div>
-             <div className="col-span-2 text-sm font-medium">
-                <span className="px-2.5 py-1 text-xs bg-green-100 text-green-700 rounded">Bật</span>
-             </div>
-          </div>
-
-        </div>
-        <div className="flex justify-center mt-6">
-           <button className="p-2 bg-white border border-slate-200 rounded-full text-slate-500 shadow-sm hover:shadow hover:bg-slate-50 transition-all">
-              <ChevronDown className="w-4 h-4" />
-           </button>
         </div>
       </div>
     </div>
   )
 }
 
-function TabCollection() {
+function TabCollection({ service }: any) {
   return (
-    <div className="animate-in fade-in duration-300 space-y-8 max-w-4xl">
-      <div>
-        <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-6 pb-2 border-b border-slate-100">Cấu hình đồng bộ dữ liệu</h3>
-        <div className="grid grid-cols-2 gap-x-12 gap-y-6">
+    <div className="animate-in fade-in duration-300 space-y-8 max-w-5xl">
+      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+          <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
+          Cấu hình đồng bộ dữ liệu
+        </h3>
+        <div className="grid grid-cols-2 gap-x-12 gap-y-8">
           
-          <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4 items-start">
-            <div className="text-sm text-slate-600 pt-0.5">Phương thức đồng bộ</div>
-            <div className="col-span-2 text-sm text-slate-900 font-medium leading-tight">Incremental &mdash; theo watermark</div>
-          </div>
-          <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-            <div className="text-sm text-slate-600">Lần chạy kế tiếp</div>
-            <div className="col-span-2 text-sm text-slate-900 font-medium text-blue-700">11/04/2025 09:00</div>
+          <div className="space-y-1">
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Loại tần suất</div>
+            <div className="text-sm text-slate-900 font-bold">Cập nhật (Incremental)</div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-            <div className="text-sm text-slate-600">Tần suất thu thập</div>
-            <div className="col-span-2 text-sm text-slate-900 font-medium">Hàng ngày &mdash; 09:00</div>
-          </div>
-          <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-            <div className="text-sm text-slate-600">Batch size</div>
-            <div className="col-span-2 text-sm text-slate-900 font-medium">1,000 bản ghi/lần</div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-            <div className="text-sm text-slate-600">Watermark column</div>
-            <div className="col-span-2 text-sm text-slate-900 font-mono font-medium">updated_at</div>
-          </div>
-          <div className="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-            <div className="text-sm text-slate-600">Thông báo lỗi</div>
-            <div className="col-span-2 text-sm text-slate-900 font-medium">admin@moj.gov.vn</div>
+          <div className="space-y-1">
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Lần chạy kế tiếp</div>
+            <div className="text-sm text-blue-700 font-bold flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
+              11/04/2025 09:00
+            </div>
           </div>
 
-        </div>
+          <div className="space-y-1">
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Tần suất lặp lại</div>
+            <div className="text-sm text-slate-900 font-bold leading-tight">
+              Lặp lại mỗi <span className="text-blue-600">1 ngày</span> vào lúc <span className="text-blue-600">09:00</span>
+            </div>
+          </div>
 
-        <div className="mt-6 bg-[#e3f2fd] border border-[#bbdefb] text-[#1976d2] p-4 rounded-lg text-sm">
-           Lưu ý: Lịch thu thập sẽ tự động chạy theo cấu hình. Hệ thống sẽ gửi thông báo khi có lỗi xảy ra trong quá trình thu thập.
+          <div className="space-y-1">
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Batch size</div>
+            <div className="text-sm text-slate-900 font-bold">1,000 bản ghi/lần</div>
+          </div>
+
+          <div className="space-y-1 col-span-2">
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Mô tả tóm lược</div>
+            <div className="text-sm text-slate-700 font-medium italic bg-blue-50/50 p-4 rounded-lg border border-blue-100 flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+              Dịch vụ sẽ tự động thu thập dữ liệu mới hàng ngày vào lúc 09:00 sáng. Kết quả sẽ được lưu vào CSDL dùng chung và gửi thông báo qua email nếu có lỗi.
+            </div>
+          </div>
+
         </div>
       </div>
 
-      <div>
-        <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-6 pb-2 border-b border-slate-100">Kiểm tra kết nối thủ công</h3>
-        <div className="flex items-center gap-6">
-           <button className="px-5 py-2.5 bg-white border border-slate-300 rounded-lg text-sm font-medium hover:bg-slate-50 hover:shadow-sm transition-all focus:ring-2 focus:ring-slate-200">
-             Kiểm tra kết nối ngay
-           </button>
-           <div className="flex items-center gap-4 text-sm text-slate-700">
-             <span>Chế độ Mockup:</span>
-             <label className="flex items-center gap-1.5 cursor-pointer">
-                <input type="radio" name="mockupMode" className="w-4 h-4 text-slate-900 focus:ring-slate-900" defaultChecked />
-                Thành công
-             </label>
-             <label className="flex items-center gap-1.5 cursor-pointer">
-                <input type="radio" name="mockupMode" className="w-4 h-4 text-slate-900 focus:ring-slate-900" />
-                Lỗi kết nối
-             </label>
-             <label className="flex items-center gap-1.5 cursor-pointer">
-                <input type="radio" name="mockupMode" className="w-4 h-4 text-slate-900 focus:ring-slate-900" />
-                Lỗi dữ liệu
-             </label>
+      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+          <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
+          Thông báo & Cảnh báo
+        </h3>
+        <div className="grid grid-cols-2 gap-8">
+           <div className="p-4 rounded-xl border border-slate-100 bg-slate-50/50">
+              <div className="text-xs font-bold text-slate-500 uppercase mb-2">Email nhận báo cáo</div>
+              <div className="text-sm font-bold text-slate-800">admin@moj.gov.vn</div>
+           </div>
+           <div className="p-4 rounded-xl border border-slate-100 bg-slate-50/50">
+              <div className="text-xs font-bold text-slate-500 uppercase mb-2">Kênh cảnh báo lỗi</div>
+              <div className="text-sm font-bold text-slate-800">Telegram, Email (Immediate)</div>
            </div>
         </div>
       </div>
@@ -434,109 +630,123 @@ function TabMapping() {
   const filteredFields = activeTable?.fields.filter(f => f.name.toLowerCase().includes(searchField.toLowerCase())) || [];
 
   return (
-    <div className="flex h-[550px] border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm animate-in fade-in duration-300">
-      {/* Left Column: Tables */}
-      <div className="w-1/3 border-r border-slate-200 flex flex-col bg-slate-50/50">
-        <div className="p-4 border-b border-slate-200 bg-white">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Tìm kiếm bảng..."
-              className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-              value={searchTable}
-              onChange={(e) => setSearchTable(e.target.value)}
-            />
-          </div>
-        </div>
-        <div className="flex-1 overflow-y-auto">
-          <div className="p-2 space-y-1">
-            {filteredTables.map(table => (
-              <button
-                key={table.id}
-                onClick={() => setActiveTableId(table.id)}
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-left transition-all ${
-                  activeTableId === table.id 
-                    ? 'bg-blue-50 text-blue-700 shadow-sm' 
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg ${activeTableId === table.id ? 'bg-blue-100' : 'bg-slate-200'}`}>
-                    <Database className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold">{table.name}</div>
-                    <div className="text-[11px] opacity-70">{table.label}</div>
-                  </div>
-                </div>
-                {activeTableId === table.id && <ChevronRight className="w-4 h-4" />}
-              </button>
-            ))}
-          </div>
-        </div>
+    <div className="space-y-4 animate-in fade-in duration-300">
+      {/* ACTION BUTTONS */}
+      <div className="flex justify-end gap-3">
+        <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-bold hover:bg-green-700 transition-all shadow-sm active:scale-95">
+          <Edit className="w-4 h-4" />
+          Sửa cấu trúc
+        </button>
+        <button className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-bold hover:bg-red-700 transition-all shadow-sm active:scale-95">
+          <Trash2 className="w-4 h-4" />
+          Xóa cấu trúc
+        </button>
       </div>
 
-      {/* Right Column: Fields */}
-      <div className="flex-1 flex flex-col bg-white">
-        <div className="p-4 border-b border-slate-200 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h4 className="font-bold text-slate-800 text-sm">Danh sách trường:</h4>
-            <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-mono">{activeTable?.name}</span>
+      <div className="flex h-[550px] border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+        {/* Left Column: Tables */}
+        <div className="w-1/3 border-r border-slate-200 flex flex-col bg-slate-50/50">
+          <div className="p-4 border-b border-slate-200 bg-white">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Tìm kiếm bảng..."
+                className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
+                value={searchTable}
+                onChange={(e) => setSearchTable(e.target.value)}
+              />
+            </div>
           </div>
-          <div className="relative w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Tìm kiếm trường..."
-              className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-              value={searchField}
-              onChange={(e) => setSearchField(e.target.value)}
-            />
+          <div className="flex-1 overflow-y-auto">
+            <div className="p-2 space-y-1">
+              {filteredTables.map(table => (
+                <button
+                  key={table.id}
+                  onClick={() => setActiveTableId(table.id)}
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-left transition-all ${
+                    activeTableId === table.id 
+                      ? 'bg-blue-50 text-blue-700 shadow-sm' 
+                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${activeTableId === table.id ? 'bg-blue-100' : 'bg-slate-200'}`}>
+                      <Database className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-bold">{table.name}</div>
+                      <div className="text-[11px] opacity-70">{table.label}</div>
+                    </div>
+                  </div>
+                  {activeTableId === table.id && <ChevronRight className="w-4 h-4" />}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
-        <div className="flex-1 overflow-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 sticky top-0 z-10 border-b border-slate-200">
-              <tr>
-                <th className="px-4 py-3 font-semibold text-slate-700">Tên trường</th>
-                <th className="px-4 py-3 font-semibold text-slate-700">Kiểu dữ liệu</th>
-                <th className="px-4 py-3 font-semibold text-slate-700">Allow null</th>
-                <th className="px-4 py-3 font-semibold text-slate-700">Is path file</th>
-                <th className="px-4 py-3 font-semibold text-slate-700">Host path file</th>
-                <th className="px-4 py-3 font-semibold text-slate-700">Tên hiển thị</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredFields.map(field => (
-                <tr key={field.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-4 py-3 font-medium text-slate-900">{field.name}</td>
-                  <td className="px-4 py-3">
-                    <span className="px-2 py-0.5 bg-slate-100 border border-slate-200 rounded text-[11px] font-mono text-slate-600">
-                      {field.dataType}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    <div className="flex justify-center">
-                      <div className={`w-4 h-4 rounded border flex items-center justify-center ${field.allowNull ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-300 bg-white'}`}>
-                        {field.allowNull && <Check className="w-3 h-3" />}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    <div className="flex justify-center">
-                      <div className={`w-4 h-4 rounded border flex items-center justify-center ${field.isPath ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-300 bg-white'}`}>
-                        {field.isPath && <Check className="w-3 h-3" />}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-slate-500 font-mono text-xs">{field.hostPath}</td>
-                  <td className="px-4 py-3 text-slate-900">{field.displayName}</td>
+        {/* Right Column: Fields */}
+        <div className="flex-1 flex flex-col bg-white">
+          <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <h4 className="font-bold text-slate-800 text-sm">Danh sách trường:</h4>
+              <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-mono">{activeTable?.name}</span>
+            </div>
+            <div className="relative w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Tìm kiếm trường..."
+                className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
+                value={searchField}
+                onChange={(e) => setSearchField(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-slate-50 sticky top-0 z-10 border-b border-slate-200">
+                <tr>
+                  <th className="px-4 py-3 font-semibold text-slate-700">Tên trường</th>
+                  <th className="px-4 py-3 font-semibold text-slate-700">Kiểu dữ liệu</th>
+                  <th className="px-4 py-3 font-semibold text-slate-700">Allow null</th>
+                  <th className="px-4 py-3 font-semibold text-slate-700">Is path file</th>
+                  <th className="px-4 py-3 font-semibold text-slate-700">Host path file</th>
+                  <th className="px-4 py-3 font-semibold text-slate-700">Tên hiển thị</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {filteredFields.map(field => (
+                  <tr key={field.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-4 py-3 font-medium text-slate-900">{field.name}</td>
+                    <td className="px-4 py-3">
+                      <span className="px-2 py-0.5 bg-slate-100 border border-slate-200 rounded text-[11px] font-mono text-slate-600">
+                        {field.dataType}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex justify-center">
+                        <div className={`w-4 h-4 rounded border flex items-center justify-center ${field.allowNull ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-300 bg-white'}`}>
+                          {field.allowNull && <Check className="w-3 h-3" />}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex justify-center">
+                        <div className={`w-4 h-4 rounded border flex items-center justify-center ${field.isPath ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-300 bg-white'}`}>
+                          {field.isPath && <Check className="w-3 h-3" />}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-slate-500 font-mono text-xs">{field.hostPath}</td>
+                    <td className="px-4 py-3 text-slate-900">{field.displayName}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

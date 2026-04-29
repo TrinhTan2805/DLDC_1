@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Plus, Eye, Edit, Settings as SettingsIcon, Trash2, FileText, Activity, Settings, AlertCircle, X, Download, Send, ChevronLeft, ChevronRight, Calendar, Wrench } from 'lucide-react';
+import { Search, Plus, Eye, Edit, Settings as SettingsIcon, Trash2, FileText, Activity, Settings, AlertCircle, X, Download, Send, ChevronLeft, ChevronRight, Calendar, Wrench, Power } from 'lucide-react';
 import { AddServiceModal, EditServiceModal, DeleteServiceModal, SettingsServiceModal } from './ServiceModals';
 import { ViewServiceModal } from './ViewServiceModal';
 import { LogManagement } from './LogManagement';
@@ -80,7 +80,10 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
     return services.filter(service => {
       // Removed date filtering logic - date picker is just for UI display
       
-      return (statusFilter === 'all' || service.status === statusFilter) &&
+      const matchesStatus = statusFilter === 'all' || 
+        (statusFilter === 'failed' ? service.status?.startsWith('failed_') : service.status === statusFilter);
+
+      return matchesStatus &&
         (typeFilter === 'all' || service.type === typeFilter) &&
         (sourceFilter === 'all' || service.source === sourceFilter) &&
         (departmentFilter === 'all' || service.department === departmentFilter) &&
@@ -271,8 +274,9 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                   >
                     <option value="all">Tất cả trạng thái</option>
                     <option value="success">Thành công</option>
-                    <option value="format_error">Lỗi định dạng</option>
-                    <option value="structure_error">Lỗi cấu trúc</option>
+                    <option value="draft">Bản nháp</option>
+                    <option value="failed">Thất bại</option>
+                    <option value="inactive">Ngưng hoạt động</option>
                   </select>
                   <select aria-label="Select box"
                     className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white flex-1"
@@ -365,14 +369,14 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                         <td className="px-4 py-3 text-sm text-slate-600">{service.createdAt}</td>
                         <td className="px-4 py-3 text-sm text-slate-600">{service.updatedAt}</td>
                         <td className="px-4 py-3">
-                          {(service.status === 'format_error' || service.status === 'structure_error') ? (
+                          {service.status?.startsWith('failed_') ? (
                             <button
                               onClick={() => {
                                 setSelectedService(service);
-                                setShowErrorDetailModal(true);
+                                setShowDetailModal(true);
                               }}
                               className={`inline-flex px-2 py-1 rounded text-xs cursor-pointer hover:opacity-80 transition-opacity ${service.statusColor}`}
-                              title="Click để xem chi tiết lỗi"
+                              title="Click để xem chi tiết lỗi kết nối"
                             >
                               {service.statusText}
                             </button>
@@ -428,12 +432,6 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                               }}
                             >
                               <SettingsIcon className="w-4 h-4" />
-                            </button>
-                            <button
-                              className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
-                              title="Bảo trì"
-                            >
-                              <Wrench className="w-4 h-4" />
                             </button>
                             <button
                               className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
@@ -564,6 +562,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
         onClose={() => setShowDataDetailPage(false)}
         service={selectedService}
       />
+
       
       {/* Error Detail Modal */}
       {showErrorDetailModal && selectedService && (

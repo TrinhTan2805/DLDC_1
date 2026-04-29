@@ -47,9 +47,11 @@ export const mockCollectionServices = [
     createdAt: '15/12/2025 08:00:00',
     updatedAt: '15/12/2025 08:00:00',
     lastReceived: '15/12/2025 08:00:00',
-    status: 'success',
-    statusText: 'Thành công',
-    statusColor: 'bg-green-100 text-green-700',
+    status: 'failed_agent',
+    statusText: 'Thất bại',
+    failureType: 'Agent',
+    failureReason: 'Agent được gán (Agent-ID-02) đang ở trạng thái không kích hoạt.',
+    statusColor: 'bg-red-100 text-red-700',
     notificationSent: true,
     notificationTime: '15/12/2025 08:00:10',
     validationDetails: {
@@ -76,9 +78,11 @@ export const mockCollectionServices = [
     createdAt: '14/12/2025 09:15:00',
     updatedAt: '14/12/2025 09:15:00',
     lastReceived: '14/12/2025 09:15:00',
-    status: 'success',
-    statusText: 'Thành công',
-    statusColor: 'bg-green-100 text-green-700',
+    status: 'failed_worker',
+    statusText: 'Thất bại',
+    failureType: 'Worker',
+    failureReason: 'Worker unreachable: Không thể kết nối tới worker xử lý tại địa chỉ 10.86.142.55.',
+    statusColor: 'bg-red-100 text-red-700',
     notificationSent: true,
     notificationTime: '14/12/2025 09:15:08',
     validationDetails: {
@@ -134,9 +138,11 @@ export const mockCollectionServices = [
     createdAt: '18/12/2025 14:20:00',
     updatedAt: '18/12/2025 14:20:00',
     lastReceived: '18/12/2025 14:20:00',
-    status: 'success',
-    statusText: 'Thành công',
-    statusColor: 'bg-green-100 text-green-700',
+    status: 'failed_auth',
+    statusText: 'Thất bại',
+    failureType: 'Authentication',
+    failureReason: 'Lỗi xác thực: Access key không hợp lệ hoặc đã hết hạn.',
+    statusColor: 'bg-red-100 text-red-700',
     notificationSent: true,
     notificationTime: '18/12/2025 14:20:12',
     validationDetails: {
@@ -163,9 +169,10 @@ export const mockCollectionServices = [
     createdAt: '17/12/2025 16:45:00',
     updatedAt: '17/12/2025 16:45:00',
     lastReceived: '17/12/2025 16:45:00',
-    status: 'err_conn',
-    statusText: 'Lỗi kết nối',
-    statusColor: 'bg-red-100 text-red-700',
+    status: 'inactive',
+    statusText: 'Ngưng hoạt động',
+    inactiveReason: 'Thay đổi Worker xử lý dữ liệu để tối ưu hiệu năng.',
+    statusColor: 'bg-gray-100 text-gray-500',
     notificationSent: false,
     notificationTime: null,
     notificationSentForError: false,
@@ -181,32 +188,8 @@ export const mockCollectionServices = [
           count: 850,
           examples: ['31/13/2023', '2023-15-45', 'invalid-date'],
           expectedFormat: 'DD/MM/YYYY hoặc YYYY-MM-DD'
-        },
-        {
-          type: 'format_error',
-          field: 'soDienThoai',
-          message: 'Sai định dạng số điện thoại',
-          count: 520,
-          examples: ['123456', '0123-456-789', 'abc123456'],
-          expectedFormat: '10-11 chữ số, bắt đầu bằng 0'
-        },
-        {
-          type: 'format_error',
-          field: 'cmnd',
-          message: 'Sai định dạng CMND/CCCD',
-          count: 200,
-          examples: ['abc12345', '12345', '123456789012345'],
-          expectedFormat: '9 hoặc 12 chữ số'
         }
       ]
-    },
-    errorDetails: {
-      errorCode: 'ERR_FORMAT',
-      errorMessage: 'Dữ liệu không đúng định dạng',
-      errorTime: '17/12/2025 16:45:00',
-      errorDescription: 'Phát hiện 1570 bản ghi có lỗi định dạng dữ liệu. Vui lòng kiểm tra lại các trường ngày sinh, số điện thoại và CMND/CCCD.',
-      attemptCount: 3,
-      lastAttempt: '17/12/2025 16:45:00'
     }
   },
   {

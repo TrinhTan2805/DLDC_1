@@ -6,8 +6,10 @@ import { DashboardHome } from '../dashboard/DashboardHome';
 import { DataCollectionPage } from '../pages/DataCollectionPage';
 import { ExternalDataPage } from '../pages/collection/ExternalDataPage';
 import { InternalDataPage } from '../pages/collection/InternalDataPage';
+import { ViewCollectedDataPage } from '../pages/collection/ViewCollectedDataPage';
 import { CollectionSetupPage } from '../pages/collection/CollectionSetupPage';
 import { SourceSystemManagementPage } from '../pages/collection/SourceSystemManagementPage';
+import { AgentManagementPage } from '../pages/collection/AgentManagementPage';
 import { DataProcessingPage } from '../pages/DataProcessingPage';
 import { ProcessedDataPage } from '../pages/processing/ProcessedDataPage';
 import { CategoryManagementPage } from '../pages/CategoryManagementPage';
@@ -207,6 +209,10 @@ const pageConfig: Record<string, { title: string; description: string }> = {
     title: 'Quản lý hệ thống nguồn',
     description: 'Quản lý danh sách và thông tin các hệ thống nguồn cung cấp dữ liệu'
   },
+  'collection-agent': {
+    title: 'Quản trị Agent',
+    description: 'Quản lý danh sách các agent thu thập dữ liệu và trạng thái hoạt động'
+  },
   'collection-reconciliation-setup': {
     title: 'Thiết lập đối soát',
     description: 'Thiết lập các quy tắc và cấu hình đối soát dữ liệu thu thập'
@@ -336,10 +342,10 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'collection-dashboard' && <CollectionDashboard />}
             {currentPage === 'screen-flow-diagram' && <ScreenFlowDiagram />}
             {currentPage === 'collection' && <DataCollectionPage />}
-            {currentPage === 'collection-external' && <ExternalDataPage />}
-            {currentPage === 'collection-internal' && <InternalDataPage />}
+            {currentPage === 'view-collected-data' && <ViewCollectedDataPage onNavigate={(id) => setCurrentPage(id)} />}
             {currentPage === 'collection-setup' && <CollectionSetupPage onNavigate={setCurrentPage} />}
             {currentPage === 'collection-source-system' && <SourceSystemManagementPage />}
+            {currentPage === 'collection-agent' && <AgentManagementPage />}
             {currentPage === 'collection-reconciliation' && <ReconciliationSetupPage />}
             {currentPage === 'collection-reconciliation-setup' && <ReconciliationSetupPage />}
             {currentPage === 'collection-reconciliation-management' && <DataReconciliationPage />}
@@ -576,18 +582,18 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'external-meritorious-relative' && <MeritoriousRelativePage />}
 
             {/* Data Info */}
-            {currentPage === 'data-info-civil-registry' && <CivilRegistryDatabasePage />}
-            {currentPage === 'data-info-case-management' && <CaseManagementPage />}
-            {currentPage === 'data-info-civil-judgment' && <CivilJudgmentPage />}
-            {currentPage === 'data-info-security-measures' && <SecurityMeasuresPage />}
-            {currentPage === 'data-info-legal-national' && <LegalNationalPage />}
-            {currentPage === 'data-info-civil-legal-center' && <CivilLegalCenterPage />}
-            {currentPage === 'data-info-civil-legal-info' && <CivilLegalInfoPage />}
-            {currentPage === 'data-info-legal-center' && <LegalCenterPage />}
-            {currentPage === 'data-info-family-base' && <FamilyBasePage />}
-            {currentPage === 'data-info-auction' && <AuctionPage />}
-            {currentPage === 'data-info-international' && <InternationalPage />}
-            {currentPage === 'collection-statistics' && <StatisticsCollectionPage />}
+            {currentPage === 'data-info-civil-registry' && <CivilRegistryDatabasePage onBack={() => setCurrentPage('view-collected-data')} />}
+            {currentPage === 'data-info-case-management' && <CaseManagementPage onBack={() => setCurrentPage('view-collected-data')} />}
+            {currentPage === 'data-info-civil-judgment' && <CivilJudgmentPage onBack={() => setCurrentPage('view-collected-data')} />}
+            {currentPage === 'data-info-security-measures' && <SecurityMeasuresPage onBack={() => setCurrentPage('view-collected-data')} />}
+            {currentPage === 'data-info-legal-national' && <LegalNationalPage onBack={() => setCurrentPage('view-collected-data')} />}
+            {currentPage === 'data-info-civil-legal-center' && <CivilLegalCenterPage onBack={() => setCurrentPage('view-collected-data')} />}
+            {currentPage === 'data-info-civil-legal-info' && <CivilLegalInfoPage onBack={() => setCurrentPage('view-collected-data')} />}
+            {currentPage === 'data-info-legal-center' && <LegalCenterPage onBack={() => setCurrentPage('view-collected-data')} />}
+            {currentPage === 'data-info-family-base' && <FamilyBasePage onBack={() => setCurrentPage('view-collected-data')} />}
+            {currentPage === 'data-info-auction' && <AuctionPage onBack={() => setCurrentPage('view-collected-data')} />}
+            {currentPage === 'data-info-international' && <InternationalPage onBack={() => setCurrentPage('view-collected-data')} />}
+            {currentPage === 'collection-statistics' && <StatisticsCollectionPage onBack={() => setCurrentPage('view-collected-data')} />}
 
             {/* Processing Data Info - CSDL Trong ngành */}
             {currentPage === 'processing-data-info-civil-registry' && <CivilRegistryProcessingPage />}
@@ -677,47 +683,48 @@ const getBreadcrumbPath = (pageId: string): string[] => {
     'collection-dashboard': ['Quản lý thu thập', 'Dashboard'],
     'collection-setup': ['Quản lý thu thập', 'Thiết lập thu thập'],
     'collection-source-system': ['Quản lý thu thập', 'Quản lý hệ thống nguồn'],
-    'collection-external': ['Quản lý thu thập', 'CSDL Trong ngành'],
-    'data-info': ['Quản lý thu thập', 'CSDL Trong ngành'],
-    'data-info-civil-registry': ['Quản lý thu thập', 'CSDL Trong ngành', 'CSDL Hộ tịch điện tử'],
-    'data-info-case-management': ['Quản lý thu thập', 'CSDL Trong ngành', 'HT quản lý hồ sơ QT'],
-    'data-info-civil-judgment': ['Quản lý thu thập', 'CSDL Trong ngành', 'CSDL thi hành án dân sự'],
-    'data-info-security-measures': ['Quản lý thu thập', 'CSDL Trong ngành', 'CSDL về biện pháp BD'],
-    'data-info-legal-national': ['Quản lý thu thập', 'CSDL Trong ngành', 'CSDL quốc gia về PL'],
-    'data-info-civil-legal-center': ['Quản lý thu thập', 'CSDL Trong ngành', 'CSDL TT Tư Pháp dân sự'],
-    'data-info-civil-legal-info': ['Quản lý thu thập', 'CSDL Trong ngành', 'HT TTTG pháp lý dân sự'],
-    'data-info-legal-center': ['Quản lý thu thập', 'CSDL Trong ngành', 'HTTT TG Pháp lý'],
-    'data-info-family-base': ['Quản lý thu thập', 'CSDL Trong ngành', 'CSDL PB, GĐ và HG cơ sở'],
-    'data-info-auction': ['Quản lý thu thập', 'CSDL Trong ngành', 'CSDL quản lý đấu giá TS'],
-    'data-info-international': ['Quản lý thu thập', 'CSDL Trong ngành', 'CSDL Hợp tác quốc tế'],
-    'collection-statistics': ['Quản lý thu thập', 'CSDL Trong ngành', 'CSDL Thống kê thu thập'],
-    'category-management': ['Quản lý thu thập', 'CSDL Trong ngành', 'Quản lý danh mục'],
-    'category-management-a': ['Quản lý thu thập', 'CSDL Trong ngành', 'Quản lý danh mục', 'Biên tập danh mục A'],
-    'collection-internal': ['Quản lý thu thập', 'CSDL Ngoài ngành'],
-    'external-court-judgment': ['Quản lý thu thập', 'CSDL Ngoài ngành', 'CSDL Thông tin Bản án, quyết định từ TAND tối cah'],
-    'external-category-group': ['Quản lý thu thập', 'CSDL Ngoài ngành', 'CSDL Nhóm danh mục'],
-    'external-social-security': ['Quản lý thu thập', 'CSDL Ngoài ngành', 'CSDL Nhóm bảo hiểm xã hội'],
-    'external-meritorious-group': ['Quản lý thu thập', 'CSDL Ngoài ngành', 'CSDL Nhóm người có công'],
-    'external-children-group': ['Quản lý thu thập', 'CSDL Ngoài ngành', 'CSDL Nhóm trẻ em'],
-    'external-gender-category': ['Quản lý thu thập', 'CSDL Ngoài ngành', 'CSDL Danh mục giới tính'],
-    'external-ethnic-category': ['Quản lý thu thập', 'CSDL Ngoài ngành', 'CSDL Danh mục và mã các dân tộc'],
-    'external-country-nationality': ['Quản lý thu thập', 'CSDL Ngoài ngành', 'CSDL Danh mục và mã Quốc gia, Quốc tịch'],
-    'external-religion-category': ['Quản lý thu thập', 'CSDL Ngoài ngành', 'CSDL Danh mục và mã các Tôn giáo'],
-    'external-agency-category': ['Quản lý thu thập', 'CSDL Ngoài ngành', 'CSDL Danh mục cơ quan'],
-    'external-administrative-unit': ['Quản lý thu thập', 'CSDL Ngoài ngành', 'CSDL Danh mục đơn vị hành chính'],
-    'external-family-relationship': ['Quản lý thu thập', 'CSDL Ngoài ngành', 'CSDL Danh mục và mã mối quan hệ trong gia đình'],
-    'external-identity-document': ['Quản lý thu thập', 'CSDL Ngoài ngành', 'CSDL Danh mục mã giấy tờ tùy thân'],
-    'external-social-assistance': ['Quản lý thu thập', 'CSDL Ngoài ngành', 'CSDL BTXH & GN - Hưởng trợ giúp XH'],
-    'external-poverty-info': ['Quản lý thu thập', 'CSDL Ngoài ngành', 'CSDL BTXH & GN - Thông tin người nghèo, cận nghèo'],
-    'external-single-person': ['Quản lý thu thập', 'CSDL Ngoài ngành', 'CSDL BTXH & GN - Người đơn thân'],
-    'external-children-social-protection': ['Quản lý thu thập', 'CSDL Ngoài ngành', 'CSDL BTXH & GN - Trẻ em là đối tượng BTXH'],
-    'external-hiv-person': ['Quản lý thu thập', 'CSDL Ngoài ngành', 'CSDL BTXH & GN - Người có HIV'],
-    'external-elderly-person': ['Quản lý thu thập', 'CSDL Ngoài ngành', 'CSDL BTXH & GN - Người cao tuổi'],
-    'external-disabled-person': ['Quản lý thu thập', 'CSDL Ngoài ngành', 'CSDL BTXH & GN - Thông tin về người khuyết tật'],
-    'external-meritorious-person': ['Quản lý thu thập', 'CSDL Ngoài ngành', 'CSDL Người có công - Hồ sơ công nhận người có công'],
-    'external-martyr-record': ['Quản lý thu thập', 'CSDL Ngoài ngành', 'CSDL Người có công - Hồ sơ liệt sĩ'],
-    'external-meritorious-relative': ['Quản lý thu thập', 'CSDL Ngoài ngành', 'CSDL Ngời có công - Hồ sơ công nhận thân nhân người có công'],
-    'external-children-info': ['Quản lý thu thập', 'CSDL Ngoài ngành', 'CSDL Trẻ em - Trẻ em'],
+    'collection-agent': ['Quản lý thu thập', 'Quản trị Agent'],
+    'view-collected-data': ['Quản lý thu thập', 'Xem dữ liệu thu thập'],
+    'data-info': ['Quản lý thu thập', 'Xem dữ liệu thu thập'],
+    'data-info-civil-registry': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL Hộ tịch điện tử'],
+    'data-info-case-management': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'HT quản lý hồ sơ QT'],
+    'data-info-civil-judgment': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL thi hành án dân sự'],
+    'data-info-security-measures': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL về biện pháp BD'],
+    'data-info-legal-national': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL quốc gia về PL'],
+    'data-info-civil-legal-center': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL TT Tư Pháp dân sự'],
+    'data-info-civil-legal-info': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'HT TTTG pháp lý dân sự'],
+    'data-info-legal-center': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'HTTT TG Pháp lý'],
+    'data-info-family-base': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL PB, GĐ và HG cơ sở'],
+    'data-info-auction': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL quản lý đấu giá TS'],
+    'data-info-international': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL Hợp tác quốc tế'],
+    'collection-statistics': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL Thống kê thu thập'],
+    'category-management': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'Quản lý danh mục'],
+    'category-management-a': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'Quản lý danh mục', 'Biên tập danh mục A'],
+
+    'external-court-judgment': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL Thông tin Bản án, quyết định từ TAND tối cah'],
+    'external-category-group': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL Nhóm danh mục'],
+    'external-social-security': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL Nhóm bảo hiểm xã hội'],
+    'external-meritorious-group': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL Nhóm người có công'],
+    'external-children-group': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL Nhóm trẻ em'],
+    'external-gender-category': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL Danh mục giới tính'],
+    'external-ethnic-category': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL Danh mục và mã các dân tộc'],
+    'external-country-nationality': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL Danh mục và mã Quốc gia, Quốc tịch'],
+    'external-religion-category': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL Danh mục và mã các Tôn giáo'],
+    'external-agency-category': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL Danh mục cơ quan'],
+    'external-administrative-unit': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL Danh mục đơn vị hành chính'],
+    'external-family-relationship': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL Danh mục và mã mối quan hệ trong gia đình'],
+    'external-identity-document': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL Danh mục mã giấy tờ tùy thân'],
+    'external-social-assistance': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL BTXH & GN - Hưởng trợ giúp XH'],
+    'external-poverty-info': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL BTXH & GN - Thông tin người nghèo, cận nghèo'],
+    'external-single-person': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL BTXH & GN - Người đơn thân'],
+    'external-children-social-protection': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL BTXH & GN - Trẻ em là đối tượng BTXH'],
+    'external-hiv-person': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL BTXH & GN - Người có HIV'],
+    'external-elderly-person': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL BTXH & GN - Người cao tuổi'],
+    'external-disabled-person': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL BTXH & GN - Thông tin về người khuyết tật'],
+    'external-meritorious-person': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL Người có công - Hồ sơ công nhận người có công'],
+    'external-martyr-record': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL Người có công - Hồ sơ liệt sĩ'],
+    'external-meritorious-relative': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL Ngời có công - Hồ sơ công nhận thân nhân người có công'],
+    'external-children-info': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL Trẻ em - Trẻ em'],
     'collection-reconciliation': ['Quản lý thu thập', 'Đối soát dữ liệu'],
 
     // Reconciliation - External Ministry
