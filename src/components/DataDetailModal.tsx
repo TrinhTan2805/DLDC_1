@@ -86,7 +86,6 @@ export function DataDetailModal({
   const [activeTab, setActiveTab] = useState('list');
   const [selectedRecord, setSelectedRecord] = useState<DetailRecord | null>(null);
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
-  const [detailTab, setDetailTab] = useState('person');
   const [searchText, setSearchText] = useState('');
   const [errorStatusFilter, setErrorStatusFilter] = useState('all');
   const [viewingPdfUrl, setViewingPdfUrl] = useState<string | null>(null);
@@ -936,83 +935,21 @@ export function DataDetailModal({
 
               {/* Content with Vertical Sidebar */}
               <div className="flex-1 flex overflow-hidden bg-white">
-                {/* Vertical Sidebar */}
-                <div className="w-64 border-r border-slate-200 bg-slate-50 overflow-y-auto flex-shrink-0">
-                  <div className="p-4 space-y-1">
-                    <button
-                      onClick={() => setDetailTab('person')}
-                      className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-all flex items-center gap-3 ${
-                        detailTab === 'person' ? 'bg-orange-50 text-orange-600 shadow-sm border border-orange-100' : 'text-slate-600 hover:bg-slate-100'
-                      }`}
-                    >
-                      <span className="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center flex-shrink-0">
-                        👤
-                      </span>
-                      Thông tin bản ghi
-                    </button>
-                    <button
-                      onClick={() => setDetailTab('father')}
-                      className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-all flex items-center gap-3 ${
-                        detailTab === 'father' ? 'bg-orange-50 text-orange-600 shadow-sm border border-orange-100' : 'text-slate-600 hover:bg-slate-100'
-                      }`}
-                    >
-                      <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0">
-                        👨
-                      </span>
-                      Thông tin Cha
-                    </button>
-                    <button
-                      onClick={() => setDetailTab('mother')}
-                      className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-all flex items-center gap-3 ${
-                        detailTab === 'mother' ? 'bg-orange-50 text-orange-600 shadow-sm border border-orange-100' : 'text-slate-600 hover:bg-slate-100'
-                      }`}
-                    >
-                      <span className="w-8 h-8 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center flex-shrink-0">
-                        👩
-                      </span>
-                      Thông tin Mẹ
-                    </button>
-                    <button
-                      onClick={() => setDetailTab('other_info')}
-                      className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-all flex items-center gap-3 ${
-                        detailTab === 'other_info' ? 'bg-orange-50 text-orange-600 shadow-sm border border-orange-100' : 'text-slate-600 hover:bg-slate-100'
-                      }`}
-                    >
-                      <span className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center flex-shrink-0">
-                        📋
-                      </span>
-                      Thông tin khác
-                    </button>
-                    <button
-                      onClick={() => setDetailTab('history')}
-                      className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-all flex items-center gap-3 ${
-                        detailTab === 'history' ? 'bg-orange-50 text-orange-600 shadow-sm border border-orange-100' : 'text-slate-600 hover:bg-slate-100'
-                      }`}
-                    >
-                      <span className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center flex-shrink-0">
-                        🕐
-                      </span>
-                      Lịch sử đồng bộ
-                    </button>
-                  </div>
-                </div>
-
                 {/* Content Area */}
                 <div className="flex-1 overflow-auto p-8">
                   {/* Tab: Thông tin về người được khai sinh */}
-                  {detailTab === 'person' && (
+                  <div className="mb-8">
                     <div className="max-w-3xl mx-auto space-y-8">
                       <div className="flex items-center gap-4 mb-8">
                         <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center text-3xl">
                           👤
                         </div>
                         <div>
-                          <h4 className="text-xl font-bold text-slate-900">Thông tin bản ghi</h4>
                           <p className="text-sm text-slate-500">Dữ liệu chi tiết về người được khai sinh</p>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+                      <div className="flex flex-col gap-4">
                         <div className="col-span-2">
                           <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Họ, chữ đệm, tên</label>
                           <div className="text-lg text-slate-900 font-semibold border-b border-slate-100 pb-2">{selectedRecord.name}</div>
@@ -1051,22 +988,21 @@ export function DataDetailModal({
                         </div>
                       </div>
                     </div>
-                  )}
+                  </div>
 
                   {/* Tab: Thông tin về người cha */}
-                  {detailTab === 'father' && (
+                  <div className="mb-8">
                     <div className="max-w-3xl mx-auto space-y-8">
                       <div className="flex items-center gap-4 mb-8">
                         <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center text-3xl">
                           👨
                         </div>
                         <div>
-                          <h4 className="text-xl font-bold text-slate-900">Thông tin Cha</h4>
                           <p className="text-sm text-slate-500">Dữ liệu chi tiết về người cha</p>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+                      <div className="flex flex-col gap-4">
                         <div className="col-span-2">
                           <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Họ, chữ đệm, tên</label>
                           <div className="text-lg text-slate-900 font-semibold border-b border-slate-100 pb-2">{selectedRecord.fatherName || '-'}</div>
@@ -1093,22 +1029,21 @@ export function DataDetailModal({
                         </div>
                       </div>
                     </div>
-                  )}
+                  </div>
 
                   {/* Tab: Thông tin về người mẹ */}
-                  {detailTab === 'mother' && (
+                  <div className="mb-8">
                     <div className="max-w-3xl mx-auto space-y-8">
                       <div className="flex items-center gap-4 mb-8">
                         <div className="w-16 h-16 bg-pink-100 rounded-2xl flex items-center justify-center text-3xl">
                           👩
                         </div>
                         <div>
-                          <h4 className="text-xl font-bold text-slate-900">Thông tin Mẹ</h4>
                           <p className="text-sm text-slate-500">Dữ liệu chi tiết về người mẹ</p>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+                      <div className="flex flex-col gap-4">
                         <div className="col-span-2">
                           <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Họ, chữ đệm, tên</label>
                           <div className="text-lg text-slate-900 font-semibold border-b border-slate-100 pb-2">{selectedRecord.motherName || '-'}</div>
@@ -1135,22 +1070,21 @@ export function DataDetailModal({
                         </div>
                       </div>
                     </div>
-                  )}
+                  </div>
 
                   {/* Tab: Thông tin khác */}
-                  {detailTab === 'other_info' && (
+                  <div className="mb-8">
                     <div className="max-w-3xl mx-auto space-y-8">
                       <div className="flex items-center gap-4 mb-8">
                         <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center text-3xl">
                           📋
                         </div>
                         <div>
-                          <h4 className="text-xl font-bold text-slate-900">Thông tin khác</h4>
                           <p className="text-sm text-slate-500">Thông tin người đi khai sinh và các thông tin bổ sung</p>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+                      <div className="flex flex-col gap-4">
                         <div className="col-span-2">
                           <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Họ, chữ đệm, tên người đi khai sinh</label>
                           <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.declarantName || '-'}</div>
@@ -1195,17 +1129,16 @@ export function DataDetailModal({
                         </div>
                       )}
                     </div>
-                  )}
+                  </div>
 
                   {/* Tab: Lịch sử đồng bộ */}
-                  {detailTab === 'history' && (
+                  <div className="mb-8">
                     <div className="max-w-3xl mx-auto space-y-8">
                       <div className="flex items-center gap-4 mb-8">
                         <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center text-3xl">
                           🕐
                         </div>
                         <div>
-                          <h4 className="text-xl font-bold text-slate-900">Lịch sử đồng bộ</h4>
                           <p className="text-sm text-slate-500">Chi tiết quá trình thu thập và đồng bộ bản ghi</p>
                         </div>
                       </div>
@@ -1230,7 +1163,7 @@ export function DataDetailModal({
                         </div>
                       </div>
                     </div>
-                  )}
+                  </div>
 
                 {/* Trạng thái lỗi - hiển thị ở tất cả các tab */}
                 {selectedRecord.hasError && (
@@ -1345,13 +1278,7 @@ export function DataDetailModal({
                   <XCircle className="w-4 h-4" />
                   Đóng
                 </button>
-                <button
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm"
-                  title="Xuất file"
-                >
-                  <FileDown className="w-4 h-4" />
-                  Xuất file
-                </button>
+                
               </div>
             </div>
           </div>

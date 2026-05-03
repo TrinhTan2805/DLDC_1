@@ -481,7 +481,7 @@ export function GrantPermissionModal({
                   <Shield className="w-4 h-4 inline mr-1" />
                   Quyền truy cập
                 </label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-3">
                   {['read', 'write', 'update', 'delete'].map((perm) => (
                     <label key={perm} htmlFor={`perm-${perm}`} className="flex items-center gap-2 p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer">
                       <input
@@ -778,7 +778,7 @@ export function GrantPermissionModal({
                         required
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="flex flex-col gap-3">
                       <div>
                         <label className="block text-xs text-slate-600 mb-1">
                           <Mail className="w-3 h-3 inline mr-1" />

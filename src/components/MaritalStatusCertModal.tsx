@@ -71,7 +71,6 @@ export function MaritalStatusCertModal({
   const [activeTab, setActiveTab] = useState('list');
   const [selectedRecord, setSelectedRecord] = useState<MaritalStatusCertRecord | null>(null);
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
-  const [detailTab, setDetailTab] = useState('record');
   
   if (!isOpen) return null;
 
@@ -227,33 +226,6 @@ export function MaritalStatusCertModal({
             >
               <X className="w-5 h-5" />
             </button>
-          </div>
-
-          {/* Tabs */}
-          <div className="px-6 border-b border-slate-200 flex items-center justify-between">
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setActiveTab('list')}
-                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === 'list'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Danh sách ({totalRecords.toLocaleString()})
-              </button>
-
-              <button
-                onClick={() => setActiveTab('sync')}
-                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === 'sync'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Lịch sử đồng bộ
-              </button>
-            </div>
           </div>
 
           {/* Content */}
@@ -486,52 +458,13 @@ export function MaritalStatusCertModal({
                 </button>
               </div>
 
-              {/* Tabs */}
-              <div className="px-6 pt-4 flex-shrink-0 border-b border-slate-200">
-                <div className="flex items-center gap-1 flex-wrap">
-                  <button
-                    onClick={() => setDetailTab('record')}
-                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                      detailTab === 'record' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    📄 Hồ sơ XNTTHN
-                  </button>
-                  <button
-                    onClick={() => setDetailTab('grantedPerson')}
-                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                      detailTab === 'grantedPerson' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    👤 Người được cấp
-                  </button>
-                  <button
-                    onClick={() => setDetailTab('requester')}
-                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                      detailTab === 'requester' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    🧑 Người đề nghị
-                  </button>
-                  <button
-                    onClick={() => setDetailTab('other')}
-                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                      detailTab === 'other' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    📋 Thông tin khác
-                  </button>
-                </div>
-              </div>
-
               {/* Content */}
               <div className="p-6 flex-1 overflow-auto bg-white">
                 {/* Tab: Hồ sơ XNTTHN */}
-                {detailTab === 'record' && (
+                <div className="mb-8">
                   <div className="space-y-6">
                     <div className="mb-6">
-                      <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-blue-600">Bộ dữ liệu hồ sơ cấp Giấy xác nhận tình trạng hôn nhân</h4>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="flex flex-col gap-3">
                         <div className="border border-slate-200 p-2 rounded col-span-2">
                           <div className="text-xs text-slate-600 mb-1">Tệp đính kèm</div>
                           <div className="text-sm text-blue-600 font-medium">{selectedRecord.fileId || 'Không có tệp tải lên'}</div>
@@ -555,14 +488,13 @@ export function MaritalStatusCertModal({
                       </div>
                     </div>
                   </div>
-                )}
+                </div>
 
                 {/* Tab: Người được cấp */}
-                {detailTab === 'grantedPerson' && (
+                <div className="mb-8">
                   <div className="space-y-6">
                     <div className="mb-6">
-                      <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-blue-600">Thông tin về người được cấp Giấy xác nhận tình trạng hôn nhân</h4>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="flex flex-col gap-3">
                         <div className="border border-slate-200 p-2 rounded col-span-2">
                           <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên</div>
                           <div className="text-sm text-slate-900 font-medium">{selectedRecord.grantedPersonName}</div>
@@ -626,14 +558,13 @@ export function MaritalStatusCertModal({
                       </div>
                     </div>
                   </div>
-                )}
+                </div>
 
                 {/* Tab: Người đề nghị */}
-                {detailTab === 'requester' && (
+                <div className="mb-8">
                   <div className="space-y-6">
                     <div className="mb-6">
-                      <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-blue-600">Thông tin về người đề nghị cấp Giấy xác nhận tình trạng hôn nhân</h4>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="flex flex-col gap-3">
                         <div className="border border-slate-200 p-2 rounded col-span-2">
                           <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên người đề nghị</div>
                           <div className="text-sm text-slate-900 font-medium">{selectedRecord.requesterName}</div>
@@ -661,14 +592,13 @@ export function MaritalStatusCertModal({
                       </div>
                     </div>
                   </div>
-                )}
+                </div>
 
                 {/* Tab: Thông tin khác */}
-                {detailTab === 'other' && (
+                <div className="mb-8">
                   <div className="space-y-6">
                     <div className="mb-6">
-                      <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-blue-600">Thông tin khác</h4>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="flex flex-col gap-3">
                         <div className="border border-slate-200 p-2 rounded">
                           <div className="text-xs text-slate-600 mb-1">Ngày, tháng, năm cấp giấy</div>
                           <div className="text-sm text-slate-900 font-medium">{selectedRecord.certIssueDate}</div>
@@ -696,7 +626,7 @@ export function MaritalStatusCertModal({
                       </div>
                     </div>
                   </div>
-                )}
+                </div>
               </div>
 
               {/* Footer */}
@@ -707,12 +637,6 @@ export function MaritalStatusCertModal({
                 >
                   <XCircle className="w-4 h-4" />
                   Đóng
-                </button>
-                <button
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm"
-                >
-                  <Download className="w-4 h-4" />
-                  Xuất file
                 </button>
               </div>
             </div>

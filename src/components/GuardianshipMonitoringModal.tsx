@@ -73,7 +73,6 @@ export function GuardianshipMonitoringModal({
   const [activeTab, setActiveTab] = useState('list');
   const [selectedRecord, setSelectedRecord] = useState<GuardianshipMonitoringRecord | null>(null);
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
-  const [detailTab, setDetailTab] = useState('record');
   
   if (!isOpen) return null;
 
@@ -152,30 +151,6 @@ export function GuardianshipMonitoringModal({
                title="Đóng"
             >
               <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Tabs */}
-          <div className="px-6 border-b border-slate-200 flex items-center">
-            <button
-              onClick={() => setActiveTab('list')}
-              className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'list'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Danh sách ({totalRecords.toLocaleString()})
-            </button>
-            <button
-              onClick={() => setActiveTab('sync')}
-              className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'sync'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Lịch sử đồng bộ
             </button>
           </div>
 
@@ -296,52 +271,13 @@ export function GuardianshipMonitoringModal({
                 </button>
               </div>
 
-              {/* Tabs */}
-              <div className="px-6 pt-4 flex-shrink-0 border-b border-slate-200">
-                <div className="flex items-center gap-1 flex-wrap">
-                  <button
-                    onClick={() => setDetailTab('record')}
-                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                      detailTab === 'record' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    📄 Thông tin hồ sơ
-                  </button>
-                  <button
-                    onClick={() => setDetailTab('monitor')}
-                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                      detailTab === 'monitor' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    👤 Người giám sát
-                  </button>
-                  <button
-                    onClick={() => setDetailTab('guardianship')}
-                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                      detailTab === 'guardianship' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    🛡️ Việc giám hộ
-                  </button>
-                  <button
-                    onClick={() => setDetailTab('general')}
-                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                      detailTab === 'general' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    📋 Thông tin khác
-                  </button>
-                </div>
-              </div>
-
               {/* Content */}
               <div className="p-6 flex-1 overflow-auto">
                 {/* Tab: Thông tin hồ sơ */}
-                {detailTab === 'record' && (
+                <div className="mb-8">
                   <div className="space-y-6">
                     <div className="mb-6">
-                      <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-blue-600">Bộ dữ liệu hồ sơ đăng ký giám sát việc giám hộ</h4>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="flex flex-col gap-3">
                         <div className="border border-slate-200 p-2 rounded">
                           <div className="text-xs text-slate-600 mb-1">Mã hồ sơ</div>
                           <div className="text-sm text-slate-900 font-medium">{selectedRecord.recordCode}</div>
@@ -362,8 +298,7 @@ export function GuardianshipMonitoringModal({
                     </div>
 
                     <div className="mb-6">
-                      <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-blue-600">Thông tin người đăng ký giám sát việc giám hộ</h4>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="flex flex-col gap-3">
                         <div className="border border-slate-200 p-2 rounded col-span-2">
                           <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên</div>
                           <div className="text-sm text-slate-900 font-medium">{selectedRecord.registrantName}</div>
@@ -375,14 +310,13 @@ export function GuardianshipMonitoringModal({
                       </div>
                     </div>
                   </div>
-                )}
+                </div>
 
                 {/* Tab: Người giám sát */}
-                {detailTab === 'monitor' && (
+                <div className="mb-8">
                   <div className="space-y-6">
                     <div className="mb-6">
-                      <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-blue-600">Người giám sát (cá nhân)</h4>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="flex flex-col gap-3">
                         <div className="border border-slate-200 p-2 rounded col-span-2">
                           <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên</div>
                           <div className="text-sm text-slate-900 font-medium text-blue-700">{selectedRecord.monitorName}</div>
@@ -415,8 +349,7 @@ export function GuardianshipMonitoringModal({
                     </div>
 
                     <div className="mb-6">
-                      <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-blue-600">Người giám sát (pháp nhân)</h4>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="flex flex-col gap-3">
                         <div className="border border-slate-200 p-2 rounded col-span-2">
                           <div className="text-xs text-slate-600 mb-1">Tên pháp nhân</div>
                           <div className="text-sm text-slate-900 font-medium text-indigo-700">{selectedRecord.legalEntityMonitorName || '-'}</div>
@@ -444,13 +377,12 @@ export function GuardianshipMonitoringModal({
                       </div>
                     </div>
                   </div>
-                )}
+                </div>
 
                 {/* Tab: Việc giám hộ */}
-                {detailTab === 'guardianship' && (
+                <div className="mb-8">
                   <div className="mb-6">
-                    <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-blue-600">Thông tin về việc giám hộ được giám sát</h4>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="flex flex-col gap-3">
                       <div className="border border-slate-200 p-2 rounded">
                         <div className="text-xs text-slate-600 mb-1">Trích lục đăng ký giám hộ số</div>
                         <div className="text-sm text-slate-900 font-medium">{selectedRecord.monitoredExtractNumber}</div>
@@ -465,14 +397,13 @@ export function GuardianshipMonitoringModal({
                       </div>
                     </div>
                   </div>
-                )}
+                </div>
 
                 {/* Tab: Thông tin khác */}
-                {detailTab === 'general' && (
+                <div className="mb-8">
                   <div className="space-y-6">
                     <div className="mb-6">
-                      <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-blue-600">Thông tin chung</h4>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="flex flex-col gap-3">
                         <div className="border border-slate-200 p-2 rounded col-span-2">
                           <div className="text-xs text-slate-600 mb-1">Người ký (Họ tên, chức vụ)</div>
                           <div className="text-sm text-slate-900 font-medium">{selectedRecord.signerFullInfo}</div>
@@ -496,7 +427,7 @@ export function GuardianshipMonitoringModal({
                       </div>
                     </div>
                   </div>
-                )}
+                </div>
               </div>
 
               {/* Footer */}
@@ -507,12 +438,6 @@ export function GuardianshipMonitoringModal({
                 >
                   <XCircle className="w-4 h-4" />
                   Đóng
-                </button>
-                <button
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm"
-                >
-                  <Download className="w-4 h-4" />
-                  Xuất file
                 </button>
               </div>
             </div>
