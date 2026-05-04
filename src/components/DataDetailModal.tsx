@@ -1,4 +1,4 @@
-import { X, Search, ChevronLeft, ChevronRight, Upload, FileDown, RefreshCw, Filter, Eye, Calendar, CheckCircle, XCircle, FileText, Database, Info } from 'lucide-react';
+import { X, Search, ChevronLeft, ChevronRight, Upload, FileDown, RefreshCw, Filter, Eye, Calendar, CheckCircle, XCircle, FileText, Database, Info, Plus, Trash2, Edit2, ListFilter, ArrowUpDown, ChevronDown, Group } from 'lucide-react';
 import { useState } from 'react';
 
 interface DataDetailModalProps {
@@ -85,7 +85,38 @@ export function DataDetailModal({
 }: DataDetailModalProps) {
   const [activeTab, setActiveTab] = useState('list');
   const [selectedRecord, setSelectedRecord] = useState<DetailRecord | null>(null);
-  const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  
+  // Filter System States
+  const [filterConditions, setFilterConditions] = useState<any[]>([
+    { id: '1', logic: 'AND', field: 'age', operator: '=', type: 'Number', value: '19' }
+  ]);
+  
+  const [valueModal, setValueModal] = useState({
+    isOpen: false,
+    conditionId: '',
+    type: 'Text',
+    value: ''
+  });
+
+  const openValueModal = (condition: any) => {
+    setValueModal({
+      isOpen: true,
+      conditionId: condition.id,
+      type: condition.type || 'Text',
+      value: condition.value || ''
+    });
+  };
+
+  const saveValue = () => {
+    setFilterConditions(prev => prev.map(c => 
+      c.id === valueModal.conditionId 
+        ? { ...c, value: valueModal.value, type: valueModal.type } 
+        : c
+    ));
+    setValueModal({ ...valueModal, isOpen: false });
+  };
   const [searchText, setSearchText] = useState('');
   const [errorStatusFilter, setErrorStatusFilter] = useState('all');
   const [viewingPdfUrl, setViewingPdfUrl] = useState<string | null>(null);
@@ -388,6 +419,68 @@ export function DataDetailModal({
 
   return (
     <>
+      {/* Value Entry Modal */}
+      {valueModal.isOpen && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4">
+          <div className="bg-white rounded-lg shadow-2xl w-full max-w-md overflow-hidden relative">
+            {/* Header */}
+            <div className="px-6 py-4 bg-[#007bff] text-white flex items-center justify-between">
+              <h3 className="text-lg font-bold">Nhập giá trị lọc</h3>
+              <button 
+                onClick={() => setValueModal({ ...valueModal, isOpen: false })} 
+                className="text-white hover:bg-white/20 p-1 rounded transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            {/* Body */}
+            <div className="p-6 space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Kiểu dữ liệu</label>
+                <select 
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 bg-white"
+                  value={valueModal.type}
+                  onChange={(e) => setValueModal({ ...valueModal, type: e.target.value })}
+                >
+                  <option value="Text">Text</option>
+                  <option value="Number">Number</option>
+                  <option value="Date">Date</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Giá trị</label>
+                <input 
+                  type={valueModal.type === 'Date' ? 'date' : valueModal.type === 'Number' ? 'number' : 'text'}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                  value={valueModal.value}
+                  onChange={(e) => setValueModal({ ...valueModal, value: e.target.value })}
+                  placeholder="Nhập giá trị..."
+                  autoFocus
+                />
+              </div>
+            </div>
+            
+            {/* Footer */}
+            <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-3">
+              <button 
+                onClick={saveValue}
+                className="px-6 py-2 bg-blue-600 text-white rounded font-medium text-sm hover:bg-blue-700 transition-colors"
+              >
+                Lưu
+              </button>
+              <button 
+                onClick={() => setValueModal({ ...valueModal, isOpen: false })}
+                className="px-6 py-2 bg-slate-500 text-white rounded font-medium text-sm hover:bg-slate-600 transition-colors"
+              >
+                Hủy
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Backdrop */}
       <div 
         className="fixed inset-0 bg-black/50 z-40"
@@ -400,14 +493,16 @@ export function DataDetailModal({
           {/* Header */}
           <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0">
             <div>
-              <h2 className="text-lg font-bold text-slate-900">Chi tiết dữ liệu đã thu thập</h2>
-              <p className="text-sm text-slate-600 mt-1">
-                {title}
-              </p>
-              <p className="text-sm text-emerald-600 mt-1 flex items-center gap-1">
-                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                Đồng bộ cuối cùng: 25/02/2026 14:30:00
-              </p>
+              <h2 className="text-lg font-bold text-slate-900">{title}</h2>
+              <div className="flex items-center gap-4 mt-1 text-sm text-slate-600">
+                <span>Tổng số: <span className="font-medium text-slate-900">{totalRecords.toLocaleString()}</span></span>
+                <span className="text-slate-300">|</span>
+                <span>Mới: <span className="font-medium text-green-600">{newRecords.toLocaleString()}</span></span>
+                <span className="text-slate-300">|</span>
+                <span>Cập nhật: <span className="font-medium text-blue-600">{updatedRecords.toLocaleString()}</span></span>
+                <span className="text-slate-300">|</span>
+                <span>Lỗi: <span className="font-medium text-red-600">{errorRecords.toLocaleString()}</span></span>
+              </div>
             </div>
             <button
               onClick={onClose}
@@ -418,30 +513,6 @@ export function DataDetailModal({
             </button>
           </div>
 
-          {/* Summary Cards */}
-          <div className="px-6 py-4 flex-shrink-0 border-b border-slate-200">
-            <div className="grid grid-cols-4 gap-4">
-              <div className="bg-slate-50 rounded-lg p-4">
-                <div className="text-sm text-slate-600 mb-1">Tổng bản ghi</div>
-                <div className="text-2xl font-bold text-slate-900">{totalRecords.toLocaleString()}</div>
-              </div>
-              <div className="bg-blue-50 rounded-lg p-4">
-                <div className="text-sm text-slate-600 mb-1">Bản ghi mới hôm nay</div>
-                <div className="text-2xl font-bold text-blue-600">{newRecords.toLocaleString()}</div>
-                <div className="text-xs text-slate-500 mt-1">Đồng bộ trong ngày</div>
-              </div>
-              <div className="bg-green-50 rounded-lg p-4">
-                <div className="text-sm text-slate-600 mb-1">Bản ghi cập nhật</div>
-                <div className="text-2xl font-bold text-green-600">{updatedRecords.toLocaleString()}</div>
-              </div>
-              <div className="bg-orange-50 rounded-lg p-4">
-                <div className="text-sm text-slate-600 mb-1">Bản ghi lỗi</div>
-                <div className="text-2xl font-bold text-orange-600">{errorRecords}</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Tabs */}
           <div className="px-6 pt-4 flex-shrink-0">
             <div className="flex items-center gap-1 border-b border-slate-200">
               <button
@@ -452,15 +523,6 @@ export function DataDetailModal({
               >
                 📋 Danh sách đối tượng
               </button>
-
-              <button
-                onClick={() => setActiveTab('history')}
-                className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === 'history' ? 'border-orange-600 text-orange-600' : 'border-transparent text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                🕐 Lịch sử đồng bộ
-              </button>
             </div>
           </div>
 
@@ -469,111 +531,159 @@ export function DataDetailModal({
             <>
               {/* Search and Filters */}
               <div className="px-6 py-4 flex-shrink-0">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                    <input
-                      type="text"
-                      placeholder="Tìm kiếm theo tên, mã dịch vụ, đơn vị..."
-                      className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      title="Tìm kiếm"
-                      value={searchText}
-                      onChange={(e: any) => setSearchText(e.target.value)}
-                    />
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setIsFilterOpen(!isFilterOpen)}
+                      className={`px-3 py-1.5 rounded flex items-center gap-2 text-sm font-medium transition-colors ${
+                        isFilterOpen ? 'bg-blue-600 text-white' : 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-50'
+                      }`}
+                    >
+                      <Filter className="w-4 h-4" />
+                      Lọc
+                    </button>
+                    <button
+                      onClick={() => setIsSortOpen(!isSortOpen)}
+                      className={`px-3 py-1.5 rounded flex items-center gap-2 text-sm font-medium transition-colors ${
+                        isSortOpen ? 'bg-blue-600 text-white' : 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-50'
+                      }`}
+                    >
+                      <ArrowUpDown className="w-4 h-4" />
+                      Sắp xếp
+                    </button>
                   </div>
-                  <button
-                    onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
-                    className={`px-4 py-2 border border-slate-300 ${showAdvancedSearch ? 'bg-slate-100' : 'bg-white'} text-slate-700 rounded-lg hover:bg-slate-50 flex items-center gap-2 text-sm whitespace-nowrap`}
-                    title="Tìm kiếm nâng cao"
-                  >
-                    <Filter className="w-4 h-4" />
-                    Tìm kiếm nâng cao
-                  </button>
                   
-                  <select
-                    className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white min-w-[180px]"
-                    title="Trạng thái xử lý lỗi"
-                    value={errorStatusFilter}
-                    onChange={(e: any) => setErrorStatusFilter(e.target.value)}
-                  >
-                    <option value="all">Tất cả xử lý lỗi</option>
-                    <option value="sent">Đã gửi hệ thống nguồn</option>
-                    <option value="updated">Đã cập nhật lại</option>
-                    <option value="pending">Chờ xử lý</option>
-                  </select>
-                  
-                  <button 
-                    className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 flex items-center gap-2 text-sm"
-                    title="Nhập dữ liệu"
-                  >
-                    <Upload className="w-4 h-4" />
-                    Nhập
-                  </button>
-                  <button 
-                    className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 flex items-center gap-2 text-sm"
-                    title="Xuất dữ liệu"
-                  >
-                    <FileDown className="w-4 h-4" />
-                    Xuất
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button className="px-3 py-1.5 border border-slate-300 rounded text-slate-700 hover:bg-slate-50 flex items-center gap-2 text-sm">
+                      <RefreshCw className="w-4 h-4" />
+                      Tải lại
+                    </button>
+                  </div>
                 </div>
 
-                {/* Advanced Search Panel */}
-                {showAdvancedSearch && (
-                  <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-3">
-                    <div className="grid grid-cols-4 gap-3 mb-3">
-                      <select 
-                        className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                        title="Nguồn dữ liệu"
+                {/* Filter Panel */}
+                {isFilterOpen && (
+                  <div className="bg-white border border-slate-200 rounded-lg p-5 mb-4 shadow-sm animate-in slide-in-from-top-2 duration-200">
+                    <div className="flex items-center justify-between mb-4">
+                      <button 
+                        onClick={() => {
+                          const newId = Date.now().toString();
+                          setFilterConditions([...filterConditions, { id: newId, logic: 'AND', field: '', operator: '=', type: 'Text', value: '' }]);
+                        }}
+                        className="px-3 py-1.5 border border-blue-500 text-blue-600 rounded flex items-center gap-2 text-sm font-medium hover:bg-blue-50"
                       >
-                        <option>Tất cả nguồn dữ liệu</option>
-                        <option>LGSP</option>
-                        <option>NDXP</option>
-                      </select>
-                      <select 
-                        className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                        title="Đơn vị Cục/Vụ"
-                      >
-                        <option>Tất cả Cục/Vụ</option>
-                        <option>Cục CNTT</option>
-                        <option>Vụ Pháp chế</option>
-                      </select>
-                      <select 
-                        className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                        title="Trạng thái"
-                      >
-                        <option>Tất cả trạng thái</option>
-                        <option>Hoạt động</option>
-                        <option>Tạm dừng</option>
-                      </select>
-                      <select 
-                        className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                        title="Loại dịch vụ"
-                      >
-                        <option>Tất cả loại dịch vụ</option>
-                        <option>Dịch vụ công</option>
-                        <option>Thu thập dữ liệu</option>
-                      </select>
+                        <Plus className="w-4 h-4" />
+                        Thêm điều kiện
+                      </button>
+                      <button onClick={() => setFilterConditions([])} className="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-slate-600" />
-                        <span className="text-sm text-slate-600">Thời gian:</span>
-                        <input type="date" defaultValue="2026-01-31" className="px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" title="Từ ngày" />
-                        <span className="text-slate-400">—</span>
-                        <input type="date" defaultValue="2026-02-27" className="px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" title="Đến ngày" />
-                      </div>
-                      <div className="ml-auto flex gap-2">
-                        <button className="px-4 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm">
-                          <Search className="w-4 h-4" />
-                          Tìm kiếm
+
+                    <div className="space-y-3">
+                      {filterConditions.map((condition, index) => (
+                        <div key={condition.id} className="flex items-center gap-3">
+                          <div className="w-20 flex-shrink-0">
+                            {index > 0 && (
+                              <select 
+                                className="w-full px-2 py-1.5 border border-slate-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                                value={condition.logic}
+                                onChange={(e) => {
+                                  const newConditions = [...filterConditions];
+                                  newConditions[index].logic = e.target.value;
+                                  setFilterConditions(newConditions);
+                                }}
+                              >
+                                <option value="AND">AND</option>
+                                <option value="OR">OR</option>
+                              </select>
+                            )}
+                          </div>
+                          
+                          <select 
+                            className="flex-1 basis-0 w-full min-w-0 px-3 py-1.5 border border-slate-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                            value={condition.field}
+                            onChange={(e) => {
+                              const newConditions = [...filterConditions];
+                              newConditions[index].field = e.target.value;
+                              setFilterConditions(newConditions);
+                            }}
+                          >
+                            <option value="">Chọn trường</option>
+                            <option value="name">Họ tên</option>
+                            <option value="birthDate">Ngày sinh</option>
+                            <option value="age">Tuổi</option>
+                            <option value="gender">Giới tính</option>
+                            <option value="idNumber">Số định danh</option>
+                          </select>
+
+                          <select 
+                            className="flex-1 basis-0 w-full min-w-0 px-3 py-1.5 border border-slate-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                            value={condition.operator}
+                            onChange={(e) => {
+                              const newConditions = [...filterConditions];
+                              newConditions[index].operator = e.target.value;
+                              setFilterConditions(newConditions);
+                            }}
+                          >
+                            <option value="=">Bằng (=)</option>
+                            <option value="&gt;">Lớn hơn (&gt;)</option>
+                            <option value="&lt;">Nhỏ hơn (&lt;)</option>
+                            <option value="&gt;=">Lớn hơn bằng (&gt;=)</option>
+                            <option value="&lt;=">Nhỏ hơn bằng (&lt;=)</option>
+                            <option value="!=">Khác (!=)</option>
+                            <option value="contains">Chứa</option>
+                            <option value="starts">Bắt đầu</option>
+                            <option value="ends">Kết thúc</option>
+                          </select>
+
+                          <div className="flex-1 basis-0 w-full min-w-0 flex items-center gap-2 px-3 py-1.5 border border-slate-300 rounded bg-white group/value">
+                            <div className="flex-1 text-sm text-slate-900 truncate">
+                              {condition.value || <span className="text-slate-400 font-mono">{"<?>"}</span>}
+                            </div>
+                            <button 
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                openValueModal(condition);
+                              }}
+                              className="p-1 hover:bg-slate-100 rounded text-blue-600 transition-colors"
+                              title="Chỉnh sửa giá trị"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                          </div>
+
+                          <button 
+                            type="button"
+                            onClick={() => setFilterConditions(filterConditions.filter(c => c.id !== condition.id))}
+                            className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                            title="Xóa điều kiện"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-6 pt-4 border-t border-slate-100 flex items-center gap-3">
+                      <button className="px-4 py-1.5 border border-blue-500 text-blue-600 rounded flex items-center gap-2 text-sm font-medium hover:bg-blue-50">
+                        <Plus className="w-4 h-4" />
+                        Điều kiện
+                      </button>
+                      <button className="px-4 py-1.5 border border-blue-500 text-blue-600 rounded flex items-center gap-2 text-sm font-medium hover:bg-blue-50">
+                        <Group className="w-4 h-4" />
+                        Gom Nhóm
+                      </button>
+                      <div className="ml-auto flex items-center gap-2">
+                        <button className="px-6 py-1.5 bg-blue-600 text-white rounded font-medium text-sm hover:bg-blue-700 flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4" />
+                          Áp dụng
                         </button>
-                        <button 
-                          onClick={() => setShowAdvancedSearch(false)}
-                          className="px-4 py-1.5 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-100 flex items-center gap-2 text-sm"
-                        >
-                          <X className="w-4 h-4" />
-                          Bỏ lọc
+                        <button onClick={() => setFilterConditions([])} className="px-6 py-1.5 bg-slate-600 text-white rounded font-medium text-sm hover:bg-slate-700 flex items-center gap-2">
+                          <XCircle className="w-4 h-4" />
+                          Xóa bộ lọc
                         </button>
                       </div>
                     </div>
@@ -684,180 +794,6 @@ export function DataDetailModal({
 
 
 
-          {/* Tab Content - SYNC HISTORY */}
-          {activeTab === 'history' && (
-            <div className="flex-1 overflow-auto p-6">
-              <div className="mb-4 flex items-center justify-between">
-                <div>
-                  <h3 className="text-sm font-medium text-slate-900 mb-1">Tổng số lần đồng bộ đợt 3 lần</h3>
-                  <p className="text-xs text-slate-600">
-                    <a href="#" className="text-blue-600 hover:underline">Làm mới</a>
-                  </p>
-                </div>
-              </div>
-
-              {/* Sync History Table */}
-              <table className="w-full">
-                <thead className="bg-slate-50">
-                  <tr className="border-b border-slate-200">
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-600">THỜI GIAN</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-600">TRẠNG THÁI</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-600">THÊM MỚI</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-600">CẬP NHẬT</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-600">LỖI</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-600">TỔNG SỐ</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-600">THỜI LƯỢNG</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-slate-600">THAO TÁC</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-b border-slate-200 hover:bg-slate-50">
-                    <td className="px-4 py-3 text-sm text-slate-600">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-slate-400" />
-                        09/12/2025 14:30:25
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-sm">
-                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">
-                        <CheckCircle className="w-3 h-3" />
-                        Thành công
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-emerald-600 font-medium">↗ 150</td>
-                    <td className="px-4 py-3 text-sm text-slate-900">45</td>
-                    <td className="px-4 py-3 text-sm text-orange-600 font-medium">0</td>
-                    <td className="px-4 py-3 text-sm text-slate-900">
-                      <div className="flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 bg-slate-400 rounded-full"></span>
-                        195
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-slate-600">2.5s</td>
-                    <td className="px-4 py-3 text-sm text-center"></td>
-                  </tr>
-                  <tr className="border-b border-slate-200 hover:bg-slate-50">
-                    <td className="px-4 py-3 text-sm text-slate-600">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-slate-400" />
-                        09/12/2025 10:15:10
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-sm">
-                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">
-                        <CheckCircle className="w-3 h-3" />
-                        Thành công
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-emerald-600 font-medium">↗ 98</td>
-                    <td className="px-4 py-3 text-sm text-slate-900">32</td>
-                    <td className="px-4 py-3 text-sm text-orange-600 font-medium">0</td>
-                    <td className="px-4 py-3 text-sm text-slate-900">
-                      <div className="flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 bg-slate-400 rounded-full"></span>
-                        130
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-slate-600">1.8s</td>
-                    <td className="px-4 py-3 text-sm text-center"></td>
-                  </tr>
-                  <tr className="border-b border-slate-200 hover:bg-slate-50">
-                    <td className="px-4 py-3 text-sm text-slate-600">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-slate-400" />
-                        08/12/2025 18:45:33
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-sm">
-                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs font-medium">
-                        <XCircle className="w-3 h-3" />
-                        Mất phần
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-emerald-600 font-medium">↗ 120</td>
-                    <td className="px-4 py-3 text-sm text-slate-900">28</td>
-                    <td className="px-4 py-3 text-sm text-orange-600 font-medium">5</td>
-                    <td className="px-4 py-3 text-sm text-slate-900">
-                      <div className="flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 bg-slate-400 rounded-full"></span>
-                        153
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-slate-600">3.2s</td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => {
-                            setSelectedSyncRecord({
-                              syncTime: '08/12/2025 18:45:33',
-                              status: 'Mất phần',
-                              errors: 5,
-                              duration: '3.2s'
-                            });
-                            setShowSyncErrorModal(true);
-                          }}
-                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                          title="Xem chi tiết lỗi"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr className="border-b border-slate-200 hover:bg-slate-50">
-                    <td className="px-4 py-3 text-sm text-slate-600">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-slate-400" />
-                        08/12/2025 14:20:15
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-sm">
-                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">
-                        <CheckCircle className="w-3 h-3" />
-                        Thành công
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-emerald-600 font-medium">↗ 210</td>
-                    <td className="px-4 py-3 text-sm text-slate-900">67</td>
-                    <td className="px-4 py-3 text-sm text-orange-600 font-medium">0</td>
-                    <td className="px-4 py-3 text-sm text-slate-900">
-                      <div className="flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 bg-slate-400 rounded-full"></span>
-                        277
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-slate-600">4.1s</td>
-                    <td className="px-4 py-3 text-sm text-center"></td>
-                  </tr>
-                  <tr className="border-b border-slate-200 hover:bg-slate-50">
-                    <td className="px-4 py-3 text-sm text-slate-600">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-slate-400" />
-                        08/12/2025 10:10:05
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-sm">
-                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">
-                        <CheckCircle className="w-3 h-3" />
-                        Thành công
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-emerald-600 font-medium">↗ 88</td>
-                    <td className="px-4 py-3 text-sm text-slate-900">19</td>
-                    <td className="px-4 py-3 text-sm text-orange-600 font-medium">0</td>
-                    <td className="px-4 py-3 text-sm text-slate-900">
-                      <div className="flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 bg-slate-400 rounded-full"></span>
-                        107
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-slate-600">1.5s</td>
-                    <td className="px-4 py-3 text-sm text-center"></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          )}
 
           {/* Footer with Pagination */}
           <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between flex-shrink-0">
@@ -937,231 +873,75 @@ export function DataDetailModal({
               <div className="flex-1 flex overflow-hidden bg-white">
                 {/* Content Area */}
                 <div className="flex-1 overflow-auto p-8">
-                  {/* Tab: Thông tin về người được khai sinh */}
-                  <div className="mb-8">
-                    <div className="max-w-3xl mx-auto space-y-8">
-                      <div className="flex items-center gap-4 mb-8">
-                        <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center text-3xl">
-                          👤
-                        </div>
-                        <div>
-                          <p className="text-sm text-slate-500">Dữ liệu chi tiết về người được khai sinh</p>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col gap-4">
-                        <div className="col-span-2">
-                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Họ, chữ đệm, tên</label>
-                          <div className="text-lg text-slate-900 font-semibold border-b border-slate-100 pb-2">{selectedRecord.name}</div>
-                        </div>
-                        <div>
-                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Giới tính</label>
-                          <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.gender}</div>
-                        </div>
-                        <div>
-                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Ngày, tháng, năm sinh</label>
-                          <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.birthDate}</div>
-                        </div>
-                        <div className="col-span-2">
-                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Ngày sinh bằng chữ</label>
-                          <div className="text-base text-slate-900 font-medium italic border-b border-slate-100 pb-2">{selectedRecord.birthDateInWords}</div>
-                        </div>
-                        <div>
-                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Nơi sinh</label>
-                          <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.birthPlace}</div>
-                        </div>
-                        <div>
-                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Quê quán</label>
-                          <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.hometown}</div>
-                        </div>
-                        <div>
-                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Dân tộc</label>
-                          <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.ethnicity}</div>
-                        </div>
-                        <div>
-                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Quốc tịch</label>
-                          <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.nationality}</div>
-                        </div>
-                        <div className="col-span-2">
-                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Số định danh cá nhân</label>
-                          <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.personalId}</div>
-                        </div>
-                      </div>
+                  {/* Flattened Record Details */}
+                  <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+                    <div>
+                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Họ, chữ đệm, tên</label>
+                      <div className="text-base text-slate-900 font-semibold border-b border-slate-100 pb-2">{selectedRecord.name}</div>
                     </div>
-                  </div>
-
-                  {/* Tab: Thông tin về người cha */}
-                  <div className="mb-8">
-                    <div className="max-w-3xl mx-auto space-y-8">
-                      <div className="flex items-center gap-4 mb-8">
-                        <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center text-3xl">
-                          👨
-                        </div>
-                        <div>
-                          <p className="text-sm text-slate-500">Dữ liệu chi tiết về người cha</p>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col gap-4">
-                        <div className="col-span-2">
-                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Họ, chữ đệm, tên</label>
-                          <div className="text-lg text-slate-900 font-semibold border-b border-slate-100 pb-2">{selectedRecord.fatherName || '-'}</div>
-                        </div>
-                        <div>
-                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Ngày, tháng, năm sinh</label>
-                          <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.fatherBirthDate || '-'}</div>
-                        </div>
-                        <div>
-                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Dân tộc</label>
-                          <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.fatherEthnicity || '-'}</div>
-                        </div>
-                        <div>
-                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Quốc tịch</label>
-                          <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.fatherNationality || '-'}</div>
-                        </div>
-                        <div className="col-span-2">
-                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Nơi cư trú</label>
-                          <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.fatherAddress || '-'}</div>
-                        </div>
-                        <div className="col-span-2">
-                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Số GTTT</label>
-                          <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.fatherIdNumber || '-'}</div>
-                        </div>
-                      </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Giới tính</label>
+                      <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.gender}</div>
                     </div>
-                  </div>
-
-                  {/* Tab: Thông tin về người mẹ */}
-                  <div className="mb-8">
-                    <div className="max-w-3xl mx-auto space-y-8">
-                      <div className="flex items-center gap-4 mb-8">
-                        <div className="w-16 h-16 bg-pink-100 rounded-2xl flex items-center justify-center text-3xl">
-                          👩
-                        </div>
-                        <div>
-                          <p className="text-sm text-slate-500">Dữ liệu chi tiết về người mẹ</p>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col gap-4">
-                        <div className="col-span-2">
-                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Họ, chữ đệm, tên</label>
-                          <div className="text-lg text-slate-900 font-semibold border-b border-slate-100 pb-2">{selectedRecord.motherName || '-'}</div>
-                        </div>
-                        <div>
-                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Ngày, tháng, năm sinh</label>
-                          <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.motherBirthDate || '-'}</div>
-                        </div>
-                        <div>
-                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Dân tộc</label>
-                          <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.motherEthnicity || '-'}</div>
-                        </div>
-                        <div>
-                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Quốc tịch</label>
-                          <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.motherNationality || '-'}</div>
-                        </div>
-                        <div className="col-span-2">
-                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Nơi cư trú</label>
-                          <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.motherAddress || '-'}</div>
-                        </div>
-                        <div className="col-span-2">
-                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Số GTTT</label>
-                          <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.motherIdNumber || '-'}</div>
-                        </div>
-                      </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Ngày, tháng, năm sinh</label>
+                      <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.birthDate}</div>
                     </div>
-                  </div>
-
-                  {/* Tab: Thông tin khác */}
-                  <div className="mb-8">
-                    <div className="max-w-3xl mx-auto space-y-8">
-                      <div className="flex items-center gap-4 mb-8">
-                        <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center text-3xl">
-                          📋
-                        </div>
-                        <div>
-                          <p className="text-sm text-slate-500">Thông tin người đi khai sinh và các thông tin bổ sung</p>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col gap-4">
-                        <div className="col-span-2">
-                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Họ, chữ đệm, tên người đi khai sinh</label>
-                          <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.declarantName || '-'}</div>
-                        </div>
-                        <div>
-                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Quan hệ với người được khai sinh</label>
-                          <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.declarantRelation || '-'}</div>
-                        </div>
-                        <div>
-                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Số GTTT người đi khai sinh</label>
-                          <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.declarantIdNumber || '-'}</div>
-                        </div>
-                        <div>
-                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Ngày ký</label>
-                          <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.signDate || '-'}</div>
-                        </div>
-                        <div>
-                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Người thực hiện</label>
-                          <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.implementer || '-'}</div>
-                        </div>
-                        <div className="col-span-2">
-                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Ghi chú</label>
-                          <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.notes || '-'}</div>
-                        </div>
-                      </div>
-
-                      {selectedRecord.pdfUrl && (
-                        <div className="mt-8 border border-orange-200 p-6 rounded-2xl bg-orange-50/30">
-                          <div className="text-xs text-orange-600 font-bold uppercase tracking-widest mb-4">Văn bản đính kèm</div>
-                          <button
-                            onClick={() => setViewingPdfUrl(selectedRecord.pdfUrl!)}
-                            className="flex items-center gap-4 text-slate-900 font-bold hover:text-orange-600 transition-all group"
-                          >
-                            <div className="bg-white p-3 rounded-xl shadow-sm group-hover:shadow-md transition-all">
-                              <FileText className="w-6 h-6 text-orange-600" />
-                            </div>
-                            <div className="flex flex-col items-start">
-                              <span className="text-sm">Hồ sơ đính kèm chi tiết.pdf</span>
-                              <span className="text-xs text-slate-500 font-medium mt-0.5">Nhấn để xem trực tiếp</span>
-                            </div>
-                          </button>
-                        </div>
-                      )}
+                    <div>
+                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Ngày sinh bằng chữ</label>
+                      <div className="text-base text-slate-900 font-medium italic border-b border-slate-100 pb-2">{selectedRecord.birthDateInWords}</div>
                     </div>
-                  </div>
-
-                  {/* Tab: Lịch sử đồng bộ */}
-                  <div className="mb-8">
-                    <div className="max-w-3xl mx-auto space-y-8">
-                      <div className="flex items-center gap-4 mb-8">
-                        <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center text-3xl">
-                          🕐
-                        </div>
-                        <div>
-                          <p className="text-sm text-slate-500">Chi tiết quá trình thu thập và đồng bộ bản ghi</p>
-                        </div>
-                      </div>
-
-                      <div className="space-y-6">
-                        <div className="flex items-start gap-4 border-l-2 border-emerald-500 pl-6 pb-6">
-                          <div className="w-3 h-3 bg-emerald-500 rounded-full -ml-[31px] mt-1.5 border-2 border-white ring-2 ring-emerald-500/20"></div>
-                          <div>
-                            <div className="text-sm font-bold text-slate-900">Đồng bộ thành công</div>
-                            <div className="text-xs text-slate-500 mt-1">{selectedRecord.syncDate}</div>
-                            <div className="text-sm text-slate-600 mt-2 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                              Bản ghi đã được thu thập từ hệ thống nguồn và đồng bộ vào kho dữ liệu tập trung thành công.
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-start gap-4 border-l-2 border-slate-200 pl-6 pb-6">
-                          <div className="w-3 h-3 bg-slate-300 rounded-full -ml-[31px] mt-1.5 border-2 border-white"></div>
-                          <div>
-                            <div className="text-sm font-semibold text-slate-600">Tiếp nhận dữ liệu</div>
-                            <div className="text-xs text-slate-500 mt-1">{selectedRecord.collectedAt}</div>
-                          </div>
-                        </div>
-                      </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Nơi sinh</label>
+                      <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.birthPlace}</div>
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Quê quán</label>
+                      <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.hometown}</div>
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Dân tộc</label>
+                      <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.ethnicity}</div>
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Quốc tịch</label>
+                      <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.nationality}</div>
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Số định danh cá nhân</label>
+                      <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.personalId}</div>
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Họ tên Cha</label>
+                      <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.fatherName || '-'}</div>
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Ngày sinh Cha</label>
+                      <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.fatherBirthDate || '-'}</div>
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Họ tên Mẹ</label>
+                      <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.motherName || '-'}</div>
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Ngày sinh Mẹ</label>
+                      <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.motherBirthDate || '-'}</div>
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Họ tên người đi khai sinh</label>
+                      <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.declarantName || '-'}</div>
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Quan hệ</label>
+                      <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.declarantRelation || '-'}</div>
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Ngày đăng ký</label>
+                      <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.registrationDate || '-'}</div>
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Ngày đồng bộ</label>
+                      <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.syncDate || '-'}</div>
                     </div>
                   </div>
 
@@ -1468,6 +1248,7 @@ export function DataDetailModal({
           </div>
         </div>
       )}
+
     </>
   );
 }

@@ -135,7 +135,8 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
 
   const [activeTab, setActiveTab] = useState<TabType>('general');
   const [dataClassification, setDataClassification] = useState('');
-  
+  const [connectionType, setConnectionType] = useState('API');
+
   // Source System State
   const [showSourceDropdown, setShowSourceDropdown] = useState(false);
   const [sourceSystemName, setSourceSystemName] = useState('');
@@ -317,7 +318,7 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
                 </div>
               </div>
             )}
-            {activeTab === 'connection' && <ConnectionConfigSection dataClassification={dataClassification} resetTestState={resetTestState} testState={testState} handleTestConnection={handleTestConnection} mockMode={mockMode} setMockMode={setMockMode} />}
+            {activeTab === 'connection' && <ConnectionConfigSection dataClassification={dataClassification} resetTestState={resetTestState} testState={testState} handleTestConnection={handleTestConnection} mockMode={mockMode} setMockMode={setMockMode} connectionType={connectionType} setConnectionType={setConnectionType} />}
             {activeTab === 'mapping' && (
               <div className="h-[600px] -mx-6 -my-4">
                 <StructureLoadingConfig />
@@ -327,7 +328,7 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
           </div>
           <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50">
             <div>
-              {activeTab === 'connection' && (
+              {activeTab === 'connection' && connectionType !== 'FILE' && (
                 <button type="button" onClick={handleTestConnection} style={{ backgroundColor: '#0dcaf0', color: '#fff' }} className="px-4 py-2 text-sm font-medium rounded-lg hover:opacity-90 transition-colors">Kiểm tra kết nối</button>
               )}
             </div>
@@ -374,7 +375,8 @@ export function EditServiceModal({ isOpen, onClose, service }: ServiceModalProps
 
   const [activeTab, setActiveTab] = useState<TabType>('general');
   const [dataClassification, setDataClassification] = useState('');
-  
+  const [connectionType, setConnectionType] = useState(service.connectionType || 'API');
+
   const [showSourceDropdown, setShowSourceDropdown] = useState(false);
   const [sourceSystemName, setSourceSystemName] = useState(service.system || 'Hệ thống Quản lý Hộ tịch điện tử');
 
@@ -551,7 +553,7 @@ export function EditServiceModal({ isOpen, onClose, service }: ServiceModalProps
                 </div>
               </div>
             )}
-            {activeTab === 'connection' && <ConnectionConfigSection dataClassification={dataClassification} resetTestState={resetTestState} isEdit={true} testState={testState} handleTestConnection={handleTestConnection} mockMode={mockMode} setMockMode={setMockMode} />}
+            {activeTab === 'connection' && <ConnectionConfigSection dataClassification={dataClassification} resetTestState={resetTestState} isEdit={true} testState={testState} handleTestConnection={handleTestConnection} mockMode={mockMode} setMockMode={setMockMode} connectionType={connectionType} setConnectionType={setConnectionType} />}
             {activeTab === 'mapping' && (
               <div className="h-[600px] -mx-6 -my-4">
                 <StructureLoadingConfig />
@@ -561,7 +563,7 @@ export function EditServiceModal({ isOpen, onClose, service }: ServiceModalProps
           </div>
           <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50">
             <div>
-              {activeTab === 'connection' && (
+              {activeTab === 'connection' && connectionType !== 'FILE' && (
                 <button type="button" onClick={handleTestConnection} style={{ backgroundColor: '#0dcaf0', color: '#fff' }} className="px-4 py-2 text-sm font-medium rounded-lg hover:opacity-90 transition-colors">Kiểm tra kết nối</button>
               )}
             </div>
