@@ -25,6 +25,7 @@ interface DatabaseRecord {
 }
 
 interface AuctionPageProps {
+  onBack?: () => void;
   mode?: 'thu thập' | 'xử lý';
   context?: 'thu thập' | 'chia sẻ';
 }

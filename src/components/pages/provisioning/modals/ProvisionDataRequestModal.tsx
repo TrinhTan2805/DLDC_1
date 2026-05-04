@@ -15,7 +15,7 @@ export function ProvisionDataRequestModal({ isOpen, onClose }: ProvisionDataRequ
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
           <h2 className="text-xl font-bold text-slate-800">Tạo yêu cầu kết xuất dữ liệu</h2>
-          <button
+          <button title="Đóng" aria-label="Đóng"
             onClick={onClose}
             className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
           >
@@ -31,7 +31,7 @@ export function ProvisionDataRequestModal({ isOpen, onClose }: ProvisionDataRequ
             <div className="grid grid-cols-1 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Cơ quan / Hệ thống yêu cầu <span className="text-red-500">*</span></label>
-                <input
+                <input title="Nhập liệu" aria-label="Trường nhập liệu"
                   type="text"
                   className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                   placeholder="Nhập tên cơ quan hoặc hệ thống đích..."
@@ -39,7 +39,7 @@ export function ProvisionDataRequestModal({ isOpen, onClose }: ProvisionDataRequ
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Loại dữ liệu cần kết xuất <span className="text-red-500">*</span></label>
-                <select className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500">
+                <select title="Loại dữ liệu cần kết xuất" aria-label="Tùy chọn" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500">
                   <option value="">Chọn loại dữ liệu</option>
                   <option value="1">Dữ liệu Hộ tịch điện tử</option>
                   <option value="2">Dữ liệu Thi hành án</option>
@@ -50,14 +50,14 @@ export function ProvisionDataRequestModal({ isOpen, onClose }: ProvisionDataRequ
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">Từ ngày</label>
-                  <input
+                  <input placeholder="..." title="Từ ngày" aria-label="Từ ngày"
                     type="date"
                     className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">Đến ngày</label>
-                  <input
+                  <input placeholder="..." title="Đến ngày" aria-label="Đến ngày"
                     type="date"
                     className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                   />
@@ -68,15 +68,15 @@ export function ProvisionDataRequestModal({ isOpen, onClose }: ProvisionDataRequ
                 <label className="block text-sm font-medium text-slate-700 mb-1">Định dạng kết xuất <span className="text-red-500">*</span></label>
                 <div className="flex gap-4 mt-2">
                   <label className="flex items-center space-x-2">
-                    <input type="radio" name="format" value="excel" className="text-amber-600 focus:ring-amber-500" defaultChecked />
+                    <input title="Nhập liệu" aria-label="Tùy chọn" type="radio" name="format" value="excel" className="text-amber-600 focus:ring-amber-500" defaultChecked />
                     <span className="text-sm text-slate-700">Excel (.xlsx)</span>
                   </label>
                   <label className="flex items-center space-x-2">
-                    <input type="radio" name="format" value="csv" className="text-amber-600 focus:ring-amber-500" />
+                    <input title="Nhập liệu" aria-label="Tùy chọn" type="radio" name="format" value="csv" className="text-amber-600 focus:ring-amber-500" />
                     <span className="text-sm text-slate-700">CSV</span>
                   </label>
                   <label className="flex items-center space-x-2">
-                    <input type="radio" name="format" value="json" className="text-amber-600 focus:ring-amber-500" />
+                    <input title="Nhập liệu" aria-label="Tùy chọn" type="radio" name="format" value="json" className="text-amber-600 focus:ring-amber-500" />
                     <span className="text-sm text-slate-700">JSON</span>
                   </label>
                 </div>
@@ -96,13 +96,13 @@ export function ProvisionDataRequestModal({ isOpen, onClose }: ProvisionDataRequ
 
         {/* Footer */}
         <div className="px-6 py-4 border-t border-slate-200 flex justify-end space-x-3 bg-slate-50 rounded-b-xl">
-          <button
+          <button title="Đóng" aria-label="Đóng"
             onClick={onClose}
             className="px-4 py-2 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors font-medium"
           >
             Hủy bỏ
           </button>
-          <button
+          <button title="Đóng" aria-label="Đóng"
             onClick={onClose}
             className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg flex items-center transition-colors font-medium"
           >

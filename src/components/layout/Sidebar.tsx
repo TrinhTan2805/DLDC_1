@@ -79,6 +79,7 @@ import imgLogo from "figma:asset/0b9fbf72a74cf9ec02b7371d312e91e368f930d8.png";
 import imgImageLogo from "figma:asset/009541fc5d689d29107b655d2b8ecd57f6d4b3ff.png";
 
 import { VersionHistoryModal } from "../modals/VersionHistoryModal";
+import { reconciliationData } from "../../data/provisionReconciliationData";
 
 interface SidebarProps {
   currentPage: string;
@@ -490,7 +491,7 @@ const menuItems: MenuItem[] = [
     subItems: [
       {
         id: "provisioning-service-setup",
-        label: "Quy trình điều phối dữ liệu",
+        label: "Thiết lập điều phối dữ liệu",
         icon: Settings,
       },
       {
@@ -508,8 +509,67 @@ const menuItems: MenuItem[] = [
         label: "Kiểm soát & giám sát cung cấp",
         icon: Activity,
       },
+      {
+        id: "provisioning-service-catalog",
+        label: "Danh mục dịch vụ cung cấp",
+        icon: Database,
+        isGroup: true,
+        subItems: [
+          {
+            id: "provisioning-shared",
+            label: "CSDL Trong ngành",
+            icon: FolderTree,
+            subItems: [
+              { id: "provisioning-shared-hotich", label: "CSDL Hộ tịch điện tử (12)", icon: Database },
+              { id: "provisioning-shared-quoctich", label: "HT quản lý hồ sơ QT (3)", icon: Database },
+              { id: "provisioning-shared-tha", label: "CSDL thi hành án dân sự (16)", icon: Database },
+              { id: "provisioning-shared-bpbd", label: "CSDL về biện pháp BĐ (4)", icon: Database },
+              { id: "provisioning-shared-qgpl", label: "CSDL quốc gia về PL (5)", icon: Database },
+              { id: "provisioning-shared-tttp", label: "CSDL TT Tư pháp dân sự (2)", icon: Database },
+              { id: "provisioning-shared-tgpl", label: "HTTT TG Pháp lý (6)", icon: Database },
+              { id: "provisioning-shared-pbgd", label: "CSDL PB, GD và HG cơ sở (16)", icon: Database },
+              { id: "provisioning-shared-dgts", label: "CSDL quản lý đấu giá TS (25)", icon: Database },
+              { id: "provisioning-shared-htqt", label: "CSDL Hợp tác quốc tế (6)", icon: Database },
+            ]
+          },
+          {
+            id: "provisioning-internal",
+            label: "CSDL Ngoài ngành",
+            icon: FolderTree,
+            subItems: [
+              { id: "provisioning-internal-banan", label: "CSDL Thông tin Bản án (1)", icon: Database },
+              { id: "provisioning-internal-danhmuc", label: "Danh mục (8)", icon: Database },
+              { id: "provisioning-internal-bhxh", label: "BHXH và Giảm nghèo (7)", icon: Database },
+              { id: "provisioning-internal-ncc", label: "Người có công (3)", icon: Database },
+              { id: "provisioning-internal-treem", label: "Trẻ em (1)", icon: Database },
+            ]
+          },
+          {
+            id: "provisioning-open",
+            label: "Dữ liệu mở (32)",
+            icon: Globe,
+          },
+          {
+            id: "provisioning-master",
+            label: "Dữ liệu chủ (1)",
+            icon: HardDrive,
+          },
+        ]
+      },
+      {
+        id: "reconciliation-catalog",
+        label: "Quy trình đối soát dữ liệu",
+        icon: GitCompare,
+        isGroup: true,
+        subItems: reconciliationData.map(item => ({
+          id: `reconciliation-${item.id}`,
+          label: item.group,
+          icon: GitCompare
+        }))
+      },
     ],
   },
+
   {
     id: "admin",
     icon: Shield,
@@ -759,7 +819,7 @@ export function Sidebar({
                 {/* Level 2 Sub Items */}
                 {hasSubItems && isExpanded && (
                   <div className="ml-4 mt-1 space-y-0.5">
-                    {item.subItems?.map((subItem) => {
+                    {item.subItems?.map((subItem: SubMenuItem) => {
                       const SubIcon = subItem.icon;
                       const isSubActive =
                         currentPage === subItem.id;
@@ -811,7 +871,7 @@ export function Sidebar({
                           {hasNestedItems && isSubExpanded && (
                             <div className="ml-4 mt-0.5 space-y-0.5">
                               {subItem.subItems?.map(
-                                (nestedItem) => {
+                                (nestedItem: NestedSubMenuItem) => {
                                   const NestedIcon =
                                     nestedItem.icon || Circle;
                                   const isNestedActive =
@@ -866,7 +926,7 @@ export function Sidebar({
                                         isNestedExpanded && (
                                           <div className="ml-4 mt-0.5 space-y-0.5">
                                             {nestedItem.subItems?.map(
-                                              (level4Item) => {
+                                              (level4Item: any) => {
                                                 const Level4Icon =
                                                   level4Item.icon;
                                                 const isLevel4Active =

@@ -4,13 +4,13 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsToolti
 import { ProvisionExportReportModal } from './modals/ProvisionExportReportModal';
 
 const mockData = [
-  { name: 'T2', 'Luồng dữ liệu': 400, 'Lỗi kết nối': 24 },
-  { name: 'T3', 'Luồng dữ liệu': 300, 'Lỗi kết nối': 13 },
-  { name: 'T4', 'Luồng dữ liệu': 200, 'Lỗi kết nối': 98 },
-  { name: 'T5', 'Luồng dữ liệu': 278, 'Lỗi kết nối': 39 },
-  { name: 'T6', 'Luồng dữ liệu': 189, 'Lỗi kết nối': 48 },
-  { name: 'T7', 'Luồng dữ liệu': 239, 'Lỗi kết nối': 38 },
-  { name: 'CN', 'Luồng dữ liệu': 349, 'Lỗi kết nối': 43 },
+  { name: '1', 'Luồng dữ liệu': 400, 'Lỗi kết nối': 0 },
+  { name: '2', 'Luồng dữ liệu': 0, 'Lỗi kết nối': 0 },
+  { name: '3', 'Luồng dữ liệu': 0, 'Lỗi kết nối': 0 },
+  { name: '4', 'Luồng dữ liệu': 0, 'Lỗi kết nối': 60 },
+  { name: '5', 'Luồng dữ liệu': 0, 'Lỗi kết nối': 0 },
+  { name: '6', 'Luồng dữ liệu': 0, 'Lỗi kết nối': 0 },
+  { name: '7', 'Luồng dữ liệu': 0, 'Lỗi kết nối': 0 },
 ];
 
 export function DataProvisionMonitoringPage() {
@@ -123,11 +123,11 @@ export function DataProvisionMonitoringPage() {
                           <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
                         </linearGradient>
                       </defs>
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                      <XAxis dataKey="name" tick={false} axisLine={false} tickLine={false} />
+                      <YAxis ticks={[400]} domain={[0, 400]} axisLine={{ stroke: '#cbd5e1' }} tickLine={true} tick={{ fill: '#94a3b8', fontSize: 12 }} />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} horizontal={true} />
                       <RechartsTooltip />
-                      <Area type="monotone" dataKey="Luồng dữ liệu" stroke="#f59e0b" fillOpacity={1} fill="url(#colorLuong)" />
+                      <Area type="linear" dataKey="Luồng dữ liệu" stroke="#f59e0b" fillOpacity={1} fill="url(#colorLuong)" />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
@@ -136,12 +136,11 @@ export function DataProvisionMonitoringPage() {
                   <h3 className="font-semibold text-slate-700 mb-4 text-center">Thống kê lỗi kết nối</h3>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={mockData}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                      <XAxis dataKey="name" />
-                      <YAxis />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} horizontal={true} />
+                      <XAxis dataKey="name" tick={false} axisLine={false} tickLine={false} />
+                      <YAxis ticks={[100]} domain={[0, 100]} axisLine={{ stroke: '#cbd5e1' }} tickLine={true} tick={{ fill: '#94a3b8', fontSize: 12 }} />
                       <RechartsTooltip />
-                      <Legend />
-                      <Bar dataKey="Lỗi kết nối" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="Lỗi kết nối" fill="#ef4444" radius={[4, 4, 0, 0]} barSize={40} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>

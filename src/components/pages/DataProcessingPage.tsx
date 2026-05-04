@@ -1,7 +1,7 @@
 import { Cog } from 'lucide-react';
 import { PageHeader } from '../common/PageHeader';
 
-export function DataProcessingPage() {
+export function DataProcessingPage({ initialCategory }: { initialCategory?: string }) {
   return (
     <div className="space-y-6">
       <PageHeader title="Xử lý dữ liệu" icon={Cog} />

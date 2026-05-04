@@ -35,10 +35,9 @@ import { ExpireRequestModal } from './components/modals/ExpireRequestModal';
 import { ExpireApproveModal } from './components/modals/ExpireApproveModal';
 import { Portal } from '../../common/Portal';
 
-export const CategorySetupPage = () => {
+export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }) => {
   // Navigation State
   const [activeTab, setActiveTab] = useState<TabType>('setup');
-  const [userRole] = useState<'leader' | 'staff'>('leader');
 
   // Entities & Attributes State
   const [entities, setEntities] = useState<MasterDataEntity[]>(defaultEntities);

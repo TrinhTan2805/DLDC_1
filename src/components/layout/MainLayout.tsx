@@ -67,6 +67,7 @@ import { MasterDataUpdatePage } from '../pages/master-data/MasterDataUpdatePage'
 import { MasterDataAPage as MasterDataUpdateAPage } from '../pages/master-data/MasterDataAPage';
 import MasterDataReportsPage from '../pages/master-data/MasterDataReportsPage';
 import { DataCoordinationPage } from '../pages/DataCoordinationPage';
+import { ProvisionReconciliationPage } from '../pages/provisioning/DataReconciliationPage';
 import { ServiceSetupPage } from '../pages/orchestration/ServiceSetupPageUpdated';
 import { APIManagementPage } from '../pages/orchestration/APIManagementPage';
 import { DataReconciliationAPIPage } from '../pages/orchestration/DataReconciliationAPIPage';
@@ -186,6 +187,7 @@ import { DataProvisionServiceSetupPage } from '../pages/provisioning/DataProvisi
 import { DataProvisionApiManagementPage } from '../pages/provisioning/DataProvisionApiManagementPage';
 import { DataProvisionRequestPage } from '../pages/provisioning/DataProvisionRequestPage';
 import { DataProvisionMonitoringPage } from '../pages/provisioning/DataProvisionMonitoringPage';
+import { DataProvisionServicesPage } from '../pages/provisioning/DataProvisionServicesPage';
 
 // Page configuration for titles and descriptions
 const pageConfig: Record<string, { title: string; description: string }> = {
@@ -198,7 +200,7 @@ const pageConfig: Record<string, { title: string; description: string }> = {
     description: 'Theo dõi tổng quan hoạt động và thống kê hệ thống kho dữ liệu DLDC'
   },
   'provisioning-service-setup': {
-    title: 'Quy trình điều phối dữ liệu',
+    title: 'Thiết lập điều phối dữ liệu',
     description: 'Thiết lập, phê duyệt và công khai dịch vụ cung cấp dữ liệu'
   },
   'provisioning-api-management': {
@@ -212,6 +214,46 @@ const pageConfig: Record<string, { title: string; description: string }> = {
   'provisioning-monitoring': {
     title: 'Kiểm soát & giám sát cung cấp',
     description: 'Giám sát luồng dữ liệu và Báo cáo thống kê dịch vụ'
+  },
+  'provisioning-catalog-internal': {
+    title: 'Dữ liệu danh mục nội ngành',
+    description: 'Danh mục dịch vụ cung cấp dữ liệu nội ngành'
+  },
+  'provisioning-catalog-shared': {
+    title: 'Dữ liệu dùng chung',
+    description: 'Danh mục dịch vụ cung cấp dữ liệu dùng chung'
+  },
+  'provisioning-catalog-open': {
+    title: 'Dữ liệu mở',
+    description: 'Danh mục dịch vụ cung cấp dữ liệu mở'
+  },
+  'provisioning-catalog-master': {
+    title: 'Dữ liệu chủ',
+    description: 'Danh mục dịch vụ cung cấp dữ liệu chủ'
+  },
+  'provisioning-shared-hotich': { title: 'CSDL Hộ tịch điện tử', description: 'Cung cấp dữ liệu CSDL Hộ tịch điện tử' },
+  'provisioning-shared-quoctich': { title: 'Hệ thống quản lý hồ sơ quốc tịch', description: 'Cung cấp dữ liệu Hệ thống quản lý hồ sơ quốc tịch' },
+  'provisioning-shared-tha': { title: 'Cơ sở dữ liệu thi hành án dân sự', description: 'Cung cấp dữ liệu Cơ sở dữ liệu thi hành án dân sự' },
+  'provisioning-shared-bpbd': { title: 'Cơ sở dữ liệu về biện pháp bảo đảm', description: 'Cung cấp dữ liệu Cơ sở dữ liệu về biện pháp bảo đảm' },
+  'provisioning-shared-qgpl': { title: 'CSDL quốc gia về pháp luật', description: 'Cung cấp dữ liệu CSDL quốc gia về pháp luật' },
+  'provisioning-shared-tttp': { title: 'Cơ sở dữ liệu tương trợ tư pháp về dân sự', description: 'Cung cấp dữ liệu Cơ sở dữ liệu tương trợ tư pháp về dân sự' },
+  'provisioning-shared-tgpl': { title: 'Hệ thống thông tin trợ giúp pháp lý', description: 'Cung cấp dữ liệu Hệ thống thông tin trợ giúp pháp lý' },
+  'provisioning-shared-pbgd': { title: 'CSDL phổ biến, giáo dục pháp luật', description: 'Cung cấp dữ liệu CSDL phổ biến, giáo dục pháp luật và hoà giải cơ sở' },
+  'provisioning-shared-dgts': { title: 'CSDL quản lý đấu giá tài sản', description: 'Cung cấp dữ liệu CSDL quản lý đấu giá tài sản' },
+  'provisioning-shared-htqt': { title: 'CSDL Hợp tác quốc tế', description: 'Cung cấp dữ liệu CSDL Hợp tác quốc tế' },
+  
+  'provisioning-internal-banan': { title: 'CSDL Thông tin Bản án', description: 'Cung cấp dữ liệu CSDL Thông tin Bản án' },
+  'provisioning-internal-danhmuc': { title: 'Danh mục nội ngành', description: 'Cung cấp dữ liệu Danh mục' },
+  'provisioning-internal-bhxh': { title: 'BHXH và Giảm nghèo', description: 'Cung cấp dữ liệu BHXH và Giảm nghèo' },
+  'provisioning-internal-ncc': { title: 'Người có công', description: 'Cung cấp dữ liệu Người có công' },
+  'provisioning-internal-treem': { title: 'Trẻ em', description: 'Cung cấp dữ liệu Trẻ em' },
+  
+  'provisioning-open': { title: 'Dữ liệu mở', description: 'Danh mục dịch vụ cung cấp dữ liệu mở' },
+  'provisioning-master': { title: 'Dữ liệu chủ', description: 'Danh mục dịch vụ cung cấp dữ liệu chủ' },
+
+  'reconciliation-catalog': {
+    title: 'Danh mục tiến trình đối soát',
+    description: 'Quản lý và giám sát các tiến trình đối soát dữ liệu cung cấp'
   },
   'collection-dashboard': {
     title: 'Dashboard - Quản lý thu thập',
@@ -432,6 +474,31 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'provisioning-api-management' && <DataProvisionApiManagementPage />}
             {currentPage === 'provisioning-data-request' && <DataProvisionRequestPage />}
             {currentPage === 'provisioning-monitoring' && <DataProvisionMonitoringPage />}
+            {currentPage === 'provisioning-catalog-internal' && <DataProvisionServicesPage category="internal" title="Dữ liệu danh mục nội ngành" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu danh mục nội ngành" />}
+            {currentPage === 'provisioning-catalog-shared' && <DataProvisionServicesPage category="shared" title="Dữ liệu dùng chung" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu dùng chung" />}
+            
+            {currentPage === 'provisioning-shared-hotich' && <DataProvisionServicesPage category="shared" group="CSDL Hộ tịch điện tử" title="CSDL Hộ tịch điện tử" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu CSDL Hộ tịch điện tử" />}
+            {currentPage === 'provisioning-shared-quoctich' && <DataProvisionServicesPage category="shared" group="Hệ thống quản lý hồ sơ quốc tịch" title="Hệ thống quản lý hồ sơ quốc tịch" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu Hệ thống quản lý hồ sơ quốc tịch" />}
+            {currentPage === 'provisioning-shared-tha' && <DataProvisionServicesPage category="shared" group="Cơ sở dữ liệu thi hành án dân sự" title="Cơ sở dữ liệu thi hành án dân sự" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu Cơ sở dữ liệu thi hành án dân sự" />}
+            {currentPage === 'provisioning-shared-bpbd' && <DataProvisionServicesPage category="shared" group="Cơ sở dữ liệu về biện pháp bảo đảm" title="Cơ sở dữ liệu về biện pháp bảo đảm" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu Cơ sở dữ liệu về biện pháp bảo đảm" />}
+            {currentPage === 'provisioning-shared-qgpl' && <DataProvisionServicesPage category="shared" group="CSDL quốc gia về pháp luật" title="CSDL quốc gia về pháp luật" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu CSDL quốc gia về pháp luật" />}
+            {currentPage === 'provisioning-shared-tttp' && <DataProvisionServicesPage category="shared" group="Cơ sở dữ liệu tương trợ tư pháp về dân sự" title="Cơ sở dữ liệu tương trợ tư pháp về dân sự" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu Cơ sở dữ liệu tương trợ tư pháp về dân sự" />}
+            {currentPage === 'provisioning-shared-tgpl' && <DataProvisionServicesPage category="shared" group="Hệ thống thông tin trợ giúp pháp lý" title="Hệ thống thông tin trợ giúp pháp lý" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu Hệ thống thông tin trợ giúp pháp lý" />}
+            {currentPage.match(/^reconciliation-\d+$/) && <ProvisionReconciliationPage processId={currentPage.replace('reconciliation-', '')} />}
+            {currentPage === 'provisioning-shared-pbgd' && <DataProvisionServicesPage category="shared" group="CSDL phổ biến, giáo dục pháp luật và hoà giải cơ sở" title="CSDL phổ biến, giáo dục pháp luật và hoà giải cơ sở" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu CSDL phổ biến, giáo dục pháp luật và hoà giải cơ sở" />}
+            {currentPage === 'provisioning-shared-dgts' && <DataProvisionServicesPage category="shared" group="CSDL quản lý đấu giá tài sản" title="CSDL quản lý đấu giá tài sản" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu CSDL quản lý đấu giá tài sản" />}
+            {currentPage === 'provisioning-shared-htqt' && <DataProvisionServicesPage category="shared" group="CSDL Hợp tác quốc tế" title="CSDL Hợp tác quốc tế" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu CSDL Hợp tác quốc tế" />}
+
+            {currentPage === 'provisioning-internal-banan' && <DataProvisionServicesPage category="internal" group="CSDL Thông tin Bản án" title="CSDL Thông tin Bản án" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu CSDL Thông tin Bản án" />}
+            {currentPage === 'provisioning-internal-danhmuc' && <DataProvisionServicesPage category="internal" group="Danh mục" title="Danh mục" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu Danh mục" />}
+            {currentPage === 'provisioning-internal-bhxh' && <DataProvisionServicesPage category="internal" group="BHXH và Giảm nghèo" title="BHXH và Giảm nghèo" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu BHXH và Giảm nghèo" />}
+            {currentPage === 'provisioning-internal-ncc' && <DataProvisionServicesPage category="internal" group="Người có công" title="Người có công" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu Người có công" />}
+            {currentPage === 'provisioning-internal-treem' && <DataProvisionServicesPage category="internal" group="Trẻ em" title="Trẻ em" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu Trẻ em" />}
+
+            {currentPage === 'provisioning-catalog-open' && <DataProvisionServicesPage category="open" title="Dữ liệu mở" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu mở" />}
+            {currentPage === 'provisioning-catalog-master' && <DataProvisionServicesPage category="master" title="Dữ liệu chủ" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu chủ" />}
+            {currentPage === 'provisioning-open' && <DataProvisionServicesPage category="open" title="Dữ liệu mở" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu mở" />}
+            {currentPage === 'provisioning-master' && <DataProvisionServicesPage category="master" title="Dữ liệu chủ" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu chủ" />}
             {currentPage === 'orchestration' && <DataCoordinationPage />}
             {currentPage === 'orchestration-service-setup' && <ServiceSetupPage />}
             {currentPage === 'orchestration-api-management' && <APIManagementPage />}
@@ -701,7 +768,7 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
 const getBreadcrumbPath = (pageId: string): string[] => {
   const breadcrumbMap: Record<string, string[]> = {
     // Provisioning
-    'provisioning-service-setup': ['Cung cấp dữ liệu', 'Quy trình điều phối dữ liệu'],
+    'provisioning-service-setup': ['Cung cấp dữ liệu', 'Thiết lập điều phối dữ liệu'],
     'provisioning-api-management': ['Cung cấp dữ liệu', 'Quản lý API cung cấp & đối soát'],
     'provisioning-data-request': ['Cung cấp dữ liệu', 'Cung cấp dữ liệu theo yêu cầu'],
     'provisioning-monitoring': ['Cung cấp dữ liệu', 'Kiểm soát & giám sát cung cấp'],

@@ -15,10 +15,10 @@ export function DataProvisionServiceSetupPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800">Quy trình điều phối dữ liệu</h2>
+          <h2 className="text-2xl font-bold text-slate-800">Thiết lập điều phối dữ liệu</h2>
           <p className="text-slate-500 mt-1">Thiết lập, phê duyệt và công khai dịch vụ cung cấp dữ liệu</p>
         </div>
-        <button 
+        <button
           onClick={() => { setSelectedService(null); setShowServiceModal(true); }}
           className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg flex items-center transition-colors"
         >
@@ -32,33 +32,30 @@ export function DataProvisionServiceSetupPage() {
           <nav className="flex space-x-8 px-6" aria-label="Tabs">
             <button
               onClick={() => setActiveTab('setup')}
-              className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center ${
-                activeTab === 'setup'
+              className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center ${activeTab === 'setup'
                   ? 'border-amber-500 text-amber-600'
                   : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-              }`}
+                }`}
             >
               <Settings className="w-4 h-4 mr-2" />
               Thiết lập dịch vụ
             </button>
             <button
               onClick={() => setActiveTab('approve')}
-              className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center ${
-                activeTab === 'approve'
+              className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center ${activeTab === 'approve'
                   ? 'border-amber-500 text-amber-600'
                   : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-              }`}
+                }`}
             >
               <CheckCircle className="w-4 h-4 mr-2" />
               Kiểm tra & Phê duyệt
             </button>
             <button
               onClick={() => setActiveTab('publish')}
-              className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center ${
-                activeTab === 'publish'
+              className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center ${activeTab === 'publish'
                   ? 'border-amber-500 text-amber-600'
                   : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-              }`}
+                }`}
             >
               <Share2 className="w-4 h-4 mr-2" />
               Công khai dịch vụ
@@ -106,12 +103,12 @@ export function DataProvisionServiceSetupPage() {
                     </span>
                   </td>
                   <td className="py-3 px-4 text-right">
-                    <button 
-                      onClick={() => { 
-                        setSelectedService({ name: 'DV_Hộ tịch điện tử', code: 'DV_001' }); 
+                    <button
+                      onClick={() => {
+                        setSelectedService({ name: 'DV_Hộ tịch điện tử', code: 'DV_001' });
                         if (activeTab === 'approve') setShowApprovalModal(true);
                         else if (activeTab === 'publish') setShowPublishModal(true);
-                        else setShowServiceModal(true); 
+                        else setShowServiceModal(true);
                       }}
                       className="text-amber-600 hover:text-amber-700 font-medium text-sm"
                     >
@@ -130,12 +127,12 @@ export function DataProvisionServiceSetupPage() {
                     </span>
                   </td>
                   <td className="py-3 px-4 text-right">
-                    <button 
-                      onClick={() => { 
-                        setSelectedService({ name: 'DV_Thi hành án dân sự', code: 'DV_002' }); 
+                    <button
+                      onClick={() => {
+                        setSelectedService({ name: 'DV_Thi hành án dân sự', code: 'DV_002' });
                         if (activeTab === 'approve') setShowApprovalModal(true);
                         else if (activeTab === 'publish') setShowPublishModal(true);
-                        else setShowServiceModal(true); 
+                        else setShowServiceModal(true);
                       }}
                       className="text-amber-600 hover:text-amber-700 font-medium text-sm"
                     >
@@ -149,16 +146,16 @@ export function DataProvisionServiceSetupPage() {
         </div>
       </div>
 
-      <ProvisionServiceModal 
-        isOpen={showServiceModal} 
-        onClose={() => setShowServiceModal(false)} 
-        service={selectedService} 
+      <ProvisionServiceModal
+        isOpen={showServiceModal}
+        onClose={() => setShowServiceModal(false)}
+        service={selectedService}
       />
-      
-      <ProvisionServiceApprovalModal 
-        isOpen={showApprovalModal} 
-        onClose={() => setShowApprovalModal(false)} 
-        service={selectedService} 
+
+      <ProvisionServiceApprovalModal
+        isOpen={showApprovalModal}
+        onClose={() => setShowApprovalModal(false)}
+        service={selectedService}
       />
 
       <ProvisionServicePublishModal

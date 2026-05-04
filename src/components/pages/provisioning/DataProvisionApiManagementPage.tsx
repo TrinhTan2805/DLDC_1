@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Server, GitCompare, Shield, History, Search, Filter, Plus } from 'lucide-react';
+import { Server, GitCompare, Shield, History, Search, Filter, Plus, Settings } from 'lucide-react';
 import { ProvisionApiModal } from './modals/ProvisionApiModal';
+import { reconciliationData } from '../../../data/provisionReconciliationData';
 
 export function DataProvisionApiManagementPage() {
   const [activeTab, setActiveTab] = useState<'api_cung_cap' | 'api_doi_soat' | 'phan_quyen' | 'phien_ban'>('api_cung_cap');
@@ -11,7 +12,7 @@ export function DataProvisionApiManagementPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800">Quản lý API Cung cấp & Đối soát</h2>
+          <h2 className="text-2xl font-bold text-slate-800">Quản lý API Cung cấp</h2>
           <p className="text-slate-500 mt-1">Danh mục API, Phân quyền truy cập và Quản lý phiên bản</p>
         </div>
         <button 
@@ -36,17 +37,6 @@ export function DataProvisionApiManagementPage() {
             >
               <Server className="w-4 h-4 mr-2" />
               API Cung cấp dữ liệu
-            </button>
-            <button
-              onClick={() => setActiveTab('api_doi_soat')}
-              className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center ${
-                activeTab === 'api_doi_soat'
-                  ? 'border-amber-500 text-amber-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-              }`}
-            >
-              <GitCompare className="w-4 h-4 mr-2" />
-              API Đối soát dữ liệu
             </button>
             <button
               onClick={() => setActiveTab('phan_quyen')}
@@ -89,59 +79,52 @@ export function DataProvisionApiManagementPage() {
             </button>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50 text-slate-500 text-sm border-b border-slate-200">
-                  <th className="py-3 px-4 font-medium">Tên API</th>
-                  <th className="py-3 px-4 font-medium">Endpoint</th>
-                  <th className="py-3 px-4 font-medium">Phiên bản</th>
-                  <th className="py-3 px-4 font-medium">Phương thức</th>
-                  <th className="py-3 px-4 font-medium">Trạng thái</th>
-                  <th className="py-3 px-4 font-medium text-right">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody className="text-sm">
-                <tr className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
-                  <td className="py-3 px-4 font-medium text-slate-800">Lấy danh sách Hộ tịch</td>
-                  <td className="py-3 px-4 text-slate-600">/api/v1/hotich/list</td>
-                  <td className="py-3 px-4 text-slate-600">v1.2</td>
-                  <td className="py-3 px-4">
-                    <span className="font-mono text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">GET</span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Hoạt động
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-right">
-                    <button 
-                      onClick={() => { setSelectedApi({ name: 'Lấy danh sách Hộ tịch', endpoint: '/api/v1/hotich/list', method: 'GET', version: 'v1.2' }); setShowApiModal(true); }}
-                      className="text-amber-600 hover:text-amber-700 font-medium text-sm"
-                    >
-                      Cập nhật
-                    </button>
-                  </td>
-                </tr>
-                <tr className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
-                  <td className="py-3 px-4 font-medium text-slate-800">Đối soát Bản án</td>
-                  <td className="py-3 px-4 text-slate-600">/api/v1/doisoat/banan</td>
-                  <td className="py-3 px-4 text-slate-600">v1.0</td>
-                  <td className="py-3 px-4">
-                    <span className="font-mono text-xs text-purple-600 bg-purple-50 px-2 py-1 rounded">POST</span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Hoạt động
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-right">
-                    <button className="text-amber-600 hover:text-amber-700 font-medium text-sm">Cập nhật</button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          {activeTab === 'api_cung_cap' && (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50 text-slate-500 text-sm border-b border-slate-200">
+                    <th className="py-3 px-4 font-medium">Tên API</th>
+                    <th className="py-3 px-4 font-medium">Endpoint</th>
+                    <th className="py-3 px-4 font-medium">Phiên bản</th>
+                    <th className="py-3 px-4 font-medium">Phương thức</th>
+                    <th className="py-3 px-4 font-medium">Trạng thái</th>
+                    <th className="py-3 px-4 font-medium text-right">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody className="text-sm">
+                  <tr className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+                    <td className="py-3 px-4 font-medium text-slate-800">Lấy danh sách Hộ tịch</td>
+                    <td className="py-3 px-4 text-slate-600">/api/v1/hotich/list</td>
+                    <td className="py-3 px-4 text-slate-600">v1.2</td>
+                    <td className="py-3 px-4">
+                      <span className="font-mono text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">GET</span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Hoạt động
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <button 
+                        onClick={() => { setSelectedApi({ name: 'Lấy danh sách Hộ tịch', endpoint: '/api/v1/hotich/list', method: 'GET', version: 'v1.2' }); setShowApiModal(true); }}
+                        className="text-amber-600 hover:text-amber-700 font-medium text-sm"
+                      >
+                        Cập nhật
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {activeTab !== 'api_cung_cap' && (
+            <div className="py-12 flex flex-col items-center justify-center text-slate-400 border border-dashed border-slate-200 rounded-lg bg-slate-50">
+              <Shield className="w-12 h-12 mb-3 opacity-20" />
+              <p>Chức năng đang được phát triển</p>
+            </div>
+          )}
         </div>
       </div>
 

@@ -18,7 +18,7 @@ export function ProvisionApiModal({ isOpen, onClose, apiData }: ProvisionApiModa
           <h2 className="text-xl font-bold text-slate-800">
             {apiData ? 'Cập nhật API' : 'Thêm mới API'}
           </h2>
-          <button
+          <button title="Đóng" aria-label="Đóng"
             onClick={onClose}
             className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
           >
@@ -32,7 +32,7 @@ export function ProvisionApiModal({ isOpen, onClose, apiData }: ProvisionApiModa
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-slate-700 mb-1">Tên API <span className="text-red-500">*</span></label>
-                <input
+                <input title="Nhập liệu" aria-label="Trường nhập liệu"
                   type="text"
                   className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                   placeholder="Nhập tên API..."
@@ -41,7 +41,7 @@ export function ProvisionApiModal({ isOpen, onClose, apiData }: ProvisionApiModa
               </div>
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-slate-700 mb-1">Endpoint (URL) <span className="text-red-500">*</span></label>
-                <input
+                <input title="Nhập liệu" aria-label="Trường nhập liệu"
                   type="text"
                   className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 font-mono text-sm"
                   placeholder="/api/v1/..."
@@ -50,7 +50,7 @@ export function ProvisionApiModal({ isOpen, onClose, apiData }: ProvisionApiModa
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Phương thức <span className="text-red-500">*</span></label>
-                <select 
+                <select title="Tùy chọn" aria-label="Tùy chọn" 
                   className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 font-mono text-sm"
                   defaultValue={apiData ? apiData.method : 'GET'}
                 >
@@ -62,7 +62,7 @@ export function ProvisionApiModal({ isOpen, onClose, apiData }: ProvisionApiModa
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Phiên bản <span className="text-red-500">*</span></label>
-                <input
+                <input title="Nhập liệu" aria-label="Trường nhập liệu"
                   type="text"
                   className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                   placeholder="v1.0"
@@ -83,13 +83,13 @@ export function ProvisionApiModal({ isOpen, onClose, apiData }: ProvisionApiModa
 
         {/* Footer */}
         <div className="px-6 py-4 border-t border-slate-200 flex justify-end space-x-3 bg-slate-50 rounded-b-xl">
-          <button
+          <button title="Đóng" aria-label="Đóng"
             onClick={onClose}
             className="px-4 py-2 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors font-medium"
           >
             Hủy bỏ
           </button>
-          <button
+          <button title="Đóng" aria-label="Đóng"
             onClick={onClose}
             className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg flex items-center transition-colors font-medium"
           >
