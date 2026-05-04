@@ -77,10 +77,6 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
             <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tên api" />
           </div>
           <div>
-            <label className="block text-sm text-slate-700 mb-1">Tên alias<span className="text-red-500">*</span></label>
-            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tên alias" />
-          </div>
-          <div>
             <label className="block text-sm text-slate-700 mb-1">URL<span className="text-red-500">*</span></label>
             <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="URL" />
           </div>

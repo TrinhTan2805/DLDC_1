@@ -216,7 +216,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <input aria-label="Input field"
                       type="text"
-                      placeholder="Tìm kiếm theo tên, mã dịch vụ, đơn vị..."
+                      placeholder="Tìm kiếm theo tên, mã dịch vụ, hệ thống nguồn..."
                       className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={searchText}
                       onChange={(e) => setSearchText(e.target.value)}
@@ -257,7 +257,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                     value={departmentFilter}
                     onChange={(e) => setDepartmentFilter(e.target.value)}
                   >
-                    <option value="all">Tất cả Cục/Vụ</option>
+                    <option value="all">Tất cả hệ thống nguồn</option>
                     <option value="Bộ ngành ngoài">Bộ ngành ngoài</option>
                     <option value="Cục Hành chính tư pháp">Cục Hành chính tư pháp</option>
                     <option value="Cục Quản lý thi hành án dân sự">Cục Quản lý thi hành án dân sự</option>
@@ -273,19 +273,20 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                     onChange={(e) => setStatusFilter(e.target.value)}
                   >
                     <option value="all">Tất cả trạng thái</option>
-                    <option value="success">Thành công</option>
                     <option value="draft">Bản nháp</option>
+                    <option value="success">Thành công</option>
                     <option value="failed">Thất bại</option>
-                    <option value="inactive">Ngưng hoạt động</option>
+                    <option value="inactive">Ngừng kết nối</option>
                   </select>
                   <select aria-label="Select box"
                     className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white flex-1"
                     value={typeFilter}
                     onChange={(e) => setTypeFilter(e.target.value)}
                   >
-                    <option value="all">Tất cả loại dịch vụ</option>
-                    <option value="REST">REST</option>
-                    <option value="SOAP">SOAP</option>
+                    <option value="all">Tất cả phương thức kết nối</option>
+                    <option value="Cơ sở dữ liệu">Cơ sở dữ liệu</option>
+                    <option value="API">API</option>
+                    <option value="Tải file Excel">Tải file Excel</option>
                   </select>
                   <button
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-sm whitespace-nowrap"
@@ -332,13 +333,12 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                       <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">STT</th>
                       <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Mã dịch vụ</th>
                       <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Tên dịch vụ</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Loại</th>
+                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase whitespace-nowrap">Phương thức kết nối</th>
                       <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Phiên bản</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Đơn vị quản lý</th>
+                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase whitespace-nowrap">Hệ thống nguồn</th>
                       <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Ngày tạo</th>
                       <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Ngày sửa</th>
                       <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Trạng thái kết nối</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Gửi thông báo</th>
                       <th className="px-4 py-3 text-center text-xs text-slate-600 uppercase">Thao tác</th>
                     </tr>
                   </thead>
@@ -360,8 +360,11 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                           </div>
                         </td>
                         <td className="px-4 py-3">
-                          <span className={`inline-flex px-2 py-1 rounded text-xs ${service.typeColor}`}>
-                            {service.type}
+                          <span className={`inline-flex px-2 py-1 rounded text-xs ${
+                            service.type === 'SOAP' ? 'bg-purple-100 text-purple-700' : 
+                            service.type === 'REST' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'
+                          }`}>
+                            {service.type === 'SOAP' ? 'Cơ sở dữ liệu' : service.type === 'REST' ? 'API' : 'Tải file Excel'}
                           </span>
                         </td>
                         <td className="px-4 py-3 text-sm text-slate-600">{service.version}</td>
@@ -387,21 +390,6 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                           )}
                         </td>
                         <td className="px-4 py-3">
-                          {(service.status === 'err_conn' || service.status === 'err_data') ? (
-                            service.notificationSentForError ? (
-                              <span className="inline-flex px-2 py-1 rounded text-xs bg-green-100 text-green-700">
-                                Đã gửi
-                              </span>
-                            ) : (
-                              <span className="inline-flex px-2 py-1 rounded text-xs bg-yellow-100 text-yellow-700">
-                                Chưa gửi
-                              </span>
-                            )
-                          ) : (
-                            <span className="text-xs text-slate-400">-</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3">
                           <div className="flex items-center justify-center gap-2">
                             <button
                               className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
@@ -422,16 +410,6 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                               }}
                             >
                               <Edit className="w-4 h-4" />
-                            </button>
-                            <button
-                              className="p-1.5 text-slate-600 hover:bg-slate-50 rounded transition-colors"
-                              title="Kiểm tra kết nối / Cài đặt"
-                              onClick={() => {
-                                setSelectedService(service);
-                                setShowSettingsModal(true);
-                              }}
-                            >
-                              <SettingsIcon className="w-4 h-4" />
                             </button>
                             <button
                               className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"

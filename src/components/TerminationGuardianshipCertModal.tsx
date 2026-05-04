@@ -145,7 +145,7 @@ export function TerminationGuardianshipCertModal({
           {/* Header */}
           <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
+              <h2 className="text-lg font-semibold text-slate-900">Danh sách dữ liệu</h2>
               <div className="flex items-center gap-4 mt-1 text-sm text-slate-600">
                 <span>Tổng số: <span className="font-medium text-slate-900">{totalRecords.toLocaleString()}</span></span>
                 <span className="text-slate-300">|</span>

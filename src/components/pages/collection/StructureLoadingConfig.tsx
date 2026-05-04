@@ -54,6 +54,9 @@ export function StructureLoadingConfig() {
   
   // Field settings: allow_null, is_path_file, host_path_file, display_name
   const [fieldSettings, setFieldSettings] = useState<Record<string, any>>({});
+  
+  // Table settings: display_name
+  const [tableSettings, setTableSettings] = useState<Record<string, any>>({});
 
   const filteredTables = useMemo(() => {
     return MOCK_TABLES.filter(t => t.name.toLowerCase().includes(searchTable.toLowerCase()));
@@ -145,6 +148,16 @@ export function StructureLoadingConfig() {
     }));
   };
 
+  const updateTableSetting = (tableId: string, key: string, value: any) => {
+    setTableSettings(prev => ({
+      ...prev,
+      [tableId]: {
+        ...(prev[tableId] || {}),
+        [key]: value
+      }
+    }));
+  };
+
   return (
     <div className="flex w-full h-[600px] bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
       
@@ -198,7 +211,7 @@ export function StructureLoadingConfig() {
                   />
                   <FileText className={`w-4 h-4 ${isActive ? 'text-blue-600' : 'text-slate-500'}`} />
                   <span className={`text-sm flex-1 truncate ${isActive ? 'font-semibold text-blue-800' : 'text-slate-700 font-medium'}`}>
-                    {table.name}
+                    {tableSettings[table.id]?.displayName || table.name}
                   </span>
                   <ChevronRight className={`w-4 h-4 ${isActive ? 'text-blue-600 opacity-100' : 'text-slate-400 opacity-0 group-hover:opacity-100'}`} />
                 </div>
@@ -218,12 +231,22 @@ export function StructureLoadingConfig() {
         {activeTable ? (
           <>
             <div className="px-6 py-4 border-b border-slate-200 shrink-0 bg-white">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                  <span>Cấu hình trường:</span>
-                  <span className="text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">{activeTable.name}</span>
-                </h3>
-              </div>
+                <div className="flex items-center gap-4">
+                  <h3 className="font-bold text-slate-800 flex items-center gap-2 whitespace-nowrap">
+                    <span>Cấu hình bảng:</span>
+                    <span className="text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100 font-mono">{activeTable.name}</span>
+                  </h3>
+                  <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg flex-1 max-w-md">
+                    <span className="text-xs font-semibold text-slate-500 whitespace-nowrap">Tên hiển thị bảng:</span>
+                    <input 
+                      type="text" 
+                      placeholder="Nhập tên hiển thị cho bảng..." 
+                      value={tableSettings[activeTable.id]?.displayName || ''}
+                      onChange={(e) => updateTableSetting(activeTable.id, 'displayName', e.target.value)}
+                      className="flex-1 bg-transparent border-0 p-0 text-sm focus:outline-none focus:ring-0 text-slate-900 font-medium placeholder:text-slate-400"
+                    />
+                  </div>
+                </div>
               <div className="relative max-w-md">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input 
@@ -251,8 +274,6 @@ export function StructureLoadingConfig() {
                     <th className="px-4 py-3 font-bold text-slate-700 w-48">Tên trường</th>
                     <th className="px-4 py-3 font-bold text-slate-700 w-32">Kiểu dữ liệu</th>
                     <th className="px-4 py-3 font-bold text-slate-700 w-24 text-center">Allow null</th>
-                    <th className="px-4 py-3 font-bold text-slate-700 w-28 text-center">Is path file</th>
-                    <th className="px-4 py-3 font-bold text-slate-700 w-48">Host path file</th>
                     <th className="px-4 py-3 font-bold text-slate-700 min-w-[200px]">Tên hiển thị</th>
                   </tr>
                 </thead>
@@ -299,25 +320,6 @@ export function StructureLoadingConfig() {
                             className="w-4 h-4 rounded text-slate-600 cursor-pointer disabled:opacity-50"
                           />
                         </td>
-                        <td className="px-4 py-2.5 text-center">
-                          <input 
-                            type="checkbox" 
-                            disabled={!isSelected}
-                            checked={settings.isPathFile || false}
-                            onChange={(e) => updateFieldSetting(activeTable.id, field.id, 'isPathFile', e.target.checked)}
-                            className="w-4 h-4 rounded text-slate-600 cursor-pointer disabled:opacity-50"
-                          />
-                        </td>
-                        <td className="px-4 py-2.5">
-                          <input 
-                            type="text" 
-                            disabled={!isSelected}
-                            placeholder="vd: http://localhost..."
-                            value={settings.hostPathFile || ''}
-                            onChange={(e) => updateFieldSetting(activeTable.id, field.id, 'hostPathFile', e.target.value)}
-                            className="w-full px-2.5 py-1.5 border border-slate-300 rounded text-[13px] focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-400 disabled:border-slate-200"
-                          />
-                        </td>
                         <td className="px-4 py-2.5">
                           <input 
                             type="text" 
@@ -333,7 +335,7 @@ export function StructureLoadingConfig() {
                   })}
                   {filteredFields.length === 0 && (
                     <tr>
-                      <td colSpan={7} className="text-center py-8 text-sm text-slate-500">
+                      <td colSpan={5} className="text-center py-8 text-sm text-slate-500">
                         Không tìm thấy trường nào
                       </td>
                     </tr>

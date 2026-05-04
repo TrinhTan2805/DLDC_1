@@ -159,7 +159,7 @@ export function CivilRegistryDatabasePage({ mode = 'thu thập', context = 'thu 
           </button>
         )}
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">Danh sách dữ liệu hộ tịch</h2>
+          <h2 className="text-2xl font-bold text-slate-900">Danh sách dữ liệu</h2>
           <p className="text-slate-500 text-sm mt-1">Quản lý và xem chi tiết dữ liệu hộ tịch điện tử</p>
         </div>
       </div>
@@ -326,12 +326,77 @@ export function CivilRegistryDatabasePage({ mode = 'thu thập', context = 'thu 
         </div>
       </>
     ) : (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 flex flex-col items-center justify-center text-center">
-          <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-            <Calendar className="w-8 h-8 text-slate-300" />
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col h-full overflow-hidden">
+          <div className="p-6 border-b border-slate-200 flex items-center justify-between bg-white sticky top-0 z-10">
+            <h3 className="text-xl font-bold text-slate-900 flex items-center gap-3">
+              Lịch sử hoạt động
+              <span className="text-slate-400 font-medium text-lg">/ CSDL_MariaDB</span>
+            </h3>
+            <div className="flex items-center gap-3">
+              <select className="border border-slate-300 rounded-lg px-4 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white min-w-[150px]">
+                <option value="all">All</option>
+                <option value="successful">Successful</option>
+                <option value="skipped">Skipped</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
           </div>
-          <h3 className="text-slate-900 font-semibold mb-1">Lịch sử thu thập</h3>
-          <p className="text-slate-500 text-sm max-w-sm">Dữ liệu lịch sử thu thập đang được cập nhật. Vui lòng quay lại sau.</p>
+          
+          <div className="overflow-x-auto flex-1">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-slate-50 text-slate-700 border-b border-slate-200 sticky top-0">
+                <tr>
+                  <th className="px-6 py-4 font-bold whitespace-nowrap">ID</th>
+                  <th className="px-6 py-4 font-bold whitespace-nowrap">Loại</th>
+                  <th className="px-6 py-4 font-bold whitespace-nowrap">Trạng thái</th>
+                  <th className="px-6 py-4 font-bold whitespace-nowrap">Người tạo</th>
+                  <th className="px-6 py-4 font-bold whitespace-nowrap">Thông Tin máy chủ</th>
+                  <th className="px-6 py-4 font-bold whitespace-nowrap">Thời gian khởi tạo</th>
+                  <th className="px-6 py-4 font-bold whitespace-nowrap text-center">#Hành động</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {[
+                  { id: '66102', type: 'NEW', status: 'SUCCESSFUL', creator: 'administrator', server: '1000', time: '09-10-2025 15:06:34' },
+                  { id: '66101', type: 'DELETE', status: 'SUCCESSFUL', creator: 'administrator', server: '1000', time: '09-10-2025 15:05:41' },
+                  { id: '66100', type: 'DELETE', status: 'SKIPPED', creator: 'administrator', server: '1000', time: '09-10-2025 15:05:05' },
+                  { id: '66093', type: 'DELETE', status: 'CANCELLED', creator: 'administrator', server: '5000', time: '09-10-2025 15:04:34' },
+                  { id: '66082', type: 'UPDATE', status: 'CANCELLED', creator: 'administrator', server: '1000', time: '09-10-2025 14:56:50' },
+                  { id: '61149', type: 'NEW', status: 'SUCCESSFUL', creator: 'administrator', server: '1000', time: '06-10-2025 11:02:19' },
+                  { id: '61148', type: 'DELETE', status: 'SUCCESSFUL', creator: 'administrator', server: '1000', time: '06-10-2025 11:01:41' }
+                ].map((row, idx) => (
+                  <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-6 py-4 font-medium text-slate-900">{row.id}</td>
+                    <td className="px-6 py-4 text-slate-700 font-medium">{row.type}</td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center px-2 py-1 rounded text-[10px] font-black tracking-tight ${
+                        row.status === 'SUCCESSFUL' ? 'bg-emerald-100 text-emerald-700' :
+                        row.status === 'SKIPPED' ? 'bg-amber-100 text-amber-700' :
+                        'bg-blue-100 text-blue-700'
+                      }`}>
+                        {row.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-slate-600 font-medium">{row.creator}</td>
+                    <td className="px-6 py-4 text-slate-600 font-medium">{row.server}</td>
+                    <td className="px-6 py-4 text-slate-600 font-medium">{row.time}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-center gap-2">
+                        <button className="px-3 py-1 bg-teal-500 text-white rounded text-xs font-bold hover:bg-teal-600 transition-colors">Chi tiết</button>
+                        <button className="px-3 py-1 bg-rose-500 text-white rounded text-xs font-bold hover:bg-rose-600 transition-colors">Xóa</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          
+          <div className="p-4 border-t border-slate-200 bg-slate-50 flex justify-end">
+            <button className="px-6 py-2 bg-slate-600 text-white rounded-lg font-bold text-sm hover:bg-slate-700 transition-colors shadow-sm">
+              Đóng
+            </button>
+          </div>
         </div>
       )}
 
