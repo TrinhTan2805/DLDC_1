@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useState, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList } from 'recharts';
 import { Calendar, Download, FileUser, UserCheck, Users, Baby, Heart, UserX, UsersRound, FileEdit, FileCheck, FileX, ChevronLeft, Search, ArrowUpRight } from 'lucide-react';
+import { DatabasePageTemplate } from '../collection/DatabasePageTemplate';
 import { DataDetailModal } from '../../DataDetailModal';
 import { MarriageDetailModal } from '../../MarriageDetailModal';
 import { MaritalStatusCertModal } from '../../MaritalStatusCertModal';
@@ -38,8 +39,8 @@ interface CivilRegistryDatabasePageProps {
 }
 
 export function CivilRegistryDatabasePage({ mode = 'thu thập', context = 'thu thập', onBack }: CivilRegistryDatabasePageProps) {
+  // Remove activeTab, keep selectedStat for modals
   const [selectedStat, setSelectedStat] = useState<StatCard | null>(null);
-  const [activeTab, setActiveTab] = useState<'records' | 'history'>('records');
   const [timeFilter, setTimeFilter] = useState<'thisMonth' | 'lastMonth' | '3months' | '6months'>('thisMonth');
 
   // Generate realistic random data
@@ -145,156 +146,95 @@ export function CivilRegistryDatabasePage({ mode = 'thu thập', context = 'thu 
 
   const legendLabels = getLegendLabels();
 
+  const sidebarItems = stats.map(s => ({ id: s.id, label: `Bộ dữ liệu ${s.title.toLowerCase()}` }));
+
   return (
-    <div className="space-y-6">
-      {/* Header with Back Button */}
-      <div className="flex items-center gap-4">
-        {onBack && (
-          <button 
-            onClick={onBack}
-            className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-600"
-            title="Quay lại"
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </button>
-        )}
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900">Danh sách dữ liệu</h2>
-          <p className="text-slate-500 text-sm mt-1">Quản lý và xem chi tiết dữ liệu hộ tịch điện tử</p>
-        </div>
-      </div>
+    <DatabasePageTemplate
+      title="Danh sách dữ liệu"
+      description="Quản lý và xem chi tiết dữ liệu hộ tịch điện tử"
+      onBack={onBack}
+      innerSidebarItems={sidebarItems}
+      onSelectDataType={(id) => {
+        const stat = stats.find(s => s.id === id);
+        if (stat) setSelectedStat(stat);
+      }}
+    >
 
-      {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200">
-        <button
-          onClick={() => setActiveTab('records')}
-          className={`px-4 py-3 text-sm font-medium transition-all relative ${
-            activeTab === 'records' ? 'text-blue-600' : 'text-slate-500 hover:text-slate-700'
-          }`}
-        >
-          Danh sách bản ghi dữ liệu đã thu thập
-          {activeTab === 'records' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />}
-        </button>
-        <button
-          onClick={() => setActiveTab('history')}
-          className={`px-4 py-3 text-sm font-medium transition-all relative ${
-            activeTab === 'history' ? 'text-blue-600' : 'text-slate-500 hover:text-slate-700'
-          }`}
-        >
-          Lịch sử thu thập
-          {activeTab === 'history' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />}
-        </button>
-      </div>
-
-      {activeTab === 'records' ? (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {stats.map((stat) => {
-            const Icon = stat.icon;
-            return (
-              <div 
-                key={stat.id} 
-                className="bg-white p-5 rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition-all group cursor-pointer"
-                onClick={() => setSelectedStat(stat)}
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="p-2 bg-slate-100 rounded-lg group-hover:bg-blue-50 transition-colors text-slate-600 group-hover:text-blue-600">
-                    <Icon className="w-6 h-6" />
-                  </div>
-                  <div className={`text-xs font-medium ${stat.change.startsWith('-') ? 'text-rose-600' : 'text-emerald-600'}`}>
-                    {stat.change}
-                  </div>
-                </div>
-                <h4 className="text-slate-900 font-semibold mb-2 group-hover:text-blue-700 transition-colors line-clamp-2 min-h-[40px]">
-                  {stat.title}
-                </h4>
-                <div className="flex items-center justify-between mt-auto">
-                  <div className="text-2xl font-bold text-slate-900">{stat.value}</div>
-                  <div className="text-blue-600 text-xs font-bold flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    Chi tiết
-                    <ArrowUpRight className="w-3 h-3 ml-1" />
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Biểu đồ thu thập dữ liệu */}
-        <div className="mt-8 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-          <div className="flex justify-between items-start mb-6">
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-slate-800">Biểu đồ thu thập dữ liệu</h3>
-              <select 
-                className="border border-blue-400 rounded-md px-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                value={timeFilter}
-                onChange={(e) => setTimeFilter(e.target.value as any)}
-              >
-                <option value="thisMonth">Tháng này</option>
-                <option value="lastMonth">Tháng trước</option>
-                <option value="3months">3 tháng gần nhất</option>
-                <option value="6months">6 tháng gần nhất</option>
-              </select>
-            </div>
-            <div className="text-slate-600 font-medium text-lg">Tổng số: {totalChartSum.toLocaleString('vi-VN').replace(/,/g, '.')}</div>
+      {/* Biểu đồ thu thập dữ liệu */}
+      <div className="mt-8 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+        <div className="flex justify-between items-start mb-6">
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-slate-800">Biểu đồ thu thập dữ liệu</h3>
+            <select 
+              className="border border-blue-400 rounded-md px-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              value={timeFilter}
+              onChange={(e) => setTimeFilter(e.target.value as any)}
+            >
+              <option value="thisMonth">Tháng này</option>
+              <option value="lastMonth">Tháng trước</option>
+              <option value="3months">3 tháng gần nhất</option>
+              <option value="6months">6 tháng gần nhất</option>
+            </select>
           </div>
-          
-          <div className="mt-8" style={{ width: '100%', height: 450 }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }} barGap={0}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                <XAxis 
-                  dataKey="name" 
-                  angle={-45} 
-                  textAnchor="end" 
-                  interval={0} 
-                  tick={{ fontSize: 12, fill: '#64748b' }} 
-                  dy={10}
-                />
-                <YAxis 
-                  tickFormatter={(value) => {
-                    if (value === 0) return '0';
-                    return `${(value / 1000000).toFixed(1)}M`;
-                  }} 
-                  tick={{ fontSize: 12, fill: '#64748b' }}
-                  axisLine={false}
-                  tickLine={false}
-                  dx={-10}
-                />
-                <Tooltip 
-                  formatter={(value: number) => value.toLocaleString('vi-VN').replace(/,/g, '.')} 
-                  cursor={{ fill: '#f1f5f9' }}
-                  contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)' }}
-                />
-                <Legend 
-                  verticalAlign="bottom" 
-                  content={() => (
-                    <div className="flex justify-center gap-8 mt-12 text-sm text-slate-600">
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-blue-400 rounded-sm"></div>
-                        <span>{legendLabels[0]}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-orange-500 rounded-sm"></div>
-                        <span>{legendLabels[1]}</span>
-                      </div>
+          <div className="text-slate-600 font-medium text-lg">Tổng số: {totalChartSum.toLocaleString('vi-VN').replace(/,/g, '.')}</div>
+        </div>
+        
+        <div className="mt-8" style={{ width: '100%', height: 450 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }} barGap={0}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+              <XAxis 
+                dataKey="name" 
+                angle={-45} 
+                textAnchor="end" 
+                interval={0} 
+                tick={{ fontSize: 12, fill: '#64748b' }} 
+                dy={10}
+              />
+              <YAxis 
+                tickFormatter={(value) => {
+                  if (value === 0) return '0';
+                  return `${(value / 1000000).toFixed(1)}M`;
+                }} 
+                tick={{ fontSize: 12, fill: '#64748b' }}
+                axisLine={false}
+                tickLine={false}
+                dx={-10}
+              />
+              <Tooltip 
+                formatter={(value: number) => value.toLocaleString('vi-VN').replace(/,/g, '.')} 
+                cursor={{ fill: '#f1f5f9' }}
+                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)' }}
+              />
+              <Legend 
+                verticalAlign="bottom" 
+                content={() => (
+                  <div className="flex justify-center gap-8 mt-12 text-sm text-slate-600">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-blue-400 rounded-sm"></div>
+                      <span>{legendLabels[0]}</span>
                     </div>
-                  )}
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-orange-500 rounded-sm"></div>
+                      <span>{legendLabels[1]}</span>
+                    </div>
+                  </div>
+                )}
+              />
+              <Bar dataKey="previous" fill="#60a5fa" radius={[4, 4, 0, 0]} maxBarSize={30} />
+              <Bar dataKey="current" fill="#f97316" radius={[4, 4, 0, 0]} maxBarSize={30}>
+                <LabelList 
+                  dataKey="current" 
+                  position="top" 
+                  formatter={(val: number) => val.toLocaleString('vi-VN').replace(/,/g, '.')} 
+                  style={{ fontSize: '11px', fontWeight: 'bold', fill: '#0f172a' }} 
+                  offset={10}
                 />
-                <Bar dataKey="previous" fill="#60a5fa" radius={[4, 4, 0, 0]} maxBarSize={30} />
-                <Bar dataKey="current" fill="#f97316" radius={[4, 4, 0, 0]} maxBarSize={30}>
-                  <LabelList 
-                    dataKey="current" 
-                    position="top" 
-                    formatter={(val: number) => val.toLocaleString('vi-VN').replace(/,/g, '.')} 
-                    style={{ fontSize: '11px', fontWeight: 'bold', fill: '#0f172a' }} 
-                    offset={10}
-                  />
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         </div>
+      </div>
 
         {/* Danh sách CSDL thu thập */}
         <div className="mt-8 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
@@ -324,9 +264,9 @@ export function CivilRegistryDatabasePage({ mode = 'thu thập', context = 'thu 
             </table>
           </div>
         </div>
-      </>
-    ) : (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col h-full overflow-hidden">
+
+        {/* Lịch sử thu thập - Moved from tab to bottom */}
+        <div className="mt-8 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
           <div className="p-6 border-b border-slate-200 flex items-center justify-between bg-white sticky top-0 z-10">
             <h3 className="text-xl font-bold text-slate-900 flex items-center gap-3">
               Lịch sử hoạt động
@@ -391,14 +331,7 @@ export function CivilRegistryDatabasePage({ mode = 'thu thập', context = 'thu 
               </tbody>
             </table>
           </div>
-          
-          <div className="p-4 border-t border-slate-200 bg-slate-50 flex justify-end">
-            <button className="px-6 py-2 bg-slate-600 text-white rounded-lg font-bold text-sm hover:bg-slate-700 transition-colors shadow-sm">
-              Đóng
-            </button>
-          </div>
         </div>
-      )}
 
       {/* Specific Modals */}
       {selectedStat && selectedStat.id === '2' && (
@@ -532,6 +465,6 @@ export function CivilRegistryDatabasePage({ mode = 'thu thập', context = 'thu 
           errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
         />
       )}
-    </div>
+    </DatabasePageTemplate>
   );
 }

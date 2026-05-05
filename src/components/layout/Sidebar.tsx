@@ -74,6 +74,8 @@ import {
   Circle,
   History as HistoryIcon,
   X,
+  Link2,
+  Zap,
 } from "lucide-react";
 import imgLogo from "figma:asset/0b9fbf72a74cf9ec02b7371d312e91e368f930d8.png";
 import imgImageLogo from "figma:asset/009541fc5d689d29107b655d2b8ecd57f6d4b3ff.png";
@@ -137,19 +139,41 @@ const menuItems: MenuItem[] = [
         icon: Settings,
       },
       {
-        id: "collection-source-system",
-        label: "Quản lý hệ thống nguồn",
-        icon: Server,
-      },
-      {
-        id: "collection-agent",
-        label: "Quản trị Agent",
-        icon: Monitor,
-      },
-      {
         id: "view-collected-data",
         label: "Xem dữ liệu thu thập",
         icon: Database,
+        subItems: [
+          {
+            id: "view-data-internal",
+            label: "CSDL Trong ngành",
+            icon: Building2,
+            subItems: [
+              { id: "data-info-civil-registry", label: "CSDL Hộ tịch điện tử", icon: Database },
+              { id: "data-info-case-management", label: "HT quản lý hồ sơ QT (3)", icon: Database },
+              { id: "data-info-civil-judgment", label: "CSDL thi hành án dân sự (16)", icon: Database },
+              { id: "data-info-security-measures", label: "CSDL về biện pháp BD (4)", icon: Database },
+              { id: "data-info-legal-national", label: "CSDL quốc gia về PL (5)", icon: Database },
+              { id: "data-info-civil-legal-center", label: "CSDL TT Tư Pháp dân sự (2)", icon: Database },
+              { id: "data-info-civil-legal-info", label: "HTTT TTTG pháp lý dân sự (6)", icon: Database },
+              { id: "data-info-legal-center", label: "HTTT TG Pháp lý", icon: Database },
+              { id: "data-info-family-base", label: "CSDL PB, GĐ và HG cơ sở (16)", icon: Database },
+              { id: "data-info-auction", label: "CSDL quản lý đấu giá TS (24)", icon: Database },
+              { id: "data-info-international", label: "CSDL Hợp tác quốc tế (6)", icon: Database },
+            ]
+          },
+          {
+            id: "view-data-external",
+            label: "CSDL Ngoài ngành",
+            icon: Building,
+            subItems: [
+              { id: "external-court-judgment", label: "CSDL Thông tin Bản án (1)", icon: Database },
+              { id: "external-category-group", label: "Danh mục (8)", icon: Database },
+              { id: "external-social-security", label: "BHXH và Giảm nghèo (7)", icon: Database },
+              { id: "external-meritorious-group", label: "Người có công (3)", icon: Database },
+              { id: "external-children-group", label: "Trẻ em (1)", icon: Database },
+            ]
+          }
+        ]
       },
       {
         id: "collection-reconciliation",
@@ -516,6 +540,11 @@ const menuItems: MenuItem[] = [
     label: "Quản trị & vận hành",
     color: "text-red-600",
     subItems: [
+      {
+        id: "connection-management",
+        label: "Quản lý kết nối",
+        icon: Link2,
+      },
       {
         id: "admin-user-management-group",
         label: "Quản trị người dùng",

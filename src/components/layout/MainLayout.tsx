@@ -8,8 +8,7 @@ import { ExternalDataPage } from '../pages/collection/ExternalDataPage';
 import { InternalDataPage } from '../pages/collection/InternalDataPage';
 import { ViewCollectedDataPage } from '../pages/collection/ViewCollectedDataPage';
 import { CollectionSetupPage } from '../pages/collection/CollectionSetupPage';
-import { SourceSystemManagementPage } from '../pages/collection/SourceSystemManagementPage';
-import { AgentManagementPage } from '../pages/collection/AgentManagementPage';
+import { ConnectionManagementPage } from '../pages/collection/ConnectionManagementPage';
 import { DataProcessingPage } from '../pages/DataProcessingPage';
 import { ProcessedDataPage } from '../pages/processing/ProcessedDataPage';
 import { CategoryManagementPage } from '../pages/CategoryManagementPage';
@@ -362,10 +361,9 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'collection-dashboard' && <CollectionDashboard />}
             {currentPage === 'screen-flow-diagram' && <ScreenFlowDiagram />}
             {currentPage === 'collection' && <DataCollectionPage />}
-            {currentPage === 'view-collected-data' && <ViewCollectedDataPage onNavigate={(id) => setCurrentPage(id)} />}
+            {/* view-collected-data mapping removed - clicking it now only toggles dropdown */}
             {currentPage === 'collection-setup' && <CollectionSetupPage onNavigate={setCurrentPage} />}
-            {currentPage === 'collection-source-system' && <SourceSystemManagementPage />}
-            {currentPage === 'collection-agent' && <AgentManagementPage />}
+            {currentPage === 'connection-management' && <ConnectionManagementPage />}
             {currentPage === 'collection-reconciliation' && <ReconciliationSetupPage />}
             {currentPage === 'collection-reconciliation-setup' && <ReconciliationSetupPage />}
             {currentPage === 'collection-reconciliation-management' && <DataReconciliationPage />}
@@ -713,7 +711,6 @@ const getBreadcrumbPath = (pageId: string): string[] => {
     'collection-setup': ['Quản lý thu thập', 'Thiết lập thu thập'],
     'collection-source-system': ['Quản lý thu thập', 'Quản lý hệ thống nguồn'],
     'collection-agent': ['Quản lý thu thập', 'Quản trị Agent'],
-    'view-collected-data': ['Quản lý thu thập', 'Xem dữ liệu thu thập'],
     'data-info': ['Quản lý thu thập', 'Xem dữ liệu thu thập'],
     'data-info-civil-registry': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL Hộ tịch điện tử'],
     'data-info-case-management': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'HT quản lý hồ sơ QT'],

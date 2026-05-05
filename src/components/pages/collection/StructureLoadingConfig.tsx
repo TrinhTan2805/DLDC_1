@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Database, FileText, Check, ChevronRight } from 'lucide-react';
+import { Search, Database, FileText, Check, ChevronRight, Key } from 'lucide-react';
 
 // --- MOCK DATA ---
 const MOCK_TABLES = [
@@ -139,13 +139,25 @@ export function StructureLoadingConfig() {
 
   const updateFieldSetting = (tableId: string, fieldId: string, key: string, value: any) => {
     const fieldKey = getFieldKey(tableId, fieldId);
-    setFieldSettings(prev => ({
-      ...prev,
-      [fieldKey]: {
-        ...(prev[fieldKey] || {}),
-        [key]: value
+    setFieldSettings(prev => {
+      const newSettings = { ...prev };
+      
+      // Nếu đang đặt trường này làm Khóa chính, phải bỏ khóa chính ở các trường khác cùng bảng
+      if (key === 'isPrimaryKey' && value === true) {
+        Object.keys(newSettings).forEach(k => {
+          if (k.startsWith(`${tableId}.`) && k !== fieldKey) {
+            newSettings[k] = { ...newSettings[k], isPrimaryKey: false };
+          }
+        });
       }
-    }));
+      
+      newSettings[fieldKey] = {
+        ...(newSettings[fieldKey] || {}),
+        [key]: value
+      };
+      
+      return newSettings;
+    });
   };
 
   const updateTableSetting = (tableId: string, key: string, value: any) => {
@@ -199,7 +211,7 @@ export function StructureLoadingConfig() {
               return (
                 <div 
                   key={table.id}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors ${isActive ? 'bg-blue-50 border border-blue-100' : 'hover:bg-slate-100 border border-transparent'}`}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all border-2 ${isActive ? 'bg-blue-50 border-blue-600 shadow-sm' : 'hover:bg-slate-100 border-transparent'}`}
                   onClick={() => setActiveTableId(table.id)}
                 >
                   <input 
@@ -213,7 +225,6 @@ export function StructureLoadingConfig() {
                   <span className={`text-sm flex-1 truncate ${isActive ? 'font-semibold text-blue-800' : 'text-slate-700 font-medium'}`}>
                     {tableSettings[table.id]?.displayName || table.name}
                   </span>
-                  <ChevronRight className={`w-4 h-4 ${isActive ? 'text-blue-600 opacity-100' : 'text-slate-400 opacity-0 group-hover:opacity-100'}`} />
                 </div>
               );
             })}
@@ -274,6 +285,7 @@ export function StructureLoadingConfig() {
                     <th className="px-4 py-3 font-bold text-slate-700 w-48">Tên trường</th>
                     <th className="px-4 py-3 font-bold text-slate-700 w-32">Kiểu dữ liệu</th>
                     <th className="px-4 py-3 font-bold text-slate-700 w-24 text-center">Allow null</th>
+                    <th className="px-4 py-3 font-bold text-slate-700 w-24 text-center">Khóa chính</th>
                     <th className="px-4 py-3 font-bold text-slate-700 min-w-[200px]">Tên hiển thị</th>
                   </tr>
                 </thead>
@@ -320,6 +332,15 @@ export function StructureLoadingConfig() {
                             className="w-4 h-4 rounded text-slate-600 cursor-pointer disabled:opacity-50"
                           />
                         </td>
+                        <td className="px-4 py-2.5 text-center">
+                          <input 
+                            type="checkbox" 
+                            disabled={!isSelected}
+                            checked={settings.isPrimaryKey || false}
+                            onChange={(e) => updateFieldSetting(activeTable.id, field.id, 'isPrimaryKey', e.target.checked)}
+                            className="w-4 h-4 rounded text-amber-600 cursor-pointer disabled:opacity-50"
+                          />
+                        </td>
                         <td className="px-4 py-2.5">
                           <input 
                             type="text" 
@@ -335,7 +356,7 @@ export function StructureLoadingConfig() {
                   })}
                   {filteredFields.length === 0 && (
                     <tr>
-                      <td colSpan={5} className="text-center py-8 text-sm text-slate-500">
+                      <td colSpan={6} className="text-center py-8 text-sm text-slate-500">
                         Không tìm thấy trường nào
                       </td>
                     </tr>

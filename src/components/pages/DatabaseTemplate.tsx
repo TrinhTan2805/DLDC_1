@@ -3,6 +3,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { GenericProcessingPage } from './processing/GenericProcessingPage';
 import { Calendar, Download, FileUser, UserCheck, Users, Baby, Heart, UserX, UsersRound, FileEdit, FileCheck, FileX, ChevronLeft, Search, ArrowUpRight } from 'lucide-react';
 import { DataDetailModal } from '../DataDetailModal';
+import { DatabasePageTemplate } from './collection/DatabasePageTemplate';
 
 interface StatCard {
   id: string;
@@ -43,7 +44,6 @@ export function DatabaseTemplate({
   onBack
 }: DatabaseTemplateProps) {
   const [selectedStat, setSelectedStat] = useState<StatCard | null>(null);
-  const [activeTab, setActiveTab] = useState<'records' | 'history'>('records');
 
   // Default stats if none provided
   const generateData = () => {
@@ -126,198 +126,135 @@ export function DatabaseTemplate({
     return <GenericProcessingPage systemName={categoryName} datasets={stats.map((s, idx) => ({ id: s.id || `item_${idx}`, name: s.title }))} />;
   }
 
+  const sidebarItems = stats.map(s => ({ id: s.id, label: `Bộ dữ liệu ${s.title.toLowerCase()}` }));
+
   return (
-    <div className="space-y-6">
-      {/* Header with Back Button */}
-      <div className="flex items-center gap-4">
-        {onBack && (
-          <button 
-            onClick={onBack}
-            className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-600"
-            title="Quay lại"
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </button>
-        )}
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900">{title}</h2>
-          <p className="text-slate-500 text-sm mt-1">Quản lý và xem chi tiết dữ liệu từ {categoryName}</p>
+    <DatabasePageTemplate
+      title={title}
+      description={`Quản lý và xem chi tiết dữ liệu từ ${categoryName}`}
+      onBack={onBack}
+      innerSidebarItems={sidebarItems}
+      onSelectDataType={(id) => {
+        const stat = stats.find(s => s.id === id);
+        if (stat) setSelectedStat(stat);
+      }}
+    >
+
+      {/* Biểu đồ thu thập dữ liệu */}
+      <div className="mt-8 bg-white p-6 rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="flex justify-between items-start mb-6">
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-slate-800">Biểu đồ thu thập dữ liệu</h3>
+            <select 
+              className="border border-blue-400 rounded-md px-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              value={timeFilter}
+              onChange={(e) => setTimeFilter(e.target.value as any)}
+            >
+              <option value="thisMonth">Tháng này</option>
+              <option value="lastMonth">Tháng trước</option>
+              <option value="3months">3 tháng gần nhất</option>
+              <option value="6months">6 tháng gần nhất</option>
+            </select>
+          </div>
+          <div className="text-slate-600 font-medium text-lg">Tổng số: {totalChartSum.toLocaleString('vi-VN').replace(/,/g, '.')}</div>
+        </div>
+        
+        <div className="overflow-x-auto overflow-y-hidden pb-4">
+          <div className="mt-8" style={{ minWidth: Math.max(stats.length * 90, 800), height: 450 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 120 }} barGap={0}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                <XAxis 
+                  dataKey="name" 
+                  angle={-45} 
+                  textAnchor="end" 
+                  interval={0} 
+                  tick={{ fontSize: 11, fill: '#64748b' }} 
+                  dy={10}
+                />
+                <YAxis 
+                  tickFormatter={(value) => {
+                    if (value === 0) return '0';
+                    return `${(value / 1000).toFixed(0)}K`;
+                  }} 
+                  tick={{ fontSize: 12, fill: '#64748b' }}
+                  axisLine={false}
+                  tickLine={false}
+                  dx={-10}
+                />
+                <Tooltip 
+                  formatter={(value: number) => value.toLocaleString('vi-VN').replace(/,/g, '.')} 
+                  cursor={{ fill: '#f1f5f9' }}
+                  contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)' }}
+                />
+                <Legend 
+                  verticalAlign="bottom" 
+                  content={() => (
+                    <div className="flex justify-center gap-8 mt-16 text-sm text-slate-600 w-full sticky left-0">
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-blue-400 rounded-sm"></div>
+                        <span>{legendLabels[0]}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-orange-500 rounded-sm"></div>
+                        <span>{legendLabels[1]}</span>
+                      </div>
+                    </div>
+                  )}
+                />
+                <Bar dataKey="previous" fill="#60a5fa" radius={[4, 4, 0, 0]} maxBarSize={30} />
+                <Bar dataKey="current" fill="#f97316" radius={[4, 4, 0, 0]} maxBarSize={30}>
+                  <LabelList 
+                    dataKey="current" 
+                    position="top" 
+                    formatter={(val: number) => val.toLocaleString('vi-VN').replace(/,/g, '.')} 
+                    style={{ fontSize: '11px', fontWeight: 'bold', fill: '#0f172a' }} 
+                    offset={10}
+                  />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200">
-        <button
-          onClick={() => setActiveTab('records')}
-          className={`px-4 py-3 text-sm font-medium transition-all relative ${
-            activeTab === 'records' ? 'text-blue-600' : 'text-slate-500 hover:text-slate-700'
-          }`}
-        >
-          Danh sách bản ghi dữ liệu đã thu thập
-          {activeTab === 'records' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />}
-        </button>
-        <button
-          onClick={() => setActiveTab('history')}
-          className={`px-4 py-3 text-sm font-medium transition-all relative ${
-            activeTab === 'history' ? 'text-blue-600' : 'text-slate-500 hover:text-slate-700'
-          }`}
-        >
-          Lịch sử thu thập
-          {activeTab === 'history' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />}
-        </button>
+      {/* Danh sách CSDL thu thập */}
+      <div className="mt-8 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-slate-200">
+          <h3 className="text-lg font-semibold text-slate-800">Danh sách CSDL thu thập</h3>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm text-slate-600">
+            <thead className="bg-slate-50 text-slate-700 font-medium border-b border-slate-200">
+              <tr>
+                <th className="px-6 py-4 font-semibold whitespace-nowrap">Tên cơ liệu</th>
+                <th className="px-6 py-4 font-semibold whitespace-nowrap">Thuộc</th>
+                <th className="px-6 py-4 font-semibold whitespace-nowrap">Số lượng đăng ký tháng này</th>
+                <th className="px-6 py-4 font-semibold whitespace-nowrap">Số lượng bản ghi lỗi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {stats.map((stat) => (
+                <tr key={stat.id} className="hover:bg-slate-50 transition-colors">
+                  <td className="px-6 py-4 font-medium text-slate-800">{stat.title}</td>
+                  <td className="px-6 py-4 text-slate-600">{categoryName}</td>
+                  <td className="px-6 py-4 text-slate-600">{stat.thisMonth.toLocaleString('vi-VN').replace(/,/g, '.')}</td>
+                  <td className="px-6 py-4 text-slate-600">{Math.floor(stat.thisMonth * 0.05).toLocaleString('vi-VN').replace(/,/g, '.')}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {activeTab === 'records' ? (
-        <div className="space-y-6">
-          {/* Stats Grid - Cards for each data type */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {stats.map((stat) => {
-              const Icon = stat.icon;
-              return (
-                <div 
-                  key={stat.id} 
-                  className="bg-white p-5 rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition-all group cursor-pointer"
-                  onClick={() => setSelectedStat(stat)}
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="p-2 bg-slate-100 rounded-lg group-hover:bg-blue-50 transition-colors text-slate-600 group-hover:text-blue-600">
-                      <Icon className="w-6 h-6" />
-                    </div>
-                    <div className={`text-xs font-medium ${stat.change.startsWith('-') ? 'text-rose-600' : 'text-emerald-600'}`}>
-                      {stat.change}
-                    </div>
-                  </div>
-                  <h4 className="text-slate-900 font-semibold mb-2 group-hover:text-blue-700 transition-colors line-clamp-2 min-h-[40px]">
-                    {stat.title}
-                  </h4>
-                  <div className="flex items-center justify-between mt-auto">
-                    <div className="text-2xl font-bold text-slate-900">{stat.value}</div>
-                    <div className="text-blue-600 text-xs font-bold flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      Chi tiết
-                      <ArrowUpRight className="w-3 h-3 ml-1" />
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Biểu đồ thu thập dữ liệu */}
-          <div className="mt-8 bg-white p-6 rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="flex justify-between items-start mb-6">
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-slate-800">Biểu đồ thu thập dữ liệu</h3>
-                <select 
-                  className="border border-blue-400 rounded-md px-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                  value={timeFilter}
-                  onChange={(e) => setTimeFilter(e.target.value as any)}
-                >
-                  <option value="thisMonth">Tháng này</option>
-                  <option value="lastMonth">Tháng trước</option>
-                  <option value="3months">3 tháng gần nhất</option>
-                  <option value="6months">6 tháng gần nhất</option>
-                </select>
-              </div>
-              <div className="text-slate-600 font-medium text-lg">Tổng số: {totalChartSum.toLocaleString('vi-VN').replace(/,/g, '.')}</div>
-            </div>
-            
-            <div className="overflow-x-auto overflow-y-hidden pb-4">
-              <div className="mt-8" style={{ minWidth: Math.max(stats.length * 90, 800), height: 450 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 120 }} barGap={0}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                    <XAxis 
-                      dataKey="name" 
-                      angle={-45} 
-                      textAnchor="end" 
-                      interval={0} 
-                      tick={{ fontSize: 11, fill: '#64748b' }} 
-                      dy={10}
-                    />
-                    <YAxis 
-                      tickFormatter={(value) => {
-                        if (value === 0) return '0';
-                        return `${(value / 1000).toFixed(0)}K`;
-                      }} 
-                      tick={{ fontSize: 12, fill: '#64748b' }}
-                      axisLine={false}
-                      tickLine={false}
-                      dx={-10}
-                    />
-                    <Tooltip 
-                      formatter={(value: number) => value.toLocaleString('vi-VN').replace(/,/g, '.')} 
-                      cursor={{ fill: '#f1f5f9' }}
-                      contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)' }}
-                    />
-                    <Legend 
-                      verticalAlign="bottom" 
-                      content={() => (
-                        <div className="flex justify-center gap-8 mt-16 text-sm text-slate-600 w-full sticky left-0">
-                          <div className="flex items-center gap-2">
-                            <div className="w-4 h-4 bg-blue-400 rounded-sm"></div>
-                            <span>{legendLabels[0]}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <div className="w-4 h-4 bg-orange-500 rounded-sm"></div>
-                            <span>{legendLabels[1]}</span>
-                          </div>
-                        </div>
-                      )}
-                    />
-                    <Bar dataKey="previous" fill="#60a5fa" radius={[4, 4, 0, 0]} maxBarSize={30} />
-                    <Bar dataKey="current" fill="#f97316" radius={[4, 4, 0, 0]} maxBarSize={30}>
-                      <LabelList 
-                        dataKey="current" 
-                        position="top" 
-                        formatter={(val: number) => val.toLocaleString('vi-VN').replace(/,/g, '.')} 
-                        style={{ fontSize: '11px', fontWeight: 'bold', fill: '#0f172a' }} 
-                        offset={10}
-                      />
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-
-          {/* Danh sách CSDL thu thập */}
-          <div className="mt-8 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-slate-200">
-              <h3 className="text-lg font-semibold text-slate-800">Danh sách CSDL thu thập</h3>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm text-slate-600">
-                <thead className="bg-slate-50 text-slate-700 font-medium border-b border-slate-200">
-                  <tr>
-                    <th className="px-6 py-4 font-semibold whitespace-nowrap">Tên cơ liệu</th>
-                    <th className="px-6 py-4 font-semibold whitespace-nowrap">Thuộc</th>
-                    <th className="px-6 py-4 font-semibold whitespace-nowrap">Số lượng đăng ký tháng này</th>
-                    <th className="px-6 py-4 font-semibold whitespace-nowrap">Số lượng bản ghi lỗi</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {stats.map((stat) => (
-                    <tr key={stat.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-6 py-4 font-medium text-slate-800">{stat.title}</td>
-                      <td className="px-6 py-4 text-slate-600">{categoryName}</td>
-                      <td className="px-6 py-4 text-slate-600">{stat.thisMonth.toLocaleString('vi-VN').replace(/,/g, '.')}</td>
-                      <td className="px-6 py-4 text-slate-600">{Math.floor(stat.thisMonth * 0.05).toLocaleString('vi-VN').replace(/,/g, '.')}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+      {/* Lịch sử thu thập - Moved from tab to bottom */}
+      <div className="mt-8 bg-white rounded-xl border border-slate-200 shadow-sm p-12 flex flex-col items-center justify-center text-center">
+        <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+          <Calendar className="w-8 h-8 text-slate-300" />
         </div>
-      ) : (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 flex flex-col items-center justify-center text-center">
-          <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-            <Calendar className="w-8 h-8 text-slate-300" />
-          </div>
-          <h3 className="text-slate-900 font-semibold mb-1">Lịch sử thu thập</h3>
-          <p className="text-slate-500 text-sm max-w-sm">Dữ liệu lịch sử thu thập đang được cập nhật. Vui lòng quay lại sau.</p>
-        </div>
-      )}
+        <h3 className="text-slate-900 font-semibold mb-1">Lịch sử thu thập</h3>
+        <p className="text-slate-500 text-sm max-w-sm">Dữ liệu lịch sử thu thập đang được cập nhật. Vui lòng quay lại sau.</p>
+      </div>
 
       {selectedStat && (
         <DataDetailModal
@@ -330,6 +267,6 @@ export function DatabaseTemplate({
           errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
         />
       )}
-    </div>
+    </DatabasePageTemplate>
   );
 }

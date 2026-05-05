@@ -169,7 +169,7 @@ export function ViewServiceModal({ isOpen, onClose, service }: ViewServiceModalP
                   </label>
                   <textarea
                     className="w-full px-5 py-4 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 min-h-[140px] text-sm bg-slate-50/30 outline-none transition-all placeholder:text-slate-400 resize-none"
-                    placeholder="Vui lòng nhập lý do cụ thể (ví dụ: Thay đổi cấu hình Worker, bảo trì định kỳ hệ thống nguồn...)"
+                    placeholder="Vui lòng nhập lý do cụ thể (ví dụ: Thay đổi cấu hình Máy chủ thực thi, bảo trì định kỳ hệ thống nguồn...)"
                     value={inactiveReason}
                     onChange={(e) => setInactiveReason(e.target.value)}
                   />
@@ -378,8 +378,8 @@ function TabConnection({ service, showApiKey, setShowApiKey }: any) {
             <AlertCircle className={`w-5 h-5 shrink-0 mt-0.5 ${service.status?.startsWith('failed_') ? 'text-red-500' : 'text-gray-500'}`} />
             <div>
               <div className="text-sm font-bold mb-1">
-                {service.status === 'failed_agent' ? 'Lỗi từ Agent' :
-                  service.status === 'failed_worker' ? 'Lỗi từ Worker' :
+                {service.status === 'failed_agent' ? 'Lỗi từ Trạm kết nối' :
+                  service.status === 'failed_worker' ? 'Lỗi từ Máy chủ thực thi' :
                     service.status === 'failed_auth' ? 'Lỗi xác thực' :
                       service.status === 'inactive' ? 'Lý do ngưng hoạt động' : 'Thông tin chi tiết'}
               </div>
@@ -438,8 +438,8 @@ function TabConnection({ service, showApiKey, setShowApiKey }: any) {
             </div>
 
             <div className="space-y-1">
-              <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Worker / Agent</div>
-              <div className="text-sm text-slate-900 font-bold">Worker 1 &mdash; Agent 02</div>
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Máy chủ thực thi / Trạm kết nối</div>
+              <div className="text-sm text-slate-900 font-bold">Máy chủ thực thi 1 &mdash; Trạm kết nối 02</div>
             </div>
             <div className="space-y-1">
               <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Timeout</div>
@@ -584,7 +584,7 @@ function TabMapping() {
       name: 'citizen_info',
       label: 'Thông tin công dân',
       fields: [
-        { id: 'f1', name: 'id', dataType: 'uuid', allowNull: false, isPath: false, hostPath: '-', displayName: 'ID' },
+        { id: 'f1', name: 'id', dataType: 'uuid', allowNull: false, isPath: false, hostPath: '-', displayName: 'ID', isPrimaryKey: true },
         { id: 'f2', name: 'full_name', dataType: 'varchar(255)', allowNull: false, isPath: false, hostPath: '-', displayName: 'Họ và tên' },
         { id: 'f3', name: 'citizen_pin', dataType: 'varchar(12)', allowNull: false, isPath: false, hostPath: '-', displayName: 'Số định danh' },
         { id: 'f4', name: 'identify_no', dataType: 'varchar(12)', allowNull: true, isPath: false, hostPath: '-', displayName: 'Số CCCD' },
@@ -597,7 +597,7 @@ function TabMapping() {
       name: 'birth_registrations',
       label: 'Đăng ký khai sinh',
       fields: [
-        { id: 'f7', name: 'id', dataType: 'uuid', allowNull: false, isPath: false, hostPath: '-', displayName: 'ID' },
+        { id: 'f7', name: 'id', dataType: 'uuid', allowNull: false, isPath: false, hostPath: '-', displayName: 'ID', isPrimaryKey: true },
         { id: 'f8', name: 'number_no', dataType: 'varchar(50)', allowNull: false, isPath: false, hostPath: '-', displayName: 'Số hiệu' },
         { id: 'f9', name: 'book_no', dataType: 'varchar(50)', allowNull: false, isPath: false, hostPath: '-', displayName: 'Số quyển' },
         { id: 'f10', name: 'mother_full_name', dataType: 'varchar(255)', allowNull: false, isPath: false, hostPath: '-', displayName: 'Họ tên mẹ' },
@@ -610,7 +610,7 @@ function TabMapping() {
       name: 'marriage_registrations',
       label: 'Đăng ký kết hôn',
       fields: [
-        { id: 'f14', name: 'id', dataType: 'uuid', allowNull: false, isPath: false, hostPath: '-', displayName: 'ID' },
+        { id: 'f14', name: 'id', dataType: 'uuid', allowNull: false, isPath: false, hostPath: '-', displayName: 'ID', isPrimaryKey: true },
         { id: 'f15', name: 'cert_number', dataType: 'varchar(50)', allowNull: false, isPath: false, hostPath: '-', displayName: 'Số chứng nhận' },
         { id: 'f16', name: 'husband_name', dataType: 'varchar(255)', allowNull: false, isPath: false, hostPath: '-', displayName: 'Họ tên chồng' },
         { id: 'f17', name: 'wife_name', dataType: 'varchar(255)', allowNull: false, isPath: false, hostPath: '-', displayName: 'Họ tên vợ' },
@@ -658,9 +658,9 @@ function TabMapping() {
                 <button
                   key={table.id}
                   onClick={() => setActiveTableId(table.id)}
-                  className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-left transition-all ${activeTableId === table.id
-                      ? 'bg-blue-50 text-blue-700 shadow-sm'
-                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-left transition-all border-2 ${activeTableId === table.id
+                      ? 'bg-blue-50 text-blue-700 border-blue-600 shadow-sm'
+                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 border-transparent'
                     }`}
                 >
                   <div className="flex items-center gap-3">
@@ -672,7 +672,6 @@ function TabMapping() {
                       <div className="text-[11px] opacity-70">{table.label}</div>
                     </div>
                   </div>
-                  {activeTableId === table.id && <ChevronRight className="w-4 h-4" />}
                 </button>
               ))}
             </div>
@@ -705,8 +704,7 @@ function TabMapping() {
                   <th className="px-4 py-3 font-semibold text-slate-700">Tên trường</th>
                   <th className="px-4 py-3 font-semibold text-slate-700">Kiểu dữ liệu</th>
                   <th className="px-4 py-3 font-semibold text-slate-700">Allow null</th>
-                  <th className="px-4 py-3 font-semibold text-slate-700">Is path file</th>
-                  <th className="px-4 py-3 font-semibold text-slate-700">Host path file</th>
+                  <th className="px-4 py-3 font-semibold text-slate-700 text-center">Khóa chính</th>
                   <th className="px-4 py-3 font-semibold text-slate-700">Tên hiển thị</th>
                 </tr>
               </thead>
@@ -727,13 +725,12 @@ function TabMapping() {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <div className="flex justify-center">
-                        <div className={`w-4 h-4 rounded border flex items-center justify-center ${field.isPath ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-300 bg-white'}`}>
-                          {field.isPath && <Check className="w-3 h-3" />}
+                      {field.isPrimaryKey && (
+                        <div className="flex justify-center">
+                          <Key className="w-4 h-4 text-amber-500" />
                         </div>
-                      </div>
+                      )}
                     </td>
-                    <td className="px-4 py-3 text-slate-500 font-mono text-xs">{field.hostPath}</td>
                     <td className="px-4 py-3 text-slate-900">{field.displayName}</td>
                   </tr>
                 ))}

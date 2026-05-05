@@ -60,13 +60,15 @@ export function SourceSystemManagementPage() {
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm min-h-full">
       {/* Header */}
       <div className="p-6 border-b border-slate-200">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-            <Server className="w-5 h-5 text-blue-600" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-slate-800">Quản lý hệ thống nguồn</h1>
-            <p className="text-sm text-slate-500">Quản lý danh sách và thông tin các hệ thống nguồn cung cấp dữ liệu</p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
+              <Server className="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-slate-800">Quản lý hệ thống nguồn</h1>
+              <p className="text-sm text-slate-500">Danh sách hệ thống nguồn cung cấp dữ liệu</p>
+            </div>
           </div>
         </div>
       </div>

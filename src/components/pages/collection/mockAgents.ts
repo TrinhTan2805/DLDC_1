@@ -24,7 +24,7 @@ export interface Agent {
 export const initialAgents: Agent[] = [
   {
     id: '7',
-    name: 'AgentHL',
+    name: 'Trạm HL',
     status: 'inactive',
     callCycle: 30,
     dbAgentId: '7',
@@ -47,7 +47,7 @@ export const initialAgents: Agent[] = [
   },
   {
     id: '2',
-    name: 'agentTH',
+    name: 'Trạm TH',
     status: 'active',
     callCycle: 60,
     dbAgentId: '2',

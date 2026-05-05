@@ -113,19 +113,19 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
           </div>
 
           <div>
-            <label className="block text-sm text-slate-700 mb-1">Worker<span className="text-red-500">*</span></label>
+            <label className="block text-sm text-slate-700 mb-1">Máy chủ thực thi<span className="text-red-500">*</span></label>
             <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-              <option value="">Chọn Worker</option>
-              <option value="worker1">Worker 1</option>
-              <option value="worker2">Worker 2</option>
+              <option value="">Chọn Máy chủ thực thi</option>
+              <option value="worker1">Máy chủ thực thi 1</option>
+              <option value="worker2">Máy chủ thực thi 2</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm text-slate-700 mb-1">Agent<span className="text-red-500">*</span></label>
+            <label className="block text-sm text-slate-700 mb-1">Trạm kết nối<span className="text-red-500">*</span></label>
             <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-              <option value="">Chọn Agent</option>
-              <option value="agent1">Agent 1</option>
-              <option value="agent2">Agent 2</option>
+              <option value="">Chọn Trạm kết nối</option>
+              <option value="agent1">Trạm kết nối 1</option>
+              <option value="agent2">Trạm kết nối 2</option>
             </select>
           </div>
           <div>
@@ -280,20 +280,20 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
           </div>
           
           <div>
-            <label className="block text-sm text-slate-700 font-medium mb-1.5">Worker <span className="text-red-500">*</span></label>
+            <label className="block text-sm text-slate-700 font-medium mb-1.5">Máy chủ thực thi <span className="text-red-500">*</span></label>
             <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-              <option value="">Chọn Worker</option>
-              <option value="worker1">Worker 1</option>
-              <option value="worker2">Worker 2</option>
+              <option value="">Chọn Máy chủ thực thi</option>
+              <option value="worker1">Máy chủ thực thi 1</option>
+              <option value="worker2">Máy chủ thực thi 2</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-sm text-slate-700 font-medium mb-1.5">Agent <span className="text-red-500">*</span></label>
+            <label className="block text-sm text-slate-700 font-medium mb-1.5">Trạm kết nối <span className="text-red-500">*</span></label>
             <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-              <option value="">Chọn Agent</option>
-              <option value="agent1">Agent 1</option>
-              <option value="agent2">Agent 2</option>
+              <option value="">Chọn Trạm kết nối</option>
+              <option value="agent1">Trạm kết nối 1</option>
+              <option value="agent2">Trạm kết nối 2</option>
             </select>
           </div>
 
@@ -338,20 +338,20 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
               </select>
             </div>
             <div>
-              <label className="block text-sm text-slate-700 font-medium mb-1.5">Agent <span className="text-red-500">*</span></label>
+              <label className="block text-sm text-slate-700 font-medium mb-1.5">Trạm kết nối <span className="text-red-500">*</span></label>
               <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                <option value="">Chọn Agent</option>
-                <option value="agent1">Agent 1</option>
-                <option value="agent2">Agent 2</option>
+                <option value="">Chọn Trạm kết nối</option>
+                <option value="agent1">Trạm kết nối 1</option>
+                <option value="agent2">Trạm kết nối 2</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-sm text-slate-700 font-medium mb-1.5">Worker <span className="text-red-500">*</span></label>
+              <label className="block text-sm text-slate-700 font-medium mb-1.5">Máy chủ thực thi <span className="text-red-500">*</span></label>
               <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                <option value="">Chọn Worker</option>
-                <option value="worker1">Worker 1</option>
-                <option value="worker2">Worker 2</option>
+                <option value="">Chọn Máy chủ thực thi</option>
+                <option value="worker1">Máy chủ thực thi 1</option>
+                <option value="worker2">Máy chủ thực thi 2</option>
               </select>
             </div>
             <div>
