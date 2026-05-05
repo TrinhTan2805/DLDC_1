@@ -330,15 +330,16 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                 <table className="w-full">
                   <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">STT</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Mã dịch vụ</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Tên dịch vụ</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase whitespace-nowrap">Phương thức kết nối</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Phiên bản</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase whitespace-nowrap">Hệ thống nguồn</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Ngày tạo</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Ngày sửa</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Trạng thái kết nối</th>
+                      <th className="px-4 py-3 text-center text-xs text-slate-600 uppercase">STT</th>
+                      <th className="px-4 py-3 text-center text-xs text-slate-600 uppercase">Mã dịch vụ</th>
+                      <th className="px-4 py-3 text-center text-xs text-slate-600 uppercase">Tên dịch vụ</th>
+                      <th className="px-4 py-3 text-center text-xs text-slate-600 uppercase">Loại nguồn dữ liệu</th>
+                      <th className="px-4 py-3 text-center text-xs text-slate-600 uppercase whitespace-nowrap">Phương thức kết nối</th>
+                      <th className="px-4 py-3 text-center text-xs text-slate-600 uppercase">Phiên bản</th>
+                      <th className="px-4 py-3 text-center text-xs text-slate-600 uppercase whitespace-nowrap">Hệ thống nguồn</th>
+                      <th className="px-4 py-3 text-center text-xs text-slate-600 uppercase">Ngày tạo</th>
+                      <th className="px-4 py-3 text-center text-xs text-slate-600 uppercase">Ngày sửa</th>
+                      <th className="px-4 py-3 text-center text-xs text-slate-600 uppercase">Trạng thái kết nối</th>
                       <th className="px-4 py-3 text-center text-xs text-slate-600 uppercase">Thao tác</th>
                     </tr>
                   </thead>
@@ -347,19 +348,22 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                       .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
                       .map((service, index) => (
                       <tr key={service.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-4 py-3 text-sm text-slate-600">{index + 1}</td>
-                        <td className="px-4 py-3">
+                        <td className="px-4 py-3 text-sm text-slate-600 text-center">{index + 1}</td>
+                        <td className="px-4 py-3 text-center">
                           <span className="text-sm text-blue-600 hover:underline cursor-pointer">
                             {service.code}
                           </span>
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-4 py-3 text-center">
                           <div>
                             <div className="text-sm text-slate-900">{service.name}</div>
                             <div className="text-xs text-slate-500">{service.description}</div>
                           </div>
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-4 py-3 text-sm text-slate-700 text-center">
+                          {service.source}
+                        </td>
+                        <td className="px-4 py-3 text-center">
                           <span className={`inline-flex px-2 py-1 rounded text-xs ${
                             service.type === 'SOAP' ? 'bg-purple-100 text-purple-700' : 
                             service.type === 'REST' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'
@@ -367,11 +371,11 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                             {service.type === 'SOAP' ? 'Cơ sở dữ liệu' : service.type === 'REST' ? 'API' : 'Tải file Excel'}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-sm text-slate-600">{service.version}</td>
-                        <td className="px-4 py-3 text-sm text-slate-600">{service.managingUnit}</td>
-                        <td className="px-4 py-3 text-sm text-slate-600">{service.createdAt}</td>
-                        <td className="px-4 py-3 text-sm text-slate-600">{service.updatedAt}</td>
-                        <td className="px-4 py-3">
+                        <td className="px-4 py-3 text-sm text-slate-600 text-center">{service.version}</td>
+                        <td className="px-4 py-3 text-sm text-slate-600 text-center">{service.managingUnit}</td>
+                        <td className="px-4 py-3 text-sm text-slate-600 text-center">{service.createdAt}</td>
+                        <td className="px-4 py-3 text-sm text-slate-600 text-center">{service.updatedAt}</td>
+                        <td className="px-4 py-3 text-center">
                           {service.status?.startsWith('failed_') ? (
                             <button
                               onClick={() => {

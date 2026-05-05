@@ -3,7 +3,7 @@ import {
   X, CheckCircle, Search, Calendar, Eye, Activity, Shield, FileText, Download,
   ArrowRight, ExternalLink, RefreshCw, ChevronDown, ChevronRight, User, Plug, Settings, Database, Clock,
   LayoutTemplate, Check, AlertCircle, AlertTriangle, EyeOff,
-  Trash2, History, Zap, PlusCircle, Edit, Code, Layers, List, Eraser, Upload, Power
+  Trash2, History, Zap, PlusCircle, Edit, Code, Layers, List, Eraser, Upload, Power, Key
 } from 'lucide-react';
 import { initialSourceSystems } from './mockSourceSystems';
 import { Portal } from '../../common/Portal';
