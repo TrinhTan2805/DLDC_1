@@ -84,9 +84,9 @@ export function AgentManagementPage() {
               </div>
             </div>
             <button
-              onClick={handleAdd}
-              className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all flex items-center gap-2 font-bold shadow-md hover:shadow-lg active:scale-95"
-            >
+ onClick={handleAdd}
+ className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all flex items-center gap-2 shadow-md hover:shadow-lg active:scale-95"
+ >
               <Plus className="w-5 h-5" />
               Thêm trạm kết nối
             </button>

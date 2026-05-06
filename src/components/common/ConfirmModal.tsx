@@ -102,20 +102,20 @@ export function ConfirmModal({
             {/* Bottom Section: Actions */}
             <div className="mt-6 flex gap-3">
               <button
-                type="button"
-                onClick={() => {
-                  onConfirm();
-                  onClose();
-                }}
-                className={`flex-1 py-2.5 ${config.confirmBg} text-white rounded-xl transition-colors font-bold text-sm shadow-sm`}
-              >
-                {confirmText}
-              </button>
+ type="button"
+ onClick={() => {
+ onConfirm();
+ onClose();
+ }}
+ className={`flex-1 py-2.5 ${config.confirmBg} text-white rounded-xl transition-colors text-sm shadow-sm`}
+ >
+ {confirmText}
+ </button>
               <button
-                type="button"
-                onClick={onClose}
-                className="flex-1 py-2.5 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 transition-colors font-bold text-sm border border-slate-200"
-              >
+ type="button"
+ onClick={onClose}
+ className="flex-1 py-2.5 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 transition-colors text-sm border border-slate-200"
+ >
                 {cancelText}
               </button>
             </div>

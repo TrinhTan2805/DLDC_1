@@ -73,9 +73,9 @@ export function RestoreVersionModal({
           <div className="mt-8 flex gap-3">
              <button onClick={onClose} className="flex-1 py-2.5 border border-slate-200 text-slate-600 rounded-lg font-medium hover:bg-slate-50 transition-colors">Hủy</button>
              <button
-               onClick={onConfirm}
-               className="flex-1 py-2.5 bg-blue-600 text-white rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-blue-700 transition-colors shadow-lg shadow-blue-100"
-             >
+ onClick={onConfirm}
+ className="flex-1 py-2.5 bg-blue-600 text-white rounded-lg flex items-center justify-center gap-2 hover:bg-blue-700 transition-colors shadow-lg shadow-blue-100"
+ >
                 <Send className="w-4 h-4"/>
                 Gửi yêu cầu
              </button>

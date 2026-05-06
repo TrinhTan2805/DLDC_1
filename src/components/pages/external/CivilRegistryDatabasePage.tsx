@@ -322,8 +322,8 @@ export function CivilRegistryDatabasePage({ mode = 'thu thập', context = 'thu 
                     <td className="px-6 py-4 text-slate-600 font-medium">{row.time}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-center gap-2">
-                        <button className="px-3 py-1 bg-teal-500 text-white rounded text-xs font-bold hover:bg-teal-600 transition-colors">Chi tiết</button>
-                        <button className="px-3 py-1 bg-rose-500 text-white rounded text-xs font-bold hover:bg-rose-600 transition-colors">Xóa</button>
+                        <button className="px-3 py-1 bg-teal-500 text-white rounded text-xs hover:bg-teal-600 transition-colors">Chi tiết</button>
+                        <button className="px-3 py-1 bg-rose-500 text-white rounded text-xs hover:bg-rose-600 transition-colors">Xóa</button>
                       </div>
                     </td>
                   </tr>

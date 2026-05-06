@@ -214,7 +214,7 @@ export function AgentDetailModal({ isOpen, onClose, data }: AgentDetailModalProp
                     </div>
                   </div>
                   <div className="flex justify-end items-end h-full">
-                    <button className="px-6 py-2 bg-blue-600 text-white rounded font-bold hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm">
+                    <button className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm">
                       <Search className="w-4 h-4" /> Tìm kiếm
                     </button>
                   </div>
@@ -266,9 +266,9 @@ export function AgentDetailModal({ isOpen, onClose, data }: AgentDetailModalProp
         {/* Footer */}
         <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex justify-end shrink-0">
           <button
-            onClick={onClose}
-            className="px-8 py-2 bg-slate-600 text-white rounded font-bold hover:bg-slate-700 transition-colors shadow-sm"
-          >
+ onClick={onClose}
+ className="px-8 py-2 bg-slate-600 text-white rounded hover:bg-slate-700 transition-colors shadow-sm"
+ >
             Đóng
           </button>
         </div>

@@ -23,6 +23,7 @@ export const mockCollectionServices = [
     statusColor: 'bg-green-100 text-green-700',
     notificationSent: true,
     notificationTime: '19/12/2025 15:30:15',
+    dataStatus: 'DATA_UPDATED',
     validationDetails: {
       totalRecords: 15420,
       validRecords: 15420,
@@ -54,6 +55,7 @@ export const mockCollectionServices = [
     statusColor: 'bg-red-100 text-red-700',
     notificationSent: true,
     notificationTime: '15/12/2025 08:00:10',
+    dataStatus: 'DATA_UPDATE_FAILED',
     validationDetails: {
       totalRecords: 150,
       validRecords: 150,
@@ -85,6 +87,7 @@ export const mockCollectionServices = [
     statusColor: 'bg-red-100 text-red-700',
     notificationSent: true,
     notificationTime: '14/12/2025 09:15:08',
+    dataStatus: 'DATA_UPDATE_FAILED',
     validationDetails: {
       totalRecords: 540,
       validRecords: 540,
@@ -114,6 +117,7 @@ export const mockCollectionServices = [
     statusColor: 'bg-slate-100 text-slate-700',
     notificationSent: true,
     notificationTime: '14/12/2025 09:30:05',
+    dataStatus: 'EMPTY',
     validationDetails: {
       totalRecords: 250,
       validRecords: 250,
@@ -145,6 +149,7 @@ export const mockCollectionServices = [
     statusColor: 'bg-red-100 text-red-700',
     notificationSent: true,
     notificationTime: '18/12/2025 14:20:12',
+    dataStatus: 'DATA_UPDATE_FAILED',
     validationDetails: {
       totalRecords: 45680,
       validRecords: 45680,
@@ -176,6 +181,7 @@ export const mockCollectionServices = [
     notificationSent: false,
     notificationTime: null,
     notificationSentForError: false,
+    dataStatus: 'DATA_INCOMPLETED',
     validationDetails: {
       totalRecords: 78420,
       validRecords: 76850,

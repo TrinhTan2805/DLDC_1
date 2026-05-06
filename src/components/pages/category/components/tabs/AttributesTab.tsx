@@ -137,16 +137,16 @@ export function AttributesTab({
         <div className="flex items-center gap-3">
           {!wizardMode && onSaveAndSubmit && (
             <button 
-              onClick={onSaveAndSubmit} 
-              className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors text-sm font-bold shadow-md shadow-emerald-100"
-            >
+ onClick={onSaveAndSubmit} 
+ className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors text-sm shadow-md shadow-emerald-100"
+ >
               Lưu & trình duyệt
             </button>
           )}
           <button
-            onClick={onAddAttribute}
-            className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors text-sm font-bold shadow-md shadow-blue-100"
-          >
+ onClick={onAddAttribute}
+ className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors text-sm shadow-md shadow-blue-100"
+ >
             <Plus className="w-4 h-4" />
             Thêm thuộc tính
           </button>

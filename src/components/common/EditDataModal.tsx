@@ -51,17 +51,17 @@ export function EditDataModal({
   const footer = (
     <>
       <button
-        type="button"
-        onClick={handleCancel}
-        className="px-6 py-2.5 border border-slate-200 text-slate-600 rounded-xl font-bold hover:bg-slate-50 transition-all active:scale-95 text-sm"
-      >
+ type="button"
+ onClick={handleCancel}
+ className="px-6 py-2.5 border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-all active:scale-95 text-sm"
+ >
         Hủy
       </button>
       <button
-        type="button"
-        onClick={handleSave}
-        className="px-8 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-xl shadow-blue-100 active:scale-95 text-sm"
-      >
+ type="button"
+ onClick={handleSave}
+ className="px-8 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-xl shadow-blue-100 active:scale-95 text-sm"
+ >
         Lưu thay đổi
       </button>
     </>
@@ -80,29 +80,29 @@ export function EditDataModal({
         {/* Modern Tabbed Navigation */}
         <div className="flex p-1.5 bg-slate-100 rounded-2xl w-fit mb-8 border border-slate-200/50">
           <button
-            type="button"
-            onClick={() => setActiveTab('sources')}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
-              activeTab === 'sources'
-                ? 'bg-white text-blue-600 shadow-lg shadow-slate-200 scale-105'
-                : 'text-slate-500 hover:text-slate-900 hover:bg-white/50'
-            }`}
-          >
-            <Database className={`w-4 h-4 ${activeTab === 'sources' ? 'animate-pulse' : ''}`} />
-            Nguồn dữ liệu
-          </button>
+ type="button"
+ onClick={() => setActiveTab('sources')}
+ className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm transition-all duration-300 ${
+ activeTab === 'sources'
+ ? 'bg-white text-blue-600 shadow-lg shadow-slate-200 scale-105'
+ : 'text-slate-500 hover:text-slate-900 hover:bg-white/50'
+ }`}
+ >
+ <Database className={`w-4 h-4 ${activeTab === 'sources' ? 'animate-pulse' : ''}`} />
+ Nguồn dữ liệu
+ </button>
           <button
-            type="button"
-            onClick={() => setActiveTab('merged')}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
-              activeTab === 'merged'
-                ? 'bg-white text-blue-600 shadow-lg shadow-slate-200 scale-105'
-                : 'text-slate-500 hover:text-slate-900 hover:bg-white/50'
-            }`}
-          >
-            <Layers className={`w-4 h-4 ${activeTab === 'merged' ? 'animate-pulse' : ''}`} />
-            Dữ liệu đã gộp
-          </button>
+ type="button"
+ onClick={() => setActiveTab('merged')}
+ className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm transition-all duration-300 ${
+ activeTab === 'merged'
+ ? 'bg-white text-blue-600 shadow-lg shadow-slate-200 scale-105'
+ : 'text-slate-500 hover:text-slate-900 hover:bg-white/50'
+ }`}
+ >
+ <Layers className={`w-4 h-4 ${activeTab === 'merged' ? 'animate-pulse' : ''}`} />
+ Dữ liệu đã gộp
+ </button>
         </div>
 
         {/* Content Area */}

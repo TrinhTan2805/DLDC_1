@@ -33,19 +33,19 @@ export function InnerSidebar({ title, items, onSelectItem }: InnerSidebarProps) 
         <div className="space-y-1">
           {filteredItems.map((item, index) => (
             <button
-              key={item.id}
-              onClick={() => onSelectItem(item.id)}
-              className="w-full text-left px-4 py-3 rounded-lg hover:bg-slate-50 text-slate-700 transition-all group flex items-start gap-3"
-            >
-              <span className="text-blue-600 font-bold text-sm shrink-0 mt-0.5">{index + 1}.</span>
-              <span className="text-sm font-medium group-hover:text-blue-700 transition-colors line-clamp-2">
-                {item.label}
-              </span>
-              <div className="ml-auto flex items-center gap-1 text-[10px] font-bold text-blue-600 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0 whitespace-nowrap bg-blue-50 px-2 py-1 rounded-md shrink-0">
-                Xem chi tiết
-                <ChevronRight className="w-3 h-3" />
-              </div>
-            </button>
+ key={item.id}
+ onClick={() => onSelectItem(item.id)}
+ className="w-full text-left px-4 py-3 rounded-lg hover:bg-slate-50 text-slate-700 transition-all group flex items-start gap-3"
+ >
+ <span className="text-blue-600 text-sm shrink-0 mt-0.5">{index + 1}.</span>
+ <span className="text-sm font-medium group-hover:text-blue-700 transition-colors line-clamp-2">
+ {item.label}
+ </span>
+ <div className="ml-auto flex items-center gap-1 text-[10px] text-blue-600 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0 whitespace-nowrap bg-blue-50 px-2 py-1 rounded-md shrink-0">
+ Xem chi tiết
+ <ChevronRight className="w-3 h-3" />
+ </div>
+ </button>
           ))}
           {filteredItems.length === 0 && (
             <div className="py-8 text-center">

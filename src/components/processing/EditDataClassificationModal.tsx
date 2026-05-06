@@ -72,17 +72,17 @@ export function EditDataClassificationModal({ dataName, onClose, onSave }: EditD
   const footer = (
     <>
       <button 
-        type="button"
-        onClick={onClose}
-        className="px-6 py-2.5 border border-slate-200 text-slate-600 rounded-xl font-bold hover:bg-slate-50 transition-all active:scale-95 text-sm"
-      >
+ type="button"
+ onClick={onClose}
+ className="px-6 py-2.5 border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-all active:scale-95 text-sm"
+ >
         Hủy
       </button>
       <button 
-        type="button"
-        onClick={handleSave}
-        className="px-8 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-xl shadow-blue-100 active:scale-95 text-sm"
-      >
+ type="button"
+ onClick={handleSave}
+ className="px-8 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-xl shadow-blue-100 active:scale-95 text-sm"
+ >
         Lưu thay đổi
       </button>
     </>

@@ -115,10 +115,10 @@ export function SetupTab({
           </select>
         </div>
         <button
-          onClick={onAdd}
-          className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all text-sm font-bold shadow-xl shadow-blue-100 active:scale-95"
-          title="Thêm mới danh mục qua Wizard"
-        >
+ onClick={onAdd}
+ className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all text-sm shadow-xl shadow-blue-100 active:scale-95"
+ title="Thêm mới danh mục qua Wizard"
+ >
           <Plus className="w-5 h-5" />
           Thêm mới
         </button>

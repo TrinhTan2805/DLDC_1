@@ -125,8 +125,8 @@ export function VersionHistoryTab({
                </div>
              </div>
              <div className="flex gap-3 px-6 py-4 border-t border-slate-100 bg-slate-50 rounded-b-2xl justify-end">
-               <button onClick={() => setShowFilter(false)} className="px-4 py-2 text-slate-600 font-bold hover:bg-slate-200 rounded-xl text-[14px] transition-colors">Hủy</button>
-               <button onClick={() => setShowFilter(false)} className="px-4 py-2 bg-blue-600 text-white font-bold rounded-xl text-[14px] shadow-sm hover:bg-blue-700 transition-colors">Áp dụng bộ lọc</button>
+               <button onClick={() => setShowFilter(false)} className="px-4 py-2 text-slate-600 hover:bg-slate-200 rounded-xl text-[14px] transition-colors">Hủy</button>
+               <button onClick={() => setShowFilter(false)} className="px-4 py-2 bg-blue-600 text-white rounded-xl text-[14px] shadow-sm hover:bg-blue-700 transition-colors">Áp dụng bộ lọc</button>
              </div>
            </div>
          </div>
@@ -182,7 +182,7 @@ export function VersionHistoryTab({
                </div>
              </div>
              <div className="flex gap-3 px-6 py-4 border-t border-slate-100 bg-white rounded-b-2xl justify-end">
-               <button onClick={() => setSelectedVersion(null)} className="px-6 py-2 bg-slate-100/80 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-[14px] transition-colors">Đóng</button>
+               <button onClick={() => setSelectedVersion(null)} className="px-6 py-2 bg-slate-100/80 hover:bg-slate-200 text-slate-700 rounded-xl text-[14px] transition-colors">Đóng</button>
              </div>
            </div>
          </div>

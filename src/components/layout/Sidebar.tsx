@@ -970,17 +970,17 @@ export function Sidebar({
       {/* Footer */}
       <div className="p-4 border-t border-slate-200">
         <button
-          onClick={() => setShowVersionHistory(true)}
-          className="w-full bg-slate-50 rounded-lg p-3 text-left hover:bg-slate-100 transition-colors shadow-sm cursor-pointer"
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <FileText className="w-4 h-4 text-slate-600" />
-            <span className="text-xs text-slate-600 font-medium">
-              Phiên bản
-            </span>
-          </div>
-          <div className="text-sm font-semibold text-slate-900">v2.2.0</div>
-        </button>
+ onClick={() => setShowVersionHistory(true)}
+ className="w-full bg-slate-50 rounded-lg p-3 text-left hover:bg-slate-100 transition-colors shadow-sm cursor-pointer"
+ >
+ <div className="flex items-center gap-2 mb-2">
+ <FileText className="w-4 h-4 text-slate-600" />
+ <span className="text-xs text-slate-600 font-medium">
+ Phiên bản
+ </span>
+ </div>
+ <div className="text-sm text-slate-900">v2.2.0</div>
+ </button>
       </div>
 
       <VersionHistoryModal

@@ -50,9 +50,9 @@ export function PublishModal({
             />
           </div>
           <button
-            onClick={onConfirm}
-            className="w-full py-3 bg-green-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-green-700 transition-colors shadow-lg shadow-green-100"
-          >
+ onClick={onConfirm}
+ className="w-full py-3 bg-green-600 text-white rounded-xl flex items-center justify-center gap-2 hover:bg-green-700 transition-colors shadow-lg shadow-green-100"
+ >
             <Share2 className="w-5 h-5" />
             Xác nhận công khai
           </button>

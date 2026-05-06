@@ -145,16 +145,16 @@ export function AgentModal({ isOpen, onClose, onSave, editingData }: AgentModalP
           {/* Footer Buttons */}
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
             <button
-              type="submit"
-              className="px-6 py-2 bg-blue-600 text-white rounded font-bold hover:bg-blue-700 transition-colors shadow-sm"
-            >
+ type="submit"
+ className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors shadow-sm"
+ >
               {editingData ? 'Cập nhật' : 'Thêm'}
             </button>
             <button
-              type="button"
-              onClick={onClose}
-              className="px-6 py-2 bg-slate-600 text-white rounded font-bold hover:bg-slate-700 transition-colors shadow-sm"
-            >
+ type="button"
+ onClick={onClose}
+ className="px-6 py-2 bg-slate-600 text-white rounded hover:bg-slate-700 transition-colors shadow-sm"
+ >
               Đóng
             </button>
           </div>

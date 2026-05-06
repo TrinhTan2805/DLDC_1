@@ -150,18 +150,18 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
         <div className="flex-1 overflow-y-auto py-2 custom-scrollbar">
           {filteredServices.map((service) => (
             <button
-              key={service.id}
-              title={service.name}
-              onClick={() => setActiveServiceId(service.id)}
-              className={`w-full text-left px-5 py-3 border-b border-slate-50 hover:bg-blue-50/30 transition-colors flex flex-col ${activeServiceId === service.id
-                ? 'bg-blue-50/60 border-l-4 border-l-blue-600 pl-[16px]'
-                : 'border-l-4 border-l-transparent'
-                }`}
-            >
-              <div className={`text-[13px] leading-relaxed ${activeServiceId === service.id ? 'text-blue-700 font-semibold' : 'text-slate-600 font-medium'}`}>
-                {service.name}
-              </div>
-            </button>
+ key={service.id}
+ title={service.name}
+ onClick={() => setActiveServiceId(service.id)}
+ className={`w-full text-left px-5 py-3 border-b border-slate-50 hover:bg-blue-50/30 transition-colors flex flex-col ${activeServiceId === service.id
+ ? 'bg-blue-50/60 border-l-4 border-l-blue-600 pl-[16px]'
+ : 'border-l-4 border-l-transparent'
+ }`}
+ >
+ <div className={`text-[13px] leading-relaxed ${activeServiceId === service.id ? 'text-blue-700 ' : 'text-slate-600 font-medium'}`}>
+ {service.name}
+ </div>
+ </button>
           ))}
         </div>
       </div>

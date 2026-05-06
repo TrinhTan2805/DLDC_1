@@ -26,8 +26,8 @@ const ConnectionSuccessModal = ({ isOpen, onClose, onContinue }: { isOpen: boole
           <p className="text-slate-500 text-[13px] mb-4 text-center px-4 leading-relaxed">Kết nối thành công, vui lòng thực hiện Nạp cấu trúc.</p>
         </div>
         <div className="px-5 py-3 flex justify-center gap-3 bg-slate-50 border-t border-slate-100">
-          <button onClick={onClose} className="px-6 py-2 bg-white border border-slate-300 text-slate-700 text-xs rounded-lg font-bold transition-colors shadow-sm hover:bg-slate-50">Đóng</button>
-          <button onClick={onContinue} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg font-bold transition-colors shadow-sm">Tiếp tục</button>
+          <button onClick={onClose} className="px-6 py-2 bg-white border border-slate-300 text-slate-700 text-xs rounded-lg transition-colors shadow-sm hover:bg-slate-50">Đóng</button>
+          <button onClick={onContinue} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg transition-colors shadow-sm">Tiếp tục</button>
         </div>
       </div>
     </div>
@@ -62,7 +62,7 @@ const ConnectionErrorModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: (
           </div>
         </div>
         <div className="px-5 py-3 flex justify-center bg-slate-50 border-t border-slate-100">
-          <button onClick={onClose} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg font-bold transition-colors shadow-sm">Đã hiểu & Đóng</button>
+          <button onClick={onClose} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg transition-colors shadow-sm">Đã hiểu & Đóng</button>
         </div>
       </div>
     </div>
@@ -97,7 +97,7 @@ const DataErrorModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
           </div>
         </div>
         <div className="px-5 py-3 flex justify-center bg-slate-50 border-t border-slate-100">
-          <button onClick={onClose} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg font-bold transition-colors shadow-sm">Đã hiểu & Đóng</button>
+          <button onClick={onClose} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg transition-colors shadow-sm">Đã hiểu & Đóng</button>
         </div>
       </div>
     </div>
@@ -247,8 +247,8 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
             {activeTab === 'general' && (
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="add-name" className="block text-sm text-slate-600 mb-1">Tên service <span className="text-red-500">*</span></label>
-                  <input aria-label="Input field" id="add-name" title="Tên service" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="VD: API dịch vụ dữ liệu quốc tịch" />
+                  <label htmlFor="add-name" className="block text-sm text-slate-600 mb-1">Tên dịch vụ <span className="text-red-500">*</span></label>
+                  <input aria-label="Input field" id="add-name" title="Tên dịch vụ" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="VD: API dịch vụ dữ liệu quốc tịch" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="col-span-2 relative">
@@ -482,8 +482,8 @@ export function EditServiceModal({ isOpen, onClose, service }: ServiceModalProps
             {activeTab === 'general' && (
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="edit-name" className="block text-sm text-slate-600 mb-1">Tên service <span className="text-red-500">*</span></label>
-                  <input aria-label="Input field" id="edit-name" title="Tên service" type="text" defaultValue={service.name} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="VD: API dịch vụ dữ liệu quốc tịch" />
+                  <label htmlFor="edit-name" className="block text-sm text-slate-600 mb-1">Tên dịch vụ <span className="text-red-500">*</span></label>
+                  <input aria-label="Input field" id="edit-name" title="Tên dịch vụ" type="text" defaultValue={service.name} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="VD: API dịch vụ dữ liệu quốc tịch" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="col-span-2 relative">

@@ -464,7 +464,7 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <h4 className="text-slate-900">API Backup (Dự phòng)</h4>
-                      <span className="px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded">● Ngừng kết nối</span>
+                      <span className="px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded">● Ngừng hoạt động</span>
                       <span className="px-2 py-1 bg-slate-100 text-slate-700 text-xs rounded">OAuth2</span>
                       <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">Tạm dừng</span>
                     </div>
