@@ -84,7 +84,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
     { id: 'general', label: 'Thông tin chung', step: 1 },
     { id: 'provider', label: 'Đơn vị cung cấp', step: 2 },
     { id: 'connection', label: 'Cấu hình kết nối', step: 3 },
-    { id: 'mapping', label: 'Cấu hình ánh xạ', step: 4 },
+    { id: 'mapping', label: 'Nạp cấu trúc', step: 4 },
     { id: 'collection', label: 'Cấu hình thu thập', step: 5 },
   ];
 

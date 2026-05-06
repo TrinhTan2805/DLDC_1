@@ -43,6 +43,7 @@ const MOCK_TABLES = [
 ];
 
 export function StructureLoadingConfig() {
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [searchTable, setSearchTable] = useState('');
   const [searchField, setSearchField] = useState('');
   
@@ -171,10 +172,20 @@ export function StructureLoadingConfig() {
   };
 
   return (
-    <div className="flex w-full h-[600px] bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
+    <div className="flex flex-col w-full h-[600px] bg-slate-50 border border-slate-200 rounded-lg overflow-hidden shadow-sm">
       
-      {/* CỘT TRÁI: DANH SÁCH BẢNG */}
-      <div className="w-1/3 min-w-[300px] border-r border-slate-200 flex flex-col bg-slate-50">
+      {/* HEADER INFO SECTION */}
+      <div className="px-6 py-4 bg-white border-b border-slate-200 shrink-0 flex justify-between items-center">
+        <div>
+          <h3 className="text-sm font-semibold text-slate-800">Cấu hình bảng và trường</h3>
+          <p className="text-xs text-slate-500 mt-0.5">Kết nối đã được thiết lập. Nhấn Nạp cấu trúc để lấy danh sách bảng và trường.</p>
+        </div>
+      </div>
+
+      {isDataLoaded ? (
+        <div className="flex flex-1 overflow-hidden">
+          {/* CỘT TRÁI: DANH SÁCH BẢNG */}
+          <div className="w-1/3 min-w-[300px] border-r border-slate-200 flex flex-col bg-slate-50">
         <div className="p-4 border-b border-slate-200 bg-white shrink-0">
           <h3 className="font-bold text-slate-800 text-sm mb-3 flex items-center gap-2">
             <Database className="w-4 h-4 text-blue-600" />
@@ -372,6 +383,23 @@ export function StructureLoadingConfig() {
           </div>
         )}
       </div>
+        </div>
+      ) : (
+        <div className="flex-1 flex flex-col items-center justify-center text-slate-500 gap-4">
+          <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-2">
+            <Database className="w-8 h-8 text-slate-400 stroke-[1.5]" />
+          </div>
+          <p className="text-sm text-slate-600">Chưa có dữ liệu cấu trúc. Vui lòng nhấn "Nạp cấu trúc" để lấy thông tin bảng và trường.</p>
+          <button
+            type="button"
+            onClick={() => setIsDataLoaded(true)}
+            className="px-6 py-2.5 mt-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm"
+          >
+            <Database className="w-4 h-4" />
+            Nạp cấu trúc
+          </button>
+        </div>
+      )}
 
       <style dangerouslySetInnerHTML={{
         __html: `

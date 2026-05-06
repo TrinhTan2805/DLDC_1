@@ -1,5 +1,6 @@
 // MainLayout Component - Updated
 import { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import { DashboardHome } from '../dashboard/DashboardHome';
@@ -295,7 +296,13 @@ interface MainLayoutProps {
 }
 
 export function MainLayout({ onLogout }: MainLayoutProps = {}) {
-  const [currentPage, setCurrentPage] = useState('dashboard');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const currentPagePath = location.pathname.substring(1);
+  const currentPage = currentPagePath || 'dashboard';
+
+  const setCurrentPage = (page: string) => navigate(`/${page}`);
+
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [showChangeBackgroundModal, setShowChangeBackgroundModal] = useState(false);
@@ -313,7 +320,7 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
     (window as any).navigateToPage = (pageId: string) => {
       setCurrentPage(pageId);
     };
-  }, []);
+  }, [navigate]);
 
   const handleUserMenuClick = (action: 'profile' | 'change-password' | 'change-background' | 'access-history' | 'action-history' | 'logout') => {
     switch (action) {
@@ -362,7 +369,7 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'screen-flow-diagram' && <ScreenFlowDiagram />}
             {currentPage === 'collection' && <DataCollectionPage />}
             {/* view-collected-data mapping removed - clicking it now only toggles dropdown */}
-            {currentPage === 'collection-setup' && <CollectionSetupPage onNavigate={setCurrentPage} />}
+            {(currentPage === 'collection-setup' || currentPage.startsWith('collection-setup/')) && <CollectionSetupPage onNavigate={setCurrentPage} />}
             {currentPage === 'connection-management' && <ConnectionManagementPage />}
             {currentPage === 'collection-reconciliation' && <ReconciliationSetupPage />}
             {currentPage === 'collection-reconciliation-setup' && <ReconciliationSetupPage />}

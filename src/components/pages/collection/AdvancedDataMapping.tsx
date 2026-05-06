@@ -234,15 +234,6 @@ export function AdvancedDataMapping({ onClose }: { onClose?: () => void }) {
           <h3 className="text-sm font-semibold text-slate-800">Cấu hình ánh xạ dữ liệu</h3>
           <p className="text-xs text-slate-500 mt-0.5">Kết nối đã được thiết lập. Nhấn Nạp cấu trúc để lấy danh sách bảng và trường.</p>
         </div>
-        <button
-          type="button"
-          onClick={() => setIsDataLoaded(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm"
-          disabled={isDataLoaded}
-        >
-          <Download className="w-4 h-4" />
-          Nạp cấu trúc
-        </button>
       </div>
 
       {isDataLoaded ? (

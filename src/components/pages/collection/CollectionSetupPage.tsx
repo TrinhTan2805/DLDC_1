@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Filter, RefreshCw, Search, Plus, Eye, Edit, Settings as SettingsIcon, Trash2, FileText, Activity, Settings, AlertCircle, X, Download, Send, ChevronLeft, ChevronRight, Calendar, Wrench, Power } from 'lucide-react';
 import { AddServiceModal, EditServiceModal, DeleteServiceModal, SettingsServiceModal } from './ServiceModals';
 import { ViewServiceModal } from './ViewServiceModal';
@@ -8,14 +9,29 @@ import { ServiceDataDetailPage } from './ServiceDataDetailPage';
 
 export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: string) => void }) {
   const [activeTab, setActiveTab] = useState<'service-setup' | 'version'>('service-setup');
-  const [showAddServiceModal, setShowAddServiceModal] = useState(false);
-  const [showEditServiceModal, setShowEditServiceModal] = useState(false);
-  const [showDetailModal, setShowDetailModal] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const pathParts = location.pathname.split('/').filter(Boolean);
+  const action = pathParts[1];
+  const urlId = pathParts[2];
+
+  const showAddServiceModal = action === 'add';
+  const showEditServiceModal = action === 'edit' && !!urlId;
+  const showDetailModal = action === 'view' && !!urlId;
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showErrorDetailModal, setShowErrorDetailModal] = useState(false);
   const [showDataDetailPage, setShowDataDetailPage] = useState(false);
   const [selectedService, setSelectedService] = useState<any>(null);
+
+  useEffect(() => {
+    if (urlId) {
+      const service = mockCollectionServices.find(s => s.id === urlId);
+      if (service) setSelectedService(service);
+    }
+  }, [urlId]);
+
+  const closeModal = () => navigate('/collection-setup');
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
@@ -26,7 +42,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
 
   useEffect(() => {
     const handleNavLog = (e: any) => {
-      setShowAddServiceModal(false);
+      navigate('/collection-setup');
       setActiveTab('version');
       if (e.detail?.logId) {
         setNavigateToPage(e.detail.logId.toString());
@@ -237,7 +253,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                 
                 <div className="flex items-center gap-3">
                   <button
-                    onClick={() => setShowAddServiceModal(true)}
+                    onClick={() => navigate('/collection-setup/add')}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-sm shadow-sm font-medium"
                   >
                     <Plus className="w-4 h-4" />
@@ -400,11 +416,21 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                           <td className="px-4 py-3">
                             <div className="flex items-center justify-center gap-2">
                               <button
+                                className="p-1.5 text-amber-600 hover:bg-amber-50 rounded transition-colors"
+                                title="Chỉnh sửa"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/collection-setup/edit/${service.id}`);
+                                }}
+                              >
+                                <Edit className="w-4 h-4" />
+                              </button>
+                              <button
                                 className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
                                 title="Quản lý"
                                 onClick={() => {
                                   setSelectedService(service);
-                                  setShowDetailModal(true);
+                                  navigate(`/collection-setup/view/${service.id}`);
                                 }}
                               >
                                 <SettingsIcon className="w-4 h-4" />
@@ -491,19 +517,19 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
       {/* Modals */}
       <AddServiceModal
         isOpen={showAddServiceModal}
-        onClose={() => setShowAddServiceModal(false)}
+        onClose={closeModal}
       />
       <EditServiceModal
         isOpen={showEditServiceModal}
-        onClose={() => setShowEditServiceModal(false)}
+        onClose={closeModal}
         service={selectedService}
       />
       <ViewServiceModal
         isOpen={showDetailModal}
-        onClose={() => setShowDetailModal(false)}
+        onClose={closeModal}
         service={selectedService}
         onViewData={(pageId?: string) => {
-          setShowDetailModal(false);
+          closeModal();
           if (pageId && onNavigate) {
             onNavigate(pageId);
           } else {
