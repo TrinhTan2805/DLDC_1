@@ -8,6 +8,7 @@ interface DatabasePageTemplateProps {
   onBack?: () => void;
   innerSidebarItems: { id: string; label: string }[];
   onSelectDataType: (id: string) => void;
+  activeId?: string;
   children: React.ReactNode;
 }
 
@@ -17,6 +18,7 @@ export function DatabasePageTemplate({
   onBack,
   innerSidebarItems,
   onSelectDataType,
+  activeId,
   children
 }: DatabasePageTemplateProps) {
   return (
@@ -27,6 +29,7 @@ export function DatabasePageTemplate({
           title="Danh mục dữ liệu" 
           items={innerSidebarItems} 
           onSelectItem={onSelectDataType} 
+          activeId={activeId}
         />
       </div>
 

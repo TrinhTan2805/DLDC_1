@@ -9,6 +9,7 @@ interface DataDetailModalProps {
   newRecords: number;
   updatedRecords: number;
   errorRecords: number;
+  isInline?: boolean;
 }
 
 interface DetailRecord {
@@ -81,7 +82,8 @@ export function DataDetailModal({
   totalRecords,
   newRecords,
   updatedRecords,
-  errorRecords
+  errorRecords,
+  isInline = false
 }: DataDetailModalProps) {
   const [activeTab, setActiveTab] = useState('list');
   const [selectedRecord, setSelectedRecord] = useState<DetailRecord | null>(null);
@@ -123,7 +125,7 @@ export function DataDetailModal({
   const [showSyncErrorModal, setShowSyncErrorModal] = useState(false);
   const [selectedSyncRecord, setSelectedSyncRecord] = useState<any>(null);
   
-  if (!isOpen) return null;
+  if (!isOpen && !isInline) return null;
 
   // Mock data for the table
   const detailRecords: DetailRecord[] = [
@@ -482,35 +484,30 @@ export function DataDetailModal({
       )}
 
       {/* Backdrop */}
-      <div 
-        className="fixed inset-0 bg-black/50 z-40"
-        onClick={onClose}
-      />
+      {!isInline && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40"
+          onClick={onClose}
+        />
+      )}
       
-      {/* Modal */}
-      <div className="fixed inset-4 z-50 flex items-center justify-center">
-        <div className="bg-white rounded-lg shadow-xl w-full max-w-[90vw] max-h-[90vh] flex flex-col">
+      {/* Container */}
+      <div className={isInline ? "w-full" : "fixed inset-4 z-50 flex items-center justify-center"}>
+        <div className={`bg-white ${isInline ? "border border-slate-200 rounded-xl overflow-hidden" : "rounded-lg shadow-xl w-full max-w-[90vw] max-h-[90vh]"} flex flex-col`}>
           {/* Header */}
           <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0">
             <div>
-              <h2 className="text-lg font-bold text-slate-900">Danh sách dữ liệu</h2>
-              <div className="flex items-center gap-4 mt-1 text-sm text-slate-600">
-                <span>Tổng số: <span className="font-medium text-slate-900">{totalRecords.toLocaleString()}</span></span>
-                <span className="text-slate-300">|</span>
-                <span>Mới: <span className="font-medium text-green-600">{newRecords.toLocaleString()}</span></span>
-                <span className="text-slate-300">|</span>
-                <span>Cập nhật: <span className="font-medium text-blue-600">{updatedRecords.toLocaleString()}</span></span>
-                <span className="text-slate-300">|</span>
-                <span>Lỗi: <span className="font-medium text-red-600">{errorRecords.toLocaleString()}</span></span>
-              </div>
+              <h2 className="text-lg font-bold text-slate-900">{title}</h2>
             </div>
-            <button
-              onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600"
-              title="Đóng"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            {!isInline && (
+              <button
+                onClick={onClose}
+                className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600"
+                title="Đóng"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
           </div>
 
           <div className="px-6 pt-4 flex-shrink-0">
@@ -530,63 +527,83 @@ export function DataDetailModal({
           {activeTab === 'list' && (
             <>
               {/* Search and Filters */}
-              <div className="px-6 py-4 flex-shrink-0">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setIsFilterOpen(!isFilterOpen)}
-                      className={`px-3 py-1.5 rounded flex items-center gap-2 text-sm font-medium transition-colors ${
-                        isFilterOpen ? 'bg-blue-600 text-white' : 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-50'
-                      }`}
-                    >
-                      <Filter className="w-4 h-4" />
-                      Lọc
-                    </button>
-                    <button
-                      onClick={() => setIsSortOpen(!isSortOpen)}
-                      className={`px-3 py-1.5 rounded flex items-center gap-2 text-sm font-medium transition-colors ${
-                        isSortOpen ? 'bg-blue-600 text-white' : 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-50'
-                      }`}
-                    >
-                      <ArrowUpDown className="w-4 h-4" />
-                      Sắp xếp
-                    </button>
+              <div className="px-6 py-4 flex-shrink-0 bg-white border-b border-slate-100">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex-1 flex items-center gap-3">
+                    <div className="relative flex-1">
+                      <input aria-label="Input field"
+                        type="text"
+                        placeholder="Tìm kiếm theo họ tên, số định danh, số giấy chứng nhận..."
+                        className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50 shadow-sm transition-all"
+                        value={searchText}
+                        onChange={(e) => setSearchText(e.target.value)}
+                      />
+                      <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setIsFilterOpen(!isFilterOpen)}
+                        className={`px-3 py-2 rounded-lg flex items-center gap-2 text-sm font-semibold transition-all shadow-sm border ${
+                          isFilterOpen ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                        }`}
+                      >
+                        <Filter className="w-4 h-4" />
+                        Lọc
+                      </button>
+                      <button
+                        onClick={() => setIsSortOpen(!isSortOpen)}
+                        className={`px-3 py-2 rounded-lg flex items-center gap-2 text-sm font-semibold transition-all shadow-sm border ${
+                          isSortOpen ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                        }`}
+                      >
+                        <ArrowUpDown className="w-4 h-4" />
+                        Sắp xếp
+                      </button>
+                    </div>
                   </div>
                   
-                  <div className="flex items-center gap-2">
-                    <button className="px-3 py-1.5 border border-slate-300 rounded text-slate-700 hover:bg-slate-50 flex items-center gap-2 text-sm">
-                      <RefreshCw className="w-4 h-4" />
-                      Tải lại
+                  <div className="flex items-center gap-3">
+                    <button className="p-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 transition-all shadow-sm" title="Tải lại">
+                      <RefreshCw className="w-5 h-5" />
+                    </button>
+                    <button className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all flex items-center gap-2 text-sm font-semibold shadow-sm">
+                      <FileDown className="w-4 h-4" />
+                      Kết xuất
                     </button>
                   </div>
                 </div>
 
                 {/* Filter Panel */}
                 {isFilterOpen && (
-                  <div className="bg-white border border-slate-200 rounded-lg p-5 mb-4 shadow-sm animate-in slide-in-from-top-2 duration-200">
-                    <div className="flex items-center justify-between mb-4">
-                      <button 
-                        onClick={() => {
-                          const newId = Date.now().toString();
-                          setFilterConditions([...filterConditions, { id: newId, logic: 'AND', field: '', operator: '=', type: 'Text', value: '' }]);
-                        }}
-                        className="px-3 py-1.5 border border-blue-500 text-blue-600 rounded flex items-center gap-2 text-sm font-medium hover:bg-blue-50"
-                      >
-                        <Plus className="w-4 h-4" />
-                        Thêm điều kiện
-                      </button>
-                      <button onClick={() => setFilterConditions([])} className="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 mt-4 shadow-sm animate-in slide-in-from-top-2 duration-200 relative">
+                    <div className="absolute -top-2 left-64 w-4 h-4 bg-slate-50 border-t border-l border-slate-200 transform rotate-45"></div>
+                    <div className="flex items-center justify-between mb-4 relative z-10">
+                      <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Điều kiện lọc nâng cao</h4>
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => {
+                            const newId = Date.now().toString();
+                            setFilterConditions([...filterConditions, { id: newId, logic: 'AND', field: '', operator: '=', type: 'Text', value: '' }]);
+                          }}
+                          className="px-3 py-1.5 bg-white border border-blue-200 text-blue-600 rounded-lg flex items-center gap-2 text-xs font-bold hover:bg-blue-50 transition-all"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          Thêm điều kiện
+                        </button>
+                        <button onClick={() => setFilterConditions([])} className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-3 relative z-10">
                       {filterConditions.map((condition, index) => (
                         <div key={condition.id} className="flex items-center gap-3">
                           <div className="w-20 flex-shrink-0">
                             {index > 0 && (
                               <select 
-                                className="w-full px-2 py-1.5 border border-slate-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                                className="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                                 value={condition.logic}
                                 onChange={(e) => {
                                   const newConditions = [...filterConditions];
@@ -601,7 +618,7 @@ export function DataDetailModal({
                           </div>
                           
                           <select 
-                            className="flex-1 basis-0 w-full min-w-0 px-3 py-1.5 border border-slate-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                            className="flex-1 basis-0 w-full min-w-0 px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                             value={condition.field}
                             onChange={(e) => {
                               const newConditions = [...filterConditions];
@@ -609,7 +626,7 @@ export function DataDetailModal({
                               setFilterConditions(newConditions);
                             }}
                           >
-                            <option value="">Chọn trường</option>
+                            <option value="">Chọn trường dữ liệu</option>
                             <option value="name">Họ tên</option>
                             <option value="birthDate">Ngày sinh</option>
                             <option value="age">Tuổi</option>
@@ -618,7 +635,7 @@ export function DataDetailModal({
                           </select>
 
                           <select 
-                            className="flex-1 basis-0 w-full min-w-0 px-3 py-1.5 border border-slate-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                            className="flex-1 basis-0 w-full min-w-0 px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                             value={condition.operator}
                             onChange={(e) => {
                               const newConditions = [...filterConditions];
@@ -637,9 +654,9 @@ export function DataDetailModal({
                             <option value="ends">Kết thúc</option>
                           </select>
 
-                          <div className="flex-1 basis-0 w-full min-w-0 flex items-center gap-2 px-3 py-1.5 border border-slate-300 rounded bg-white group/value">
+                          <div className="flex-1 basis-0 w-full min-w-0 flex items-center gap-2 px-3 py-1.5 border border-slate-200 rounded-lg bg-white shadow-sm group/value">
                             <div className="flex-1 text-sm text-slate-900 truncate">
-                              {condition.value || <span className="text-slate-400 font-mono">{"<?>"}</span>}
+                              {condition.value || <span className="text-slate-400 italic">Nhập giá trị...</span>}
                             </div>
                             <button 
                               type="button"
@@ -648,10 +665,10 @@ export function DataDetailModal({
                                 e.stopPropagation();
                                 openValueModal(condition);
                               }}
-                              className="p-1 hover:bg-slate-100 rounded text-blue-600 transition-colors"
+                              className="p-1 hover:bg-blue-50 rounded text-blue-600 transition-colors"
                               title="Chỉnh sửa giá trị"
                             >
-                              <Edit2 className="w-4 h-4" />
+                              <Edit2 className="w-3.5 h-3.5" />
                             </button>
                           </div>
 
@@ -667,23 +684,14 @@ export function DataDetailModal({
                       ))}
                     </div>
 
-                    <div className="mt-6 pt-4 border-t border-slate-100 flex items-center gap-3">
-                      <button className="px-4 py-1.5 border border-blue-500 text-blue-600 rounded flex items-center gap-2 text-sm font-medium hover:bg-blue-50">
-                        <Plus className="w-4 h-4" />
-                        Điều kiện
-                      </button>
-                      <button className="px-4 py-1.5 border border-blue-500 text-blue-600 rounded flex items-center gap-2 text-sm font-medium hover:bg-blue-50">
-                        <Group className="w-4 h-4" />
-                        Gom Nhóm
-                      </button>
-                      <div className="ml-auto flex items-center gap-2">
-                        <button className="px-6 py-1.5 bg-blue-600 text-white rounded font-medium text-sm hover:bg-blue-700 flex items-center gap-2">
+                    <div className="mt-6 pt-4 border-t border-slate-200 flex items-center gap-3 relative z-10">
+                      <div className="flex items-center gap-2">
+                        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-bold text-sm hover:bg-blue-700 flex items-center gap-2 shadow-md transition-all active:scale-95">
                           <CheckCircle className="w-4 h-4" />
-                          Áp dụng
+                          Áp dụng bộ lọc
                         </button>
-                        <button onClick={() => setFilterConditions([])} className="px-6 py-1.5 bg-slate-600 text-white rounded font-medium text-sm hover:bg-slate-700 flex items-center gap-2">
-                          <XCircle className="w-4 h-4" />
-                          Xóa bộ lọc
+                        <button onClick={() => setFilterConditions([])} className="px-4 py-2 bg-white border border-slate-300 text-slate-600 rounded-lg font-bold text-sm hover:bg-slate-50 transition-all">
+                          Xóa tất cả
                         </button>
                       </div>
                     </div>
@@ -692,27 +700,27 @@ export function DataDetailModal({
               </div>
 
               {/* Table */}
-              <div className="flex-1 overflow-auto">
-                <table className="w-full">
-                  <thead className="bg-slate-50 sticky top-0">
+              <div className="flex-1 overflow-auto bg-white">
+                <table className="w-full border-collapse">
+                  <thead className="bg-slate-50 sticky top-0 z-20">
                     <tr className="border-b border-slate-200">
-                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-600">STT</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-600">Tình trạng</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-600">Họ tên</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-600">Giới tính</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-600">Ngày sinh</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-600">Họ tên Cha</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-600">Họ tên Mẹ</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-600">Quốc tịch</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-600">SG giấy chứng nhận</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-600">Ngày đăng ký</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-600">Ngày đồng bộ</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-600">Văn bản</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-600">Trạng thái</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-600">Thao tác</th>
+                      <th className="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">STT</th>
+                      <th className="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Phân loại</th>
+                      <th className="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Họ tên</th>
+                      <th className="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Giới tính</th>
+                      <th className="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Ngày sinh</th>
+                      <th className="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Họ tên Cha</th>
+                      <th className="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Họ tên Mẹ</th>
+                      <th className="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Quốc tịch</th>
+                      <th className="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Số định danh</th>
+                      <th className="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Ngày đăng ký</th>
+                      <th className="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Ngày đồng bộ</th>
+                      <th className="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Văn bản</th>
+                      <th className="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Trạng thái</th>
+                      <th className="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Thao tác</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-slate-100">
                     {detailRecords
                       .filter(record => {
                         const matchesSearch = searchText === '' || 
@@ -725,63 +733,56 @@ export function DataDetailModal({
                         return matchesSearch && matchesErrorProcess;
                       })
                       .map((record, index) => (
-                      <tr key={record.id} className="border-b border-slate-200 hover:bg-slate-50">
-                        <td className="px-4 py-3 text-sm text-slate-900">{index + 1}</td>
-                        <td className="px-4 py-3 text-sm">
-                          <span className={`inline-block px-2 py-1 rounded text-xs ${
-                            record.type === 'Mới' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
+                      <tr key={record.id} className="hover:bg-blue-50/30 transition-all group">
+                        <td className="px-4 py-4 text-center text-sm text-slate-500 font-medium">{index + 1}</td>
+                        <td className="px-4 py-4 text-center">
+                          <span className={`inline-flex px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                            record.type === 'Mới' ? 'bg-blue-50 text-blue-700 border border-blue-100' : 'bg-purple-50 text-purple-700 border border-purple-100'
                           }`}>
                             {record.type}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-sm text-slate-900">{record.name}</td>
-                        <td className="px-4 py-3 text-sm text-slate-900">{record.gender}</td>
-                        <td className="px-4 py-3 text-sm text-slate-900">{record.birthDate}</td>
-                        <td className="px-4 py-3 text-sm text-slate-900">{record.fatherName}</td>
-                        <td className="px-4 py-3 text-sm text-slate-900">{record.motherName}</td>
-                        <td className="px-4 py-3 text-sm text-slate-900">{record.nationality}</td>
-                        <td className="px-4 py-3 text-sm text-slate-900">{record.certificateNo}</td>
-                        <td className="px-4 py-3 text-sm text-slate-900">{record.registrationDate}</td>
-                        <td className="px-4 py-3 text-sm text-slate-600">{record.syncDate}</td>
-                        <td className="px-4 py-3 text-sm">
+                        <td className="px-4 py-4 text-center text-sm font-semibold text-slate-900">{record.name}</td>
+                        <td className="px-4 py-4 text-center text-sm text-slate-600 font-medium">{record.gender}</td>
+                        <td className="px-4 py-4 text-center text-sm text-slate-600 font-medium font-mono">{record.birthDate}</td>
+                        <td className="px-4 py-4 text-center text-sm text-slate-600 font-medium">{record.fatherName}</td>
+                        <td className="px-4 py-4 text-center text-sm text-slate-600 font-medium">{record.motherName}</td>
+                        <td className="px-4 py-4 text-center text-sm text-slate-600 font-medium">{record.nationality}</td>
+                        <td className="px-4 py-4 text-center text-sm text-slate-600 font-medium font-mono">{record.idNumber}</td>
+                        <td className="px-4 py-4 text-center text-sm text-slate-600 font-medium font-mono">{record.registrationDate}</td>
+                        <td className="px-4 py-4 text-center text-sm text-slate-500 font-medium font-mono whitespace-nowrap">{record.syncDate}</td>
+                        <td className="px-4 py-4 text-center">
                           {record.pdfUrl ? (
                             <button
                               onClick={() => setViewingPdfUrl(record.pdfUrl!)}
-                              className="flex items-center gap-1 text-blue-600 hover:text-blue-800 hover:underline"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-600 rounded-full text-[10px] font-bold uppercase tracking-wider border border-blue-100 hover:bg-blue-100 transition-colors"
                               title="Xem văn bản đính kèm"
                             >
-                              <FileText className="w-4 h-4" />
+                              <FileText className="w-3.5 h-3.5" />
                               Xem
                             </button>
                           ) : (
-                            <span className="text-slate-400">—</span>
+                            <span className="text-slate-400 text-xs">—</span>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-sm">
-                          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs ${
+                        <td className="px-4 py-4 text-center">
+                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border shadow-sm whitespace-nowrap ${
                             record.approvalStatus === 'Đã đồng bộ' 
-                              ? 'bg-green-100 text-green-700' 
+                              ? 'bg-green-50 text-green-700 border-green-100' 
                               : record.approvalStatus === 'Đã gửi lại hệ thống nguồn'
-                              ? 'bg-blue-100 text-blue-700'
-                              : 'bg-emerald-100 text-emerald-700'
+                              ? 'bg-blue-50 text-blue-700 border-blue-100'
+                              : 'bg-emerald-50 text-emerald-700 border-emerald-100'
                           }`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${
-                              record.approvalStatus === 'Đã đồng bộ' 
-                                ? 'bg-green-600' 
-                                : record.approvalStatus === 'Đã gửi lại hệ thống nguồn'
-                                ? 'bg-blue-600'
-                                : 'bg-emerald-600'
-                            }`}></span>
                             {record.approvalStatus}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-sm">
+                        <td className="px-4 py-4 text-center">
                           <button 
                             onClick={() => setSelectedRecord(record)}
-                            className="w-8 h-8 flex items-center justify-center rounded hover:bg-blue-50 text-blue-600"
+                            className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all"
                             title="Xem chi tiết"
                           >
-                            <Eye className="w-4 h-4" />
+                            <Eye className="w-4.5 h-4.5" />
                           </button>
                         </td>
                       </tr>
@@ -874,74 +875,74 @@ export function DataDetailModal({
                 {/* Content Area */}
                 <div className="flex-1 overflow-auto p-8">
                   {/* Flattened Record Details */}
-                  <div className="grid grid-cols-2 gap-x-8 gap-y-6">
-                    <div>
-                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Họ, chữ đệm, tên</label>
-                      <div className="text-base text-slate-900 font-semibold border-b border-slate-100 pb-2">{selectedRecord.name}</div>
+                  <div className="flex flex-col gap-3">
+                    <div className="border border-slate-200 p-2 rounded">
+                      <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên</div>
+                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.name}</div>
                     </div>
-                    <div>
-                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Giới tính</label>
-                      <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.gender}</div>
+                    <div className="border border-slate-200 p-2 rounded">
+                      <div className="text-xs text-slate-600 mb-1">Giới tính</div>
+                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.gender}</div>
                     </div>
-                    <div>
-                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Ngày, tháng, năm sinh</label>
-                      <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.birthDate}</div>
+                    <div className="border border-slate-200 p-2 rounded">
+                      <div className="text-xs text-slate-600 mb-1">Ngày, tháng, năm sinh</div>
+                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.birthDate}</div>
                     </div>
-                    <div>
-                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Ngày sinh bằng chữ</label>
-                      <div className="text-base text-slate-900 font-medium italic border-b border-slate-100 pb-2">{selectedRecord.birthDateInWords}</div>
+                    <div className="border border-slate-200 p-2 rounded">
+                      <div className="text-xs text-slate-600 mb-1">Ngày sinh bằng chữ</div>
+                      <div className="text-sm text-slate-900 italic">{selectedRecord.birthDateInWords}</div>
                     </div>
-                    <div>
-                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Nơi sinh</label>
-                      <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.birthPlace}</div>
+                    <div className="border border-slate-200 p-2 rounded">
+                      <div className="text-xs text-slate-600 mb-1">Nơi sinh</div>
+                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.birthPlace}</div>
                     </div>
-                    <div>
-                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Quê quán</label>
-                      <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.hometown}</div>
+                    <div className="border border-slate-200 p-2 rounded">
+                      <div className="text-xs text-slate-600 mb-1">Quê quán</div>
+                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.hometown}</div>
                     </div>
-                    <div>
-                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Dân tộc</label>
-                      <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.ethnicity}</div>
+                    <div className="border border-slate-200 p-2 rounded">
+                      <div className="text-xs text-slate-600 mb-1">Dân tộc</div>
+                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.ethnicity}</div>
                     </div>
-                    <div>
-                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Quốc tịch</label>
-                      <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.nationality}</div>
+                    <div className="border border-slate-200 p-2 rounded">
+                      <div className="text-xs text-slate-600 mb-1">Quốc tịch</div>
+                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.nationality}</div>
                     </div>
-                    <div>
-                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Số định danh cá nhân</label>
-                      <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.personalId}</div>
+                    <div className="border border-slate-200 p-2 rounded">
+                      <div className="text-xs text-slate-600 mb-1">Số định danh cá nhân</div>
+                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.personalId}</div>
                     </div>
-                    <div>
-                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Họ tên Cha</label>
-                      <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.fatherName || '-'}</div>
+                    <div className="border border-slate-200 p-2 rounded">
+                      <div className="text-xs text-slate-600 mb-1">Họ tên Cha</div>
+                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.fatherName || '-'}</div>
                     </div>
-                    <div>
-                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Ngày sinh Cha</label>
-                      <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.fatherBirthDate || '-'}</div>
+                    <div className="border border-slate-200 p-2 rounded">
+                      <div className="text-xs text-slate-600 mb-1">Ngày sinh Cha</div>
+                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.fatherBirthDate || '-'}</div>
                     </div>
-                    <div>
-                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Họ tên Mẹ</label>
-                      <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.motherName || '-'}</div>
+                    <div className="border border-slate-200 p-2 rounded">
+                      <div className="text-xs text-slate-600 mb-1">Họ tên Mẹ</div>
+                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.motherName || '-'}</div>
                     </div>
-                    <div>
-                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Ngày sinh Mẹ</label>
-                      <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.motherBirthDate || '-'}</div>
+                    <div className="border border-slate-200 p-2 rounded">
+                      <div className="text-xs text-slate-600 mb-1">Ngày sinh Mẹ</div>
+                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.motherBirthDate || '-'}</div>
                     </div>
-                    <div>
-                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Họ tên người đi khai sinh</label>
-                      <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.declarantName || '-'}</div>
+                    <div className="border border-slate-200 p-2 rounded">
+                      <div className="text-xs text-slate-600 mb-1">Họ tên người đi khai sinh</div>
+                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.declarantName || '-'}</div>
                     </div>
-                    <div>
-                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Quan hệ</label>
-                      <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.declarantRelation || '-'}</div>
+                    <div className="border border-slate-200 p-2 rounded">
+                      <div className="text-xs text-slate-600 mb-1">Quan hệ</div>
+                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.declarantRelation || '-'}</div>
                     </div>
-                    <div>
-                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Ngày đăng ký</label>
-                      <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.registrationDate || '-'}</div>
+                    <div className="border border-slate-200 p-2 rounded">
+                      <div className="text-xs text-slate-600 mb-1">Ngày đăng ký</div>
+                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.registrationDate || '-'}</div>
                     </div>
-                    <div>
-                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Ngày đồng bộ</label>
-                      <div className="text-base text-slate-900 font-medium border-b border-slate-100 pb-2">{selectedRecord.syncDate || '-'}</div>
+                    <div className="border border-slate-200 p-2 rounded">
+                      <div className="text-xs text-slate-600 mb-1">Ngày đồng bộ</div>
+                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.syncDate || '-'}</div>
                     </div>
                   </div>
 

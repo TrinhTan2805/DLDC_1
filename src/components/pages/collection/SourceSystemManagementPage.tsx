@@ -101,52 +101,52 @@ export function SourceSystemManagementPage() {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200">
-              <th className="py-3 px-4 text-xs font-semibold text-slate-600 uppercase w-12 text-center">STT</th>
-              <th className="py-3 px-4 text-xs font-semibold text-slate-600 uppercase">Tên hệ thống</th>
-              <th className="py-3 px-4 text-xs font-semibold text-slate-600 uppercase">Tên đơn vị</th>
-              <th className="py-3 px-4 text-xs font-semibold text-slate-600 uppercase w-32">Loại nguồn</th>
-              <th className="py-3 px-4 text-xs font-semibold text-slate-600 uppercase w-48">Đầu mối liên hệ</th>
-              <th className="py-3 px-4 text-xs font-semibold text-slate-600 uppercase text-center w-32">Thao tác</th>
+              <th className="py-4 px-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">STT</th>
+              <th className="py-4 px-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Tên hệ thống</th>
+              <th className="py-4 px-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Tên đơn vị</th>
+              <th className="py-4 px-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Loại nguồn</th>
+              <th className="py-4 px-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Đầu mối liên hệ</th>
+              <th className="py-4 px-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Thao tác</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-200">
+          <tbody className="divide-y divide-slate-100 bg-white">
             {filteredData.length > 0 ? (
               filteredData.map((item, index) => (
-                <tr key={item.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="py-3 px-4 text-sm text-slate-600 text-center">{index + 1}</td>
-                  <td className="py-3 px-4 text-sm font-medium text-slate-900">{item.systemName}</td>
-                  <td className="py-3 px-4 text-sm text-slate-600">{item.unitName}</td>
-                  <td className="py-3 px-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                <tr key={item.id} className="hover:bg-slate-50/80 transition-all group">
+                  <td className="py-4 px-4 text-sm text-slate-500 text-center font-medium">{index + 1}</td>
+                  <td className="py-4 px-4 text-sm font-semibold text-slate-900 text-center">{item.systemName}</td>
+                  <td className="py-4 px-4 text-sm text-slate-600 text-center">{item.unitName}</td>
+                  <td className="py-4 px-4 text-center">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-blue-100 text-blue-800 shadow-sm">
                       {item.sourceType}
                     </span>
                   </td>
-                  <td className="py-3 px-4">
-                    <div className="text-sm text-slate-900">{item.contactPerson || '-'}</div>
-                    <div className="text-xs text-slate-500">{item.phone}</div>
+                  <td className="py-4 px-4 text-center">
+                    <div className="text-sm font-medium text-slate-900">{item.contactPerson || '-'}</div>
+                    <div className="text-xs text-slate-500 mt-0.5">{item.phone}</div>
                   </td>
-                  <td className="py-3 px-4">
+                  <td className="py-4 px-4">
                     <div className="flex items-center justify-center gap-2">
                       <button
                         onClick={() => handleView(item)}
-                        className="p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all"
                         title="Xem chi tiết"
                       >
-                        <Eye className="w-4 h-4" />
+                        <Eye className="w-4.5 h-4.5" />
                       </button>
                       <button
                         onClick={() => handleEdit(item)}
-                        className="p-1 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-colors"
+                        className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-full transition-all"
                         title="Sửa"
                       >
-                        <Edit className="w-4 h-4" />
+                        <Edit className="w-4.5 h-4.5" />
                       </button>
                       <button
                         onClick={() => handleDelete(item.id)}
-                        className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-all"
                         title="Xóa"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-4.5 h-4.5" />
                       </button>
                     </div>
                   </td>
@@ -154,8 +154,11 @@ export function SourceSystemManagementPage() {
               ))
             ) : (
               <tr>
-                <td colSpan={6} className="py-8 text-center text-slate-500">
-                  Không tìm thấy hệ thống nguồn nào.
+                <td colSpan={6} className="py-12 text-center text-slate-400">
+                  <div className="flex flex-col items-center justify-center">
+                    <Server className="w-10 h-10 mb-2 opacity-20" />
+                    <p className="text-sm">Không tìm thấy hệ thống nguồn nào.</p>
+                  </div>
                 </td>
               </tr>
             )}

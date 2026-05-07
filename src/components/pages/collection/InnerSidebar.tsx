@@ -5,9 +5,10 @@ interface InnerSidebarProps {
   title: string;
   items: { id: string; label: string }[];
   onSelectItem: (id: string) => void;
+  activeId?: string;
 }
 
-export function InnerSidebar({ title, items, onSelectItem }: InnerSidebarProps) {
+export function InnerSidebar({ title, items, onSelectItem, activeId }: InnerSidebarProps) {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredItems = items.filter(item =>
@@ -32,15 +33,21 @@ export function InnerSidebar({ title, items, onSelectItem }: InnerSidebarProps) 
       <div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
         <div className="space-y-1">
           {filteredItems.map((item, index) => (
-            <button
- key={item.id}
- onClick={() => onSelectItem(item.id)}
- className="w-full text-left px-4 py-3 rounded-lg hover:bg-slate-50 text-slate-700 transition-all group flex items-start gap-3"
- >
+             <button
+              key={item.id}
+              onClick={() => onSelectItem(item.id)}
+              className={`w-full text-left px-4 py-3 rounded-lg transition-all group flex items-start gap-3 ${
+                activeId === item.id 
+                  ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200 shadow-sm' 
+                  : 'hover:bg-slate-50 text-slate-700'
+              }`}
+             >
  <span className="text-blue-600 text-sm shrink-0 mt-0.5">{index + 1}.</span>
- <span className="text-sm font-medium group-hover:text-blue-700 transition-colors line-clamp-2">
- {item.label}
- </span>
+  <span className={`text-sm font-medium transition-colors line-clamp-2 ${
+    activeId === item.id ? 'text-blue-700' : 'group-hover:text-blue-700'
+  }`}>
+  {item.label}
+  </span>
  <div className="ml-auto flex items-center gap-1 text-[10px] text-blue-600 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0 whitespace-nowrap bg-blue-50 px-2 py-1 rounded-md shrink-0">
  Xem chi tiết
  <ChevronRight className="w-3 h-3" />

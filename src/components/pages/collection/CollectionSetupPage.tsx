@@ -18,6 +18,9 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
   const showAddServiceModal = action === 'add';
   const showEditServiceModal = action === 'edit' && !!urlId;
   const showDetailModal = action === 'view' && !!urlId;
+  const queryParams = new URLSearchParams(location.search);
+  const initialTab = queryParams.get('tab') || 'general';
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showErrorDetailModal, setShowErrorDetailModal] = useState(false);
@@ -26,7 +29,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
 
   useEffect(() => {
     if (urlId) {
-      const service = mockCollectionServices.find(s => s.id === urlId);
+      const service = mockCollectionServices.find(s => s.id === Number(urlId));
       if (service) setSelectedService(service);
     }
   }, [urlId]);
@@ -64,8 +67,8 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
   };
 
   const defaultRange = getCurrentMonthRange();
-  const [startDate, setStartDate] = useState(defaultRange.start);
-  const [endDate, setEndDate] = useState(defaultRange.end);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -80,7 +83,8 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
     setDepartmentFilter('all');
     setStatusFilter('all');
     setTypeFilter('all');
-    // Không reset date range vì chỉ là UI display
+    setStartDate('');
+    setEndDate('');
     setCurrentPage(1);
   };
 
@@ -95,12 +99,29 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
   // Helper function to filter services (date range is just for display, not filtering)
   const filterServices = (services: any[]) => {
     return services.filter(service => {
-      // Removed date filtering logic - date picker is just for UI display
+      // Date filtering based on updatedAt
+      let matchesDate = true;
+      if (startDate || endDate) {
+        const updateDate = parseDate(service.updatedAt);
+        if (updateDate) {
+          if (startDate) {
+            const start = new Date(startDate);
+            start.setHours(0, 0, 0, 0);
+            if (updateDate < start) matchesDate = false;
+          }
+          if (endDate) {
+            const end = new Date(endDate);
+            end.setHours(23, 59, 59, 999);
+            if (updateDate > end) matchesDate = false;
+          }
+        }
+      }
 
       const matchesStatus = statusFilter === 'all' ||
         (statusFilter === 'active' ? (!service.status?.startsWith('draft') && !service.status?.startsWith('inactive')) : service.status === statusFilter);
 
-      return matchesStatus &&
+      return matchesDate &&
+        matchesStatus &&
         (typeFilter === 'all' || service.type === typeFilter) &&
         (sourceFilter === 'all' || service.source === sourceFilter) &&
         (departmentFilter === 'all' || service.department === departmentFilter) &&
@@ -148,8 +169,8 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
           <button
             onClick={() => setActiveTab('service-setup')}
             className={`pb-3 pt-4 text-sm transition-colors border-b-2 ${activeTab === 'service-setup'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-slate-600 hover:text-slate-900'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-slate-600 hover:text-slate-900'
               }`}
           >
             Thiết lập dịch vụ
@@ -157,8 +178,8 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
           <button
             onClick={() => setActiveTab('version')}
             className={`pb-3 pt-4 text-sm transition-colors border-b-2 ${activeTab === 'version'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-slate-600 hover:text-slate-900'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-slate-600 hover:text-slate-900'
               }`}
           >
             Quản lý nhật ký
@@ -179,7 +200,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                     <FileText className="w-5 h-5 text-blue-600" />
                   </div>
                   <div>
-                    <div className="text-xs text-slate-500">Tổng số dữ liệu đã thiết lập</div>
+                    <div className="text-xs text-slate-500">Tổng số dịch vụ đã thiết lập</div>
                     <div className="text-2xl text-slate-900">{stats.total}</div>
                   </div>
                 </div>
@@ -203,7 +224,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                     <Settings className="w-5 h-5 text-yellow-600" />
                   </div>
                   <div>
-                    <div className="text-xs text-slate-500">Đang bảo trì</div>
+                    <div className="text-xs text-slate-500">Bản nháp</div>
                     <div className="text-2xl text-slate-900">{stats.maintenance}</div>
                   </div>
                 </div>
@@ -222,15 +243,15 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
               </div>
             </div>
 
-                        {/* Filters and Actions */}
+            {/* Filters and Actions */}
             <div className="mb-6">
               {/* Row 1: Search and Buttons */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="relative w-[300px]">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex-1 flex items-center gap-3">
+                  <div className="relative flex-1">
                     <input aria-label="Input field"
                       type="text"
-                      placeholder="Tìm kiếm..."
+                      placeholder="Tìm kiếm theo tên dịch vụ, hệ thống nguồn"
                       className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                       value={searchText}
                       onChange={(e) => setSearchText(e.target.value)}
@@ -239,18 +260,15 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                   <button className="p-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors shadow-sm flex items-center justify-center">
                     <Search className="w-5 h-5" />
                   </button>
-                  <button onClick={resetFilters} className="p-2 bg-rose-100 text-rose-500 rounded-lg hover:bg-rose-200 transition-colors shadow-sm flex items-center justify-center" title="Làm mới">
-                    <RefreshCw className="w-5 h-5" />
-                  </button>
-                  <button 
-                    onClick={() => setShowFilters(!showFilters)} 
-                    className={`p-2 rounded-lg transition-colors shadow-sm flex items-center justify-center ${showFilters ? 'bg-blue-50 border border-blue-200 text-blue-500' : 'bg-blue-100 text-blue-600 hover:bg-blue-200'}`}
+                  <button
+                    onClick={() => setShowFilters(!showFilters)}
+                    className={`p-2 rounded-lg transition-colors shadow-sm flex items-center justify-center border ${showFilters ? 'bg-blue-50 border-blue-200 text-blue-500' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
                     title="Bộ lọc"
                   >
                     {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
                   </button>
                 </div>
-                
+
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => navigate('/collection-setup/add')}
@@ -264,9 +282,9 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
 
               {/* Row 2: Filters (Collapsible) */}
               {showFilters && (
-                <div className="bg-slate-50 p-5 rounded-xl border border-slate-200 grid grid-cols-5 gap-6 mt-4 animate-in slide-in-from-top-2 duration-200 shadow-sm relative">
-                  <div className="absolute -top-2 left-[330px] w-4 h-4 bg-slate-50 border-t border-l border-slate-200 transform rotate-45"></div>
-                  
+                <div className="bg-slate-50 p-5 rounded-xl border border-slate-200 grid grid-cols-6 gap-4 mt-4 animate-in slide-in-from-top-2 duration-200 shadow-sm relative">
+                  <div className="absolute -top-2 right-[200px] w-4 h-4 bg-slate-50 border-t border-l border-slate-200 transform rotate-45"></div>
+
                   <div className="space-y-1.5 relative z-10">
                     <label className="text-xs font-bold text-slate-700">Loại kết nối</label>
                     <select aria-label="Select box"
@@ -280,7 +298,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                       <option value="Tải file Excel">Tải file Excel</option>
                     </select>
                   </div>
-                  
+
                   <div className="space-y-1.5 relative z-10">
                     <label className="text-xs font-bold text-slate-700">Nguồn dữ liệu</label>
                     <select aria-label="Select box"
@@ -312,7 +330,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                       <option value="Cục Kế hoạch - Tài chính">Cục Kế hoạch - Tài chính</option>
                     </select>
                   </div>
-                  
+
                   <div className="space-y-1.5 relative z-10">
                     <label className="text-xs font-bold text-slate-700">Trạng thái</label>
                     <select aria-label="Select box"
@@ -326,9 +344,9 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                       <option value="inactive">Ngưng hoạt động</option>
                     </select>
                   </div>
-                  
+
                   <div className="space-y-1.5 relative z-10">
-                    <label className="text-xs font-bold text-slate-700">Thời gian</label>
+                    <label className="text-xs font-bold text-slate-700">Thời gian từ</label>
                     <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
                       <input aria-label="Input field"
                         type="date"
@@ -339,103 +357,111 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                       <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
                     </div>
                   </div>
+
+                  <div className="space-y-1.5 relative z-10">
+                    <label className="text-xs font-bold text-slate-700">Thời gian đến</label>
+                    <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
+                      <input aria-label="Input field"
+                        type="date"
+                        className="w-full border-0 bg-transparent text-sm focus:outline-none text-slate-700 p-0"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                      />
+                      <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
 
             {/* Services Table */}
-            <div className="bg-white rounded-lg border border-slate-200">
+            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-slate-50 border-b border-slate-200">
+                <table className="w-full border-collapse">
+                  <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
                     <tr>
-                      <th className="px-4 py-3 text-center text-xs text-slate-600 uppercase">STT</th>
-                      <th className="px-4 py-3 text-center text-xs text-slate-600 uppercase">Tên dịch vụ</th>
-                      <th className="px-4 py-3 text-center text-xs text-slate-600 uppercase">Loại nguồn </th>
-                      <th className="px-4 py-3 text-center text-xs text-slate-600 uppercase whitespace-nowrap">Phương thức kết nối</th>
-                      <th className="px-4 py-3 text-center text-xs text-slate-600 uppercase">Phiên bản</th>
-                      <th className="px-4 py-3 text-center text-xs text-slate-600 uppercase whitespace-nowrap">Hệ thống nguồn</th>
-                      <th className="px-4 py-3 text-center text-xs text-slate-600 uppercase">Ngày sửa</th>
-                      <th className="px-4 py-3 text-center text-xs text-slate-600 uppercase">Trạng thái dịch vụ</th>
-                      <th className="px-4 py-3 text-center text-xs text-slate-600 uppercase">Trạng thái dữ liệu</th>
-                      <th className="px-4 py-3 text-center text-xs text-slate-600 uppercase">Thao tác</th>
+                      <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-12">STT</th>
+                      <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Tên dịch vụ</th>
+                      <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Loại nguồn</th>
+                      <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Phương thức kết nối</th>
+                      <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-20">Phiên bản</th>
+                      <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Hệ thống nguồn</th>
+                      <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Ngày tạo</th>
+                      <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Trạng thái dịch vụ</th>
+                      <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Trạng thái dữ liệu</th>
+                      <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-20">Thao tác</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {filteredServices
                       .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
                       .map((service, index) => (
-                        <tr key={service.id} className="hover:bg-slate-50 transition-colors">
-                          <td className="px-4 py-3 text-sm text-slate-600 text-center">{index + 1}</td>
-                          <td className="px-4 py-3 text-center">
-                            <div>
-                              <div className="text-sm text-slate-900">{service.name}</div>
-                              <div className="text-xs text-slate-500">{service.description}</div>
+                        <tr key={service.id} className="hover:bg-blue-50/30 transition-all group">
+                          <td className="px-4 py-4 text-center text-sm text-slate-500 font-medium">{index + 1}</td>
+                          <td className="px-4 py-4 text-left">
+                            <div className="max-w-xs">
+                              <div className="text-sm font-semibold text-slate-900 leading-snug">{service.name}</div>
+                              {service.description && <div className="text-[11px] text-slate-500 mt-1 line-clamp-2">{service.description}</div>}
                             </div>
                           </td>
-                          <td className="px-4 py-3 text-sm text-slate-700 text-center">
-                            {service.source}
+                          <td className="px-4 py-4 text-center">
+                            <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border text-center ${service.source === 'Trong ngành' ? 'bg-blue-50 text-blue-700 border-blue-100' : 'bg-purple-50 text-purple-700 border-purple-100'
+                              }`}>
+                              {service.source}
+                            </span>
                           </td>
-                          <td className="px-4 py-3 text-center">
-                            <span className={`inline-flex px-2 py-1 rounded text-xs ${service.type === 'SOAP' ? 'bg-purple-100 text-purple-700' :
-                                service.type === 'REST' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'
+                          <td className="px-4 py-4 text-center">
+                            <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${service.type === 'SOAP' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' :
+                                service.type === 'REST' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                                  'bg-amber-50 text-amber-700 border-amber-100'
                               }`}>
                               {service.type === 'SOAP' ? 'Cơ sở dữ liệu' : service.type === 'REST' ? 'API' : 'Tải file Excel'}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-sm text-slate-600 text-center">{service.version}</td>
-                          <td className="px-4 py-3 text-sm text-slate-600 text-center">{service.managingUnit}</td>
-                          <td className="px-4 py-3 text-sm text-slate-600 text-center">{service.updatedAt}</td>
-                          <td className="px-4 py-3 text-center">
-                            <span className={`inline-flex px-2 py-1 rounded text-xs font-bold ${
-                              service.status === 'draft' ? 'bg-slate-100 text-slate-700' :
-                              service.status === 'inactive' ? 'bg-gray-100 text-gray-700 border border-gray-200' :
-                              'bg-green-100 text-green-700'
-                            }`}>
+                          <td className="px-4 py-4 text-center text-sm text-slate-600 font-medium font-mono">{service.version}</td>
+                          <td className="px-4 py-4 text-center text-sm text-slate-600 font-medium max-w-[120px]">
+                            <div className="leading-tight">{service.managingUnit}</div>
+                          </td>
+                          <td className="px-4 py-4 text-center text-sm text-slate-500 font-medium font-mono whitespace-nowrap">
+                            {service.updatedAt.split(' ').map((part: string, i: number) => (
+                              <div key={i}>{part}</div>
+                            ))}
+                          </td>
+                          <td className="px-4 py-4 text-center">
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${service.status === 'draft' ? 'bg-slate-50 text-slate-600 border-slate-200' :
+                                service.status === 'inactive' ? 'bg-gray-50 text-gray-500 border-gray-200' :
+                                  'bg-green-50 text-green-700 border-green-100'
+                              }`}>
                               {service.status === 'draft' ? 'Bản nháp' :
-                               service.status === 'inactive' ? 'Ngưng hoạt động' :
-                               'Hoạt động'}
+                                service.status === 'inactive' ? 'Ngưng hoạt động' :
+                                  'Hoạt động'}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-center">
-                            <span className={`inline-flex items-center px-2 py-1 rounded text-xs ${(service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'EMPTY' ? 'bg-slate-100 text-slate-600' :
-                                (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'PROCESSING' ? 'bg-blue-100 text-blue-700' :
-                                  (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'DATA_UPDATED' ? 'bg-green-100 text-green-700' :
-                                    (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'DATA_INCOMPLETED' ? 'bg-orange-100 text-orange-700' :
-                                      (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'DATA_UPDATE_FAILED' ? 'bg-red-100 text-red-700' :
-                                        'bg-slate-100 text-slate-600'
+                          <td className="px-4 py-4 text-center">
+                            <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border whitespace-nowrap ${(service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'EMPTY' ? 'bg-slate-50 text-slate-500 border-slate-200' :
+                                (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'PROCESSING' ? 'bg-blue-50 text-blue-700 border-blue-100' :
+                                  (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'DATA_UPDATED' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                                    (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'DATA_INCOMPLETED' ? 'bg-orange-50 text-orange-700 border-orange-100' :
+                                      'bg-red-50 text-red-700 border-red-100'
                               }`}>
                               {(service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'EMPTY' ? 'Rỗng' :
                                 (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'PROCESSING' ? 'Đang lấy dữ liệu' :
                                   (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'DATA_UPDATED' ? 'Cập nhật thành công' :
                                     (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'DATA_INCOMPLETED' ? 'Lỗi cấu trúc' :
-                                      (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'DATA_UPDATE_FAILED' ? 'Lỗi cập nhật' :
-                                        'Rỗng'}
+                                      'Lỗi cập nhật'}
                             </span>
                           </td>
-                          <td className="px-4 py-3">
-                            <div className="flex items-center justify-center gap-2">
-                              <button
-                                className="p-1.5 text-amber-600 hover:bg-amber-50 rounded transition-colors"
-                                title="Chỉnh sửa"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate(`/collection-setup/edit/${service.id}`);
-                                }}
-                              >
-                                <Edit className="w-4 h-4" />
-                              </button>
-                              <button
-                                className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                                title="Quản lý"
-                                onClick={() => {
-                                  setSelectedService(service);
-                                  navigate(`/collection-setup/view/${service.id}`);
-                                }}
-                              >
-                                <SettingsIcon className="w-4 h-4" />
-                              </button>
-                            </div>
+                          <td className="px-4 py-4 text-center">
+                            <button
+                              className="p-1.5 text-blue-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-all"
+                              title="Quản lý"
+                              onClick={() => {
+                                setSelectedService(service);
+                                navigate(`/collection-setup/view/${service.id}`);
+                              }}
+                            >
+                              <SettingsIcon className="w-4 h-4" />
+                            </button>
                           </td>
                         </tr>
                       ))}
@@ -523,6 +549,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
         isOpen={showEditServiceModal}
         onClose={closeModal}
         service={selectedService}
+        initialTab={initialTab}
       />
       <ViewServiceModal
         isOpen={showDetailModal}

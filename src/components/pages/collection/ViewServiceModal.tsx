@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   X, CheckCircle, Search, Calendar, Eye, Activity, Shield, FileText, Download,
   ArrowRight, ExternalLink, RefreshCw, ChevronDown, ChevronRight, User, Plug, Settings, Database, Clock,
@@ -12,15 +13,21 @@ interface ViewServiceModalProps {
   isOpen: boolean;
   onClose: () => void;
   service?: any;
+  onViewData?: (pageId?: string) => void;
 }
 
-type TabType = 'general' | 'contact' | 'connection' | 'collection' | 'mapping';
+type TabType = 'general' | 'contact' | 'connection' | 'collection' | 'mapping' | 'history';
 
 export function ViewServiceModal({ isOpen, onClose, service }: ViewServiceModalProps) {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabType>('general');
   const [showApiKey, setShowApiKey] = useState(false);
   const [showInactiveModal, setShowInactiveModal] = useState(false);
   const [inactiveReason, setInactiveReason] = useState('');
+
+  const handleEdit = () => {
+    navigate(`/collection-setup/edit/${service.id}?tab=${activeTab}`);
+  };
 
   if (!isOpen || !service) return null;
 
@@ -112,6 +119,7 @@ export function ViewServiceModal({ isOpen, onClose, service }: ViewServiceModalP
               { id: 'connection', label: 'Cấu hình kết nối', icon: Plug },
               { id: 'mapping', label: 'Cấu trúc', icon: LayoutTemplate },
               { id: 'collection', label: 'Cấu hình thu thập', icon: Settings },
+              { id: 'history', label: 'Lịch sử hoạt động', icon: History },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -130,10 +138,11 @@ export function ViewServiceModal({ isOpen, onClose, service }: ViewServiceModalP
 
           {/* TABS CONTENT */}
           <div className="px-8 py-8 flex-1 bg-[#fcfcfc] overflow-y-auto min-h-[500px]">
-            {activeTab === 'general' && <TabGeneral service={service} sourceSystem={sourceSystem} />}
-            {activeTab === 'connection' && <TabConnection service={service} showApiKey={showApiKey} setShowApiKey={setShowApiKey} />}
-            {activeTab === 'collection' && <TabCollection service={service} />}
-            {activeTab === 'mapping' && <TabMapping />}
+            {activeTab === 'general' && <TabGeneral service={service} sourceSystem={sourceSystem} onEdit={handleEdit} />}
+            {activeTab === 'connection' && <TabConnection service={service} showApiKey={showApiKey} setShowApiKey={setShowApiKey} onEdit={handleEdit} />}
+            {activeTab === 'collection' && <TabCollection service={service} onEdit={handleEdit} />}
+            {activeTab === 'mapping' && <TabMapping onEdit={handleEdit} />}
+            {activeTab === 'history' && <TabActivityHistory onEdit={handleEdit} />}
           </div>
         </div>
 
@@ -206,7 +215,7 @@ export function ViewServiceModal({ isOpen, onClose, service }: ViewServiceModalP
 
 // ------ TAB COMPONENTS ------
 
-function TabGeneral({ service, sourceSystem }: any) {
+function TabGeneral({ service, sourceSystem, onEdit }: any) {
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
@@ -349,7 +358,7 @@ function TabGeneral({ service, sourceSystem }: any) {
       </div>
 
       <div className="flex justify-end pt-4 border-t border-slate-200 mt-6">
-        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm shadow-sm hover:bg-blue-700 transition-colors flex items-center gap-2">
+        <button onClick={onEdit} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm shadow-sm hover:bg-blue-700 transition-colors flex items-center gap-2">
           <Edit className="w-4 h-4" /> Chỉnh sửa
         </button>
       </div>
@@ -423,7 +432,7 @@ function TabContact({ sourceSystem }: any) {
   );
 }
 
-function TabConnection({ service, showApiKey, setShowApiKey }: any) {
+function TabConnection({ service, showApiKey, setShowApiKey, onEdit }: any) {
   // Mock connection type if not in service
   const connectionType = service.connectionType || 'API';
 
@@ -571,7 +580,7 @@ function TabConnection({ service, showApiKey, setShowApiKey }: any) {
       </div>
 
       <div className="flex justify-end pt-4 border-t border-slate-200 mt-6">
-        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm shadow-sm hover:bg-blue-700 transition-colors flex items-center gap-2">
+        <button onClick={onEdit} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm shadow-sm hover:bg-blue-700 transition-colors flex items-center gap-2">
           <Edit className="w-4 h-4" /> Chỉnh sửa
         </button>
       </div>
@@ -579,7 +588,7 @@ function TabConnection({ service, showApiKey, setShowApiKey }: any) {
   )
 }
 
-function TabCollection({ service }: any) {
+function TabCollection({ service, onEdit }: any) {
   return (
     <div className="animate-in fade-in duration-300 space-y-6">
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
@@ -626,7 +635,7 @@ function TabCollection({ service }: any) {
       </div>
 
       <div className="flex justify-end pt-4 border-t border-slate-200 mt-6">
-        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm shadow-sm hover:bg-blue-700 transition-colors flex items-center gap-2">
+        <button onClick={onEdit} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm shadow-sm hover:bg-blue-700 transition-colors flex items-center gap-2">
           <Edit className="w-4 h-4" /> Chỉnh sửa
         </button>
       </div>
@@ -634,7 +643,7 @@ function TabCollection({ service }: any) {
   )
 }
 
-function TabMapping() {
+function TabMapping({ onEdit }: { onEdit: () => void }) {
   const [activeTableId, setActiveTableId] = useState('citizen_info');
   const [searchTable, setSearchTable] = useState('');
   const [searchField, setSearchField] = useState('');
@@ -692,7 +701,7 @@ function TabMapping() {
           <Download className="w-4 h-4" />
           Nạp cấu trúc
         </button>
-        <button className="flex items-center gap-2 px-4 py-2 bg-white text-slate-700 border border-slate-200 rounded-lg text-sm hover:bg-slate-50 transition-all shadow-sm active:scale-95">
+        <button onClick={onEdit} className="flex items-center gap-2 px-4 py-2 bg-white text-slate-700 border border-slate-200 rounded-lg text-sm hover:bg-slate-50 transition-all shadow-sm active:scale-95">
           <Edit className="w-4 h-4" />
           Sửa cấu trúc
         </button>
@@ -1121,6 +1130,97 @@ function TabChangelog() {
           >
             Trang sau
           </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+function TabActivityHistory({ onEdit }: { onEdit: () => void }) {
+  const [filterStatus, setFilterStatus] = useState('all');
+
+  const historyData = [
+    { id: '66102', type: 'NEW', status: 'SUCCESSFUL', creator: 'administrator', server: '1000', time: '09-10-2025 15:06:34' },
+    { id: '66101', type: 'DELETE', status: 'SUCCESSFUL', creator: 'administrator', server: '1000', time: '09-10-2025 15:05:41' },
+    { id: '66100', type: 'DELETE', status: 'SKIPPED', creator: 'administrator', server: '1000', time: '09-10-2025 15:05:05' },
+    { id: '66093', type: 'DELETE', status: 'CANCELLED', creator: 'administrator', server: '5000', time: '09-10-2025 15:04:34' },
+    { id: '66082', type: 'UPDATE', status: 'CANCELLED', creator: 'administrator', server: '1000', time: '09-10-2025 14:56:50' },
+    { id: '61149', type: 'NEW', status: 'SUCCESSFUL', creator: 'administrator', server: '1000', time: '06-10-2025 11:02:19' },
+    { id: '61148', type: 'DELETE', status: 'SUCCESSFUL', creator: 'administrator', server: '1000', time: '06-10-2025 11:01:41' }
+  ];
+
+  const filteredHistory = historyData.filter(item => 
+    filterStatus === 'all' || item.status.toLowerCase() === filterStatus.toLowerCase()
+  );
+
+  return (
+    <div className="space-y-6 animate-in fade-in duration-300">
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+        <div className="p-6 border-b border-slate-200 flex items-center justify-between bg-white">
+          <h3 className="text-xl font-bold text-slate-900 flex items-center gap-3">
+            Lịch sử hoạt động
+          </h3>
+          <div className="flex items-center gap-3">
+            <select 
+              aria-label="Filter status"
+              className="border border-slate-300 rounded-lg px-4 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white min-w-[150px]"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="all">Tất cả trạng thái</option>
+              <option value="successful">Successful</option>
+              <option value="skipped">Skipped</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
+        </div>
+        
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-slate-50 text-slate-700 border-b border-slate-200 sticky top-0">
+              <tr>
+                <th className="px-6 py-4 font-bold whitespace-nowrap">ID</th>
+                <th className="px-6 py-4 font-bold whitespace-nowrap">Loại</th>
+                <th className="px-6 py-4 font-bold whitespace-nowrap">Trạng thái</th>
+                <th className="px-6 py-4 font-bold whitespace-nowrap">Người tạo</th>
+                <th className="px-6 py-4 font-bold whitespace-nowrap">Thông Tin máy chủ</th>
+                <th className="px-6 py-4 font-bold whitespace-nowrap">Thời gian khởi tạo</th>
+                <th className="px-6 py-4 font-bold whitespace-nowrap text-center">#Hành động</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {filteredHistory.map((row, idx) => (
+                <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                  <td className="px-6 py-4 font-medium text-slate-900">{row.id}</td>
+                  <td className="px-6 py-4 text-slate-700 font-medium">{row.type}</td>
+                  <td className="px-6 py-4">
+                    <span className={`inline-flex items-center px-2 py-1 rounded text-[10px] font-black tracking-tight ${
+                      row.status === 'SUCCESSFUL' ? 'bg-emerald-100 text-emerald-700' :
+                      row.status === 'SKIPPED' ? 'bg-amber-100 text-amber-700' :
+                      'bg-blue-100 text-blue-700'
+                    }`}>
+                      {row.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-slate-600 font-medium">{row.creator}</td>
+                  <td className="px-6 py-4 text-slate-600 font-medium">{row.server}</td>
+                  <td className="px-6 py-4 text-slate-600 font-medium">{row.time}</td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center justify-center gap-2">
+                      <button className="px-3 py-1 bg-teal-500 text-white rounded text-xs hover:bg-teal-600 transition-colors">Chi tiết</button>
+                      <button className="px-3 py-1 bg-rose-500 text-white rounded text-xs hover:bg-rose-600 transition-colors">Xóa</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {filteredHistory.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="px-6 py-10 text-center text-slate-500 italic">
+                    Không tìm thấy dữ liệu lịch sử phù hợp.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

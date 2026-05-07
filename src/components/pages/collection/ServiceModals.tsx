@@ -1,4 +1,5 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type FormEvent, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   X, AlertCircle, CheckCircle, Upload, Eye, EyeOff, 
   Database, FileText, User, Plug, Settings, Plus,
@@ -125,6 +126,7 @@ interface ServiceModalProps {
   onClose: () => void;
   service?: any;
   onViewData?: (pageId?: string) => void;
+  initialTab?: any;
 }
 
 type TabType = 'general' | 'contact' | 'connection' | 'mapping' | 'collection';
@@ -370,10 +372,17 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
 }
 
 // Cấu phần khác được giữ nguyên cấu trúc
-export function EditServiceModal({ isOpen, onClose, service }: ServiceModalProps) {
+export function EditServiceModal({ isOpen, onClose, service, initialTab }: ServiceModalProps) {
   if (!isOpen || !service) return null;
 
-  const [activeTab, setActiveTab] = useState<TabType>('general');
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab || 'general');
+
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
   const [dataClassification, setDataClassification] = useState('');
   const [connectionType, setConnectionType] = useState(service.connectionType || 'API');
 
@@ -438,7 +447,8 @@ export function EditServiceModal({ isOpen, onClose, service }: ServiceModalProps
     e.preventDefault();
     const finalStatus = (testState === 'success' || testState === 'connection_error' || testState === 'data_error') ? testState : 'Bản nháp';
     alert(`Cập nhật phương thức thu thập thành công!\nTrạng thái bản ghi: ${finalStatus}`);
-    onClose();
+    // Quay về màn hình chi tiết thay vì đóng modal
+    navigate(`/collection-setup/view/${service.id}`);
   };
 
   const tabs = [

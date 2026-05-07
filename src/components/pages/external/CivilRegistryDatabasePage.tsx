@@ -4,6 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { Calendar, Download, FileUser, UserCheck, Users, Baby, Heart, UserX, UsersRound, FileEdit, FileCheck, FileX, ChevronLeft, Search, ArrowUpRight } from 'lucide-react';
 import { DatabasePageTemplate } from '../collection/DatabasePageTemplate';
 import { DataDetailModal } from '../../DataDetailModal';
+import { BirthCertDetailModal } from '../../BirthCertDetailModal';
 import { MarriageDetailModal } from '../../MarriageDetailModal';
 import { MaritalStatusCertModal } from '../../MaritalStatusCertModal';
 import { DeathCertModal } from '../../DeathCertModal';
@@ -39,9 +40,6 @@ interface CivilRegistryDatabasePageProps {
 }
 
 export function CivilRegistryDatabasePage({ mode = 'thu thập', context = 'thu thập', onBack }: CivilRegistryDatabasePageProps) {
-  // Remove activeTab, keep selectedStat for modals
-  const [selectedStat, setSelectedStat] = useState<StatCard | null>(null);
-  const [timeFilter, setTimeFilter] = useState<'thisMonth' | 'lastMonth' | '3months' | '6months'>('thisMonth');
 
   // Generate realistic random data
   const generateData = () => {
@@ -90,61 +88,9 @@ export function CivilRegistryDatabasePage({ mode = 'thu thập', context = 'thu 
 
   const stats = useMemo(() => generateData(), []);
 
-  const chartData = useMemo(() => {
-    const shortNames: Record<string, string> = {
-      'Hồ sơ khai sinh': 'Khai sinh',
-      'Hồ sơ đăng ký kết hôn': 'Kết hôn',
-      'Hồ sơ cấp GĐKN kết hôn': 'Cấp GĐKN',
-      'Hồ sơ đăng ký khai tử': 'Khai tử',
-      'Hồ sơ DK nhận cha, mẹ, con': 'Nhận cha, mẹ, con',
-      'Hồ sơ đăng ký nuôi con nuôi': 'Nuôi con nuôi',
-      'Hồ sơ đăng ký giám hộ': 'Giám hộ',
-      'Hồ sơ DK chấm dứt giám hộ': 'Chấm dứt GH',
-      'Hồ sơ DK thay đổi TT hộ tịch, văn danh dự dân tộc': 'Thay đổi TT',
-      'Hồ sơ đăng ký chấm dứt giám sát việc giám hộ': 'Kiểm sát GH',
-      'Hồ sơ đăng ký giám sát việc giám hộ': 'Giám sát GH',
-      'Hồ sơ ly hôn/hủy kết hôn ở nước ngoài': 'Ly hôn/hủy KH NN',
-    };
-
-    return stats.map(stat => {
-      let currentPeriod = 0;
-      let previousPeriod = 0;
-
-      if (timeFilter === 'thisMonth') {
-        currentPeriod = stat.thisMonth;
-        previousPeriod = stat.lastMonth;
-      } else if (timeFilter === 'lastMonth') {
-        currentPeriod = stat.lastMonth;
-        previousPeriod = Math.floor(stat.lastMonth * 0.9);
-      } else if (timeFilter === '3months') {
-        currentPeriod = stat.thisMonth + stat.lastMonth * 2;
-        previousPeriod = Math.floor(stat.lastMonth * 2.8);
-      } else if (timeFilter === '6months') {
-        currentPeriod = stat.thisMonth + stat.lastMonth * 5;
-        previousPeriod = Math.floor(stat.lastMonth * 5.5);
-      }
-
-      return {
-        name: shortNames[stat.title] || stat.title,
-        current: currentPeriod,
-        previous: previousPeriod,
-      };
-    });
-  }, [stats, timeFilter]);
-
-  const totalChartSum = chartData.reduce((sum, item) => sum + item.current, 0);
-
-  const getLegendLabels = () => {
-    switch(timeFilter) {
-      case 'thisMonth': return ['Số lượng bản ghi đã thu thập tháng trước', 'Số lượng bản ghi đã thu thập tháng này'];
-      case 'lastMonth': return ['Số lượng bản ghi đã thu thập tháng trước nữa', 'Số lượng bản ghi đã thu thập tháng trước'];
-      case '3months': return ['Số lượng bản ghi đã thu thập 3 tháng trước', 'Số lượng bản ghi đã thu thập 3 tháng gần nhất'];
-      case '6months': return ['Số lượng bản ghi đã thu thập 6 tháng trước', 'Số lượng bản ghi đã thu thập 6 tháng gần nhất'];
-      default: return ['Kỳ trước', 'Kỳ này'];
-    }
-  };
-
-  const legendLabels = getLegendLabels();
+  // Set default selected stat to the first item
+  const [selectedStat, setSelectedStat] = useState<StatCard | null>(stats[0]);
+  const [timeFilter, setTimeFilter] = useState<'thisMonth' | 'lastMonth' | '3months' | '6months'>('thisMonth');
 
   const sidebarItems = stats.map(s => ({ id: s.id, label: `Bộ dữ liệu ${s.title.toLowerCase()}` }));
 
@@ -154,317 +100,165 @@ export function CivilRegistryDatabasePage({ mode = 'thu thập', context = 'thu 
       description="Quản lý và xem chi tiết dữ liệu hộ tịch điện tử"
       onBack={onBack}
       innerSidebarItems={sidebarItems}
+      activeId={selectedStat?.id}
       onSelectDataType={(id) => {
         const stat = stats.find(s => s.id === id);
         if (stat) setSelectedStat(stat);
       }}
     >
+      <div className="mt-4">
+        {selectedStat && selectedStat.id === '1' && (
+          <BirthCertDetailModal
+            isOpen={true}
+            onClose={() => {}}
+            isInline={true}
+            title={selectedStat.title}
+            totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
+            newRecords={selectedStat.thisMonth}
+            updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
+            errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
+          />
+        )}
 
-      {/* Biểu đồ thu thập dữ liệu */}
-      <div className="mt-8 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <div className="flex justify-between items-start mb-6">
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-slate-800">Biểu đồ thu thập dữ liệu</h3>
-            <select 
-              className="border border-blue-400 rounded-md px-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-              value={timeFilter}
-              onChange={(e) => setTimeFilter(e.target.value as any)}
-            >
-              <option value="thisMonth">Tháng này</option>
-              <option value="lastMonth">Tháng trước</option>
-              <option value="3months">3 tháng gần nhất</option>
-              <option value="6months">6 tháng gần nhất</option>
-            </select>
-          </div>
-          <div className="text-slate-600 font-medium text-lg">Tổng số: {totalChartSum.toLocaleString('vi-VN').replace(/,/g, '.')}</div>
-        </div>
+        {selectedStat && selectedStat.id === '2' && (
+          <MarriageDetailModal
+            isOpen={true}
+            onClose={() => {}}
+            isInline={true}
+            title={selectedStat.title}
+            totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
+            newRecords={selectedStat.thisMonth}
+            updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
+            errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
+          />
+        )}
+
+        {selectedStat && selectedStat.id === '3' && (
+          <MaritalStatusCertModal
+            isOpen={true}
+            onClose={() => {}}
+            isInline={true}
+            title={selectedStat.title}
+            totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
+            newRecords={selectedStat.thisMonth}
+            updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
+            errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
+          />
+        )}
+
+        {selectedStat && selectedStat.id === '4' && (
+          <DeathCertModal
+            isOpen={true}
+            onClose={() => {}}
+            isInline={true}
+            title={selectedStat.title}
+            totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
+            newRecords={selectedStat.thisMonth}
+            updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
+            errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
+          />
+        )}
+
+        {selectedStat && selectedStat.id === '5' && (
+          <ParentChildRecognitionModal
+            isOpen={true}
+            onClose={() => {}}
+            isInline={true}
+            title={selectedStat.title}
+            totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
+            newRecords={selectedStat.thisMonth}
+            updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
+            errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
+          />
+        )}
+
+        {selectedStat && selectedStat.id === '6' && (
+          <AdoptionCertModal
+            isOpen={true}
+            onClose={() => {}}
+            isInline={true}
+            title={selectedStat.title}
+            totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
+            newRecords={selectedStat.thisMonth}
+            updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
+            errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
+          />
+        )}
+
+        {selectedStat && selectedStat.id === '7' && (
+          <GuardianshipCertModal
+            isOpen={true}
+            onClose={() => {}}
+            isInline={true}
+            title={selectedStat.title}
+            totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
+            newRecords={selectedStat.thisMonth}
+            updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
+            errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
+          />
+        )}
+
+        {selectedStat && selectedStat.id === '8' && (
+          <TerminationGuardianshipCertModal
+            isOpen={true}
+            onClose={() => {}}
+            title={selectedStat.title}
+            totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
+            newRecords={selectedStat.thisMonth}
+            updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
+            errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
+          />
+        )}
+
+        {selectedStat && selectedStat.id === '9' && (
+          <CivilRegistryChangeModal
+            isOpen={true}
+            onClose={() => {}}
+            title={selectedStat.title}
+            totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
+            newRecords={selectedStat.thisMonth}
+            updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
+            errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
+          />
+        )}
+
+        {selectedStat && selectedStat.id === '10' && (
+          <TerminationGuardianshipMonitoringModal
+            isOpen={true}
+            onClose={() => {}}
+            title={selectedStat.title}
+            totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
+            newRecords={selectedStat.thisMonth}
+            updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
+            errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
+          />
+        )}
         
-        <div className="mt-8" style={{ width: '100%', height: 450 }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }} barGap={0}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-              <XAxis 
-                dataKey="name" 
-                angle={-45} 
-                textAnchor="end" 
-                interval={0} 
-                tick={{ fontSize: 12, fill: '#64748b' }} 
-                dy={10}
-              />
-              <YAxis 
-                tickFormatter={(value) => {
-                  if (value === 0) return '0';
-                  return `${(value / 1000000).toFixed(1)}M`;
-                }} 
-                tick={{ fontSize: 12, fill: '#64748b' }}
-                axisLine={false}
-                tickLine={false}
-                dx={-10}
-              />
-              <Tooltip 
-                formatter={(value: number) => value.toLocaleString('vi-VN').replace(/,/g, '.')} 
-                cursor={{ fill: '#f1f5f9' }}
-                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)' }}
-              />
-              <Legend 
-                verticalAlign="bottom" 
-                content={() => (
-                  <div className="flex justify-center gap-8 mt-12 text-sm text-slate-600">
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-blue-400 rounded-sm"></div>
-                      <span>{legendLabels[0]}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-orange-500 rounded-sm"></div>
-                      <span>{legendLabels[1]}</span>
-                    </div>
-                  </div>
-                )}
-              />
-              <Bar dataKey="previous" fill="#60a5fa" radius={[4, 4, 0, 0]} maxBarSize={30} />
-              <Bar dataKey="current" fill="#f97316" radius={[4, 4, 0, 0]} maxBarSize={30}>
-                <LabelList 
-                  dataKey="current" 
-                  position="top" 
-                  formatter={(val: number) => val.toLocaleString('vi-VN').replace(/,/g, '.')} 
-                  style={{ fontSize: '11px', fontWeight: 'bold', fill: '#0f172a' }} 
-                  offset={10}
-                />
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        {selectedStat && selectedStat.id === '11' && (
+          <GuardianshipMonitoringModal
+            isOpen={true}
+            onClose={() => {}}
+            title={selectedStat.title}
+            totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
+            newRecords={selectedStat.thisMonth}
+            updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
+            errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
+          />
+        )}
+
+        {selectedStat && selectedStat.id !== '1' && selectedStat.id !== '2' && selectedStat.id !== '3' && selectedStat.id !== '4' && selectedStat.id !== '5' && selectedStat.id !== '6' && selectedStat.id !== '7' && selectedStat.id !== '8' && selectedStat.id !== '9' && selectedStat.id !== '10' && selectedStat.id !== '11' && (
+          <DataDetailModal
+            isOpen={true}
+            onClose={() => {}}
+            isInline={true}
+            title={selectedStat.title}
+            totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
+            newRecords={selectedStat.thisMonth}
+            updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
+            errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
+          />
+        )}
       </div>
-
-        {/* Danh sách CSDL thu thập */}
-        <div className="mt-8 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-slate-200">
-            <h3 className="text-lg font-semibold text-slate-800">Danh sách CSDL thu thập</h3>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-slate-600">
-              <thead className="bg-slate-50 text-slate-700 font-medium border-b border-slate-200">
-                <tr>
-                  <th className="px-6 py-4 font-semibold whitespace-nowrap">Tên cơ liệu</th>
-                  <th className="px-6 py-4 font-semibold whitespace-nowrap">Thuộc</th>
-                  <th className="px-6 py-4 font-semibold whitespace-nowrap">Số lượng đăng ký tháng này</th>
-                  <th className="px-6 py-4 font-semibold whitespace-nowrap">Số lượng bản ghi lỗi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {stats.map((stat) => (
-                  <tr key={stat.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-slate-800">{stat.title}</td>
-                    <td className="px-6 py-4 text-slate-600">Hộ tịch điện tử</td>
-                    <td className="px-6 py-4 text-slate-600">{stat.thisMonth.toLocaleString('vi-VN').replace(/,/g, '.')}</td>
-                    <td className="px-6 py-4 text-slate-600">{Math.floor(stat.thisMonth * 0.05).toLocaleString('vi-VN').replace(/,/g, '.')}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Lịch sử thu thập - Moved from tab to bottom */}
-        <div className="mt-8 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
-          <div className="p-6 border-b border-slate-200 flex items-center justify-between bg-white sticky top-0 z-10">
-            <h3 className="text-xl font-bold text-slate-900 flex items-center gap-3">
-              Lịch sử hoạt động
-              <span className="text-slate-400 font-medium text-lg">/ CSDL_MariaDB</span>
-            </h3>
-            <div className="flex items-center gap-3">
-              <select className="border border-slate-300 rounded-lg px-4 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white min-w-[150px]">
-                <option value="all">All</option>
-                <option value="successful">Successful</option>
-                <option value="skipped">Skipped</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-            </div>
-          </div>
-          
-          <div className="overflow-x-auto flex-1">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-slate-700 border-b border-slate-200 sticky top-0">
-                <tr>
-                  <th className="px-6 py-4 font-bold whitespace-nowrap">ID</th>
-                  <th className="px-6 py-4 font-bold whitespace-nowrap">Loại</th>
-                  <th className="px-6 py-4 font-bold whitespace-nowrap">Trạng thái</th>
-                  <th className="px-6 py-4 font-bold whitespace-nowrap">Người tạo</th>
-                  <th className="px-6 py-4 font-bold whitespace-nowrap">Thông Tin máy chủ</th>
-                  <th className="px-6 py-4 font-bold whitespace-nowrap">Thời gian khởi tạo</th>
-                  <th className="px-6 py-4 font-bold whitespace-nowrap text-center">#Hành động</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {[
-                  { id: '66102', type: 'NEW', status: 'SUCCESSFUL', creator: 'administrator', server: '1000', time: '09-10-2025 15:06:34' },
-                  { id: '66101', type: 'DELETE', status: 'SUCCESSFUL', creator: 'administrator', server: '1000', time: '09-10-2025 15:05:41' },
-                  { id: '66100', type: 'DELETE', status: 'SKIPPED', creator: 'administrator', server: '1000', time: '09-10-2025 15:05:05' },
-                  { id: '66093', type: 'DELETE', status: 'CANCELLED', creator: 'administrator', server: '5000', time: '09-10-2025 15:04:34' },
-                  { id: '66082', type: 'UPDATE', status: 'CANCELLED', creator: 'administrator', server: '1000', time: '09-10-2025 14:56:50' },
-                  { id: '61149', type: 'NEW', status: 'SUCCESSFUL', creator: 'administrator', server: '1000', time: '06-10-2025 11:02:19' },
-                  { id: '61148', type: 'DELETE', status: 'SUCCESSFUL', creator: 'administrator', server: '1000', time: '06-10-2025 11:01:41' }
-                ].map((row, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-slate-900">{row.id}</td>
-                    <td className="px-6 py-4 text-slate-700 font-medium">{row.type}</td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2 py-1 rounded text-[10px] font-black tracking-tight ${
-                        row.status === 'SUCCESSFUL' ? 'bg-emerald-100 text-emerald-700' :
-                        row.status === 'SKIPPED' ? 'bg-amber-100 text-amber-700' :
-                        'bg-blue-100 text-blue-700'
-                      }`}>
-                        {row.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-slate-600 font-medium">{row.creator}</td>
-                    <td className="px-6 py-4 text-slate-600 font-medium">{row.server}</td>
-                    <td className="px-6 py-4 text-slate-600 font-medium">{row.time}</td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-center gap-2">
-                        <button className="px-3 py-1 bg-teal-500 text-white rounded text-xs hover:bg-teal-600 transition-colors">Chi tiết</button>
-                        <button className="px-3 py-1 bg-rose-500 text-white rounded text-xs hover:bg-rose-600 transition-colors">Xóa</button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-      {/* Specific Modals */}
-      {selectedStat && selectedStat.id === '2' && (
-        <MarriageDetailModal
-          isOpen={true}
-          onClose={() => setSelectedStat(null)}
-          title={selectedStat.title}
-          totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
-          newRecords={selectedStat.thisMonth}
-          updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
-          errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
-        />
-      )}
-
-      {selectedStat && selectedStat.id === '3' && (
-        <MaritalStatusCertModal
-          isOpen={true}
-          onClose={() => setSelectedStat(null)}
-          title={selectedStat.title}
-          totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
-          newRecords={selectedStat.thisMonth}
-          updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
-          errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
-        />
-      )}
-
-      {selectedStat && selectedStat.id === '4' && (
-        <DeathCertModal
-          isOpen={true}
-          onClose={() => setSelectedStat(null)}
-          title={selectedStat.title}
-          totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
-          newRecords={selectedStat.thisMonth}
-          updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
-          errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
-        />
-      )}
-
-      {selectedStat && selectedStat.id === '5' && (
-        <ParentChildRecognitionModal
-          isOpen={true}
-          onClose={() => setSelectedStat(null)}
-          title={selectedStat.title}
-          totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
-          newRecords={selectedStat.thisMonth}
-          updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
-          errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
-        />
-      )}
-
-      {selectedStat && selectedStat.id === '6' && (
-        <AdoptionCertModal
-          isOpen={true}
-          onClose={() => setSelectedStat(null)}
-          title={selectedStat.title}
-          totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
-          newRecords={selectedStat.thisMonth}
-          updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
-          errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
-        />
-      )}
-
-      {selectedStat && selectedStat.id === '7' && (
-        <GuardianshipCertModal
-          isOpen={true}
-          onClose={() => setSelectedStat(null)}
-          title={selectedStat.title}
-          totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
-          newRecords={selectedStat.thisMonth}
-          updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
-          errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
-        />
-      )}
-
-      {selectedStat && selectedStat.id === '8' && (
-        <TerminationGuardianshipCertModal
-          isOpen={true}
-          onClose={() => setSelectedStat(null)}
-          title={selectedStat.title}
-          totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
-          newRecords={selectedStat.thisMonth}
-          updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
-          errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
-        />
-      )}
-
-      {selectedStat && selectedStat.id === '9' && (
-        <CivilRegistryChangeModal
-          isOpen={true}
-          onClose={() => setSelectedStat(null)}
-          title={selectedStat.title}
-          totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
-          newRecords={selectedStat.thisMonth}
-          updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
-          errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
-        />
-      )}
-
-      {selectedStat && selectedStat.id === '10' && (
-        <TerminationGuardianshipMonitoringModal
-          isOpen={true}
-          onClose={() => setSelectedStat(null)}
-          title={selectedStat.title}
-          totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
-          newRecords={selectedStat.thisMonth}
-          updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
-          errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
-        />
-      )}
-      
-      {selectedStat && selectedStat.id === '11' && (
-        <GuardianshipMonitoringModal
-          isOpen={true}
-          onClose={() => setSelectedStat(null)}
-          title={selectedStat.title}
-          totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
-          newRecords={selectedStat.thisMonth}
-          updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
-          errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
-        />
-      )}
-
-      {selectedStat && selectedStat.id !== '2' && selectedStat.id !== '3' && selectedStat.id !== '4' && selectedStat.id !== '5' && selectedStat.id !== '6' && selectedStat.id !== '7' && selectedStat.id !== '8' && selectedStat.id !== '9' && selectedStat.id !== '10' && selectedStat.id !== '11' && (
-        <DataDetailModal
-          isOpen={true}
-          onClose={() => setSelectedStat(null)}
-          title={selectedStat.title}
-          totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
-          newRecords={selectedStat.thisMonth}
-          updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
-          errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
-        />
-      )}
     </DatabasePageTemplate>
   );
 }
