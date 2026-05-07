@@ -3,11 +3,9 @@ import { Download, Database, Building2, Building } from 'lucide-react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const methodData = [
-  { name: 'API RESTful', value: 45 },
-  { name: 'API SOAP', value: 28 },
-  { name: 'Database', value: 15 },
-  { name: 'FTP/SFTP', value: 7 },
-  { name: 'File Upload', value: 5 },
+  { name: 'API', value: 45 },
+  { name: 'Cơ sở dữ liệu', value: 28 },
+  { name: 'File excel', value: 15 },
 ];
 
 const sourceData = [
@@ -18,18 +16,50 @@ const sourceData = [
 ];
 
 const resultData = [
-  { name: 'Thành công', value: 1245 },
-  { name: 'Thất bại', value: 156 },
-  { name: 'Đang xử lý', value: 89 },
+  { name: 'Bản nháp', value: 156 },
+  { name: 'Hoạt động', value: 1245 },
+  { name: 'Ngưng hoạt động', value: 89 },
 ];
 
-const timeData = [
+const timeDataToday = [
   { name: '00:00', value: 123 },
   { name: '04:00', value: 87 },
   { name: '08:00', value: 245 },
   { name: '12:00', value: 389 },
   { name: '16:00', value: 421 },
   { name: '20:00', value: 165 },
+];
+
+const timeDataThisWeek = [
+  { name: 'T2', value: 120 },
+  { name: 'T3', value: 250 },
+  { name: 'T4', value: 180 },
+  { name: 'T5', value: 390 },
+  { name: 'T6', value: 420 },
+  { name: 'T7', value: 160 },
+  { name: 'CN', value: 90 },
+];
+
+const timeDataThisMonth = [
+  { name: 'Tuần 1', value: 1200 },
+  { name: 'Tuần 2', value: 1800 },
+  { name: 'Tuần 3', value: 1500 },
+  { name: 'Tuần 4', value: 2100 },
+];
+
+const timeDataThisYear = [
+  { name: 'T1', value: 4500 },
+  { name: 'T2', value: 5200 },
+  { name: 'T3', value: 4800 },
+  { name: 'T4', value: 5500 },
+  { name: 'T5', value: 6100 },
+  { name: 'T6', value: 5900 },
+  { name: 'T7', value: 6800 },
+  { name: 'T8', value: 7200 },
+  { name: 'T9', value: 6500 },
+  { name: 'T10', value: 7800 },
+  { name: 'T11', value: 8200 },
+  { name: 'T12', value: 9100 },
 ];
 
 const trendData = [
@@ -51,9 +81,12 @@ interface ChartCardProps {
   title: string;
   total: number;
   data: Array<{ name: string; value: number }>;
+  filterValue?: string;
+  onFilterChange?: (value: string) => void;
+  filterOptions?: string[];
 }
 
-function ChartCard({ title, total, data }: ChartCardProps) {
+function ChartCard({ title, total, data, filterValue, onFilterChange, filterOptions }: ChartCardProps) {
   return (
     <div className="bg-white rounded-lg border border-slate-200 p-6">
       {/* Header */}
@@ -63,17 +96,20 @@ function ChartCard({ title, total, data }: ChartCardProps) {
       </div>
 
       {/* Controls */}
-      <div className="flex items-center gap-3 mb-4">
-        <select aria-label="Select box" 
-          className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-          title="Chọn khoảng thời gian"
-        >
-          <option>Tháng này</option>
-          <option>Tuần này</option>
-          <option>Hôm nay</option>
-          <option>Tháng trước</option>
-        </select>
-      </div>
+      {filterOptions && filterOptions.length > 0 && (
+        <div className="flex items-center gap-3 mb-4">
+          <select aria-label="Select box" 
+            className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+            title="Chọn khoảng thời gian"
+            value={filterValue}
+            onChange={(e) => onFilterChange && onFilterChange(e.target.value)}
+          >
+            {filterOptions.map(opt => (
+              <option key={opt} value={opt}>{opt}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* Chart */}
       <div className="w-full h-64">
@@ -180,6 +216,21 @@ function TrendChart() {
 }
 
 export function CollectionDashboard() {
+  const [timeFilter, setTimeFilter] = React.useState('Hôm nay');
+
+  const getTimeData = () => {
+    switch(timeFilter) {
+      case 'Tuần này': return timeDataThisWeek;
+      case 'Tháng này': return timeDataThisMonth;
+      case 'Năm nay': return timeDataThisYear;
+      case 'Hôm nay':
+      default: return timeDataToday;
+    }
+  };
+
+  const currentTimeData = getTimeData();
+  const timeTotal = currentTimeData.reduce((acc, curr) => acc + curr.value, 0);
+
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
@@ -233,8 +284,11 @@ export function CollectionDashboard() {
         />
         <ChartCard
           title="Biểu đồ thu thập dữ liệu theo thời gian"
-          total={1430}
-          data={timeData}
+          total={timeTotal}
+          data={currentTimeData}
+          filterValue={timeFilter}
+          onFilterChange={setTimeFilter}
+          filterOptions={['Hôm nay', 'Tuần này', 'Tháng này', 'Năm nay']}
         />
       </div>
     </div>
