@@ -1,8 +1,10 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { Search, ChevronDown, ChevronUp, AlertTriangle, Send, Download, Eye, Lock, EyeOff, SquarePen, X } from 'lucide-react';
+import { Search, ChevronDown, ChevronUp, AlertTriangle, Send, Download, Eye, Lock, EyeOff, SquarePen, X, Network } from 'lucide-react';
 
-
+import { DataMappingModal } from './DataMappingModal';
+import { SelectTargetDatabaseModal } from './SelectTargetDatabaseModal';
+import { TargetDatabase } from './mockTargetDatabases';
 
 export interface ProcessingDatasetItem {
   id: string;
@@ -22,6 +24,18 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
   const [activeTab, setActiveTab] = useState('clean');
   const [isSendPopupOpen, setIsSendPopupOpen] = useState(false);
   const [isEditClassifyModalOpen, setIsEditClassifyModalOpen] = useState(false);
+  
+  // Mapping Flow States
+  const [isSelectDBModalOpen, setIsSelectDBModalOpen] = useState(false);
+  const [isMappingModalOpen, setIsMappingModalOpen] = useState(false);
+  const [selectedTargetDB, setSelectedTargetDB] = useState<TargetDatabase | null>(null);
+
+  const handleContinueMapping = (db: TargetDatabase) => {
+    setSelectedTargetDB(db);
+    setIsSelectDBModalOpen(false);
+    setIsMappingModalOpen(true);
+  };
+
   const [expandedSidebarGroups, setExpandedSidebarGroups] = useState<Record<string, boolean>>({ 'CSDL Hộ tịch điện tử': true });
   const toggleSidebarGroup = (groupName: string) => {
     setExpandedSidebarGroups(prev => ({ ...prev, [groupName]: !prev[groupName] }));
@@ -169,10 +183,19 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
       {/* Main Content */}
       <div className="flex-1 flex flex-col bg-slate-50 relative">
         <div className="p-6">
-          <h1 className="text-xl font-bold text-slate-800 mb-2">
-            {activeTab === 'history' ? 'Lịch sử xử lý dữ liệu' :
-              activeTab === 'classification' ? 'Phân loại Dữ liệu' : 'Quản lý Quy tắc Xử lý'}
-          </h1>
+          <div className="flex justify-between items-center mb-2">
+            <h1 className="text-xl font-bold text-slate-800">
+              {activeTab === 'history' ? 'Lịch sử xử lý dữ liệu' :
+                activeTab === 'classification' ? 'Phân loại Dữ liệu' : 'Quản lý Quy tắc Xử lý'}
+            </h1>
+            <button
+              onClick={() => setIsSelectDBModalOpen(true)}
+              className="flex items-center gap-2 px-5 py-2.5 bg-[#00bcd4] text-white rounded-lg text-sm font-semibold hover:bg-[#00acc1] transition-colors shadow-sm"
+            >
+              <Network className="w-4 h-4" />
+              Ánh xạ dữ liệu
+            </button>
+          </div>
           <p className="text-sm text-slate-500 mb-6">Nguồn dữ liệu: {systemName} | Dữ liệu {activeService.name.toLowerCase()}</p>
 
           {/* Stats Overview */}
@@ -978,6 +1001,19 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
           </div>
         </div>
       )}
+
+      <SelectTargetDatabaseModal
+        isOpen={isSelectDBModalOpen}
+        onClose={() => setIsSelectDBModalOpen(false)}
+        onContinue={handleContinueMapping}
+      />
+
+      <DataMappingModal
+        isOpen={isMappingModalOpen}
+        onClose={() => setIsMappingModalOpen(false)}
+        targetDatabase={selectedTargetDB}
+        sourceDatasetName={activeService.name}
+      />
     </div>
   );
 }

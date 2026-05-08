@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Filter, RefreshCw, Search, Plus, Eye, Edit, Settings as SettingsIcon, Trash2, FileText, Activity, Settings, AlertCircle, X, Download, Send, ChevronLeft, ChevronRight, Calendar, Wrench, Power } from 'lucide-react';
+import { Filter, RefreshCw, Search, Plus, Eye, Edit, Settings as SettingsIcon, Trash2, FileText, Activity, Settings, AlertCircle, X, Download, Send, ChevronLeft, ChevronRight, Calendar, Wrench, Power, Layers, Database, Eraser } from 'lucide-react';
 import { AddServiceModal, EditServiceModal, DeleteServiceModal, SettingsServiceModal } from './ServiceModals';
 import { ViewServiceModal } from './ViewServiceModal';
 import { LogManagement } from './LogManagement';
@@ -389,7 +389,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                       <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Ngày tạo</th>
                       <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Trạng thái dịch vụ</th>
                       <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Trạng thái dữ liệu</th>
-                      <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-20">Thao tác</th>
+                      <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-64">Thao tác</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -452,16 +452,66 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                             </span>
                           </td>
                           <td className="px-4 py-4 text-center">
-                            <button
-                              className="p-1.5 text-blue-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-all"
-                              title="Quản lý"
-                              onClick={() => {
-                                setSelectedService(service);
-                                navigate(`/collection-setup/view/${service.id}`);
-                              }}
-                            >
-                              <SettingsIcon className="w-4 h-4" />
-                            </button>
+                            <div className="flex items-center justify-center gap-1">
+                              <button
+                                className="p-1.5 text-blue-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-all"
+                                title="Xem dữ liệu tích hợp"
+                                onClick={() => {
+                                  setSelectedService(service);
+                                  setShowDataDetailPage(true);
+                                }}
+                              >
+                                <Layers className="w-4 h-4" />
+                              </button>
+                              <button
+                                className="p-1.5 text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-all"
+                                title="Cập nhật dữ liệu"
+                                onClick={() => alert(`Cập nhật dữ liệu cho ${service.name}`)}
+                              >
+                                <RefreshCw className="w-4 h-4" />
+                              </button>
+                              <button
+                                className="p-1.5 text-indigo-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-all"
+                                title="Tích hợp mới"
+                                onClick={() => alert(`Tích hợp mới cho ${service.name}`)}
+                              >
+                                <Plus className="w-4 h-4" />
+                              </button>
+                              <button
+                                className="p-1.5 text-amber-500 hover:text-amber-600 hover:bg-amber-50 rounded transition-all"
+                                title="Ngừng hoạt động"
+                                onClick={() => alert(`Dừng hoạt động ${service.name}`)}
+                              >
+                                <Power className="w-4 h-4" />
+                              </button>
+                              <button
+                                className="p-1.5 text-orange-500 hover:text-orange-600 hover:bg-orange-50 rounded transition-all"
+                                title="Xóa dữ liệu thu thập"
+                                onClick={() => alert(`Xóa dữ liệu thu thập của ${service.name}`)}
+                              >
+                                <Eraser className="w-4 h-4" />
+                              </button>
+                              <button
+                                className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-all"
+                                title="Quản lý"
+                                onClick={() => {
+                                  setSelectedService(service);
+                                  navigate(`/collection-setup/view/${service.id}`);
+                                }}
+                              >
+                                <SettingsIcon className="w-4 h-4" />
+                              </button>
+                              <button
+                                className="p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 rounded transition-all"
+                                title="Xóa dịch vụ"
+                                onClick={() => {
+                                  setSelectedService(service);
+                                  setShowDeleteModal(true);
+                                }}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}

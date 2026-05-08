@@ -10,6 +10,7 @@ import { InternalDataPage } from '../pages/collection/InternalDataPage';
 import { ViewCollectedDataPage } from '../pages/collection/ViewCollectedDataPage';
 import { CollectionSetupPage } from '../pages/collection/CollectionSetupPage';
 import { ConnectionManagementPage } from '../pages/collection/ConnectionManagementPage';
+import { LogManagement } from '../pages/collection/LogManagement';
 import { DataProcessingPage } from '../pages/DataProcessingPage';
 import { ProcessedDataPage } from '../pages/processing/ProcessedDataPage';
 import { CategoryManagementPage } from '../pages/CategoryManagementPage';
@@ -172,6 +173,7 @@ import { ProcessingAuctionPage } from '../pages/processing/ProcessingAuctionPage
 import { ProcessingCooperationDeptPage } from '../pages/processing/ProcessingCooperationDeptPage';
 import { ProcessingCooperationDbPage } from '../pages/processing/ProcessingCooperationDbPage';
 import { ProcessingCooperationPage } from '../pages/processing/ProcessingCooperationPage';
+import { TargetDatabaseManagementPage } from '../pages/processing/TargetDatabaseManagementPage';
 import { NotificationBrowser } from '../notifications/NotificationBrowser';
 import { UserGuidePage } from '../pages/UserGuidePage';
 import { DataManagementDetail } from '../collection/DataManagementDetail';
@@ -288,6 +290,10 @@ const pageConfig: Record<string, { title: string; description: string }> = {
   'master-data-update-a': {
     title: 'CSDL A',
     description: 'Xử lý dữ liệu từ CSDL A'
+  },
+  'target-database-management': {
+    title: 'Quản lý CSDL đích',
+    description: 'Quản lý danh sách kết nối và cấu trúc các cơ sở dữ liệu đích'
   }
 };
 
@@ -370,6 +376,7 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'collection' && <DataCollectionPage />}
             {/* view-collected-data mapping removed - clicking it now only toggles dropdown */}
             {(currentPage === 'collection-setup' || currentPage.startsWith('collection-setup/')) && <CollectionSetupPage onNavigate={setCurrentPage} />}
+            {currentPage === 'collection-log' && <LogManagement />}
             {currentPage === 'connection-management' && <ConnectionManagementPage />}
             {currentPage === 'collection-reconciliation' && <ReconciliationSetupPage />}
             {currentPage === 'collection-reconciliation-setup' && <ReconciliationSetupPage />}
@@ -378,6 +385,7 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'processing-external' && <DataProcessingPage initialCategory="Dữ liệu ngoài ngành" />}
             {currentPage === 'processing-internal' && <DataProcessingPage initialCategory="Dữ liệu trong ngành" />}
             {currentPage === 'processed-data' && <ProcessedDataPage title="Dữ liệu đã xử lý" dataType="Toàn cục" />}
+            {currentPage === 'target-database-management' && <TargetDatabaseManagementPage />}
             {currentPage === 'category' && <CategoryManagementPage />}
             {currentPage === 'category-setup' && <CategorySetupPage userRole={userRole} />}
             {currentPage === 'category-a' && <CategoryAPage />}
@@ -784,6 +792,7 @@ const getBreadcrumbPath = (pageId: string): string[] => {
 
     // Processing
     'processed-data': ['Xử lý dữ liệu', 'Dữ liệu đã xử lý'],
+    'target-database-management': ['Xử lý dữ liệu', 'Quản lý CSDL đích'],
     'processing-internal-data': ['Xử lý dữ liệu', 'CSDL Trong ngành'],
     'processing-data-info-civil-registry': ['Xử lý dữ liệu', 'CSDL Trong ngành', 'CSDL Hộ tịch điện tử'],
     'processing-data-info-case-management': ['Xử lý dữ liệu', 'CSDL Trong ngành', 'HT quản lý hồ sơ QT'],

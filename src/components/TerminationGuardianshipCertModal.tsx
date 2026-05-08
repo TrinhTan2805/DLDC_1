@@ -9,6 +9,7 @@ export interface TerminationGuardianshipCertModalProps {
   newRecords: number;
   updatedRecords: number;
   errorRecords: number;
+  isInline?: boolean;
 }
 
 export interface TerminationGuardianshipCertRecord {
@@ -74,13 +75,14 @@ export function TerminationGuardianshipCertModal({
   totalRecords,
   newRecords,
   updatedRecords,
-  errorRecords
+  errorRecords,
+  isInline = false
 }: TerminationGuardianshipCertModalProps) {
   const [activeTab, setActiveTab] = useState('list');
   const [selectedRecord, setSelectedRecord] = useState<TerminationGuardianshipCertRecord | null>(null);
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
   
-  if (!isOpen) return null;
+  if (!isOpen && !isInline) return null;
 
   // Mock data
   const records: TerminationGuardianshipCertRecord[] = [

@@ -317,9 +317,6 @@ export function MarriageDetailModal({
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-hidden flex flex-col">
-
-
           {/* Content Area */}
           <div className="flex-1 overflow-hidden flex flex-col">
             {activeTab === 'list' && (
@@ -751,7 +748,6 @@ export function MarriageDetailModal({
           </div>
         </div>
       </div>
-    </div>
 
       {/* Record Detail Modal */}
       {selectedRecord && (

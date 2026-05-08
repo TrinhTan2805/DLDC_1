@@ -48,7 +48,26 @@ const menuItems: MenuItem[] = [
     id: 'processing',
     title: 'Xử lý dữ liệu',
     icon: Sparkles,
-    page: 'data-processing',
+    subItems: [
+      {
+        id: 'data-processing-dashboard',
+        title: 'Tổng quan xử lý',
+        icon: Home,
+        page: 'data-processing',
+      },
+      {
+        id: 'target-database-management',
+        title: 'Quản lý CSDL đích',
+        icon: Database,
+        page: 'target-database-management',
+      },
+      {
+        id: 'processed-data-view',
+        title: 'Dữ liệu đã xử lý',
+        icon: List,
+        page: 'processed-data',
+      },
+    ],
   },
   {
     id: 'search',

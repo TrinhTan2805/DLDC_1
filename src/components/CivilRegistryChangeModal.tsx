@@ -9,6 +9,7 @@ export interface CivilRegistryChangeModalProps {
   newRecords: number;
   updatedRecords: number;
   errorRecords: number;
+  isInline?: boolean;
 }
 
 export interface CivilRegistryChangeRecord {
@@ -65,48 +66,42 @@ export function CivilRegistryChangeModal({
   totalRecords,
   newRecords,
   updatedRecords,
-  errorRecords
+  errorRecords,
+  isInline = false
 }: CivilRegistryChangeModalProps) {
   const [activeTab, setActiveTab] = useState('list');
   const [selectedRecord, setSelectedRecord] = useState<CivilRegistryChangeRecord | null>(null);
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
   
-  if (!isOpen) return null;
+  if (!isOpen && !isInline) return null;
 
   // Mock data
   const records: CivilRegistryChangeRecord[] = [
     {
       id: '1',
       status: 'approved',
-      recordCode: 'TĐHT-2024-009988',
+      recordCode: 'HT-2024-001234',
       changedPersonName: 'Nguyễn Thị Thu Hà',
-      personalId: '001195000123',
+      personalId: '001195006789',
       registrantName: 'Nguyễn Văn Hùng',
-      relationship: 'Cha đẻ',
-      civilDocNumber: '35/2024/GCN-TĐHT',
-      syncDate: '18/04/2024 08:30:15',
+      relationship: 'Bố đẻ',
+      civilDocNumber: '123/2024/GKS',
+      syncDate: '10/05/2024 09:30:15',
       hasPdf: true,
       
       targetGender: 'Nữ',
-      targetBirthDate: '15/05/1995',
+      targetBirthDate: '15/05/2010',
       targetHometown: 'Hà Nội',
-      targetBirthPlace: 'Bệnh viện Phụ sản TW',
+      targetBirthPlace: 'Hà Nội',
       targetEthnicity: 'Kinh',
       targetNationality: 'Việt Nam',
-      targetIdIssueDate: '10/01/2021',
-      targetIdIssuePlace: 'Cục CS QLHC',
-      targetIdNumber: '001195000123',
-      targetResidence: 'Số 12, ngõ 34, phố Lê Trọng Tấn, Hà Nội',
+      targetResidence: 'Số 12, Duy Tân, Cầu Giấy, Hà Nội',
+      targetReason: 'Thay đổi họ tên đệm cho con',
 
-      registrantIdIssueDate: '20/02/2018',
-      registrantIdIssuePlace: 'Công an Hà Nội',
-      registrantIdNumber: '001070004567',
-      registrantPersonalId: '001070004567',
-
-      registrationPlace: 'UBND Phường Khương Mai, Quận Thanh Xuân',
-      registrationDate: '15/04/2024',
-      registrationType: 'Thay đổi thông tin hộ tịch',
-      civilDocIssueDate: '15/04/2024',
+      registrationPlace: 'UBND Phường Dịch Vọng Hậu',
+      registrationDate: '10/05/2024',
+      registrationType: 'Thay đổi hộ tịch',
+      civilDocIssueDate: '15/05/2010',
       civilDocIssuePlace: 'UBND Phường Khương Mai',
       signerName: 'Lê Văn Chính',
       signerPosition: 'Chủ tịch UBND',
@@ -123,22 +118,26 @@ export function CivilRegistryChangeModal({
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/50 z-50" onClick={onClose}></div>
+      {/* Backdrop */}
+      {!isInline && <div className="fixed inset-0 bg-black/50 z-50" onClick={onClose}></div>}
       
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-        <div className="bg-white rounded-lg shadow-xl max-w-[95vw] w-full max-h-[90vh] flex flex-col pointer-events-auto">
+      {/* Container */}
+      <div className={isInline ? "w-full" : "fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"}>
+        <div className={`bg-white ${isInline ? "border border-slate-200 rounded-xl overflow-hidden" : "rounded-lg shadow-xl max-w-[95vw] w-full max-h-[90vh] pointer-events-auto"} flex flex-col`}>
           {/* Header */}
           <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
             </div>
-            <button
-               onClick={onClose}
-               className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600"
-               title="Đóng"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            {!isInline && (
+              <button
+                 onClick={onClose}
+                 className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600"
+                 title="Đóng"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
           </div>
 
 

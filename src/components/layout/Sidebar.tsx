@@ -139,6 +139,11 @@ const menuItems: MenuItem[] = [
         icon: Settings,
       },
       {
+        id: "collection-log",
+        label: "Quản lý nhật ký",
+        icon: ScrollText,
+      },
+      {
         id: "view-collected-data",
         label: "Xem dữ liệu thu thập",
         icon: Database,
@@ -284,6 +289,11 @@ const menuItems: MenuItem[] = [
     label: "Xử lý dữ liệu",
     color: "text-purple-600",
     subItems: [
+      {
+        id: "target-database-management",
+        label: "Quản lý CSDL đích",
+        icon: Database,
+      },
       {
         id: "processing-internal",
         label: "CSDL Trong ngành",

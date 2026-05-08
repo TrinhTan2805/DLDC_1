@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { useState, useMemo } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList } from 'recharts';
-import { Calendar, Download, FileUser, UserCheck, Users, Baby, Heart, UserX, UsersRound, FileEdit, FileCheck, FileX, ChevronLeft, Search, ArrowUpRight } from 'lucide-react';
+import { Calendar, Download, FileUser, UserCheck, Users, Baby, Heart, UserX, UsersRound, FileEdit, FileCheck, FileX, ChevronLeft, Search } from 'lucide-react';
 import { DatabasePageTemplate } from '../collection/DatabasePageTemplate';
 import { DataDetailModal } from '../../DataDetailModal';
 import { BirthCertDetailModal } from '../../BirthCertDetailModal';
@@ -202,6 +201,7 @@ export function CivilRegistryDatabasePage({ mode = 'thu thập', context = 'thu 
           <TerminationGuardianshipCertModal
             isOpen={true}
             onClose={() => {}}
+            isInline={true}
             title={selectedStat.title}
             totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
             newRecords={selectedStat.thisMonth}
@@ -214,6 +214,7 @@ export function CivilRegistryDatabasePage({ mode = 'thu thập', context = 'thu 
           <CivilRegistryChangeModal
             isOpen={true}
             onClose={() => {}}
+            isInline={true}
             title={selectedStat.title}
             totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
             newRecords={selectedStat.thisMonth}
@@ -226,6 +227,7 @@ export function CivilRegistryDatabasePage({ mode = 'thu thập', context = 'thu 
           <TerminationGuardianshipMonitoringModal
             isOpen={true}
             onClose={() => {}}
+            isInline={true}
             title={selectedStat.title}
             totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
             newRecords={selectedStat.thisMonth}
@@ -238,6 +240,7 @@ export function CivilRegistryDatabasePage({ mode = 'thu thập', context = 'thu 
           <GuardianshipMonitoringModal
             isOpen={true}
             onClose={() => {}}
+            isInline={true}
             title={selectedStat.title}
             totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
             newRecords={selectedStat.thisMonth}

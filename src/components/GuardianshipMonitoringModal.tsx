@@ -9,6 +9,7 @@ export interface GuardianshipMonitoringModalProps {
   newRecords: number;
   updatedRecords: number;
   errorRecords: number;
+  isInline?: boolean;
 }
 
 export interface GuardianshipMonitoringRecord {
@@ -60,7 +61,6 @@ export interface GuardianshipMonitoringRecord {
   finalRegDate?: string;
   finalRegPlace?: string;
 }
-
 export function GuardianshipMonitoringModal({ 
   isOpen, 
   onClose, 
@@ -68,13 +68,14 @@ export function GuardianshipMonitoringModal({
   totalRecords,
   newRecords,
   updatedRecords,
-  errorRecords
+  errorRecords,
+  isInline = false
 }: GuardianshipMonitoringModalProps) {
   const [activeTab, setActiveTab] = useState('list');
   const [selectedRecord, setSelectedRecord] = useState<GuardianshipMonitoringRecord | null>(null);
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
   
-  if (!isOpen) return null;
+  if (!isOpen && !isInline) return null;
 
   // Mock data
   const records: GuardianshipMonitoringRecord[] = [
@@ -127,25 +128,27 @@ export function GuardianshipMonitoringModal({
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/50 z-50" onClick={onClose}></div>
+      {/* Backdrop */}
+      {!isInline && <div className="fixed inset-0 bg-black/50 z-50" onClick={onClose} />}
       
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-        <div className="bg-white rounded-lg shadow-xl max-w-[95vw] w-full max-h-[90vh] flex flex-col pointer-events-auto">
+      {/* Container */}
+      <div className={isInline ? "w-full" : "fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"}>
+        <div className={`bg-white ${isInline ? "border border-slate-200 rounded-xl overflow-hidden" : "rounded-lg shadow-xl max-w-[95vw] w-full max-h-[90vh] pointer-events-auto"} flex flex-col`}>
           {/* Header */}
           <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
             </div>
-            <button
-               onClick={onClose}
-               className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600"
-               title="Đóng"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            {!isInline && (
+              <button
+                 onClick={onClose}
+                 className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600"
+                 title="Đóng"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
           </div>
-
-
 
           {/* Content */}
           <div className="flex-1 overflow-hidden flex flex-col">
