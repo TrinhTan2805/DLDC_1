@@ -17,7 +17,7 @@ interface LogEntry {
 }
 
 export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number | null }) {
-  const [activeLogTab, setActiveLogTab] = useState<'access' | 'activity' | 'other'>('access');
+  const [showExtraInfo, setShowExtraInfo] = useState(false);
   const [logSearchText, setLogSearchText] = useState('');
   const [logUserFilter, setLogUserFilter] = useState('all');
   const [logActionFilter, setLogActionFilter] = useState('all');
@@ -175,13 +175,14 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
     },
   ];
 
-  /* 
-   * Move useEffect after activityLogs declaration
-   */
+  const allLogs = [
+    ...activityLogs,
+    ...accessLogs.map(l => ({...l, id: l.id + 1000}))
+  ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
   useEffect(() => {
     if (initialOpenLogId) {
-      setActiveLogTab('activity');
-      const logToOpen = activityLogs.find(l => l.id === initialOpenLogId);
+      const logToOpen = allLogs.find(l => l.id === initialOpenLogId);
       if (logToOpen) {
         setSelectedLog(logToOpen);
         setShowLogDetailModal(true);
@@ -189,71 +190,11 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
     }
   }, [initialOpenLogId]);
 
-  // Mock data cho thông tin khác
-  const otherLogs: LogEntry[] = [
-    {
-      id: 1,
-      user: 'admin',
-      userName: 'Nguyễn Văn A',
-      action: 'Thông tin thiết bị',
-      module: 'Hệ thống',
-      timestamp: '2023-12-19 08:30:15',
-      ip: '192.168.1.100',
-      device: 'Windows 10 Pro - Version 22H2',
-      browser: 'Chrome 120.0.6099.129',
-      status: 'Active',
-      statusColor: 'bg-blue-100 text-blue-700',
-      details: 'Độ phân giải: 1920x1080, Timezone: UTC+7'
-    },
-    {
-      id: 2,
-      user: 'user1',
-      userName: 'Trần Thị B',
-      action: 'Thông tin kết nối',
-      module: 'Hệ thống',
-      timestamp: '2023-12-19 09:15:42',
-      ip: '192.168.1.101',
-      device: 'MacOS Sonoma 14.2',
-      browser: 'Safari 17.2 (WebKit)',
-      status: 'Active',
-      statusColor: 'bg-blue-100 text-blue-700',
-      details: 'ISP: VNPT, Location: Hà Nội, VN'
-    },
-    {
-      id: 3,
-      user: 'user2',
-      userName: 'Lê Văn C',
-      action: 'Thông tin phiên làm việc',
-      module: 'Hệ thống',
-      timestamp: '2023-12-19 10:20:33',
-      ip: '192.168.1.102',
-      device: 'Ubuntu 22.04 LTS',
-      browser: 'Firefox 121.0',
-      status: 'Expired',
-      statusColor: 'bg-slate-100 text-slate-700',
-      details: 'Session timeout: 30 phút, Last activity: 12:20:33'
-    },
-  ];
-
-  const getCurrentLogs = () => {
-    switch (activeLogTab) {
-      case 'access':
-        return accessLogs;
-      case 'activity':
-        return activityLogs;
-      case 'other':
-        return otherLogs;
-      default:
-        return accessLogs;
-    }
-  };
-
-  const filteredLogs = getCurrentLogs().filter(log => {
+  const filteredLogs = allLogs.filter(log => {
     const matchSearch = logSearchText === '' || 
       log.user.toLowerCase().includes(logSearchText.toLowerCase()) ||
       log.userName.toLowerCase().includes(logSearchText.toLowerCase()) ||
-      log.action.toLowerCase().includes(logSearchText.toLowerCase()) ||
-      log.ip.toLowerCase().includes(logSearchText.toLowerCase());
+      log.action.toLowerCase().includes(logSearchText.toLowerCase());
     
     const matchUser = logUserFilter === 'all' || log.user === logUserFilter;
     const matchAction = logActionFilter === 'all' || log.action === logActionFilter;
@@ -266,57 +207,12 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
   });
 
   const handleExportLogs = () => {
-    const tabNames = {
-      access: 'Lịch sử truy cập',
-      activity: 'Lịch sử hoạt động',
-      other: 'Thông tin khác'
-    };
-    alert(`Đang kết xuất "${tabNames[activeLogTab]}" ra file Excel...`);
+    alert(`Đang kết xuất nhật ký ra file Excel...`);
   };
 
   return (
     <div className="space-y-4 animate-in fade-in duration-500">
-      {/* Sub Tabs */}
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
-        <div className="border-b border-slate-200 px-4 bg-white">
-          <div className="flex gap-4">
-            <button
-              onClick={() => setActiveLogTab('access')}
-              className={`pb-3 pt-4 text-sm transition-all border-b-2 flex items-center gap-2 font-medium ${
-                activeLogTab === 'access'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-700'
-              }`}
-            >
-              <User className="w-4 h-4" />
-              Lịch sử truy cập
-            </button>
-            <button
-              onClick={() => setActiveLogTab('activity')}
-              className={`pb-3 pt-4 text-sm transition-all border-b-2 flex items-center gap-2 font-medium ${
-                activeLogTab === 'activity'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-700'
-              }`}
-            >
-              <Activity className="w-4 h-4" />
-              Lịch sử hoạt động
-            </button>
-            <button
-              onClick={() => setActiveLogTab('other')}
-              className={`pb-3 pt-4 text-sm transition-all border-b-2 flex items-center gap-2 font-medium ${
-                activeLogTab === 'other'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-700'
-              }`}
-            >
-              <Monitor className="w-4 h-4" />
-              Thông tin khác
-            </button>
-          </div>
-        </div>
-
-        {/* Sync with CollectionSetupPage style */}
         <div className="p-5 space-y-4 bg-white">
           {/* Row 1: Search and Buttons */}
           <div className="flex items-center justify-between gap-4">
@@ -324,7 +220,7 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
               <div className="relative flex-1">
                 <input aria-label="Input field"
                   type="text"
-                  placeholder="Tìm kiếm người dùng, hành động, IP..."
+                  placeholder="Tìm kiếm người dùng, hành động..."
                   className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                   value={logSearchText}
                   onChange={(e) => setLogSearchText(e.target.value)}
@@ -380,30 +276,14 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
                   onChange={(e) => setLogActionFilter(e.target.value)}
                 >
                   <option value="all">Tất cả hành động</option>
-                  {activeLogTab === 'access' && (
-                    <>
-                      <option value="Đăng nhập">Đăng nhập</option>
-                      <option value="Đăng xuất">Đăng xuất</option>
-                      <option value="Truy cập Dashboard">Truy cập Dashboard</option>
-                    </>
-                  )}
-                  {activeLogTab === 'activity' && (
-                    <>
-                      <option value="Thêm dịch vụ mới">Thêm dịch vụ mới</option>
-                      <option value="Cập nhật dịch vụ">Cập nhật dịch vụ</option>
-                      <option value="Xóa dịch vụ">Xóa dịch vụ</option>
-                      <option value="Kết xuất báo cáo">Kết xuất báo cáo</option>
-                      <option value="Cài đặt dịch vụ">Cài đặt dịch vụ</option>
-                      <option value="Kiểm tra kết nối dịch vụ">Kiểm tra kết nối dịch vụ</option>
-                    </>
-                  )}
-                  {activeLogTab === 'other' && (
-                    <>
-                      <option value="Thông tin thiết bị">Thông tin thiết bị</option>
-                      <option value="Thông tin kết nối">Thông tin kết nối</option>
-                      <option value="Thông tin phiên làm việc">Thông tin phiên làm việc</option>
-                    </>
-                  )}
+                  <option value="Đăng nhập">Đăng nhập</option>
+                  <option value="Đăng xuất">Đăng xuất</option>
+                  <option value="Thêm dịch vụ mới">Thêm dịch vụ mới</option>
+                  <option value="Cập nhật dịch vụ">Cập nhật dịch vụ</option>
+                  <option value="Xóa dịch vụ">Xóa dịch vụ</option>
+                  <option value="Kết xuất báo cáo">Kết xuất báo cáo</option>
+                  <option value="Cài đặt dịch vụ">Cài đặt dịch vụ</option>
+                  <option value="Kiểm tra kết nối dịch vụ">Kiểm tra kết nối dịch vụ</option>
                 </select>
               </div>
 
@@ -452,11 +332,6 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
                   <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Người dùng</th>
                   <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Hành động</th>
                   <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap w-40">Thời gian</th>
-                  <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap w-32">IP</th>
-                  <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Trình duyệt</th>
-                  {activeLogTab === 'other' && (
-                    <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Thiết bị</th>
-                  )}
                   <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap w-28">Trạng thái</th>
                   <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap w-20">Thao tác</th>
                 </tr>
@@ -476,11 +351,6 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
                       <div className="text-[11px] text-slate-500 mt-0.5">{log.module}</div>
                     </td>
                     <td className="px-4 py-4 text-center text-sm text-slate-500 font-medium font-mono whitespace-nowrap">{log.timestamp}</td>
-                    <td className="px-4 py-4 text-center text-sm text-slate-500 font-mono">{log.ip}</td>
-                    <td className="px-4 py-4 text-center text-sm text-slate-600 font-medium">{log.browser}</td>
-                    {activeLogTab === 'other' && (
-                      <td className="px-4 py-4 text-center text-sm text-slate-600 font-medium">{log.device}</td>
-                    )}
                     <td className="px-4 py-4 text-center">
                       <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border shadow-sm ${
                         log.status === 'Thành công' || log.status === 'Active' ? 'bg-green-50 text-green-700 border-green-100' :
@@ -496,6 +366,7 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
                         title="Xem chi tiết"
                         onClick={() => {
                           setSelectedLog(log);
+                          setShowExtraInfo(false);
                           setShowLogDetailModal(true);
                         }}
                       >
@@ -506,7 +377,7 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
                 ))}
                 {filteredLogs.length === 0 && (
                   <tr>
-                    <td colSpan={activeLogTab === 'other' ? 9 : 8} className="px-4 py-16 text-center">
+                    <td colSpan={6} className="px-4 py-16 text-center">
                       <div className="flex flex-col items-center justify-center text-slate-300">
                         <Search className="w-12 h-12 mb-3 opacity-20" />
                         <p className="text-sm font-medium">Không tìm thấy kết quả phù hợp</p>
@@ -528,7 +399,10 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
               <h2 className="text-lg text-slate-900">Chi tiết nhật ký</h2>
               <button
-                onClick={() => setShowLogDetailModal(false)}
+                onClick={() => {
+                  setShowLogDetailModal(false);
+                  setShowExtraInfo(false);
+                }}
                 className="p-1 hover:bg-slate-100 rounded transition-colors"
               >
                 <span className="sr-only">Đóng</span>
@@ -581,33 +455,45 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
               </div>
 
               <div className="border-t border-slate-200 pt-4">
-                <h3 className="text-sm text-slate-700 mb-3">Thông tin kết nối</h3>
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs text-slate-500 mb-1">Địa chỉ IP</label>
-                    <p className="text-sm text-slate-900 font-mono">{selectedLog.ip}</p>
-                  </div>
-                  <div>
-                    <label className="block text-xs text-slate-500 mb-1">Thiết bị</label>
-                    <p className="text-sm text-slate-900">{selectedLog.device}</p>
-                  </div>
-                  <div>
-                    <label className="block text-xs text-slate-500 mb-1">Trình duyệt</label>
-                    <p className="text-sm text-slate-900">{selectedLog.browser}</p>
-                  </div>
-                </div>
+                <label className="block text-xs text-slate-500 mb-1">Chi tiết</label>
+                <p className="text-sm text-slate-900 bg-slate-50 p-3 rounded">{selectedLog.details}</p>
               </div>
 
               <div className="border-t border-slate-200 pt-4">
-                <label className="block text-xs text-slate-500 mb-1">Chi tiết</label>
-                <p className="text-sm text-slate-900 bg-slate-50 p-3 rounded">{selectedLog.details}</p>
+                <button
+                  onClick={() => setShowExtraInfo(!showExtraInfo)}
+                  className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1.5"
+                >
+                  <Monitor className="w-4 h-4" />
+                  {showExtraInfo ? 'Ẩn thông tin khác' : 'Xem thông tin khác'}
+                </button>
+                
+                {showExtraInfo && (
+                  <div className="mt-4 bg-slate-50 rounded-lg p-4 space-y-3 border border-slate-100 animate-in slide-in-from-top-2">
+                    <div>
+                      <label className="block text-xs text-slate-500 mb-1">Địa chỉ IP</label>
+                      <p className="text-sm text-slate-900 font-mono">{selectedLog.ip}</p>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-slate-500 mb-1">Thiết bị</label>
+                      <p className="text-sm text-slate-900">{selectedLog.device}</p>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-slate-500 mb-1">Trình duyệt</label>
+                      <p className="text-sm text-slate-900">{selectedLog.browser}</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Footer */}
             <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200">
               <button
-                onClick={() => setShowLogDetailModal(false)}
+                onClick={() => {
+                  setShowLogDetailModal(false);
+                  setShowExtraInfo(false);
+                }}
                 className="px-4 py-2 text-sm text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
               >
                 Đóng
