@@ -510,18 +510,7 @@ export function DataDetailModal({
             )}
           </div>
 
-          <div className="px-6 pt-4 flex-shrink-0">
-            <div className="flex items-center gap-1 border-b border-slate-200">
-              <button
-                onClick={() => setActiveTab('list')}
-                className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === 'list' ? 'border-orange-600 text-orange-600' : 'border-transparent text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                📋 Danh sách đối tượng
-              </button>
-            </div>
-          </div>
+
 
           {/* Tab Content - LIST */}
           {activeTab === 'list' && (
