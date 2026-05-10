@@ -750,57 +750,59 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
         </div>
 
         {/* Footer */}
-        {activeTab === 'clean' || activeTab === 'standardize' || activeTab === 'transform' ? (
-          <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 flex items-center justify-between z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-            <div className="text-sm text-slate-600 font-medium">
-              Đã áp dụng {Object.values(appliedRules).filter(Boolean).length} / 10 quy tắc
+        {!(isMappingModalOpen && systemName === 'CSDL Hộ tịch điện tử') && (
+          activeTab === 'clean' || activeTab === 'standardize' || activeTab === 'transform' ? (
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 flex items-center justify-between z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+              <div className="text-sm text-slate-600 font-medium">
+                Đã áp dụng {Object.values(appliedRules).filter(Boolean).length} / 10 quy tắc
+              </div>
+              <div className="flex items-center gap-3">
+                <button className="px-6 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors">
+                  Hủy
+                </button>
+                <button className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors">
+                  Lưu cấu hình
+                </button>
+              </div>
             </div>
-            <div className="flex items-center gap-3">
-              <button className="px-6 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors">
-                Hủy
-              </button>
-              <button className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors">
-                Lưu cấu hình
-              </button>
+          ) : activeTab === 'errors' ? (
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 flex items-center justify-between z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+              <div className="text-sm text-slate-600 font-medium">
+                10 bản ghi chưa xử lý • 2 đã gửi về hệ thống nguồn
+              </div>
+              <div className="flex items-center gap-3">
+                <button className="px-6 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors">
+                  Đóng
+                </button>
+                <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-emerald-600 rounded-md hover:bg-emerald-700 transition-colors">
+                  <Download className="w-4 h-4" />
+                  Xuất danh sách lỗi
+                </button>
+                <button
+                  onClick={() => setIsSendPopupOpen(true)}
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  <Send className="w-4 h-4" />
+                  Gửi tất cả về hệ thống nguồn
+                </button>
+              </div>
             </div>
-          </div>
-        ) : activeTab === 'errors' ? (
-          <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 flex items-center justify-between z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-            <div className="text-sm text-slate-600 font-medium">
-              10 bản ghi chưa xử lý • 2 đã gửi về hệ thống nguồn
-            </div>
-            <div className="flex items-center gap-3">
-              <button className="px-6 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors">
+          ) : activeTab === 'history' ? (
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 flex items-center justify-end z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+              <button className="px-6 py-2 text-sm font-medium text-slate-700 bg-slate-100 rounded-md hover:bg-slate-200 transition-colors">
                 Đóng
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-emerald-600 rounded-md hover:bg-emerald-700 transition-colors">
-                <Download className="w-4 h-4" />
-                Xuất danh sách lỗi
+            </div>
+          ) : (
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 flex items-center justify-end z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+              <button className="px-6 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors mr-3">
+                Đóng
               </button>
-              <button
-                onClick={() => setIsSendPopupOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
-              >
-                <Send className="w-4 h-4" />
-                Gửi tất cả về hệ thống nguồn
+              <button className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors">
+                Xuất báo cáo
               </button>
             </div>
-          </div>
-        ) : activeTab === 'history' ? (
-          <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 flex items-center justify-end z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-            <button className="px-6 py-2 text-sm font-medium text-slate-700 bg-slate-100 rounded-md hover:bg-slate-200 transition-colors">
-              Đóng
-            </button>
-          </div>
-        ) : (
-          <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 flex items-center justify-end z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-            <button className="px-6 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors mr-3">
-              Đóng
-            </button>
-            <button className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors">
-              Xuất báo cáo
-            </button>
-          </div>
+          )
         )}
       </div>
 
