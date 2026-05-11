@@ -1,5 +1,6 @@
 // MainLayout Component - Updated
 import { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import { DashboardHome } from '../dashboard/DashboardHome';
@@ -8,8 +9,8 @@ import { ExternalDataPage } from '../pages/collection/ExternalDataPage';
 import { InternalDataPage } from '../pages/collection/InternalDataPage';
 import { ViewCollectedDataPage } from '../pages/collection/ViewCollectedDataPage';
 import { CollectionSetupPage } from '../pages/collection/CollectionSetupPage';
-import { SourceSystemManagementPage } from '../pages/collection/SourceSystemManagementPage';
-import { AgentManagementPage } from '../pages/collection/AgentManagementPage';
+import { ConnectionManagementPage } from '../pages/collection/ConnectionManagementPage';
+import { LogManagement } from '../pages/collection/LogManagement';
 import { DataProcessingPage } from '../pages/DataProcessingPage';
 import { ProcessedDataPage } from '../pages/processing/ProcessedDataPage';
 import { CategoryManagementPage } from '../pages/CategoryManagementPage';
@@ -173,6 +174,7 @@ import { ProcessingAuctionPage } from '../pages/processing/ProcessingAuctionPage
 import { ProcessingCooperationDeptPage } from '../pages/processing/ProcessingCooperationDeptPage';
 import { ProcessingCooperationDbPage } from '../pages/processing/ProcessingCooperationDbPage';
 import { ProcessingCooperationPage } from '../pages/processing/ProcessingCooperationPage';
+import { TargetDatabaseManagementPage } from '../pages/processing/TargetDatabaseManagementPage';
 import { NotificationBrowser } from '../notifications/NotificationBrowser';
 import { UserGuidePage } from '../pages/UserGuidePage';
 import { DataManagementDetail } from '../collection/DataManagementDetail';
@@ -330,6 +332,10 @@ const pageConfig: Record<string, { title: string; description: string }> = {
   'master-data-update-a': {
     title: 'CSDL A',
     description: 'Xử lý dữ liệu từ CSDL A'
+  },
+  'target-database-management': {
+    title: 'Quản lý CSDL đích',
+    description: 'Quản lý danh sách kết nối và cấu trúc các cơ sở dữ liệu đích'
   }
 };
 
@@ -338,7 +344,13 @@ interface MainLayoutProps {
 }
 
 export function MainLayout({ onLogout }: MainLayoutProps = {}) {
-  const [currentPage, setCurrentPage] = useState('dashboard');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const currentPagePath = location.pathname.substring(1);
+  const currentPage = currentPagePath || 'dashboard';
+
+  const setCurrentPage = (page: string) => navigate(`/${page}`);
+
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [showChangeBackgroundModal, setShowChangeBackgroundModal] = useState(false);
@@ -356,7 +368,7 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
     (window as any).navigateToPage = (pageId: string) => {
       setCurrentPage(pageId);
     };
-  }, []);
+  }, [navigate]);
 
   const handleUserMenuClick = (action: 'profile' | 'change-password' | 'change-background' | 'access-history' | 'action-history' | 'logout') => {
     switch (action) {
@@ -404,10 +416,10 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'collection-dashboard' && <CollectionDashboard />}
             {currentPage === 'screen-flow-diagram' && <ScreenFlowDiagram />}
             {currentPage === 'collection' && <DataCollectionPage />}
-            {currentPage === 'view-collected-data' && <ViewCollectedDataPage onNavigate={(id) => setCurrentPage(id)} />}
-            {currentPage === 'collection-setup' && <CollectionSetupPage onNavigate={setCurrentPage} />}
-            {currentPage === 'collection-source-system' && <SourceSystemManagementPage />}
-            {currentPage === 'collection-agent' && <AgentManagementPage />}
+            {/* view-collected-data mapping removed - clicking it now only toggles dropdown */}
+            {(currentPage === 'collection-setup' || currentPage.startsWith('collection-setup/')) && <CollectionSetupPage onNavigate={setCurrentPage} />}
+            {currentPage === 'collection-log' && <LogManagement />}
+            {currentPage === 'connection-management' && <ConnectionManagementPage />}
             {currentPage === 'collection-reconciliation' && <ReconciliationSetupPage />}
             {currentPage === 'collection-reconciliation-setup' && <ReconciliationSetupPage />}
             {currentPage === 'collection-reconciliation-management' && <DataReconciliationPage />}
@@ -415,6 +427,7 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'processing-external' && <DataProcessingPage initialCategory="Dữ liệu ngoài ngành" />}
             {currentPage === 'processing-internal' && <DataProcessingPage initialCategory="Dữ liệu trong ngành" />}
             {currentPage === 'processed-data' && <ProcessedDataPage title="Dữ liệu đã xử lý" dataType="Toàn cục" />}
+            {currentPage === 'target-database-management' && <TargetDatabaseManagementPage />}
             {currentPage === 'category' && <CategoryManagementPage />}
             {currentPage === 'category-setup' && <CategorySetupPage userRole={userRole} />}
             {currentPage === 'category-a' && <CategoryAPage />}
@@ -780,7 +793,6 @@ const getBreadcrumbPath = (pageId: string): string[] => {
     'collection-setup': ['Quản lý thu thập', 'Thiết lập thu thập'],
     'collection-source-system': ['Quản lý thu thập', 'Quản lý hệ thống nguồn'],
     'collection-agent': ['Quản lý thu thập', 'Quản trị Agent'],
-    'view-collected-data': ['Quản lý thu thập', 'Xem dữ liệu thu thập'],
     'data-info': ['Quản lý thu thập', 'Xem dữ liệu thu thập'],
     'data-info-civil-registry': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL Hộ tịch điện tử'],
     'data-info-case-management': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'HT quản lý hồ sơ QT'],
@@ -847,6 +859,7 @@ const getBreadcrumbPath = (pageId: string): string[] => {
 
     // Processing
     'processed-data': ['Xử lý dữ liệu', 'Dữ liệu đã xử lý'],
+    'target-database-management': ['Xử lý dữ liệu', 'Quản lý CSDL đích'],
     'processing-internal-data': ['Xử lý dữ liệu', 'CSDL Trong ngành'],
     'processing-data-info-civil-registry': ['Xử lý dữ liệu', 'CSDL Trong ngành', 'CSDL Hộ tịch điện tử'],
     'processing-data-info-case-management': ['Xử lý dữ liệu', 'CSDL Trong ngành', 'HT quản lý hồ sơ QT'],

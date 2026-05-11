@@ -50,7 +50,7 @@ export function AgentModal({ isOpen, onClose, onSave, editingData }: AgentModalP
       <div className="bg-white rounded-lg shadow-xl w-full max-w-lg overflow-hidden border border-slate-200">
         {/* Header */}
         <div className="bg-blue-600 px-6 py-4 flex items-center justify-between text-white">
-          <h2 className="text-xl font-bold">{editingData ? 'Cập nhật agent' : 'Thêm agent'}</h2>
+          <h2 className="text-xl font-bold">{editingData ? 'Cập nhật trạm kết nối' : 'Thêm trạm kết nối'}</h2>
           <button onClick={onClose} className="hover:bg-white/20 p-1 rounded-full transition-colors">
             <X className="w-5 h-5" />
           </button>
@@ -61,11 +61,11 @@ export function AgentModal({ isOpen, onClose, onSave, editingData }: AgentModalP
             {/* Tên agent */}
             <div>
               <label className="block text-sm font-bold text-slate-700 mb-1.5">
-                Tên agent<span className="text-red-500">*</span>
+                Tên trạm kết nối<span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
-                placeholder="Tên agent"
+                placeholder="Tên trạm kết nối"
                 required
                 className="w-full px-3 py-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                 value={formData.name}
@@ -76,7 +76,7 @@ export function AgentModal({ isOpen, onClose, onSave, editingData }: AgentModalP
             {/* Trạng thái agent */}
             <div>
               <label className="block text-sm font-bold text-slate-700 mb-1.5">
-                Trạng thái agent<span className="text-red-500">*</span>
+                Trạng thái trạm kết nối<span className="text-red-500">*</span>
               </label>
               <select
                 className="w-full px-3 py-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
@@ -105,7 +105,7 @@ export function AgentModal({ isOpen, onClose, onSave, editingData }: AgentModalP
 
             {/* DIP - File Agent Section */}
             <div className="border border-slate-200 rounded-lg p-4 bg-slate-50/30">
-              <h3 className="text-sm font-bold text-slate-800 mb-4 uppercase tracking-wider">DIP - File Agent</h3>
+              <h3 className="text-sm font-bold text-slate-800 mb-4 uppercase tracking-wider">DIP - File Trạm kết nối</h3>
               
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
@@ -145,16 +145,16 @@ export function AgentModal({ isOpen, onClose, onSave, editingData }: AgentModalP
           {/* Footer Buttons */}
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
             <button
-              type="submit"
-              className="px-6 py-2 bg-blue-600 text-white rounded font-bold hover:bg-blue-700 transition-colors shadow-sm"
-            >
+ type="submit"
+ className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors shadow-sm"
+ >
               {editingData ? 'Cập nhật' : 'Thêm'}
             </button>
             <button
-              type="button"
-              onClick={onClose}
-              className="px-6 py-2 bg-slate-600 text-white rounded font-bold hover:bg-slate-700 transition-colors shadow-sm"
-            >
+ type="button"
+ onClick={onClose}
+ className="px-6 py-2 bg-slate-600 text-white rounded hover:bg-slate-700 transition-colors shadow-sm"
+ >
               Đóng
             </button>
           </div>

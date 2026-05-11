@@ -77,17 +77,23 @@ export function DataCollectionConfigSection({ resetTestState }: DataCollectionCo
   return (
     <div className="w-full max-w-4xl mx-auto px-6 py-4 space-y-6">
       
-      {/* Loại tần suất */}
-      <div className="flex items-center gap-6">
-        <label className="w-32 text-[13px] text-slate-700 font-medium shrink-0">Loại tần suất</label>
-        <select 
-          value={frequencyType}
-          onChange={e => setFrequencyType(e.target.value)}
-          className="flex-1 max-w-2xl px-3 py-1.5 text-sm border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
-        >
-          <option value="Tạo mới">Tạo mới</option>
-          <option value="Cập nhật">Cập nhật</option>
-        </select>
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center gap-6">
+          <label className="w-32 text-[13px] text-slate-700 font-medium shrink-0">Loại tần suất</label>
+          <select 
+            value={frequencyType}
+            onChange={e => setFrequencyType(e.target.value)}
+            className="flex-1 max-w-2xl px-3 py-1.5 text-sm border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+          >
+            <option value="Tạo mới">Tạo mới</option>
+            <option value="Cập nhật">Cập nhật</option>
+          </select>
+        </div>
+        <div className="ml-[152px] text-[11px] text-slate-500 italic">
+          {frequencyType === 'Tạo mới' 
+            ? "* Hệ thống sẽ thu thập tất cả các bản ghi mới phát sinh từ nguồn dữ liệu." 
+            : "* Hệ thống chỉ thu thập các bản ghi có sự thay đổi hoặc được cập nhật mới."}
+        </div>
       </div>
 
       {/* Divider Tần suất */}

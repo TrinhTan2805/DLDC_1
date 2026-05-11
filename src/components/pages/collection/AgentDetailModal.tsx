@@ -18,7 +18,7 @@ export function AgentDetailModal({ isOpen, onClose, data }: AgentDetailModalProp
         {/* Header */}
         <div className="bg-blue-600 px-6 py-4 flex items-center justify-between text-white shrink-0">
           <h2 className="text-xl font-bold flex items-center gap-2">
-            <Monitor className="w-5 h-5" /> Thông tin Agent
+            <Monitor className="w-5 h-5" /> Thông tin Trạm kết nối
           </h2>
           <button onClick={onClose} className="hover:bg-white/20 p-1 rounded-full transition-colors">
             <X className="w-5 h-5" />
@@ -36,7 +36,7 @@ export function AgentDetailModal({ isOpen, onClose, data }: AgentDetailModalProp
                 : 'text-slate-500 hover:text-slate-700'
               }`}
             >
-              Agent
+              Trạm kết nối
             </button>
             <button
               onClick={() => setActiveTab('history')}
@@ -59,7 +59,7 @@ export function AgentDetailModal({ isOpen, onClose, data }: AgentDetailModalProp
                 {/* DIP - DB Agent */}
                 <div className="space-y-4">
                   <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                    <Database className="w-4 h-4 text-blue-600" /> DIP - DB Agent
+                    <Database className="w-4 h-4 text-blue-600" /> DIP - DB Trạm kết nối
                   </h3>
                   <div className="border border-slate-200 rounded overflow-hidden">
                     <table className="w-full text-sm">
@@ -69,11 +69,11 @@ export function AgentDetailModal({ isOpen, onClose, data }: AgentDetailModalProp
                           <td className="px-4 py-2.5 text-slate-600 font-mono">{data.dbAgentId || data.id}</td>
                         </tr>
                         <tr>
-                          <td className="px-4 py-2.5 font-bold text-slate-700 border-r border-slate-100 text-xs uppercase">Tên agent:</td>
+                          <td className="px-4 py-2.5 font-bold text-slate-700 border-r border-slate-100 text-xs uppercase">Tên trạm:</td>
                           <td className="px-4 py-2.5 text-slate-600">{data.name}</td>
                         </tr>
                         <tr className="bg-slate-50/30">
-                          <td className="px-4 py-2.5 font-bold text-slate-700 border-r border-slate-100 text-xs uppercase">Khóa agent:</td>
+                          <td className="px-4 py-2.5 font-bold text-slate-700 border-r border-slate-100 text-xs uppercase">Khóa trạm:</td>
                           <td className="px-4 py-2.5 text-slate-600 font-mono text-[11px] truncate max-w-[200px]" title={data.agentKey}>{data.agentKey}</td>
                         </tr>
                         <tr>
@@ -85,7 +85,7 @@ export function AgentDetailModal({ isOpen, onClose, data }: AgentDetailModalProp
                           <td className="px-4 py-2.5 text-slate-600">{data.lastDbUpdate}</td>
                         </tr>
                         <tr>
-                          <td className="px-4 py-2.5 font-bold text-slate-700 border-r border-slate-100 text-xs uppercase">Trạng thái agent:</td>
+                          <td className="px-4 py-2.5 font-bold text-slate-700 border-r border-slate-100 text-xs uppercase">Trạng thái trạm:</td>
                           <td className="px-4 py-2.5">
                             <span className={`px-2 py-0.5 rounded text-xs font-medium ${data.status === 'active' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
                               {data.status === 'active' ? 'Kích hoạt' : 'Không kích hoạt'}
@@ -100,7 +100,7 @@ export function AgentDetailModal({ isOpen, onClose, data }: AgentDetailModalProp
                 {/* DIP - File Agent */}
                 <div className="space-y-4">
                   <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                    <Monitor className="w-4 h-4 text-emerald-600" /> DIP - File Agent
+                    <Monitor className="w-4 h-4 text-emerald-600" /> DIP - File Trạm kết nối
                   </h3>
                   <div className="border border-slate-200 rounded overflow-hidden">
                     <table className="w-full text-sm">
@@ -214,7 +214,7 @@ export function AgentDetailModal({ isOpen, onClose, data }: AgentDetailModalProp
                     </div>
                   </div>
                   <div className="flex justify-end items-end h-full">
-                    <button className="px-6 py-2 bg-blue-600 text-white rounded font-bold hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm">
+                    <button className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm">
                       <Search className="w-4 h-4" /> Tìm kiếm
                     </button>
                   </div>
@@ -232,7 +232,7 @@ export function AgentDetailModal({ isOpen, onClose, data }: AgentDetailModalProp
                       <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase text-[11px]">
                         <th className="px-6 py-3 border-r border-slate-200">Hành động</th>
                         <th className="px-6 py-3 border-r border-slate-200">Loại</th>
-                        <th className="px-6 py-3 border-r border-slate-200">Agent</th>
+                        <th className="px-6 py-3 border-r border-slate-200">Trạm kết nối</th>
                         <th className="px-6 py-3 border-r border-slate-200">Địa chỉ IP</th>
                         <th className="px-6 py-3 border-r border-slate-200">Tên máy chủ</th>
                         <th className="px-6 py-3 border-r border-slate-200">Ngày</th>
@@ -266,9 +266,9 @@ export function AgentDetailModal({ isOpen, onClose, data }: AgentDetailModalProp
         {/* Footer */}
         <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex justify-end shrink-0">
           <button
-            onClick={onClose}
-            className="px-8 py-2 bg-slate-600 text-white rounded font-bold hover:bg-slate-700 transition-colors shadow-sm"
-          >
+ onClick={onClose}
+ className="px-8 py-2 bg-slate-600 text-white rounded hover:bg-slate-700 transition-colors shadow-sm"
+ >
             Đóng
           </button>
         </div>

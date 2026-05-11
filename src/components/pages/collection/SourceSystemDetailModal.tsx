@@ -56,7 +56,7 @@ export function SourceSystemDetailModal({ isOpen, onClose, data }: SourceSystemD
               <div className="grid grid-cols-2 gap-x-8 gap-y-6">
                 <div className="space-y-1">
                   <dt className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Tên hệ thống</dt>
-                  <dd className="text-sm text-slate-900 font-bold leading-relaxed">{data.systemName || '-'}</dd>
+                  <dd className="text-sm text-slate-900 font-medium leading-relaxed">{data.systemName || '-'}</dd>
                 </div>
                 <div className="space-y-1">
                   <dt className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Loại nguồn</dt>
@@ -72,7 +72,7 @@ export function SourceSystemDetailModal({ isOpen, onClose, data }: SourceSystemD
                 </div>
                 <div className="col-span-2 space-y-1">
                   <dt className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Tên đơn vị quản lý</dt>
-                  <dd className="text-sm text-slate-900 font-bold leading-relaxed">{data.unitName || '-'}</dd>
+                  <dd className="text-sm text-slate-900 font-medium leading-relaxed">{data.unitName || '-'}</dd>
                 </div>
                 <div className="col-span-2 space-y-1">
                   <dt className="text-xs font-semibold text-slate-500 uppercase tracking-tight flex items-center gap-1.5">
@@ -92,21 +92,21 @@ export function SourceSystemDetailModal({ isOpen, onClose, data }: SourceSystemD
               <div className="grid grid-cols-2 gap-x-8 gap-y-6">
                 <div className="space-y-1">
                   <dt className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Người đại diện</dt>
-                  <dd className="text-sm text-slate-900 font-bold flex items-center gap-2">
+                  <dd className="text-sm text-slate-900 font-medium flex items-center gap-2">
                     <User className="w-3.5 h-3.5 text-slate-400" />
                     {data.contactPerson || '-'}
                   </dd>
                 </div>
                 <div className="space-y-1">
                   <dt className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Số điện thoại</dt>
-                  <dd className="text-sm text-slate-900 font-bold flex items-center gap-2">
+                  <dd className="text-sm text-slate-900 font-medium flex items-center gap-2">
                     <Phone className="w-3.5 h-3.5 text-slate-400" />
                     {data.phone || '-'}
                   </dd>
                 </div>
                 <div className="col-span-2 space-y-1">
                   <dt className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Email</dt>
-                  <dd className="text-sm text-blue-600 font-bold flex items-center gap-2">
+                  <dd className="text-sm text-blue-600 font-medium flex items-center gap-2">
                     <Mail className="w-3.5 h-3.5 text-blue-400" />
                     <span className="underline underline-offset-4">{data.email || '-'}</span>
                   </dd>
@@ -130,9 +130,9 @@ export function SourceSystemDetailModal({ isOpen, onClose, data }: SourceSystemD
         {/* Footer */}
         <div className="px-8 py-5 border-t border-slate-100 flex justify-end bg-white">
           <button
-            onClick={onClose}
-            className="px-6 py-2 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm"
-          >
+ onClick={onClose}
+ className="px-6 py-2 text-sm text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm"
+ >
             Đóng
           </button>
         </div>

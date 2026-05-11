@@ -277,12 +277,12 @@ export function RelationshipsTab({
           </p>
         </div>
         <button
-          onClick={() => setShowForm(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md text-sm font-bold active:scale-95"
-        >
-          <Plus className="w-4 h-4" />
-          Thêm quan hệ mới
-        </button>
+ onClick={() => setShowForm(true)}
+ className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md text-sm active:scale-95"
+ >
+ <Plus className="w-4 h-4" />
+ Thêm quan hệ mới
+ </button>
       </div>
 
       {/* Relationships Table */}
@@ -649,31 +649,31 @@ export function RelationshipsTab({
 
             <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-100 bg-slate-50 shrink-0">
               <button
-                onClick={handleCloseForm}
-                className="px-6 py-2.5 text-black bg-white border border-slate-300 hover:bg-slate-50 rounded-lg transition-colors font-semibold text-[14px]"
-              >
+ onClick={handleCloseForm}
+ className="px-6 py-2.5 text-black bg-white border border-slate-300 hover:bg-slate-50 rounded-lg transition-colors text-[14px]"
+ >
                 Hủy
               </button>
               <button
-                onClick={() => {
-                   setApprovalRequestData({
-                      id: editingRelationship?.id || `rel-${Date.now()}`,
-                      code: formData.relationshipType || '',
-                      name: `Cấu hình quan hệ mới`,
-                      type: 'attribute'
-                   });
-                   setApprovalRequestForm({ reviewer: '', note: '' });
-                   setShowApprovalModal(true);
-                }}
-                className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-bold shadow-lg shadow-emerald-200 text-[14px]"
-              >
-                <Send className="w-4 h-4" />
-                Lưu & trình duyệt
-              </button>
+ onClick={() => {
+ setApprovalRequestData({
+ id: editingRelationship?.id || `rel-${Date.now()}`,
+ code: formData.relationshipType || '',
+ name: `Cấu hình quan hệ mới`,
+ type: 'attribute'
+ });
+ setApprovalRequestForm({ reviewer: '', note: '' });
+ setShowApprovalModal(true);
+ }}
+ className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-200 text-[14px]"
+ >
+ <Send className="w-4 h-4" />
+ Lưu & trình duyệt
+ </button>
               <button
-                onClick={handleSubmit}
-                className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-bold shadow-lg shadow-blue-200 text-[14px]"
-              >
+ onClick={handleSubmit}
+ className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200 text-[14px]"
+ >
                 <Save className="w-4 h-4" />
                 {editingRelationship ? 'Lưu cập nhật' : 'Thêm quan hệ'}
               </button>

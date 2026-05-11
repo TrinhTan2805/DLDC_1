@@ -110,27 +110,27 @@ export function ExpireApproveModal({
         {/* Footer */}
         <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
            <button 
-             onClick={onClose}
-             className="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl font-bold hover:bg-slate-50 transition-all text-[14px]"
-           >
+ onClick={onClose}
+ className="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-all text-[14px]"
+ >
              Đóng
            </button>
            <div className="flex gap-2">
               <button 
-                disabled={checking}
-                onClick={() => onReject(note)}
-                className="px-6 py-2.5 bg-slate-100 text-slate-700 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-slate-200 transition-all text-[14px] disabled:opacity-50"
-              >
-                 <XCircle className="w-4 h-4" /> Từ chối
-              </button>
+ disabled={checking}
+ onClick={() => onReject(note)}
+ className="px-6 py-2.5 bg-slate-100 text-slate-700 rounded-xl flex items-center justify-center gap-2 hover:bg-slate-200 transition-all text-[14px] disabled:opacity-50"
+ >
+ <XCircle className="w-4 h-4" /> Từ chối
+ </button>
               <button 
-                disabled={checking || checkResult === 'has_constraints'}
-                onClick={() => onApprove(note)}
-                className={`px-6 py-2.5 ${checkResult === 'has_constraints' ? 'bg-slate-300 text-slate-500 cursor-not-allowed' : 'bg-purple-600 text-white hover:bg-purple-700 shadow-lg shadow-purple-200'} rounded-xl font-bold flex items-center justify-center gap-2 transition-all text-[14px]`}
-                title={checkResult === 'has_constraints' ? 'Không thể phê duyệt do vướng ràng buộc khóa ngoại' : 'Phê duyệt hết hiệu lực'}
-              >
-                 <Check className="w-4 h-4" /> Duyệt ngừng SD
-              </button>
+ disabled={checking || checkResult === 'has_constraints'}
+ onClick={() => onApprove(note)}
+ className={`px-6 py-2.5 ${checkResult === 'has_constraints' ? 'bg-slate-300 text-slate-500 cursor-not-allowed' : 'bg-purple-600 text-white hover:bg-purple-700 shadow-lg shadow-purple-200'} rounded-xl flex items-center justify-center gap-2 transition-all text-[14px]`}
+ title={checkResult === 'has_constraints' ? 'Không thể phê duyệt do vướng ràng buộc khóa ngoại' : 'Phê duyệt hết hiệu lực'}
+ >
+ <Check className="w-4 h-4" /> Duyệt ngừng SD
+ </button>
            </div>
         </div>
       </div>

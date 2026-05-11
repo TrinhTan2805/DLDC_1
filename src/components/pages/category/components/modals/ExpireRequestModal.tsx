@@ -105,19 +105,19 @@ export function ExpireRequestModal({
         {/* Footer */}
         <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex gap-3 justify-end items-center">
           <button 
-            onClick={onClose}
-            className="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl font-bold hover:bg-slate-50 transition-all text-[14px]"
-          >
+ onClick={onClose}
+ className="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-all text-[14px]"
+ >
             Hủy
           </button>
           <button 
-            onClick={() => onSubmit(formData)}
-            disabled={!formData.expireDate || !formData.reason}
-            className="px-6 py-2.5 bg-orange-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-orange-700 transition-all text-[14px] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-orange-200"
-          >
-            <Send className="w-4 h-4" />
-            Trình duyệt hết hiệu lực
-          </button>
+ onClick={() => onSubmit(formData)}
+ disabled={!formData.expireDate || !formData.reason}
+ className="px-6 py-2.5 bg-orange-600 text-white rounded-xl flex items-center justify-center gap-2 hover:bg-orange-700 transition-all text-[14px] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-orange-200"
+ >
+ <Send className="w-4 h-4" />
+ Trình duyệt hết hiệu lực
+ </button>
         </div>
       </div>
     </div>

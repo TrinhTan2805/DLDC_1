@@ -111,76 +111,81 @@ export function GenericDataTable({
   const dataListContent = (
     <div className="space-y-6">
       {/* Actions Bar */}
-      <div className="flex flex-wrap items-center gap-3">
-        {/* Search */}
-        <div className="flex-1 min-w-[250px]">
-          <div className="relative">
+      <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-1 rounded-xl">
+        <div className="flex-1 flex items-center gap-3">
+          {/* Search */}
+          <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
-              placeholder="Tìm kiếm..."
+              placeholder="Tìm kiếm nhanh..."
               value={searchTerm}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 bg-slate-50/50 shadow-sm transition-all"
             />
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Advanced Search */}
+            <button
+              onClick={() => setShowAdvancedSearch(true)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 transition-all font-semibold text-sm shadow-sm"
+            >
+              <Filter className="w-4 h-4" />
+              Lọc nâng cao
+            </button>
+
+            {/* Import */}
+            <button
+              onClick={() => setShowImport(true)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 transition-all font-semibold text-sm shadow-sm"
+            >
+              <Upload className="w-4 h-4" />
+              Nhập dữ liệu
+            </button>
           </div>
         </div>
 
-        {/* Advanced Search */}
-        <button
-          onClick={() => setShowAdvancedSearch(true)}
-          className="flex items-center gap-2 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
-        >
-          <Filter className="w-4 h-4" />
-          Tìm kiếm nâng cao
-        </button>
-
-        {/* Import */}
-        <button
-          onClick={() => setShowImport(true)}
-          className="flex items-center gap-2 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
-        >
-          <Upload className="w-4 h-4" />
-          Nhập
-        </button>
-
-        {/* Export */}
-        <button
-          onClick={handleExport}
-          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-        >
-          <Download className="w-4 h-4" />
-          Xuất
-        </button>
-
-        {/* Sync */}
-        {onSync && (
+        <div className="flex items-center gap-3">
+          {/* Export */}
           <button
-            onClick={onSync}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            onClick={handleExport}
+            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all font-bold text-sm shadow-md active:scale-95"
           >
-            <RefreshCw className="w-4 h-4" />
-            Đồng bộ
+            <Download className="w-4 h-4" />
+            Kết xuất
           </button>
-        )}
+
+          {/* Sync */}
+          {onSync && (
+            <button
+              onClick={onSync}
+              className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-bold text-sm shadow-md active:scale-95"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Đồng bộ ngay
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Active Filters */}
       {Object.keys(filters).length > 0 && (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2 px-1">
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mr-2">Bộ lọc:</span>
           {Object.entries(filters).map(([key, value]) => (
             <span
               key={key}
-              className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs"
+              className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 border border-blue-100 rounded-full text-xs font-semibold"
             >
-              {key}: {String(value)}
+              <span className="opacity-60">{key}:</span> {String(value)}
               <button
                 onClick={() => {
                   const newFilters = { ...filters };
                   delete newFilters[key];
                   setFilters(newFilters);
                 }}
-                className="hover:text-blue-900"
+                className="hover:text-blue-900 ml-1 bg-blue-200/50 rounded-full w-4 h-4 flex items-center justify-center transition-colors"
               >
                 ×
               </button>
@@ -188,34 +193,34 @@ export function GenericDataTable({
           ))}
           <button
             onClick={() => setFilters({})}
-            className="text-xs text-blue-600 hover:text-blue-800"
+            className="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors ml-2"
           >
-            Xóa tất cả
+            Xóa tất cả bộ lọc
           </button>
         </div>
       )}
 
       {/* Table */}
-      <div className="border border-slate-200 rounded-lg">
+      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-slate-50">
+          <table className="w-full border-collapse">
+            <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">
+                <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">
                   STT
                 </th>
-                <th className="px-4 py-3 text-center text-xs text-slate-600 uppercase tracking-wider w-24">
+                <th className="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">
                   Tình trạng
                 </th>
                 {columns.map((col) => (
                   <th
                     key={col.key}
-                    className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider"
+                    className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider"
                   >
                     {col.label}
                   </th>
                 ))}
-                <th className="px-6 py-3 text-right text-xs text-slate-600 uppercase tracking-wider">
+                <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">
                   Thao tác
                 </th>
               </tr>
@@ -223,30 +228,30 @@ export function GenericDataTable({
             <tbody className="divide-y divide-slate-100 bg-white">
               {paginatedData.length > 0 ? (
                 paginatedData.map((item, index) => (
-                  <tr key={item.id} className="hover:bg-slate-50">
-                    <td className="px-6 py-4 text-sm text-slate-600">
-                      {startIndex + index + 1}
+                  <tr key={item.id} className="hover:bg-blue-50/30 transition-all group">
+                    <td className="px-6 py-4 text-sm text-slate-500 text-center font-medium">
+                      {(startIndex + index + 1).toString().padStart(2, '0')}
                     </td>
                     <td className="px-4 py-4 text-center">
                       {item.originalData && Object.keys(item.originalData).length > 0 ? (
                         <button
                           onClick={() => handleViewDetail(item)}
-                          className="text-xs px-3 py-1 bg-green-100 text-green-700 rounded-full hover:bg-green-200 transition-colors"
+                          className="text-[10px] font-bold uppercase tracking-tighter px-2.5 py-1 bg-amber-100 text-amber-700 rounded-full hover:bg-amber-200 transition-all shadow-sm"
                           title="Click để xem thông tin đã sửa"
                         >
-                          Đã sửa
+                          Đã hiệu chỉnh
                         </button>
                       ) : (
-                        <span className="text-xs text-slate-500">Không sửa</span>
+                        <span className="text-[10px] font-bold uppercase tracking-tighter px-2.5 py-1 bg-slate-100 text-slate-500 rounded-full">Nguyên bản</span>
                       )}
                     </td>
                     {columns.map((col) => (
-                      <td key={col.key} className="px-6 py-4 text-sm text-slate-900">
+                      <td key={col.key} className="px-6 py-4 text-sm text-slate-700 text-center font-medium group-hover:text-slate-900 transition-colors">
                         {item[col.key]}
                       </td>
                     ))}
                     <td className="px-6 py-4">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center justify-center gap-1">
                         <ActionIconButton action="view" onClick={() => handleViewDetailSimple(item)} title="Xem chi tiết" />
                         {onEdit && (
                           <ActionIconButton action="edit" onClick={() => onEdit(item)} title="Sửa" />
@@ -262,9 +267,12 @@ export function GenericDataTable({
                 <tr>
                   <td
                     colSpan={columns.length + 3}
-                    className="px-6 py-8 text-center text-slate-500"
+                    className="px-6 py-16 text-center text-slate-400"
                   >
-                    Không tìm thấy dữ liệu
+                    <div className="flex flex-col items-center justify-center">
+                      <Database className="w-12 h-12 mb-3 opacity-20" />
+                      <p className="text-sm font-medium">Không tìm thấy dữ liệu phù hợp với bộ lọc</p>
+                    </div>
                   </td>
                 </tr>
               )}
@@ -275,47 +283,49 @@ export function GenericDataTable({
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between bg-white">
-            <div className="text-sm text-slate-600">
-              Hiển thị {startIndex + 1} - {Math.min(startIndex + itemsPerPage, filteredData.length)} trong tổng số {filteredData.length}
+            <div className="text-sm text-slate-500 font-medium">
+              Hiển thị <span className="text-slate-900">{startIndex + 1}</span> - <span className="text-slate-900">{Math.min(startIndex + itemsPerPage, filteredData.length)}</span> trong tổng số <span className="text-blue-600 font-bold">{filteredData.length}</span> bản ghi
             </div>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-1">
               <button
                 onClick={() => setCurrentPage(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="px-3 py-1 border border-slate-300 rounded text-sm hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-2 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
               >
                 Trước
               </button>
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                let pageNum;
-                if (totalPages <= 5) {
-                  pageNum = i + 1;
-                } else if (currentPage <= 3) {
-                  pageNum = i + 1;
-                } else if (currentPage >= totalPages - 2) {
-                  pageNum = totalPages - 4 + i;
-                } else {
-                  pageNum = currentPage - 2 + i;
-                }
-                
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => setCurrentPage(pageNum)}
-                    className={`px-3 py-1 rounded text-sm ${
-                      currentPage === pageNum
-                        ? 'bg-blue-600 text-white'
-                        : 'border border-slate-300 hover:bg-slate-50'
-                    }`}
-                  >
-                    {pageNum}
-                  </button>
-                );
-              })}
+              <div className="flex gap-1 px-2">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+                  
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setCurrentPage(pageNum)}
+                      className={`w-9 h-9 rounded-lg text-sm font-bold transition-all shadow-sm ${
+                        currentPage === pageNum
+                          ? 'bg-blue-600 text-white shadow-blue-200'
+                          : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </div>
               <button
                 onClick={() => setCurrentPage(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className="px-3 py-1 border border-slate-300 rounded text-sm hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-2 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
               >
                 Sau
               </button>

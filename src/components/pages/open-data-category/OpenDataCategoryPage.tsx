@@ -1088,7 +1088,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                <h2 className="text-xl font-bold text-slate-800">Phê duyệt danh mục</h2>
                <p className="text-sm text-slate-500 mt-1">Lãnh đạo nghiệp vụ xem xét và phê duyệt các yêu cầu thay đổi dữ liệu chủ</p>
                <div className="flex gap-8 mt-6 overflow-x-auto">
-                 <button className="whitespace-nowrap pb-3 border-b-2 border-blue-600 text-blue-600 font-semibold text-sm flex items-center gap-2">
+                 <button className="whitespace-nowrap pb-3 border-b-2 border-blue-600 text-blue-600 text-sm flex items-center gap-2">
                    <CheckSquare className="w-4 h-4" /> Phê duyệt danh mục
                  </button>
                  <button className="whitespace-nowrap pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium text-sm flex items-center gap-2 transition-colors">

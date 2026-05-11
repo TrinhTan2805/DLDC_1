@@ -92,15 +92,15 @@ export function SimpleRejectModal({
         {/* Footer */}
         <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex gap-3 justify-end">
            <button 
-             onClick={onClose}
-             className="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl font-bold hover:bg-slate-50 transition-all text-[14px]"
-           >
+ onClick={onClose}
+ className="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-all text-[14px]"
+ >
               Hủy
            </button>
            <button 
-             onClick={handleConfirm}
-             className="px-6 py-2.5 bg-red-500 text-white rounded-xl font-bold flex items-center gap-2 hover:bg-red-600 transition-all text-[14px] shadow-lg shadow-red-100"
-           >
+ onClick={handleConfirm}
+ className="px-6 py-2.5 bg-red-500 text-white rounded-xl flex items-center gap-2 hover:bg-red-600 transition-all text-[14px] shadow-lg shadow-red-100"
+ >
               <XCircle className="w-5 h-5"/>
               Từ chối
            </button>

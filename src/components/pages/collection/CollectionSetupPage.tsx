@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Search, Plus, Eye, Edit, Settings as SettingsIcon, Trash2, FileText, Activity, Settings, AlertCircle, X, Download, Send, ChevronLeft, ChevronRight, Calendar, Wrench, Power } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Filter, RefreshCw, Search, Plus, Eye, Edit, Settings as SettingsIcon, Trash2, FileText, Activity, Settings, AlertCircle, X, Download, Send, ChevronLeft, ChevronRight, Calendar, Wrench, Power, Layers, Database, Eraser } from 'lucide-react';
 import { AddServiceModal, EditServiceModal, DeleteServiceModal, SettingsServiceModal } from './ServiceModals';
 import { ViewServiceModal } from './ViewServiceModal';
 import { LogManagement } from './LogManagement';
@@ -8,24 +9,43 @@ import { ServiceDataDetailPage } from './ServiceDataDetailPage';
 
 export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: string) => void }) {
   const [activeTab, setActiveTab] = useState<'service-setup' | 'version'>('service-setup');
-  const [showAddServiceModal, setShowAddServiceModal] = useState(false);
-  const [showEditServiceModal, setShowEditServiceModal] = useState(false);
-  const [showDetailModal, setShowDetailModal] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const pathParts = location.pathname.split('/').filter(Boolean);
+  const action = pathParts[1];
+  const urlId = pathParts[2];
+
+  const showAddServiceModal = action === 'add';
+  const showEditServiceModal = action === 'edit' && !!urlId;
+  const showDetailModal = action === 'view' && !!urlId;
+  const queryParams = new URLSearchParams(location.search);
+  const initialTab = queryParams.get('tab') || 'general';
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showErrorDetailModal, setShowErrorDetailModal] = useState(false);
   const [showDataDetailPage, setShowDataDetailPage] = useState(false);
   const [selectedService, setSelectedService] = useState<any>(null);
+
+  useEffect(() => {
+    if (urlId) {
+      const service = mockCollectionServices.find(s => s.id === Number(urlId));
+      if (service) setSelectedService(service);
+    }
+  }, [urlId]);
+
+  const closeModal = () => navigate('/collection-setup');
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [sourceFilter, setSourceFilter] = useState('all'); // New: nguồn dữ liệu filter
   const [departmentFilter, setDepartmentFilter] = useState('all'); // New: cục/vụ filter
   const [navigateToPage, setNavigateToPage] = useState<string | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     const handleNavLog = (e: any) => {
-      setShowAddServiceModal(false);
+      navigate('/collection-setup');
       setActiveTab('version');
       if (e.detail?.logId) {
         setNavigateToPage(e.detail.logId.toString());
@@ -34,7 +54,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
     window.addEventListener('NAVIGATE_TO_LOG', handleNavLog);
     return () => window.removeEventListener('NAVIGATE_TO_LOG', handleNavLog);
   }, []);
-  
+
   // Get current month's first and last day
   const getCurrentMonthRange = () => {
     const now = new Date();
@@ -45,11 +65,11 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
       end: lastDay.toISOString().split('T')[0]
     };
   };
-  
+
   const defaultRange = getCurrentMonthRange();
-  const [startDate, setStartDate] = useState(defaultRange.start);
-  const [endDate, setEndDate] = useState(defaultRange.end);
-  
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -63,7 +83,8 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
     setDepartmentFilter('all');
     setStatusFilter('all');
     setTypeFilter('all');
-    // Không reset date range vì chỉ là UI display
+    setStartDate('');
+    setEndDate('');
     setCurrentPage(1);
   };
 
@@ -78,18 +99,35 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
   // Helper function to filter services (date range is just for display, not filtering)
   const filterServices = (services: any[]) => {
     return services.filter(service => {
-      // Removed date filtering logic - date picker is just for UI display
-      
-      const matchesStatus = statusFilter === 'all' || 
-        (statusFilter === 'failed' ? service.status?.startsWith('failed_') : service.status === statusFilter);
+      // Date filtering based on updatedAt
+      let matchesDate = true;
+      if (startDate || endDate) {
+        const updateDate = parseDate(service.updatedAt);
+        if (updateDate) {
+          if (startDate) {
+            const start = new Date(startDate);
+            start.setHours(0, 0, 0, 0);
+            if (updateDate < start) matchesDate = false;
+          }
+          if (endDate) {
+            const end = new Date(endDate);
+            end.setHours(23, 59, 59, 999);
+            if (updateDate > end) matchesDate = false;
+          }
+        }
+      }
 
-      return matchesStatus &&
+      const matchesStatus = statusFilter === 'all' ||
+        (statusFilter === 'active' ? (!service.status?.startsWith('draft') && !service.status?.startsWith('inactive')) : service.status === statusFilter);
+
+      return matchesDate &&
+        matchesStatus &&
         (typeFilter === 'all' || service.type === typeFilter) &&
         (sourceFilter === 'all' || service.source === sourceFilter) &&
         (departmentFilter === 'all' || service.department === departmentFilter) &&
-        (searchText === '' || 
-          service.name.toLowerCase().includes(searchText.toLowerCase()) || 
-          service.code.toLowerCase().includes(searchText.toLowerCase()) || 
+        (searchText === '' ||
+          service.name.toLowerCase().includes(searchText.toLowerCase()) ||
+          service.code.toLowerCase().includes(searchText.toLowerCase()) ||
           service.managingUnit.toLowerCase().includes(searchText.toLowerCase())
         );
     });
@@ -110,11 +148,11 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
       code: service.code,
       status: service.statusText,
       time: new Date().toLocaleString('vi-VN'),
-      message: service.status === 'success' 
+      message: service.status === 'success'
         ? `Kiểm tra cấu trúc thành công. Đã nhận ${service.recordsReceived} bản ghi.`
         : `Kiểm tra cấu trúc thất bại: ${service.errorDetails?.errorMessage || 'Lỗi không xác định'}`
     });
-    
+
     alert(`✅ Đã gửi thông báo tự động cho ${service.managingUnit}\n\nTrạng thái: ${service.statusText}\nThời gian: ${new Date().toLocaleString('vi-VN')}`);
   };
 
@@ -130,21 +168,19 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
         <div className="flex gap-6">
           <button
             onClick={() => setActiveTab('service-setup')}
-            className={`pb-3 pt-4 text-sm transition-colors border-b-2 ${
-              activeTab === 'service-setup'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-slate-600 hover:text-slate-900'
-            }`}
+            className={`pb-3 pt-4 text-sm transition-colors border-b-2 ${activeTab === 'service-setup'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-slate-600 hover:text-slate-900'
+              }`}
           >
             Thiết lập dịch vụ
           </button>
           <button
             onClick={() => setActiveTab('version')}
-            className={`pb-3 pt-4 text-sm transition-colors border-b-2 ${
-              activeTab === 'version'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-slate-600 hover:text-slate-900'
-            }`}
+            className={`pb-3 pt-4 text-sm transition-colors border-b-2 ${activeTab === 'version'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-slate-600 hover:text-slate-900'
+              }`}
           >
             Quản lý nhật ký
           </button>
@@ -164,7 +200,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                     <FileText className="w-5 h-5 text-blue-600" />
                   </div>
                   <div>
-                    <div className="text-xs text-slate-500">Tổng số dữ liệu đã thiết lập</div>
+                    <div className="text-xs text-slate-500">Tổng số dịch vụ đã thiết lập</div>
                     <div className="text-2xl text-slate-900">{stats.total}</div>
                   </div>
                 </div>
@@ -188,7 +224,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                     <Settings className="w-5 h-5 text-yellow-600" />
                   </div>
                   <div>
-                    <div className="text-xs text-slate-500">Đang bảo trì</div>
+                    <div className="text-xs text-slate-500">Bản nháp</div>
                     <div className="text-2xl text-slate-900">{stats.maintenance}</div>
                   </div>
                 </div>
@@ -208,245 +244,277 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
             </div>
 
             {/* Filters and Actions */}
-            <div className="bg-white rounded-lg border border-slate-200 p-4">
-              <div className="space-y-3">
-                {/* Row 1: Search and Date Range */}
-                <div className="flex items-center gap-3">
+            <div className="mb-6">
+              {/* Row 1: Search and Buttons */}
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex-1 flex items-center gap-3">
                   <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <input aria-label="Input field"
                       type="text"
-                      placeholder="Tìm kiếm theo tên, mã dịch vụ, đơn vị..."
-                      className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Tìm kiếm theo tên dịch vụ, hệ thống nguồn"
+                      className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                       value={searchText}
                       onChange={(e) => setSearchText(e.target.value)}
                     />
                   </div>
-                  <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-300">
-                    <Calendar className="w-4 h-4 text-slate-500" />
-                    <span className="text-sm text-slate-600">Thời gian:</span>
-                    <input aria-label="Input field"
-                      type="date"
-                      className="px-2 py-0.5 border-0 bg-transparent text-sm focus:outline-none focus:ring-0 text-slate-700"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                    />
-                    <span className="text-slate-400">-</span>
-                    <input aria-label="Input field"
-                      type="date"
-                      className="px-2 py-0.5 border-0 bg-transparent text-sm focus:outline-none focus:ring-0 text-slate-700"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                    />
-                  </div>
-                </div>
-                
-                {/* Row 2: Filter Dropdowns, Search and Reset Button */}
-                <div className="flex items-center gap-3">
-                  <select aria-label="Select box"
-                    className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white flex-1"
-                    value={sourceFilter}
-                    onChange={(e) => setSourceFilter(e.target.value)}
-                  >
-                    <option value="all">Tất cả nguồn dữ liệu</option>
-                    <option value="Trong ngành">Trong ngành</option>
-                    <option value="Ngoài ngành">Ngoài ngành</option>
-                  </select>
-                  <select aria-label="Select box"
-                    className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white flex-1"
-                    value={departmentFilter}
-                    onChange={(e) => setDepartmentFilter(e.target.value)}
-                  >
-                    <option value="all">Tất cả Cục/Vụ</option>
-                    <option value="Bộ ngành ngoài">Bộ ngành ngoài</option>
-                    <option value="Cục Hành chính tư pháp">Cục Hành chính tư pháp</option>
-                    <option value="Cục Quản lý thi hành án dân sự">Cục Quản lý thi hành án dân sự</option>
-                    <option value="Cục Đăng ký giao dịch bảo đảm">Cục Đăng ký giao dịch bảo đảm</option>
-                    <option value="Cục Kiểm tra văn bản">Cục Kiểm tra văn bản</option>
-                    <option value="Cục Bổ trợ tư pháp">Cục Bổ trợ tư pháp</option>
-                    <option value="Vụ Hợp tác quốc tế">Vụ Hợp tác quốc tế</option>
-                    <option value="Cục Kế hoạch - Tài chính">Cục Kế hoạch - Tài chính</option>
-                  </select>
-                  <select aria-label="Select box"
-                    className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white flex-1"
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                  >
-                    <option value="all">Tất cả trạng thái</option>
-                    <option value="success">Thành công</option>
-                    <option value="draft">Bản nháp</option>
-                    <option value="failed">Thất bại</option>
-                    <option value="inactive">Ngưng hoạt động</option>
-                  </select>
-                  <select aria-label="Select box"
-                    className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white flex-1"
-                    value={typeFilter}
-                    onChange={(e) => setTypeFilter(e.target.value)}
-                  >
-                    <option value="all">Tất cả loại dịch vụ</option>
-                    <option value="REST">REST</option>
-                    <option value="SOAP">SOAP</option>
-                  </select>
-                  <button
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-sm whitespace-nowrap"
-                  >
-                    <Search className="w-4 h-4" />
-                    Tìm kiếm
+                  <button className="p-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors shadow-sm flex items-center justify-center">
+                    <Search className="w-5 h-5" />
                   </button>
                   <button
-                    onClick={resetFilters}
-                    className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 text-sm whitespace-nowrap"
-                    title="Bỏ lọc"
+                    onClick={() => setShowFilters(!showFilters)}
+                    className={`p-2 rounded-lg transition-colors shadow-sm flex items-center justify-center border ${showFilters ? 'bg-blue-50 border-blue-200 text-blue-500' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+                    title="Bộ lọc"
                   >
-                    <X className="w-4 h-4" />
-                    Bỏ lọc
+                    {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => navigate('/collection-setup/add')}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-sm shadow-sm font-medium"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Thêm mới
                   </button>
                 </div>
               </div>
-            </div>
 
-            {/* Action Buttons Above Table */}
-            <div className="flex items-center justify-end gap-3">
-              <button 
-                onClick={() => setShowAddServiceModal(true)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-sm whitespace-nowrap"
-              >
-                <Plus className="w-4 h-4" />
-                Thêm dịch vụ mới
-              </button>
-              <button
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 text-sm whitespace-nowrap"
-                onClick={handleExportServiceList}
-              >
-                <Download className="w-4 h-4" />
-                Kết xuất danh sách
-              </button>
+              {/* Row 2: Filters (Collapsible) */}
+              {showFilters && (
+                <div className="bg-slate-50 p-5 rounded-xl border border-slate-200 grid grid-cols-6 gap-4 mt-4 animate-in slide-in-from-top-2 duration-200 shadow-sm relative">
+                  <div className="absolute -top-2 right-[200px] w-4 h-4 bg-slate-50 border-t border-l border-slate-200 transform rotate-45"></div>
+
+                  <div className="space-y-1.5 relative z-10">
+                    <label className="text-xs font-bold text-slate-700">Loại kết nối</label>
+                    <select aria-label="Select box"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                      value={typeFilter}
+                      onChange={(e) => setTypeFilter(e.target.value)}
+                    >
+                      <option value="all">Tất cả phương thức</option>
+                      <option value="Cơ sở dữ liệu">Cơ sở dữ liệu</option>
+                      <option value="API">API</option>
+                      <option value="Tải file Excel">Tải file Excel</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5 relative z-10">
+                    <label className="text-xs font-bold text-slate-700">Nguồn dữ liệu</label>
+                    <select aria-label="Select box"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                      value={sourceFilter}
+                      onChange={(e) => setSourceFilter(e.target.value)}
+                    >
+                      <option value="all">Tất cả nguồn dữ liệu</option>
+                      <option value="Trong ngành">Trong ngành</option>
+                      <option value="Ngoài ngành">Ngoài ngành</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5 relative z-10">
+                    <label className="text-xs font-bold text-slate-700">Hệ thống nguồn</label>
+                    <select aria-label="Select box"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                      value={departmentFilter}
+                      onChange={(e) => setDepartmentFilter(e.target.value)}
+                    >
+                      <option value="all">Tất cả hệ thống nguồn</option>
+                      <option value="Bộ ngành ngoài">Bộ ngành ngoài</option>
+                      <option value="Cục Hành chính tư pháp">Cục Hành chính tư pháp</option>
+                      <option value="Cục Quản lý thi hành án dân sự">Cục Quản lý thi hành án dân sự</option>
+                      <option value="Cục Đăng ký giao dịch bảo đảm">Cục Đăng ký giao dịch bảo đảm</option>
+                      <option value="Cục Kiểm tra văn bản">Cục Kiểm tra văn bản</option>
+                      <option value="Cục Bổ trợ tư pháp">Cục Bổ trợ tư pháp</option>
+                      <option value="Vụ Hợp tác quốc tế">Vụ Hợp tác quốc tế</option>
+                      <option value="Cục Kế hoạch - Tài chính">Cục Kế hoạch - Tài chính</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5 relative z-10">
+                    <label className="text-xs font-bold text-slate-700">Trạng thái</label>
+                    <select aria-label="Select box"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                    >
+                      <option value="all">Tất cả trạng thái</option>
+                      <option value="draft">Bản nháp</option>
+                      <option value="active">Hoạt động</option>
+                      <option value="inactive">Ngưng hoạt động</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5 relative z-10">
+                    <label className="text-xs font-bold text-slate-700">Thời gian từ</label>
+                    <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
+                      <input aria-label="Input field"
+                        type="date"
+                        className="w-full border-0 bg-transparent text-sm focus:outline-none text-slate-700 p-0"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                      />
+                      <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5 relative z-10">
+                    <label className="text-xs font-bold text-slate-700">Thời gian đến</label>
+                    <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
+                      <input aria-label="Input field"
+                        type="date"
+                        className="w-full border-0 bg-transparent text-sm focus:outline-none text-slate-700 p-0"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                      />
+                      <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Services Table */}
-            <div className="bg-white rounded-lg border border-slate-200">
+            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-slate-50 border-b border-slate-200">
+                <table className="w-full border-collapse">
+                  <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">STT</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Mã dịch vụ</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Tên dịch vụ</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Loại</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Phiên bản</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Đơn vị quản lý</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Ngày tạo</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Ngày sửa</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Trạng thái kết nối</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Gửi thông báo</th>
-                      <th className="px-4 py-3 text-center text-xs text-slate-600 uppercase">Thao tác</th>
+                      <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-12">STT</th>
+                      <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Tên dịch vụ</th>
+                      <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Loại nguồn</th>
+                      <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Phương thức kết nối</th>
+                      <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-20">Phiên bản</th>
+                      <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Hệ thống nguồn</th>
+                      <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Ngày tạo</th>
+                      <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Trạng thái dịch vụ</th>
+                      <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Trạng thái dữ liệu</th>
+                      <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-64">Thao tác</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {filteredServices
                       .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
                       .map((service, index) => (
-                      <tr key={service.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-4 py-3 text-sm text-slate-600">{index + 1}</td>
-                        <td className="px-4 py-3">
-                          <span className="text-sm text-blue-600 hover:underline cursor-pointer">
-                            {service.code}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div>
-                            <div className="text-sm text-slate-900">{service.name}</div>
-                            <div className="text-xs text-slate-500">{service.description}</div>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className={`inline-flex px-2 py-1 rounded text-xs ${service.typeColor}`}>
-                            {service.type}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-sm text-slate-600">{service.version}</td>
-                        <td className="px-4 py-3 text-sm text-slate-600">{service.managingUnit}</td>
-                        <td className="px-4 py-3 text-sm text-slate-600">{service.createdAt}</td>
-                        <td className="px-4 py-3 text-sm text-slate-600">{service.updatedAt}</td>
-                        <td className="px-4 py-3">
-                          {service.status?.startsWith('failed_') ? (
-                            <button
-                              onClick={() => {
-                                setSelectedService(service);
-                                setShowDetailModal(true);
-                              }}
-                              className={`inline-flex px-2 py-1 rounded text-xs cursor-pointer hover:opacity-80 transition-opacity ${service.statusColor}`}
-                              title="Click để xem chi tiết lỗi kết nối"
-                            >
-                              {service.statusText}
-                            </button>
-                          ) : (
-                            <span className={`inline-flex px-2 py-1 rounded text-xs ${service.statusColor}`}>
-                              {service.statusText}
+                        <tr key={service.id} className="hover:bg-blue-50/30 transition-all group">
+                          <td className="px-4 py-4 text-center text-sm text-slate-500 font-medium">{index + 1}</td>
+                          <td className="px-4 py-4 text-left">
+                            <div className="max-w-xs">
+                              <div className="text-sm font-semibold text-slate-900 leading-snug">{service.name}</div>
+                              {service.description && <div className="text-[11px] text-slate-500 mt-1 line-clamp-2">{service.description}</div>}
+                            </div>
+                          </td>
+                          <td className="px-4 py-4 text-center">
+                            <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border text-center ${service.source === 'Trong ngành' ? 'bg-blue-50 text-blue-700 border-blue-100' : 'bg-purple-50 text-purple-700 border-purple-100'
+                              }`}>
+                              {service.source}
                             </span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3">
-                          {(service.status === 'err_conn' || service.status === 'err_data') ? (
-                            service.notificationSentForError ? (
-                              <span className="inline-flex px-2 py-1 rounded text-xs bg-green-100 text-green-700">
-                                Đã gửi
-                              </span>
-                            ) : (
-                              <span className="inline-flex px-2 py-1 rounded text-xs bg-yellow-100 text-yellow-700">
-                                Chưa gửi
-                              </span>
-                            )
-                          ) : (
-                            <span className="text-xs text-slate-400">-</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center justify-center gap-2">
-                            <button
-                              className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                              title="Xem chi tiết"
-                              onClick={() => {
-                                setSelectedService(service);
-                                setShowDetailModal(true);
-                              }}
-                            >
-                              <Eye className="w-4 h-4" />
-                            </button>
-                            <button
-                              className="p-1.5 text-orange-600 hover:bg-orange-50 rounded transition-colors"
-                              title="Chỉnh sửa"
-                              onClick={() => {
-                                setSelectedService(service);
-                                setShowEditServiceModal(true);
-                              }}
-                            >
-                              <Edit className="w-4 h-4" />
-                            </button>
-                            <button
-                              className="p-1.5 text-slate-600 hover:bg-slate-50 rounded transition-colors"
-                              title="Kiểm tra kết nối / Cài đặt"
-                              onClick={() => {
-                                setSelectedService(service);
-                                setShowSettingsModal(true);
-                              }}
-                            >
-                              <SettingsIcon className="w-4 h-4" />
-                            </button>
-                            <button
-                              className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
-                              title="Xóa"
-                              onClick={() => {
-                                setSelectedService(service);
-                                setShowDeleteModal(true);
-                              }}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                          </td>
+                          <td className="px-4 py-4 text-center">
+                            <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${service.type === 'SOAP' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' :
+                                service.type === 'REST' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                                  'bg-amber-50 text-amber-700 border-amber-100'
+                              }`}>
+                              {service.type === 'SOAP' ? 'Cơ sở dữ liệu' : service.type === 'REST' ? 'API' : 'Tải file Excel'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4 text-center text-sm text-slate-600 font-medium font-mono">{service.version}</td>
+                          <td className="px-4 py-4 text-center text-sm text-slate-600 font-medium max-w-[120px]">
+                            <div className="leading-tight">{service.managingUnit}</div>
+                          </td>
+                          <td className="px-4 py-4 text-center text-sm text-slate-500 font-medium font-mono whitespace-nowrap">
+                            {service.updatedAt.split(' ').map((part: string, i: number) => (
+                              <div key={i}>{part}</div>
+                            ))}
+                          </td>
+                          <td className="px-4 py-4 text-center">
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${service.status === 'draft' ? 'bg-slate-50 text-slate-600 border-slate-200' :
+                                service.status === 'inactive' ? 'bg-gray-50 text-gray-500 border-gray-200' :
+                                  'bg-green-50 text-green-700 border-green-100'
+                              }`}>
+                              {service.status === 'draft' ? 'Bản nháp' :
+                                service.status === 'inactive' ? 'Ngưng hoạt động' :
+                                  'Hoạt động'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4 text-center">
+                            <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border whitespace-nowrap ${(service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'EMPTY' ? 'bg-slate-50 text-slate-500 border-slate-200' :
+                                (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'PROCESSING' ? 'bg-blue-50 text-blue-700 border-blue-100' :
+                                  (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'DATA_UPDATED' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                                    (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'DATA_INCOMPLETED' ? 'bg-orange-50 text-orange-700 border-orange-100' :
+                                      'bg-red-50 text-red-700 border-red-100'
+                              }`}>
+                              {(service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'EMPTY' ? 'Rỗng' :
+                                (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'PROCESSING' ? 'Đang lấy dữ liệu' :
+                                  (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'DATA_UPDATED' ? 'Cập nhật thành công' :
+                                    (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'DATA_INCOMPLETED' ? 'Lỗi cấu trúc' :
+                                      'Lỗi cập nhật'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4 text-center">
+                            <div className="flex items-center justify-center gap-1">
+                              <button
+                                className="p-1.5 text-blue-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-all"
+                                title="Xem dữ liệu tích hợp"
+                                onClick={() => {
+                                  setSelectedService(service);
+                                  setShowDataDetailPage(true);
+                                }}
+                              >
+                                <Layers className="w-4 h-4" />
+                              </button>
+                              <button
+                                className="p-1.5 text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-all"
+                                title="Cập nhật dữ liệu"
+                                onClick={() => alert(`Cập nhật dữ liệu cho ${service.name}`)}
+                              >
+                                <RefreshCw className="w-4 h-4" />
+                              </button>
+                              <button
+                                className="p-1.5 text-indigo-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-all"
+                                title="Tích hợp mới"
+                                onClick={() => alert(`Tích hợp mới cho ${service.name}`)}
+                              >
+                                <Plus className="w-4 h-4" />
+                              </button>
+                              <button
+                                className="p-1.5 text-amber-500 hover:text-amber-600 hover:bg-amber-50 rounded transition-all"
+                                title="Ngừng hoạt động"
+                                onClick={() => alert(`Dừng hoạt động ${service.name}`)}
+                              >
+                                <Power className="w-4 h-4" />
+                              </button>
+                              <button
+                                className="p-1.5 text-orange-500 hover:text-orange-600 hover:bg-orange-50 rounded transition-all"
+                                title="Xóa dữ liệu thu thập"
+                                onClick={() => alert(`Xóa dữ liệu thu thập của ${service.name}`)}
+                              >
+                                <Eraser className="w-4 h-4" />
+                              </button>
+                              <button
+                                className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-all"
+                                title="Quản lý"
+                                onClick={() => {
+                                  setSelectedService(service);
+                                  navigate(`/collection-setup/view/${service.id}`);
+                                }}
+                              >
+                                <SettingsIcon className="w-4 h-4" />
+                              </button>
+                              <button
+                                className="p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 rounded transition-all"
+                                title="Xóa dịch vụ"
+                                onClick={() => {
+                                  setSelectedService(service);
+                                  setShowDeleteModal(true);
+                                }}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
               </div>
@@ -525,19 +593,20 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
       {/* Modals */}
       <AddServiceModal
         isOpen={showAddServiceModal}
-        onClose={() => setShowAddServiceModal(false)}
+        onClose={closeModal}
       />
       <EditServiceModal
         isOpen={showEditServiceModal}
-        onClose={() => setShowEditServiceModal(false)}
+        onClose={closeModal}
         service={selectedService}
+        initialTab={initialTab}
       />
       <ViewServiceModal
         isOpen={showDetailModal}
-        onClose={() => setShowDetailModal(false)}
+        onClose={closeModal}
         service={selectedService}
         onViewData={(pageId?: string) => {
-          setShowDetailModal(false);
+          closeModal();
           if (pageId && onNavigate) {
             onNavigate(pageId);
           } else {
@@ -563,7 +632,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
         service={selectedService}
       />
 
-      
+
       {/* Error Detail Modal */}
       {showErrorDetailModal && selectedService && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">

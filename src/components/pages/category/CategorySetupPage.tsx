@@ -358,14 +358,14 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
             { id: 'version-history', label: 'Lịch sử phiên bản', icon: Clock }
           ].map(tab => (
             <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as TabType)}
-              className={`flex items-center gap-2 px-6 py-4 text-[14px] font-bold transition-all border-b-2 ${activeTab === tab.id ? 'bg-blue-50/50 text-blue-600 border-blue-600' : 'text-slate-500 border-transparent hover:bg-slate-50'
-                }`}
-            >
-              <tab.icon className="w-4 h-4" />
-              {tab.label}
-            </button>
+ key={tab.id}
+ onClick={() => setActiveTab(tab.id as TabType)}
+ className={`flex items-center gap-2 px-6 py-4 text-[14px] transition-all border-b-2 ${activeTab === tab.id ? 'bg-blue-50/50 text-blue-600 border-blue-600' : 'text-slate-500 border-transparent hover:bg-slate-50'
+ }`}
+ >
+ <tab.icon className="w-4 h-4" />
+ {tab.label}
+ </button>
           ))}
         </div>
 

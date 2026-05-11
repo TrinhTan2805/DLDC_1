@@ -92,17 +92,17 @@ export function ReviewApprovalModal({ isOpen, onClose, requests, attributes, onA
                 ) : (
                   <div className="flex gap-2.5 shrink-0 ml-4">
                     <button 
-                      onClick={() => onReject([request.id], note)}
-                      className="px-5 py-2 bg-white border border-red-200 text-red-600 font-bold rounded-xl flex items-center justify-center gap-1.5 hover:bg-red-50 transition-all text-[14px]"
-                    >
-                      <XCircle className="w-5 h-5"/> Từ chối
-                    </button>
+ onClick={() => onReject([request.id], note)}
+ className="px-5 py-2 bg-white border border-red-200 text-red-600 rounded-xl flex items-center justify-center gap-1.5 hover:bg-red-50 transition-all text-[14px]"
+ >
+ <XCircle className="w-5 h-5"/> Từ chối
+ </button>
                     <button 
-                      onClick={() => onApprove([request.id], note, lineStatuses)}
-                      className="px-5 py-2 bg-blue-600 text-white font-bold rounded-xl flex items-center justify-center gap-1.5 hover:bg-blue-700 transition-all text-[14px] shadow-lg shadow-blue-200"
-                    >
-                      <CheckCircle className="w-5 h-5"/> Phê duyệt
-                    </button>
+ onClick={() => onApprove([request.id], note, lineStatuses)}
+ className="px-5 py-2 bg-blue-600 text-white rounded-xl flex items-center justify-center gap-1.5 hover:bg-blue-700 transition-all text-[14px] shadow-lg shadow-blue-200"
+ >
+ <CheckCircle className="w-5 h-5"/> Phê duyệt
+ </button>
                   </div>
                 )}
               </div>
@@ -235,26 +235,26 @@ export function ReviewApprovalModal({ isOpen, onClose, requests, attributes, onA
         {/* Footer Area */}
         <div className="px-8 py-5 bg-white border-t border-slate-100 flex gap-4 justify-end flex-shrink-0">
           <button 
-            onClick={onClose} 
-            className="px-8 py-3 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-all text-[15px]"
-          >
+ onClick={onClose} 
+ className="px-8 py-3 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 transition-all text-[15px]"
+ >
             Đóng
           </button>
           
           {hasPending && (
             <>
               <button 
-                 onClick={() => onReject(pendingRequests.map(r => r.id), note)}
-                 className="px-8 py-3 bg-white border border-red-200 text-red-600 font-bold rounded-xl flex items-center justify-center gap-2.5 hover:bg-red-50 transition-all text-[15px]"
-              >
-                <XCircle className="w-5 h-5"/> Từ chối tất cả
-              </button>
+ onClick={() => onReject(pendingRequests.map(r => r.id), note)}
+ className="px-8 py-3 bg-white border border-red-200 text-red-600 rounded-xl flex items-center justify-center gap-2.5 hover:bg-red-50 transition-all text-[15px]"
+ >
+ <XCircle className="w-5 h-5"/> Từ chối tất cả
+ </button>
               <button 
-                 onClick={() => onApprove(pendingRequests.map(r => r.id), note, lineStatuses)}
-                 className="px-8 py-3 bg-blue-600 text-white font-bold rounded-xl flex items-center justify-center gap-2.5 hover:bg-blue-700 transition-all text-[15px] shadow-xl shadow-blue-300"
-              >
-                <CheckCircle className="w-5 h-5"/> Phê duyệt tất cả
-              </button>
+ onClick={() => onApprove(pendingRequests.map(r => r.id), note, lineStatuses)}
+ className="px-8 py-3 bg-blue-600 text-white rounded-xl flex items-center justify-center gap-2.5 hover:bg-blue-700 transition-all text-[15px] shadow-xl shadow-blue-300"
+ >
+ <CheckCircle className="w-5 h-5"/> Phê duyệt tất cả
+ </button>
              </>
           )}
         </div>

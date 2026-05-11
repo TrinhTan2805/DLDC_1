@@ -1,8 +1,10 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { Search, ChevronDown, ChevronUp, AlertTriangle, Send, Download, Eye, Lock, EyeOff, SquarePen, X } from 'lucide-react';
+import { Search, ChevronDown, ChevronUp, AlertTriangle, Send, Download, Eye, Lock, EyeOff, SquarePen, X, Network } from 'lucide-react';
 
-
+import { DataMappingModal } from './DataMappingModal';
+import { SelectTargetDatabaseModal } from './SelectTargetDatabaseModal';
+import { TargetDatabase } from './mockTargetDatabases';
 
 export interface ProcessingDatasetItem {
   id: string;
@@ -22,6 +24,18 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
   const [activeTab, setActiveTab] = useState('clean');
   const [isSendPopupOpen, setIsSendPopupOpen] = useState(false);
   const [isEditClassifyModalOpen, setIsEditClassifyModalOpen] = useState(false);
+  
+  // Mapping Flow States
+  const [isSelectDBModalOpen, setIsSelectDBModalOpen] = useState(false);
+  const [isMappingModalOpen, setIsMappingModalOpen] = useState(false);
+  const [selectedTargetDB, setSelectedTargetDB] = useState<TargetDatabase | null>(null);
+
+  const handleContinueMapping = (db: TargetDatabase) => {
+    setSelectedTargetDB(db);
+    setIsSelectDBModalOpen(false);
+    setIsMappingModalOpen(true);
+  };
+
   const [expandedSidebarGroups, setExpandedSidebarGroups] = useState<Record<string, boolean>>({ 'CSDL Hộ tịch điện tử': true });
   const toggleSidebarGroup = (groupName: string) => {
     setExpandedSidebarGroups(prev => ({ ...prev, [groupName]: !prev[groupName] }));
@@ -150,18 +164,18 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
         <div className="flex-1 overflow-y-auto py-2 custom-scrollbar">
           {filteredServices.map((service) => (
             <button
-              key={service.id}
-              title={service.name}
-              onClick={() => setActiveServiceId(service.id)}
-              className={`w-full text-left px-5 py-3 border-b border-slate-50 hover:bg-blue-50/30 transition-colors flex flex-col ${activeServiceId === service.id
-                ? 'bg-blue-50/60 border-l-4 border-l-blue-600 pl-[16px]'
-                : 'border-l-4 border-l-transparent'
-                }`}
-            >
-              <div className={`text-[13px] leading-relaxed ${activeServiceId === service.id ? 'text-blue-700 font-semibold' : 'text-slate-600 font-medium'}`}>
-                {service.name}
-              </div>
-            </button>
+ key={service.id}
+ title={service.name}
+ onClick={() => setActiveServiceId(service.id)}
+ className={`w-full text-left px-5 py-3 border-b border-slate-50 hover:bg-blue-50/30 transition-colors flex flex-col ${activeServiceId === service.id
+ ? 'bg-blue-50/60 border-l-4 border-l-blue-600 pl-[16px]'
+ : 'border-l-4 border-l-transparent'
+ }`}
+ >
+ <div className={`text-[13px] leading-relaxed ${activeServiceId === service.id ? 'text-blue-700 ' : 'text-slate-600 font-medium'}`}>
+ {service.name}
+ </div>
+ </button>
           ))}
         </div>
       </div>
@@ -169,10 +183,19 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
       {/* Main Content */}
       <div className="flex-1 flex flex-col bg-slate-50 relative">
         <div className="p-6">
-          <h1 className="text-xl font-bold text-slate-800 mb-2">
-            {activeTab === 'history' ? 'Lịch sử xử lý dữ liệu' :
-              activeTab === 'classification' ? 'Phân loại Dữ liệu' : 'Quản lý Quy tắc Xử lý'}
-          </h1>
+          <div className="flex justify-between items-center mb-2">
+            <h1 className="text-xl font-bold text-slate-800">
+              {activeTab === 'history' ? 'Lịch sử xử lý dữ liệu' :
+                activeTab === 'classification' ? 'Phân loại Dữ liệu' : 'Quản lý Quy tắc Xử lý'}
+            </h1>
+            <button
+              onClick={() => setIsSelectDBModalOpen(true)}
+              className="flex items-center gap-2 px-5 py-2.5 bg-[#00bcd4] text-white rounded-lg text-sm font-semibold hover:bg-[#00acc1] transition-colors shadow-sm"
+            >
+              <Network className="w-4 h-4" />
+              Ánh xạ dữ liệu
+            </button>
+          </div>
           <p className="text-sm text-slate-500 mb-6">Nguồn dữ liệu: {systemName} | Dữ liệu {activeService.name.toLowerCase()}</p>
 
           {/* Stats Overview */}
@@ -529,40 +552,43 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
 
                 <div className="text-xs text-slate-500 mb-2">Hiển thị 12 / 12 bản ghi</div>
 
-                <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-                  <table className="w-full text-sm text-left">
-                    <thead className="text-xs text-slate-500 bg-slate-50/80 uppercase font-semibold border-b border-slate-200">
+                <div className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
+                  <table className="w-full border-collapse">
+                    <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
                       <tr>
-                        <th className="px-6 py-4">Mã Bản Ghi</th>
-                        <th className="px-6 py-4">Trường Dữ Liệu</th>
-                        <th className="px-6 py-4">Giá Trị Gốc</th>
-                        <th className="px-6 py-4">Loại Lỗi</th>
-                        <th className="px-6 py-4">Mô Tả Lỗi</th>
-                        <th className="px-6 py-4">Trạng Thái</th>
+                        <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Mã Bản Ghi</th>
+                        <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Trường Dữ Liệu</th>
+                        <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Giá Trị Gốc</th>
+                        <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Loại Lỗi</th>
+                        <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Mô Tả Lỗi</th>
+                        <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Trạng Thái</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {mockErrors.map((error, idx) => (
-                        <tr key={idx} className={`hover:bg-slate-50/50 transition-colors group ${error.status === 'Đã gửi về hệ thống nguồn' ? 'bg-slate-50/30' : ''}`}>
-                          <td className="px-6 py-4 font-medium text-slate-700">{error.id}</td>
-                          <td className="px-6 py-4 text-slate-600">{error.field}</td>
-                          <td className={`px-6 py-4 line-through ${error.status === 'Đã gửi về hệ thống nguồn' ? 'text-slate-400' : 'text-red-500'}`}>{error.originalValue}</td>
-                          <td className="px-6 py-4">
-                            <span className={`px-2.5 py-1 text-xs font-medium rounded-md ${error.type === 'Sai định dạng' ? 'bg-red-50 text-red-600' :
-                              error.type === 'Thiếu dữ liệu' ? 'bg-orange-50 text-orange-600' :
-                                'bg-amber-50 text-amber-600'
-                              } ${error.status === 'Đã gửi về hệ thống nguồn' ? 'opacity-50 grayscale' : ''}`}>
+                        <tr key={idx} className={`hover:bg-blue-50/30 transition-all group ${error.status === 'Đã gửi về hệ thống nguồn' ? 'bg-slate-50/30' : ''}`}>
+                          <td className="px-6 py-4 text-center text-sm font-semibold text-slate-900 font-mono">{error.id}</td>
+                          <td className="px-6 py-4 text-center text-sm text-slate-600 font-medium">{error.field}</td>
+                          <td className={`px-6 py-4 text-center text-sm font-mono line-through ${error.status === 'Đã gửi về hệ thống nguồn' ? 'text-slate-400' : 'text-red-500 font-semibold'}`}>{error.originalValue}</td>
+                          <td className="px-6 py-4 text-center">
+                            <span className={`inline-flex items-center px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full border shadow-sm ${
+                              error.type === 'Sai định dạng' ? 'bg-red-50 text-red-700 border-red-100' :
+                              error.type === 'Thiếu dữ liệu' ? 'bg-orange-50 text-orange-700 border-orange-100' :
+                              'bg-amber-50 text-amber-700 border-amber-100'
+                            } ${error.status === 'Đã gửi về hệ thống nguồn' ? 'opacity-50 grayscale' : ''}`}>
                               {error.type}
                             </span>
                           </td>
-                          <td className={`px-6 py-4 flex items-center gap-2 ${error.status === 'Đã gửi về hệ thống nguồn' ? 'text-slate-400' : 'text-slate-600'}`}>
-                            <AlertTriangle className={`w-4 h-4 ${error.status === 'Đã gửi về hệ thống nguồn' ? 'text-slate-400' : 'text-red-500'}`} />
-                            {error.desc}
+                          <td className="px-6 py-4 text-center">
+                            <div className={`inline-flex items-center gap-2 text-sm font-medium ${error.status === 'Đã gửi về hệ thống nguồn' ? 'text-slate-400' : 'text-slate-600'}`}>
+                              <AlertTriangle className={`w-4 h-4 ${error.status === 'Đã gửi về hệ thống nguồn' ? 'text-slate-400' : 'text-red-500'}`} />
+                              {error.desc}
+                            </div>
                           </td>
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-2">
-                              <span className={`w-2 h-2 rounded-full ${error.status === 'Đã gửi về hệ thống nguồn' ? 'bg-emerald-500' : 'bg-orange-500'}`}></span>
-                              <span className={`${error.status === 'Đã gửi về hệ thống nguồn' ? 'text-emerald-700 font-medium' : 'text-slate-600'}`}>{error.status}</span>
+                          <td className="px-6 py-4 text-center">
+                            <div className="flex items-center justify-center gap-2">
+                              <span className={`w-2 h-2 rounded-full ${error.status === 'Đã gửi về hệ thống nguồn' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]' : 'bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.4)]'}`}></span>
+                              <span className={`text-xs font-bold uppercase tracking-wider ${error.status === 'Đã gửi về hệ thống nguồn' ? 'text-emerald-700' : 'text-slate-600'}`}>{error.status}</span>
                             </div>
                           </td>
                         </tr>
@@ -636,35 +662,37 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                     Chỉnh sửa các trường
                   </button>
                 </div>
-                <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-                  <table className="w-full text-sm text-left">
-                    <thead className="text-xs text-slate-500 bg-slate-50/80 uppercase font-semibold border-b border-slate-200">
+                <div className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
+                  <table className="w-full border-collapse">
+                    <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
                       <tr>
-                        <th className="px-6 py-4">Tên Trường</th>
-                        <th className="px-6 py-4">Mức Độ Công Khai</th>
-                        <th className="px-6 py-4">Mức Độ Nhạy Cảm</th>
+                        <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Tên Trường</th>
+                        <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Mức Độ Công Khai</th>
+                        <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Mức Độ Nhạy Cảm</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {mockClassification.map((item, idx) => (
-                        <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
-                          <td className="px-6 py-4 font-medium text-slate-700">{item.field}</td>
-                          <td className="px-6 py-4">
-                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full ${item.publicLevel === 'Công khai hạn chế' ? 'bg-blue-50 text-blue-600' :
-                              item.publicLevel === 'Nội bộ' ? 'bg-orange-50 text-orange-600' :
-                                'bg-red-50 text-red-600'
-                              }`}>
+                        <tr key={idx} className="hover:bg-blue-50/30 transition-all group">
+                          <td className="px-6 py-4 text-center text-sm font-semibold text-slate-900">{item.field}</td>
+                          <td className="px-6 py-4 text-center">
+                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full border shadow-sm ${
+                              item.publicLevel === 'Công khai hạn chế' ? 'bg-blue-50 text-blue-700 border-blue-100' :
+                              item.publicLevel === 'Nội bộ' ? 'bg-orange-50 text-orange-700 border-orange-100' :
+                              'bg-red-50 text-red-700 border-red-100'
+                            }`}>
                               {item.publicLevel === 'Công khai hạn chế' && <Eye className="w-3.5 h-3.5" />}
                               {item.publicLevel === 'Nội bộ' && <Lock className="w-3.5 h-3.5" />}
                               {item.publicLevel === 'Mật' && <EyeOff className="w-3.5 h-3.5" />}
                               {item.publicLevel}
                             </span>
                           </td>
-                          <td className="px-6 py-4">
-                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full ${item.sensLevel === 'Thấp' ? 'bg-emerald-50 text-emerald-600' :
-                              item.sensLevel === 'Cao' ? 'bg-red-50 text-red-500' :
-                                'bg-red-100 text-red-700'
-                              }`}>
+                          <td className="px-6 py-4 text-center">
+                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full border shadow-sm ${
+                              item.sensLevel === 'Thấp' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                              item.sensLevel === 'Cao' ? 'bg-red-50 text-red-700 border-red-100' :
+                              'bg-red-100 text-red-800 border-red-200 shadow-red-100'
+                            }`}>
                               {item.sensLevel}
                             </span>
                           </td>
@@ -682,30 +710,31 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input type="text" placeholder="Tìm kiếm theo tên quy tắc, thời gian..." className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" />
                 </div>
-                <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-                  <table className="w-full text-sm text-left">
-                    <thead className="text-xs text-slate-500 bg-slate-50/80 uppercase font-semibold border-b border-slate-200">
+                <div className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
+                  <table className="w-full border-collapse">
+                    <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
                       <tr>
-                        <th className="px-6 py-4 w-20">STT</th>
-                        <th className="px-6 py-4 w-48">Thời gian</th>
-                        <th className="px-6 py-4">Loại xử lý</th>
-                        <th className="px-6 py-4 w-32">Trạng thái</th>
+                        <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap w-20">STT</th>
+                        <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap w-48">Thời gian</th>
+                        <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Loại xử lý</th>
+                        <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap w-32">Trạng thái</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {mockHistory.map((item, idx) => (
-                        <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
-                          <td className="px-6 py-4 font-medium text-slate-600">{item.stt}</td>
-                          <td className="px-6 py-4 text-slate-600">{item.time}</td>
-                          <td className="px-6 py-4">
-                            <div className="font-medium text-slate-800 mb-1">{item.type}</div>
-                            <div className="text-xs text-slate-500">{item.progress}</div>
+                        <tr key={idx} className="hover:bg-blue-50/30 transition-all group">
+                          <td className="px-6 py-4 text-center text-sm font-semibold text-slate-500">{(idx + 1).toString().padStart(2, '0')}</td>
+                          <td className="px-6 py-4 text-center text-sm text-slate-600 font-medium font-mono">{item.time}</td>
+                          <td className="px-6 py-4 text-center">
+                            <div className="font-semibold text-slate-900 text-sm mb-1">{item.type}</div>
+                            <div className="text-xs text-slate-500 font-mono">{item.progress}</div>
                           </td>
-                          <td className="px-6 py-4">
-                            <span className={`px-3 py-1.5 text-xs font-medium rounded-md ${item.status === 'Đang xử lý' ? 'bg-indigo-50 text-indigo-600' :
-                              item.status === 'Hoàn thành' ? 'bg-emerald-50 text-emerald-600' :
-                                'bg-red-50 text-red-600'
-                              }`}>
+                          <td className="px-6 py-4 text-center">
+                            <span className={`inline-flex items-center px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-full border shadow-sm ${
+                              item.status === 'Đang xử lý' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' :
+                              item.status === 'Hoàn thành' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                              'bg-red-50 text-red-700 border-red-100'
+                            }`}>
                               {item.status}
                             </span>
                           </td>
@@ -721,57 +750,59 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
         </div>
 
         {/* Footer */}
-        {activeTab === 'clean' || activeTab === 'standardize' || activeTab === 'transform' ? (
-          <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 flex items-center justify-between z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-            <div className="text-sm text-slate-600 font-medium">
-              Đã áp dụng {Object.values(appliedRules).filter(Boolean).length} / 10 quy tắc
+        {!(isMappingModalOpen && systemName === 'CSDL Hộ tịch điện tử') && (
+          activeTab === 'clean' || activeTab === 'standardize' || activeTab === 'transform' ? (
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 flex items-center justify-between z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+              <div className="text-sm text-slate-600 font-medium">
+                Đã áp dụng {Object.values(appliedRules).filter(Boolean).length} / 10 quy tắc
+              </div>
+              <div className="flex items-center gap-3">
+                <button className="px-6 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors">
+                  Hủy
+                </button>
+                <button className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors">
+                  Lưu cấu hình
+                </button>
+              </div>
             </div>
-            <div className="flex items-center gap-3">
-              <button className="px-6 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors">
-                Hủy
-              </button>
-              <button className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors">
-                Lưu cấu hình
-              </button>
+          ) : activeTab === 'errors' ? (
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 flex items-center justify-between z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+              <div className="text-sm text-slate-600 font-medium">
+                10 bản ghi chưa xử lý • 2 đã gửi về hệ thống nguồn
+              </div>
+              <div className="flex items-center gap-3">
+                <button className="px-6 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors">
+                  Đóng
+                </button>
+                <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-emerald-600 rounded-md hover:bg-emerald-700 transition-colors">
+                  <Download className="w-4 h-4" />
+                  Xuất danh sách lỗi
+                </button>
+                <button
+                  onClick={() => setIsSendPopupOpen(true)}
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  <Send className="w-4 h-4" />
+                  Gửi tất cả về hệ thống nguồn
+                </button>
+              </div>
             </div>
-          </div>
-        ) : activeTab === 'errors' ? (
-          <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 flex items-center justify-between z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-            <div className="text-sm text-slate-600 font-medium">
-              10 bản ghi chưa xử lý • 2 đã gửi về hệ thống nguồn
-            </div>
-            <div className="flex items-center gap-3">
-              <button className="px-6 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors">
+          ) : activeTab === 'history' ? (
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 flex items-center justify-end z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+              <button className="px-6 py-2 text-sm font-medium text-slate-700 bg-slate-100 rounded-md hover:bg-slate-200 transition-colors">
                 Đóng
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-emerald-600 rounded-md hover:bg-emerald-700 transition-colors">
-                <Download className="w-4 h-4" />
-                Xuất danh sách lỗi
+            </div>
+          ) : (
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 flex items-center justify-end z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+              <button className="px-6 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors mr-3">
+                Đóng
               </button>
-              <button
-                onClick={() => setIsSendPopupOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
-              >
-                <Send className="w-4 h-4" />
-                Gửi tất cả về hệ thống nguồn
+              <button className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors">
+                Xuất báo cáo
               </button>
             </div>
-          </div>
-        ) : activeTab === 'history' ? (
-          <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 flex items-center justify-end z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-            <button className="px-6 py-2 text-sm font-medium text-slate-700 bg-slate-100 rounded-md hover:bg-slate-200 transition-colors">
-              Đóng
-            </button>
-          </div>
-        ) : (
-          <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 flex items-center justify-end z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-            <button className="px-6 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors mr-3">
-              Đóng
-            </button>
-            <button className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors">
-              Xuất báo cáo
-            </button>
-          </div>
+          )
         )}
       </div>
 
@@ -972,6 +1003,19 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
           </div>
         </div>
       )}
+
+      <SelectTargetDatabaseModal
+        isOpen={isSelectDBModalOpen}
+        onClose={() => setIsSelectDBModalOpen(false)}
+        onContinue={handleContinueMapping}
+      />
+
+      <DataMappingModal
+        isOpen={isMappingModalOpen}
+        onClose={() => setIsMappingModalOpen(false)}
+        targetDatabase={selectedTargetDB}
+        sourceDatasetName={activeService.name}
+      />
     </div>
   );
 }

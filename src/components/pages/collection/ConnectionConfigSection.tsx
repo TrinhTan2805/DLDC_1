@@ -23,12 +23,12 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
   const [authorization, setAuthorization] = useState('No Authen');
   const [isExpanded, setIsExpanded] = useState(false);
   const [tokenType, setTokenType] = useState('api');
-  
+
   const [headers1, setHeaders1] = useState<HeaderItem[]>([
     { id: '1', key: '', value: '' },
     { id: '2', key: '', value: '' }
   ]);
-  
+
   const [headers2, setHeaders2] = useState<HeaderItem[]>([
     { id: '1', key: '', value: '' }
   ]);
@@ -66,7 +66,7 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
         >
           <option value="API">API</option>
           <option value="DB">Cơ sở dữ liệu</option>
-          <option value="FILE">Tải file</option>
+          <option value="FILE">Tải file Excel</option>
         </select>
       </div>
 
@@ -75,10 +75,6 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
           <div>
             <label className="block text-sm text-slate-700 mb-1">Tên api<span className="text-red-500">*</span></label>
             <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tên api" />
-          </div>
-          <div>
-            <label className="block text-sm text-slate-700 mb-1">Tên alias<span className="text-red-500">*</span></label>
-            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tên alias" />
           </div>
           <div>
             <label className="block text-sm text-slate-700 mb-1">URL<span className="text-red-500">*</span></label>
@@ -117,19 +113,19 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
           </div>
 
           <div>
-            <label className="block text-sm text-slate-700 mb-1">Worker<span className="text-red-500">*</span></label>
+            <label className="block text-sm text-slate-700 mb-1">Máy chủ thực thi<span className="text-red-500">*</span></label>
             <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-              <option value="">Chọn Worker</option>
-              <option value="worker1">Worker 1</option>
-              <option value="worker2">Worker 2</option>
+              <option value="">Chọn Máy chủ thực thi</option>
+              <option value="worker1">Máy chủ thực thi 1</option>
+              <option value="worker2">Máy chủ thực thi 2</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm text-slate-700 mb-1">Agent<span className="text-red-500">*</span></label>
+            <label className="block text-sm text-slate-700 mb-1">Trạm kết nối<span className="text-red-500">*</span></label>
             <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-              <option value="">Chọn Agent</option>
-              <option value="agent1">Agent 1</option>
-              <option value="agent2">Agent 2</option>
+              <option value="">Chọn Trạm kết nối</option>
+              <option value="agent1">Trạm kết nối 1</option>
+              <option value="agent2">Trạm kết nối 2</option>
             </select>
           </div>
           <div>
@@ -141,10 +137,10 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
               <option value="DELETE">DELETE</option>
             </select>
           </div>
-          
+
           <div>
             <label className="block text-sm text-slate-700 mb-1">Authorization</label>
-            <select 
+            <select
               value={authorization}
               onChange={(e) => {
                 setAuthorization(e.target.value);
@@ -166,14 +162,14 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
           </div>
 
           <div className="pt-2">
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={() => setIsExpanded(!isExpanded)}
-              className="flex items-center gap-2 text-base font-bold text-[#5c6e81] hover:text-slate-900 transition-colors"
+              className="flex items-center gap-2 text-base text-[#5c6e81] hover:text-slate-900 transition-colors"
             >
               Thông tin mở rộng {isExpanded ? <ChevronUp className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
             </button>
-            
+
             {isExpanded && (
               <div className="mt-4 p-5 bg-white border border-slate-200 shadow-sm rounded-lg space-y-4 animate-in slide-in-from-top-2 duration-200">
                 {authorization === 'Basic Authen' && (
@@ -188,12 +184,12 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
                     </div>
                   </div>
                 )}
-                
+
                 {authorization === 'Bearer Token' && (
                   <>
                     <div>
                       <label className="block text-sm text-slate-700 mb-1">Loại token</label>
-                      <select 
+                      <select
                         value={tokenType}
                         onChange={(e) => setTokenType(e.target.value)}
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
@@ -204,14 +200,14 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
                     </div>
                     <div>
                       <label className="block text-sm text-slate-700 mb-1">Nhập token</label>
-                      <input 
-                        type="text" 
-                        disabled={tokenType !== 'static'} 
-                        className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${tokenType !== 'static' ? 'border-slate-200 bg-slate-100 text-slate-500' : 'border-slate-300 bg-white'}`} 
-                        placeholder={tokenType === 'static' ? "Nhập token..." : ""} 
+                      <input
+                        type="text"
+                        disabled={tokenType !== 'static'}
+                        className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${tokenType !== 'static' ? 'border-slate-200 bg-slate-100 text-slate-500' : 'border-slate-300 bg-white'}`}
+                        placeholder={tokenType === 'static' ? "Nhập token..." : ""}
                       />
                     </div>
-                    
+
                     {tokenType === 'api' && (
                       <div className="space-y-4 animate-in fade-in duration-200 mt-4">
                         <div>
@@ -266,7 +262,7 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
                     )}
                   </>
                 )}
-                
+
                 {authorization === 'No Authen' && (
                   <div className="text-sm text-slate-500 italic">Không có cấu hình mở rộng cho loại xác thực hiện tại. Chọn Bearer Token hoặc Basic Authen để xem.</div>
                 )}
@@ -282,22 +278,22 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
             <label className="block text-sm text-slate-700 font-medium mb-1.5">Tên File CSDL <span className="text-red-500">*</span></label>
             <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tên File CSDL" />
           </div>
-          
+
           <div>
-            <label className="block text-sm text-slate-700 font-medium mb-1.5">Worker <span className="text-red-500">*</span></label>
+            <label className="block text-sm text-slate-700 font-medium mb-1.5">Máy chủ thực thi <span className="text-red-500">*</span></label>
             <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-              <option value="">Chọn Worker</option>
-              <option value="worker1">Worker 1</option>
-              <option value="worker2">Worker 2</option>
+              <option value="">Chọn Máy chủ thực thi</option>
+              <option value="worker1">Máy chủ thực thi 1</option>
+              <option value="worker2">Máy chủ thực thi 2</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-sm text-slate-700 font-medium mb-1.5">Agent <span className="text-red-500">*</span></label>
+            <label className="block text-sm text-slate-700 font-medium mb-1.5">Trạm kết nối <span className="text-red-500">*</span></label>
             <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-              <option value="">Chọn Agent</option>
-              <option value="agent1">Agent 1</option>
-              <option value="agent2">Agent 2</option>
+              <option value="">Chọn Trạm kết nối</option>
+              <option value="agent1">Trạm kết nối 1</option>
+              <option value="agent2">Trạm kết nối 2</option>
             </select>
           </div>
 
@@ -309,11 +305,11 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
               </div>
               <div className="text-center">
                 <p className="text-sm text-slate-600">Kéo và thả tập tin vào đây hoặc</p>
-                <button type="button" className="mt-2 px-4 py-1.5 bg-white border border-slate-200 rounded text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50">Chọn tập tin</button>
+                <button type="button" className="mt-2 px-4 py-1.5 bg-white border border-slate-200 rounded text-xs text-slate-700 shadow-sm hover:bg-slate-50">Chọn tập tin</button>
               </div>
             </div>
             <p className="mt-3 text-[13px] text-slate-500">
-              Các định dạng cho phép: <span className="font-bold text-slate-700 italic">CSV, XLS, XLSX, JSON, XML</span>
+              Các định dạng cho phép: <span className="font-bold text-slate-700 italic">CSV, XLS, XLSX</span>
             </p>
           </div>
         </div>
@@ -342,20 +338,20 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
               </select>
             </div>
             <div>
-              <label className="block text-sm text-slate-700 font-medium mb-1.5">Agent <span className="text-red-500">*</span></label>
+              <label className="block text-sm text-slate-700 font-medium mb-1.5">Trạm kết nối <span className="text-red-500">*</span></label>
               <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                <option value="">Chọn Agent</option>
-                <option value="agent1">Agent 1</option>
-                <option value="agent2">Agent 2</option>
+                <option value="">Chọn Trạm kết nối</option>
+                <option value="agent1">Trạm kết nối 1</option>
+                <option value="agent2">Trạm kết nối 2</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-sm text-slate-700 font-medium mb-1.5">Worker <span className="text-red-500">*</span></label>
+              <label className="block text-sm text-slate-700 font-medium mb-1.5">Máy chủ thực thi <span className="text-red-500">*</span></label>
               <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                <option value="">Chọn Worker</option>
-                <option value="worker1">Worker 1</option>
-                <option value="worker2">Worker 2</option>
+                <option value="">Chọn Máy chủ thực thi</option>
+                <option value="worker1">Máy chủ thực thi 1</option>
+                <option value="worker2">Máy chủ thực thi 2</option>
               </select>
             </div>
             <div>
@@ -379,14 +375,14 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
           </div>
 
           <div className="pt-2">
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={() => setIsExpanded(!isExpanded)}
-              className="flex items-center gap-2 text-base font-bold text-[#5c6e81] hover:text-slate-900 transition-colors"
+              className="flex items-center gap-2 text-base text-[#5c6e81] hover:text-slate-900 transition-colors"
             >
               Thông tin mở rộng {isExpanded ? <ChevronUp className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
             </button>
-            
+
             {isExpanded && (
               <div className="mt-4 p-5 bg-white border border-slate-200 shadow-sm rounded-lg space-y-4 animate-in slide-in-from-top-2 duration-200">
                 <div className="grid grid-cols-2 gap-x-6 gap-y-4">

@@ -76,20 +76,20 @@ export function ApprovalTab({
           const Icon = tab.icon;
           return (
             <button
-              key={tab.key}
-              onClick={() => {
-                setApprovalTab(tab.key);
-                setStatusFilter('all');
-              }}
-              className={`px-4 py-2 rounded-lg text-[13px] font-bold transition-all flex items-center gap-2 ${
-                approvalTab === tab.key
-                  ? 'bg-white text-blue-600 shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-200 hover:text-slate-900'
-              }`}
-            >
-              <Icon className="w-4 h-4" />
-              {tab.label}
-            </button>
+ key={tab.key}
+ onClick={() => {
+ setApprovalTab(tab.key);
+ setStatusFilter('all');
+ }}
+ className={`px-4 py-2 rounded-lg text-[13px] transition-all flex items-center gap-2 ${
+ approvalTab === tab.key
+ ? 'bg-white text-blue-600 shadow-sm'
+ : 'text-slate-600 hover:bg-slate-200 hover:text-slate-900'
+ }`}
+ >
+ <Icon className="w-4 h-4" />
+ {tab.label}
+ </button>
           )
         })}
       </div>
@@ -124,15 +124,15 @@ export function ApprovalTab({
         <span className="text-[13px] text-slate-600 font-semibold mr-1">Trang thái:</span>
         {tabList.map(tab => (
           <button
-            key={tab.key}
-            onClick={() => setStatusFilter(tab.key)}
-            className={`px-3 py-1.5 rounded-lg text-[13px] font-bold transition-all ${statusFilter === tab.key
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
-          >
-            {tab.label} ({tab.count})
-          </button>
+ key={tab.key}
+ onClick={() => setStatusFilter(tab.key)}
+ className={`px-3 py-1.5 rounded-lg text-[13px] transition-all ${statusFilter === tab.key
+ ? 'bg-blue-600 text-white shadow-sm'
+ : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+ }`}
+ >
+ {tab.label} ({tab.count})
+ </button>
         ))}
       </div>
 
@@ -225,28 +225,28 @@ export function ApprovalTab({
                   {/* Right — vertical action buttons */}
                   <div className="flex flex-col gap-2 shrink-0 items-stretch min-w-[128px]">
                     <button
-                      onClick={() => onViewDetail(req)}
-                      className="flex items-center justify-center gap-1.5 px-3 py-2 border border-slate-200 text-blue-600 rounded-lg text-[13px] font-bold hover:bg-blue-50 transition-colors"
-                    >
-                      <Eye className="w-3.5 h-3.5" />
-                      Xem chi tiết
-                    </button>
+ onClick={() => onViewDetail(req)}
+ className="flex items-center justify-center gap-1.5 px-3 py-2 border border-slate-200 text-blue-600 rounded-lg text-[13px] hover:bg-blue-50 transition-colors"
+ >
+ <Eye className="w-3.5 h-3.5" />
+ Xem chi tiết
+ </button>
                     {req.status === 'pending' && (
                       <>
                         <button
-                          onClick={() => onApproveClick(req)}
-                          className="flex items-center justify-center gap-1.5 px-3 py-2 bg-green-600 text-white rounded-lg text-[13px] font-bold hover:bg-green-700 transition-colors"
-                        >
-                          <Check className="w-3.5 h-3.5" />
-                          Phê duyệt
-                        </button>
+ onClick={() => onApproveClick(req)}
+ className="flex items-center justify-center gap-1.5 px-3 py-2 bg-green-600 text-white rounded-lg text-[13px] hover:bg-green-700 transition-colors"
+ >
+ <Check className="w-3.5 h-3.5" />
+ Phê duyệt
+ </button>
                         <button
-                          onClick={() => onRejectClick(req)}
-                          className="flex items-center justify-center gap-1.5 px-3 py-2 bg-red-600 text-white rounded-lg text-[13px] font-bold hover:bg-red-700 transition-colors"
-                        >
-                          <Ban className="w-3.5 h-3.5" />
-                          Từ chối
-                        </button>
+ onClick={() => onRejectClick(req)}
+ className="flex items-center justify-center gap-1.5 px-3 py-2 bg-red-600 text-white rounded-lg text-[13px] hover:bg-red-700 transition-colors"
+ >
+ <Ban className="w-3.5 h-3.5" />
+ Từ chối
+ </button>
                       </>
                     )}
                   </div>

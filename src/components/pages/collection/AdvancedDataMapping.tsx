@@ -229,31 +229,10 @@ export function AdvancedDataMapping({ onClose }: { onClose?: () => void }) {
     <div className="flex flex-col w-full h-full bg-slate-50">
 
       {/* HEADER INFO SECTION */}
-      <div className="px-6 pt-5 pb-4 bg-white border-b border-slate-200 shrink-0">
-        <div className="flex gap-4 items-end">
-          <div className="flex-1">
-            <label htmlFor="url-endpoint" className="block text-sm text-slate-700 font-medium mb-1">
-              URL Endpoint <span className="text-red-500">*</span>
-            </label>
-            <input aria-label="Input field"
-              id="url-endpoint"
-              type="text"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="https://api.example.com/data"
-              value={endpointUrl}
-              onChange={(e) => setEndpointUrl(e.target.value)}
-            />
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              if (endpointUrl) setIsDataLoaded(true);
-            }}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center gap-2 h-[38px]"
-          >
-            <Send className="w-4 h-4" />
-            Send
-          </button>
+      <div className="px-6 py-4 bg-white border-b border-slate-200 shrink-0 flex justify-between items-center">
+        <div>
+          <h3 className="text-sm font-semibold text-slate-800">Cấu hình ánh xạ dữ liệu</h3>
+          <p className="text-xs text-slate-500 mt-0.5">Kết nối đã được thiết lập. Nhấn Nạp cấu trúc để lấy danh sách bảng và trường.</p>
         </div>
       </div>
 
@@ -278,17 +257,17 @@ export function AdvancedDataMapping({ onClose }: { onClose?: () => void }) {
               return (
                 <div key={group.groupId} className="border border-slate-200 bg-white rounded-md overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
                   <button
-                    type="button"
-                    onClick={() => toggleSourceGroup(group.groupId)}
-                    className="w-full flex items-center justify-between px-2 py-2 hover:bg-slate-50 transition-colors focus:outline-none"
-                  >
-                    <div className="flex items-center gap-1.5">
-                      <span className="w-4 h-4 flex items-center justify-center text-slate-400">
-                        {group.isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
-                      </span>
-                      <span className="text-xs font-bold text-slate-700 truncate">{group.groupName}</span>
-                    </div>
-                  </button>
+ type="button"
+ onClick={() => toggleSourceGroup(group.groupId)}
+ className="w-full flex items-center justify-between px-2 py-2 hover:bg-slate-50 transition-colors focus:outline-none"
+ >
+ <div className="flex items-center gap-1.5">
+ <span className="w-4 h-4 flex items-center justify-center text-slate-400">
+ {group.isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+ </span>
+ <span className="text-xs text-slate-700 truncate">{group.groupName}</span>
+ </div>
+ </button>
 
                   {group.isExpanded && (
                     <div className="py-0 pb-1">
@@ -509,9 +488,19 @@ export function AdvancedDataMapping({ onClose }: { onClose?: () => void }) {
       </div>
       </>
       ) : (
-        <div className="flex-1 flex flex-col items-center justify-center text-slate-500 gap-4 mt-[-10vh]">
-          <Database className="w-16 h-16 text-slate-200 stroke-[1.5]" />
-          <p className="text-sm">Vui lòng nhập URL Endpoint và nhấn Send để kiểm tra dữ liệu, sau đó thực hiện cấu hình ánh xạ.</p>
+        <div className="flex-1 flex flex-col items-center justify-center text-slate-500 gap-4 mt-[-5vh]">
+          <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-2">
+            <Database className="w-8 h-8 text-slate-400 stroke-[1.5]" />
+          </div>
+          <p className="text-sm text-slate-600">Chưa có dữ liệu cấu trúc. Vui lòng nhấn "Nạp cấu trúc" để lấy thông tin bảng và trường.</p>
+          <button
+            type="button"
+            onClick={() => setIsDataLoaded(true)}
+            className="px-6 py-2.5 mt-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm"
+          >
+            <Download className="w-4 h-4" />
+            Nạp cấu trúc
+          </button>
         </div>
       )}
 

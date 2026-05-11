@@ -71,7 +71,7 @@ export function AgentManagementPage() {
   return (
     <div className="bg-[#f8f9fa] min-h-full p-6 font-sans">
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        {/* Header */}
+        {/* Toolbar */}
         <div className="p-6 border-b border-slate-200 bg-white">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
@@ -79,16 +79,16 @@ export function AgentManagementPage() {
                 <Monitor className="w-6 h-6 text-blue-600" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-800">Quản trị Agent</h1>
-                <p className="text-sm text-slate-500">Quản lý danh sách các agent thu thập dữ liệu và trạng thái hoạt động</p>
+                <h1 className="text-2xl font-bold text-slate-800">Quản lý Trạm kết nối</h1>
+                <p className="text-sm text-slate-500">Quản lý danh sách các trạm kết nối thu thập dữ liệu</p>
               </div>
             </div>
             <button
-              onClick={handleAdd}
-              className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all flex items-center gap-2 font-bold shadow-md hover:shadow-lg active:scale-95"
-            >
+ onClick={handleAdd}
+ className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all flex items-center gap-2 shadow-md hover:shadow-lg active:scale-95"
+ >
               <Plus className="w-5 h-5" />
-              Thêm agent
+              Thêm trạm kết nối
             </button>
           </div>
 
@@ -98,7 +98,7 @@ export function AgentManagementPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 type="text"
-                placeholder="Tìm kiếm theo tên agent..."
+                placeholder="Tìm kiếm theo tên trạm kết nối..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-slate-50/50"
@@ -113,7 +113,7 @@ export function AgentManagementPage() {
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-600 font-bold uppercase text-xs tracking-wider">
                 <th className="py-4 px-6 w-16 text-center">STT</th>
-                <th className="py-4 px-6">Thông tin Agent</th>
+                <th className="py-4 px-6">Thông tin Trạm kết nối</th>
                 <th className="py-4 px-6 text-center">Số CSDL</th>
                 <th className="py-4 px-6">Trạng thái hoạt động</th>
                 <th className="py-4 px-6">Cập nhật cuối</th>
@@ -210,7 +210,7 @@ export function AgentManagementPage() {
               ) : (
                 <tr>
                   <td colSpan={7} className="py-12 text-center text-slate-500 italic">
-                    Không tìm thấy agent nào khớp với tìm kiếm.
+                    Không tìm thấy trạm kết nối nào khớp với tìm kiếm.
                   </td>
                 </tr>
               )}

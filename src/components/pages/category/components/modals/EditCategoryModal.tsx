@@ -124,18 +124,18 @@ export function EditCategoryModal({
             {/* Footer nút bấm góc dưới phải */}
             <div className="mt-10 flex justify-end gap-3">
               <button title="Nút bấm"
-                onClick={onClose}
-                className="px-6 py-2.5 border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-colors font-bold text-sm"
-              >
+ onClick={onClose}
+ className="px-6 py-2.5 border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-colors text-sm"
+ >
                 Hủy
               </button>
               <button title="Nút bấm"
-                onClick={() => onSave(formData)}
-                className="px-8 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-bold text-sm flex items-center gap-2 shadow-lg shadow-blue-100"
-              >
-                <Save className="w-4 h-4" />
-                Lưu thay đổi
-              </button>
+ onClick={() => onSave(formData)}
+ className="px-8 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors text-sm flex items-center gap-2 shadow-lg shadow-blue-100"
+ >
+ <Save className="w-4 h-4" />
+ Lưu thay đổi
+ </button>
             </div>
           </div>
         </div>

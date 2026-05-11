@@ -1,3 +1,4 @@
+// Standardized Registry Modal - Marriage Detail
 import { X, Search, Filter, Download, FileDown, XCircle, CheckCircle, AlertCircle, Eye, RefreshCw, Calendar, ArrowUp, Plus, Trash2, Edit2 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -9,6 +10,7 @@ interface MarriageDetailModalProps {
   newRecords: number;
   updatedRecords: number;
   errorRecords: number;
+  isInline?: boolean;
 }
 
 interface MarriageRecord {
@@ -71,7 +73,8 @@ export function MarriageDetailModal({
   totalRecords,
   newRecords,
   updatedRecords,
-  errorRecords
+  errorRecords,
+  isInline = false
 }: MarriageDetailModalProps) {
   const [activeTab, setActiveTab] = useState('list');
   const [selectedRecord, setSelectedRecord] = useState<MarriageRecord | null>(null);
@@ -108,7 +111,7 @@ export function MarriageDetailModal({
     setValueModal({ ...valueModal, isOpen: false });
   };
   
-  if (!isOpen) return null;
+  if (!isOpen && !isInline) return null;
 
   // Mock data
   const records: MarriageRecord[] = [
@@ -291,95 +294,97 @@ export function MarriageDetailModal({
         </div>
       )}
 
-      {/* Backdrop */}
-      <div className="fixed inset-0 bg-black/50 z-50" onClick={onClose} />
+      {/* Backdrop - Only if not inline */}
+      {!isInline && <div className="fixed inset-0 bg-black/50 z-50" onClick={onClose}></div>}
       
-      {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-        <div className="bg-white rounded-lg shadow-xl max-w-7xl w-full max-h-[90vh] flex flex-col pointer-events-auto">
+      {/* Container */}
+      <div className={isInline ? "w-full" : "fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"}>
+        <div className={`bg-white ${isInline ? "border border-slate-200 rounded-xl overflow-hidden" : "rounded-lg shadow-xl max-w-7xl w-full max-h-[90vh] pointer-events-auto"} flex flex-col`}>
           {/* Header */}
           <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
-              <div className="flex items-center gap-4 mt-1 text-sm text-slate-600">
-                <span>Tổng số: <span className="font-medium text-slate-900">{totalRecords.toLocaleString()}</span></span>
-                <span className="text-slate-300">|</span>
-                <span>Mới: <span className="font-medium text-green-600">{newRecords.toLocaleString()}</span></span>
-                <span className="text-slate-300">|</span>
-                <span>Cập nhật: <span className="font-medium text-blue-600">{updatedRecords.toLocaleString()}</span></span>
-                <span className="text-slate-300">|</span>
-                <span>Lỗi: <span className="font-medium text-red-600">{errorRecords.toLocaleString()}</span></span>
-              </div>
             </div>
-            <button
-              onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600"
-              title="Đóng"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            {!isInline && (
+              <button
+                onClick={onClose}
+                className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600"
+                title="Đóng"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
           </div>
 
           {/* Content */}
+          {/* Content Area */}
           <div className="flex-1 overflow-hidden flex flex-col">
             {activeTab === 'list' && (
               <>
                 {/* Search & Actions */}
-                <div className="p-4 border-b border-slate-200 flex-shrink-0">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setIsFilterOpen(!isFilterOpen)}
-                        className={`px-3 py-1.5 rounded flex items-center gap-2 text-sm font-medium transition-colors ${
-                          isFilterOpen ? 'bg-blue-600 text-white' : 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-50'
-                        }`}
-                      >
-                        <Filter className="w-4 h-4" />
-                        Lọc
-                      </button>
-                      <button
-                        onClick={() => setIsSortOpen(!isSortOpen)}
-                        className={`px-3 py-1.5 rounded flex items-center gap-2 text-sm font-medium transition-colors ${
-                          isSortOpen ? 'bg-blue-600 text-white' : 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-50'
-                        }`}
-                      >
-                        <ArrowUp className="w-4 h-4" />
-                        Sắp xếp
-                      </button>
+                <div className="px-6 py-4 border-b border-slate-200 flex-shrink-0 bg-white">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex-1 flex items-center gap-3">
+                      <div className="relative flex-1">
+                        <input aria-label="Input field"
+                          type="text"
+                          placeholder="Tìm kiếm theo họ tên, số định danh, số giấy chứng nhận..."
+                          className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50 shadow-sm transition-all"
+                        />
+                        <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setIsFilterOpen(!isFilterOpen)}
+                          className={`px-3 py-2 rounded-lg flex items-center gap-2 text-sm font-semibold transition-all shadow-sm border ${
+                            isFilterOpen ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                          }`}
+                        >
+                          <Filter className="w-4 h-4" />
+                          Lọc
+                        </button>
+                      </div>
                     </div>
                     
-                    <button className="px-3 py-1.5 border border-slate-300 rounded text-slate-700 hover:bg-slate-50 flex items-center gap-2 text-sm">
-                      <RefreshCw className="w-4 h-4" />
-                      Tải lại
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <button className="p-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 transition-all shadow-sm" title="Tải lại">
+                        <RefreshCw className="w-4 h-4" />
+                      </button>
+                      <button className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all flex items-center gap-2 text-sm font-semibold shadow-sm">
+                        <Download className="w-4 h-4" />
+                        Kết xuất
+                      </button>
+                    </div>
                   </div>
 
                   {/* Filter Panel */}
                   {isFilterOpen && (
-                    <div className="bg-white border border-slate-200 rounded-lg p-5 mb-4 shadow-sm">
-                      <div className="flex items-center justify-between mb-4">
-                        <button 
-                          onClick={() => {
-                            const newId = Date.now().toString();
-                            setFilterConditions([...filterConditions, { id: newId, logic: 'AND', field: '', operator: '=', type: 'Text', value: '' }]);
-                          }}
-                          className="px-3 py-1.5 border border-blue-500 text-blue-600 rounded flex items-center gap-2 text-sm font-medium hover:bg-blue-50"
-                        >
-                          <Plus className="w-4 h-4" />
-                          Thêm điều kiện
-                        </button>
-                        <button onClick={() => setFilterConditions([])} className="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 mt-4 shadow-sm animate-in slide-in-from-top-2 duration-200 relative">
+                      <div className="absolute -top-2 left-64 w-4 h-4 bg-slate-50 border-t border-l border-slate-200 transform rotate-45"></div>
+                      <div className="flex items-center justify-between mb-4 relative z-10">
+                        <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Điều kiện lọc nâng cao</h4>
+                        <div className="flex items-center gap-2">
+                          <button 
+                            onClick={() => {
+                              const newId = Date.now().toString();
+                              setFilterConditions([...filterConditions, { id: newId, logic: 'AND', field: '', operator: '=', type: 'Text', value: '' }]);
+                            }}
+                            className="px-3 py-1.5 bg-white border border-blue-200 text-blue-600 rounded-lg flex items-center gap-2 text-xs font-bold hover:bg-blue-50 transition-all"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                            Thêm điều kiện
+                          </button>
+                        </div>
                       </div>
 
-                      <div className="space-y-3">
+                      <div className="space-y-3 relative z-10">
                         {filterConditions.map((condition, index) => (
                           <div key={condition.id} className="flex items-center gap-3">
                             <div className="w-20 flex-shrink-0">
                               {index > 0 && (
-                                <select 
-                                  className="w-full px-2 py-1.5 border border-slate-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                                <select aria-label="Select box"
+                                  className="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                                   value={condition.logic}
                                   onChange={(e) => {
                                     const newConditions = [...filterConditions];
@@ -393,8 +398,8 @@ export function MarriageDetailModal({
                               )}
                             </div>
                             
-                            <select 
-                              className="flex-1 basis-0 w-full min-w-0 px-3 py-1.5 border border-slate-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                            <select aria-label="Select box"
+                              className="flex-1 basis-0 w-full min-w-0 px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                               value={condition.field}
                               onChange={(e) => {
                                 const newConditions = [...filterConditions];
@@ -402,15 +407,15 @@ export function MarriageDetailModal({
                                 setFilterConditions(newConditions);
                               }}
                             >
-                              <option value="">Chọn trường</option>
+                              <option value="">Chọn trường dữ liệu</option>
                               <option value="husbandName">Họ tên chồng</option>
                               <option value="wifeName">Họ tên vợ</option>
                               <option value="marriageDate">Ngày kết hôn</option>
                               <option value="registrationNumber">Số đăng ký</option>
                             </select>
 
-                            <select 
-                              className="flex-1 basis-0 w-full min-w-0 px-3 py-1.5 border border-slate-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                            <select aria-label="Select box"
+                              className="flex-1 basis-0 w-full min-w-0 px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                               value={condition.operator}
                               onChange={(e) => {
                                 const newConditions = [...filterConditions];
@@ -419,39 +424,28 @@ export function MarriageDetailModal({
                               }}
                             >
                               <option value="=">Bằng (=)</option>
-                              <option value="&gt;">Lớn hơn (&gt;)</option>
-                              <option value="&lt;">Nhỏ hơn (&lt;)</option>
-                              <option value="&gt;=">Lớn hơn bằng (&gt;=)</option>
-                              <option value="&lt;=">Nhỏ hơn bằng (&lt;=)</option>
-                              <option value="!=">Khác (!=)</option>
                               <option value="contains">Chứa</option>
                               <option value="starts">Bắt đầu</option>
-                              <option value="ends">Kết thúc</option>
                             </select>
 
-                            <div className="flex-1 basis-0 w-full min-w-0 flex items-center gap-2 px-3 py-1.5 border border-slate-300 rounded bg-white group/value">
-                              <div className="flex-1 text-sm text-slate-900 truncate">
-                                {condition.value || <span className="text-slate-400 font-mono">{"<?>"}</span>}
-                              </div>
-                              <button 
-                                type="button"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  openValueModal(condition);
+                            <div className="flex-1 basis-0 w-full min-w-0 flex items-center gap-2 px-3 py-1.5 border border-slate-200 rounded-lg bg-white shadow-sm">
+                              <input aria-label="Input field"
+                                type="text"
+                                className="flex-1 bg-transparent border-0 p-0 text-sm focus:outline-none"
+                                placeholder="Nhập giá trị..."
+                                value={condition.value}
+                                onChange={(e) => {
+                                  const newConditions = [...filterConditions];
+                                  newConditions[index].value = e.target.value;
+                                  setFilterConditions(newConditions);
                                 }}
-                                className="p-1 hover:bg-slate-100 rounded text-blue-600 transition-colors"
-                                title="Chỉnh sửa giá trị"
-                              >
-                                <Edit2 className="w-4 h-4" />
-                              </button>
+                              />
                             </div>
 
                             <button 
                               type="button"
                               onClick={() => setFilterConditions(filterConditions.filter(c => c.id !== condition.id))}
                               className="p-2 text-slate-400 hover:text-red-500 transition-colors"
-                              title="Xóa điều kiện"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -459,77 +453,70 @@ export function MarriageDetailModal({
                         ))}
                       </div>
 
-                      <div className="mt-6 pt-4 border-t border-slate-100 flex items-center gap-3">
-                        <button className="px-4 py-1.5 border border-blue-500 text-blue-600 rounded flex items-center gap-2 text-sm font-medium hover:bg-blue-50">
-                          <Plus className="w-4 h-4" />
-                          Điều kiện
+                      <div className="mt-6 pt-4 border-t border-slate-200 flex items-center gap-3 relative z-10">
+                        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-bold text-sm hover:bg-blue-700 flex items-center gap-2 shadow-md transition-all active:scale-95">
+                          <CheckCircle className="w-4 h-4" />
+                          Áp dụng bộ lọc
                         </button>
-                        <div className="ml-auto flex items-center gap-2">
-                          <button className="px-6 py-1.5 bg-blue-600 text-white rounded font-medium text-sm hover:bg-blue-700 flex items-center gap-2">
-                            <CheckCircle className="w-4 h-4" />
-                            Áp dụng
-                          </button>
-                          <button onClick={() => setFilterConditions([])} className="px-6 py-1.5 bg-slate-600 text-white rounded font-medium text-sm hover:bg-slate-700 flex items-center gap-2">
-                            <XCircle className="w-4 h-4" />
-                            Xóa bộ lọc
-                          </button>
-                        </div>
+                        <button onClick={() => setFilterConditions([])} className="px-4 py-2 bg-white border border-slate-300 text-slate-600 rounded-lg font-bold text-sm hover:bg-slate-50 transition-all">
+                          Xóa tất cả
+                        </button>
                       </div>
                     </div>
                   )}
                 </div>
 
                 {/* Table */}
-                <div className="flex-1 overflow-auto">
-                  <table className="w-full text-sm">
-                    <thead className="bg-slate-50 border-b border-slate-200 sticky top-0">
+                <div className="flex-1 overflow-auto bg-white">
+                  <table className="w-full border-collapse">
+                    <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
                       <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-slate-700 whitespace-nowrap">STT</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-slate-700 whitespace-nowrap">Họ tên Chồng</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-slate-700 whitespace-nowrap">Ngày sinh Chồng</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-slate-700 whitespace-nowrap">Họ tên Vợ</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-slate-700 whitespace-nowrap">Ngày sinh Vợ</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-slate-700 whitespace-nowrap">Ngày xác lập quan hệ hôn nhân</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-slate-700 whitespace-nowrap">Trạng thái</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-slate-700 whitespace-nowrap">Thao tác</th>
+                        <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">STT</th>
+                        <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Họ tên Chồng</th>
+                        <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Ngày sinh Chồng</th>
+                        <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Họ tên Vợ</th>
+                        <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Ngày sinh Vợ</th>
+                        <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Ngày kết hôn</th>
+                        <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Trạng thái</th>
+                        <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Thao tác</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-200">
+                    <tbody className="divide-y divide-slate-100">
                       {records.map((record, index) => (
-                        <tr key={record.id} className="hover:bg-slate-50">
-                          <td className="px-4 py-3 text-slate-900">{index + 1}</td>
-                          <td className="px-4 py-3 text-slate-900">{record.husbandName}</td>
-                          <td className="px-4 py-3 text-slate-600">{record.husbandBirthDate}</td>
-                          <td className="px-4 py-3 text-slate-900">{record.wifeName}</td>
-                          <td className="px-4 py-3 text-slate-600">{record.wifeBirthDate}</td>
-                          <td className="px-4 py-3 text-slate-600">{record.marriageDate}</td>
-                          <td className="px-4 py-3">
+                        <tr key={record.id} className="hover:bg-blue-50/30 transition-all group">
+                          <td className="px-4 py-4 text-center text-sm text-slate-500 font-medium">{(index + 1).toString().padStart(2, '0')}</td>
+                          <td className="px-4 py-4 text-center text-sm font-semibold text-slate-900">{record.husbandName}</td>
+                          <td className="px-4 py-4 text-center text-sm text-slate-600 font-medium font-mono">{record.husbandBirthDate}</td>
+                          <td className="px-4 py-4 text-center text-sm font-semibold text-slate-900">{record.wifeName}</td>
+                          <td className="px-4 py-4 text-center text-sm text-slate-600 font-medium font-mono">{record.wifeBirthDate}</td>
+                          <td className="px-4 py-4 text-center text-sm text-slate-600 font-medium font-mono">{record.marriageDate}</td>
+                          <td className="px-4 py-4 text-center">
                             {record.status === 'approved' && (
-                              <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 rounded-md text-xs">
-                                <CheckCircle className="w-3 h-3" />
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-50 text-green-700 rounded-full text-[10px] font-bold uppercase tracking-wider border border-green-100 shadow-sm whitespace-nowrap">
+                                <CheckCircle className="w-3.5 h-3.5" />
                                 Đã phê duyệt
                               </span>
                             )}
                             {record.status === 'pending' && (
-                              <span className="inline-flex items-center gap-1 px-2 py-1 bg-amber-50 text-amber-700 rounded-md text-xs">
-                                <AlertCircle className="w-3 h-3" />
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full text-[10px] font-bold uppercase tracking-wider border border-amber-100 shadow-sm whitespace-nowrap">
+                                <AlertCircle className="w-3.5 h-3.5" />
                                 Chờ duyệt
                               </span>
                             )}
                             {record.status === 'error' && (
-                              <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-50 text-red-700 rounded-md text-xs">
-                                <XCircle className="w-3 h-3" />
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-50 text-red-700 rounded-full text-[10px] font-bold uppercase tracking-wider border border-red-100 shadow-sm whitespace-nowrap">
+                                <XCircle className="w-3.5 h-3.5" />
                                 Lỗi
                               </span>
                             )}
                           </td>
-                          <td className="px-4 py-3">
+                          <td className="px-4 py-4 text-center">
                             <button
                               onClick={() => setSelectedRecord(record)}
-                              className="text-blue-600 hover:text-blue-700"
+                              className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all"
                               title="Xem chi tiết"
                             >
-                              <Eye className="w-4 h-4" />
+                              <Eye className="w-4.5 h-4.5" />
                             </button>
                           </td>
                         </tr>
@@ -539,26 +526,14 @@ export function MarriageDetailModal({
                 </div>
 
                 {/* Pagination */}
-                <div className="px-6 py-3 border-t border-slate-200 flex items-center justify-between">
-                  <div className="text-sm text-slate-600">
-                    Hiển thị <span className="font-medium text-slate-900">1-{records.length}</span> trong tổng số <span className="font-medium text-slate-900">{totalRecords}</span> bản ghi
+                <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between bg-slate-50/50">
+                  <div className="text-sm text-slate-600 font-medium">
+                    Hiển thị <span className="text-slate-900 font-bold">1-{records.length}</span> trong tổng số <span className="text-slate-900 font-bold">{totalRecords}</span> bản ghi
                   </div>
                   <div className="flex items-center gap-2">
-                    <button 
-                      className="px-3 py-1 border border-slate-300 text-slate-700 rounded hover:bg-slate-50 text-sm"
-                      title="Trang trước"
-                    >
-                      Trước
-                    </button>
-                    <button title="Hành động" aria-label="Hành động" className="px-3 py-1 bg-blue-600 text-white rounded text-sm">1</button>
-                    <button title="Hành động" aria-label="Hành động" className="px-3 py-1 border border-slate-300 text-slate-700 rounded hover:bg-slate-50 text-sm">2</button>
-                    <button title="Hành động" aria-label="Hành động" className="px-3 py-1 border border-slate-300 text-slate-700 rounded hover:bg-slate-50 text-sm">3</button>
-                    <button 
-                      className="px-3 py-1 border border-slate-300 text-slate-700 rounded hover:bg-slate-50 text-sm"
-                      title="Trang sau"
-                    >
-                      Sau
-                    </button>
+                    <button className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-white text-sm font-bold transition-colors">Trước</button>
+                    <button className="w-9 h-9 bg-blue-600 text-white rounded-lg text-sm font-bold shadow-md">1</button>
+                    <button className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-white text-sm font-bold transition-colors">Sau</button>
                   </div>
                 </div>
               </>
@@ -777,7 +752,7 @@ export function MarriageDetailModal({
       {/* Record Detail Modal */}
       {selectedRecord && (
         <>
-          <div className="fixed inset-0 bg-black/50 z-[60]" onClick={() => setSelectedRecord(null)} />
+          <div className="fixed inset-0 bg-black/50 z-[60]" onClick={() => setSelectedRecord(null)}></div>
           
           {/* Record Detail Modal */}
           <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
@@ -795,192 +770,163 @@ export function MarriageDetailModal({
               </div>
 
               {/* Content */}
-              <div className="p-6 flex-1 overflow-auto">
-                {/* Tab: Thông tin hồ sơ */}
-                <div className="mb-8">
-                <div className="mb-6">
-                  <div className="flex flex-col gap-3">
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Mã hồ sơ</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.recordCode || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Số đăng ký</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.registrationNumber || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Số quyển</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.bookNumber || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Trang số</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.pageNumber || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded col-span-2">
-                      <div className="text-xs text-slate-600 mb-1">Tệp đính kèm</div>
-                      <div className="text-sm text-blue-600 hover:underline cursor-pointer">{selectedRecord.fileId || 'Không có tệp đính kèm'}</div>
-                    </div>
+              <div className="p-6 flex-1 overflow-auto bg-white text-slate-900">
+                <div className="flex flex-col gap-3">
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Mã hồ sơ</div>
+                    <div className="text-sm text-slate-900">{selectedRecord.recordCode || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Số đăng ký</div>
+                    <div className="text-sm text-slate-900">{selectedRecord.registrationNumber || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Số quyển</div>
+                    <div className="text-sm text-slate-900">{selectedRecord.bookNumber || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Trang số</div>
+                    <div className="text-sm text-slate-900">{selectedRecord.pageNumber || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Tệp đính kèm</div>
+                    <div className="text-sm text-blue-600 hover:underline cursor-pointer">{selectedRecord.fileId || 'Không có tệp đính kèm'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên chồng</div>
+                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.husbandName}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Ngày, tháng, năm sinh chồng</div>
+                    <div className="text-sm text-slate-900">{selectedRecord.husbandBirthDate}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Dân tộc chồng</div>
+                    <div className="text-sm text-slate-900">{selectedRecord.husbandEthnicity || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Quốc tịch chồng</div>
+                    <div className="text-sm text-slate-900">{selectedRecord.husbandNationality || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Nơi cư trú chồng</div>
+                    <div className="text-sm text-slate-900">{selectedRecord.husbandResidence || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Số GTTT chồng</div>
+                    <div className="text-sm text-slate-900">{selectedRecord.husbandIdNumber || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Ngày cấp GTTT chồng</div>
+                    <div className="text-sm text-slate-900">{selectedRecord.husbandIdIssueDate || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Nơi cấp GTTT chồng</div>
+                    <div className="text-sm text-slate-900">{selectedRecord.husbandIdIssuePlace || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Số định danh cá nhân chồng</div>
+                    <div className="text-sm text-slate-900">{selectedRecord.husbandPersonalId || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Số lần kết hôn chồng</div>
+                    <div className="text-sm text-slate-900">{selectedRecord.husbandMarriageCount || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên vợ</div>
+                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.wifeName}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Ngày, tháng, năm sinh vợ</div>
+                    <div className="text-sm text-slate-900">{selectedRecord.wifeBirthDate}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Dân tộc vợ</div>
+                    <div className="text-sm text-slate-900">{selectedRecord.wifeEthnicity || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Quốc tịch vợ</div>
+                    <div className="text-sm text-slate-900">{selectedRecord.wifeNationality || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Nơi cư trú vợ</div>
+                    <div className="text-sm text-slate-900">{selectedRecord.wifeResidence || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Số GTTT vợ</div>
+                    <div className="text-sm text-slate-900">{selectedRecord.wifeIdNumber || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Ngày cấp GTTT vợ</div>
+                    <div className="text-sm text-slate-900">{selectedRecord.wifeIdIssueDate || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Nơi cấp GTTT vợ</div>
+                    <div className="text-sm text-slate-900">{selectedRecord.wifeIdIssuePlace || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Số định danh cá nhân vợ</div>
+                    <div className="text-sm text-slate-900">{selectedRecord.wifePersonalId || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Số lần kết hôn vợ</div>
+                    <div className="text-sm text-slate-900">{selectedRecord.wifeMarriageCount || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Nơi đăng ký</div>
+                    <div className="text-sm text-slate-900">{selectedRecord.registrationPlace || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Ngày đăng ký</div>
+                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.registrationDate || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Loại đăng ký</div>
+                    <div className="text-sm text-slate-900">{selectedRecord.registrationType || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Số GCN kết hôn nước ngoài</div>
+                    <div className="text-sm text-slate-900">{selectedRecord.foreignCertificateNumber || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Ngày cấp GCN kết hôn nước ngoài</div>
+                    <div className="text-sm text-slate-900">{selectedRecord.foreignCertificateDate || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Cơ quan nước ngoài cấp</div>
+                    <div className="text-sm text-slate-900">{selectedRecord.foreignAgencyName || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Quốc gia cấp</div>
+                    <div className="text-sm text-slate-900">{selectedRecord.foreignCountry || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Ngày xác lập quan hệ hôn nhân</div>
+                    <div className="text-sm text-slate-900">{selectedRecord.marriageDate || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Tình trạng hôn nhân</div>
+                    <div className="text-sm text-slate-900 font-medium text-blue-700">{selectedRecord.marriageStatus || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Người ký</div>
+                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.signerName || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Chức vụ người ký</div>
+                    <div className="text-sm text-slate-900">{selectedRecord.signerPosition || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Người thực hiện</div>
+                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.implementer || '-'}</div>
+                  </div>
+                  <div className="border border-slate-200 p-2 rounded">
+                    <div className="text-xs text-slate-600 mb-1">Ghi chú</div>
+                    <div className="text-sm text-slate-600 italic whitespace-pre-wrap">{selectedRecord.notes || '-'}</div>
                   </div>
                 </div>
-                </div>
 
-                {/* Tab: Thông tin bên chồng */}
-                <div className="mb-8">
-                <div className="mb-6">
-                  <div className="flex flex-col gap-3">
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên chồng</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.husbandName}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Ngày, tháng, năm sinh</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.husbandBirthDate}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Dân tộc</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.husbandEthnicity || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Quốc tịch</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.husbandNationality || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded col-span-2">
-                      <div className="text-xs text-slate-600 mb-1">Nơi cư trú</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.husbandResidence || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Ngày cấp giấy tờ tùy thân</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.husbandIdIssueDate || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Nơi cấp giấy tờ tùy thân</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.husbandIdIssuePlace || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Số giấy tờ tùy thân</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.husbandIdNumber || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Số định danh cá nhân</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.husbandPersonalId || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded col-span-2">
-                      <div className="text-xs text-slate-600 mb-1">Số lần kết hôn</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.husbandMarriageCount || '-'}</div>
-                    </div>
-                  </div>
-                </div>
-                </div>
-
-                {/* Tab: Thông tin bên vợ */}
-                <div className="mb-8">
-                <div className="mb-6">
-                  <div className="flex flex-col gap-3">
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên vợ</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.wifeName}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Ngày, tháng, năm sinh</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.wifeBirthDate}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Dân tộc</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.wifeEthnicity || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Quốc tịch</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.wifeNationality || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded col-span-2">
-                      <div className="text-xs text-slate-600 mb-1">Nơi cư trú</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.wifeResidence || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Ngày cấp giấy tờ tùy thân</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.wifeIdIssueDate || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Nơi cấp giấy tờ tùy thân</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.wifeIdIssuePlace || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Số giấy tờ tùy thân</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.wifeIdNumber || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Số định danh cá nhân</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.wifePersonalId || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded col-span-2">
-                      <div className="text-xs text-slate-600 mb-1">Số lần kết hôn</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.wifeMarriageCount || '-'}</div>
-                    </div>
-                  </div>
-                </div>
-                </div>
-
-                {/* Tab: Thông tin khác */}
-                <div className="mb-8">
-                <div className="mb-6">
-                  <div className="flex flex-col gap-3">
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Nơi đăng ký</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.registrationPlace || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Ngày đăng ký</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.registrationDate || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded col-span-2">
-                      <div className="text-xs text-slate-600 mb-1">Loại đăng ký</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.registrationType || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Số giấy chứng nhận kết hôn do cơ quan nước ngoài cấp</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.foreignCertificateNumber || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Ngày cấp giấy chứng nhận kết hôn do cơ quan nước ngoài cấp</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.foreignCertificateDate || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Tên cơ quan nước ngoài cấp giấy chứng nhận kết hôn</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.foreignAgencyName || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Quốc gia đã cấp giấy chứng nhận kết hôn</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.foreignCountry || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Ngày xác lập quan hệ hôn nhân</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.marriageDate || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Tình trạng hôn nhân</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.marriageStatus || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Người ký</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.signerName || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Chức vụ người ký</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.signerPosition || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Người thực hiện</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.implementer || '-'}</div>
-                    </div>
-                    <div className="border border-slate-200 p-2 rounded col-span-2">
-                      <div className="text-xs text-slate-600 mb-1">Ghi chú/ghi những nội dung thay đổi sau này</div>
-                      <div className="text-sm text-slate-900">{selectedRecord.notes || '-'}</div>
-                    </div>
-                  </div>
-                </div>
-                </div>
-
-                {/* Trạng thái lỗi - hiển thị ở tất cả các tab */}
+                {/* Trạng thái lỗi */}
                 {selectedRecord.hasError && (
                   <div className="bg-red-50 border border-red-200 rounded-lg p-4 mt-4">
                     <div className="flex items-start gap-3">
@@ -1003,7 +949,6 @@ export function MarriageDetailModal({
                   <XCircle className="w-4 h-4" />
                   Đóng
                 </button>
-                
               </div>
             </div>
           </div>

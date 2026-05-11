@@ -169,7 +169,14 @@ export function ProvisionServiceModal({ isOpen, onClose, service }: ProvisionSer
                     </label>
                     {isRateLimited && (
                       <div className="flex items-center gap-2">
-                        <input type="number" className="w-20 px-3 py-1.5 border border-slate-300 rounded-lg text-sm text-center" value={rateLimitValue} onChange={(e) => setRateLimitValue(Number(e.target.value))} />
+                        <input 
+                          type="number" 
+                          title="Số lượng request mỗi phút"
+                          placeholder="Số lượng"
+                          className="w-20 px-3 py-1.5 border border-slate-300 rounded-lg text-sm text-center" 
+                          value={rateLimitValue} 
+                          onChange={(e) => setRateLimitValue(Number(e.target.value))} 
+                        />
                         <span className="text-sm text-slate-600 font-medium">req / phút</span>
                       </div>
                     )}

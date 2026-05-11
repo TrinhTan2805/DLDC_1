@@ -31,35 +31,35 @@ export function AttributeFormModal({
   const footer = (
     <>
       <button 
-        type="button"
-        onClick={onClose} 
-        className="px-6 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-bold transition-all active:scale-95 text-sm"
-      >
+ type="button"
+ onClick={onClose} 
+ className="px-6 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all active:scale-95 text-sm"
+ >
         Hủy
       </button>
       <button 
-        type="button"
-        onClick={onSave} 
-        className="px-6 py-2.5 rounded-xl bg-white border border-blue-200 text-blue-600 hover:bg-blue-50 font-bold transition-all active:scale-95 text-sm"
-      >
+ type="button"
+ onClick={onSave} 
+ className="px-6 py-2.5 rounded-xl bg-white border border-blue-200 text-blue-600 hover:bg-blue-50 transition-all active:scale-95 text-sm"
+ >
         Lưu tạm
       </button>
       <button 
-        type="button"
-        onClick={() => {
-          onSave();
-          onSaveAndSubmit({
-            id: formData.id || 'new',
-            code: formData.fieldName || 'ATTR-001',
-            name: formData.displayName || 'Thuộc tính mới',
-            type: 'attribute'
-          });
-        }}
-        className="px-8 py-2.5 rounded-xl bg-blue-600 text-white hover:bg-blue-700 font-bold flex items-center gap-2 shadow-xl shadow-blue-100 transition-all active:scale-95 text-sm"
-      >
-        <Send className="w-4 h-4"/>
-        Lưu và Trình duyệt
-      </button>
+ type="button"
+ onClick={() => {
+ onSave();
+ onSaveAndSubmit({
+ id: formData.id || 'new',
+ code: formData.fieldName || 'ATTR-001',
+ name: formData.displayName || 'Thuộc tính mới',
+ type: 'attribute'
+ });
+ }}
+ className="px-8 py-2.5 rounded-xl bg-blue-600 text-white hover:bg-blue-700 flex items-center gap-2 shadow-xl shadow-blue-100 transition-all active:scale-95 text-sm"
+ >
+ <Send className="w-4 h-4"/>
+ Lưu và Trình duyệt
+ </button>
     </>
   );
 

@@ -878,13 +878,13 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
 
                   <div className={`flex justify-end pt-3 border-t border-blue-100 mt-4 ${isView ? 'hidden' : ''}`}>
                     <button
-                      type="button"
-                      onClick={() => setShowSendConfirm(true)}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors"
-                    >
-                      <Upload className="w-4 h-4" />
-                      Gửi trình duyệt
-                    </button>
+ type="button"
+ onClick={() => setShowSendConfirm(true)}
+ className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm rounded-lg shadow-sm transition-colors"
+ >
+ <Upload className="w-4 h-4" />
+ Gửi trình duyệt
+ </button>
                   </div>
                 </div>
 
@@ -1043,36 +1043,36 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
 
             <div className="flex gap-3 justify-end">
               <button 
-                type="button" 
-                onClick={() => { setShowApprovalConfirm(false); setApprovalDecision(null); }} 
-                className="px-5 py-2.5 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
-              >
-                Quay lại
-              </button>
+ type="button" 
+ onClick={() => { setShowApprovalConfirm(false); setApprovalDecision(null); }} 
+ className="px-5 py-2.5 text-sm text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+ >
+ Quay lại
+ </button>
                 <button 
-                  type="button" 
-                  disabled={!approvalNote.trim()}
-                  onClick={() => {
-                    alert(`Thực hiện thành công: ${
-                      approvalDecision === 'approve' ? 'Phê duyệt' : 
-                      approvalDecision === 'reject' ? 'Từ chối' : 
-                      'Yêu cầu bổ sung thông tin'
-                    }`);
-                    setShowApprovalConfirm(false);
-                    onClose();
-                  }}
-                  className={`px-6 py-2.5 text-sm font-bold text-white rounded-lg shadow-sm transition-all active:scale-95 disabled:opacity-50 ${
-                    approvalDecision === 'approve' ? 'bg-green-600 hover:bg-green-700 shadow-green-100' : 
-                    approvalDecision === 'reject' ? 'bg-red-600 hover:bg-red-700 shadow-red-100' : 
-                    'bg-amber-600 hover:bg-amber-700 shadow-amber-100'
-                  }`}
-                >
-                  Xác nhận {
-                    approvalDecision === 'approve' ? 'Phê duyệt' : 
-                    approvalDecision === 'reject' ? 'Từ chối' : 
-                    'Gửi yêu cầu'
-                  }
-                </button>
+ type="button" 
+ disabled={!approvalNote.trim()}
+ onClick={() => {
+ alert(`Thực hiện thành công: ${
+ approvalDecision === 'approve' ? 'Phê duyệt' : 
+ approvalDecision === 'reject' ? 'Từ chối' : 
+ 'Yêu cầu bổ sung thông tin'
+ }`);
+ setShowApprovalConfirm(false);
+ onClose();
+ }}
+ className={`px-6 py-2.5 text-sm text-white rounded-lg shadow-sm transition-all active:scale-95 disabled:opacity-50 ${
+ approvalDecision === 'approve' ? 'bg-green-600 hover:bg-green-700 shadow-green-100' : 
+ approvalDecision === 'reject' ? 'bg-red-600 hover:bg-red-700 shadow-red-100' : 
+ 'bg-amber-600 hover:bg-amber-700 shadow-amber-100'
+ }`}
+ >
+ Xác nhận {
+ approvalDecision === 'approve' ? 'Phê duyệt' : 
+ approvalDecision === 'reject' ? 'Từ chối' : 
+ 'Gửi yêu cầu'
+ }
+ </button>
             </div>
           </div>
         </div>

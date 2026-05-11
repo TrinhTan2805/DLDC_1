@@ -37,9 +37,9 @@ export function DeleteConfirmModal({
               Hủy
             </button>
             <button
-              onClick={onConfirm}
-              className="flex-1 py-2.5 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 transition-colors shadow-lg shadow-red-100"
-            >
+ onClick={onConfirm}
+ className="flex-1 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-lg shadow-red-100"
+ >
               Xác nhận xóa
             </button>
           </div>

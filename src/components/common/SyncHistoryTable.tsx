@@ -96,29 +96,29 @@ export function SyncHistoryTable({ records, isCollapsed = false }: SyncHistoryTa
         </button>
       </div>
 
-      <div className="overflow-x-auto border border-slate-200 rounded-lg">
-        <table className="w-full">
-          <thead className="bg-slate-50">
+      <div className="overflow-x-auto bg-white border border-slate-200 rounded-xl shadow-sm">
+        <table className="w-full border-collapse">
+          <thead className="bg-slate-50 border-b border-slate-200">
             <tr>
-              <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">
+              <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">
                 Thời gian
               </th>
-              <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">
+              <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">
                 Trạng thái
               </th>
-              <th className="px-6 py-3 text-right text-xs text-slate-600 uppercase tracking-wider">
+              <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">
                 Thêm mới
               </th>
-              <th className="px-6 py-3 text-right text-xs text-slate-600 uppercase tracking-wider">
+              <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">
                 Cập nhật
               </th>
-              <th className="px-6 py-3 text-right text-xs text-slate-600 uppercase tracking-wider">
+              <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">
                 Lỗi
               </th>
-              <th className="px-6 py-3 text-right text-xs text-slate-600 uppercase tracking-wider">
+              <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">
                 Tổng số
               </th>
-              <th className="px-6 py-3 text-right text-xs text-slate-600 uppercase tracking-wider">
+              <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">
                 Thời lượng
               </th>
             </tr>
@@ -129,48 +129,48 @@ export function SyncHistoryTable({ records, isCollapsed = false }: SyncHistoryTa
               const StatusIcon = config.icon;
               
               return (
-                <tr key={record.id} className="hover:bg-slate-50">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-slate-400" />
-                      <span className="text-sm text-slate-900">{record.timestamp}</span>
+                <tr key={record.id} className="hover:bg-blue-50/30 transition-all group">
+                  <td className="px-6 py-4 text-center">
+                    <div className="flex items-center justify-center gap-2">
+                      <Calendar className="w-4 h-4 text-slate-400 group-hover:text-blue-500 transition-colors" />
+                      <span className="text-sm text-slate-700 font-medium">{record.timestamp}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className={`inline-flex items-center gap-2 px-3 py-1 ${config.bg} rounded-full`}>
-                      <StatusIcon className={`w-4 h-4 ${config.color}`} />
-                      <span className={`text-sm ${config.color}`}>{config.label}</span>
+                  <td className="px-6 py-4 text-center">
+                    <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${config.bg} ${config.color} border border-current opacity-80 group-hover:opacity-100 transition-all shadow-sm`}>
+                      <StatusIcon className="w-3.5 h-3.5" />
+                      {config.label}
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <TrendingUp className="w-3 h-3 text-green-600" />
-                      <span className="text-sm text-slate-900">{record.recordsAdded}</span>
+                  <td className="px-6 py-4 text-center">
+                    <div className="flex items-center justify-center gap-1.5">
+                      <TrendingUp className="w-3.5 h-3.5 text-green-500" />
+                      <span className="text-sm font-bold text-slate-900">{record.recordsAdded}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-right">
-                    <span className="text-sm text-slate-900">{record.recordsUpdated}</span>
+                  <td className="px-6 py-4 text-center">
+                    <span className="text-sm font-bold text-slate-700">{record.recordsUpdated}</span>
                   </td>
-                  <td className="px-6 py-4 text-right">
+                  <td className="px-6 py-4 text-center">
                     {record.recordsFailed > 0 ? (
                       <button
                         onClick={() => handleErrorClick(record)}
-                        className="text-sm text-red-600 hover:text-red-800 hover:underline cursor-pointer transition-colors"
+                        className="text-sm font-bold text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 px-2 py-0.5 rounded transition-all active:scale-95 border border-red-100"
                       >
                         {record.recordsFailed}
                       </button>
                     ) : (
-                      <span className="text-sm text-slate-400">0</span>
+                      <span className="text-sm text-slate-300 font-medium">0</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <Database className="w-3 h-3 text-slate-400" />
-                      <span className="text-sm text-slate-900">{record.totalRecords}</span>
+                  <td className="px-6 py-4 text-center">
+                    <div className="flex items-center justify-center gap-1.5">
+                      <Database className="w-3.5 h-3.5 text-blue-400 opacity-50" />
+                      <span className="text-sm font-bold text-slate-900">{record.totalRecords}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-right">
-                    <span className="text-sm text-slate-600">{record.duration}</span>
+                  <td className="px-6 py-4 text-center">
+                    <span className="text-sm text-slate-500 font-mono italic">{record.duration}</span>
                   </td>
                 </tr>
               );

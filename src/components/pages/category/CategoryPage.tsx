@@ -1330,10 +1330,10 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                 <h3 className="font-bold text-slate-800 text-[15px]">Danh sách phiên bản</h3>
                 <p className="text-sm text-slate-500 mt-1">Quản lý, tra cứu và đóng băng các phiên bản của danh mục hệ thống</p>
              </div>
-             <button onClick={() => setShowCreateVersionModal(true)} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold transition-colors text-sm shadow-md shadow-blue-100">
-                <Plus className="w-4 h-4"/>
-                Tạo phiên bản mới
-             </button>
+             <button onClick={() => setShowCreateVersionModal(true)} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl transition-colors text-sm shadow-md shadow-blue-100">
+ <Plus className="w-4 h-4"/>
+ Tạo phiên bản mới
+ </button>
           </div>
           {/* Version History Table */}
           <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
@@ -2626,9 +2626,9 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
               </div>
             </div>
             <div className="p-5 border-t border-slate-200 flex justify-end gap-3 bg-slate-50">
-              <button title="Đóng" aria-label="Đóng" onClick={() => setShowCompareModal(false)} className="px-5 py-2.5 bg-white border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-colors text-[14px]">
-                Đóng
-              </button>
+              <button title="Đóng" aria-label="Đóng" onClick={() => setShowCompareModal(false)} className="px-5 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors text-[14px]">
+ Đóng
+ </button>
             </div>
           </div>
         </div>
@@ -2667,9 +2667,9 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                </div>
             </div>
             <div className="p-5 border-t border-slate-200 flex justify-end bg-slate-50">
-              <button title="Đóng" aria-label="Đóng" onClick={() => setShowVersionDetailModal(false)} className="px-5 py-2.5 bg-white border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-colors text-[14px]">
-                Đóng
-              </button>
+              <button title="Đóng" aria-label="Đóng" onClick={() => setShowVersionDetailModal(false)} className="px-5 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors text-[14px]">
+ Đóng
+ </button>
             </div>
           </div>
         </div>
@@ -2694,16 +2694,16 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
               Hệ thống sẽ tạo ra một phiên bản mới (Nháp) dựa trên dữ liệu của phiên bản {selectedVersionData.version}. Các cấu trúc hiện tại sẽ không bị ghi đè cho đến khi bạn xác nhận và lưu.
             </div>
             <div className="p-5 border-t border-slate-200 flex justify-center gap-3 bg-slate-50">
-              <button onClick={() => setShowRestoreModal(false)} className="px-5 py-2.5 bg-white border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-colors text-[14px] flex-1">
-                Hủy
-              </button>
+              <button onClick={() => setShowRestoreModal(false)} className="px-5 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors text-[14px] flex-1">
+ Hủy
+ </button>
               <button onClick={() => {
-                 setShowRestoreModal(false);
-                 setSuccessNotificationMessage(`Khôi phục thành công dự thảo làm việc từ phiên bản ${selectedVersionData.version}`);
-                 setShowSuccessNotification(true);
-              }} className="px-5 py-2.5 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition-colors text-[14px] flex-1 flex items-center justify-center gap-2">
-                <CheckCircle2 className="w-5 h-5"/> Khôi phục
-              </button>
+ setShowRestoreModal(false);
+ setSuccessNotificationMessage(`Khôi phục thành công dự thảo làm việc từ phiên bản ${selectedVersionData.version}`);
+ setShowSuccessNotification(true);
+ }} className="px-5 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors text-[14px] flex-1 flex items-center justify-center gap-2">
+ <CheckCircle2 className="w-5 h-5"/> Khôi phục
+ </button>
             </div>
           </div>
         </div>
@@ -2741,14 +2741,14 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
               </div>
             </div>
             <div className="p-5 border-t border-slate-200 bg-slate-50 flex justify-end gap-3 rounded-b-lg">
-               <button onClick={() => setShowCreateVersionModal(false)} className="px-5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-bold text-slate-700 hover:bg-slate-50">Hủy bỏ</button>
+               <button onClick={() => setShowCreateVersionModal(false)} className="px-5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-700 hover:bg-slate-50">Hủy bỏ</button>
                <button onClick={() => {
-                  setShowCreateVersionModal(false);
-                  setSuccessNotificationMessage("Đã tạo và lưu trữ phiên bản mới xuất phát từ cấu trúc hiện tại.");
-                  setShowSuccessNotification(true);
-               }} className="px-5 py-2.5 bg-blue-600 rounded-xl text-sm font-bold text-white hover:bg-blue-700 flex items-center gap-2">
-                 <Save className="w-4 h-4"/> Lưu phiên bản
-               </button>
+ setShowCreateVersionModal(false);
+ setSuccessNotificationMessage("Đã tạo và lưu trữ phiên bản mới xuất phát từ cấu trúc hiện tại.");
+ setShowSuccessNotification(true);
+ }} className="px-5 py-2.5 bg-blue-600 rounded-xl text-sm text-white hover:bg-blue-700 flex items-center gap-2">
+ <Save className="w-4 h-4"/> Lưu phiên bản
+ </button>
             </div>
           </div>
         </div>

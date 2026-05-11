@@ -177,7 +177,7 @@ export function CollectionMonitoring() {
                           step.status === 'skipped' ? 'text-gray-500' :
                           'text-gray-600'
                         }`}>
-                          {step.message || step.error || step.duration}
+                          {(step as any).message || (step as any).error || (step as any).duration}
                         </p>
                       </div>
                     </div>

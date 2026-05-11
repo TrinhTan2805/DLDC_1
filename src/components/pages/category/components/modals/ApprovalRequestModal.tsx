@@ -88,15 +88,15 @@ export function ApprovalRequestModal({
         {/* Footer */}
         <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex gap-3 justify-end items-center">
            <button 
-             onClick={onClose}
-             className="px-8 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl font-bold hover:bg-slate-50 transition-all text-[14px]"
-           >
+ onClick={onClose}
+ className="px-8 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-all text-[14px]"
+ >
               Hủy
            </button>
            <button 
-             onClick={onSubmit}
-             className="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-blue-700 transition-all text-[14px] shadow-lg shadow-blue-200"
-           >
+ onClick={onSubmit}
+ className="px-6 py-2.5 bg-blue-600 text-white rounded-xl flex items-center justify-center gap-2 hover:bg-blue-700 transition-all text-[14px] shadow-lg shadow-blue-200"
+ >
               <Send className="w-5 h-5 rotate-[-20deg]"/>
               Gửi trình duyệt
            </button>

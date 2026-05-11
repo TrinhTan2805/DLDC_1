@@ -1363,21 +1363,21 @@ export function ServiceSetupPage() {
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <button 
-                      onClick={() => {
-                        const service = services.find(s => s.code === app.apiCode);
-                        if (service) {
-                          setSelectedService(service);
-                          setModalMode('approve');
-                          setShowAddModal(true);
-                        } else {
-                          alert('Không tìm thấy thông tin chi tiết của dịch vụ này.');
-                        }
-                      }}
-                      className="px-5 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-2 shadow-sm shadow-blue-100 transition-all active:scale-95"
-                    >
-                      <Eye className="w-4 h-4" />
-                      Kiểm tra và phê duyệt
-                    </button>
+ onClick={() => {
+ const service = services.find(s => s.code === app.apiCode);
+ if (service) {
+ setSelectedService(service);
+ setModalMode('approve');
+ setShowAddModal(true);
+ } else {
+ alert('Không tìm thấy thông tin chi tiết của dịch vụ này.');
+ }
+ }}
+ className="px-5 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-2 shadow-sm shadow-blue-100 transition-all active:scale-95"
+ >
+ <Eye className="w-4 h-4" />
+ Kiểm tra và phê duyệt
+ </button>
                   </div>
                 </div>
 

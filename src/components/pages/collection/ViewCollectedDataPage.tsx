@@ -95,7 +95,6 @@ export function ViewCollectedDataPage({ onNavigate }: { onNavigate?: (id: string
 
   return (
     <div className="space-y-6">
-      {/* Breadcrumb & Header */}
       <div>
         <div className="flex items-center gap-2 text-sm text-slate-500 mb-2">
           <span>Thu thập</span>
@@ -104,8 +103,8 @@ export function ViewCollectedDataPage({ onNavigate }: { onNavigate?: (id: string
         </div>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Xem dữ liệu thu thập</h1>
-            <p className="text-slate-500 text-sm mt-1 mb-4">Tiếp nhận dữ liệu từ các hệ thống nguồn và cơ sở dữ liệu</p>
+            <h1 className="text-2xl font-bold text-slate-900">Tổng quan dữ liệu thu thập</h1>
+            <p className="text-slate-500 text-sm mt-1 mb-4">Theo dõi trạng thái và thống kê dữ liệu từ tất cả các nguồn hệ thống</p>
             
             <div className="flex items-center gap-2 p-1 bg-slate-100 rounded-lg w-fit">
               <button

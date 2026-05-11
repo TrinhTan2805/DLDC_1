@@ -211,17 +211,17 @@ export function RecordFormModal({ isOpen, onClose, onSave, initialData, title }:
 
           <div className="p-6 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3 rounded-b-2xl">
             <button
-              onClick={onClose}
-              disabled={isValidating || checkResult === 'valid'}
-              className="px-6 py-2.5 text-sm font-semibold text-slate-600 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 hover:text-slate-900 transition-colors disabled:opacity-50"
-            >
+ onClick={onClose}
+ disabled={isValidating || checkResult === 'valid'}
+ className="px-6 py-2.5 text-sm text-slate-600 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 hover:text-slate-900 transition-colors disabled:opacity-50"
+ >
               Hủy bỏ
             </button>
             <button
-              onClick={handleSave}
-              disabled={isValidating || checkResult === 'valid'}
-              className="flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-600/20 transition-all disabled:opacity-70 disabled:cursor-not-allowed min-w-[140px]"
-            >
+ onClick={handleSave}
+ disabled={isValidating || checkResult === 'valid'}
+ className="flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 text-white text-sm rounded-xl hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-600/20 transition-all disabled:opacity-70 disabled:cursor-not-allowed min-w-[140px]"
+ >
               {isValidating ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />

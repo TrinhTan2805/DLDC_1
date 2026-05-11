@@ -215,17 +215,17 @@ export function CategoryStatisticsReportPage() {
                     Tìm kiếm
                   </button>
                   <button 
-                    onClick={() => setShowAdvancedSearchModal(true)}
-                    className="px-6 py-3 bg-white border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 font-medium flex items-center gap-2 shadow-sm whitespace-nowrap relative"
-                  >
-                    <SlidersHorizontal className="w-5 h-5 text-slate-500" />
-                    Tìm kiếm nâng cao
-                    {(filterCategory !== 'all' || filterValidity !== 'all' || filterPublishStatus !== 'all' || filterApprovalStatus !== 'all') && (
-                        <span className="absolute -top-2 -right-2 w-5 h-5 flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full border-2 border-white">
-                           !
-                        </span>
-                    )}
-                  </button>
+ onClick={() => setShowAdvancedSearchModal(true)}
+ className="px-6 py-3 bg-white border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 font-medium flex items-center gap-2 shadow-sm whitespace-nowrap relative"
+ >
+ <SlidersHorizontal className="w-5 h-5 text-slate-500" />
+ Tìm kiếm nâng cao
+ {(filterCategory !== 'all' || filterValidity !== 'all' || filterPublishStatus !== 'all' || filterApprovalStatus !== 'all') && (
+ <span className="absolute -top-2 -right-2 w-5 h-5 flex items-center justify-center bg-red-500 text-white text-[10px] rounded-full border-2 border-white">
+ !
+ </span>
+ )}
+ </button>
                 </div>
               </div>
 

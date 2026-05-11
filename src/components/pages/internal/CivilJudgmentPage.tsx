@@ -103,9 +103,8 @@ export function CivilJudgmentPage({ mode = 'thu thập', context = 'thu thập',
   return (
     <DatabaseTemplate
       title="Dữ liệu CSDL thi hành án dân sự"
+      categoryName="Thi hành án dân sự"
       stats={stats}
-      chartData={chartData}
-      tableData={tableData}
       context={context}
       mode={mode}
       onBack={onBack}
