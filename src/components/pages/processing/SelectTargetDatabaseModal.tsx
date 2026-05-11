@@ -21,7 +21,10 @@ export function SelectTargetDatabaseModal({ isOpen, onClose, onContinue }: Selec
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] font-sans p-4">
+    <div 
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[500] font-sans p-4 animate-in fade-in duration-200"
+      style={{ backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }}
+    >
       <div className="bg-white w-full max-w-2xl rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
         
         {/* Header */}
@@ -96,7 +99,7 @@ export function SelectTargetDatabaseModal({ isOpen, onClose, onContinue }: Selec
           <button 
             onClick={handleContinue}
             disabled={!selectedId}
-            className={`px-6 py-2.5 text-sm font-semibold text-white rounded-lg transition-all ${
+            className={`px-6 py-2.5 text-sm font-medium text-white rounded-lg transition-all ${
               selectedId 
                 ? 'bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow active:scale-95' 
                 : 'bg-slate-300 cursor-not-allowed'

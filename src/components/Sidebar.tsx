@@ -56,12 +56,6 @@ const menuItems: MenuItem[] = [
         page: 'data-processing',
       },
       {
-        id: 'target-database-management',
-        title: 'Quản lý CSDL đích',
-        icon: Database,
-        page: 'target-database-management',
-      },
-      {
         id: 'processed-data-view',
         title: 'Dữ liệu đã xử lý',
         icon: List,
@@ -99,6 +93,12 @@ const menuItems: MenuItem[] = [
     icon: Settings,
     // page: 'admin', // Allow clicking parent to expand
     subItems: [
+      {
+        id: 'target-database-management',
+        title: 'Quản lý CSDL đích',
+        icon: Database,
+        page: 'target-database-management',
+      },
       {
         id: 'admin-users-group',
         title: 'Quản trị người dùng',

@@ -1,9 +1,10 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { Search, ChevronDown, ChevronUp, AlertTriangle, Send, Download, Eye, Lock, EyeOff, SquarePen, X, Network } from 'lucide-react';
+import { Search, ChevronDown, ChevronUp, AlertTriangle, Send, Download, Eye, Lock, EyeOff, SquarePen, X, Network, Plus, Trash2, ArrowLeftRight } from 'lucide-react';
 
 import { DataMappingModal } from './DataMappingModal';
 import { SelectTargetDatabaseModal } from './SelectTargetDatabaseModal';
+import { TargetDatabaseConfigModal } from './TargetDatabaseConfigModal';
 import { TargetDatabase } from './mockTargetDatabases';
 
 export interface ProcessingDatasetItem {
@@ -27,8 +28,129 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
   
   // Mapping Flow States
   const [isSelectDBModalOpen, setIsSelectDBModalOpen] = useState(false);
+  const [isTargetConfigModalOpen, setIsTargetConfigModalOpen] = useState(false);
   const [isMappingModalOpen, setIsMappingModalOpen] = useState(false);
   const [selectedTargetDB, setSelectedTargetDB] = useState<TargetDatabase | null>(null);
+  const [targetConfigData, setTargetConfigData] = useState<any>(null);
+  const [formatRules, setFormatRules] = useState<{id: number, field: string, rule: string, action: string, replacementValue: string, isSaved: boolean}[]>([]);
+  const [validityRules, setValidityRules] = useState<{id: number, field: string, rule: string, action: string, replacementValue: string, isSaved: boolean}[]>([]);
+
+  const handleAddRule = () => {
+    setFormatRules(prev => [...prev, { id: Date.now(), field: '', rule: '', action: '', replacementValue: '', isSaved: false }]);
+  };
+
+  const handleUpdateRule = (id: number, field: string, value: string) => {
+    setFormatRules(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r));
+  };
+
+  const handleSaveRules = () => {
+    setFormatRules(prev => prev.map(r => ({ ...r, isSaved: true })));
+  };
+
+  const handleEditRule = (id: number) => {
+    setFormatRules(prev => prev.map(r => r.id === id ? { ...r, isSaved: false } : r));
+  };
+
+  // Validity Rules Handlers
+  const handleAddValidityRule = () => {
+    setValidityRules(prev => [...prev, { id: Date.now(), field: '', rule: '', action: '', replacementValue: '', isSaved: false }]);
+  };
+
+  const handleUpdateValidityRule = (id: number, field: string, value: string) => {
+    setValidityRules(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r));
+  };
+
+  const handleSaveValidityRules = () => {
+    setValidityRules(prev => prev.map(r => ({ ...r, isSaved: true })));
+  };
+
+  const handleEditValidityRule = (id: number) => {
+    setValidityRules(prev => prev.map(r => r.id === id ? { ...r, isSaved: false } : r));
+  };
+
+  // Missing Value Rules Handlers
+  const [missingValueRules, setMissingValueRules] = useState<{id: number, field: string, type: string, action: string, value: string, isSaved: boolean}[]>([]);
+
+  const handleAddMissingValueRule = () => {
+    setMissingValueRules(prev => [...prev, { id: Date.now(), field: '', type: 'null, empty', action: 'Điền giá trị mặc định', value: '', isSaved: false }]);
+  };
+
+  const handleUpdateMissingValueRule = (id: number, field: string, value: string) => {
+    setMissingValueRules(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r));
+  };
+
+  const handleSaveMissingValueRules = () => {
+    setMissingValueRules(prev => prev.map(r => ({ ...r, isSaved: true })));
+  };
+
+  const handleEditMissingValueRule = (id: number) => {
+    setMissingValueRules(prev => prev.map(r => r.id === id ? { ...r, isSaved: false } : r));
+  };
+
+  // Transform Rules Handlers
+  const [transformRules, setTransformRules] = useState<{id: number, field: string, type: string, info: string, value: string, isSaved: boolean}[]>([]);
+
+  const handleAddTransformRule = () => {
+    setTransformRules(prev => [...prev, { id: Date.now(), field: '', type: '', info: '', value: '', isSaved: false }]);
+  };
+
+  const handleUpdateTransformRule = (id: number, field: string, value: string) => {
+    setTransformRules(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r));
+  };
+
+  const handleSaveTransformRules = () => {
+    setTransformRules(prev => prev.map(r => ({ ...r, isSaved: true })));
+  };
+
+  const handleEditTransformRule = (id: number) => {
+    setTransformRules(prev => prev.map(r => r.id === id ? { ...r, isSaved: false } : r));
+  };
+
+  // Reference Rules Handlers
+  const [referenceRules, setReferenceRules] = useState<{id: number, field: string, refTable: string, refField: string, action: string, isSaved: boolean}[]>([]);
+
+  const handleAddReferenceRule = () => {
+    setReferenceRules(prev => [...prev, { id: Date.now(), field: '', refTable: '', refField: '', action: '', isSaved: false }]);
+  };
+
+  const handleUpdateReferenceRule = (id: number, field: string, value: string) => {
+    setReferenceRules(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r));
+  };
+
+  const handleSaveReferenceRules = () => {
+    setReferenceRules(prev => prev.map(r => ({ ...r, isSaved: true })));
+  };
+
+  const handleEditReferenceRule = (id: number) => {
+    setReferenceRules(prev => prev.map(r => r.id === id ? { ...r, isSaved: false } : r));
+  };
+
+  const handleOpenTargetConfig = () => {
+    setIsTargetConfigModalOpen(true);
+  };
+
+  const handleDownloadTargetFromConfig = () => {
+    setIsSelectDBModalOpen(true);
+  };
+
+  const handleSelectTargetDB = (db: TargetDatabase) => {
+    setSelectedTargetDB(db);
+    setTargetConfigData({
+      name: db.name,
+      host: db.host,
+      port: db.port,
+      username: db.username,
+      type: `DBT_${db.type.toUpperCase()}`
+    });
+    setIsSelectDBModalOpen(false);
+    setIsTargetConfigModalOpen(true);
+  };
+
+  const handleNextToMapping = (data: any) => {
+    setTargetConfigData(data);
+    setIsTargetConfigModalOpen(false);
+    setIsMappingModalOpen(true);
+  };
 
   const handleContinueMapping = (db: TargetDatabase) => {
     setSelectedTargetDB(db);
@@ -56,39 +178,19 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
     setExpandedRules(prev => ({ ...prev, [ruleId]: !prev[ruleId] }));
   };
 
-  const toggleRuleApplication = (ruleId: string, e: any) => {
-    e.stopPropagation();
-    setAppliedRules(prev => ({ ...prev, [ruleId]: !prev[ruleId] }));
-  };
-
   const RuleAccordion = ({ id, title, children }: { id: string, title: string, children?: React.ReactNode }) => {
     const isExpanded = !!expandedRules[id];
-    const isApplied = !!appliedRules[id];
 
     return (
-      <div className={`mb-4 w-full rounded-lg border ${isApplied ? 'border-green-300 bg-[#f4fbf7]' : 'border-slate-200 bg-white'}`}>
+      <div className="mb-4 w-full rounded-lg border border-slate-200 bg-white">
         <div
-          className="flex items-center justify-between p-4 cursor-pointer"
+          className="flex items-center justify-between p-4 cursor-pointer hover:bg-slate-50/50 transition-colors"
           onClick={() => toggleRuleExpansion(id)}
         >
           <div className="flex items-center gap-3">
-            <h4 className="text-[15px] font-medium text-slate-800">{title}</h4>
-            {isApplied && (
-              <span className="px-2 py-0.5 text-xs font-medium text-green-700 bg-green-100 rounded-full">
-                Đã áp dụng
-              </span>
-            )}
+            <h4 className="text-[15px] font-semibold text-slate-800">{title}</h4>
           </div>
           <div className="flex items-center gap-4">
-            <button
-              onClick={(e: any) => toggleRuleApplication(id, e)}
-              className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${isApplied
-                ? 'bg-red-50 text-red-600 hover:bg-red-100'
-                : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
-                }`}
-            >
-              {isApplied ? 'Hủy áp dụng' : 'Áp dụng'}
-            </button>
             {isExpanded ? (
               <ChevronUp className="w-5 h-5 text-slate-400" />
             ) : (
@@ -105,13 +207,13 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
     );
   };
 
-  const FieldSelector = () => (
+  const FieldSelector = ({ multiple, selectedFields }: { multiple?: boolean, selectedFields?: string[] }) => (
     <div className="mb-4">
       <label className="block text-sm font-medium text-slate-700 mb-1.5">
         Áp dụng cho trường (trường hợp để trống sẽ áp dụng cho tất cả):
       </label>
-      <select title="Field Selector" className="w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm text-slate-700 focus:outline-none focus:border-blue-500">
-        <option>-- Chọn trường dữ liệu --</option>
+      <select title="Field Selector" multiple={multiple} className={`w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm text-slate-700 focus:outline-none focus:border-blue-500 ${multiple ? 'min-h-[100px]' : ''}`}>
+        {!multiple && <option>-- Chọn trường dữ liệu --</option>}
         <option>Họ và tên</option>
         <option>Ngày sinh</option>
         <option>Số CCCD/CMND</option>
@@ -189,11 +291,11 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                 activeTab === 'classification' ? 'Phân loại Dữ liệu' : 'Quản lý Quy tắc Xử lý'}
             </h1>
             <button
-              onClick={() => setIsSelectDBModalOpen(true)}
-              className="flex items-center gap-2 px-5 py-2.5 bg-[#00bcd4] text-white rounded-lg text-sm font-semibold hover:bg-[#00acc1] transition-colors shadow-sm"
+              onClick={handleOpenTargetConfig}
+              className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors shadow-sm"
             >
-              <Network className="w-4 h-4" />
-              Ánh xạ dữ liệu
+              <ArrowLeftRight className="w-4 h-4" />
+              Cấu hình ánh xạ
             </button>
           </div>
           <p className="text-sm text-slate-500 mb-6">Nguồn dữ liệu: {systemName} | Dữ liệu {activeService.name.toLowerCase()}</p>
@@ -225,13 +327,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                 <span className="text-xs font-semibold text-purple-600/80 bg-purple-50 px-1.5 py-0.5 rounded">90.4%</span>
               </div>
             </div>
-            <div className="bg-white p-4 rounded-xl border border-red-100 flex flex-col justify-center">
-              <span className="text-[11px] font-bold text-red-500 uppercase tracking-wider mb-2">Danh sách lỗi</span>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-bold text-red-600">12</span>
-                <span className="text-xs font-semibold text-red-600/80 bg-red-50 px-1.5 py-0.5 rounded">0.02%</span>
-              </div>
-            </div>
+
           </div>
 
           {/* Tabs */}
@@ -263,15 +359,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
             >
               Biến đổi (3)
             </button>
-            <button
-              onClick={() => setActiveTab('errors')}
-              className={`pb-3 px-4 text-sm font-medium border-b-2 mr-4 transition-colors ${activeTab === 'errors'
-                ? 'border-red-600 text-red-600'
-                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                }`}
-            >
-              Danh sách lỗi (12)
-            </button>
+
             <button
               onClick={() => setActiveTab('classification')}
               className={`pb-3 px-4 text-sm font-medium border-b-2 mr-4 transition-colors ${activeTab === 'classification'
@@ -296,95 +384,324 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
             {activeTab === 'clean' && (
               <div className="flex flex-col">
                 <RuleAccordion id="clean-1" title="Kiểm tra quy tắc về chuẩn định dạng">
-                  <FieldSelector />
-                  <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-100">
-                    <h5 className="text-sm font-medium text-slate-700 mb-4">Cấu hình chuẩn định dạng:</h5>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm text-slate-600 mb-1.5">Điều kiện định dạng:</label>
-                        <select title="Điều kiện định dạng" className="w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm text-slate-700 focus:outline-none focus:border-blue-500">
-                          <option>Đúng định dạng Email</option>
-                          <option>Đúng định dạng Số điện thoại</option>
-                          <option>Đúng định dạng Ngày tháng</option>
-                        </select>
+                  <div className="space-y-6">
+                    {formatRules.length > 0 && (
+                      <div className="space-y-4">
+                        {formatRules.map((rule) => (
+                          <div key={rule.id} className={`flex gap-8 items-end p-5 rounded-xl border transition-all relative group ${rule.isSaved ? 'bg-slate-50 border-slate-200' : 'bg-white border-blue-200 shadow-sm'}`}>
+                            <div className="flex-1 space-y-2">
+                              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Trường áp dụng</label>
+                              <select 
+                                disabled={rule.isSaved}
+                                value={rule.field}
+                                onChange={(e) => handleUpdateRule(rule.id, 'field', e.target.value)}
+                                title="Trường áp dụng" 
+                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                              >
+                                <option value="">-- Chọn trường --</option>
+                                <option value="Họ và tên">Họ và tên</option>
+                                <option value="Số CCCD/CMND">Số CCCD/CMND</option>
+                                <option value="Ngày sinh">Ngày sinh</option>
+                                <option value="Địa chỉ">Địa chỉ</option>
+                              </select>
+                            </div>
+                            
+                            <div className="flex-1 space-y-2">
+                              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Quy tắc định dạng</label>
+                              <select 
+                                disabled={rule.isSaved}
+                                value={rule.rule}
+                                onChange={(e) => handleUpdateRule(rule.id, 'rule', e.target.value)}
+                                title="Quy tắc định dạng" 
+                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                              >
+                                <option value="">-- Chọn quy tắc --</option>
+
+                                <option value="Đúng định dạng CCCD">Đúng định dạng CCCD</option>
+                                <option value="Đúng định dạng Email">Đúng định dạng Email</option>
+                                <option value="Đúng định dạng Số điện thoại">Đúng định dạng Số điện thoại</option>
+                              </select>
+                            </div>
+
+                            <div className="flex-[1.5] space-y-2">
+                              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Xử lý ngoại lệ</label>
+                              <div className="flex gap-3">
+                                <select 
+                                  disabled={rule.isSaved}
+                                  value={rule.action}
+                                  onChange={(e) => handleUpdateRule(rule.id, 'action', e.target.value)}
+                                  title="Xử lý ngoại lệ" 
+                                  className={`flex-1 px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                                >
+                                  <option value="">-- Chọn xử lý --</option>
+                                  <option value="Loại bỏ bản ghi lỗi">Loại bỏ bản ghi lỗi</option>
+                                  <option value="Thay thế bằng giá trị mặc định">Thay thế bằng giá trị mặc định</option>
+                                </select>
+                                {rule.action === 'Thay thế bằng giá trị mặc định' && (
+                                  <input 
+                                    type="text"
+                                    disabled={rule.isSaved}
+                                    value={rule.replacementValue}
+                                    onChange={(e) => handleUpdateRule(rule.id, 'replacementValue', e.target.value)}
+                                    placeholder="Giá trị thay thế..."
+                                    className={`flex-1 px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                                  />
+                                )}
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-1 mb-1">
+                              {rule.isSaved && (
+                                <button 
+                                  onClick={() => handleEditRule(rule.id)}
+                                  title="Chỉnh sửa" 
+                                  className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                                >
+                                  <SquarePen className="w-4 h-4" />
+                                </button>
+                              )}
+                              <button 
+                                onClick={() => setFormatRules(prev => prev.filter(r => r.id !== rule.id))}
+                                title="Xóa" 
+                                className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                      <div>
-                        <label className="block text-sm text-slate-600 mb-1.5">Hành động:</label>
-                        <select title="Hành động" className="w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm text-slate-700 focus:outline-none focus:border-blue-500">
-                          <option>Ghi log lỗi</option>
-                          <option>Loại bỏ bản ghi</option>
-                        </select>
-                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between mt-2 px-1">
+                      <button 
+                        onClick={handleAddRule}
+                        className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-md active:scale-95"
+                      >
+                        <Plus className="w-4 h-4 stroke-[3px]" />
+                        Thêm quy tắc
+                      </button>
+
+                      {formatRules.some(r => !r.isSaved) && (
+                        <button 
+                          onClick={handleSaveRules}
+                          className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-all shadow-sm active:scale-95"
+                        >
+                          Lưu quy tắc
+                        </button>
+                      )}
                     </div>
                   </div>
                 </RuleAccordion>
                 <RuleAccordion id="clean-2" title="Kiểm tra tính hợp lệ của dữ liệu">
-                  <FieldSelector />
-                  <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-100">
-                    <h5 className="text-sm font-medium text-slate-700 mb-4">Cấu hình hợp lệ:</h5>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm text-slate-600 mb-1.5">Điều kiện hợp lệ:</label>
-                        <select title="Điều kiện hợp lệ" className="w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm text-slate-700 focus:outline-none focus:border-blue-500">
-                          <option>Độ dài từ 2-100 ký tự</option>
-                          <option>Không để trống</option>
-                          <option>Tuổi từ 18-65</option>
-                        </select>
+                  <div className="space-y-6">
+                    {validityRules.length > 0 && (
+                      <div className="space-y-4">
+                        {validityRules.map((rule) => (
+                          <div key={rule.id} className={`flex gap-8 items-end p-5 rounded-xl border transition-all relative group ${rule.isSaved ? 'bg-slate-50 border-slate-200' : 'bg-white border-blue-200 shadow-sm'}`}>
+                            <div className="flex-1 space-y-2">
+                              <label className="block text-[11px] font-medium text-slate-500 uppercase tracking-wider">Trường áp dụng</label>
+                              <select 
+                                disabled={rule.isSaved}
+                                value={rule.field}
+                                onChange={(e) => handleUpdateValidityRule(rule.id, 'field', e.target.value)}
+                                title="Trường áp dụng" 
+                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                              >
+                                <option value="">-- Chọn trường --</option>
+                                <option value="Họ và tên">Họ và tên</option>
+                                <option value="Số CCCD/CMND">Số CCCD/CMND</option>
+                                <option value="Ngày sinh">Ngày sinh</option>
+                                <option value="Địa chỉ">Địa chỉ</option>
+                              </select>
+                            </div>
+                            
+                            <div className="flex-1 space-y-2">
+                              <label className="block text-[11px] font-medium text-slate-500 uppercase tracking-wider">Điều kiện hợp lệ</label>
+                              <select 
+                                disabled={rule.isSaved}
+                                value={rule.rule}
+                                onChange={(e) => handleUpdateValidityRule(rule.id, 'rule', e.target.value)}
+                                title="Điều kiện hợp lệ" 
+                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                              >
+                                <option value="">-- Chọn điều kiện --</option>
+                                <option value="Không để trống">Không để trống</option>
+                                <option value="Độ dài từ 2-100 ký tự">Độ dài từ 2-100 ký tự</option>
+                                <option value="Tuổi từ 18-65">Tuổi từ 18-65</option>
+                              </select>
+                            </div>
+
+                            <div className="flex-[1.5] space-y-2">
+                              <label className="block text-[11px] font-medium text-slate-500 uppercase tracking-wider">Hành động</label>
+                              <div className="flex gap-3">
+                                <select 
+                                  disabled={rule.isSaved}
+                                  value={rule.action}
+                                  onChange={(e) => handleUpdateValidityRule(rule.id, 'action', e.target.value)}
+                                  title="Hành động" 
+                                  className={`flex-1 px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                                >
+                                  <option value="">-- Chọn hành động --</option>
+                                  <option value="Đánh dấu cần xem xét">Đánh dấu cần xem xét</option>
+                                  <option value="Loại bỏ bản ghi">Loại bỏ bản ghi</option>
+                                  <option value="Thay thế bằng giá trị mặc định">Thay thế bằng giá trị mặc định</option>
+                                </select>
+                                {rule.action === 'Thay thế bằng giá trị mặc định' && (
+                                  <input 
+                                    type="text"
+                                    disabled={rule.isSaved}
+                                    value={rule.replacementValue}
+                                    onChange={(e) => handleUpdateValidityRule(rule.id, 'replacementValue', e.target.value)}
+                                    placeholder="Giá trị thay thế..."
+                                    className={`flex-1 px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                                  />
+                                )}
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-1 mb-1">
+                              {rule.isSaved && (
+                                <button 
+                                  onClick={() => handleEditValidityRule(rule.id)}
+                                  title="Chỉnh sửa" 
+                                  className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                                >
+                                  <SquarePen className="w-4 h-4" />
+                                </button>
+                              )}
+                              <button 
+                                onClick={() => setValidityRules(prev => prev.filter(r => r.id !== rule.id))}
+                                title="Xóa" 
+                                className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                      <div>
-                        <label className="block text-sm text-slate-600 mb-1.5">Hành động:</label>
-                        <select title="Hành động" className="w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm text-slate-700 focus:outline-none focus:border-blue-500">
-                          <option>Ghi log lỗi</option>
-                          <option>Đánh dấu cần xem xét</option>
-                        </select>
-                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between mt-2 px-1">
+                      <button 
+                        onClick={handleAddValidityRule}
+                        className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-md active:scale-95"
+                      >
+                        <Plus className="w-4 h-4 stroke-[3px]" />
+                        Thêm quy tắc
+                      </button>
+
+                      {validityRules.some(r => !r.isSaved) && (
+                        <button 
+                          onClick={handleSaveValidityRules}
+                          className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-all shadow-sm active:scale-95"
+                        >
+                          Lưu quy tắc
+                        </button>
+                      )}
                     </div>
                   </div>
                 </RuleAccordion>
                 <RuleAccordion id="clean-3" title="Xử lý giá trị thiếu dữ liệu">
-                  <FieldSelector />
-                  <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-100">
-                    <h5 className="text-sm font-medium text-slate-700 mb-4">Cấu hình xử lý thiếu:</h5>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm text-slate-600 mb-1.5">Kiểu giá trị thiếu:</label>
-                        <input title="Kiểu giá trị thiếu" type="text" placeholder="VD: null, empty, N/A" defaultValue="null, empty" className="w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm text-slate-700 focus:outline-none focus:border-blue-500" />
+                  <div className="space-y-6">
+                    {missingValueRules.length > 0 && (
+                      <div className="space-y-4">
+                        {missingValueRules.map((rule) => (
+                          <div key={rule.id} className={`flex gap-6 items-end p-5 rounded-xl border transition-all relative group ${rule.isSaved ? 'bg-slate-50 border-slate-200' : 'bg-white border-blue-200 shadow-sm'}`}>
+                            <div className="flex-1 space-y-2">
+                              <label className="block text-[11px] font-medium text-slate-500 uppercase tracking-wider">Trường áp dụng</label>
+                              <select 
+                                disabled={rule.isSaved}
+                                value={rule.field}
+                                onChange={(e) => handleUpdateMissingValueRule(rule.id, 'field', e.target.value)}
+                                title="Trường áp dụng" 
+                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                              >
+                                <option value="">-- Chọn trường --</option>
+                                <option value="Họ và tên">Họ và tên</option>
+                                <option value="Số CCCD/CMND">Số CCCD/CMND</option>
+                                <option value="Ngày sinh">Ngày sinh</option>
+                                <option value="Địa chỉ">Địa chỉ</option>
+                              </select>
+                            </div>
+                            
+                            <div className="flex-1 space-y-2">
+                              <label className="block text-[11px] font-medium text-slate-500 uppercase tracking-wider">Kiểu giá trị thiếu</label>
+                              <input 
+                                type="text"
+                                disabled={rule.isSaved}
+                                value={rule.type}
+                                onChange={(e) => handleUpdateMissingValueRule(rule.id, 'type', e.target.value)}
+                                placeholder="VD: null, empty"
+                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                              />
+                            </div>
+
+                            <div className="flex-1 space-y-2">
+                              <label className="block text-[11px] font-medium text-slate-500 uppercase tracking-wider">Hành động</label>
+                              <select 
+                                disabled
+                                value="Điền giá trị mặc định"
+                                title="Hành động" 
+                                className="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-[13px] text-slate-500 transition-all focus:outline-none"
+                              >
+                                <option>Điền giá trị mặc định</option>
+                              </select>
+                            </div>
+
+                            <div className="flex-1 space-y-2">
+                              <label className="block text-[11px] font-medium text-slate-500 uppercase tracking-wider">Giá trị điền vào</label>
+                              <input 
+                                type="text"
+                                disabled={rule.isSaved}
+                                value={rule.value}
+                                onChange={(e) => handleUpdateMissingValueRule(rule.id, 'value', e.target.value)}
+                                placeholder="Nhập giá trị..."
+                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                              />
+                            </div>
+                            
+                            <div className="flex items-center gap-1 mb-1">
+                              {rule.isSaved && (
+                                <button 
+                                  onClick={() => handleEditMissingValueRule(rule.id)}
+                                  title="Chỉnh sửa" 
+                                  className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                                >
+                                  <SquarePen className="w-4 h-4" />
+                                </button>
+                              )}
+                              <button 
+                                onClick={() => setMissingValueRules(prev => prev.filter(r => r.id !== rule.id))}
+                                title="Xóa" 
+                                className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                      <div>
-                        <label className="block text-sm text-slate-600 mb-1.5">Hành động:</label>
-                        <select title="Hành động" className="w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm text-slate-700 focus:outline-none focus:border-blue-500">
-                          <option>Điền giá trị mặc định</option>
-                          <option>Đánh dấu cần kiểm tra</option>
-                          <option>Bỏ qua bản ghi</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm text-slate-600 mb-1.5">Giá trị điền vào (nếu có):</label>
-                        <input title="Giá trị điền vào" type="text" placeholder="Nhập giá trị mặc định" className="w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm text-slate-700 focus:outline-none focus:border-blue-500" />
-                      </div>
-                    </div>
-                  </div>
-                </RuleAccordion>
-                <RuleAccordion id="clean-4" title="Loại bỏ hoặc thay thế giá trị ngoại lệ">
-                  <FieldSelector />
-                  <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-100">
-                    <h5 className="text-sm font-medium text-slate-700 mb-4">Cấu hình xử lý ngoại lệ:</h5>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm text-slate-600 mb-1.5">Điều kiện ngoại lệ:</label>
-                        <select title="Điều kiện ngoại lệ" className="w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm text-slate-700 focus:outline-none focus:border-blue-500">
-                          <option>Ngoài khoảng cho phép</option>
-                          <option>Không đúng định dạng Regex</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm text-slate-600 mb-1.5">Hành động:</label>
-                        <select title="Hành động" className="w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm text-slate-700 focus:outline-none focus:border-blue-500">
-                          <option>Loại bỏ bản ghi</option>
-                          <option>Đặt giá trị mặc định</option>
-                          <option>Thay thế bằng null</option>
-                        </select>
-                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between mt-2 px-1">
+                      <button 
+                        onClick={handleAddMissingValueRule}
+                        className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-md active:scale-95"
+                      >
+                        <Plus className="w-4 h-4 stroke-[3px]" />
+                        Thêm quy tắc
+                      </button>
+
+                      {missingValueRules.some(r => !r.isSaved) && (
+                        <button 
+                          onClick={handleSaveMissingValueRules}
+                          className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-all shadow-sm active:scale-95"
+                        >
+                          Lưu quy tắc
+                        </button>
+                      )}
                     </div>
                   </div>
                 </RuleAccordion>
@@ -393,66 +710,140 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
 
             {activeTab === 'standardize' && (
               <div className="flex flex-col">
-                <RuleAccordion id="std-1" title="Kiểm tra đối sánh tồn tại dựa trên trường khóa">
-                  <FieldSelector selectedFields={['so_cccd', 'email']} />
-                  <div className="bg-green-50/50 p-4 rounded-lg border border-green-100">
-                    <h5 className="text-sm font-medium text-slate-700 mb-4">Cấu hình kiểm tra trường khóa:</h5>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm text-slate-600 mb-1.5">Bảng tham chiếu:</label>
-                        <input title="Bảng tham chiếu" type="text" placeholder="VD: tb_nguoi_dung" defaultValue="tb_nguoi_dung" className="w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm text-slate-700 focus:outline-none focus:border-blue-500" />
-                      </div>
-                      <div>
-                        <label className="block text-sm text-slate-600 mb-1.5">Hành động khi không tồn tại:</label>
-                        <select title="Hành động khi không tồn tại" className="w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm text-slate-700 focus:outline-none focus:border-blue-500">
-                          <option>Từ chối bản ghi</option>
-                          <option>Ghi log cảnh báo</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                </RuleAccordion>
-                <RuleAccordion id="std-2" title="Xử lý trùng lặp">
+                <RuleAccordion id="std-2" title="Kiểm tra đối sánh tồn tại dựa trên trường khóa">
                   <FieldSelector />
                   <div className="bg-green-50/50 p-4 rounded-lg border border-green-100">
-                    <h5 className="text-sm font-medium text-slate-700 mb-4">Cấu hình xử lý trùng lặp:</h5>
+                    <h5 className="text-sm font-medium text-slate-700 mb-4">Quy tắc đối sánh:</h5>
                     <div className="space-y-4">
                       <div>
                         <label className="block text-sm text-slate-600 mb-1.5">Trường kiểm tra trùng:</label>
                         <input title="Trường kiểm tra trùng" type="text" placeholder="VD: so_cccd" defaultValue="so_cccd" className="w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm text-slate-700 focus:outline-none focus:border-blue-500" />
                       </div>
                       <div>
-                        <label className="block text-sm text-slate-600 mb-1.5">Hành động:</label>
-                        <select title="Hành động" className="w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm text-slate-700 focus:outline-none focus:border-blue-500">
+                        <label className="block text-sm text-slate-600 mb-1.5">Xử lý trùng lặp:</label>
+                        <select title="Xử lý trùng lặp" className="w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm text-slate-700 focus:outline-none focus:border-blue-500">
                           <option>Giữ bản ghi mới nhất</option>
                           <option>Giữ bản ghi đầu tiên</option>
-                          <option>Gộp thông tin</option>
                         </select>
                       </div>
                     </div>
                   </div>
                 </RuleAccordion>
                 <RuleAccordion id="std-3" title="Xử lý vi phạm về ràng buộc thuộc tính tham chiếu">
-                  <FieldSelector />
-                  <div className="bg-green-50/50 p-4 rounded-lg border border-green-100">
-                    <h5 className="text-sm font-medium text-slate-700 mb-4">Cấu hình ràng buộc tham chiếu:</h5>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm text-slate-600 mb-1.5">Bảng tham chiếu:</label>
-                        <select title="Bảng tham chiếu" className="w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm text-slate-700 focus:outline-none focus:border-blue-500">
-                          <option>Danh mục Tỉnh/Thành phố</option>
-                          <option>Danh mục Quốc tịch</option>
-                          <option>Danh mục Dân tộc</option>
-                        </select>
+                  <div className="space-y-6">
+                    {referenceRules.length > 0 && (
+                      <div className="space-y-4">
+                        {referenceRules.map((rule) => (
+                          <div key={rule.id} className={`flex gap-6 items-end p-5 rounded-xl border transition-all relative group ${rule.isSaved ? 'bg-slate-50 border-slate-200' : 'bg-white border-blue-200 shadow-sm'}`}>
+                            <div className="flex-1 space-y-2">
+                              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Trường áp dụng</label>
+                              <select 
+                                disabled={rule.isSaved}
+                                value={rule.field}
+                                onChange={(e) => handleUpdateReferenceRule(rule.id, 'field', e.target.value)}
+                                title="Trường áp dụng" 
+                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                              >
+                                <option value="">-- Chọn trường --</option>
+                                <option value="ma_tinh_thanh">Mã Tỉnh/Thành</option>
+                                <option value="ma_quan_huyen">Mã Quận/Huyện</option>
+                                <option value="ma_phuong_xa">Mã Phường/Xã</option>
+                                <option value="dan_toc">Dân tộc</option>
+                                <option value="quoc_tich">Quốc tịch</option>
+                              </select>
+                            </div>
+                            
+                            <div className="flex-1 space-y-2">
+                              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Bảng tham chiếu</label>
+                              <select 
+                                disabled={rule.isSaved}
+                                value={rule.refTable}
+                                onChange={(e) => handleUpdateReferenceRule(rule.id, 'refTable', e.target.value)}
+                                title="Bảng tham chiếu" 
+                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                              >
+                                <option value="">-- Chọn bảng --</option>
+                                <option value="dm_tinh_thanh">Danh mục Tỉnh/Thành</option>
+                                <option value="dm_quan_huyen">Danh mục Quận/Huyện</option>
+                                <option value="dm_phuong_xa">Danh mục Phường/Xã</option>
+                                <option value="dm_dan_toc">Danh mục Dân tộc</option>
+                                <option value="dm_quoc_tich">Danh mục Quốc tịch</option>
+                              </select>
+                            </div>
+
+                            <div className="flex-1 space-y-2">
+                              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Trường tham chiếu</label>
+                              <select 
+                                disabled={rule.isSaved}
+                                value={rule.refField}
+                                onChange={(e) => handleUpdateReferenceRule(rule.id, 'refField', e.target.value)}
+                                title="Trường tham chiếu" 
+                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                              >
+                                <option value="">-- Chọn trường --</option>
+                                <option value="ma_danh_muc">Mã danh mục</option>
+                                <option value="ten_danh_muc">Tên danh mục</option>
+                                <option value="ma_code">Mã Code</option>
+                              </select>
+                            </div>
+
+                            <div className="flex-1 space-y-2">
+                              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Hành động</label>
+                              <select 
+                                disabled={rule.isSaved}
+                                value={rule.action}
+                                onChange={(e) => handleUpdateReferenceRule(rule.id, 'action', e.target.value)}
+                                title="Hành động" 
+                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                              >
+                                <option value="">-- Chọn hành động --</option>
+                                <option value="Từ chối bản ghi vi phạm">Từ chối bản ghi vi phạm</option>
+                                <option value="Gán giá trị rỗng (NULL)">Gán giá trị rỗng (NULL)</option>
+                                <option value="Gán giá trị mặc định">Gán giá trị mặc định</option>
+                                <option value="Đánh dấu cảnh báo">Đánh dấu cảnh báo</option>
+                              </select>
+                            </div>
+                            
+                            <div className="flex items-center gap-1 mb-1">
+                              {rule.isSaved && (
+                                <button 
+                                  onClick={() => handleEditReferenceRule(rule.id)}
+                                  title="Chỉnh sửa" 
+                                  className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                                >
+                                  <SquarePen className="w-4 h-4" />
+                                </button>
+                              )}
+                              <button 
+                                onClick={() => setReferenceRules(prev => prev.filter(r => r.id !== rule.id))}
+                                title="Xóa" 
+                                className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                      <div>
-                        <label className="block text-sm text-slate-600 mb-1.5">Hành động:</label>
-                        <select title="Hành động" className="w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm text-slate-700 focus:outline-none focus:border-blue-500">
-                          <option>Từ chối bản ghi vi phạm</option>
-                          <option>Tự động cập nhật tham chiếu</option>
-                          <option>Đánh dấu cần kiểm tra</option>
-                        </select>
-                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between mt-2 px-1">
+                      <button 
+                        onClick={handleAddReferenceRule}
+                        className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-md active:scale-95"
+                      >
+                        <Plus className="w-4 h-4 stroke-[3px]" />
+                        Thêm quy tắc
+                      </button>
+
+                      {referenceRules.some(r => !r.isSaved) && (
+                        <button 
+                          onClick={handleSaveReferenceRules}
+                          className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-all shadow-sm active:scale-95"
+                        >
+                          Lưu quy tắc
+                        </button>
+                      )}
                     </div>
                   </div>
                 </RuleAccordion>
@@ -462,26 +853,118 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
             {activeTab === 'transform' && (
               <div className="flex flex-col">
                 <RuleAccordion id="trans-1" title="Biến đổi định dạng dữ liệu">
-                  <FieldSelector />
-                  <div className="bg-purple-50/50 p-4 rounded-lg border border-purple-100">
-                    <h5 className="text-sm font-medium text-slate-700 mb-4">Cấu hình biến đổi định dạng:</h5>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm text-slate-600 mb-1.5">Định dạng nguồn:</label>
-                        <input title="Định dạng nguồn" type="text" placeholder="VD: dd/mm/yyyy" defaultValue="dd/mm/yyyy" className="w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm text-slate-700 focus:outline-none focus:border-blue-500" />
+                  <div className="space-y-6">
+                    {transformRules.length > 0 && (
+                      <div className="space-y-4">
+                        {transformRules.map((rule) => (
+                          <div key={rule.id} className={`flex gap-6 items-end p-5 rounded-xl border transition-all relative group ${rule.isSaved ? 'bg-slate-50 border-slate-200' : 'bg-white border-blue-200 shadow-sm'}`}>
+                            <div className="flex-1 space-y-2">
+                              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Trường áp dụng</label>
+                              <select 
+                                disabled={rule.isSaved}
+                                value={rule.field}
+                                onChange={(e) => handleUpdateTransformRule(rule.id, 'field', e.target.value)}
+                                title="Trường áp dụng" 
+                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                              >
+                                <option value="">-- Chọn trường --</option>
+                                <option value="Họ và tên">Họ và tên</option>
+                                <option value="Số CCCD/CMND">Số CCCD/CMND</option>
+                                <option value="Ngày sinh">Ngày sinh</option>
+                                <option value="Địa chỉ">Địa chỉ</option>
+                              </select>
+                            </div>
+                            
+                            <div className="flex-1 space-y-2">
+                              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Kiểu dữ liệu</label>
+                              <select 
+                                disabled={rule.isSaved}
+                                value={rule.type}
+                                onChange={(e) => handleUpdateTransformRule(rule.id, 'type', e.target.value)}
+                                title="Kiểu dữ liệu" 
+                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                              >
+                                <option value="">-- Chọn kiểu --</option>
+                                <option value="Số thập phân">Số thập phân</option>
+                                <option value="Số nguyên">Số nguyên</option>
+                                <option value="Chuyển đôi từ unix timestamp">Chuyển đôi từ unix timestamp</option>
+                                <option value="Thời gian">Thời gian</option>
+                                <option value="Ngày tháng">Ngày tháng</option>
+                                <option value="Chuỗi">Chuỗi</option>
+                                <option value="Tiền tệ">Tiền tệ</option>
+                              </select>
+                            </div>
+
+                            <div className="flex-1 space-y-2">
+                              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Thông tin chuyển đổi</label>
+                              <select 
+                                disabled={rule.isSaved}
+                                value={rule.info}
+                                onChange={(e) => handleUpdateTransformRule(rule.id, 'info', e.target.value)}
+                                title="Thông tin chuyển đổi" 
+                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                              >
+                                <option value="">-- Chọn thông tin --</option>
+                                <option value="dd/mm/yyyy">dd/mm/yyyy</option>
+                                <option value="yyyy-mm-dd">yyyy-mm-dd</option>
+                                <option value="0,000">0,000</option>
+                                <option value="UPPERCASE">VIẾT HOA</option>
+                                <option value="lowercase">viết thường</option>
+                              </select>
+                            </div>
+
+                            <div className="flex-1 space-y-2">
+                              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Giá trị</label>
+                              <input 
+                                type="text"
+                                disabled={rule.isSaved}
+                                value={rule.value}
+                                onChange={(e) => handleUpdateTransformRule(rule.id, 'value', e.target.value)}
+                                placeholder="Nhập giá trị..."
+                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                              />
+                            </div>
+                            
+                            <div className="flex items-center gap-1 mb-1">
+                              {rule.isSaved && (
+                                <button 
+                                  onClick={() => handleEditTransformRule(rule.id)}
+                                  title="Chỉnh sửa" 
+                                  className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                                >
+                                  <SquarePen className="w-4 h-4" />
+                                </button>
+                              )}
+                              <button 
+                                onClick={() => setTransformRules(prev => prev.filter(r => r.id !== rule.id))}
+                                title="Xóa" 
+                                className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                      <div>
-                        <label className="block text-sm text-slate-600 mb-1.5">Định dạng đích:</label>
-                        <input title="Định dạng đích" type="text" placeholder="VD: yyyy-mm-dd" defaultValue="yyyy-mm-dd" className="w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm text-slate-700 focus:outline-none focus:border-blue-500" />
-                      </div>
-                      <div>
-                        <label className="block text-sm text-slate-600 mb-1.5">Kiểu biến đổi:</label>
-                        <select title="Kiểu biến đổi" className="w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm text-slate-700 focus:outline-none focus:border-blue-500">
-                          <option>Chuyển chữ viết hoa</option>
-                          <option>Loại bỏ khoảng trắng thừa</option>
-                          <option>Chuẩn hóa ngày tháng</option>
-                        </select>
-                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between mt-2 px-1">
+                      <button 
+                        onClick={handleAddTransformRule}
+                        className="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-md active:scale-95"
+                      >
+                        <Plus className="w-4 h-4 stroke-[3px]" />
+                        Thêm quy tắc
+                      </button>
+
+                      {transformRules.some(r => !r.isSaved) && (
+                        <button 
+                          onClick={handleSaveTransformRules}
+                          className="flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-all shadow-sm active:scale-95"
+                        >
+                          Lưu quy tắc
+                        </button>
+                      )}
                     </div>
                   </div>
                 </RuleAccordion>
@@ -530,74 +1013,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
               </div>
             )}
 
-            {activeTab === 'errors' && (
-              <div className="flex flex-col">
-                <div className="flex gap-4 mb-4">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <input type="text" placeholder="Tìm kiếm theo mã bản ghi, trường dữ liệu, lỗi..." className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" />
-                  </div>
-                  <select title="Trạng thái" className="border border-slate-200 rounded-lg px-4 py-2 text-sm max-w-[180px] bg-white focus:outline-none focus:border-blue-500">
-                    <option>Tất cả trạng thái</option>
-                    <option>Chưa xử lý</option>
-                    <option>Đã gửi về hệ thống nguồn</option>
-                  </select>
-                  <select title="Loại lỗi" className="border border-slate-200 rounded-lg px-4 py-2 text-sm max-w-[180px] bg-white focus:outline-none focus:border-blue-500">
-                    <option>Tất cả loại lỗi</option>
-                    <option>Sai định dạng</option>
-                    <option>Thiếu dữ liệu</option>
-                    <option>Giá trị không hợp lệ</option>
-                  </select>
-                </div>
 
-                <div className="text-xs text-slate-500 mb-2">Hiển thị 12 / 12 bản ghi</div>
-
-                <div className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
-                  <table className="w-full border-collapse">
-                    <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
-                      <tr>
-                        <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Mã Bản Ghi</th>
-                        <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Trường Dữ Liệu</th>
-                        <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Giá Trị Gốc</th>
-                        <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Loại Lỗi</th>
-                        <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Mô Tả Lỗi</th>
-                        <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Trạng Thái</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {mockErrors.map((error, idx) => (
-                        <tr key={idx} className={`hover:bg-blue-50/30 transition-all group ${error.status === 'Đã gửi về hệ thống nguồn' ? 'bg-slate-50/30' : ''}`}>
-                          <td className="px-6 py-4 text-center text-sm font-semibold text-slate-900 font-mono">{error.id}</td>
-                          <td className="px-6 py-4 text-center text-sm text-slate-600 font-medium">{error.field}</td>
-                          <td className={`px-6 py-4 text-center text-sm font-mono line-through ${error.status === 'Đã gửi về hệ thống nguồn' ? 'text-slate-400' : 'text-red-500 font-semibold'}`}>{error.originalValue}</td>
-                          <td className="px-6 py-4 text-center">
-                            <span className={`inline-flex items-center px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full border shadow-sm ${
-                              error.type === 'Sai định dạng' ? 'bg-red-50 text-red-700 border-red-100' :
-                              error.type === 'Thiếu dữ liệu' ? 'bg-orange-50 text-orange-700 border-orange-100' :
-                              'bg-amber-50 text-amber-700 border-amber-100'
-                            } ${error.status === 'Đã gửi về hệ thống nguồn' ? 'opacity-50 grayscale' : ''}`}>
-                              {error.type}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-center">
-                            <div className={`inline-flex items-center gap-2 text-sm font-medium ${error.status === 'Đã gửi về hệ thống nguồn' ? 'text-slate-400' : 'text-slate-600'}`}>
-                              <AlertTriangle className={`w-4 h-4 ${error.status === 'Đã gửi về hệ thống nguồn' ? 'text-slate-400' : 'text-red-500'}`} />
-                              {error.desc}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-center">
-                            <div className="flex items-center justify-center gap-2">
-                              <span className={`w-2 h-2 rounded-full ${error.status === 'Đã gửi về hệ thống nguồn' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]' : 'bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.4)]'}`}></span>
-                              <span className={`text-xs font-bold uppercase tracking-wider ${error.status === 'Đã gửi về hệ thống nguồn' ? 'text-emerald-700' : 'text-slate-600'}`}>{error.status}</span>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
 
             {activeTab === 'classification' && (
               <div className="flex flex-col">
@@ -749,61 +1165,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
           </div>
         </div>
 
-        {/* Footer */}
-        {!(isMappingModalOpen && systemName === 'CSDL Hộ tịch điện tử') && (
-          activeTab === 'clean' || activeTab === 'standardize' || activeTab === 'transform' ? (
-            <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 flex items-center justify-between z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-              <div className="text-sm text-slate-600 font-medium">
-                Đã áp dụng {Object.values(appliedRules).filter(Boolean).length} / 10 quy tắc
-              </div>
-              <div className="flex items-center gap-3">
-                <button className="px-6 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors">
-                  Hủy
-                </button>
-                <button className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors">
-                  Lưu cấu hình
-                </button>
-              </div>
-            </div>
-          ) : activeTab === 'errors' ? (
-            <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 flex items-center justify-between z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-              <div className="text-sm text-slate-600 font-medium">
-                10 bản ghi chưa xử lý • 2 đã gửi về hệ thống nguồn
-              </div>
-              <div className="flex items-center gap-3">
-                <button className="px-6 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors">
-                  Đóng
-                </button>
-                <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-emerald-600 rounded-md hover:bg-emerald-700 transition-colors">
-                  <Download className="w-4 h-4" />
-                  Xuất danh sách lỗi
-                </button>
-                <button
-                  onClick={() => setIsSendPopupOpen(true)}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
-                >
-                  <Send className="w-4 h-4" />
-                  Gửi tất cả về hệ thống nguồn
-                </button>
-              </div>
-            </div>
-          ) : activeTab === 'history' ? (
-            <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 flex items-center justify-end z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-              <button className="px-6 py-2 text-sm font-medium text-slate-700 bg-slate-100 rounded-md hover:bg-slate-200 transition-colors">
-                Đóng
-              </button>
-            </div>
-          ) : (
-            <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 flex items-center justify-end z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-              <button className="px-6 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors mr-3">
-                Đóng
-              </button>
-              <button className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors">
-                Xuất báo cáo
-              </button>
-            </div>
-          )
-        )}
+
       </div>
 
       {/* Popovers / Modals */}
@@ -1004,10 +1366,19 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
         </div>
       )}
 
+      <TargetDatabaseConfigModal
+        isOpen={isTargetConfigModalOpen}
+        onClose={() => setIsTargetConfigModalOpen(false)}
+        onBack={() => setIsTargetConfigModalOpen(false)}
+        onDownloadTarget={handleDownloadTargetFromConfig}
+        onNext={handleNextToMapping}
+        initialData={targetConfigData}
+      />
+
       <SelectTargetDatabaseModal
         isOpen={isSelectDBModalOpen}
         onClose={() => setIsSelectDBModalOpen(false)}
-        onContinue={handleContinueMapping}
+        onContinue={handleSelectTargetDB}
       />
 
       <DataMappingModal

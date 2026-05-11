@@ -117,7 +117,9 @@ export function SourceSystemManagementPage() {
                   <td className="py-4 px-4 text-sm font-semibold text-slate-900 text-center">{item.systemName}</td>
                   <td className="py-4 px-4 text-sm text-slate-600 text-center">{item.unitName}</td>
                   <td className="py-4 px-4 text-center">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-blue-100 text-blue-800 shadow-sm">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold border shadow-sm ${
+                      item.sourceType === 'Trong ngành' ? 'bg-purple-50 text-purple-700 border-purple-100' : 'bg-blue-50 text-blue-700 border-blue-100'
+                    }`}>
                       {item.sourceType}
                     </span>
                   </td>
@@ -129,24 +131,24 @@ export function SourceSystemManagementPage() {
                     <div className="flex items-center justify-center gap-2">
                       <button
                         onClick={() => handleView(item)}
-                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all"
+                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                         title="Xem chi tiết"
                       >
-                        <Eye className="w-4.5 h-4.5" />
+                        <Eye className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleEdit(item)}
-                        className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-full transition-all"
+                        className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
                         title="Sửa"
                       >
-                        <Edit className="w-4.5 h-4.5" />
+                        <Edit className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(item.id)}
-                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-all"
+                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                         title="Xóa"
                       >
-                        <Trash2 className="w-4.5 h-4.5" />
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </td>

@@ -83,32 +83,7 @@ export function ViewServiceModal({ isOpen, onClose, service }: ViewServiceModalP
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2">
-                <button className="px-3 py-1.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-[13px] font-normal shadow-sm hover:bg-slate-200 transition-colors flex items-center gap-1.5">
-                  <Layers className="w-3.5 h-3.5" /> Xem dữ liệu tích hợp
-                </button>
-                <button className="px-3 py-1.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-[13px] font-normal shadow-sm hover:bg-slate-200 transition-colors flex items-center gap-1.5">
-                  <RefreshCw className="w-3.5 h-3.5" /> Cập nhật dữ liệu
-                </button>
-                <button className="px-3 py-1.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-[13px] font-normal shadow-sm hover:bg-slate-200 transition-colors flex items-center gap-1.5">
-                  <Plus className="w-3.5 h-3.5" /> Tích hợp mới
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowInactiveModal(true);
-                  }}
-                  className="px-3 py-1.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-[13px] font-normal shadow-sm hover:bg-slate-200 transition-colors flex items-center gap-1.5"
-                >
-                  <Power className="w-3.5 h-3.5" /> Ngừng hoạt động
-                </button>
-                <button className="px-3 py-1.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-[13px] font-normal shadow-sm hover:bg-slate-200 transition-colors flex items-center gap-1.5">
-                  <Eraser className="w-3.5 h-3.5" /> Xóa dữ liệu thu thập
-                </button>
-                <button className="px-3 py-1.5 bg-red-50 text-red-600 border border-red-200 rounded-lg text-[13px] font-normal shadow-sm hover:bg-red-100 transition-colors flex items-center gap-1.5">
-                  <Trash2 className="w-3.5 h-3.5" /> Xóa dịch vụ
-                </button>
-              </div>
+
             </div>
           </div>
 
@@ -219,27 +194,27 @@ function TabGeneral({ service, sourceSystem, onEdit }: any) {
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+        <h3 className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
           <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
           Thông tin dịch vụ
         </h3>
         <div className="grid grid-cols-2 gap-x-12 gap-y-6">
 
           <div className="space-y-1">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Tên dịch vụ</div>
-            <div className="text-sm text-slate-900 font-medium leading-relaxed">{service.name || '-'}</div>
+            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Tên dịch vụ</div>
+            <div className="text-xs text-slate-900 font-medium leading-relaxed">{service.name || '-'}</div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Tên hệ thống nguồn</div>
-            <div className="text-sm text-slate-900 font-medium leading-relaxed flex items-center gap-2">
+            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Tên hệ thống nguồn</div>
+            <div className="text-xs text-slate-900 font-medium leading-relaxed flex items-center gap-2">
               <Database className="w-4 h-4 text-blue-500" />
               {service.system || sourceSystem.systemName}
             </div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Mức độ bảo mật dữ liệu</div>
+            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Mức độ bảo mật dữ liệu</div>
             <div>
               <span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold bg-blue-50 text-blue-700 border border-blue-100">
                 {service.securityLevel || 'Nội bộ'}
@@ -248,7 +223,7 @@ function TabGeneral({ service, sourceSystem, onEdit }: any) {
           </div>
 
           <div className="space-y-1">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Trạng thái dữ liệu</div>
+            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Trạng thái dữ liệu</div>
             <div>
               <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs ${(service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'EMPTY' ? 'bg-slate-100 text-slate-600 border border-slate-200' :
                   (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'PROCESSING' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
@@ -268,8 +243,8 @@ function TabGeneral({ service, sourceSystem, onEdit }: any) {
           </div>
 
           <div className="space-y-1 col-span-2">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Mô tả</div>
-            <div className="text-sm text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-100 italic">
+            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Mô tả</div>
+            <div className="text-xs text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-100 italic">
               {service.description || 'Chưa có mô tả cho dịch vụ này.'}
             </div>
           </div>
@@ -278,7 +253,7 @@ function TabGeneral({ service, sourceSystem, onEdit }: any) {
       </div>
 
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+        <h3 className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
           <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
           Đính kèm văn bản
         </h3>
@@ -308,49 +283,49 @@ function TabGeneral({ service, sourceSystem, onEdit }: any) {
       </div>
 
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+        <h3 className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
           <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
           Thông tin hệ thống nguồn
         </h3>
         <div className="grid grid-cols-2 gap-x-12 gap-y-6">
           <div className="space-y-1">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Tên hệ thống</div>
-            <div className="text-sm text-slate-900 font-medium leading-relaxed">{sourceSystem.systemName}</div>
+            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Tên hệ thống</div>
+            <div className="text-xs text-slate-900 font-medium leading-relaxed">{sourceSystem.systemName}</div>
           </div>
           <div className="space-y-1">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Tên đơn vị</div>
-            <div className="text-sm text-slate-900 font-medium leading-relaxed">{sourceSystem.unitName}</div>
+            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Tên đơn vị</div>
+            <div className="text-xs text-slate-900 font-medium leading-relaxed">{sourceSystem.unitName}</div>
           </div>
           <div className="space-y-1">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Loại nguồn</div>
+            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Loại nguồn</div>
             <div>
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold ${sourceSystem.sourceType === 'Trong ngành' ? 'bg-indigo-50 text-indigo-700 border border-indigo-100' : 'bg-orange-50 text-orange-700 border border-orange-100'}`}>
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold border ${sourceSystem.sourceType === 'Trong ngành' ? 'bg-purple-50 text-purple-700 border-purple-100' : 'bg-blue-50 text-blue-700 border-blue-100'}`}>
                 {sourceSystem.sourceType}
               </span>
             </div>
           </div>
           <div className="space-y-1">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Đầu mối liên hệ</div>
-            <div className="text-sm text-slate-900 font-medium leading-relaxed flex items-center gap-2">
+            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Đầu mối liên hệ</div>
+            <div className="text-xs text-slate-900 font-medium leading-relaxed flex items-center gap-2">
               <User className="w-4 h-4 text-slate-400" />
               {sourceSystem.contactPerson}
             </div>
           </div>
           <div className="space-y-1 col-span-2">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Địa chỉ</div>
-            <div className="text-sm text-slate-900 font-medium leading-relaxed italic">{sourceSystem.address}</div>
+            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Địa chỉ</div>
+            <div className="text-xs text-slate-900 font-medium leading-relaxed italic">{sourceSystem.address}</div>
           </div>
           <div className="space-y-1">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Số điện thoại</div>
-            <div className="text-sm text-slate-900 font-medium leading-relaxed">{sourceSystem.phone}</div>
+            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Số điện thoại</div>
+            <div className="text-xs text-slate-900 font-medium leading-relaxed">{sourceSystem.phone}</div>
           </div>
           <div className="space-y-1">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Email</div>
-            <div className="text-sm text-slate-900 font-medium leading-relaxed text-blue-600 underline underline-offset-4">{sourceSystem.email}</div>
+            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Email</div>
+            <div className="text-xs text-slate-900 font-medium leading-relaxed text-blue-600 underline underline-offset-4">{sourceSystem.email}</div>
           </div>
           <div className="space-y-1 col-span-2">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Ghi chú</div>
-            <div className="text-sm text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-100">
+            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Ghi chú</div>
+            <div className="text-xs text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-100">
               {sourceSystem.note || 'Không có ghi chú.'}
             </div>
           </div>
@@ -370,26 +345,26 @@ function TabContact({ sourceSystem }: any) {
   return (
     <div className="animate-in fade-in duration-300 space-y-6">
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+        <h3 className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
           <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
           Thông tin hệ thống nguồn
         </h3>
         <div className="grid grid-cols-2 gap-x-12 gap-y-8 max-w-5xl">
 
           <div className="space-y-1">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Tên hệ thống</div>
-            <div className="text-sm text-slate-900 font-medium leading-relaxed">{sourceSystem.systemName}</div>
+            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Tên hệ thống</div>
+            <div className="text-xs text-slate-900 font-medium leading-relaxed">{sourceSystem.systemName}</div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Tên đơn vị</div>
-            <div className="text-sm text-slate-900 font-medium leading-relaxed">{sourceSystem.unitName}</div>
+            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Tên đơn vị</div>
+            <div className="text-xs text-slate-900 font-medium leading-relaxed">{sourceSystem.unitName}</div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Loại nguồn</div>
+            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Loại nguồn</div>
             <div>
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold ${sourceSystem.sourceType === 'Trong ngành' ? 'bg-indigo-50 text-indigo-700 border border-indigo-100' : 'bg-orange-50 text-orange-700 border border-orange-100'
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold border ${sourceSystem.sourceType === 'Trong ngành' ? 'bg-purple-50 text-purple-700 border-purple-100' : 'bg-blue-50 text-blue-700 border-blue-100'
                 }`}>
                 {sourceSystem.sourceType}
               </span>
@@ -397,31 +372,31 @@ function TabContact({ sourceSystem }: any) {
           </div>
 
           <div className="space-y-1">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Đầu mối liên hệ</div>
-            <div className="text-sm text-slate-900 font-medium leading-relaxed flex items-center gap-2">
+            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Đầu mối liên hệ</div>
+            <div className="text-xs text-slate-900 font-medium leading-relaxed flex items-center gap-2">
               <User className="w-4 h-4 text-slate-400" />
               {sourceSystem.contactPerson}
             </div>
           </div>
 
           <div className="space-y-1 col-span-2">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Địa chỉ</div>
-            <div className="text-sm text-slate-900 font-medium leading-relaxed italic">{sourceSystem.address}</div>
+            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Địa chỉ</div>
+            <div className="text-xs text-slate-900 font-medium leading-relaxed italic">{sourceSystem.address}</div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Số điện thoại</div>
-            <div className="text-sm text-slate-900 font-medium leading-relaxed">{sourceSystem.phone}</div>
+            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Số điện thoại</div>
+            <div className="text-xs text-slate-900 font-medium leading-relaxed">{sourceSystem.phone}</div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Email</div>
-            <div className="text-sm text-slate-900 font-medium leading-relaxed text-blue-600 underline underline-offset-4">{sourceSystem.email}</div>
+            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Email</div>
+            <div className="text-xs text-slate-900 font-medium leading-relaxed text-blue-600 underline underline-offset-4">{sourceSystem.email}</div>
           </div>
 
           <div className="space-y-1 col-span-2">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Ghi chú</div>
-            <div className="text-sm text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-100">
+            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Ghi chú</div>
+            <div className="text-xs text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-100">
               {sourceSystem.note || 'Không có ghi chú.'}
             </div>
           </div>
@@ -479,45 +454,45 @@ function TabConnection({ service, showApiKey, setShowApiKey, onEdit }: any) {
       </div>
 
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+        <h3 className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
           <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
           Cấu hình kết nối
         </h3>
         <div className="grid grid-cols-2 gap-x-12 gap-y-6 max-w-4xl">
           <div className="space-y-1 col-span-2">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Phương thức kết nối</div>
-            <div className="text-sm text-slate-900 font-medium">{connectionType === 'API' ? 'API' : connectionType === 'DB' ? 'Cơ sở dữ liệu' : 'Tải file'}</div>
+            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Phương thức kết nối</div>
+            <div className="text-xs text-slate-900 font-medium">{connectionType === 'API' ? 'API' : connectionType === 'DB' ? 'Cơ sở dữ liệu' : 'Tải file'}</div>
           </div>
 
           {connectionType === 'API' && (
             <>
               <div className="space-y-1">
-                <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Tên api</div>
-                <div className="text-sm text-slate-900 font-medium">API Lấy thông tin công dân</div>
+                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Tên api</div>
+                <div className="text-xs text-slate-900 font-medium">API Lấy thông tin công dân</div>
               </div>
               <div className="space-y-1">
-                <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">URL</div>
-                <div className="text-sm text-slate-900 font-medium font-mono">https://api.hotich.moj.gov.vn/api/v1/quoctich</div>
+                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">URL</div>
+                <div className="text-xs text-slate-900 font-medium font-mono">https://api.hotich.moj.gov.vn/api/v1/quoctich</div>
               </div>
               <div className="space-y-1">
-                <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Máy chủ thực thi</div>
-                <div className="text-sm text-slate-900 font-medium">Máy chủ thực thi 1</div>
+                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Máy chủ thực thi</div>
+                <div className="text-xs text-slate-900 font-medium">Máy chủ thực thi 1</div>
               </div>
               <div className="space-y-1">
-                <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Trạm kết nối</div>
-                <div className="text-sm text-slate-900 font-medium">Trạm kết nối 1</div>
+                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Trạm kết nối</div>
+                <div className="text-xs text-slate-900 font-medium">Trạm kết nối 1</div>
               </div>
               <div className="space-y-1">
-                <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Method</div>
-                <div className="text-sm text-slate-900 font-medium">GET</div>
+                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Method</div>
+                <div className="text-xs text-slate-900 font-medium">GET</div>
               </div>
               <div className="space-y-1">
-                <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Authorization</div>
-                <div className="text-sm text-slate-900 font-medium">Bearer Token</div>
+                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Authorization</div>
+                <div className="text-xs text-slate-900 font-medium">Bearer Token</div>
               </div>
               <div className="space-y-1 col-span-2">
-                <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Body</div>
-                <div className="text-sm text-slate-900 font-medium">-</div>
+                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Body</div>
+                <div className="text-xs text-slate-900 font-medium">-</div>
               </div>
             </>
           )}
@@ -525,36 +500,36 @@ function TabConnection({ service, showApiKey, setShowApiKey, onEdit }: any) {
           {connectionType === 'DB' && (
             <>
               <div className="space-y-1">
-                <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Tên CSDL</div>
-                <div className="text-sm text-slate-900 font-medium">HOTICH_PROD</div>
+                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Tên CSDL</div>
+                <div className="text-xs text-slate-900 font-medium">HOTICH_PROD</div>
               </div>
               <div className="space-y-1">
-                <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Tên CSDL gốc</div>
-                <div className="text-sm text-slate-900 font-medium">HOTICH_MASTER</div>
+                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Tên CSDL gốc</div>
+                <div className="text-xs text-slate-900 font-medium">HOTICH_MASTER</div>
               </div>
               <div className="space-y-1">
-                <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Kiểu CSDL</div>
-                <div className="text-sm text-slate-900 font-medium">POSTGRESQL</div>
+                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Kiểu CSDL</div>
+                <div className="text-xs text-slate-900 font-medium">POSTGRESQL</div>
               </div>
               <div className="space-y-1">
-                <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Trạm kết nối</div>
-                <div className="text-sm text-slate-900 font-medium">Trạm kết nối 1</div>
+                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Trạm kết nối</div>
+                <div className="text-xs text-slate-900 font-medium">Trạm kết nối 1</div>
               </div>
               <div className="space-y-1">
-                <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Máy chủ thực thi</div>
-                <div className="text-sm text-slate-900 font-medium">Máy chủ thực thi 1</div>
+                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Máy chủ thực thi</div>
+                <div className="text-xs text-slate-900 font-medium">Máy chủ thực thi 1</div>
               </div>
               <div className="space-y-1">
-                <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Địa chỉ CSDL</div>
-                <div className="text-sm text-slate-900 font-medium">192.168.1.100</div>
+                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Địa chỉ CSDL</div>
+                <div className="text-xs text-slate-900 font-medium">192.168.1.100</div>
               </div>
               <div className="space-y-1">
-                <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Cổng kết nối</div>
-                <div className="text-sm text-slate-900 font-medium">5432</div>
+                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Cổng kết nối</div>
+                <div className="text-xs text-slate-900 font-medium">5432</div>
               </div>
               <div className="space-y-1">
-                <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Tài khoản</div>
-                <div className="text-sm text-slate-900 font-medium">admin_db</div>
+                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Tài khoản</div>
+                <div className="text-xs text-slate-900 font-medium">admin_db</div>
               </div>
             </>
           )}
@@ -562,16 +537,16 @@ function TabConnection({ service, showApiKey, setShowApiKey, onEdit }: any) {
           {connectionType === 'FILE' && (
             <>
               <div className="space-y-1">
-                <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Tên File CSDL</div>
-                <div className="text-sm text-slate-900 font-medium">Data_Export_2024.csv</div>
+                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Tên File CSDL</div>
+                <div className="text-xs text-slate-900 font-medium">Data_Export_2024.csv</div>
               </div>
               <div className="space-y-1">
-                <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Máy chủ thực thi</div>
-                <div className="text-sm text-slate-900 font-medium">Máy chủ thực thi 1</div>
+                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Máy chủ thực thi</div>
+                <div className="text-xs text-slate-900 font-medium">Máy chủ thực thi 1</div>
               </div>
               <div className="space-y-1">
-                <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Trạm kết nối</div>
-                <div className="text-sm text-slate-900 font-medium">Trạm kết nối 1</div>
+                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Trạm kết nối</div>
+                <div className="text-xs text-slate-900 font-medium">Trạm kết nối 1</div>
               </div>
             </>
           )}
@@ -592,40 +567,40 @@ function TabCollection({ service, onEdit }: any) {
   return (
     <div className="animate-in fade-in duration-300 space-y-6">
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+        <h3 className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
           <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
           Cấu hình đồng bộ dữ liệu
         </h3>
         <div className="grid grid-cols-2 gap-x-12 gap-y-8 max-w-4xl">
 
           <div className="space-y-1">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Loại tần suất</div>
-            <div className="text-sm text-slate-900 font-medium">Cập nhật</div>
+            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Loại tần suất</div>
+            <div className="text-xs text-slate-900 font-medium">Cập nhật</div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Lặp lại</div>
-            <div className="text-sm text-slate-900 font-medium">Hằng ngày</div>
+            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Lặp lại</div>
+            <div className="text-xs text-slate-900 font-medium">Hằng ngày</div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Lặp lại trong</div>
-            <div className="text-sm text-slate-900 font-medium leading-tight">
+            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Lặp lại trong</div>
+            <div className="text-xs text-slate-900 font-medium leading-tight">
               1 ngày
             </div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Thực hiện lúc</div>
-            <div className="text-sm text-blue-700 font-medium flex items-center gap-2">
+            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Thực hiện lúc</div>
+            <div className="text-xs text-blue-700 font-medium flex items-center gap-2">
               <Clock className="w-4 h-4" />
               12:00
             </div>
           </div>
 
           <div className="space-y-1 col-span-2">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Mô tả tóm lược</div>
-            <div className="text-sm text-slate-700 font-medium italic bg-blue-50/50 p-4 rounded-lg border border-blue-100 flex items-start gap-3">
+            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Mô tả tóm lược</div>
+            <div className="text-xs text-slate-700 font-medium italic bg-blue-50/50 p-4 rounded-lg border border-blue-100 flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
               Lặp lại mỗi 1 ngày lúc 12:00
             </div>
@@ -1069,7 +1044,7 @@ function TabChangelog() {
   return (
     <div className="animate-in fade-in duration-300">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Nhật ký thay đổi thiết lập kết nối</h3>
+        <h3 className="text-[15px] font-bold text-slate-800 uppercase tracking-wider">Nhật ký thay đổi thiết lập kết nối</h3>
       </div>
 
       <div className="border border-slate-200 rounded-lg overflow-hidden bg-white">

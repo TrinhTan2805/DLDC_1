@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Filter, RefreshCw, Search, Plus, Eye, Edit, Settings as SettingsIcon, Trash2, FileText, Activity, Settings, AlertCircle, X, Download, Send, ChevronLeft, ChevronRight, Calendar, Wrench, Power, Layers, Database, Eraser } from 'lucide-react';
+import { Filter, RefreshCw, Search, Plus, Eye, Edit, Settings as SettingsIcon, Trash2, FileText, Activity, Settings, AlertCircle, AlertTriangle, X, Download, Send, ChevronLeft, ChevronRight, Calendar, Wrench, Power, Layers, Database, Eraser } from 'lucide-react';
 import { AddServiceModal, EditServiceModal, DeleteServiceModal, SettingsServiceModal } from './ServiceModals';
 import { ViewServiceModal } from './ViewServiceModal';
 import { LogManagement } from './LogManagement';
 import { mockCollectionServices } from './mockCollectionServices';
 import { ServiceDataDetailPage } from './ServiceDataDetailPage';
+import { Portal } from '../../common/Portal';
 
 export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: string) => void }) {
   const [activeTab, setActiveTab] = useState<'service-setup' | 'version'>('service-setup');
@@ -25,6 +26,8 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showErrorDetailModal, setShowErrorDetailModal] = useState(false);
   const [showDataDetailPage, setShowDataDetailPage] = useState(false);
+  const [showInactiveModal, setShowInactiveModal] = useState(false);
+  const [inactiveReason, setInactiveReason] = useState('');
   const [selectedService, setSelectedService] = useState<any>(null);
 
   useEffect(() => {
@@ -378,7 +381,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
             <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse">
-                  <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
+                  <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-[1]">
                     <tr>
                       <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-12">STT</th>
                       <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Tên dịch vụ</th>
@@ -455,10 +458,13 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                             <div className="flex items-center justify-center gap-1">
                               <button
                                 className="p-1.5 text-blue-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-all"
-                                title="Xem dữ liệu tích hợp"
                                 onClick={() => {
-                                  setSelectedService(service);
-                                  setShowDataDetailPage(true);
+                                  if (onNavigate) {
+                                    onNavigate('data-info-civil-registry');
+                                  } else {
+                                    setSelectedService(service);
+                                    setShowDataDetailPage(true);
+                                  }
                                 }}
                               >
                                 <Layers className="w-4 h-4" />
@@ -480,7 +486,10 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                               <button
                                 className="p-1.5 text-amber-500 hover:text-amber-600 hover:bg-amber-50 rounded transition-all"
                                 title="Ngừng hoạt động"
-                                onClick={() => alert(`Dừng hoạt động ${service.name}`)}
+                                onClick={() => {
+                                  setSelectedService(service);
+                                  setShowInactiveModal(true);
+                                }}
                               >
                                 <Power className="w-4 h-4" />
                               </button>
@@ -499,7 +508,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                                   navigate(`/collection-setup/view/${service.id}`);
                                 }}
                               >
-                                <SettingsIcon className="w-4 h-4" />
+                                <Eye className="w-4 h-4" />
                               </button>
                               <button
                                 className="p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 rounded transition-all"
@@ -766,6 +775,73 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
             </div>
           </div>
         </div>
+      )}
+      {/* Inactive Confirmation Modal */}
+      {showInactiveModal && (
+        <Portal>
+          <div 
+            className="fixed inset-0 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-in fade-in duration-200"
+            style={{ zIndex: 999999 }}
+          >
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-200">
+              <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/80 backdrop-blur-md">
+                <h3 className="text-xl font-bold text-slate-900 flex items-center gap-3">
+                  <div className="p-2 bg-amber-100 rounded-lg">
+                    <Power className="w-5 h-5 text-amber-600" />
+                  </div>
+                  Ngừng hoạt động
+                </h3>
+                <button onClick={() => setShowInactiveModal(false)} className="text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-200 transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="p-8 space-y-6">
+                <div className="bg-red-50 border border-red-100 p-5 rounded-2xl flex gap-4 shadow-inner">
+                  <div className="p-2 bg-red-100 rounded-full h-fit">
+                    <AlertTriangle className="w-6 h-6 text-red-600 shrink-0" />
+                  </div>
+                  <div>
+                    <div className="text-md font-medium text-red-900 mb-1">Cảnh báo gián đoạn dữ liệu</div>
+                    <p className="text-sm text-red-800/80 leading-relaxed font-medium">
+                      Bạn có chắc muốn ngừng hoạt động của dịch vụ <span className="font-bold text-red-900">{selectedService?.name}</span>? Hành động này sẽ khiến luồng dữ liệu bị gián đoạn cho đến khi được kích hoạt lại thủ công.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <label className="block text-sm font-medium text-slate-700 ml-1">
+                    Lý do ngừng hoạt động <span className="text-red-500 font-black">*</span>
+                  </label>
+                  <textarea
+                    className="w-full px-5 py-4 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 min-h-[140px] text-sm bg-slate-50/30 outline-none transition-all placeholder:text-slate-400 resize-none"
+                    placeholder="Vui lòng nhập lý do cụ thể (ví dụ: Thay đổi cấu hình Máy chủ thực thi, bảo trì định kỳ hệ thống nguồn...)"
+                    value={inactiveReason}
+                    onChange={(e) => setInactiveReason(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="px-8 py-5 bg-slate-50/50 border-t border-slate-100 flex justify-end gap-4">
+                <button
+                  onClick={() => setShowInactiveModal(false)}
+                  className="px-6 py-2.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded-xl transition-all"
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  disabled={!inactiveReason.trim()}
+                  onClick={() => {
+                    alert(`Đã yêu cầu ngừng hoạt động dịch vụ: ${selectedService?.name}.\nLý do: ${inactiveReason}`);
+                    setShowInactiveModal(false);
+                    setInactiveReason('');
+                  }}
+                  className="px-8 py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-xl text-sm hover:from-amber-700 hover:to-orange-700 transition-all shadow-lg shadow-amber-200 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed transform active:scale-95"
+                >
+                  Xác nhận ngừng
+                </button>
+              </div>
+            </div>
+          </div>
+        </Portal>
       )}
     </div>
   );
