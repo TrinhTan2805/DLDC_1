@@ -13,6 +13,7 @@ import {
   Globe,
   ChevronDown,
   ChevronRight,
+  ChevronLeft,
   Monitor,
   Users,
   UsersRound,
@@ -86,6 +87,8 @@ import { reconciliationData } from "../../data/provisionReconciliationData";
 interface SidebarProps {
   currentPage: string;
   onNavigate: (page: string) => void;
+  isCollapsed: boolean;
+  onToggleCollapse: () => void;
 }
 
 interface NestedSubMenuItem {
@@ -730,6 +733,8 @@ const normalizeText = (text: string) => {
 export function Sidebar({
   currentPage,
   onNavigate,
+  isCollapsed,
+  onToggleCollapse
 }: SidebarProps) {
   const [expandedMenus, setExpandedMenus] = useState<
     Set<string>
@@ -738,6 +743,7 @@ export function Sidebar({
   const [showVersionHistory, setShowVersionHistory] = useState(false);
 
   const toggleMenu = (menuId: string) => {
+    if (isCollapsed) return; // Don't toggle submenus when collapsed
     const newExpanded = new Set(expandedMenus);
     if (newExpanded.has(menuId)) {
       newExpanded.delete(menuId);
@@ -750,46 +756,69 @@ export function Sidebar({
   useAutoExpand(searchTerm, menuItems, setExpandedMenus);
 
   return (
-    <aside className="w-72 bg-white border-r border-slate-200 flex flex-col flex-shrink-0 z-20 relative">
-      {/* Logo */}
-      <div className="h-16 flex items-center gap-3 px-6 border-b border-slate-200">
-        <div className="w-10 h-10 flex items-center justify-center relative rounded overflow-hidden flex-shrink-0">
-          <img
-            src={imgImageLogo}
-            alt="Logo"
-            className="w-full h-full object-cover"
-          />
-        </div>
-        <div>
-          <div className="text-slate-900 text-base leading-5">
-            Kho Dữ liệu dùng chung
+    <aside className={`${isCollapsed ? 'w-20' : 'w-72'} bg-white border-r border-slate-200 flex flex-col flex-shrink-0 z-20 relative transition-all duration-300`}>
+      {/* Logo & Toggle */}
+      <div className={`h-16 flex items-center justify-between px-4 border-b border-slate-200 overflow-hidden`}>
+        <div className="flex items-center gap-3 overflow-hidden">
+          <div className="w-10 h-10 flex items-center justify-center relative rounded overflow-hidden flex-shrink-0">
+            <img
+              src={imgImageLogo}
+              alt="Logo"
+              className="w-full h-full object-cover"
+            />
           </div>
-          <div className="text-xs text-slate-500 leading-4">
-            Hệ thống quản lý
-          </div>
+          {!isCollapsed && (
+            <div className="whitespace-nowrap animate-in fade-in slide-in-from-left-2 duration-300">
+              <div className="text-slate-900 text-base leading-5 font-bold">
+                Kho Dữ liệu dùng chung
+              </div>
+              <div className="text-[10px] text-slate-500 leading-4 uppercase font-bold tracking-tight">
+                Hệ thống quản lý
+              </div>
+            </div>
+          )}
         </div>
+        <button 
+          onClick={onToggleCollapse}
+          className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors"
+          title={isCollapsed ? "Mở rộng menu" : "Thu gọn menu"}
+        >
+          {isCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
+        </button>
       </div>
 
       {/* Search Bar */}
-      <div className="px-4 py-3 border-b border-slate-100">
-        <div className="relative group">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-          <input
-            type="text"
-            placeholder="Tìm kiếm menu..."
-            title="Tìm kiếm menu..."
-            className="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          {searchTerm && (
-            <button
-              onClick={() => setSearchTerm("")}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-slate-200 rounded-full transition-colors"
-              title="Xóa tìm kiếm"
-            >
-              <X className="w-3.5 h-3.5 text-slate-400" />
-            </button>
+      <div className={`px-4 py-3 border-b border-slate-100 ${isCollapsed ? 'flex justify-center' : ''}`}>
+        <div className="relative group w-full">
+          {isCollapsed ? (
+             <button 
+               onClick={onToggleCollapse}
+               className="w-full flex justify-center p-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-white transition-all"
+               title="Tìm kiếm menu"
+             >
+               <Search className="w-5 h-5" />
+             </button>
+          ) : (
+            <>
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+              <input
+                type="text"
+                placeholder="Tìm kiếm menu..."
+                title="Tìm kiếm menu..."
+                className="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-slate-200 rounded-full transition-colors"
+                  title="Xóa tìm kiếm"
+                >
+                  <X className="w-3.5 h-3.5 text-slate-400" />
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -830,13 +859,14 @@ export function Sidebar({
               <div key={item.id}>
                 <button
                   onClick={() => {
-                    if (hasSubItems) {
+                    if (hasSubItems && !isCollapsed) {
                       toggleMenu(item.id);
                     } else {
                       onNavigate(item.id);
                     }
                   }}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${isActive
+                  title={isCollapsed ? item.label : ""}
+                  className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-3 px-3'} py-2.5 rounded-lg transition-all ${isActive
                     ? "bg-blue-50 text-blue-700 shadow-sm"
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                     }`}
@@ -844,10 +874,12 @@ export function Sidebar({
                   <Icon
                     className={`w-5 h-5 flex-shrink-0 ${isActive ? item.color : ""}`}
                   />
-                  <span className="text-sm flex-1 text-left">
-                    {item.label}
-                  </span>
-                  {hasSubItems &&
+                  {!isCollapsed && (
+                    <span className="text-sm flex-1 text-left whitespace-nowrap animate-in fade-in slide-in-from-left-2 duration-300">
+                      {item.label}
+                    </span>
+                  )}
+                  {!isCollapsed && hasSubItems &&
                     (isExpanded ? (
                       <ChevronDown className="w-4 h-4 flex-shrink-0" />
                     ) : (
@@ -856,8 +888,8 @@ export function Sidebar({
                 </button>
 
                 {/* Level 2 Sub Items */}
-                {hasSubItems && isExpanded && (
-                  <div className="ml-4 mt-1 space-y-0.5">
+                {hasSubItems && isExpanded && !isCollapsed && (
+                  <div className="ml-4 mt-1 space-y-0.5 animate-in fade-in slide-in-from-top-1 duration-200">
                     {item.subItems?.map((subItem: SubMenuItem) => {
                       const SubIcon = subItem.icon;
                       const isSubActive =
@@ -1038,19 +1070,21 @@ export function Sidebar({
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-slate-200">
+      <div className={`p-4 border-t border-slate-200 ${isCollapsed ? 'flex justify-center' : ''}`}>
         <button
- onClick={() => setShowVersionHistory(true)}
- className="w-full bg-slate-50 rounded-lg p-3 text-left hover:bg-slate-100 transition-colors shadow-sm cursor-pointer"
- >
- <div className="flex items-center gap-2 mb-2">
- <FileText className="w-4 h-4 text-slate-600" />
- <span className="text-xs text-slate-600 font-medium">
- Phiên bản
- </span>
- </div>
- <div className="text-sm text-slate-900">v2.2.0</div>
- </button>
+          onClick={() => setShowVersionHistory(true)}
+          className={`w-full bg-slate-50 rounded-lg ${isCollapsed ? 'p-2' : 'p-3'} text-left hover:bg-slate-100 transition-colors shadow-sm cursor-pointer flex flex-col items-center`}
+        >
+          <div className={`flex items-center gap-2 ${isCollapsed ? 'mb-0' : 'mb-2'}`}>
+            <FileText className="w-4 h-4 text-slate-600" />
+            {!isCollapsed && (
+              <span className="text-xs text-slate-600 font-medium whitespace-nowrap">
+                Phiên bản
+              </span>
+            )}
+          </div>
+          {!isCollapsed && <div className="text-sm text-slate-900 font-bold">v2.2.0</div>}
+        </button>
       </div>
 
       <VersionHistoryModal

@@ -351,6 +351,7 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
 
   const setCurrentPage = (page: string) => navigate(`/${page}`);
 
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [showChangeBackgroundModal, setShowChangeBackgroundModal] = useState(false);
@@ -396,7 +397,12 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
   return (
     <div className="flex h-screen bg-slate-50">
       {/* Sidebar */}
-      <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} />
+      <Sidebar 
+        currentPage={currentPage} 
+        onNavigate={setCurrentPage} 
+        isCollapsed={isCollapsed}
+        onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
+      />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
