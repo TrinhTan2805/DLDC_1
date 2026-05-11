@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Search, Edit, Trash2, Eye, Database, Server, RefreshCw, Filter } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Eye, Database, Server, RefreshCw, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import { TargetDatabaseModal } from './TargetDatabaseModal';
 import { TargetDatabaseDetailModal } from './TargetDatabaseDetailModal';
 import { initialTargetDatabases, TargetDatabase } from './mockTargetDatabases';
@@ -109,21 +109,21 @@ export function TargetDatabaseManagementPage() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="flex-1 px-4 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 bg-white"
             />
-            <button className="px-4 py-2.5 bg-[#00bfa5] text-white rounded-lg hover:bg-[#00a08a] transition-colors flex items-center justify-center shrink-0">
+            <button className="px-4 py-2.5 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 shadow-sm transition-all flex items-center justify-center shrink-0 active:scale-95">
               <Search className="w-5 h-5" />
             </button>
             <button 
               onClick={() => setShowFilters(!showFilters)}
-              className={`px-4 py-2.5 border rounded-lg transition-colors flex items-center justify-center shrink-0 ${showFilters ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-slate-200 text-slate-500 hover:text-slate-700'}`}
+              className={`px-4 py-2.5 border rounded-lg shadow-sm transition-all flex items-center justify-center shrink-0 active:scale-95 ${showFilters ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
             >
               <Filter className="w-5 h-5" />
             </button>
             <button
               onClick={handleAdd}
-              className="px-5 py-2.5 bg-[#2962ff] text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-sm font-medium shrink-0"
+              className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-sm transition-all flex items-center gap-2 text-sm font-semibold shrink-0 active:scale-95"
             >
               <Plus className="w-5 h-5" />
-              Thêm mới
+              <span>Thêm mới</span>
             </button>
           </div>
 
@@ -274,12 +274,34 @@ export function TargetDatabaseManagementPage() {
           </table>
         </div>
 
-        {/* Footer info */}
-        <div className="p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between text-xs text-slate-500 font-medium">
-          <div>Hiển thị {filteredData.length} trên tổng số {data.length} kết nối</div>
-          <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span> Kích hoạt</span>
-            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-slate-300"></span> Không kích hoạt</span>
+        {/* Footer info - Pagination Style */}
+        <div className="px-6 py-4 border-t border-slate-200 bg-white flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-slate-500">Hiển thị</span>
+            <select className="px-2 py-1 border border-slate-200 rounded text-sm bg-white focus:outline-none focus:border-blue-500">
+              <option>10</option>
+              <option>20</option>
+              <option>50</option>
+            </select>
+            <span className="text-sm text-slate-500">bản ghi/trang</span>
+          </div>
+
+          <div className="flex items-center gap-8">
+            <div className="text-sm text-slate-500">
+              Hiển thị 1-{filteredData.length} / {data.length} bản ghi
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <button title="Previous Page" className="p-1 hover:bg-slate-100 rounded transition-colors text-slate-400">
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <div className="text-sm text-slate-600">
+                Trang <span className="font-semibold">1</span> / 1
+              </div>
+              <button title="Next Page" className="p-1 hover:bg-slate-100 rounded transition-colors text-slate-400">
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         </div>
       </div>

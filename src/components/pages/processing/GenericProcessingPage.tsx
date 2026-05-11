@@ -19,10 +19,11 @@ export interface GenericProcessingPageProps {
 }
 
 export function GenericProcessingPage({ systemName, datasets }: GenericProcessingPageProps) {
+  const isOnlyTransform = ['Danh mục', 'BHXH và Giảm nghèo', 'Người có công', 'Trẻ em'].includes(systemName);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchDatasetQuery, setSearchDatasetQuery] = useState('');
   const [activeServiceId, setActiveServiceId] = useState(datasets[0]?.id || '');
-  const [activeTab, setActiveTab] = useState('clean');
+  const [activeTab, setActiveTab] = useState(isOnlyTransform ? 'transform' : 'clean');
   const [isSendPopupOpen, setIsSendPopupOpen] = useState(false);
   const [isEditClassifyModalOpen, setIsEditClassifyModalOpen] = useState(false);
   
@@ -331,54 +332,56 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
           </div>
 
           {/* Tabs */}
-          <div className="flex border-b border-slate-200 mb-6">
-            <button
-              onClick={() => setActiveTab('clean')}
-              className={`pb-3 px-4 text-sm font-medium border-b-2 mr-4 transition-colors ${activeTab === 'clean'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                }`}
-            >
-              Làm sạch (4)
-            </button>
-            <button
-              onClick={() => setActiveTab('standardize')}
-              className={`pb-3 px-4 text-sm font-medium border-b-2 mr-4 transition-colors ${activeTab === 'standardize'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                }`}
-            >
-              Chuẩn hóa (3)
-            </button>
-            <button
-              onClick={() => setActiveTab('transform')}
-              className={`pb-3 px-4 text-sm font-medium border-b-2 mr-4 transition-colors ${activeTab === 'transform'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                }`}
-            >
-              Biến đổi (3)
-            </button>
+          {!isOnlyTransform && (
+            <div className="flex border-b border-slate-200 mb-6">
+              <button
+                onClick={() => setActiveTab('clean')}
+                className={`pb-3 px-4 text-sm font-medium border-b-2 mr-4 transition-colors ${activeTab === 'clean'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                  }`}
+              >
+                Làm sạch
+              </button>
+              <button
+                onClick={() => setActiveTab('standardize')}
+                className={`pb-3 px-4 text-sm font-medium border-b-2 mr-4 transition-colors ${activeTab === 'standardize'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                  }`}
+              >
+                Chuẩn hóa
+              </button>
+              <button
+                onClick={() => setActiveTab('transform')}
+                className={`pb-3 px-4 text-sm font-medium border-b-2 mr-4 transition-colors ${activeTab === 'transform'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                  }`}
+              >
+                Biến đổi
+              </button>
 
-            <button
-              onClick={() => setActiveTab('classification')}
-              className={`pb-3 px-4 text-sm font-medium border-b-2 mr-4 transition-colors ${activeTab === 'classification'
-                ? 'border-indigo-600 text-indigo-600'
-                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                }`}
-            >
-              Phân loại dữ liệu
-            </button>
-            <button
-              onClick={() => setActiveTab('history')}
-              className={`pb-3 px-4 text-sm font-medium border-b-2 transition-colors ${activeTab === 'history'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                }`}
-            >
-              Lịch sử
-            </button>
-          </div>
+              <button
+                onClick={() => setActiveTab('classification')}
+                className={`pb-3 px-4 text-sm font-medium border-b-2 mr-4 transition-colors ${activeTab === 'classification'
+                  ? 'border-indigo-600 text-indigo-600'
+                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                  }`}
+              >
+                Phân loại dữ liệu
+              </button>
+              <button
+                onClick={() => setActiveTab('history')}
+                className={`pb-3 px-4 text-sm font-medium border-b-2 transition-colors ${activeTab === 'history'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                  }`}
+              >
+                Lịch sử
+              </button>
+            </div>
+          )}
 
           <div className="pb-32 overflow-y-auto max-h-[calc(100vh-320px)] pr-2 custom-scrollbar">
             {activeTab === 'clean' && (
