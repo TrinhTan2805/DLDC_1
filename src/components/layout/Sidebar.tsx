@@ -142,11 +142,7 @@ const menuItems: MenuItem[] = [
         label: "Thiết lập thu thập",
         icon: Settings,
       },
-      {
-        id: "collection-log",
-        label: "Quản lý nhật ký",
-        icon: ScrollText,
-      },
+
       {
         id: "view-collected-data",
         label: "Xem dữ liệu thu thập",
@@ -293,11 +289,6 @@ const menuItems: MenuItem[] = [
     label: "Xử lý dữ liệu",
     color: "text-purple-600",
     subItems: [
-      {
-        id: "target-database-management",
-        label: "Quản lý CSDL đích",
-        icon: Database,
-      },
       {
         id: "processing-internal",
         label: "CSDL Trong ngành",
@@ -617,6 +608,11 @@ const menuItems: MenuItem[] = [
         id: "connection-management",
         label: "Quản lý kết nối",
         icon: Link2,
+      },
+      {
+        id: "target-database-management",
+        label: "Quản lý CSDL đích",
+        icon: Database,
       },
       {
         id: "admin-user-management-group",

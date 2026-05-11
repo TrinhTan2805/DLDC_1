@@ -866,72 +866,72 @@ export function DataDetailModal({
                   {/* Flattened Record Details */}
                   <div className="flex flex-col gap-3">
                     <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên</div>
-                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.name}</div>
+                      <div className="text-sm text-slate-600 mb-1">Họ, chữ đệm, tên</div>
+                      <div className="text-xs text-slate-900 font-medium">{selectedRecord.name}</div>
                     </div>
                     <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Giới tính</div>
-                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.gender}</div>
+                      <div className="text-sm text-slate-600 mb-1">Giới tính</div>
+                      <div className="text-xs text-slate-900 font-medium">{selectedRecord.gender}</div>
                     </div>
                     <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Ngày, tháng, năm sinh</div>
-                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.birthDate}</div>
+                      <div className="text-sm text-slate-600 mb-1">Ngày, tháng, năm sinh</div>
+                      <div className="text-xs text-slate-900 font-medium">{selectedRecord.birthDate}</div>
                     </div>
                     <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Ngày sinh bằng chữ</div>
-                      <div className="text-sm text-slate-900 italic">{selectedRecord.birthDateInWords}</div>
+                      <div className="text-sm text-slate-600 mb-1">Ngày sinh bằng chữ</div>
+                      <div className="text-xs text-slate-900 italic">{selectedRecord.birthDateInWords}</div>
                     </div>
                     <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Nơi sinh</div>
-                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.birthPlace}</div>
+                      <div className="text-sm text-slate-600 mb-1">Nơi sinh</div>
+                      <div className="text-xs text-slate-900 font-medium">{selectedRecord.birthPlace}</div>
                     </div>
                     <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Quê quán</div>
-                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.hometown}</div>
+                      <div className="text-sm text-slate-600 mb-1">Quê quán</div>
+                      <div className="text-xs text-slate-900 font-medium">{selectedRecord.hometown}</div>
                     </div>
                     <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Dân tộc</div>
-                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.ethnicity}</div>
+                      <div className="text-sm text-slate-600 mb-1">Dân tộc</div>
+                      <div className="text-xs text-slate-900 font-medium">{selectedRecord.ethnicity}</div>
                     </div>
                     <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Quốc tịch</div>
-                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.nationality}</div>
+                      <div className="text-sm text-slate-600 mb-1">Quốc tịch</div>
+                      <div className="text-xs text-slate-900 font-medium">{selectedRecord.nationality}</div>
                     </div>
                     <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Số định danh cá nhân</div>
-                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.personalId}</div>
+                      <div className="text-sm text-slate-600 mb-1">Số định danh cá nhân</div>
+                      <div className="text-xs text-slate-900 font-medium">{selectedRecord.personalId}</div>
                     </div>
                     <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Họ tên Cha</div>
-                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.fatherName || '-'}</div>
+                      <div className="text-sm text-slate-600 mb-1">Họ tên Cha</div>
+                      <div className="text-xs text-slate-900 font-medium">{selectedRecord.fatherName || '-'}</div>
                     </div>
                     <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Ngày sinh Cha</div>
-                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.fatherBirthDate || '-'}</div>
+                      <div className="text-sm text-slate-600 mb-1">Ngày sinh Cha</div>
+                      <div className="text-xs text-slate-900 font-medium">{selectedRecord.fatherBirthDate || '-'}</div>
                     </div>
                     <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Họ tên Mẹ</div>
-                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.motherName || '-'}</div>
+                      <div className="text-sm text-slate-600 mb-1">Họ tên Mẹ</div>
+                      <div className="text-xs text-slate-900 font-medium">{selectedRecord.motherName || '-'}</div>
                     </div>
                     <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Ngày sinh Mẹ</div>
-                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.motherBirthDate || '-'}</div>
+                      <div className="text-sm text-slate-600 mb-1">Ngày sinh Mẹ</div>
+                      <div className="text-xs text-slate-900 font-medium">{selectedRecord.motherBirthDate || '-'}</div>
                     </div>
                     <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Họ tên người đi khai sinh</div>
-                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.declarantName || '-'}</div>
+                      <div className="text-sm text-slate-600 mb-1">Họ tên người đi khai sinh</div>
+                      <div className="text-xs text-slate-900 font-medium">{selectedRecord.declarantName || '-'}</div>
                     </div>
                     <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Quan hệ</div>
-                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.declarantRelation || '-'}</div>
+                      <div className="text-sm text-slate-600 mb-1">Quan hệ</div>
+                      <div className="text-xs text-slate-900 font-medium">{selectedRecord.declarantRelation || '-'}</div>
                     </div>
                     <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Ngày đăng ký</div>
-                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.registrationDate || '-'}</div>
+                      <div className="text-sm text-slate-600 mb-1">Ngày đăng ký</div>
+                      <div className="text-xs text-slate-900 font-medium">{selectedRecord.registrationDate || '-'}</div>
                     </div>
                     <div className="border border-slate-200 p-2 rounded">
-                      <div className="text-xs text-slate-600 mb-1">Ngày đồng bộ</div>
-                      <div className="text-sm text-slate-900 font-medium">{selectedRecord.syncDate || '-'}</div>
+                      <div className="text-sm text-slate-600 mb-1">Ngày đồng bộ</div>
+                      <div className="text-xs text-slate-900 font-medium">{selectedRecord.syncDate || '-'}</div>
                     </div>
                   </div>
 
@@ -959,14 +959,14 @@ export function DataDetailModal({
                         {/* Cột 1: Thông tin lỗi */}
                         <div className="space-y-4">
                           <div>
-                            <div className="text-xs font-medium text-slate-500 mb-1.5 uppercase tracking-wider">Mô tả lỗi</div>
-                            <div className="text-sm font-medium text-slate-900 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <div className="text-sm font-medium text-slate-500 mb-1.5 uppercase tracking-wider">Mô tả lỗi</div>
+                            <div className="text-xs font-medium text-slate-900 bg-slate-50 p-3 rounded-lg border border-slate-100">
                                {selectedRecord.errorMessage || 'Lỗi không xác định'}
                             </div>
                           </div>
                           
                           <div>
-                            <div className="text-xs font-medium text-slate-500 mb-1.5 uppercase tracking-wider">Trường dữ liệu phát hiện lỗi</div>
+                            <div className="text-sm font-medium text-slate-500 mb-1.5 uppercase tracking-wider">Trường dữ liệu phát hiện lỗi</div>
                             <div className="flex flex-wrap gap-2 mt-1">
                               {selectedRecord.errorMessage?.includes('điện thoại') ? (
                                 <span className="px-2.5 py-1 bg-rose-50 border border-rose-200 text-rose-700 rounded-md text-xs font-mono font-medium flex items-center gap-1.5">
@@ -993,7 +993,7 @@ export function DataDetailModal({
                         {/* Cột 2: Lịch sử xử lý */}
                         <div className="space-y-4 border-l border-slate-100 pl-6">
                           <div>
-                            <div className="text-xs font-medium text-slate-500 mb-1.5 uppercase tracking-wider">Trạng thái xử lý</div>
+                            <div className="text-sm font-medium text-slate-500 mb-1.5 uppercase tracking-wider">Trạng thái xử lý</div>
                             <div className="flex items-center gap-2">
                               <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium ${
                                 selectedRecord.errorProcessStatus === 'sent' 
@@ -1014,7 +1014,7 @@ export function DataDetailModal({
                           </div>
 
                           <div>
-                            <div className="text-xs font-medium text-slate-500 mb-1.5 uppercase tracking-wider">Ghi chú bổ sung</div>
+                            <div className="text-sm font-medium text-slate-500 mb-1.5 uppercase tracking-wider">Ghi chú bổ sung</div>
                             <div className="text-sm text-slate-600 italic">
                                {selectedRecord.errorProcessText || 'Chưa có thông tin xử lý từ bên thứ 3.'}
                             </div>

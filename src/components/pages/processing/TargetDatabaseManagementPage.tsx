@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { Plus, Search, Edit, Trash2, Eye, Database, Server, RefreshCw, Filter, Network } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Eye, Database, Server, RefreshCw, Filter } from 'lucide-react';
 import { TargetDatabaseModal } from './TargetDatabaseModal';
 import { TargetDatabaseDetailModal } from './TargetDatabaseDetailModal';
-import { DataMappingModal } from './DataMappingModal';
 import { initialTargetDatabases, TargetDatabase } from './mockTargetDatabases';
 
 export function TargetDatabaseManagementPage() {
@@ -17,10 +16,8 @@ export function TargetDatabaseManagementPage() {
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [isMappingModalOpen, setIsMappingModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<TargetDatabase | null>(null);
   const [viewingItem, setViewingItem] = useState<TargetDatabase | null>(null);
-  const [mappingItem, setMappingItem] = useState<TargetDatabase | null>(null);
 
   // Filtered data based on search term and filters
   const filteredData = data.filter(item => {
@@ -48,10 +45,6 @@ export function TargetDatabaseManagementPage() {
     setIsDetailModalOpen(true);
   };
 
-  const handleMapping = (item: TargetDatabase) => {
-    setMappingItem(item);
-    setIsMappingModalOpen(true);
-  };
 
   const handleDelete = (id: string) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa kết nối CSDL này?')) {
@@ -237,13 +230,6 @@ export function TargetDatabaseManagementPage() {
                           <Eye className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => handleMapping(item)}
-                          className="p-2 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all"
-                          title="Ánh xạ dữ liệu"
-                        >
-                          <Network className="w-4 h-4" />
-                        </button>
-                        <button
                           onClick={() => handleEdit(item)}
                           className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
                           title="Chỉnh sửa kết nối"
@@ -312,11 +298,6 @@ export function TargetDatabaseManagementPage() {
         data={viewingItem}
       />
 
-      <DataMappingModal
-        isOpen={isMappingModalOpen}
-        onClose={() => setIsMappingModalOpen(false)}
-        data={mappingItem}
-      />
     </div>
   );
 }

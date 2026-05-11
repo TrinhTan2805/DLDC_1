@@ -362,7 +362,7 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
                     </td>
                     <td className="px-4 py-4 text-center">
                       <button
-                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all"
+                        className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all"
                         title="Xem chi tiết"
                         onClick={() => {
                           setSelectedLog(log);
@@ -370,7 +370,7 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
                           setShowLogDetailModal(true);
                         }}
                       >
-                        <Eye className="w-4.5 h-4.5" />
+                        <Eye className="w-4 h-4" />
                       </button>
                     </td>
                   </tr>

@@ -400,31 +400,47 @@ export function RuleManagementModal({ config, onClose }: RuleManagementModalProp
     // Quy tắc 7: Xử lý vi phạm ràng buộc
     if (rule.id === 7) {
       return (
-        <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
-          <div className="text-xs text-slate-700 mb-2">Cấu hình kiểm tra ràng buộc:</div>
-          <div className="space-y-2">
+        <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+          <div className="text-xs text-slate-700 mb-2 font-bold uppercase tracking-wider">Cấu hình ràng buộc tham chiếu:</div>
+          <div className="space-y-3">
             <div>
-              <label className="text-xs text-slate-600">Loại ràng buộc:</label>
+              <label className="text-xs text-slate-600 font-medium">Bảng tham chiếu:</label>
               <select 
-                className="w-full mt-1 px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                value={rule.config?.constraintType || 'foreign_key'}
-                onChange={(e) => updateRuleConfig(rule.id, 'constraintType', e.target.value)}
+                className="w-full mt-1 px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                value={rule.config?.refTable || 'dm_tinh_thanh'}
+                onChange={(e) => updateRuleConfig(rule.id, 'refTable', e.target.value)}
               >
-                <option value="foreign_key">Foreign Key</option>
-                <option value="check">Check Constraint</option>
-                <option value="unique">Unique Constraint</option>
-                <option value="not_null">Not Null</option>
+                <option value="dm_tinh_thanh">Danh mục Tỉnh/Thành phố</option>
+                <option value="dm_quan_huyen">Danh mục Quận/Huyện</option>
+                <option value="dm_phuong_xa">Danh mục Phường/Xã</option>
+                <option value="dm_dan_toc">Danh mục Dân tộc</option>
+                <option value="dm_quoc_tich">Danh mục Quốc tịch</option>
               </select>
             </div>
             <div>
-              <label className="text-xs text-slate-600">Hành động vi phạm:</label>
+              <label className="text-xs text-slate-600 font-medium">Trường tham chiếu:</label>
               <select 
-                className="w-full mt-1 px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full mt-1 px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                value={rule.config?.refField || 'ma_tinh'}
+                onChange={(e) => updateRuleConfig(rule.id, 'refField', e.target.value)}
+              >
+                <option value="ma_tinh">Mã Tỉnh/Thành phố</option>
+                <option value="ten_tinh">Tên Tỉnh/Thành phố</option>
+                <option value="ma_quan_huyen">Mã Quận/Huyện</option>
+                <option value="ma_phuong_xa">Mã Phường/Xã</option>
+                <option value="ma_dan_toc">Mã Dân tộc</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-xs text-slate-600 font-medium">Hành động:</label>
+              <select 
+                className="w-full mt-1 px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                 value={rule.config?.violationAction || 'reject'}
                 onChange={(e) => updateRuleConfig(rule.id, 'violationAction', e.target.value)}
               >
-                <option value="reject">Từ chối bản ghi</option>
-                <option value="fix">Tự động sửa</option>
+                <option value="reject">Từ chối bản ghi vi phạm</option>
+                <option value="set_null">Gán giá trị rỗng (NULL)</option>
+                <option value="set_default">Gán giá trị mặc định</option>
                 <option value="flag">Đánh dấu cảnh báo</option>
               </select>
             </div>
