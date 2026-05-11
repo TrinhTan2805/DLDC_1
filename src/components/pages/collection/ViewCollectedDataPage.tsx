@@ -105,25 +105,26 @@ export function ViewCollectedDataPage({ onNavigate }: { onNavigate?: (id: string
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-slate-900">Xem dữ liệu thu thập</h1>
-            <p className="text-slate-500 text-sm mt-1">Tiếp nhận dữ liệu từ các hệ thống nguồn và cơ sở dữ liệu</p>
-          </div>
-          <div className="flex items-center gap-2 p-1 bg-slate-100 rounded-lg w-fit">
-            <button
-              onClick={() => setActiveTab('internal')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                activeTab === 'internal' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Trong ngành
-            </button>
-            <button
-              onClick={() => setActiveTab('external')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                activeTab === 'external' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Ngoài ngành
-            </button>
+            <p className="text-slate-500 text-sm mt-1 mb-4">Tiếp nhận dữ liệu từ các hệ thống nguồn và cơ sở dữ liệu</p>
+            
+            <div className="flex items-center gap-2 p-1 bg-slate-100 rounded-lg w-fit">
+              <button
+                onClick={() => setActiveTab('internal')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                  activeTab === 'internal' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Trong ngành
+              </button>
+              <button
+                onClick={() => setActiveTab('external')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                  activeTab === 'external' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Ngoài ngành
+              </button>
+            </div>
           </div>
         </div>
       </div>

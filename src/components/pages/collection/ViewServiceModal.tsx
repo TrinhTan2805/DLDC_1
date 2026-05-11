@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { 
+import {
   X, CheckCircle, Search, Calendar, Eye, Activity, Shield, FileText, Download,
   ArrowRight, ExternalLink, RefreshCw, ChevronDown, ChevronRight, User, Plug, Settings, Database, Clock,
   LayoutTemplate, Check, AlertCircle, AlertTriangle, EyeOff,
@@ -30,7 +30,7 @@ export function ViewServiceModal({ isOpen, onClose, service }: ViewServiceModalP
   return (
     <>
       <div className="fixed inset-0 z-50 flex overflow-y-auto bg-black/50 py-10 px-4 items-start font-sans">
-        <div className="bg-white rounded-xl shadow-xl w-full max-w-5xl mx-auto flex flex-col flex-shrink-0 mb-auto overflow-hidden">
+        <div className="bg-white rounded-xl shadow-xl w-full max-w-5xl mx-auto flex flex-col flex-shrink-0 mb-auto overflow-hidden relative z-0">
           
           {/* HEADER */}
           <div className="px-8 py-6 bg-slate-50/50 border-b border-slate-100">
@@ -50,20 +50,18 @@ export function ViewServiceModal({ isOpen, onClose, service }: ViewServiceModalP
                 <h1 className="text-2xl font-bold text-slate-900 mb-3 leading-tight">
                   {service.name || 'Dịch vụ chưa đặt tên'}
                 </h1>
-                
+
                 <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600">
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${
-                    service.status === 'success' ? 'bg-green-50 text-green-700 border-green-200' : 
-                    service.status?.startsWith('failed_') ? 'bg-red-50 text-red-700 border-red-200' :
-                    service.status === 'inactive' ? 'bg-gray-100 text-gray-500 border-gray-200' :
-                    'bg-slate-50 text-slate-700 border-slate-200'
-                  }`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${
-                      service.status === 'success' ? 'bg-green-600' : 
-                      service.status?.startsWith('failed_') ? 'bg-red-600' : 
-                      service.status === 'inactive' ? 'bg-gray-400' :
-                      'bg-slate-400'
-                    }`}></span> 
+                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${service.status === 'success' ? 'bg-green-50 text-green-700 border-green-200' :
+                      service.status?.startsWith('failed_') ? 'bg-red-50 text-red-700 border-red-200' :
+                        service.status === 'inactive' ? 'bg-gray-100 text-gray-500 border-gray-200' :
+                          'bg-slate-50 text-slate-700 border-slate-200'
+                    }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${service.status === 'success' ? 'bg-green-600' :
+                        service.status?.startsWith('failed_') ? 'bg-red-600' :
+                          service.status === 'inactive' ? 'bg-gray-400' :
+                            'bg-slate-400'
+                      }`}></span>
                     {service.statusText || 'Bản nháp'}
                   </span>
                   <span className="text-slate-300">|</span>
@@ -79,26 +77,26 @@ export function ViewServiceModal({ isOpen, onClose, service }: ViewServiceModalP
                   </span>
                 </div>
               </div>
-              
+
               <div className="flex gap-2">
-                 <button className="px-3 py-1.5 bg-purple-600 text-white rounded-lg text-[13px] font-semibold shadow-sm hover:bg-purple-700 transition-colors flex items-center gap-1.5">
-                   <Layers className="w-3.5 h-3.5" /> Xem dữ liệu tích hợp
-                 </button>
-                 <button className="px-3 py-1.5 bg-teal-600 text-white rounded-lg text-[13px] font-semibold shadow-sm hover:bg-teal-700 transition-colors flex items-center gap-1.5">
-                   <RefreshCw className="w-3.5 h-3.5" /> Cập nhật dữ liệu
-                 </button>
-                 <button 
-                   onClick={(e) => {
-                     e.stopPropagation();
-                     setShowInactiveModal(true);
-                   }}
-                   className="px-3 py-1.5 bg-amber-600 text-white rounded-lg text-[13px] font-semibold shadow-sm hover:bg-amber-700 transition-colors flex items-center gap-1.5"
-                 >
-                   <Power className="w-3.5 h-3.5" /> Ngừng kết nối
-                 </button>
-                 <button className="px-3 py-1.5 bg-red-600 text-white rounded-lg text-[13px] font-semibold shadow-sm hover:bg-red-700 transition-colors flex items-center gap-1.5">
-                   <Trash2 className="w-3.5 h-3.5" /> Xóa dữ liệu
-                 </button>
+                <button className="px-3 py-1.5 bg-purple-600 text-white rounded-lg text-[13px] font-semibold shadow-sm hover:bg-purple-700 transition-colors flex items-center gap-1.5">
+                  <Layers className="w-3.5 h-3.5" /> Xem dữ liệu tích hợp
+                </button>
+                <button className="px-3 py-1.5 bg-teal-600 text-white rounded-lg text-[13px] font-semibold shadow-sm hover:bg-teal-700 transition-colors flex items-center gap-1.5">
+                  <RefreshCw className="w-3.5 h-3.5" /> Cập nhật dữ liệu
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowInactiveModal(true);
+                  }}
+                  className="px-3 py-1.5 bg-amber-600 text-white rounded-lg text-[13px] font-semibold shadow-sm hover:bg-amber-700 transition-colors flex items-center gap-1.5"
+                >
+                  <Power className="w-3.5 h-3.5" /> Ngừng kết nối
+                </button>
+                <button className="px-3 py-1.5 bg-red-600 text-white rounded-lg text-[13px] font-semibold shadow-sm hover:bg-red-700 transition-colors flex items-center gap-1.5">
+                  <Trash2 className="w-3.5 h-3.5" /> Xóa dữ liệu
+                </button>
               </div>
             </div>
           </div>
@@ -115,11 +113,10 @@ export function ViewServiceModal({ isOpen, onClose, service }: ViewServiceModalP
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as TabType)}
-                className={`flex items-center gap-2 px-6 py-4 border-b-2 font-bold text-sm transition-all relative ${
-                  activeTab === tab.id
+                className={`flex items-center gap-2 px-6 py-4 border-b-2 font-bold text-sm transition-all relative ${activeTab === tab.id
                     ? 'border-blue-600 text-blue-600'
                     : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-gray-300'
-                }`}
+                  }`}
               >
                 <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-blue-600' : 'text-slate-400'}`} />
                 {tab.label}
@@ -130,15 +127,15 @@ export function ViewServiceModal({ isOpen, onClose, service }: ViewServiceModalP
 
           {/* TABS CONTENT */}
           <div className="px-8 py-8 flex-1 bg-[#fcfcfc] overflow-y-auto min-h-[500px]">
-             {activeTab === 'general' && <TabGeneral service={service} sourceSystem={sourceSystem} />}
-             {activeTab === 'contact' && <TabContact sourceSystem={sourceSystem} />}
-             {activeTab === 'connection' && <TabConnection service={service} showApiKey={showApiKey} setShowApiKey={setShowApiKey} />}
-             {activeTab === 'collection' && <TabCollection service={service} />}
-             {activeTab === 'mapping' && <TabMapping /> }
+            {activeTab === 'general' && <TabGeneral service={service} sourceSystem={sourceSystem} />}
+            {activeTab === 'contact' && <TabContact sourceSystem={sourceSystem} />}
+            {activeTab === 'connection' && <TabConnection service={service} showApiKey={showApiKey} setShowApiKey={setShowApiKey} />}
+            {activeTab === 'collection' && <TabCollection service={service} />}
+            {activeTab === 'mapping' && <TabMapping />}
           </div>
         </div>
 
-        {/* INACTIVE CONFIRMATION MODAL - INSIDE SAME BACKDROP FOR BETTER STACKING */}
+        {/* INACTIVE CONFIRMATION MODAL - RESTORED AND FIXED Z-INDEX CONTEXT */}
         {showInactiveModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-200">
@@ -146,7 +143,7 @@ export function ViewServiceModal({ isOpen, onClose, service }: ViewServiceModalP
                 <h3 className="text-xl font-bold text-slate-900 flex items-center gap-3">
                   <div className="p-2 bg-amber-100 rounded-lg">
                     <Power className="w-5 h-5 text-amber-600" />
-                  </div> 
+                  </div>
                   Ngừng kết nối
                 </h3>
                 <button onClick={() => setShowInactiveModal(false)} className="text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-200 transition-colors">
@@ -165,7 +162,7 @@ export function ViewServiceModal({ isOpen, onClose, service }: ViewServiceModalP
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="space-y-3">
                   <label className="block text-sm font-bold text-slate-700 ml-1">
                     Lý do ngừng kết nối <span className="text-red-500 font-black">*</span>
@@ -216,7 +213,7 @@ function TabGeneral({ service, sourceSystem }: any) {
           Thông tin dịch vụ
         </h3>
         <div className="grid grid-cols-2 gap-x-12 gap-y-6">
-          
+
           <div className="space-y-1">
             <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Tên service</div>
             <div className="text-sm text-slate-900 font-bold leading-relaxed">{service.name || '-'}</div>
@@ -265,7 +262,7 @@ function TabGeneral({ service, sourceSystem }: any) {
             </div>
             <Download className="w-4 h-4 text-slate-400 ml-4 group-hover:text-blue-600" />
           </div>
-          
+
           <div className="flex items-center gap-3 border border-slate-200 rounded-xl px-4 py-3 bg-white hover:border-blue-300 hover:bg-blue-50/30 transition-all cursor-pointer group shadow-sm">
             <div className="p-2 bg-blue-50 text-blue-500 rounded-lg group-hover:bg-blue-100">
               <FileText className="w-5 h-5" />
@@ -291,7 +288,7 @@ function TabContact({ sourceSystem }: any) {
           Thông tin hệ thống nguồn
         </h3>
         <div className="grid grid-cols-2 gap-x-12 gap-y-8 max-w-5xl">
-          
+
           <div className="space-y-1">
             <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Tên hệ thống</div>
             <div className="text-sm text-slate-900 font-bold leading-relaxed">{sourceSystem.systemName}</div>
@@ -305,9 +302,8 @@ function TabContact({ sourceSystem }: any) {
           <div className="space-y-1">
             <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Loại nguồn</div>
             <div>
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold ${
-                sourceSystem.sourceType === 'Trong ngành' ? 'bg-indigo-50 text-indigo-700 border border-indigo-100' : 'bg-orange-50 text-orange-700 border border-orange-100'
-              }`}>
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold ${sourceSystem.sourceType === 'Trong ngành' ? 'bg-indigo-50 text-indigo-700 border border-indigo-100' : 'bg-orange-50 text-orange-700 border border-orange-100'
+                }`}>
                 {sourceSystem.sourceType}
               </span>
             </div>
@@ -352,42 +348,40 @@ function TabContact({ sourceSystem }: any) {
 function TabConnection({ service, showApiKey, setShowApiKey }: any) {
   // Mock connection type if not in service
   const connectionType = service.connectionType || 'API';
-  
+
   return (
     <div className="animate-in fade-in duration-300 space-y-8">
       {/* STATUS BANNER */}
-      <div className={`rounded-xl p-5 border ${
-        service.status === 'success' ? 'bg-green-50 border-green-200 text-green-800' : 
-        service.status?.startsWith('failed_') ? 'bg-red-50 border-red-200 text-red-800' :
-        service.status === 'inactive' ? 'bg-gray-50 border-gray-200 text-gray-700' :
-        'bg-slate-50 border-slate-200 text-slate-700'
-      }`}>
+      <div className={`rounded-xl p-5 border ${service.status === 'success' ? 'bg-green-50 border-green-200 text-green-800' :
+          service.status?.startsWith('failed_') ? 'bg-red-50 border-red-200 text-red-800' :
+            service.status === 'inactive' ? 'bg-gray-50 border-gray-200 text-gray-700' :
+              'bg-slate-50 border-slate-200 text-slate-700'
+        }`}>
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3 font-bold text-sm uppercase tracking-tight">
-            <div className={`w-2.5 h-2.5 rounded-full ${
-              service.status === 'success' ? 'bg-green-600 animate-pulse' : 
-              service.status?.startsWith('failed_') ? 'bg-red-600' : 
-              'bg-gray-400'
-            }`}></div> 
-            {service.status === 'success' ? 'Kết nối đang hoạt động tốt' : 
-             service.status?.startsWith('failed_') ? 'Kết nối thất bại' :
-             service.status === 'inactive' ? 'Kết nối đang tạm ngưng' : 'Trạng thái bản nháp'}
+            <div className={`w-2.5 h-2.5 rounded-full ${service.status === 'success' ? 'bg-green-600 animate-pulse' :
+                service.status?.startsWith('failed_') ? 'bg-red-600' :
+                  'bg-gray-400'
+              }`}></div>
+            {service.status === 'success' ? 'Kết nối đang hoạt động tốt' :
+              service.status?.startsWith('failed_') ? 'Kết nối thất bại' :
+                service.status === 'inactive' ? 'Kết nối đang tạm ngưng' : 'Trạng thái bản nháp'}
           </div>
           <div className="text-xs font-medium opacity-70 flex items-center gap-2">
             <Clock className="w-3.5 h-3.5" />
             Kiểm tra lần cuối: {service.lastReceived || 'Vừa xong'}
           </div>
         </div>
-        
+
         {(service.status?.startsWith('failed_') || service.status === 'inactive') && (
           <div className="bg-white/60 backdrop-blur-sm p-4 rounded-lg border border-black/5 mt-2 flex items-start gap-3">
             <AlertCircle className={`w-5 h-5 shrink-0 mt-0.5 ${service.status?.startsWith('failed_') ? 'text-red-500' : 'text-gray-500'}`} />
             <div>
               <div className="text-sm font-bold mb-1">
                 {service.status === 'failed_agent' ? 'Lỗi từ Agent' :
-                 service.status === 'failed_worker' ? 'Lỗi từ Worker' :
-                 service.status === 'failed_auth' ? 'Lỗi xác thực' :
-                 service.status === 'inactive' ? 'Lý do ngưng hoạt động' : 'Thông tin chi tiết'}
+                  service.status === 'failed_worker' ? 'Lỗi từ Worker' :
+                    service.status === 'failed_auth' ? 'Lỗi xác thực' :
+                      service.status === 'inactive' ? 'Lý do ngưng hoạt động' : 'Thông tin chi tiết'}
               </div>
               <div className="text-sm leading-relaxed">
                 {service.failureReason || service.inactiveReason || 'Không có thông tin chi tiết.'}
@@ -402,7 +396,7 @@ function TabConnection({ service, showApiKey, setShowApiKey }: any) {
           <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
           Cấu hình {connectionType === 'API' ? 'RESTful API' : connectionType === 'DB' ? 'Cơ sở dữ liệu' : 'File Upload'}
         </h3>
-        
+
         {connectionType === 'API' && (
           <div className="grid grid-cols-2 gap-x-12 gap-y-6">
             <div className="space-y-1">
@@ -433,16 +427,16 @@ function TabConnection({ service, showApiKey, setShowApiKey }: any) {
               <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">API Key / Token</div>
               <div className="flex items-center gap-3 bg-slate-900 p-3 rounded-lg border border-slate-800 mt-1">
                 <span className="font-mono text-lg tracking-[0.2em] text-blue-400 flex-1 leading-none">
-                   {showApiKey ? "A5D9-2X8K-Q7P1-B9M4" : "••••••••••••••••"}
+                  {showApiKey ? "A5D9-2X8K-Q7P1-B9M4" : "••••••••••••••••"}
                 </span>
-                <button 
-                   onClick={() => setShowApiKey(!showApiKey)}
-                   className="p-1.5 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 transition-colors">
+                <button
+                  onClick={() => setShowApiKey(!showApiKey)}
+                  className="p-1.5 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 transition-colors">
                   {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
-            
+
             <div className="space-y-1">
               <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Worker / Agent</div>
               <div className="text-sm text-slate-900 font-bold">Worker 1 &mdash; Agent 02</div>
@@ -522,7 +516,7 @@ function TabCollection({ service }: any) {
           Cấu hình đồng bộ dữ liệu
         </h3>
         <div className="grid grid-cols-2 gap-x-12 gap-y-8">
-          
+
           <div className="space-y-1">
             <div className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Loại tần suất</div>
             <div className="text-sm text-slate-900 font-bold">Cập nhật (Incremental)</div>
@@ -565,14 +559,14 @@ function TabCollection({ service }: any) {
           Thông báo & Cảnh báo
         </h3>
         <div className="grid grid-cols-2 gap-8">
-           <div className="p-4 rounded-xl border border-slate-100 bg-slate-50/50">
-              <div className="text-xs font-bold text-slate-500 uppercase mb-2">Email nhận báo cáo</div>
-              <div className="text-sm font-bold text-slate-800">admin@moj.gov.vn</div>
-           </div>
-           <div className="p-4 rounded-xl border border-slate-100 bg-slate-50/50">
-              <div className="text-xs font-bold text-slate-500 uppercase mb-2">Kênh cảnh báo lỗi</div>
-              <div className="text-sm font-bold text-slate-800">Telegram, Email (Immediate)</div>
-           </div>
+          <div className="p-4 rounded-xl border border-slate-100 bg-slate-50/50">
+            <div className="text-xs font-bold text-slate-500 uppercase mb-2">Email nhận báo cáo</div>
+            <div className="text-sm font-bold text-slate-800">admin@moj.gov.vn</div>
+          </div>
+          <div className="p-4 rounded-xl border border-slate-100 bg-slate-50/50">
+            <div className="text-xs font-bold text-slate-500 uppercase mb-2">Kênh cảnh báo lỗi</div>
+            <div className="text-sm font-bold text-slate-800">Telegram, Email (Immediate)</div>
+          </div>
         </div>
       </div>
     </div>
@@ -664,11 +658,10 @@ function TabMapping() {
                 <button
                   key={table.id}
                   onClick={() => setActiveTableId(table.id)}
-                  className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-left transition-all ${
-                    activeTableId === table.id 
-                      ? 'bg-blue-50 text-blue-700 shadow-sm' 
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-left transition-all ${activeTableId === table.id
+                      ? 'bg-blue-50 text-blue-700 shadow-sm'
                       : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-3">
                     <div className={`p-2 rounded-lg ${activeTableId === table.id ? 'bg-blue-100' : 'bg-slate-200'}`}>
@@ -823,7 +816,7 @@ function TabHistory({ onGoToMapping }: { onGoToMapping?: () => void }) {
                 <td className={`px-6 py-4 ${log.status === 'error' ? 'text-[#d32f2f]' : ''}`}>
                   <div className="whitespace-pre-wrap">{log.note}</div>
                   {log.hasDetails && (
-                    <button 
+                    <button
                       onClick={() => setSelectedLogId(log.id)}
                       className="mt-2 text-blue-600 hover:text-blue-700 text-[13px] font-medium flex items-center gap-1 transition-colors">
                       <Eye className="w-3 h-3" /> Xem chi tiết
@@ -838,16 +831,16 @@ function TabHistory({ onGoToMapping }: { onGoToMapping?: () => void }) {
 
       <div className="flex items-center justify-between mt-6">
         <div className="flex justify-center w-full px-4 mb-1">
-           <button className="p-2 bg-white border border-slate-200 rounded-full text-slate-500 shadow-sm hover:shadow hover:bg-slate-50 transition-all mt-4 absolute left-1/2 -translate-x-1/2 z-10 bottom-0">
-             <ChevronDown className="w-4 h-4" />
-           </button>
+          <button className="p-2 bg-white border border-slate-200 rounded-full text-slate-500 shadow-sm hover:shadow hover:bg-slate-50 transition-all mt-4 absolute left-1/2 -translate-x-1/2 z-10 bottom-0">
+            <ChevronDown className="w-4 h-4" />
+          </button>
         </div>
         <div className="flex items-center gap-2 ml-auto z-20 absolute right-8 -mt-2">
-           <button className="px-4 py-2 border border-slate-300 rounded text-sm text-slate-600 bg-white hover:bg-slate-50 font-medium">Trang trước</button>
-           <button className="px-4 py-2 border border-slate-900 rounded text-sm text-white bg-slate-900 font-medium">1</button>
-           <button className="px-4 py-2 border border-slate-300 rounded text-sm text-slate-600 bg-white hover:bg-slate-50 font-medium">2</button>
-           <button className="px-4 py-2 border border-slate-300 rounded text-sm text-slate-600 bg-white hover:bg-slate-50 font-medium">3</button>
-           <button className="px-4 py-2 border border-slate-300 rounded text-sm text-slate-600 bg-white hover:bg-slate-50 font-medium">Trang sau</button>
+          <button className="px-4 py-2 border border-slate-300 rounded text-sm text-slate-600 bg-white hover:bg-slate-50 font-medium">Trang trước</button>
+          <button className="px-4 py-2 border border-slate-900 rounded text-sm text-white bg-slate-900 font-medium">1</button>
+          <button className="px-4 py-2 border border-slate-300 rounded text-sm text-slate-600 bg-white hover:bg-slate-50 font-medium">2</button>
+          <button className="px-4 py-2 border border-slate-300 rounded text-sm text-slate-600 bg-white hover:bg-slate-50 font-medium">3</button>
+          <button className="px-4 py-2 border border-slate-300 rounded text-sm text-slate-600 bg-white hover:bg-slate-50 font-medium">Trang sau</button>
         </div>
       </div>
     </div>
@@ -881,20 +874,20 @@ function ErrorDetailView({ log, onBack, onGoToMapping }: any) {
         {/* Missing Fields Area */}
         <div>
           <div className="flex items-center justify-between mb-4">
-             <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center text-red-600 border border-red-100 shadow-sm">
-                   <Activity className="w-5 h-5" />
-                </div>
-                <div>
-                   <h4 className="font-semibold text-slate-800 text-sm">Bản ghi thiếu trường bắt buộc</h4>
-                   <p className="text-xs text-slate-500">2 bản ghi bị từ chối do thiếu dữ liệu mapping</p>
-                </div>
-             </div>
-             <button className="px-4 py-2 border border-slate-300 bg-white rounded text-sm text-slate-700 font-medium hover:bg-slate-50 flex items-center gap-2 shadow-sm transition-all focus:ring-2 focus:ring-slate-200">
-               <Download className="w-4 h-4" /> Xuất File Lỗi
-             </button>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center text-red-600 border border-red-100 shadow-sm">
+                <Activity className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-slate-800 text-sm">Bản ghi thiếu trường bắt buộc</h4>
+                <p className="text-xs text-slate-500">2 bản ghi bị từ chối do thiếu dữ liệu mapping</p>
+              </div>
+            </div>
+            <button className="px-4 py-2 border border-slate-300 bg-white rounded text-sm text-slate-700 font-medium hover:bg-slate-50 flex items-center gap-2 shadow-sm transition-all focus:ring-2 focus:ring-slate-200">
+              <Download className="w-4 h-4" /> Xuất File Lỗi
+            </button>
           </div>
-          
+
           <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
             <table className="w-full text-left text-sm">
               <thead className="bg-[#f8f7f5] text-slate-700 font-medium border-b border-slate-200">
@@ -906,17 +899,17 @@ function ErrorDetailView({ log, onBack, onGoToMapping }: any) {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {missingRecords.map(rec => (
-                   <tr key={rec.id} className="hover:bg-slate-50 transition-colors">
-                     <td className="px-4 py-3 font-mono text-xs text-slate-600">{rec.id}</td>
-                     <td className="px-4 py-3 font-mono text-xs text-slate-600 bg-slate-50 p-2 rounded block mx-2 my-2 border border-slate-100">{rec.raw}</td>
-                     <td className="px-4 py-3">
-                       <div className="flex flex-wrap gap-1.5">
-                          {rec.missing.map(m => (
-                             <span key={m} className="px-2 py-1 bg-red-50 text-red-700 border border-red-200 rounded text-xs font-mono font-medium shadow-sm">{m}</span>
-                          ))}
-                       </div>
-                     </td>
-                   </tr>
+                  <tr key={rec.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-4 py-3 font-mono text-xs text-slate-600">{rec.id}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-slate-600 bg-slate-50 p-2 rounded block mx-2 my-2 border border-slate-100">{rec.raw}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-wrap gap-1.5">
+                        {rec.missing.map(m => (
+                          <span key={m} className="px-2 py-1 bg-red-50 text-red-700 border border-red-200 rounded text-xs font-mono font-medium shadow-sm">{m}</span>
+                        ))}
+                      </div>
+                    </td>
+                  </tr>
                 ))}
               </tbody>
             </table>
@@ -925,24 +918,24 @@ function ErrorDetailView({ log, onBack, onGoToMapping }: any) {
 
         {/* Unmapped Fields Area */}
         <div>
-           <div className="flex items-center justify-between mb-4 mt-2">
-             <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600 border border-amber-100 shadow-sm">
-                   <Database className="w-5 h-5" />
-                </div>
-                <div>
-                   <h4 className="font-semibold text-slate-800 text-sm">Phát hiện dữ liệu mới / thay đổi</h4>
-                   <p className="text-xs text-slate-500">Một vài bản ghi trả về các trường dữ liệu bị thay đổi cấu trúc, không khớp với sơ đồ hiện tại</p>
-                </div>
-             </div>
-             <div className="flex gap-3">
-                 <button className="px-4 py-2 border border-slate-300 bg-white rounded text-sm text-slate-700 font-medium hover:bg-slate-50 shadow-sm transition-all focus:ring-2 focus:ring-slate-200">
-                   Bỏ qua
-                 </button>
-                 <button onClick={onGoToMapping} className="px-4 py-2 bg-blue-600 rounded text-sm text-white font-medium hover:bg-blue-700 flex items-center gap-2 shadow-sm transition-all focus:ring-2 focus:ring-blue-500">
-                   <Shield className="w-4 h-4" /> Cấu hình ánh xạ ngay
-                 </button>
-             </div>
+          <div className="flex items-center justify-between mb-4 mt-2">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600 border border-amber-100 shadow-sm">
+                <Database className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-slate-800 text-sm">Phát hiện dữ liệu mới / thay đổi</h4>
+                <p className="text-xs text-slate-500">Một vài bản ghi trả về các trường dữ liệu bị thay đổi cấu trúc, không khớp với sơ đồ hiện tại</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button className="px-4 py-2 border border-slate-300 bg-white rounded text-sm text-slate-700 font-medium hover:bg-slate-50 shadow-sm transition-all focus:ring-2 focus:ring-slate-200">
+                Bỏ qua
+              </button>
+              <button onClick={onGoToMapping} className="px-4 py-2 bg-blue-600 rounded text-sm text-white font-medium hover:bg-blue-700 flex items-center gap-2 shadow-sm transition-all focus:ring-2 focus:ring-blue-500">
+                <Shield className="w-4 h-4" /> Cấu hình ánh xạ ngay
+              </button>
+            </div>
           </div>
 
           <div className="border border-slate-200 rounded-xl overflow-hidden bg-[#fbfaf9] shadow-sm">
@@ -956,16 +949,16 @@ function ErrorDetailView({ log, onBack, onGoToMapping }: any) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 bg-white">
-                 {unmappedFields.map(f => (
-                    <tr key={f.fieldName} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-4 py-3 font-mono text-[13px] text-slate-800 font-medium">{f.fieldName}</td>
-                      <td className="px-4 py-3">
-                         <span className="px-2.5 py-1 border rounded text-slate-500 font-mono text-[11px] bg-slate-50 font-medium">{f.type}</span>
-                      </td>
-                      <td className="px-4 py-3 text-slate-600 italic">"{f.sample}"</td>
-                      <td className="px-4 py-3 text-slate-600">{f.affectedRecords} bản ghi</td>
-                    </tr>
-                 ))}
+                {unmappedFields.map(f => (
+                  <tr key={f.fieldName} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-4 py-3 font-mono text-[13px] text-slate-800 font-medium">{f.fieldName}</td>
+                    <td className="px-4 py-3">
+                      <span className="px-2.5 py-1 border rounded text-slate-500 font-mono text-[11px] bg-slate-50 font-medium">{f.type}</span>
+                    </td>
+                    <td className="px-4 py-3 text-slate-600 italic">"{f.sample}"</td>
+                    <td className="px-4 py-3 text-slate-600">{f.affectedRecords} bản ghi</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -1005,7 +998,7 @@ function TabChangelog() {
   return (
     <div className="animate-in fade-in duration-300">
       <div className="flex items-center justify-between mb-6">
-         <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Nhật ký thay đổi thiết lập kết nối</h3>
+        <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Nhật ký thay đổi thiết lập kết nối</h3>
       </div>
 
       <div className="border border-slate-200 rounded-lg overflow-hidden bg-white">
@@ -1041,31 +1034,31 @@ function TabChangelog() {
           Hiển thị bản ghi <span className="font-medium">{startIndex + 1}</span> - <span className="font-medium">{Math.min(startIndex + itemsPerPage, changelogs.length)}</span> trong tổng số <span className="font-medium">{changelogs.length}</span>
         </div>
         <div className="flex items-center gap-2 ml-auto z-20">
-           <button 
-             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-             disabled={currentPage === 1}
-             className="px-4 py-2 border border-slate-300 rounded text-sm text-slate-600 bg-white hover:bg-slate-50 font-medium disabled:opacity-50"
-           >
-             Trang trước
-           </button>
-           
-           {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-             <button 
-               key={page}
-               onClick={() => setCurrentPage(page)}
-               className={`px-4 py-2 border rounded text-sm font-medium ${currentPage === page ? 'border-slate-900 text-white bg-slate-900' : 'border-slate-300 text-slate-600 bg-white hover:bg-slate-50'}`}
-             >
-               {page}
-             </button>
-           ))}
-           
-           <button 
-             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-             disabled={currentPage === totalPages}
-             className="px-4 py-2 border border-slate-300 rounded text-sm text-slate-600 bg-white hover:bg-slate-50 font-medium disabled:opacity-50"
-           >
-             Trang sau
-           </button>
+          <button
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className="px-4 py-2 border border-slate-300 rounded text-sm text-slate-600 bg-white hover:bg-slate-50 font-medium disabled:opacity-50"
+          >
+            Trang trước
+          </button>
+
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+            <button
+              key={page}
+              onClick={() => setCurrentPage(page)}
+              className={`px-4 py-2 border rounded text-sm font-medium ${currentPage === page ? 'border-slate-900 text-white bg-slate-900' : 'border-slate-300 text-slate-600 bg-white hover:bg-slate-50'}`}
+            >
+              {page}
+            </button>
+          ))}
+
+          <button
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 border border-slate-300 rounded text-sm text-slate-600 bg-white hover:bg-slate-50 font-medium disabled:opacity-50"
+          >
+            Trang sau
+          </button>
         </div>
       </div>
     </div>

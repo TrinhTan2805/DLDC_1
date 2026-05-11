@@ -1,4 +1,4 @@
-import { X, Search, Filter, Download, FileDown, XCircle, CheckCircle, AlertCircle, Eye, RefreshCw, Calendar, ArrowUp } from 'lucide-react';
+import { X, Search, Filter, Download, FileDown, XCircle, CheckCircle, AlertCircle, Eye, RefreshCw, Calendar, ArrowUp, Plus, Trash2, Edit2 } from 'lucide-react';
 import { useState } from 'react';
 
 interface MarriageDetailModalProps {
@@ -75,8 +75,38 @@ export function MarriageDetailModal({
 }: MarriageDetailModalProps) {
   const [activeTab, setActiveTab] = useState('list');
   const [selectedRecord, setSelectedRecord] = useState<MarriageRecord | null>(null);
-  const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
-  const [detailTab, setDetailTab] = useState('record');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  
+  // Filter System States
+  const [filterConditions, setFilterConditions] = useState<any[]>([
+    { id: '1', logic: 'AND', field: 'husbandName', operator: '=', type: 'Text', value: '' }
+  ]);
+  
+  const [valueModal, setValueModal] = useState({
+    isOpen: false,
+    conditionId: '',
+    type: 'Text',
+    value: ''
+  });
+
+  const openValueModal = (condition: any) => {
+    setValueModal({
+      isOpen: true,
+      conditionId: condition.id,
+      type: condition.type || 'Text',
+      value: condition.value || ''
+    });
+  };
+
+  const saveValue = () => {
+    setFilterConditions(prev => prev.map(c => 
+      c.id === valueModal.conditionId 
+        ? { ...c, value: valueModal.value, type: valueModal.type } 
+        : c
+    ));
+    setValueModal({ ...valueModal, isOpen: false });
+  };
   
   if (!isOpen) return null;
 
@@ -199,6 +229,68 @@ export function MarriageDetailModal({
 
   return (
     <>
+      {/* Value Entry Modal */}
+      {valueModal.isOpen && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4">
+          <div className="bg-white rounded-lg shadow-2xl w-full max-w-md overflow-hidden relative">
+            {/* Header */}
+            <div className="px-6 py-4 bg-[#007bff] text-white flex items-center justify-between">
+              <h3 className="text-lg font-bold">Nhập giá trị lọc</h3>
+              <button 
+                onClick={() => setValueModal({ ...valueModal, isOpen: false })} 
+                className="text-white hover:bg-white/20 p-1 rounded transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            {/* Body */}
+            <div className="p-6 space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Kiểu dữ liệu</label>
+                <select 
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 bg-white"
+                  value={valueModal.type}
+                  onChange={(e) => setValueModal({ ...valueModal, type: e.target.value })}
+                >
+                  <option value="Text">Text</option>
+                  <option value="Number">Number</option>
+                  <option value="Date">Date</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Giá trị</label>
+                <input 
+                  type={valueModal.type === 'Date' ? 'date' : valueModal.type === 'Number' ? 'number' : 'text'}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                  value={valueModal.value}
+                  onChange={(e) => setValueModal({ ...valueModal, value: e.target.value })}
+                  placeholder="Nhập giá trị..."
+                  autoFocus
+                />
+              </div>
+            </div>
+            
+            {/* Footer */}
+            <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-3">
+              <button 
+                onClick={saveValue}
+                className="px-6 py-2 bg-blue-600 text-white rounded font-medium text-sm hover:bg-blue-700 transition-colors"
+              >
+                Lưu
+              </button>
+              <button 
+                onClick={() => setValueModal({ ...valueModal, isOpen: false })}
+                className="px-6 py-2 bg-slate-500 text-white rounded font-medium text-sm hover:bg-slate-600 transition-colors"
+              >
+                Hủy
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Backdrop */}
       <div className="fixed inset-0 bg-black/50 z-50" onClick={onClose} />
       
@@ -228,83 +320,160 @@ export function MarriageDetailModal({
             </button>
           </div>
 
-          {/* Tabs */}
-          <div className="px-6 border-b border-slate-200 flex items-center justify-between">
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setActiveTab('list')}
-                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === 'list'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Danh sách ({totalRecords.toLocaleString()})
-              </button>
-
-              <button
-                onClick={() => setActiveTab('sync')}
-                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === 'sync'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Lịch sử đồng bộ
-              </button>
-            </div>
-          </div>
-
           {/* Content */}
           <div className="flex-1 overflow-hidden flex flex-col">
             {activeTab === 'list' && (
               <>
                 {/* Search & Actions */}
-                <div className="p-4 border-b border-slate-200 space-y-3">
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1 relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                      <input
-                        type="text"
-                        placeholder="Tìm kiếm theo tên chồng, tên vợ, số đăng ký..."
-                        className="w-full pl-9 pr-4 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-                        title="Tìm kiếm"
-                      />
+                <div className="p-4 border-b border-slate-200 flex-shrink-0">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setIsFilterOpen(!isFilterOpen)}
+                        className={`px-3 py-1.5 rounded flex items-center gap-2 text-sm font-medium transition-colors ${
+                          isFilterOpen ? 'bg-blue-600 text-white' : 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        <Filter className="w-4 h-4" />
+                        Lọc
+                      </button>
+                      <button
+                        onClick={() => setIsSortOpen(!isSortOpen)}
+                        className={`px-3 py-1.5 rounded flex items-center gap-2 text-sm font-medium transition-colors ${
+                          isSortOpen ? 'bg-blue-600 text-white' : 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        <ArrowUp className="w-4 h-4" />
+                        Sắp xếp
+                      </button>
                     </div>
-                    <button
-                      onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
-                      className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 flex items-center gap-2 text-sm"
-                      title="Lọc nâng cao"
-                    >
-                      <Filter className="w-4 h-4" />
-                      Lọc nâng cao
-                    </button>
-                    <button 
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm"
-                      title="Xuất Excel"
-                    >
-                      <Download className="w-4 h-4" />
-                      Xuất Excel
+                    
+                    <button className="px-3 py-1.5 border border-slate-300 rounded text-slate-700 hover:bg-slate-50 flex items-center gap-2 text-sm">
+                      <RefreshCw className="w-4 h-4" />
+                      Tải lại
                     </button>
                   </div>
 
-                  {showAdvancedSearch && (
-                    <div className="grid grid-cols-4 gap-3 p-4 bg-slate-50 rounded-lg border border-slate-200">
-                      <div>
-                        <label className="block text-xs font-medium text-slate-700 mb-1">Họ tên chồng</label>
-                        <input type="text" className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" title="Họ tên chồng" />
+                  {/* Filter Panel */}
+                  {isFilterOpen && (
+                    <div className="bg-white border border-slate-200 rounded-lg p-5 mb-4 shadow-sm">
+                      <div className="flex items-center justify-between mb-4">
+                        <button 
+                          onClick={() => {
+                            const newId = Date.now().toString();
+                            setFilterConditions([...filterConditions, { id: newId, logic: 'AND', field: '', operator: '=', type: 'Text', value: '' }]);
+                          }}
+                          className="px-3 py-1.5 border border-blue-500 text-blue-600 rounded flex items-center gap-2 text-sm font-medium hover:bg-blue-50"
+                        >
+                          <Plus className="w-4 h-4" />
+                          Thêm điều kiện
+                        </button>
+                        <button onClick={() => setFilterConditions([])} className="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
-                      <div>
-                        <label className="block text-xs font-medium text-slate-700 mb-1">Họ tên vợ</label>
-                        <input type="text" className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" title="Họ tên vợ" />
+
+                      <div className="space-y-3">
+                        {filterConditions.map((condition, index) => (
+                          <div key={condition.id} className="flex items-center gap-3">
+                            <div className="w-20 flex-shrink-0">
+                              {index > 0 && (
+                                <select 
+                                  className="w-full px-2 py-1.5 border border-slate-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                                  value={condition.logic}
+                                  onChange={(e) => {
+                                    const newConditions = [...filterConditions];
+                                    newConditions[index].logic = e.target.value;
+                                    setFilterConditions(newConditions);
+                                  }}
+                                >
+                                  <option value="AND">AND</option>
+                                  <option value="OR">OR</option>
+                                </select>
+                              )}
+                            </div>
+                            
+                            <select 
+                              className="flex-1 basis-0 w-full min-w-0 px-3 py-1.5 border border-slate-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                              value={condition.field}
+                              onChange={(e) => {
+                                const newConditions = [...filterConditions];
+                                newConditions[index].field = e.target.value;
+                                setFilterConditions(newConditions);
+                              }}
+                            >
+                              <option value="">Chọn trường</option>
+                              <option value="husbandName">Họ tên chồng</option>
+                              <option value="wifeName">Họ tên vợ</option>
+                              <option value="marriageDate">Ngày kết hôn</option>
+                              <option value="registrationNumber">Số đăng ký</option>
+                            </select>
+
+                            <select 
+                              className="flex-1 basis-0 w-full min-w-0 px-3 py-1.5 border border-slate-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                              value={condition.operator}
+                              onChange={(e) => {
+                                const newConditions = [...filterConditions];
+                                newConditions[index].operator = e.target.value;
+                                setFilterConditions(newConditions);
+                              }}
+                            >
+                              <option value="=">Bằng (=)</option>
+                              <option value="&gt;">Lớn hơn (&gt;)</option>
+                              <option value="&lt;">Nhỏ hơn (&lt;)</option>
+                              <option value="&gt;=">Lớn hơn bằng (&gt;=)</option>
+                              <option value="&lt;=">Nhỏ hơn bằng (&lt;=)</option>
+                              <option value="!=">Khác (!=)</option>
+                              <option value="contains">Chứa</option>
+                              <option value="starts">Bắt đầu</option>
+                              <option value="ends">Kết thúc</option>
+                            </select>
+
+                            <div className="flex-1 basis-0 w-full min-w-0 flex items-center gap-2 px-3 py-1.5 border border-slate-300 rounded bg-white group/value">
+                              <div className="flex-1 text-sm text-slate-900 truncate">
+                                {condition.value || <span className="text-slate-400 font-mono">{"<?>"}</span>}
+                              </div>
+                              <button 
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  openValueModal(condition);
+                                }}
+                                className="p-1 hover:bg-slate-100 rounded text-blue-600 transition-colors"
+                                title="Chỉnh sửa giá trị"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                            </div>
+
+                            <button 
+                              type="button"
+                              onClick={() => setFilterConditions(filterConditions.filter(c => c.id !== condition.id))}
+                              className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                              title="Xóa điều kiện"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
                       </div>
-                      <div>
-                        <label className="block text-xs font-medium text-slate-700 mb-1">Từ ngày</label>
-                        <input type="date" className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" title="Từ ngày" />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-slate-700 mb-1">Đến ngày</label>
-                        <input type="date" className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" title="Đến ngày" />
+
+                      <div className="mt-6 pt-4 border-t border-slate-100 flex items-center gap-3">
+                        <button className="px-4 py-1.5 border border-blue-500 text-blue-600 rounded flex items-center gap-2 text-sm font-medium hover:bg-blue-50">
+                          <Plus className="w-4 h-4" />
+                          Điều kiện
+                        </button>
+                        <div className="ml-auto flex items-center gap-2">
+                          <button className="px-6 py-1.5 bg-blue-600 text-white rounded font-medium text-sm hover:bg-blue-700 flex items-center gap-2">
+                            <CheckCircle className="w-4 h-4" />
+                            Áp dụng
+                          </button>
+                          <button onClick={() => setFilterConditions([])} className="px-6 py-1.5 bg-slate-600 text-white rounded font-medium text-sm hover:bg-slate-700 flex items-center gap-2">
+                            <XCircle className="w-4 h-4" />
+                            Xóa bộ lọc
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -625,51 +794,12 @@ export function MarriageDetailModal({
                 </button>
               </div>
 
-              {/* Tabs */}
-              <div className="px-6 pt-4 flex-shrink-0 border-b border-slate-200">
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => setDetailTab('record')}
-                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                      detailTab === 'record' ? 'border-orange-600 text-orange-600' : 'border-transparent text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    📄 Thông tin hồ sơ
-                  </button>
-                  <button
-                    onClick={() => setDetailTab('husband')}
-                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                      detailTab === 'husband' ? 'border-orange-600 text-orange-600' : 'border-transparent text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    👨 Bên chồng
-                  </button>
-                  <button
-                    onClick={() => setDetailTab('wife')}
-                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                      detailTab === 'wife' ? 'border-orange-600 text-orange-600' : 'border-transparent text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    👩 Bên vợ
-                  </button>
-                  <button
-                    onClick={() => setDetailTab('other')}
-                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                      detailTab === 'other' ? 'border-orange-600 text-orange-600' : 'border-transparent text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    📋 Thông tin khác
-                  </button>
-                </div>
-              </div>
-
               {/* Content */}
               <div className="p-6 flex-1 overflow-auto">
                 {/* Tab: Thông tin hồ sơ */}
-                {detailTab === 'record' && (
+                <div className="mb-8">
                 <div className="mb-6">
-                  <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-orange-600">Bộ dữ liệu hồ sơ đăng ký kết hôn</h4>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-3">
                     <div className="border border-slate-200 p-2 rounded">
                       <div className="text-xs text-slate-600 mb-1">Mã hồ sơ</div>
                       <div className="text-sm text-slate-900">{selectedRecord.recordCode || '-'}</div>
@@ -692,13 +822,12 @@ export function MarriageDetailModal({
                     </div>
                   </div>
                 </div>
-                )}
+                </div>
 
                 {/* Tab: Thông tin bên chồng */}
-                {detailTab === 'husband' && (
+                <div className="mb-8">
                 <div className="mb-6">
-                  <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-orange-600">Thông tin bên chồng</h4>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-3">
                     <div className="border border-slate-200 p-2 rounded">
                       <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên chồng</div>
                       <div className="text-sm text-slate-900">{selectedRecord.husbandName}</div>
@@ -741,13 +870,12 @@ export function MarriageDetailModal({
                     </div>
                   </div>
                 </div>
-                )}
+                </div>
 
                 {/* Tab: Thông tin bên vợ */}
-                {detailTab === 'wife' && (
+                <div className="mb-8">
                 <div className="mb-6">
-                  <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-orange-600">Thông tin bên vợ</h4>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-3">
                     <div className="border border-slate-200 p-2 rounded">
                       <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên vợ</div>
                       <div className="text-sm text-slate-900">{selectedRecord.wifeName}</div>
@@ -790,13 +918,12 @@ export function MarriageDetailModal({
                     </div>
                   </div>
                 </div>
-                )}
+                </div>
 
                 {/* Tab: Thông tin khác */}
-                {detailTab === 'other' && (
+                <div className="mb-8">
                 <div className="mb-6">
-                  <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-orange-600">Thông tin khác</h4>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-3">
                     <div className="border border-slate-200 p-2 rounded">
                       <div className="text-xs text-slate-600 mb-1">Nơi đăng ký</div>
                       <div className="text-sm text-slate-900">{selectedRecord.registrationPlace || '-'}</div>
@@ -851,7 +978,7 @@ export function MarriageDetailModal({
                     </div>
                   </div>
                 </div>
-                )}
+                </div>
 
                 {/* Trạng thái lỗi - hiển thị ở tất cả các tab */}
                 {selectedRecord.hasError && (
@@ -876,12 +1003,7 @@ export function MarriageDetailModal({
                   <XCircle className="w-4 h-4" />
                   Đóng
                 </button>
-                <button
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm"
-                >
-                  <FileDown className="w-4 h-4" />
-                  Xuất file
-                </button>
+                
               </div>
             </div>
           </div>

@@ -83,13 +83,13 @@ export function AccessControlModal({ isOpen, onClose, service }: AccessControlMo
 
         {/* Footer */}
         <div className="px-6 py-4 border-t border-slate-200 flex justify-end space-x-3 bg-white">
-          <button title="Đóng" aria-label="Đóng" 
+          <button title="Hủy bỏ" aria-label="Hủy bỏ" 
             onClick={onClose}
             className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 font-medium"
           >
             Hủy bỏ
           </button>
-          <button title="Đóng" aria-label="Đóng" 
+          <button title="Lưu cấu hình" aria-label="Lưu cấu hình" 
             onClick={onClose}
             className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center font-medium"
           >

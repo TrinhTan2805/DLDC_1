@@ -1,4 +1,4 @@
-import { Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, ChevronDown, ChevronUp, Upload } from 'lucide-react';
 import { useState } from 'react';
 
 interface ConnectionConfigSectionProps {
@@ -9,6 +9,8 @@ interface ConnectionConfigSectionProps {
   handleTestConnection?: () => void;
   mockMode?: 'success' | 'err_conn' | 'err_data';
   setMockMode?: (mode: 'success' | 'err_conn' | 'err_data') => void;
+  connectionType: string;
+  setConnectionType: (type: string) => void;
 }
 
 interface HeaderItem {
@@ -17,8 +19,7 @@ interface HeaderItem {
   value: string;
 }
 
-export function ConnectionConfigSection({ resetTestState, isEdit = false }: ConnectionConfigSectionProps) {
-  const [connectionType, setConnectionType] = useState('API');
+export function ConnectionConfigSection({ resetTestState, isEdit = false, connectionType, setConnectionType }: ConnectionConfigSectionProps) {
   const [authorization, setAuthorization] = useState('No Authen');
   const [isExpanded, setIsExpanded] = useState(false);
   const [tokenType, setTokenType] = useState('api');
@@ -276,158 +277,153 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false }: Conn
       )}
 
       {connectionType === 'FILE' && (
-        <div className="space-y-4">
-          <h3 className="text-sm font-medium text-slate-700 mb-3 pb-2 border-b border-slate-200">Cấu hình File Upload</h3>
+        <div className="space-y-6">
           <div>
-            <label htmlFor="file-formats" className="block text-sm text-slate-600 mb-1">Định dạng hỗ trợ</label>
-            <input aria-label="Input field" 
-              id="file-formats" 
-              type="text" 
-              title="Định dạng hỗ trợ"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
-              placeholder="VD: .csv, .xlsx, .json" 
-            />
+            <label className="block text-sm text-slate-700 font-medium mb-1.5">Tên File CSDL <span className="text-red-500">*</span></label>
+            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tên File CSDL" />
           </div>
+          
           <div>
-            <label htmlFor="file-max-size" className="block text-sm text-slate-600 mb-1">Dung lượng tối đa (MB)</label>
-            <input aria-label="Input field" 
-              id="file-max-size" 
-              type="number" 
-              title="Dung lượng tối đa (MB)"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
-              placeholder="50" 
-              defaultValue={50} 
-            />
+            <label className="block text-sm text-slate-700 font-medium mb-1.5">Worker <span className="text-red-500">*</span></label>
+            <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+              <option value="">Chọn Worker</option>
+              <option value="worker1">Worker 1</option>
+              <option value="worker2">Worker 2</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm text-slate-700 font-medium mb-1.5">Agent <span className="text-red-500">*</span></label>
+            <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+              <option value="">Chọn Agent</option>
+              <option value="agent1">Agent 1</option>
+              <option value="agent2">Agent 2</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm text-slate-700 font-medium mb-1.5">Tập tin tải lên <span className="text-red-500">*</span></label>
+            <div className="border-2 border-dashed border-slate-200 rounded-xl p-8 bg-slate-50/50 flex flex-col items-center justify-center gap-3 group hover:bg-slate-50 hover:border-blue-400 transition-all cursor-pointer">
+              <div className="text-slate-400 group-hover:text-blue-500 transition-colors">
+                <Upload className="w-10 h-10" />
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-slate-600">Kéo và thả tập tin vào đây hoặc</p>
+                <button type="button" className="mt-2 px-4 py-1.5 bg-white border border-slate-200 rounded text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50">Chọn tập tin</button>
+              </div>
+            </div>
+            <p className="mt-3 text-[13px] text-slate-500">
+              Các định dạng cho phép: <span className="font-bold text-slate-700 italic">CSV, XLS, XLSX, JSON, XML</span>
+            </p>
           </div>
         </div>
       )}
 
 
       {connectionType === 'DB' && (
-        <div className="space-y-4">
-          <h3 className="text-sm font-medium text-slate-700 mb-3 pb-2 border-b border-slate-200">Cấu hình Database</h3>
-          <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
             <div>
-              <label htmlFor="db-type" className="block text-sm text-slate-600 mb-1">Loại Cơ sở dữ liệu <span className="text-red-500">*</span></label>
-              <select aria-label="Select box" 
-                id="db-type" 
-                title="Loại Cơ sở dữ liệu"
-                disabled={isEdit} 
-                className={`w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${isEdit ? 'bg-slate-100 text-slate-500 cursor-not-allowed' : ''}`}
-                defaultValue="oracle"
-              >
+              <label className="block text-sm text-slate-700 font-medium mb-1.5">Tên CSDL <span className="text-red-500">*</span></label>
+              <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tên CSDL" />
+            </div>
+            <div>
+              <label className="block text-sm text-slate-700 font-medium mb-1.5">Tên CSDL gốc <span className="text-red-500">*</span></label>
+              <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tên CSDL gốc" />
+            </div>
 
-                <option value="oracle">Oracle</option>
-                <option value="postgres">PostgreSql</option>
+            <div>
+              <label className="block text-sm text-slate-700 font-medium mb-1.5">Kiểu CSDL <span className="text-red-500">*</span></label>
+              <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" defaultValue="DBT_ORACLE_10g">
+                <option value="DBT_ORACLE_10g">DBT_ORACLE_10g</option>
+                <option value="POSTGRESQL">PostgreSql</option>
+                <option value="MYSQL">MySql</option>
+                <option value="SQLSERVER">SQL Server</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm text-slate-600 mb-1 opacity-0">Hidden Label</label>
-              <input aria-label="Input field" 
-                id="db-host" 
-                type="text" 
-                title="Host/IP"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                placeholder="192.168.1.100" 
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <input aria-label="Input field" 
-                id="db-port" 
-                type="text" 
-                title="Port"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                placeholder="1521 / 5432" 
-              />
-            </div>
-            <div>
-              <input aria-label="Input field" 
-                id="db-name" 
-                type="text" 
-                title="Database Name / SID"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                placeholder="ORCL / db_name" 
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <input aria-label="Input field" 
-                id="db-username" 
-                type="text" 
-                title="Username"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                placeholder="Nhập DB Username" 
-                required 
-              />
-            </div>
-            <div>
-              <input aria-label="Input field" 
-                id="db-password" 
-                type="password" 
-                title="Password"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                placeholder="Nhập DB Password" 
-                required 
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label htmlFor="db-schema" className="block text-sm text-slate-600 mb-1">Schema (Optional)</label>
-              <input aria-label="Input field" 
-                id="db-schema" 
-                type="text" 
-                title="Schema"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                placeholder="public / schema_name" 
-              />
-            </div>
-            <div>
-              <label htmlFor="db-query" className="block text-sm text-slate-600 mb-1">Query/Table</label>
-              <input aria-label="Input field" 
-                id="db-query" 
-                type="text" 
-                title="Query/Table"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                placeholder="VD: SELECT * FROM..." 
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <label htmlFor="db-pool-size" className="block text-sm text-slate-600 mb-1">Conn Pool Size</label>
-              <input aria-label="Input field" 
-                id="db-pool-size" 
-                type="number" 
-                title="Connection Pool Size"
-                defaultValue="10" 
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
-              />
-            </div>
-            <div>
-              <label htmlFor="db-timeout" className="block text-sm text-slate-600 mb-1">Timeout (giây)</label>
-              <input aria-label="Input field" 
-                id="db-timeout" 
-                type="number" 
-                title="Timeout"
-                defaultValue="30" 
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
-              />
-            </div>
-            <div>
-              <label htmlFor="db-batch-size" className="block text-sm text-slate-600 mb-1">Batch Size</label>
-              <input aria-label="Input field" 
-                id="db-batch-size" 
-                type="number" 
-                title="Batch Size"
-                defaultValue="1000" 
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
-              />
+              <label className="block text-sm text-slate-700 font-medium mb-1.5">Agent <span className="text-red-500">*</span></label>
+              <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                <option value="">Chọn Agent</option>
+                <option value="agent1">Agent 1</option>
+                <option value="agent2">Agent 2</option>
+              </select>
             </div>
 
+            <div>
+              <label className="block text-sm text-slate-700 font-medium mb-1.5">Worker <span className="text-red-500">*</span></label>
+              <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                <option value="">Chọn Worker</option>
+                <option value="worker1">Worker 1</option>
+                <option value="worker2">Worker 2</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm text-slate-700 font-medium mb-1.5">Địa chỉ CSDL <span className="text-red-500">*</span></label>
+              <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Địa chỉ CSDL" />
+            </div>
+
+            <div>
+              <label className="block text-sm text-slate-700 font-medium mb-1.5">Cổng kết nối <span className="text-red-500">*</span></label>
+              <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Cổng kết nối" />
+            </div>
+            <div>
+              <label className="block text-sm text-slate-700 font-medium mb-1.5">Tài khoản <span className="text-red-500">*</span></label>
+              <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tài khoản" />
+            </div>
+
+            <div>
+              <label className="block text-sm text-slate-700 font-medium mb-1.5">Mật khẩu <span className="text-red-500">*</span></label>
+              <input type="password" size={1} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Mật khẩu" />
+            </div>
+          </div>
+
+          <div className="pt-2">
+            <button 
+              type="button" 
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="flex items-center gap-2 text-base font-bold text-[#5c6e81] hover:text-slate-900 transition-colors"
+            >
+              Thông tin mở rộng {isExpanded ? <ChevronUp className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+            </button>
+            
+            {isExpanded && (
+              <div className="mt-4 p-5 bg-white border border-slate-200 shadow-sm rounded-lg space-y-4 animate-in slide-in-from-top-2 duration-200">
+                <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                  <div>
+                    <label className="block text-sm text-slate-700 font-medium mb-1.5">Mã CSDL</label>
+                    <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Code" />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-slate-700 font-medium mb-1.5">Mô tả CSDL</label>
+                    <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Mô tả CSDL" />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm text-slate-700 font-medium mb-1.5">Tên ứng dụng</label>
+                    <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tên ứng dụng" />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-slate-700 font-medium mb-1.5">Người quản lý</label>
+                    <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Người quản lý" />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm text-slate-700 font-medium mb-1.5">Thư điện tử của quản lý</label>
+                    <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Thư điện tử của quản lý" />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-slate-700 font-medium mb-1.5">Số điện thoại của quản lý</label>
+                    <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Số điện thoại của quản lý" />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm text-slate-700 font-medium mb-1.5">Phòng ban quản lý</label>
+                    <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Phòng ban quản lý" />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

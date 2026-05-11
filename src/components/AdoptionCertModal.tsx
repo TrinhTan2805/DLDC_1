@@ -117,7 +117,6 @@ export function AdoptionCertModal({
   const [activeTab, setActiveTab] = useState('list');
   const [selectedRecord, setSelectedRecord] = useState<AdoptionCertRecord | null>(null);
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
-  const [detailTab, setDetailTab] = useState('record');
   
   if (!isOpen) return null;
 
@@ -293,33 +292,6 @@ export function AdoptionCertModal({
             </button>
           </div>
 
-          {/* Tabs */}
-          <div className="px-6 border-b border-slate-200 flex items-center justify-between">
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setActiveTab('list')}
-                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === 'list'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Danh sách ({totalRecords.toLocaleString()})
-              </button>
-
-              <button
-                onClick={() => setActiveTab('sync')}
-                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === 'sync'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Lịch sử đồng bộ
-              </button>
-            </div>
-          </div>
-
           {/* Content */}
           <div className="flex-1 overflow-hidden flex flex-col">
             {activeTab === 'list' && (
@@ -468,60 +440,13 @@ export function AdoptionCertModal({
                 </button>
               </div>
 
-              {/* Tabs */}
-              <div className="px-6 pt-4 flex-shrink-0 border-b border-slate-200">
-                <div className="flex items-center gap-1 flex-wrap">
-                  <button
-                    onClick={() => setDetailTab('record')}
-                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                      detailTab === 'record' ? 'border-orange-600 text-orange-600' : 'border-transparent text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    📄 Hồ sơ đăng ký
-                  </button>
-                  <button
-                    onClick={() => setDetailTab('adopted')}
-                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                      detailTab === 'adopted' ? 'border-orange-600 text-orange-600' : 'border-transparent text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    👶 Người được nhận nuôi
-                  </button>
-                  <button
-                    onClick={() => setDetailTab('parents')}
-                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                      detailTab === 'parents' ? 'border-orange-600 text-orange-600' : 'border-transparent text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    👨‍👩‍👧 Thông tin cha, mẹ
-                  </button>
-                  <button
-                    onClick={() => setDetailTab('handovers')}
-                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                      detailTab === 'handovers' ? 'border-orange-600 text-orange-600' : 'border-transparent text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    🧑 Người giao con nuôi
-                  </button>
-                  <button
-                    onClick={() => setDetailTab('other')}
-                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                      detailTab === 'other' ? 'border-orange-600 text-orange-600' : 'border-transparent text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    📋 Thông tin khác
-                  </button>
-                </div>
-              </div>
-
               {/* Content */}
               <div className="p-6 flex-1 overflow-auto bg-white text-slate-900">
                 {/* Tab: Hồ sơ đăng ký */}
-                {detailTab === 'record' && (
+                <div className="mb-8">
                   <div className="space-y-6">
                     <div className="mb-6">
-                      <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-orange-600">Hồ sơ đăng ký</h4>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="flex flex-col gap-3">
                         <div className="border border-slate-200 p-2 rounded col-span-2">
                           <div className="text-xs text-slate-600 mb-1">Tệp đính kèm</div>
                           <div className="text-sm text-blue-600 font-medium">{selectedRecord.fileId || 'Không có tệp tải lên'}</div>
@@ -545,14 +470,13 @@ export function AdoptionCertModal({
                       </div>
                     </div>
                   </div>
-                )}
+                </div>
 
                 {/* Tab: Người được nhận nuôi */}
-                {detailTab === 'adopted' && (
+                <div className="mb-8">
                   <div className="space-y-6">
                     <div className="mb-6">
-                      <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-orange-600">Thông tin người được nhận nuôi</h4>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="flex flex-col gap-3">
                         <div className="border border-slate-200 p-2 rounded col-span-2">
                           <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên</div>
                           <div className="text-sm text-slate-900 font-medium">{selectedRecord.adoptedName}</div>
@@ -604,14 +528,13 @@ export function AdoptionCertModal({
                       </div>
                     </div>
                   </div>
-                )}
+                </div>
 
                 {/* Tab: Thông tin cha mẹ */}
-                {detailTab === 'parents' && (
+                <div className="mb-8">
                   <div className="space-y-6">
                     <div className="mb-6">
-                      <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-orange-600">Thông tin cha</h4>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="flex flex-col gap-3">
                         <div className="border border-slate-200 p-2 rounded col-span-2">
                           <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên</div>
                           <div className="text-sm text-slate-900 font-medium">{selectedRecord.fatherName}</div>
@@ -644,8 +567,7 @@ export function AdoptionCertModal({
                     </div>
 
                     <div className="mb-6">
-                      <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-orange-600">Thông tin mẹ</h4>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="flex flex-col gap-3">
                         <div className="border border-slate-200 p-2 rounded col-span-2">
                           <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên</div>
                           <div className="text-sm text-slate-900 font-medium">{selectedRecord.motherName}</div>
@@ -677,14 +599,13 @@ export function AdoptionCertModal({
                       </div>
                     </div>
                   </div>
-                )}
+                </div>
 
                 {/* Tab: Người giao con nuôi */}
-                {detailTab === 'handovers' && (
+                <div className="mb-8">
                   <div className="space-y-6">
                     <div className="mb-6">
-                      <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-orange-600">Thông tin người giao con nuôi</h4>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="flex flex-col gap-3">
                         <div className="border border-slate-200 p-2 rounded col-span-2">
                           <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên (người thứ 1)</div>
                           <div className="text-sm text-slate-900 font-medium">{selectedRecord.handoverPerson1Name}</div>
@@ -715,14 +636,13 @@ export function AdoptionCertModal({
                       </div>
                     </div>
                   </div>
-                )}
+                </div>
 
                 {/* Tab: Thông tin khác */}
-                {detailTab === 'other' && (
+                <div className="mb-8">
                   <div className="space-y-6">
                     <div className="mb-6">
-                      <h4 className="text-sm font-medium text-slate-900 bg-slate-100 px-3 py-2 mb-3 border-l-4 border-orange-600">Thông tin khác</h4>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="flex flex-col gap-3">
                         <div className="border border-slate-200 p-2 rounded col-span-2">
                           <div className="text-xs text-slate-600 mb-1">Nơi đăng ký</div>
                           <div className="text-sm text-slate-900 font-medium">{selectedRecord.registrationPlace}</div>
@@ -750,7 +670,7 @@ export function AdoptionCertModal({
                       </div>
                     </div>
                   </div>
-                )}
+                </div>
               </div>
 
               {/* Footer */}
@@ -761,12 +681,6 @@ export function AdoptionCertModal({
                 >
                   <XCircle className="w-4 h-4" />
                   Đóng
-                </button>
-                <button
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm"
-                >
-                  <Download className="w-4 h-4" />
-                  Xuất file
                 </button>
               </div>
             </div>

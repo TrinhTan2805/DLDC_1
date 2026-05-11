@@ -4,13 +4,13 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsToolti
 import { ProvisionExportReportModal } from './modals/ProvisionExportReportModal';
 
 const mockData = [
-  { name: '1', 'Luồng dữ liệu': 400, 'Lỗi kết nối': 0 },
-  { name: '2', 'Luồng dữ liệu': 0, 'Lỗi kết nối': 0 },
-  { name: '3', 'Luồng dữ liệu': 0, 'Lỗi kết nối': 0 },
-  { name: '4', 'Luồng dữ liệu': 0, 'Lỗi kết nối': 60 },
-  { name: '5', 'Luồng dữ liệu': 0, 'Lỗi kết nối': 0 },
-  { name: '6', 'Luồng dữ liệu': 0, 'Lỗi kết nối': 0 },
-  { name: '7', 'Luồng dữ liệu': 0, 'Lỗi kết nối': 0 },
+  { name: 'T2', 'Luồng dữ liệu': 250, 'Lỗi kết nối': 12 },
+  { name: 'T3', 'Luồng dữ liệu': 310, 'Lỗi kết nối': 8 },
+  { name: 'T4', 'Luồng dữ liệu': 280, 'Lỗi kết nối': 15 },
+  { name: 'T5', 'Luồng dữ liệu': 380, 'Lỗi kết nối': 5 },
+  { name: 'T6', 'Luồng dữ liệu': 350, 'Lỗi kết nối': 20 },
+  { name: 'T7', 'Luồng dữ liệu': 150, 'Lỗi kết nối': 2 },
+  { name: 'CN', 'Luồng dữ liệu': 120, 'Lỗi kết nối': 0 },
 ];
 
 export function DataProvisionMonitoringPage() {
@@ -113,36 +113,40 @@ export function DataProvisionMonitoringPage() {
           ) : (
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="h-80 border border-slate-200 rounded-xl p-4">
+                <div className="h-80 border border-slate-200 rounded-xl p-4 flex flex-col">
                   <h3 className="font-semibold text-slate-700 mb-4 text-center">Lưu lượng truy cập API (7 ngày)</h3>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={mockData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id="colorLuong" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.8}/>
-                          <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <XAxis dataKey="name" tick={false} axisLine={false} tickLine={false} />
-                      <YAxis ticks={[400]} domain={[0, 400]} axisLine={{ stroke: '#cbd5e1' }} tickLine={true} tick={{ fill: '#94a3b8', fontSize: 12 }} />
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} horizontal={true} />
-                      <RechartsTooltip />
-                      <Area type="linear" dataKey="Luồng dữ liệu" stroke="#f59e0b" fillOpacity={1} fill="url(#colorLuong)" />
-                    </AreaChart>
-                  </ResponsiveContainer>
+                  <div className="flex-1 w-full min-h-0">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={mockData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="colorLuong" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <XAxis dataKey="name" tick={{ fill: '#94a3b8', fontSize: 12 }} axisLine={false} tickLine={false} />
+                        <YAxis domain={[0, 400]} axisLine={{ stroke: '#cbd5e1' }} tickLine={true} tick={{ fill: '#94a3b8', fontSize: 12 }} />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} horizontal={true} />
+                        <RechartsTooltip />
+                        <Area type="linear" dataKey="Luồng dữ liệu" stroke="#f59e0b" fillOpacity={1} fill="url(#colorLuong)" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
 
-                <div className="h-80 border border-slate-200 rounded-xl p-4">
+                <div className="h-80 border border-slate-200 rounded-xl p-4 flex flex-col">
                   <h3 className="font-semibold text-slate-700 mb-4 text-center">Thống kê lỗi kết nối</h3>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={mockData}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} horizontal={true} />
-                      <XAxis dataKey="name" tick={false} axisLine={false} tickLine={false} />
-                      <YAxis ticks={[100]} domain={[0, 100]} axisLine={{ stroke: '#cbd5e1' }} tickLine={true} tick={{ fill: '#94a3b8', fontSize: 12 }} />
-                      <RechartsTooltip />
-                      <Bar dataKey="Lỗi kết nối" fill="#ef4444" radius={[4, 4, 0, 0]} barSize={40} />
-                    </BarChart>
-                  </ResponsiveContainer>
+                  <div className="flex-1 w-full min-h-0">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={mockData}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} horizontal={true} />
+                        <XAxis dataKey="name" tick={{ fill: '#94a3b8', fontSize: 12 }} axisLine={false} tickLine={false} />
+                        <YAxis domain={[0, 100]} axisLine={{ stroke: '#cbd5e1' }} tickLine={true} tick={{ fill: '#94a3b8', fontSize: 12 }} />
+                        <RechartsTooltip />
+                        <Bar dataKey="Lỗi kết nối" fill="#ef4444" radius={[4, 4, 0, 0]} barSize={40} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
               </div>
             </div>
