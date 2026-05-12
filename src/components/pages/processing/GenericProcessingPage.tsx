@@ -34,7 +34,16 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
   const [selectedTargetDB, setSelectedTargetDB] = useState<TargetDatabase | null>(null);
   const [targetConfigData, setTargetConfigData] = useState<any>(null);
   const [formatRules, setFormatRules] = useState<{id: number, field: string, rule: string, action: string, replacementValue: string, isSaved: boolean}[]>([]);
-  const [validityRules, setValidityRules] = useState<{id: number, field: string, rule: string, action: string, replacementValue: string, isSaved: boolean}[]>([]);
+  const [validityRules, setValidityRules] = useState<{
+    id: number, 
+    field: string, 
+    rule: string, 
+    value: string, 
+    conditions: { id: string; field: string; operator: string; value: string }[],
+    action: string, 
+    replacementValue: string, 
+    isSaved: boolean
+  }[]>([]);
 
   const handleAddRule = () => {
     setFormatRules(prev => [...prev, { id: Date.now(), field: '', rule: '', action: '', replacementValue: '', isSaved: false }]);
@@ -54,11 +63,41 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
 
   // Validity Rules Handlers
   const handleAddValidityRule = () => {
-    setValidityRules(prev => [...prev, { id: Date.now(), field: '', rule: '', action: '', replacementValue: '', isSaved: false }]);
+    setValidityRules(prev => [...prev, { 
+      id: Date.now(), 
+      field: '', 
+      rule: '', 
+      value: '', 
+      conditions: [{ id: `cond-${Date.now()}`, field: '', operator: '=', value: '' }],
+      action: '', 
+      replacementValue: '', 
+      isSaved: false 
+    }]);
   };
 
-  const handleUpdateValidityRule = (id: number, field: string, value: string) => {
+  const handleUpdateValidityRule = (id: number, field: string, value: any) => {
     setValidityRules(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r));
+  };
+
+  const handleAddValidityCondition = (ruleId: number) => {
+    setValidityRules(prev => prev.map(r => r.id === ruleId ? {
+      ...r,
+      conditions: [...r.conditions, { id: `cond-${Date.now()}`, field: '', operator: '=', value: '' }]
+    } : r));
+  };
+
+  const handleUpdateValidityCondition = (ruleId: number, condId: string, field: string, value: string) => {
+    setValidityRules(prev => prev.map(r => r.id === ruleId ? {
+      ...r,
+      conditions: r.conditions.map(c => c.id === condId ? { ...c, [field]: value } : c)
+    } : r));
+  };
+
+  const handleRemoveValidityCondition = (ruleId: number, condId: string) => {
+    setValidityRules(prev => prev.map(r => r.id === ruleId ? {
+      ...r,
+      conditions: r.conditions.filter(c => c.id !== condId)
+    } : r));
   };
 
   const handleSaveValidityRules = () => {
@@ -465,8 +504,8 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                               )}
                               <button 
                                 onClick={() => setFormatRules(prev => prev.filter(r => r.id !== rule.id))}
-                                title="Xóa" 
-                                className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                title="Xóa quy tắc" 
+                                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
@@ -496,100 +535,264 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                     </div>
                   </div>
                 </RuleAccordion>
+
                 <RuleAccordion id="clean-2" title="Kiểm tra tính hợp lệ của dữ liệu">
                   <div className="space-y-6">
                     {validityRules.length > 0 && (
-                      <div className="space-y-4">
-                        {validityRules.map((rule) => (
-                          <div key={rule.id} className={`flex gap-8 items-end p-5 rounded-xl border transition-all relative group ${rule.isSaved ? 'bg-slate-50 border-slate-200' : 'bg-white border-blue-200 shadow-sm'}`}>
-                            <div className="flex-1 space-y-2">
-                              <label className="block text-[11px] font-medium text-slate-500 uppercase tracking-wider">Trường áp dụng</label>
-                              <select 
-                                disabled={rule.isSaved}
-                                value={rule.field}
-                                onChange={(e) => handleUpdateValidityRule(rule.id, 'field', e.target.value)}
-                                title="Trường áp dụng" 
-                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
-                              >
-                                <option value="">-- Chọn trường --</option>
-                                <option value="Họ và tên">Họ và tên</option>
-                                <option value="Số CCCD/CMND">Số CCCD/CMND</option>
-                                <option value="Ngày sinh">Ngày sinh</option>
-                                <option value="Địa chỉ">Địa chỉ</option>
-                              </select>
-                            </div>
-                            
-                            <div className="flex-1 space-y-2">
-                              <label className="block text-[11px] font-medium text-slate-500 uppercase tracking-wider">Điều kiện hợp lệ</label>
-                              <select 
-                                disabled={rule.isSaved}
-                                value={rule.rule}
-                                onChange={(e) => handleUpdateValidityRule(rule.id, 'rule', e.target.value)}
-                                title="Điều kiện hợp lệ" 
-                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
-                              >
-                                <option value="">-- Chọn điều kiện --</option>
-                                <option value="Không để trống">Không để trống</option>
-                                <option value="Độ dài từ 2-100 ký tự">Độ dài từ 2-100 ký tự</option>
-                                <option value="Tuổi từ 18-65">Tuổi từ 18-65</option>
-                              </select>
-                            </div>
+                      <div className="space-y-6">
+                        {validityRules.map((rule) => {
+                          const isGroup = rule.rule === 'AND' || rule.rule === 'OR';
+                          
+                          return (
+                            <div key={rule.id} className={`p-6 rounded-2xl border transition-all relative ${rule.isSaved ? 'bg-slate-50 border-slate-200' : 'bg-white border-blue-200 shadow-lg'}`}>
+                              {!isGroup ? (
+                                <div className="flex gap-8 items-end">
+                                  <div className="flex-1 space-y-2">
+                                    <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Trường áp dụng</label>
+                                    <select 
+                                      disabled={rule.isSaved}
+                                      value={rule.field}
+                                      onChange={(e) => handleUpdateValidityRule(rule.id, 'field', e.target.value)}
+                                      title="Trường áp dụng" 
+                                      className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                                    >
+                                      <option value="">-- Chọn trường --</option>
+                                      <option value="Họ và tên">Họ và tên</option>
+                                      <option value="Số CCCD/CMND">Số CCCD/CMND</option>
+                                      <option value="Ngày sinh">Ngày sinh</option>
+                                      <option value="Địa chỉ">Địa chỉ</option>
+                                    </select>
+                                  </div>
+                                  
+                                  <div className="flex-[2] grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                      <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Điều kiện hợp lệ</label>
+                                      <select 
+                                        disabled={rule.isSaved}
+                                        value={rule.rule}
+                                        onChange={(e) => handleUpdateValidityRule(rule.id, 'rule', e.target.value)}
+                                        title="Điều kiện hợp lệ" 
+                                        className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                                      >
+                                        <option value="">-- Chọn điều kiện --</option>
+                                        <option value="=">Bằng (=)</option>
+                                        <option value="!=">Khác (!=)</option>
+                                        <option value=">">Lớn hơn (&gt;)</option>
+                                        <option value="<">Nhỏ hơn (&lt;)</option>
+                                        <option value=">=">Lớn hơn hoặc bằng (&gt;=)</option>
+                                        <option value="<=">Nhỏ hơn hoặc bằng (&lt;=)</option>
+                                        <option value="IN">Thuộc danh sách (IN)</option>
+                                        <option value="NOT IN">Không thuộc danh sách (NOT IN)</option>
+                                        <option value="s%">Bắt đầu bằng (s%)</option>
+                                        <option value="%s">Kết thúc bằng (%s)</option>
+                                        <option value="%s%">Bao gồm (%s%)</option>
+                                        <option value="REGEX">Khớp biểu thức nâng cao (REGEX)</option>
+                                        <option value="AND">Kết hợp (AND)</option>
+                                        <option value="OR">Hoặc (OR)</option>
+                                      </select>
+                                    </div>
+                                    <div className="space-y-2">
+                                      <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Giá trị kiểm tra</label>
+                                      {(rule.rule === 'IN' || rule.rule === 'NOT IN') ? (
+                                        <div className={`relative flex flex-wrap gap-1.5 p-1.5 min-h-[42px] rounded-lg border transition-all ${rule.isSaved ? 'bg-slate-100 border-slate-200' : 'bg-white border-slate-300 focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500'}`}>
+                                          {rule.value.split(',').filter(t => t.trim()).map((tag, idx) => (
+                                            <span key={idx} className="flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 text-xs font-medium rounded border border-blue-100">
+                                              {tag.trim()}
+                                              {!rule.isSaved && (
+                                                <button 
+                                                  onClick={() => {
+                                                    const tags = rule.value.split(',').filter((_, i) => i !== idx);
+                                                    handleUpdateValidityRule(rule.id, 'value', tags.join(','));
+                                                  }}
+                                                  className="hover:text-blue-900"
+                                                >
+                                                  <X className="w-3 h-3" />
+                                                </button>
+                                              )}
+                                            </span>
+                                          ))}
+                                          {!rule.isSaved && (
+                                            <input 
+                                              type="text"
+                                              placeholder="Nhập giá trị..."
+                                              className="flex-1 bg-transparent border-none outline-none text-[13px] text-slate-700 min-w-[120px] px-1"
+                                              onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                  const val = (e.target as HTMLInputElement).value.trim();
+                                                  if (val) {
+                                                    const currentTags = rule.value ? rule.value.split(',') : [];
+                                                    if (!currentTags.includes(val)) {
+                                                      handleUpdateValidityRule(rule.id, 'value', [...currentTags, val].join(','));
+                                                    }
+                                                    (e.target as HTMLInputElement).value = '';
+                                                  }
+                                                  e.preventDefault();
+                                                }
+                                              }}
+                                            />
+                                          )}
+                                        </div>
+                                      ) : (
+                                        <input 
+                                          type="text"
+                                          disabled={rule.isSaved}
+                                          value={rule.value}
+                                          onChange={(e) => handleUpdateValidityRule(rule.id, 'value', e.target.value)}
+                                          placeholder="Nhập giá trị..."
+                                          className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                                        />
+                                      )}
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="flex items-center gap-1 mb-1">
+                                    {rule.isSaved && (
+                                      <button 
+                                        onClick={() => handleEditValidityRule(rule.id)}
+                                        title="Chỉnh sửa" 
+                                        className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                                      >
+                                        <SquarePen className="w-4 h-4" />
+                                      </button>
+                                    )}
+                                    <button 
+                                      onClick={() => setValidityRules(prev => prev.filter(r => r.id !== rule.id))}
+                                      title="Xóa quy tắc" 
+                                      className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="space-y-4">
+                                  <div className="flex items-center justify-between">
+                                    <select 
+                                      disabled={rule.isSaved}
+                                      value={rule.rule}
+                                      onChange={(e) => handleUpdateValidityRule(rule.id, 'rule', e.target.value)}
+                                      className={`w-64 px-3 py-2 rounded-lg text-sm transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 text-slate-500' : 'bg-white border-slate-300 border text-slate-700'}`}
+                                      title="Logic Operator"
+                                    >
+                                      <option value="AND">AND</option>
+                                      <option value="OR">OR</option>
+                                    </select>
+                                    <button 
+                                      onClick={() => setValidityRules(prev => prev.filter(r => r.id !== rule.id))}
+                                      title="Xóa quy tắc"
+                                      className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </button>
+                                  </div>
+                                  
+                                  <div className="space-y-3">
+                                    <div className="flex gap-4 items-center px-1">
+                                      <div className="flex-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Trường áp dụng</div>
+                                      <div className="flex-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Điều kiện hợp lệ</div>
+                                      <div className="flex-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Giá trị kiểm tra</div>
+                                      {!rule.isSaved && <div className="w-8" />}
+                                    </div>
+                                    {rule.conditions.map((cond, idx) => (
+                                      <div key={cond.id} className="flex gap-4 items-center">
+                                        <select 
+                                          disabled={rule.isSaved}
+                                          value={cond.field}
+                                          onChange={(e) => handleUpdateValidityCondition(rule.id, cond.id, 'field', e.target.value)}
+                                          className={`flex-1 px-3 py-2 rounded-lg text-sm transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 text-slate-500' : 'bg-white border-slate-300 border text-slate-700'}`}
+                                          title="Trường"
+                                        >
+                                          <option value="">-- Chọn trường --</option>
+                                          <option value="DIP_RefId">DIP_RefId</option>
+                                          <option value="Họ và tên">Họ và tên</option>
+                                          <option value="Số CCCD/CMND">Số CCCD/CMND</option>
+                                          <option value="Ngày sinh">Ngày sinh</option>
+                                          <option value="Địa chỉ">Địa chỉ</option>
+                                        </select>
+                                        <select 
+                                          disabled={rule.isSaved}
+                                          value={cond.operator}
+                                          onChange={(e) => handleUpdateValidityCondition(rule.id, cond.id, 'operator', e.target.value)}
+                                          className={`flex-1 px-3 py-2 rounded-lg text-sm transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 text-slate-500' : 'bg-white border-slate-300 border text-slate-700'}`}
+                                          title="Toán tử"
+                                        >
+                                          <option value="=">=</option>
+                                          <option value="!=">!=</option>
+                                          <option value=">">&gt;</option>
+                                          <option value="<">&lt;</option>
+                                          <option value=">=">&gt;=</option>
+                                          <option value="<=">&lt;=</option>
+                                          <option value="IN">IN</option>
+                                          <option value="NOT IN">NOT IN</option>
+                                        </select>
+                                        <input 
+                                          type="text"
+                                          disabled={rule.isSaved}
+                                          value={cond.value}
+                                          onChange={(e) => handleUpdateValidityCondition(rule.id, cond.id, 'value', e.target.value)}
+                                          placeholder="0"
+                                          className={`flex-1 px-3 py-2 rounded-lg text-sm transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 text-slate-500' : 'bg-white border-slate-300 border text-slate-700'}`}
+                                        />
+                                        {!rule.isSaved && rule.conditions.length > 1 && (
+                                          <button 
+                                            onClick={() => handleRemoveValidityCondition(rule.id, cond.id)}
+                                            title="Xóa điều kiện"
+                                            className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded transition-all"
+                                          >
+                                            <Trash2 className="w-4 h-4" />
+                                          </button>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                  
+                                  {!rule.isSaved && (
+                                    <button 
+                                      onClick={() => handleAddValidityCondition(rule.id)}
+                                      className="w-8 h-8 flex items-center justify-center bg-blue-600 text-white rounded shadow-sm hover:bg-blue-700 transition-all active:scale-95"
+                                    >
+                                      <Plus className="w-5 h-5 stroke-[3px]" />
+                                    </button>
+                                  )}
+                                </div>
+                              )}
 
-                            <div className="flex-[1.5] space-y-2">
-                              <label className="block text-[11px] font-medium text-slate-500 uppercase tracking-wider">Hành động</label>
-                              <div className="flex gap-3">
-                                <select 
-                                  disabled={rule.isSaved}
-                                  value={rule.action}
-                                  onChange={(e) => handleUpdateValidityRule(rule.id, 'action', e.target.value)}
-                                  title="Hành động" 
-                                  className={`flex-1 px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
-                                >
-                                  <option value="">-- Chọn hành động --</option>
-                                  <option value="Đánh dấu cần xem xét">Đánh dấu cần xem xét</option>
-                                  <option value="Loại bỏ bản ghi">Loại bỏ bản ghi</option>
-                                  <option value="Thay thế bằng giá trị mặc định">Thay thế bằng giá trị mặc định</option>
-                                </select>
-                                {rule.action === 'Thay thế bằng giá trị mặc định' && (
-                                  <input 
-                                    type="text"
+                              <div className="flex-[1.5] space-y-2 mt-6 pt-6 border-t border-slate-100">
+                                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Hành động</label>
+                                <div className="flex gap-3">
+                                  <select 
                                     disabled={rule.isSaved}
-                                    value={rule.replacementValue}
-                                    onChange={(e) => handleUpdateValidityRule(rule.id, 'replacementValue', e.target.value)}
-                                    placeholder="Giá trị thay thế..."
+                                    value={rule.action}
+                                    onChange={(e) => handleUpdateValidityRule(rule.id, 'action', e.target.value)}
+                                    title="Hành động" 
                                     className={`flex-1 px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
-                                  />
-                                )}
+                                  >
+                                    <option value="">-- Chọn hành động --</option>
+                                    <option value="Loại bỏ bản ghi">Loại bỏ bản ghi</option>
+                                    <option value="Thay thế bằng giá trị mặc định">Thay thế bằng giá trị mặc định</option>
+                                  </select>
+                                  {rule.action === 'Thay thế bằng giá trị mặc định' && (
+                                    <input 
+                                      type="text"
+                                      disabled={rule.isSaved}
+                                      value={rule.replacementValue}
+                                      onChange={(e) => handleUpdateValidityRule(rule.id, 'replacementValue', e.target.value)}
+                                      placeholder="Giá trị thay thế..."
+                                      className={`flex-1 px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                                    />
+                                  )}
+                                </div>
                               </div>
                             </div>
-                            
-                            <div className="flex items-center gap-1 mb-1">
-                              {rule.isSaved && (
-                                <button 
-                                  onClick={() => handleEditValidityRule(rule.id)}
-                                  title="Chỉnh sửa" 
-                                  className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                                >
-                                  <SquarePen className="w-4 h-4" />
-                                </button>
-                              )}
-                              <button 
-                                onClick={() => setValidityRules(prev => prev.filter(r => r.id !== rule.id))}
-                                title="Xóa" 
-                                className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     )}
 
                     <div className="flex items-center justify-between mt-2 px-1">
                       <button 
                         onClick={handleAddValidityRule}
-                        className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-md active:scale-95"
+                        className="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-md active:scale-95"
                       >
                         <Plus className="w-4 h-4 stroke-[3px]" />
                         Thêm quy tắc
@@ -678,7 +881,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                               <button 
                                 onClick={() => setMissingValueRules(prev => prev.filter(r => r.id !== rule.id))}
                                 title="Xóa" 
-                                className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
@@ -994,25 +1197,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                     </div>
                   </div>
                 </RuleAccordion>
-                <RuleAccordion id="trans-3" title="Phân loại, gán nhãn dữ liệu">
-                  <FieldSelector />
-                  <div className="bg-purple-50/50 p-4 rounded-lg border border-purple-100">
-                    <h5 className="text-sm font-medium text-slate-700 mb-4">Cấu hình phân loại:</h5>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm text-slate-600 mb-1.5">Điều kiện phân loại:</label>
-                        <input title="Điều kiện phân loại" type="text" placeholder="VD: >100: Cao, 50-100: Trung bình" className="w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm text-slate-700 focus:outline-none focus:border-blue-500" />
-                      </div>
-                      <div>
-                        <label className="block text-sm text-slate-600 mb-1.5">Hành động:</label>
-                        <select title="Hành động" className="w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm text-slate-700 focus:outline-none focus:border-blue-500">
-                          <option>Gán nhãn tự động</option>
-                          <option>Phân loại theo nhóm</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                </RuleAccordion>
+
               </div>
             )}
 

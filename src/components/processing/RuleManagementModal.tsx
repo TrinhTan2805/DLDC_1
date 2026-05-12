@@ -59,7 +59,7 @@ export function RuleManagementModal({ config, onClose }: RuleManagementModalProp
     // Quy tắc Biến đổi
     { id: 8, name: 'Biến đổi định dạng dữ liệu', type: 'transformation', typeLabel: 'Biến đổi', isApplied: false, appliedFields: [] },
     { id: 9, name: 'Gộp hoặc tách cột dữ liệu', type: 'transformation', typeLabel: 'Biến đổi', isApplied: false, appliedFields: [] },
-    { id: 10, name: 'Phân loại, gán nhãn dữ liệu', type: 'transformation', typeLabel: 'Biến đổi', isApplied: false, appliedFields: [] },
+
   ]);
 
   const [expandedRuleId, setExpandedRuleId] = useState<number | null>(null);
@@ -177,44 +177,119 @@ export function RuleManagementModal({ config, onClose }: RuleManagementModalProp
       return (
         <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
           <div className="text-xs text-slate-700 mb-2">Cấu hình kiểm tra hợp lệ:</div>
-          <div className="space-y-2">
-            <div>
-              <label className="text-xs text-slate-600">Kiểu dữ liệu:</label>
-              <select 
-                className="w-full mt-1 px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={rule.config?.dataType || 'text'}
-                onChange={(e) => updateRuleConfig(rule.id, 'dataType', e.target.value)}
-              >
-                <option value="text">Văn bản</option>
-                <option value="number">Số</option>
-                <option value="email">Email</option>
-                <option value="phone">Số điện thoại</option>
-                <option value="cccd">Số CCCD</option>
-                <option value="date">Ngày tháng</option>
-              </select>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-slate-600">Giá trị tối thiểu:</label>
-                <input 
-                  type="text"
-                  placeholder="VD: 0"
+                <label className="text-xs text-slate-600">Điều kiện:</label>
+                <select 
                   className="w-full mt-1 px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={rule.config?.minValue || ''}
-                  onChange={(e) => updateRuleConfig(rule.id, 'minValue', e.target.value)}
-                />
+                  value={rule.config?.condition || ''}
+                  onChange={(e) => updateRuleConfig(rule.id, 'condition', e.target.value)}
+                >
+                  <option value="">-- Chọn điều kiện --</option>
+                  <option value="=">Bằng (=)</option>
+                  <option value="!=">Khác (!=)</option>
+                  <option value=">">Lớn hơn (&gt;)</option>
+                  <option value="<">Nhỏ hơn (&lt;)</option>
+                  <option value=">=">Lớn hơn hoặc bằng (&gt;=)</option>
+                  <option value="<=">Nhỏ hơn hoặc bằng (&lt;=)</option>
+                  <option value="IN">Thuộc danh sách (IN)</option>
+                  <option value="NOT IN">Không thuộc danh sách (NOT IN)</option>
+                  <option value="s%">Bắt đầu bằng (s%)</option>
+                  <option value="%s">Kết thúc bằng (%s)</option>
+                  <option value="%s%">Bao gồm (%s%)</option>
+                  <option value="REGEX">Khớp biểu thức nâng cao (REGEX)</option>
+                </select>
               </div>
               <div>
-                <label className="text-xs text-slate-600">Giá trị tối đa:</label>
-                <input 
-                  type="text"
-                  placeholder="VD: 100"
-                  className="w-full mt-1 px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={rule.config?.maxValue || ''}
-                  onChange={(e) => updateRuleConfig(rule.id, 'maxValue', e.target.value)}
-                />
+                <label className="text-xs text-slate-600">Giá trị:</label>
+                {(rule.config?.condition === 'IN' || rule.config?.condition === 'NOT IN') ? (
+                  <div className="mt-1 flex flex-wrap gap-1 p-1.5 min-h-[34px] bg-white border border-slate-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-500">
+                    {(rule.config?.value || '').split(',').filter((t: string) => t.trim()).map((tag: string, idx: number) => (
+                      <span key={idx} className="flex items-center gap-1 px-1.5 py-0.5 bg-blue-100 text-blue-700 text-[11px] font-medium rounded border border-blue-200">
+                        {tag.trim()}
+                        <button 
+                          onClick={() => {
+                            const tags = (rule.config?.value || '').split(',').filter((_: any, i: number) => i !== idx);
+                            updateRuleConfig(rule.id, 'value', tags.join(','));
+                          }}
+                          className="hover:text-blue-900"
+                        >
+                          <X className="w-2.5 h-2.5" />
+                        </button>
+                      </span>
+                    ))}
+                    <input 
+                      type="text"
+                      placeholder="Nhập..."
+                      className="flex-1 bg-transparent border-none outline-none text-sm min-w-[60px]"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          const val = (e.target as HTMLInputElement).value.trim();
+                          if (val) {
+                            const currentTags = rule.config?.value ? rule.config.value.split(',') : [];
+                            if (!currentTags.includes(val)) {
+                              updateRuleConfig(rule.id, 'value', [...currentTags, val].join(','));
+                            }
+                            (e.target as HTMLInputElement).value = '';
+                          }
+                          e.preventDefault();
+                        }
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <input 
+                    type="text"
+                    placeholder="Nhập giá trị..."
+                    className="w-full mt-1 px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={rule.config?.value || ''}
+                    onChange={(e) => updateRuleConfig(rule.id, 'value', e.target.value)}
+                  />
+                )}
               </div>
             </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-slate-600">Kiểu dữ liệu (Gợi ý):</label>
+                <select 
+                  className="w-full mt-1 px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={rule.config?.dataType || 'text'}
+                  onChange={(e) => updateRuleConfig(rule.id, 'dataType', e.target.value)}
+                >
+                  <option value="text">Văn bản</option>
+                  <option value="number">Số</option>
+                  <option value="email">Email</option>
+                  <option value="phone">Số điện thoại</option>
+                  <option value="cccd">Số CCCD</option>
+                  <option value="date">Ngày tháng</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-slate-600">Hành động xử lý:</label>
+                <select 
+                  className="w-full mt-1 px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={rule.config?.action || ''}
+                  onChange={(e) => updateRuleConfig(rule.id, 'action', e.target.value)}
+                >
+                  <option value="">-- Chọn hành động --</option>
+                  <option value="Loại bỏ bản ghi">Loại bỏ bản ghi</option>
+                  <option value="Thay thế bằng giá trị mặc định">Thay thế bằng giá trị mặc định</option>
+                </select>
+              </div>
+            </div>
+            {rule.config?.action === 'Thay thế bằng giá trị mặc định' && (
+              <div>
+                <label className="text-xs text-slate-600">Giá trị thay thế:</label>
+                <input 
+                  type="text"
+                  placeholder="Nhập giá trị mặc định..."
+                  className="w-full mt-1 px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={rule.config?.replacementValue || ''}
+                  onChange={(e) => updateRuleConfig(rule.id, 'replacementValue', e.target.value)}
+                />
+              </div>
+            )}
           </div>
         </div>
       );
@@ -550,50 +625,7 @@ export function RuleManagementModal({ config, onClose }: RuleManagementModalProp
       );
     }
 
-    // Quy tắc 10: Phân loại, gán nhãn
-    if (rule.id === 10) {
-      return (
-        <div className="mt-3 p-3 bg-purple-50 rounded-lg border border-purple-200">
-          <div className="text-xs text-slate-700 mb-2">Cấu hình phân loại/gán nhãn:</div>
-          <div className="space-y-2">
-            <div>
-              <label className="text-xs text-slate-600">Phương thức:</label>
-              <select 
-                className="w-full mt-1 px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                value={rule.config?.labelMethod || 'condition'}
-                onChange={(e) => updateRuleConfig(rule.id, 'labelMethod', e.target.value)}
-              >
-                <option value="condition">Theo điều kiện</option>
-                <option value="range">Theo khoảng giá trị</option>
-                <option value="mapping">Theo bảng ánh xạ</option>
-              </select>
-            </div>
-            {rule.config?.labelMethod === 'range' && (
-              <div>
-                <label className="text-xs text-slate-600">Quy tắc phân loại:</label>
-                <textarea 
-                  placeholder={'VD:\n0-18: Vị thành niên\n18-60: Người lớn\n60+: Người cao tuổi'}
-                  className="w-full mt-1 px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 font-mono"
-                  rows={4}
-                  value={rule.config?.rangeRules || ''}
-                  onChange={(e) => updateRuleConfig(rule.id, 'rangeRules', e.target.value)}
-                />
-              </div>
-            )}
-            <div>
-              <label className="text-xs text-slate-600">Tên cột nhãn mới:</label>
-              <input 
-                type="text"
-                placeholder="VD: nhom_tuoi"
-                className="w-full mt-1 px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                value={rule.config?.labelColumnName || ''}
-                onChange={(e) => updateRuleConfig(rule.id, 'labelColumnName', e.target.value)}
-              />
-            </div>
-          </div>
-        </div>
-      );
-    }
+
 
     return null;
   };
