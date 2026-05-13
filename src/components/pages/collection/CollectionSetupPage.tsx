@@ -274,6 +274,13 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
 
                 <div className="flex items-center gap-3">
                   <button
+                    onClick={handleExportServiceList}
+                    className="px-4 py-2 bg-white text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 text-sm shadow-sm font-medium"
+                  >
+                    <Download className="w-4 h-4" />
+                    Kết xuất
+                  </button>
+                  <button
                     onClick={() => navigate('/collection-setup/add')}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-sm shadow-sm font-medium"
                   >
@@ -528,15 +535,37 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                 </table>
               </div>
               {/* Pagination */}
-              <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-                <div className="flex-1 flex justify-between sm:hidden">
+              <div className="bg-white px-4 py-4 flex items-center justify-between border-t border-slate-200 sm:px-6">
+                <div className="text-sm text-slate-500">
+                  Hiển thị {(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, filteredServices.length)} / {filteredServices.length}
+                </div>
+                <div className="flex gap-1">
                   <button
                     onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : currentPage)}
                     disabled={currentPage === 1}
-                    className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className={`px-3 py-1 border rounded text-sm transition-colors ${
+                      currentPage === 1 
+                        ? 'border-slate-100 text-slate-300 cursor-not-allowed' 
+                        : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                    }`}
                   >
-                    Trước
+                    Trang trước
                   </button>
+                  
+                  {Array.from({ length: Math.ceil(filteredServices.length / itemsPerPage) }, (_, i) => i + 1).map(page => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-1 border rounded text-sm transition-colors ${
+                        currentPage === page
+                          ? 'bg-blue-600 border-blue-600 text-white'
+                          : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+
                   <button
                     onClick={() => {
                       const totalPages = Math.ceil(filteredServices.length / itemsPerPage);
@@ -545,48 +574,14 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                       }
                     }}
                     disabled={currentPage === Math.ceil(filteredServices.length / itemsPerPage)}
-                    className="ml-3 relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className={`px-3 py-1 border rounded text-sm transition-colors ${
+                      currentPage === Math.ceil(filteredServices.length / itemsPerPage)
+                        ? 'border-slate-100 text-slate-300 cursor-not-allowed'
+                        : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                    }`}
                   >
                     Sau
                   </button>
-                </div>
-                <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-sm text-gray-700">
-                      Hiển thị <span className="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span> đến{' '}
-                      <span className="font-medium">
-                        {Math.min(currentPage * itemsPerPage, filteredServices.length)}
-                      </span>{' '}
-                      trong{' '}
-                      <span className="font-medium">
-                        {filteredServices.length}
-                      </span>{' '}
-                      kết quả
-                    </p>
-                  </div>
-                  <div>
-                    <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                      <button
-                        onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : currentPage)}
-                        disabled={currentPage === 1}
-                        className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <ChevronLeft className="h-5 w-5" />
-                      </button>
-                      <button
-                        onClick={() => {
-                          const totalPages = Math.ceil(filteredServices.length / itemsPerPage);
-                          if (currentPage < totalPages) {
-                            setCurrentPage(currentPage + 1);
-                          }
-                        }}
-                        disabled={currentPage === Math.ceil(filteredServices.length / itemsPerPage)}
-                        className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <ChevronRight className="h-5 w-5" />
-                      </button>
-                    </nav>
-                  </div>
                 </div>
               </div>
             </div>
