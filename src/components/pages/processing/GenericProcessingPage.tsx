@@ -1,11 +1,13 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { Search, ChevronDown, ChevronUp, AlertTriangle, Send, Download, Eye, Lock, EyeOff, SquarePen, X, Network, Plus, Trash2, ArrowLeftRight } from 'lucide-react';
+import { Search, ChevronDown, ChevronUp, AlertTriangle, Send, Download, Eye, Lock, EyeOff, SquarePen, X, Network, Plus, Trash2, ArrowLeftRight, Database, Clock } from 'lucide-react';
 
 import { DataMappingModal } from './DataMappingModal';
 import { SelectTargetDatabaseModal } from './SelectTargetDatabaseModal';
 import { TargetDatabaseConfigModal } from './TargetDatabaseConfigModal';
 import { TargetDatabase } from './mockTargetDatabases';
+import { StatusTag } from '../../common/StatusTag';
+import { BaseModal } from '../../common/BaseModal';
 
 export interface ProcessingDatasetItem {
   id: string;
@@ -109,10 +111,10 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
   };
 
   // Missing Value Rules Handlers
-  const [missingValueRules, setMissingValueRules] = useState<{id: number, field: string, type: string, action: string, value: string, isSaved: boolean}[]>([]);
+  const [missingValueRules, setMissingValueRules] = useState<{id: number, field: string, type: string, sourceValue: string, value: string, isSaved: boolean}[]>([]);
 
   const handleAddMissingValueRule = () => {
-    setMissingValueRules(prev => [...prev, { id: Date.now(), field: '', type: 'null, empty', action: 'Điền giá trị mặc định', value: '', isSaved: false }]);
+    setMissingValueRules(prev => [...prev, { id: Date.now(), field: '', type: '', sourceValue: '', value: '', isSaved: false }]);
   };
 
   const handleUpdateMissingValueRule = (id: number, field: string, value: string) => {
@@ -165,8 +167,19 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
     setReferenceRules(prev => prev.map(r => r.id === id ? { ...r, isSaved: false } : r));
   };
 
+  // Matching Rules Handlers (std-2)
+  const [matchingConfig, setMatchingConfig] = useState({
+    field: 'so_cccd',
+    action: 'Giữ bản ghi mới nhất',
+    sortField: 'ngay_cap_nhat'
+  });
+
+  const handleUpdateMatchingConfig = (field: string, value: string) => {
+    setMatchingConfig(prev => ({ ...prev, [field]: value }));
+  };
+
   const handleOpenTargetConfig = () => {
-    setIsTargetConfigModalOpen(true);
+    setIsSelectDBModalOpen(true);
   };
 
   const handleDownloadTargetFromConfig = () => {
@@ -183,7 +196,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
       type: `DBT_${db.type.toUpperCase()}`
     });
     setIsSelectDBModalOpen(false);
-    setIsTargetConfigModalOpen(true);
+    setIsMappingModalOpen(true);
   };
 
   const handleNextToMapping = (data: any) => {
@@ -330,13 +343,42 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
               {activeTab === 'history' ? 'Lịch sử xử lý dữ liệu' :
                 activeTab === 'classification' ? 'Phân loại Dữ liệu' : 'Quản lý Quy tắc Xử lý'}
             </h1>
-            <button
-              onClick={handleOpenTargetConfig}
-              className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors shadow-sm"
-            >
-              <ArrowLeftRight className="w-4 h-4" />
-              Cấu hình ánh xạ
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                title="Chuyển đổi dữ liệu"
+                className="p-2.5 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-xl hover:bg-emerald-100 transition-all shadow-sm active:scale-95"
+              >
+                <Send className="w-5 h-5" />
+              </button>
+              <button
+                title="Cập nhật dữ liệu"
+                className="p-2.5 bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-xl hover:bg-indigo-100 transition-all shadow-sm active:scale-95"
+              >
+                <Database className="w-5 h-5" />
+              </button>
+              <button
+                title="Xóa dữ liệu"
+                className="p-2.5 bg-rose-50 text-rose-600 border border-rose-200 rounded-xl hover:bg-rose-100 transition-all shadow-sm active:scale-95"
+              >
+                <Trash2 className="w-5 h-5" />
+              </button>
+              <button
+                title="Thêm lịch biểu"
+                className="p-2.5 bg-amber-50 text-amber-600 border border-amber-200 rounded-xl hover:bg-amber-100 transition-all shadow-sm active:scale-95"
+              >
+                <Clock className="w-5 h-5" />
+              </button>
+              
+              <div className="w-px h-6 bg-slate-200 mx-2" />
+              
+              <button
+                onClick={handleOpenTargetConfig}
+                title="Cấu hình ánh xạ"
+                className="p-2.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-xl hover:bg-blue-100 transition-all shadow-sm active:scale-95"
+              >
+                <ArrowLeftRight className="w-5 h-5" />
+              </button>
+            </div>
           </div>
           <p className="text-sm text-slate-500 mb-6">Nguồn dữ liệu: {systemName} | Dữ liệu {activeService.name.toLowerCase()}</p>
 
@@ -350,21 +392,18 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
               <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2">Đã Làm sạch</span>
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-bold text-emerald-600">49,850</span>
-                <span className="text-xs font-semibold text-emerald-600/80 bg-emerald-50 px-1.5 py-0.5 rounded">99.7%</span>
               </div>
             </div>
             <div className="bg-white p-4 rounded-xl border border-indigo-100 flex flex-col justify-center">
               <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2">Đã Chuẩn hóa</span>
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-bold text-indigo-600">45,230</span>
-                <span className="text-xs font-semibold text-indigo-600/80 bg-indigo-50 px-1.5 py-0.5 rounded">90.4%</span>
               </div>
             </div>
             <div className="bg-white p-4 rounded-xl border border-purple-100 flex flex-col justify-center">
               <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2">Đã Biến đổi</span>
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-bold text-purple-600">45,230</span>
-                <span className="text-xs font-semibold text-purple-600/80 bg-purple-50 px-1.5 py-0.5 rounded">90.4%</span>
               </div>
             </div>
 
@@ -477,18 +516,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                 >
                                   <option value="">-- Chọn xử lý --</option>
                                   <option value="Loại bỏ bản ghi lỗi">Loại bỏ bản ghi lỗi</option>
-                                  <option value="Thay thế bằng giá trị mặc định">Thay thế bằng giá trị mặc định</option>
                                 </select>
-                                {rule.action === 'Thay thế bằng giá trị mặc định' && (
-                                  <input 
-                                    type="text"
-                                    disabled={rule.isSaved}
-                                    value={rule.replacementValue}
-                                    onChange={(e) => handleUpdateRule(rule.id, 'replacementValue', e.target.value)}
-                                    placeholder="Giá trị thay thế..."
-                                    className={`flex-1 px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
-                                  />
-                                )}
                               </div>
                             </div>
                             
@@ -596,9 +624,11 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                       {(rule.rule === 'IN' || rule.rule === 'NOT IN') ? (
                                         <div className={`relative flex flex-wrap gap-1.5 p-1.5 min-h-[42px] rounded-lg border transition-all ${rule.isSaved ? 'bg-slate-100 border-slate-200' : 'bg-white border-slate-300 focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500'}`}>
                                           {rule.value.split(',').filter(t => t.trim()).map((tag, idx) => (
-                                            <span key={idx} className="flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 text-xs font-medium rounded border border-blue-100">
-                                              {tag.trim()}
-                                              {!rule.isSaved && (
+                                            <StatusTag
+                                              key={idx}
+                                              label={tag.trim()}
+                                              variant="blue"
+                                              icon={!rule.isSaved && (
                                                 <button 
                                                   onClick={() => {
                                                     const tags = rule.value.split(',').filter((_, i) => i !== idx);
@@ -609,7 +639,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                                   <X className="w-3 h-3" />
                                                 </button>
                                               )}
-                                            </span>
+                                            />
                                           ))}
                                           {!rule.isSaved && (
                                             <input 
@@ -758,29 +788,18 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                               )}
 
                               <div className="flex-[1.5] space-y-2 mt-6 pt-6 border-t border-slate-100">
-                                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Hành động</label>
+                                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Xử lý ngoại lệ</label>
                                 <div className="flex gap-3">
                                   <select 
                                     disabled={rule.isSaved}
                                     value={rule.action}
                                     onChange={(e) => handleUpdateValidityRule(rule.id, 'action', e.target.value)}
-                                    title="Hành động" 
+                                    title="Xử lý ngoại lệ" 
                                     className={`flex-1 px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                                   >
-                                    <option value="">-- Chọn hành động --</option>
+                                    <option value="">-- Chọn xử lý --</option>
                                     <option value="Loại bỏ bản ghi">Loại bỏ bản ghi</option>
-                                    <option value="Thay thế bằng giá trị mặc định">Thay thế bằng giá trị mặc định</option>
                                   </select>
-                                  {rule.action === 'Thay thế bằng giá trị mặc định' && (
-                                    <input 
-                                      type="text"
-                                      disabled={rule.isSaved}
-                                      value={rule.replacementValue}
-                                      onChange={(e) => handleUpdateValidityRule(rule.id, 'replacementValue', e.target.value)}
-                                      placeholder="Giá trị thay thế..."
-                                      className={`flex-1 px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
-                                    />
-                                  )}
                                 </div>
                               </div>
                             </div>
@@ -792,7 +811,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                     <div className="flex items-center justify-between mt-2 px-1">
                       <button 
                         onClick={handleAddValidityRule}
-                        className="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-md active:scale-95"
+                        className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-md active:scale-95"
                       >
                         <Plus className="w-4 h-4 stroke-[3px]" />
                         Thêm quy tắc
@@ -809,7 +828,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                     </div>
                   </div>
                 </RuleAccordion>
-                <RuleAccordion id="clean-3" title="Xử lý giá trị thiếu dữ liệu">
+                <RuleAccordion id="clean-3" title="Xử lý, thay thế giá trị, thiếu dữ liệu">
                   <div className="space-y-6">
                     {missingValueRules.length > 0 && (
                       <div className="space-y-4">
@@ -833,31 +852,36 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                             </div>
                             
                             <div className="flex-1 space-y-2">
-                              <label className="block text-[11px] font-medium text-slate-500 uppercase tracking-wider">Kiểu giá trị thiếu</label>
-                              <input 
-                                type="text"
+                              <label className="block text-[11px] font-medium text-slate-500 uppercase tracking-wider">Chọn điều kiện</label>
+                              <select 
                                 disabled={rule.isSaved}
                                 value={rule.type}
                                 onChange={(e) => handleUpdateMissingValueRule(rule.id, 'type', e.target.value)}
+                                title="Chọn điều kiện" 
+                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                              >
+                                <option value="">-- Chọn điều kiện --</option>
+                                <option value="Bằng với">Bằng với</option>
+                                <option value="Bắt đầu bằng">Bắt đầu bằng</option>
+                                <option value="Kết thúc bằng">Kết thúc bằng</option>
+                                <option value="Bao gồm">Bao gồm</option>
+                              </select>
+                            </div>
+
+                            <div className="flex-1 space-y-2">
+                              <label className="block text-[11px] font-medium text-slate-500 uppercase tracking-wider">Nhập giá trị nguồn</label>
+                              <input 
+                                type="text"
+                                disabled={rule.isSaved}
+                                value={rule.sourceValue || ''}
+                                onChange={(e) => handleUpdateMissingValueRule(rule.id, 'sourceValue', e.target.value)}
                                 placeholder="VD: null, empty"
                                 className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                               />
                             </div>
 
                             <div className="flex-1 space-y-2">
-                              <label className="block text-[11px] font-medium text-slate-500 uppercase tracking-wider">Hành động</label>
-                              <select 
-                                disabled
-                                value="Điền giá trị mặc định"
-                                title="Hành động" 
-                                className="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-[13px] text-slate-500 transition-all focus:outline-none"
-                              >
-                                <option>Điền giá trị mặc định</option>
-                              </select>
-                            </div>
-
-                            <div className="flex-1 space-y-2">
-                              <label className="block text-[11px] font-medium text-slate-500 uppercase tracking-wider">Giá trị điền vào</label>
+                              <label className="block text-[11px] font-medium text-slate-500 uppercase tracking-wider">Giá trị thay thế</label>
                               <input 
                                 type="text"
                                 disabled={rule.isSaved}
@@ -917,19 +941,52 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
             {activeTab === 'standardize' && (
               <div className="flex flex-col">
                 <RuleAccordion id="std-2" title="Kiểm tra đối sánh tồn tại dựa trên trường khóa">
-                  <FieldSelector />
-                  <div className="bg-green-50/50 p-4 rounded-lg border border-green-100">
-                    <h5 className="text-sm font-medium text-slate-700 mb-4">Quy tắc đối sánh:</h5>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm text-slate-600 mb-1.5">Trường kiểm tra trùng:</label>
-                        <input title="Trường kiểm tra trùng" type="text" placeholder="VD: so_cccd" defaultValue="so_cccd" className="w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm text-slate-700 focus:outline-none focus:border-blue-500" />
+                  <div className="bg-white p-5 rounded-xl border border-blue-200 shadow-sm">
+                    <div className="grid grid-cols-3 gap-6">
+                      <div className="space-y-2">
+                        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Trường làm khóa đối sánh</label>
+                        <select 
+                          value={matchingConfig.field}
+                          onChange={(e) => handleUpdateMatchingConfig('field', e.target.value)}
+                          title="Trường làm khóa đối sánh" 
+                          className="w-full px-3.5 py-2.5 rounded-lg text-[13px] bg-white border border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all focus:outline-none"
+                        >
+                          <option value="">-- Chọn trường --</option>
+                          <option value="so_cccd">Số CCCD</option>
+                          <option value="ma_so_thue">Mã số thuế</option>
+                          <option value="so_dien_thoai">Số điện thoại</option>
+                          <option value="email">Email</option>
+                        </select>
                       </div>
-                      <div>
-                        <label className="block text-sm text-slate-600 mb-1.5">Xử lý trùng lặp:</label>
-                        <select title="Xử lý trùng lặp" className="w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm text-slate-700 focus:outline-none focus:border-blue-500">
-                          <option>Giữ bản ghi mới nhất</option>
-                          <option>Giữ bản ghi đầu tiên</option>
+                      
+                      <div className="space-y-2">
+                        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Xử lý ngoại lệ</label>
+                        <select 
+                          value={matchingConfig.action}
+                          onChange={(e) => handleUpdateMatchingConfig('action', e.target.value)}
+                          title="Xử lý ngoại lệ" 
+                          className="w-full px-3.5 py-2.5 rounded-lg text-[13px] bg-white border border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all focus:outline-none"
+                        >
+                          <option value="">-- Chọn xử lý --</option>
+                          <option value="Giữ bản ghi mới nhất">Giữ bản ghi mới nhất</option>
+                          <option value="Giữ bản ghi cũ nhất">Giữ bản ghi cũ nhất</option>
+                          <option value="Từ chối toàn bộ các bản ghi trùng">Từ chối toàn bộ các bản ghi trùng</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Cột căn cứ sắp xếp</label>
+                        <select 
+                          disabled={!(matchingConfig.action === 'Giữ bản ghi mới nhất' || matchingConfig.action === 'Giữ bản ghi cũ nhất')}
+                          value={matchingConfig.sortField}
+                          onChange={(e) => handleUpdateMatchingConfig('sortField', e.target.value)}
+                          title="Cột căn cứ sắp xếp" 
+                          className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${!(matchingConfig.action === 'Giữ bản ghi mới nhất' || matchingConfig.action === 'Giữ bản ghi cũ nhất') ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                        >
+                          <option value="">-- Chọn trường --</option>
+                          <option value="ngay_tao">Ngày tạo</option>
+                          <option value="ngay_cap_nhat">Ngày cập nhật</option>
+                          <option value="thoi_gian_gui">Thời gian gửi</option>
                         </select>
                       </div>
                     </div>
@@ -1157,7 +1214,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                     <div className="flex items-center justify-between mt-2 px-1">
                       <button 
                         onClick={handleAddTransformRule}
-                        className="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-md active:scale-95"
+                        className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-md active:scale-95"
                       >
                         <Plus className="w-4 h-4 stroke-[3px]" />
                         Thêm quy tắc
@@ -1166,34 +1223,11 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                       {transformRules.some(r => !r.isSaved) && (
                         <button 
                           onClick={handleSaveTransformRules}
-                          className="flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-all shadow-sm active:scale-95"
+                          className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-all shadow-sm active:scale-95"
                         >
                           Lưu quy tắc
                         </button>
                       )}
-                    </div>
-                  </div>
-                </RuleAccordion>
-                <RuleAccordion id="trans-2" title="Gộp hoặc tách cột dữ liệu">
-                  <FieldSelector />
-                  <div className="bg-purple-50/50 p-4 rounded-lg border border-purple-100">
-                    <h5 className="text-sm font-medium text-slate-700 mb-4">Cấu hình gộp/tách cột:</h5>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm text-slate-600 mb-1.5">Hành động:</label>
-                        <select title="Hành động" className="w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm text-slate-700 focus:outline-none focus:border-blue-500">
-                          <option>Gộp nhiều cột</option>
-                          <option>Tách thành nhiều cột</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm text-slate-600 mb-1.5">Danh sách cột / Phân cách:</label>
-                        <input title="Danh sách cột / Phân cách" type="text" placeholder="VD: Họ, Tên đệm, Tên hoặc dấu phẩy (,)" className="w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm text-slate-700 focus:outline-none focus:border-blue-500" />
-                      </div>
-                      <div>
-                        <label className="block text-sm text-slate-600 mb-1.5">Tên cột đích / Cột mới:</label>
-                        <input title="Cột đích" type="text" placeholder="VD: Họ và tên đầy đủ" className="w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm text-slate-700 focus:outline-none focus:border-blue-500" />
-                      </div>
                     </div>
                   </div>
                 </RuleAccordion>
@@ -1280,25 +1314,23 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                         <tr key={idx} className="hover:bg-blue-50/30 transition-all group">
                           <td className="px-6 py-4 text-center text-sm font-semibold text-slate-900">{item.field}</td>
                           <td className="px-6 py-4 text-center">
-                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full border shadow-sm ${
-                              item.publicLevel === 'Công khai hạn chế' ? 'bg-blue-50 text-blue-700 border-blue-100' :
-                              item.publicLevel === 'Nội bộ' ? 'bg-orange-50 text-orange-700 border-orange-100' :
-                              'bg-red-50 text-red-700 border-red-100'
-                            }`}>
-                              {item.publicLevel === 'Công khai hạn chế' && <Eye className="w-3.5 h-3.5" />}
-                              {item.publicLevel === 'Nội bộ' && <Lock className="w-3.5 h-3.5" />}
-                              {item.publicLevel === 'Mật' && <EyeOff className="w-3.5 h-3.5" />}
-                              {item.publicLevel}
-                            </span>
+                            <StatusTag 
+                              label={item.publicLevel} 
+                              variant={item.publicLevel === 'Công khai hạn chế' ? 'blue' : item.publicLevel === 'Nội bộ' ? 'orange' : 'red'}
+                              icon={
+                                <>
+                                  {item.publicLevel === 'Công khai hạn chế' && <Eye className="w-3.5 h-3.5" />}
+                                  {item.publicLevel === 'Nội bộ' && <Lock className="w-3.5 h-3.5" />}
+                                  {item.publicLevel === 'Mật' && <EyeOff className="w-3.5 h-3.5" />}
+                                </>
+                              }
+                            />
                           </td>
                           <td className="px-6 py-4 text-center">
-                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full border shadow-sm ${
-                              item.sensLevel === 'Thấp' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
-                              item.sensLevel === 'Cao' ? 'bg-red-50 text-red-700 border-red-100' :
-                              'bg-red-100 text-red-800 border-red-200 shadow-red-100'
-                            }`}>
-                              {item.sensLevel}
-                            </span>
+                            <StatusTag 
+                              label={item.sensLevel} 
+                              variant={item.sensLevel === 'Thấp' ? 'emerald' : item.sensLevel === 'Cao' ? 'red' : 'red'} 
+                            />
                           </td>
                         </tr>
                       ))}
@@ -1334,13 +1366,10 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                             <div className="text-xs text-slate-500 font-mono">{item.progress}</div>
                           </td>
                           <td className="px-6 py-4 text-center">
-                            <span className={`inline-flex items-center px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-full border shadow-sm ${
-                              item.status === 'Đang xử lý' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' :
-                              item.status === 'Hoàn thành' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
-                              'bg-red-50 text-red-700 border-red-100'
-                            }`}>
-                              {item.status}
-                            </span>
+                            <StatusTag 
+                              label={item.status} 
+                              variant={item.status === 'Đang xử lý' ? 'indigo' : item.status === 'Hoàn thành' ? 'emerald' : 'red'} 
+                            />
                           </td>
                         </tr>
                       ))}
@@ -1357,211 +1386,209 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
       </div>
 
       {/* Popovers / Modals */}
-      {isEditClassifyModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
-          <div className="bg-white rounded-xl shadow-xl w-[800px] max-h-[90vh] flex flex-col animate-in fade-in zoom-in duration-200">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-white z-10">
-              <h3 className="font-bold text-slate-800 text-lg">Cấu hình Phân loại Dữ liệu</h3>
-              <button title="Đóng" onClick={() => setIsEditClassifyModalOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors p-1 rounded-md hover:bg-slate-100">
-                <X className="w-5 h-5" />
-              </button>
+      {/* Phân loại dữ liệu modal */}
+      <BaseModal
+        isOpen={isEditClassifyModalOpen}
+        onClose={() => setIsEditClassifyModalOpen(false)}
+        title="Cấu hình Phân loại Dữ liệu"
+        subtitle="Thiết lập mức độ bảo mật và nhạy cảm cho bảng và các trường thông tin"
+        maxWidth="max-w-4xl"
+        customHeaderIcon={
+          <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 mr-4">
+            <Lock className="w-6 h-6" />
+          </div>
+        }
+        footer={
+          <div className="flex items-center justify-end gap-3 w-full">
+            <button
+              onClick={() => setIsEditClassifyModalOpen(false)}
+              className="px-6 py-2.5 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all"
+            >
+              Hủy bỏ
+            </button>
+            <button
+              onClick={() => {
+                setIsEditClassifyModalOpen(false);
+              }}
+              className="px-8 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-all shadow-md shadow-blue-200"
+            >
+              Lưu cấu hình
+            </button>
+          </div>
+        }
+      >
+        <div className="py-2 space-y-8">
+          {/* Phân loại cấp Bảng */}
+          <div>
+            <h4 className="text-[15px] font-bold text-slate-800 mb-4 flex items-center gap-2.5">
+              <div className="w-2 h-2 rounded-full bg-blue-600"></div>
+              Phân loại toàn bảng (Áp dụng mặc định)
+            </h4>
+            <div className="grid grid-cols-2 gap-8 bg-slate-50/50 p-6 rounded-2xl border border-slate-100 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50/50 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+              <div className="relative z-10 space-y-2">
+                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Mức độ công khai</label>
+                <select title="Mức độ công khai" className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 focus:outline-none focus:border-blue-500 transition-all">
+                  <option>Công khai</option>
+                  <option>Công khai hạn chế</option>
+                  <option selected>Nội bộ</option>
+                  <option>Mật</option>
+                </select>
+                <p className="text-[11px] text-slate-400 mt-2 font-medium">Áp dụng cho các trường chưa được cấu hình riêng lẻ.</p>
+              </div>
+              <div className="relative z-10 space-y-2">
+                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Mức độ nhạy cảm</label>
+                <select title="Mức độ nhạy cảm" className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 focus:outline-none focus:border-blue-500 transition-all">
+                  <option>Thấp</option>
+                  <option>Trung bình</option>
+                  <option selected>Cao</option>
+                  <option>Rất cao</option>
+                </select>
+              </div>
             </div>
+          </div>
+
+          {/* Phân loại cấp Trường */}
+          <div>
+            <h4 className="text-[15px] font-bold text-slate-800 mb-4 flex items-center gap-2.5">
+              <div className="w-2 h-2 rounded-full bg-fuchsia-600"></div>
+              Phân loại các trường ngoại lệ
+            </h4>
+            <p className="text-sm text-slate-500 mb-5 font-medium">
+              Cấu hình mức độ cho các trường thông tin cụ thể (mức độ này sẽ ưu tiên ghi đè lên mức phân loại toàn bảng).
+            </p>
             
-            <div className="flex-1 overflow-y-auto p-6 bg-slate-50/50 custom-scrollbar">
-              {/* Phân loại cấp Bảng */}
-              <div className="mb-8">
-                <h4 className="text-[15px] font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>
-                  Phân loại toàn bảng (Áp dụng mặc định)
-                </h4>
-                <div className="grid grid-cols-2 gap-6 bg-white p-5 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50/50 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
-                  <div className="relative z-10">
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Mức độ công khai</label>
-                    <select title="Mức độ công khai" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                      <option>Công khai</option>
-                      <option>Công khai hạn chế</option>
-                      <option selected>Nội bộ</option>
-                      <option>Mật</option>
-                    </select>
-                    <p className="text-xs text-slate-500 mt-2">Áp dụng cho các trường chưa được cấu hình riêng lẻ.</p>
-                  </div>
-                  <div className="relative z-10">
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Mức độ nhạy cảm</label>
-                    <select title="Mức độ nhạy cảm" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                      <option>Thấp</option>
-                      <option>Trung bình</option>
-                      <option selected>Cao</option>
-                      <option>Rất cao</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
+            <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
+                    <th className="px-6 py-4 w-[30%]">Tên trường</th>
+                    <th className="px-6 py-4 w-[35%]">Mức độ công khai</th>
+                    <th className="px-6 py-4 w-[35%]">Mức độ nhạy cảm</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {mockClassification.map((item, idx) => (
+                    <tr key={idx} className="hover:bg-slate-50/30 transition-colors">
+                      <td className="px-6 py-4 font-bold text-slate-700 text-[13px]">{item.field}</td>
+                      <td className="px-6 py-4">
+                        <select title="Mức công khai" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] text-slate-700 focus:outline-none focus:border-blue-500 transition-all" defaultValue={item.publicLevel}>
+                          <option className="text-slate-400">-- Theo mặc định bảng --</option>
+                          <option>Công khai</option>
+                          <option>Công khai hạn chế</option>
+                          <option>Nội bộ</option>
+                          <option>Mật</option>
+                        </select>
+                      </td>
+                      <td className="px-6 py-4">
+                        <select title="Mức nhạy cảm" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] text-slate-700 focus:outline-none focus:border-blue-500 transition-all" defaultValue={item.sensLevel}>
+                          <option className="text-slate-400">-- Theo mặc định bảng --</option>
+                          <option>Thấp</option>
+                          <option>Trung bình</option>
+                          <option>Cao</option>
+                          <option>Rất cao</option>
+                        </select>
+                      </td>
+                    </tr>
+                  ))}
+                  {/* Empty state entry */}
+                  <tr className="hover:bg-slate-50/30 transition-colors group">
+                    <td className="px-6 py-4 font-bold text-slate-400 group-hover:text-slate-700 text-[13px] transition-colors">Địa chỉ thường trú</td>
+                    <td className="px-6 py-4">
+                      <select title="Mức công khai" className="w-full px-4 py-2 bg-transparent border border-slate-200 border-dashed rounded-xl text-[13px] text-slate-400 focus:text-slate-700 focus:border-blue-500 focus:border-solid transition-all">
+                        <option selected className="text-slate-400">-- Theo mặc định bảng --</option>
+                        <option>Công khai</option>
+                        <option>Công khai hạn chế</option>
+                        <option>Nội bộ</option>
+                        <option>Mật</option>
+                      </select>
+                    </td>
+                    <td className="px-6 py-4">
+                      <select title="Mức nhạy cảm" className="w-full px-4 py-2 bg-transparent border border-slate-200 border-dashed rounded-xl text-[13px] text-slate-400 focus:text-slate-700 focus:border-blue-500 focus:border-solid transition-all">
+                        <option selected className="text-slate-400">-- Theo mặc định bảng --</option>
+                        <option>Thấp</option>
+                        <option>Trung bình</option>
+                        <option>Cao</option>
+                        <option>Rất cao</option>
+                      </select>
+                    </td>
+                  </tr>
+                  {/* Empty state entry 2 */}
+                  <tr className="hover:bg-slate-50/30 transition-colors group">
+                    <td className="px-6 py-4 font-bold text-slate-400 group-hover:text-slate-700 text-[13px] transition-colors">Quê quán</td>
+                    <td className="px-6 py-4">
+                      <select title="Mức công khai" className="w-full px-4 py-2 bg-transparent border border-slate-200 border-dashed rounded-xl text-[13px] text-slate-400 focus:text-slate-700 focus:border-blue-500 focus:border-solid transition-all">
+                        <option selected className="text-slate-400">-- Theo mặc định bảng --</option>
+                        <option>Công khai</option>
+                        <option>Công khai hạn chế</option>
+                        <option>Nội bộ</option>
+                        <option>Mật</option>
+                      </select>
+                    </td>
+                    <td className="px-6 py-4">
+                      <select title="Mức nhạy cảm" className="w-full px-4 py-2 bg-transparent border border-slate-200 border-dashed rounded-xl text-[13px] text-slate-400 focus:text-slate-700 focus:border-blue-500 focus:border-solid transition-all">
+                        <option selected className="text-slate-400">-- Theo mặc định bảng --</option>
+                        <option>Thấp</option>
+                        <option>Trung bình</option>
+                        <option>Cao</option>
+                        <option>Rất cao</option>
+                      </select>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </BaseModal>
 
-              {/* Phân loại cấp Trường */}
-              <div>
-                <h4 className="text-[15px] font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-fuchsia-600"></div>
-                  Phân loại các trường ngoại lệ
-                </h4>
-                <p className="text-sm text-slate-500 mb-4">
-                  Cấu hình mức độ cho các trường thông tin cụ thể (mức độ này sẽ ưu tiên ghi đè lên mức phân loại toàn bảng).
+
+      {/* Xác nhận gửi modal */}
+      <BaseModal
+        isOpen={isSendPopupOpen}
+        onClose={() => setIsSendPopupOpen(false)}
+        title="Xác nhận gửi yêu cầu xử lý"
+        maxWidth="max-w-lg"
+        footer={
+          <div className="flex items-center justify-end gap-3 w-full">
+            <button
+              onClick={() => setIsSendPopupOpen(false)}
+              className="px-6 py-2.5 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all"
+            >
+              Hủy bỏ
+            </button>
+            <button
+              onClick={() => setIsSendPopupOpen(false)}
+              className="px-8 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-all flex items-center gap-2 shadow-md shadow-blue-200"
+            >
+              <Send className="w-4 h-4" />
+              Xác nhận Gửi
+            </button>
+          </div>
+        }
+      >
+        <div className="py-4">
+          <div className="flex gap-5">
+            <div className="w-14 h-14 shrink-0 bg-blue-50 border-2 border-blue-100 rounded-2xl flex items-center justify-center shadow-sm">
+              <Send className="w-6 h-6 text-blue-600" />
+            </div>
+            <div className="space-y-3">
+              <p className="text-slate-600 text-[15px] leading-relaxed">
+                Hệ thống sẽ chuyển danh sách gồm <strong className="text-slate-900 font-bold underline decoration-blue-200 decoration-4">10 bản ghi lỗi (Chưa xử lý)</strong> về hệ thống nghiệp vụ nguồn (<span className="font-bold text-blue-700">{systemName}</span>) để rà soát và khắc phục dữ liệu gốc.
+              </p>
+              <div className="flex items-start gap-2 p-3 bg-amber-50 rounded-xl border border-amber-100">
+                <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <p className="text-amber-700 text-xs font-medium italic">
+                  Lưu ý: Các bản ghi "Đã gửi về hệ thống nguồn" sẽ không bị ảnh hưởng bởi hành động này.
                 </p>
-                
-                <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                  <table className="w-full text-sm text-left">
-                    <thead className="text-xs text-slate-500 bg-slate-50 uppercase font-semibold border-b border-slate-200">
-                      <tr>
-                        <th className="px-5 py-3 w-[30%]">Tên trường</th>
-                        <th className="px-5 py-3 w-[35%]">Mức độ công khai</th>
-                        <th className="px-5 py-3 w-[35%]">Mức độ nhạy cảm</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {mockClassification.map((item, idx) => (
-                        <tr key={idx} className="hover:bg-slate-50/50">
-                          <td className="px-5 py-3 font-medium text-slate-700">{item.field}</td>
-                          <td className="px-5 py-3">
-                            <select title="Mức công khai" className="w-full px-2.5 py-1.5 border border-slate-200 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-slate-50/50 hover:bg-white transition-colors" defaultValue={item.publicLevel}>
-                              <option className="text-slate-400">-- Theo mặc định bảng --</option>
-                              <option>Công khai</option>
-                              <option>Công khai hạn chế</option>
-                              <option>Nội bộ</option>
-                              <option>Mật</option>
-                            </select>
-                          </td>
-                          <td className="px-5 py-3">
-                            <select title="Mức nhạy cảm" className="w-full px-2.5 py-1.5 border border-slate-200 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-slate-50/50 hover:bg-white transition-colors" defaultValue={item.sensLevel}>
-                              <option className="text-slate-400">-- Theo mặc định bảng --</option>
-                              <option>Thấp</option>
-                              <option>Trung bình</option>
-                              <option>Cao</option>
-                              <option>Rất cao</option>
-                            </select>
-                          </td>
-                        </tr>
-                      ))}
-                      {/* Empty state entry */}
-                      <tr className="hover:bg-slate-50/50 group">
-                        <td className="px-5 py-3 font-medium text-slate-500 group-hover:text-slate-700 transition-colors">Địa chỉ thường trú</td>
-                        <td className="px-5 py-3">
-                          <select title="Mức công khai" className="w-full px-2.5 py-1.5 border border-slate-100 border-dashed rounded-md text-sm text-slate-400 focus:text-slate-700 focus:border-blue-500 focus:border-solid focus:ring-1 focus:ring-blue-500 bg-transparent hover:bg-white transition-colors">
-                            <option selected className="text-slate-400">-- Theo mặc định bảng --</option>
-                            <option>Công khai</option>
-                            <option>Công khai hạn chế</option>
-                            <option>Nội bộ</option>
-                            <option>Mật</option>
-                          </select>
-                        </td>
-                        <td className="px-5 py-3">
-                          <select title="Mức nhạy cảm" className="w-full px-2.5 py-1.5 border border-slate-100 border-dashed rounded-md text-sm text-slate-400 focus:text-slate-700 focus:border-blue-500 focus:border-solid focus:ring-1 focus:ring-blue-500 bg-transparent hover:bg-white transition-colors">
-                            <option selected className="text-slate-400">-- Theo mặc định bảng --</option>
-                            <option>Thấp</option>
-                            <option>Trung bình</option>
-                            <option>Cao</option>
-                            <option>Rất cao</option>
-                          </select>
-                        </td>
-                      </tr>
-                      {/* Empty state entry 2 */}
-                      <tr className="hover:bg-slate-50/50 group">
-                        <td className="px-5 py-3 font-medium text-slate-500 group-hover:text-slate-700 transition-colors">Quê quán</td>
-                        <td className="px-5 py-3">
-                          <select title="Mức công khai" className="w-full px-2.5 py-1.5 border border-slate-100 border-dashed rounded-md text-sm text-slate-400 focus:text-slate-700 focus:border-blue-500 focus:border-solid focus:ring-1 focus:ring-blue-500 bg-transparent hover:bg-white transition-colors">
-                            <option selected className="text-slate-400">-- Theo mặc định bảng --</option>
-                            <option>Công khai</option>
-                            <option>Công khai hạn chế</option>
-                            <option>Nội bộ</option>
-                            <option>Mật</option>
-                          </select>
-                        </td>
-                        <td className="px-5 py-3">
-                          <select title="Mức nhạy cảm" className="w-full px-2.5 py-1.5 border border-slate-100 border-dashed rounded-md text-sm text-slate-400 focus:text-slate-700 focus:border-blue-500 focus:border-solid focus:ring-1 focus:ring-blue-500 bg-transparent hover:bg-white transition-colors">
-                            <option selected className="text-slate-400">-- Theo mặc định bảng --</option>
-                            <option>Thấp</option>
-                            <option>Trung bình</option>
-                            <option>Cao</option>
-                            <option>Rất cao</option>
-                          </select>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
               </div>
-            </div>
-
-            <div className="px-6 py-4 bg-white flex items-center justify-end gap-3 rounded-b-xl border-t border-slate-200 z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-              <button
-                onClick={() => setIsEditClassifyModalOpen(false)}
-                className="px-5 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
-              >
-                Hủy bỏ
-              </button>
-              <button
-                onClick={() => {
-                  setIsEditClassifyModalOpen(false);
-                }}
-                className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center shadow-sm"
-              >
-                Lưu cấu hình
-              </button>
             </div>
           </div>
         </div>
-      )}
+      </BaseModal>
 
-      {isSendPopupOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
-          <div className="bg-white rounded-xl shadow-xl w-[480px] overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-              <h3 className="font-bold text-slate-800 text-lg">Xác nhận gửi yêu cầu xử lý</h3>
-              <button title="Đóng" onClick={() => setIsSendPopupOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors p-1 rounded-md hover:bg-slate-100">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="p-6">
-              <div className="flex gap-4 mb-4">
-                <div className="w-12 h-12 shrink-0 bg-blue-50 border border-blue-100 rounded-full flex items-center justify-center">
-                  <Send className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-slate-600 text-[15px] mb-3 leading-relaxed">
-                    Hệ thống sẽ chuyển danh sách gồm <strong className="text-slate-800 font-semibold">10 bản ghi lỗi (Chưa xử lý)</strong> về hệ thống nghiệp vụ nguồn (<span className="font-medium text-blue-700">{systemName}</span>) để rà soát và khắc phục dữ liệu gốc.
-                  </p>
-                  <p className="text-slate-500 text-sm italic">
-                    Lưu ý: Các bản ghi "Đã gửi về hệ thống nguồn" sẽ không bị ảnh hưởng.
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="px-6 py-4 bg-slate-50 flex items-center justify-end gap-3 rounded-b-xl border-t border-slate-100">
-              <button
-                onClick={() => setIsSendPopupOpen(false)}
-                className="px-5 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
-              >
-                Hủy bỏ
-              </button>
-              <button
-                onClick={() => setIsSendPopupOpen(false)}
-                className="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm"
-              >
-                <Send className="w-4 h-4 shadow-sm" />
-                Xác nhận Gửi
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
-      <TargetDatabaseConfigModal
-        isOpen={isTargetConfigModalOpen}
-        onClose={() => setIsTargetConfigModalOpen(false)}
-        onBack={() => setIsTargetConfigModalOpen(false)}
-        onDownloadTarget={handleDownloadTargetFromConfig}
-        onNext={handleNextToMapping}
-        initialData={targetConfigData}
-      />
+
 
       <SelectTargetDatabaseModal
         isOpen={isSelectDBModalOpen}

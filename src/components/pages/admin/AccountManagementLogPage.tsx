@@ -22,6 +22,7 @@ import {
   XCircle
 } from 'lucide-react';
 import { StatsCard } from '../../common/StatsCard';
+import { StatusTag } from '../../common/StatusTag';
 
 interface AccountLog {
   id: number;
@@ -441,10 +442,11 @@ export function AccountManagementLogPage() {
                   </td>
                   <td className="px-6 py-4 text-sm text-slate-700 whitespace-nowrap">{log.timestamp}</td>
                   <td className="px-6 py-4">
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs border ${getActionColor(log.action)}`}>
-                      {getActionIcon(log.action)}
-                      {getActionLabel(log.action)}
-                    </span>
+                    <StatusTag 
+                      label={getActionLabel(log.action)} 
+                      variant={log.action === 'create' ? 'green' : log.action === 'update' ? 'blue' : log.action === 'delete' ? 'red' : log.action === 'lock' ? 'orange' : log.action === 'unlock' ? 'teal' : log.action === 'role_change' ? 'cyan' : 'purple'} 
+                      icon={getActionIcon(log.action)}
+                    />
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-sm text-slate-900">{log.targetUser}</div>
@@ -459,16 +461,11 @@ export function AccountManagementLogPage() {
                     </code>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs ${
-                      log.status === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                    }`}>
-                      {log.status === 'success' ? (
-                        <CheckCircle2 className="w-3 h-3" />
-                      ) : (
-                        <XCircle className="w-3 h-3" />
-                      )}
-                      {log.status === 'success' ? 'Thành công' : 'Thất bại'}
-                    </span>
+                    <StatusTag 
+                      label={log.status === 'success' ? 'Thành công' : 'Thất bại'} 
+                      variant={log.status === 'success' ? 'green' : 'red'} 
+                      icon={log.status === 'success' ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                    />
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end">
@@ -542,16 +539,11 @@ export function AccountManagementLogPage() {
                     <CheckCircle2 className="w-4 h-4" />
                     <span className="text-xs">Trạng thái</span>
                   </div>
-                  <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs ${
-                    selectedLog.status === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                  }`}>
-                    {selectedLog.status === 'success' ? (
-                      <CheckCircle2 className="w-3 h-3" />
-                    ) : (
-                      <XCircle className="w-3 h-3" />
-                    )}
-                    {selectedLog.status === 'success' ? 'Thành công' : 'Thất bại'}
-                  </span>
+                  <StatusTag 
+                    label={selectedLog.status === 'success' ? 'Thành công' : 'Thất bại'} 
+                    variant={selectedLog.status === 'success' ? 'green' : 'red'} 
+                    icon={selectedLog.status === 'success' ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                  />
                 </div>
               </div>
 

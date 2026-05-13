@@ -18,6 +18,7 @@ import {
   Globe,
   Upload
 } from 'lucide-react';
+import { StatusTag } from '../common/StatusTag';
 
 interface Category {
   id: string;
@@ -656,12 +657,17 @@ export function CategoryManagementPage() {
                       <td className="px-4 py-3 text-sm text-slate-600">{category.dataType}</td>
                       <td className="px-4 py-3 text-sm text-slate-600">{category.managingUnit}</td>
                       <td className="px-4 py-3">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs ${statusColors[category.status]}`}>
-                          {category.status === 'approved' && <CheckCircle className="w-3 h-3" />}
-                          {category.status === 'pending' && <Clock className="w-3 h-3" />}
-                          {category.status === 'rejected' && <AlertCircle className="w-3 h-3" />}
-                          {statusLabels[category.status]}
-                        </span>
+                        <StatusTag 
+                          label={statusLabels[category.status]} 
+                          variant={category.status === 'approved' ? 'green' : category.status === 'pending' ? 'amber' : category.status === 'rejected' ? 'red' : category.status === 'published' ? 'indigo' : 'slate'}
+                          icon={
+                            <>
+                              {category.status === 'approved' && <CheckCircle className="w-3 h-3" />}
+                              {category.status === 'pending' && <Clock className="w-3 h-3" />}
+                              {category.status === 'rejected' && <AlertCircle className="w-3 h-3" />}
+                            </>
+                          }
+                        />
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-2">

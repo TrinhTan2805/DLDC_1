@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Search, Eye, Download, User, Activity, Monitor, Filter, X, Calendar } from 'lucide-react';
+import { StatusTag } from '../../common/StatusTag';
 
 interface LogEntry {
   id: number;
@@ -352,13 +353,10 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
                     </td>
                     <td className="px-4 py-4 text-center text-sm text-slate-500 font-medium font-mono whitespace-nowrap">{log.timestamp}</td>
                     <td className="px-4 py-4 text-center">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border shadow-sm ${
-                        log.status === 'Thành công' || log.status === 'Active' ? 'bg-green-50 text-green-700 border-green-100' :
-                        log.status === 'Thất bại' ? 'bg-red-50 text-red-700 border-red-100' :
-                        'bg-slate-50 text-slate-600 border-slate-200'
-                      }`}>
-                        {log.status}
-                      </span>
+                      <StatusTag 
+                        label={log.status} 
+                        variant={log.status === 'Thành công' || log.status === 'Active' ? 'green' : log.status === 'Thất bại' ? 'red' : 'slate'} 
+                      />
                     </td>
                     <td className="px-4 py-4 text-center">
                       <button
@@ -420,10 +418,10 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
                   <p className="text-sm text-slate-900">#{selectedLog.id}</p>
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-500 mb-1">Trạng thái</label>
-                  <span className={`inline-flex px-2 py-1 rounded text-xs ${selectedLog.statusColor}`}>
-                    {selectedLog.status}
-                  </span>
+                  <StatusTag 
+                    label={selectedLog.status} 
+                    variant={selectedLog.status === 'Thành công' || selectedLog.status === 'Active' ? 'green' : selectedLog.status === 'Thất bại' ? 'red' : 'slate'} 
+                  />
                 </div>
               </div>
 

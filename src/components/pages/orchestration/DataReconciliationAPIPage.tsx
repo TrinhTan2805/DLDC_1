@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { Plus, Search, GitCompare, Eye, Edit, Trash2, CheckCircle, XCircle, Activity, X, Save, Server } from 'lucide-react';
+import { StatusTag } from '../../common/StatusTag';
 
 interface ReconciliationAPI {
   id: string;
@@ -155,34 +155,25 @@ export function DataReconciliationAPIPage() {
   });
 
   const getStatusBadge = (status: string) => {
-    const styles = {
-      active: 'bg-green-100 text-green-700 border-green-200',
-      inactive: 'bg-slate-100 text-slate-600 border-slate-200',
-      error: 'bg-red-100 text-red-700 border-red-200'
-    };
     const labels = {
       active: 'Hoạt động',
       inactive: 'Tạm dừng',
       error: 'Lỗi'
     };
     return (
-      <span className={`px-2 py-1 text-xs border rounded-full ${styles[status as keyof typeof styles]}`}>
-        {labels[status as keyof typeof labels]}
-      </span>
+      <StatusTag 
+        label={labels[status as keyof typeof labels]} 
+        variant={status === 'active' ? 'green' : status === 'inactive' ? 'slate' : 'red'} 
+      />
     );
   };
 
   const getMethodBadge = (method: string) => {
-    const styles = {
-      GET: 'bg-green-100 text-green-700',
-      POST: 'bg-blue-100 text-blue-700',
-      PUT: 'bg-amber-100 text-amber-700',
-      DELETE: 'bg-red-100 text-red-700'
-    };
     return (
-      <span className={`px-2 py-0.5 text-xs rounded ${styles[method as keyof typeof styles]}`}>
-        {method}
-      </span>
+      <StatusTag 
+        label={method} 
+        variant={method === 'GET' ? 'green' : method === 'POST' ? 'blue' : method === 'PUT' ? 'orange' : 'red'} 
+      />
     );
   };
 

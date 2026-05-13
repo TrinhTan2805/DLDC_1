@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Search, Server, Eye, Edit, Trash2, CheckCircle, XCircle, Settings as SettingsIcon, Database, Globe, X, Save, EyeOff, Eye as EyeIcon, FileCheck, FileText, Shield, GitBranch, Clock, AlertCircle, User, Lock, Share, Wifi, FolderOpen, Mail, MessageSquare, BarChart3, TrendingUp } from 'lucide-react';
+import { StatusTag } from '../../common/StatusTag';
 import { MonitoringPage } from './MonitoringPage';
 import { AddProvisionServiceModal } from './AddProvisionServiceModal';
 import { ApprovalReviewModal } from './ApprovalReviewModal';
@@ -686,15 +687,6 @@ export function ServiceSetupPage() {
   };
 
   const getStatusBadge = (status: string) => {
-    const styles = {
-      active: 'bg-green-100 text-green-700 border-green-200',
-      inactive: 'bg-slate-100 text-slate-600 border-slate-200',
-      maintenance: 'bg-amber-100 text-amber-700 border-amber-200',
-      pending: 'bg-orange-100 text-orange-700 border-orange-200',
-      approved: 'bg-blue-100 text-blue-700 border-blue-200',
-      published: 'bg-indigo-100 text-indigo-700 border-indigo-200',
-      publishing: 'bg-purple-100 text-purple-700 border-purple-200'
-    };
     const labels = {
       active: 'Hoạt động',
       inactive: 'Chưa hoạt động',
@@ -704,88 +696,76 @@ export function ServiceSetupPage() {
       published: 'Đang công khai',
       publishing: 'Đang xử lý công khai'
     };
+    const variants = {
+      active: 'green',
+      inactive: 'slate',
+      maintenance: 'amber',
+      pending: 'orange',
+      approved: 'blue',
+      published: 'indigo',
+      publishing: 'purple'
+    };
     return (
-      <span className={`px-2 py-1 text-xs border rounded-full ${styles[status as keyof typeof styles]}`}>
-        {labels[status as keyof typeof labels]}
-      </span>
+      <StatusTag 
+        label={labels[status as keyof typeof labels]} 
+        variant={variants[status as keyof typeof variants] as any} 
+      />
     );
   };
 
   const getTypeBadge = (type: string) => {
-    const styles = {
-      REST: 'bg-blue-100 text-blue-700 border-blue-200',
-      SOAP: 'bg-purple-100 text-purple-700 border-purple-200',
-      GraphQL: 'bg-pink-100 text-pink-700 border-pink-200'
-    };
     return (
-      <span className={`px-2 py-1 text-xs border rounded-full ${styles[type as keyof typeof styles]}`}>
-        {type}
-      </span>
+      <StatusTag 
+        label={type} 
+        variant={type === 'REST' ? 'blue' : type === 'SOAP' ? 'purple' : 'pink'} 
+      />
     );
   };
 
   const getVisibilityBadge = (visibility?: string) => {
-    const styles = {
-      public: 'bg-blue-100 text-blue-700 border-blue-200',
-      private: 'bg-slate-100 text-slate-600 border-slate-200'
-    };
-    const labels = {
-      public: 'Công khai',
-      private: 'Không công khai'
-    };
     const vis = visibility || 'private';
     return (
-      <span className={`px-2 py-1 text-xs border rounded-full ${styles[vis as keyof typeof styles]}`}>
-        {labels[vis as keyof typeof labels]}
-      </span>
+      <StatusTag 
+        label={vis === 'public' ? 'Công khai' : 'Không công khai'} 
+        variant={vis === 'public' ? 'blue' : 'slate'} 
+      />
     );
   };
 
   const getRequestTypeBadge = (type: string) => {
-    const styles = {
-      publish: 'bg-green-100 text-green-700 border-green-200',
-      update: 'bg-blue-100 text-blue-700 border-blue-200',
-      delete: 'bg-red-100 text-red-700 border-red-200'
-    };
     const labels = {
       publish: 'Công bố',
       update: 'Cập nhật',
       delete: 'Xóa'
     };
     return (
-      <span className={`px-2 py-1 text-xs border rounded-full ${styles[type as keyof typeof styles]}`}>
-        {labels[type as keyof typeof labels]}
-      </span>
+      <StatusTag 
+        label={labels[type as keyof typeof labels]} 
+        variant={type === 'publish' ? 'green' : type === 'update' ? 'blue' : 'red'} 
+      />
     );
   };
 
   const getApprovalStatusBadge = (status: string) => {
-    const styles = {
-      pending: 'bg-amber-100 text-amber-700 border-amber-200',
-      approved: 'bg-green-100 text-green-700 border-green-200',
-      rejected: 'bg-red-100 text-red-700 border-red-200'
-    };
     const labels = {
       pending: 'Chờ duyệt',
       approved: 'Đã duyệt',
       rejected: 'Từ chối'
     };
     return (
-      <span className={`px-2 py-1 text-xs border rounded-full ${styles[status as keyof typeof styles]}`}>
-        {labels[status as keyof typeof labels]}
-      </span>
+      <StatusTag 
+        label={labels[status as keyof typeof labels]} 
+        variant={status === 'pending' ? 'amber' : status === 'approved' ? 'green' : 'red'} 
+      />
     );
   };
 
   const getLogStatusBadge = (status: string) => {
-    return status === 'success' ? (
-      <span className="px-2 py-1 text-xs bg-green-100 text-green-700 border border-green-200 rounded-full">
-        Thành công
-      </span>
-    ) : (
-      <span className="px-2 py-1 text-xs bg-red-100 text-red-700 border border-red-200 rounded-full">
-        Thất bại
-      </span>
+    return (
+      <StatusTag 
+        label={status === 'success' ? 'Thành công' : 'Thất bại'} 
+        variant={status === 'success' ? 'green' : 'red'} 
+      />
     );
   };
 

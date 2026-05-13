@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { initialSourceSystems } from './mockSourceSystems';
 import { Portal } from '../../common/Portal';
+import { StatusTag } from '../../common/StatusTag';
 
 interface ViewServiceModalProps {
   isOpen: boolean;
@@ -59,22 +60,20 @@ export function ViewServiceModal({ isOpen, onClose, service }: ViewServiceModalP
                 </h1>
 
                 <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600">
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${service.status === 'draft' ? 'bg-slate-50 text-slate-700 border-slate-200' :
-                    service.status === 'inactive' ? 'bg-gray-100 text-gray-500 border-gray-200' :
-                      'bg-green-50 text-green-700 border-green-200'
-                    }`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${service.status === 'draft' ? 'bg-slate-400' :
-                      service.status === 'inactive' ? 'bg-gray-400' :
-                        'bg-green-600'
-                      }`}></span>
-                    {service.status === 'draft' ? 'Bản nháp' : service.status === 'inactive' ? 'Ngưng hoạt động' : 'Hoạt động'}
-                  </span>
+                  <StatusTag 
+                    label={service.status === 'draft' ? 'Bản nháp' : service.status === 'inactive' ? 'Ngưng hoạt động' : 'Hoạt động'} 
+                    variant={service.status === 'draft' ? 'slate' : service.status === 'inactive' ? 'gray' : 'green'} 
+                    icon={
+                      <span className={`w-1.5 h-1.5 rounded-full ${service.status === 'draft' ? 'bg-slate-400' :
+                        service.status === 'inactive' ? 'bg-gray-400' :
+                          'bg-green-600'
+                        }`}></span>
+                    }
+                  />
                   <span className="text-slate-300">|</span>
                   <span className="font-medium text-slate-700">{service.managingUnit || sourceSystem.unitName}</span>
                   <span className="text-slate-300">|</span>
-                  <span className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded text-[11px] font-bold">
-                    {service.version || 'v1.0.0'}
-                  </span>
+                  <StatusTag label={service.version || 'v1.0.0'} variant="blue" />
                   <span className="text-slate-300">|</span>
                   <span className="flex items-center gap-1">
                     <Clock className="w-3.5 h-3.5" />
@@ -216,29 +215,27 @@ function TabGeneral({ service, sourceSystem, onEdit }: any) {
           <div className="space-y-1">
             <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Mức độ bảo mật dữ liệu</div>
             <div>
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold bg-blue-50 text-blue-700 border border-blue-100">
-                {service.securityLevel || 'Nội bộ'}
-              </span>
+              <StatusTag label={service.securityLevel || 'Nội bộ'} variant="blue" />
             </div>
           </div>
 
           <div className="space-y-1">
             <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Trạng thái dữ liệu</div>
             <div>
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs ${(service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'EMPTY' ? 'bg-slate-100 text-slate-600 border border-slate-200' :
-                  (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'PROCESSING' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
-                    (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'DATA_UPDATED' ? 'bg-green-50 text-green-700 border border-green-200' :
-                      (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'DATA_INCOMPLETED' ? 'bg-orange-50 text-orange-700 border border-orange-200' :
-                        (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'DATA_UPDATE_FAILED' ? 'bg-red-50 text-red-700 border border-red-200' :
-                          'bg-slate-100 text-slate-600 border border-slate-200'
-                }`}>
-                {(service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'EMPTY' ? 'Rỗng' :
-                  (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'PROCESSING' ? 'Đang lấy dữ liệu' :
-                    (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'DATA_UPDATED' ? 'Cập nhật thành công' :
-                      (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'DATA_INCOMPLETED' ? 'Lỗi cấu trúc' :
-                        (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'DATA_UPDATE_FAILED' ? 'Lỗi cập nhật' :
-                          'Rỗng'}
-              </span>
+              {(() => {
+                const dataStatus = service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY');
+                const label = dataStatus === 'EMPTY' ? 'Rỗng' :
+                  dataStatus === 'PROCESSING' ? 'Đang lấy dữ liệu' :
+                  dataStatus === 'DATA_UPDATED' ? 'Cập nhật thành công' :
+                  dataStatus === 'DATA_INCOMPLETED' ? 'Lỗi cấu trúc' :
+                  'Lỗi cập nhật';
+                const variant = dataStatus === 'EMPTY' ? 'slate' :
+                  dataStatus === 'PROCESSING' ? 'blue' :
+                  dataStatus === 'DATA_UPDATED' ? 'emerald' :
+                  dataStatus === 'DATA_INCOMPLETED' ? 'orange' :
+                  'red';
+                return <StatusTag label={label} variant={variant as any} />;
+              })()}
             </div>
           </div>
 
@@ -299,9 +296,7 @@ function TabGeneral({ service, sourceSystem, onEdit }: any) {
           <div className="space-y-1">
             <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Loại nguồn</div>
             <div>
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold border ${sourceSystem.sourceType === 'Trong ngành' ? 'bg-purple-50 text-purple-700 border-purple-100' : 'bg-blue-50 text-blue-700 border-blue-100'}`}>
-                {sourceSystem.sourceType}
-              </span>
+              <StatusTag label={sourceSystem.sourceType} variant={sourceSystem.sourceType === 'Trong ngành' ? 'purple' : 'blue'} />
             </div>
           </div>
           <div className="space-y-1">
@@ -364,10 +359,10 @@ function TabContact({ sourceSystem }: any) {
           <div className="space-y-1">
             <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Loại nguồn</div>
             <div>
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold border ${sourceSystem.sourceType === 'Trong ngành' ? 'bg-purple-50 text-purple-700 border-purple-100' : 'bg-blue-50 text-blue-700 border-blue-100'
-                }`}>
-                {sourceSystem.sourceType}
-              </span>
+              <StatusTag 
+                label={sourceSystem.sourceType} 
+                variant={sourceSystem.sourceType === 'Trong ngành' ? 'purple' : 'blue'} 
+              />
             </div>
           </div>
 
@@ -847,11 +842,11 @@ function TabHistory({ onGoToMapping }: { onGoToMapping?: () => void }) {
                 <td className="px-6 py-4 font-mono text-[13px] whitespace-pre-wrap">{log.runTime}</td>
                 <td className="px-6 py-4">
                   {log.status === 'success' ? (
-                    <span className="px-2.5 py-1 text-[13px] bg-[#e8f5e9] text-[#2e7d32] rounded font-medium border border-[#c8e6c9]">Thành công</span>
+                    <StatusTag label="Thành công" variant="emerald" />
                   ) : log.status === 'partial_success' ? (
-                    <span className="px-2.5 py-1 text-[13px] bg-amber-50 text-amber-700 rounded font-medium border border-amber-200">Một phần</span>
+                    <StatusTag label="Một phần" variant="amber" />
                   ) : (
-                    <span className="px-2.5 py-1 text-[13px] bg-[#feeceb] text-[#d32f2f] rounded font-medium border border-[#ffcdd2]">Thất bại</span>
+                    <StatusTag label="Thất bại" variant="red" />
                   )}
                 </td>
                 <td className="px-6 py-4 font-mono">{log.records}</td>
@@ -951,7 +946,7 @@ function ErrorDetailView({ log, onBack, onGoToMapping }: any) {
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-1.5">
                         {rec.missing.map(m => (
-                          <span key={m} className="px-2 py-1 bg-red-50 text-red-700 border border-red-200 rounded text-xs font-mono font-medium shadow-sm">{m}</span>
+                          <StatusTag key={m} label={m} variant="red" />
                         ))}
                       </div>
                     </td>
@@ -999,7 +994,7 @@ function ErrorDetailView({ log, onBack, onGoToMapping }: any) {
                   <tr key={f.fieldName} className="hover:bg-slate-50 transition-colors">
                     <td className="px-4 py-3 font-mono text-[13px] text-slate-800 font-medium">{f.fieldName}</td>
                     <td className="px-4 py-3">
-                      <span className="px-2.5 py-1 border rounded text-slate-500 font-mono text-[11px] bg-slate-50 font-medium">{f.type}</span>
+                      <StatusTag label={f.type} variant="slate" />
                     </td>
                     <td className="px-4 py-3 text-slate-600 italic">"{f.sample}"</td>
                     <td className="px-4 py-3 text-slate-600">{f.affectedRecords} bản ghi</td>
@@ -1063,9 +1058,7 @@ function TabChangelog() {
                 <td className="px-6 py-4 font-mono text-[13px]">{log.time}</td>
                 <td className="px-6 py-4 text-slate-700">{log.user}</td>
                 <td className="px-6 py-4">
-                  <span className={`px-2.5 py-1 text-[12px] rounded font-medium border ${getTypeStyle(log.type)}`}>
-                    {log.type}
-                  </span>
+                  <StatusTag label={log.type} variant={log.type === 'Tạo mới' ? 'blue' : log.type === 'Cập nhật' ? 'amber' : log.type === 'Bảo trì' ? 'slate' : 'green'} />
                 </td>
                 <td className="px-6 py-4 text-slate-600 whitespace-normal leading-relaxed">{log.desc}</td>
               </tr>
@@ -1168,13 +1161,10 @@ function TabActivityHistory({ onEdit }: { onEdit: () => void }) {
                   <td className="px-6 py-4 font-medium text-slate-900">{row.id}</td>
                   <td className="px-6 py-4 text-slate-700 font-medium">{row.type}</td>
                   <td className="px-6 py-4">
-                    <span className={`inline-flex items-center px-2 py-1 rounded text-[10px] font-black tracking-tight ${
-                      row.status === 'SUCCESSFUL' ? 'bg-emerald-100 text-emerald-700' :
-                      row.status === 'SKIPPED' ? 'bg-amber-100 text-amber-700' :
-                      'bg-blue-100 text-blue-700'
-                    }`}>
-                      {row.status}
-                    </span>
+                    <StatusTag 
+                      label={row.status} 
+                      variant={row.status === 'SUCCESSFUL' ? 'emerald' : row.status === 'SKIPPED' ? 'amber' : 'blue'} 
+                    />
                   </td>
                   <td className="px-6 py-4 text-slate-600 font-medium">{row.creator}</td>
                   <td className="px-6 py-4 text-slate-600 font-medium">{row.server}</td>

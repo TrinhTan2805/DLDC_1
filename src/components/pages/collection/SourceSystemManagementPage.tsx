@@ -3,6 +3,7 @@ import { Plus, Search, Edit, Trash2, Eye, Server } from 'lucide-react';
 import { SourceSystemModal } from './SourceSystemModal';
 import { SourceSystemDetailModal } from './SourceSystemDetailModal';
 import { initialSourceSystems } from './mockSourceSystems';
+import { StatusTag } from '../../common/StatusTag';
 
 export function SourceSystemManagementPage() {
   const [data, setData] = useState(initialSourceSystems);
@@ -117,11 +118,10 @@ export function SourceSystemManagementPage() {
                   <td className="py-4 px-4 text-sm font-semibold text-slate-900 text-center">{item.systemName}</td>
                   <td className="py-4 px-4 text-sm text-slate-600 text-center">{item.unitName}</td>
                   <td className="py-4 px-4 text-center">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold border shadow-sm ${
-                      item.sourceType === 'Trong ngành' ? 'bg-purple-50 text-purple-700 border-purple-100' : 'bg-blue-50 text-blue-700 border-blue-100'
-                    }`}>
-                      {item.sourceType}
-                    </span>
+                    <StatusTag 
+                      label={item.sourceType} 
+                      variant={item.sourceType === 'Trong ngành' ? 'purple' : 'blue'} 
+                    />
                   </td>
                   <td className="py-4 px-4 text-center">
                     <div className="text-sm font-medium text-slate-900">{item.contactPerson || '-'}</div>

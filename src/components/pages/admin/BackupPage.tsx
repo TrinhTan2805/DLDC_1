@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { StatusTag } from '../../common/StatusTag';
 import { 
   Database, 
   Download, 
@@ -346,15 +347,10 @@ export function BackupPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs ${
-                          backup.type === 'auto'
-                            ? 'bg-blue-100 text-blue-800'
-                            : 'bg-purple-100 text-purple-800'
-                        }`}
-                      >
-                        {backup.type === 'auto' ? 'Tự động' : 'Thủ công'}
-                      </span>
+                      <StatusTag 
+                        label={backup.type === 'auto' ? 'Tự động' : 'Thủ công'} 
+                        variant={backup.type === 'auto' ? 'blue' : 'purple'} 
+                      />
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-slate-900">{backup.date}</div>
@@ -370,16 +366,11 @@ export function BackupPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        {getStatusIcon(backup.status)}
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs ${getStatusColor(
-                            backup.status
-                          )}`}
-                        >
-                          {getStatusText(backup.status)}
-                        </span>
-                      </div>
+                      <StatusTag 
+                        label={getStatusText(backup.status)} 
+                        variant={backup.status === 'success' ? 'green' : backup.status === 'failed' ? 'red' : 'blue'} 
+                        icon={getStatusIcon(backup.status)}
+                      />
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-2">

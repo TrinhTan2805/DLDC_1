@@ -29,6 +29,7 @@ import {
   UserCog
 } from 'lucide-react';
 import { StatsCard } from '../../common/StatsCard';
+import { StatusTag } from '../../common/StatusTag';
 import { LogRetentionConfigPage } from './LogRetentionConfigPage';
 
 interface ConfigLog {
@@ -483,10 +484,11 @@ export function ConfigChangeLogPage() {
                       </td>
                       <td className="px-6 py-4 text-sm text-slate-700 whitespace-nowrap">{log.timestamp}</td>
                       <td className="px-6 py-4">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs border ${getConfigTypeColor(log.configType)}`}>
-                          {getConfigTypeIcon(log.configType)}
-                          {getConfigTypeLabel(log.configType)}
-                        </span>
+                        <StatusTag 
+                          label={getConfigTypeLabel(log.configType)} 
+                          variant={log.configType === 'security' ? 'red' : log.configType === 'system' ? 'blue' : log.configType === 'email' ? 'purple' : log.configType === 'backup' ? 'green' : log.configType === 'notification' ? 'amber' : log.configType === 'ui' ? 'pink' : log.configType === 'database' ? 'indigo' : 'cyan'} 
+                          icon={getConfigTypeIcon(log.configType)}
+                        />
                       </td>
                       <td className="px-6 py-4">
                         <div className="text-sm text-slate-900 max-w-xs truncate">{log.configName}</div>
@@ -507,16 +509,11 @@ export function ConfigChangeLogPage() {
                         </code>
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs ${
-                          log.status === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                        }`}>
-                          {log.status === 'success' ? (
-                            <CheckCircle2 className="w-3 h-3" />
-                          ) : (
-                            <XCircle className="w-3 h-3" />
-                          )}
-                          {log.status === 'success' ? 'Thành công' : 'Thất bại'}
-                        </span>
+                        <StatusTag 
+                          label={log.status === 'success' ? 'Thành công' : 'Thất bại'} 
+                          variant={log.status === 'success' ? 'green' : 'red'} 
+                          icon={log.status === 'success' ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                        />
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-end">
@@ -590,16 +587,11 @@ export function ConfigChangeLogPage() {
                         <CheckCircle2 className="w-4 h-4" />
                         <span className="text-xs">Trạng thái</span>
                       </div>
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs ${
-                        selectedLog.status === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                      }`}>
-                        {selectedLog.status === 'success' ? (
-                          <CheckCircle2 className="w-3 h-3" />
-                        ) : (
-                          <XCircle className="w-3 h-3" />
-                        )}
-                        {selectedLog.status === 'success' ? 'Thành công' : 'Thất bại'}
-                      </span>
+                      <StatusTag 
+                        label={selectedLog.status === 'success' ? 'Thành công' : 'Thất bại'} 
+                        variant={selectedLog.status === 'success' ? 'green' : 'red'} 
+                        icon={selectedLog.status === 'success' ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                      />
                     </div>
                   </div>
 
@@ -612,10 +604,11 @@ export function ConfigChangeLogPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
                         <div className="text-xs text-slate-500 mb-1">Loại cấu hình</div>
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs border ${getConfigTypeColor(selectedLog.configType)}`}>
-                          {getConfigTypeIcon(selectedLog.configType)}
-                          {getConfigTypeLabel(selectedLog.configType)}
-                        </span>
+                        <StatusTag 
+                          label={getConfigTypeLabel(selectedLog.configType)} 
+                          variant={selectedLog.configType === 'security' ? 'red' : selectedLog.configType === 'system' ? 'blue' : selectedLog.configType === 'email' ? 'purple' : selectedLog.configType === 'backup' ? 'green' : selectedLog.configType === 'notification' ? 'amber' : selectedLog.configType === 'ui' ? 'pink' : selectedLog.configType === 'database' ? 'indigo' : 'cyan'} 
+                          icon={getConfigTypeIcon(selectedLog.configType)}
+                        />
                       </div>
                       <div>
                         <div className="text-xs text-slate-500 mb-1">Tên cấu hình</div>

@@ -65,11 +65,36 @@ export const mockColumns: Record<string, { name: string, type: string, length: s
     { name: 'TEN_DAN_TOC', type: 'NVARCHAR2', length: '200', description: 'Tên dân tộc' },
     { name: 'NGAY_TAO', type: 'DATE', length: '-', description: 'Ngày tạo' },
   ],
+  'DM_QUOC_GIA': [
+    { name: 'ID', type: 'VARCHAR2', length: '50', description: 'Khóa chính' },
+    { name: 'MA_QUOC_GIA', type: 'VARCHAR2', length: '20', description: 'Mã quốc gia' },
+    { name: 'TEN_QUOC_GIA', type: 'NVARCHAR2', length: '200', description: 'Tên quốc gia' },
+    { name: 'MA_CHAU_LUC', type: 'VARCHAR2', length: '20', description: 'Mã châu lục' },
+  ],
+  'DM_TON_GIAO': [
+    { name: 'ID', type: 'VARCHAR2', length: '50', description: 'Khóa chính' },
+    { name: 'MA_TON_GIAO', type: 'VARCHAR2', length: '20', description: 'Mã tôn giáo' },
+    { name: 'TEN_TON_GIAO', type: 'NVARCHAR2', length: '200', description: 'Tên tôn giáo' },
+  ],
   'HS_HO_TICH': [
     { name: 'ID', type: 'VARCHAR2', length: '50', description: 'Khóa chính' },
     { name: 'MA_HO_SO', type: 'VARCHAR2', length: '50', description: 'Mã hồ sơ' },
     { name: 'HO_TEN', type: 'NVARCHAR2', length: '200', description: 'Họ và tên' },
     { name: 'NGAY_SINH', type: 'DATE', length: '-', description: 'Ngày sinh' },
     { name: 'GIOI_TINH', type: 'NUMBER', length: '1', description: 'Giới tính (1: Nam, 2: Nữ)' },
+    { name: 'MA_QUOC_GIA', type: 'VARCHAR2', length: '20', description: 'Mã quốc gia' },
+    { name: 'MA_TINH', type: 'VARCHAR2', length: '20', description: 'Mã tỉnh' },
+  ],
+  'HS_KHAI_SINH': [
+    { name: 'ID', type: 'VARCHAR2', length: '50', description: 'Khóa chính' },
+    { name: 'MA_SO_DINH_DANH', type: 'VARCHAR2', length: '12', description: 'Mã số định danh cá nhân' },
+    { name: 'HO_TEN', type: 'NVARCHAR2', length: '200', description: 'Họ và tên' },
+    { name: 'NGAY_SINH', type: 'DATE', length: '-', description: 'Ngày sinh' },
+    { name: 'GIOI_TINH', type: 'NUMBER', length: '1', description: 'Giới tính' },
+    { name: 'NOI_SINH', type: 'NVARCHAR2', length: '500', description: 'Nơi sinh' },
+    { name: 'DAN_TOC', type: 'VARCHAR2', length: '20', description: 'Dân tộc' },
+    { name: 'QUOC_TICH', type: 'VARCHAR2', length: '20', description: 'Quốc tịch' },
+    { name: 'HO_TEN_CHA', type: 'NVARCHAR2', length: '200', description: 'Họ tên cha' },
+    { name: 'HO_TEN_ME', type: 'NVARCHAR2', length: '200', description: 'Họ tên mẹ' },
   ]
 };

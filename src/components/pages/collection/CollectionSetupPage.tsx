@@ -7,6 +7,7 @@ import { LogManagement } from './LogManagement';
 import { mockCollectionServices } from './mockCollectionServices';
 import { ServiceDataDetailPage } from './ServiceDataDetailPage';
 import { Portal } from '../../common/Portal';
+import { StatusTag } from '../../common/StatusTag';
 
 export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: string) => void }) {
   const [activeTab, setActiveTab] = useState<'service-setup' | 'version'>('service-setup');
@@ -408,18 +409,16 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                             </div>
                           </td>
                           <td className="px-4 py-4 text-center">
-                            <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border text-center ${service.source === 'Trong ngành' ? 'bg-blue-50 text-blue-700 border-blue-100' : 'bg-purple-50 text-purple-700 border-purple-100'
-                              }`}>
-                              {service.source}
-                            </span>
+                            <StatusTag 
+                              label={service.source} 
+                              variant={service.source === 'Trong ngành' ? 'blue' : 'purple'} 
+                            />
                           </td>
                           <td className="px-4 py-4 text-center">
-                            <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${service.type === 'SOAP' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' :
-                                service.type === 'REST' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
-                                  'bg-amber-50 text-amber-700 border-amber-100'
-                              }`}>
-                              {service.type === 'SOAP' ? 'Cơ sở dữ liệu' : service.type === 'REST' ? 'API' : 'Tải file Excel'}
-                            </span>
+                            <StatusTag 
+                              label={service.type === 'SOAP' ? 'Cơ sở dữ liệu' : service.type === 'REST' ? 'API' : 'Tải file Excel'} 
+                              variant={service.type === 'SOAP' ? 'indigo' : service.type === 'REST' ? 'emerald' : 'amber'} 
+                            />
                           </td>
                           <td className="px-4 py-4 text-center text-sm text-slate-600 font-medium font-mono">{service.version}</td>
                           <td className="px-4 py-4 text-center text-sm text-slate-600 font-medium max-w-[120px]">
@@ -431,28 +430,26 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                             ))}
                           </td>
                           <td className="px-4 py-4 text-center">
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${service.status === 'draft' ? 'bg-slate-50 text-slate-600 border-slate-200' :
-                                service.status === 'inactive' ? 'bg-gray-50 text-gray-500 border-gray-200' :
-                                  'bg-green-50 text-green-700 border-green-100'
-                              }`}>
-                              {service.status === 'draft' ? 'Bản nháp' :
-                                service.status === 'inactive' ? 'Ngưng hoạt động' :
-                                  'Hoạt động'}
-                            </span>
+                            <StatusTag 
+                              label={service.status === 'draft' ? 'Bản nháp' : service.status === 'inactive' ? 'Ngưng hoạt động' : 'Hoạt động'} 
+                              variant={service.status === 'draft' ? 'slate' : service.status === 'inactive' ? 'gray' : 'green'} 
+                            />
                           </td>
                           <td className="px-4 py-4 text-center">
-                            <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border whitespace-nowrap ${(service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'EMPTY' ? 'bg-slate-50 text-slate-500 border-slate-200' :
-                                (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'PROCESSING' ? 'bg-blue-50 text-blue-700 border-blue-100' :
-                                  (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'DATA_UPDATED' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
-                                    (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'DATA_INCOMPLETED' ? 'bg-orange-50 text-orange-700 border-orange-100' :
-                                      'bg-red-50 text-red-700 border-red-100'
-                              }`}>
-                              {(service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'EMPTY' ? 'Rỗng' :
-                                (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'PROCESSING' ? 'Đang lấy dữ liệu' :
-                                  (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'DATA_UPDATED' ? 'Cập nhật thành công' :
-                                    (service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY')) === 'DATA_INCOMPLETED' ? 'Lỗi cấu trúc' :
-                                      'Lỗi cập nhật'}
-                            </span>
+                            {(() => {
+                              const dataStatus = service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY');
+                              const label = dataStatus === 'EMPTY' ? 'Rỗng' :
+                                dataStatus === 'PROCESSING' ? 'Đang lấy dữ liệu' :
+                                dataStatus === 'DATA_UPDATED' ? 'Cập nhật thành công' :
+                                dataStatus === 'DATA_INCOMPLETED' ? 'Lỗi cấu trúc' :
+                                'Lỗi cập nhật';
+                              const variant = dataStatus === 'EMPTY' ? 'slate' :
+                                dataStatus === 'PROCESSING' ? 'blue' :
+                                dataStatus === 'DATA_UPDATED' ? 'emerald' :
+                                dataStatus === 'DATA_INCOMPLETED' ? 'orange' :
+                                'red';
+                              return <StatusTag label={label} variant={variant as any} />;
+                            })()}
                           </td>
                           <td className="px-4 py-4 text-center">
                             <div className="flex items-center justify-center gap-1">
@@ -704,9 +701,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                               <h5 className="font-semibold text-slate-900 text-sm">{error.field}</h5>
                               <p className="text-sm text-slate-600 mt-0.5">{error.message}</p>
                             </div>
-                            <span className="px-2.5 py-1 bg-red-50 text-red-600 rounded text-sm font-medium whitespace-nowrap ml-3">
-                              {error.count} lỗi
-                            </span>
+                            <StatusTag label={`${error.count} lỗi`} variant="red" />
                           </div>
                           {error.examples && (
                             <div className="mb-3">

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Plus, Search, FolderOpen, Eye, Edit, Trash2, FileText, Server } from 'lucide-react';
+import { StatusTag } from '../../common/StatusTag';
 
 interface ServiceCategory {
   id: string;
@@ -67,14 +68,11 @@ export function ServiceCategoryPage() {
   });
 
   const getStatusBadge = (status: string) => {
-    return status === 'active' ? (
-      <span className="px-2 py-1 text-xs bg-green-100 text-green-700 border border-green-200 rounded-full">
-        Đang sử dụng
-      </span>
-    ) : (
-      <span className="px-2 py-1 text-xs bg-slate-100 text-slate-600 border border-slate-200 rounded-full">
-        Ngừng sử dụng
-      </span>
+    return (
+      <StatusTag 
+        label={status === 'active' ? 'Đang sử dụng' : 'Ngừng sử dụng'} 
+        variant={status === 'active' ? 'green' : 'slate'} 
+      />
     );
   };
 
