@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import { Settings, Plus, Search, Edit, Trash2, Save, X, Calendar, Database, FileText, Clock, Play, Loader2, CheckCircle, History as HistoryIcon, Eye, Download, Send, AlertCircle, Info, Filter, Layers, Server, Package, RefreshCw, BarChart3, FileCheck, XCircle } from 'lucide-react';
 import { CreateLGSPReconciliationModal } from '../modals/CreateLGSPReconciliationModal';
+import { StatusTag } from '../common/StatusTag';
 
 // Interface cho bản ghi đối soát dữ liệu
 interface ReconciliationRecord {
@@ -636,14 +637,11 @@ export function ReconciliationSetupPage() {
   };
 
   const getLogStatusBadge = (status: string) => {
-    return status === 'success' ? (
-      <span className="px-2 py-1 text-xs bg-green-100 text-green-700 border border-green-200 rounded-full">
-        Thành công
-      </span>
-    ) : (
-      <span className="px-2 py-1 text-xs bg-red-100 text-red-700 border border-red-200 rounded-full">
-        Thất bại
-      </span>
+    return (
+      <StatusTag 
+        label={status === 'success' ? 'Thành công' : 'Thất bại'} 
+        variant={status === 'success' ? 'green' : 'red'} 
+      />
     );
   };
 
@@ -853,24 +851,27 @@ export function ReconciliationSetupPage() {
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs border ${record.statusColor}`}>
-                              {record.status === 'matched' && <CheckCircle className="w-3 h-3" />}
-                              {record.statusText}
-                            </span>
+                            <StatusTag 
+                              label={record.statusText} 
+                              variant={record.status === 'matched' ? 'green' : record.status === 'mismatched' ? 'orange' : record.status === 'pending' ? 'blue' : 'red'}
+                              icon={record.status === 'matched' && <CheckCircle className="w-3 h-3" />}
+                            />
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             {record.status === 'matched' ? (
                               <span className="text-xs text-slate-400 italic">Không có sai lệch</span>
                             ) : record.isReportSent ? (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full border bg-indigo-50 text-indigo-700 border-indigo-200">
-                                <Send className="w-3 h-3 text-indigo-500" />
-                                Đã gửi báo cáo
-                              </span>
+                              <StatusTag 
+                                label="Đã gửi báo cáo" 
+                                variant="indigo" 
+                                icon={<Send className="w-3 h-3" />} 
+                              />
                             ) : (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full border bg-amber-50 text-amber-700 border-amber-200">
-                                <Info className="w-3 h-3 text-amber-500" />
-                                Chưa gửi báo cáo
-                              </span>
+                              <StatusTag 
+                                label="Chưa gửi báo cáo" 
+                                variant="amber" 
+                                icon={<Info className="w-3 h-3" />} 
+                              />
                             )}
                           </td>
                           <td className="px-6 py-4">
@@ -1002,25 +1003,17 @@ export function ReconciliationSetupPage() {
                             <div className="text-sm text-slate-900 font-mono">{config.endpoint}</div>
                           </td>
                           <td className="px-6 py-4">
-                            <span className="inline-flex px-2 py-1 text-xs bg-blue-100 text-blue-700 border border-blue-200 rounded">
-                              {config.method}
-                            </span>
+                            <StatusTag label={config.method} variant="blue" />
                           </td>
                           <td className="px-6 py-4 text-sm text-slate-700">
                             {config.authType}
                           </td>
                           <td className="px-6 py-4">
-                            {config.status === 'active' ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-green-100 text-green-700 border border-green-200 rounded-full">
-                                <CheckCircle className="w-3 h-3" />
-                                Hoạt động
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-slate-100 text-slate-700 border border-slate-200 rounded-full">
-                                <X className="w-3 h-3" />
-                                Tạm dừng
-                              </span>
-                            )}
+                            <StatusTag 
+                              label={config.status === 'active' ? 'Hoạt động' : 'Tạm dừng'} 
+                              variant={config.status === 'active' ? 'green' : 'slate'}
+                              icon={config.status === 'active' && <CheckCircle className="w-3 h-3" />}
+                            />
                           </td>
                           <td className="px-6 py-4 text-sm text-slate-600">
                             {config.lastUsed || '-'}
@@ -1481,16 +1474,21 @@ export function ReconciliationSetupPage() {
                       <span className="text-sm text-slate-900">{selectedRecord.lastReconcileDate}</span>
                     </div>
                   )}
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-slate-600">Trạng thái:</span>
-                    <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs border ${selectedRecord.statusColor}`}>
-                      {selectedRecord.status === 'matched' && <CheckCircle className="w-3 h-3" />}
-                      {selectedRecord.status === 'mismatched' && <AlertCircle className="w-3 h-3" />}
-                      {selectedRecord.status === 'pending' && <Clock className="w-3 h-3" />}
-                      {selectedRecord.status === 'error' && <XCircle className="w-3 h-3" />}
-                      {selectedRecord.statusText}
-                    </span>
-                  </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-slate-600">Trạng thái:</span>
+                      <StatusTag 
+                        label={selectedRecord.statusText} 
+                        variant={selectedRecord.status === 'matched' ? 'green' : selectedRecord.status === 'mismatched' ? 'orange' : selectedRecord.status === 'pending' ? 'blue' : 'red'}
+                        icon={
+                          <>
+                            {selectedRecord.status === 'matched' && <CheckCircle className="w-3 h-3" />}
+                            {selectedRecord.status === 'mismatched' && <AlertCircle className="w-3 h-3" />}
+                            {selectedRecord.status === 'pending' && <Clock className="w-3 h-3" />}
+                            {selectedRecord.status === 'error' && <XCircle className="w-3 h-3" />}
+                          </>
+                        }
+                      />
+                    </div>
                   {selectedRecord.matchRate !== undefined && (
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-slate-600">Tỷ lệ khớp:</span>

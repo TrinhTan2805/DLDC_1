@@ -10,6 +10,9 @@ interface BaseModalProps {
   children: ReactNode;
   footer?: ReactNode;
   maxWidth?: string;
+  showCloseButton?: boolean;
+  customHeaderIcon?: ReactNode;
+  headerActions?: ReactNode;
 }
 
 /**
@@ -24,39 +27,54 @@ export function BaseModal({
   subtitle,
   children,
   footer,
-  maxWidth = 'max-w-2xl'
+  maxWidth = 'max-w-2xl',
+  showCloseButton = true,
+  customHeaderIcon,
+  headerActions
 }: BaseModalProps) {
   if (!isOpen) return null;
 
   return (
     <Portal>
       <div 
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[10000] p-4 animate-in fade-in duration-200"
-        style={{ backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }}
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
+        style={{ 
+          zIndex: 999999999,
+          backdropFilter: 'blur(4px)', 
+          WebkitBackdropFilter: 'blur(4px)' 
+        }}
         onClick={onClose}
       >
         <div 
-          className={`bg-white rounded-2xl shadow-2xl w-full ${maxWidth} max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300 ease-out`}
+          className={`bg-white rounded-2xl shadow-2xl w-full ${maxWidth} max-h-[95vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300 ease-out`}
           onClick={(e: MouseEvent) => e.stopPropagation()}
         >
           {/* Header Section */}
           <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10 shadow-sm shadow-slate-900/5">
-            <div>
-              <h3 className="text-xl font-bold text-slate-800 leading-tight">{title}</h3>
-              {subtitle && <p className="text-sm text-slate-500 mt-1 font-medium">{subtitle}</p>}
+            <div className="flex items-center">
+              {customHeaderIcon}
+              <div>
+                <h3 className="font-bold text-slate-800 leading-tight" style={{ fontSize: '20px' }}>{title}</h3>
+                {subtitle && <p className="text-[12px] text-slate-500 mt-1 font-medium">{subtitle}</p>}
+              </div>
             </div>
-            <button 
-              type="button"
-              onClick={onClose}
-              className="p-2.5 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-xl transition-all active:scale-95 group"
-              title="Đóng"
-            >
-              <X className="w-6 h-6 transition-transform group-hover:rotate-90 duration-300" />
-            </button>
+            <div className="flex items-center gap-3">
+              {headerActions}
+              {showCloseButton && (
+                <button 
+                  type="button"
+                  onClick={onClose}
+                  className="p-2.5 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-xl transition-all active:scale-95 group"
+                  title="Đóng"
+                >
+                  <X className="w-6 h-6 transition-transform group-hover:rotate-90 duration-300" />
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Scrollable Body Content */}
-          <div className="flex-1 overflow-y-auto p-6 bg-white">
+          <div className="flex-1 overflow-y-auto p-6 bg-white custom-scrollbar">
             {children}
           </div>
 

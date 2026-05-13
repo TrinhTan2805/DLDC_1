@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Search, Download, Eye } from 'lucide-react';
+import { StatusTag } from '../../common/StatusTag';
 
 type TabType = 'access' | 'activity' | 'info';
 
@@ -254,13 +255,10 @@ export function UserActivityHistoryPage() {
                               {log.browser}
                             </td>
                             <td className="px-4 py-3">
-                              <span className={`inline-flex px-2 py-1 text-xs rounded-full ${
-                                log.status === 'success'
-                                  ? 'bg-green-100 text-green-700'
-                                  : 'bg-red-100 text-red-700'
-                              }`}>
-                                {log.status === 'success' ? 'Thành công' : 'Thất bại'}
-                              </span>
+                              <StatusTag 
+                                label={log.status === 'success' ? 'Thành công' : 'Thất bại'} 
+                                variant={log.status === 'success' ? 'green' : 'red'} 
+                              />
                             </td>
                             <td className="px-4 py-3 text-center">
                               <button

@@ -266,30 +266,17 @@ export function RuleManagementModal({ config, onClose }: RuleManagementModalProp
                 </select>
               </div>
               <div>
-                <label className="text-xs text-slate-600">Hành động xử lý:</label>
+                <label className="text-xs text-slate-600">Xử lý ngoại lệ:</label>
                 <select 
                   className="w-full mt-1 px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={rule.config?.action || ''}
                   onChange={(e) => updateRuleConfig(rule.id, 'action', e.target.value)}
                 >
-                  <option value="">-- Chọn hành động --</option>
+                  <option value="">-- Chọn xử lý --</option>
                   <option value="Loại bỏ bản ghi">Loại bỏ bản ghi</option>
-                  <option value="Thay thế bằng giá trị mặc định">Thay thế bằng giá trị mặc định</option>
                 </select>
               </div>
             </div>
-            {rule.config?.action === 'Thay thế bằng giá trị mặc định' && (
-              <div>
-                <label className="text-xs text-slate-600">Giá trị thay thế:</label>
-                <input 
-                  type="text"
-                  placeholder="Nhập giá trị mặc định..."
-                  className="w-full mt-1 px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={rule.config?.replacementValue || ''}
-                  onChange={(e) => updateRuleConfig(rule.id, 'replacementValue', e.target.value)}
-                />
-              </div>
-            )}
           </div>
         </div>
       );

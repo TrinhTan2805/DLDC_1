@@ -20,6 +20,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { StatsCard } from '../../common/StatsCard';
+import { StatusTag } from '../../common/StatusTag';
 
 interface AccessLog {
   id: number;
@@ -480,11 +481,10 @@ export function AccessLogPage() {
                     <div className="text-xs text-slate-500">{log.browser}</div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-2.5 py-1 rounded-full text-xs ${
-                      log.status === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                    }`}>
-                      {log.status === 'success' ? 'Thành công' : 'Thất bại'}
-                    </span>
+                    <StatusTag 
+                      label={log.status === 'success' ? 'Thành công' : 'Thất bại'} 
+                      variant={log.status === 'success' ? 'green' : 'red'} 
+                    />
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end">
@@ -588,9 +588,7 @@ export function AccessLogPage() {
               <div className="flex items-center gap-2 mb-4">
                 <FileText className="w-5 h-5 text-blue-600" />
                 <h4 className="text-slate-900">Lịch sử thao tác trong phiên</h4>
-                <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs">
-                  {sessionActions.length} hành động
-                </span>
+                <StatusTag label={`${sessionActions.length} hành động`} variant="blue" />
               </div>
 
               {sessionActions.length === 0 ? (
@@ -615,9 +613,7 @@ export function AccessLogPage() {
                           <div className="flex items-start justify-between gap-4 mb-2">
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1">
-                                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs ${getActionColor(action.type)}`}>
-                                  {action.action}
-                                </span>
+                                <StatusTag label={action.action} variant={action.type === 'create' ? 'green' : action.type === 'update' ? 'blue' : action.type === 'delete' ? 'red' : action.type === 'view' ? 'purple' : 'orange'} />
                                 <span className="text-sm text-slate-900">{action.module}</span>
                                 {action.status === 'success' ? (
                                   <CheckCircle2 className="w-4 h-4 text-green-600" />

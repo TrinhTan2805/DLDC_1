@@ -12,6 +12,7 @@ import { ConfirmModal } from '../../common/ConfirmModal';
 import { BaseModal } from '../../common/BaseModal';
 import { StructureLoadingConfig } from './StructureLoadingConfig';
 import { initialSourceSystems } from './mockSourceSystems';
+import { StatusTag } from '../../common/StatusTag';
 
 const ConnectionSuccessModal = ({ isOpen, onClose, onContinue }: { isOpen: boolean, onClose: () => void, onContinue: () => void }) => {
   if (!isOpen) return null;
@@ -286,7 +287,7 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
                               <span className="font-medium text-slate-700">{ss.systemName}</span>
                               <span className="text-xs text-slate-500">{ss.unitName}</span>
                             </div>
-                            <span className="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">{ss.sourceType}</span>
+                            <StatusTag label={ss.sourceType} variant={ss.sourceType === 'Trong ngành' ? 'purple' : 'blue'} />
                           </div>
                         ))}
                       </div>

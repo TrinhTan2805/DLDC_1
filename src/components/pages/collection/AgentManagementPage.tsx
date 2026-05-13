@@ -3,6 +3,7 @@ import { Plus, Search, Edit, Trash2, Eye, RefreshCw, Monitor, Shield, CheckCircl
 import { AgentModal } from './AgentModal';
 import { AgentDetailModal } from './AgentDetailModal';
 import { initialAgents, Agent } from './mockAgents';
+import { StatusTag } from '../../common/StatusTag';
 
 export function AgentManagementPage() {
   const [data, setData] = useState<Agent[]>(initialAgents);
@@ -144,14 +145,11 @@ export function AgentManagementPage() {
                     </td>
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-2">
-                        {item.fileAgent.isActive ? (
-                          <CheckCircle2 className="w-4 h-4 text-green-500" />
-                        ) : (
-                          <XCircle className="w-4 h-4 text-red-500" />
-                        )}
-                        <span className={`text-[13px] font-medium ${item.fileAgent.isActive ? 'text-green-700' : 'text-red-700'}`}>
-                          {item.fileAgent.isActive ? 'Có hoạt động' : 'Không hoạt động'}
-                        </span>
+                        <StatusTag 
+                          label={item.fileAgent.isActive ? 'Có hoạt động' : 'Không hoạt động'} 
+                          variant={item.fileAgent.isActive ? 'emerald' : 'red'}
+                          icon={item.fileAgent.isActive ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                        />
                       </div>
                     </td>
                     <td className="py-4 px-6">
@@ -169,9 +167,10 @@ export function AgentManagementPage() {
                             item.status === 'active' ? 'translate-x-5' : 'translate-x-1'
                           }`} />
                         </button>
-                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter">
-                          {item.status === 'active' ? 'Kích hoạt' : 'Không kích hoạt'}
-                        </span>
+                        <StatusTag 
+                          label={item.status === 'active' ? 'Kích hoạt' : 'Không kích hoạt'} 
+                          variant={item.status === 'active' ? 'blue' : 'slate'} 
+                        />
                       </div>
                     </td>
                     <td className="py-4 px-6">

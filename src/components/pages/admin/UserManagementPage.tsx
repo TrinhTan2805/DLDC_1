@@ -1,7 +1,6 @@
-import { useState } from 'react';
-import { Search, Plus, Edit, Trash2, Lock, Unlock, X, Eye, UserPlus, RefreshCw, Upload, Download } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, Lock, Unlock, X, Eye, UserPlus, RefreshCw, Upload, Download, Users } from 'lucide-react';
+import { StatusTag } from '../../common/StatusTag';
 import { StatsCard } from '../../common/StatsCard';
-import { Users } from 'lucide-react';
 import { ResetPasswordModal } from '../../user/ResetPasswordModal';
 import { ImportExcelModal } from '../../user/ImportExcelModal';
 import * as XLSX from 'xlsx';
@@ -288,9 +287,7 @@ export function UserManagementPage() {
                   <td className="px-6 py-4 text-sm text-slate-700">{user.email}</td>
                   <td className="px-6 py-4 text-sm text-slate-700">{user.department}</td>
                   <td className="px-6 py-4">
-                    <span className="px-2.5 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">
-                      {user.role}
-                    </span>
+                    <StatusTag label={user.role} variant="blue" />
                   </td>
                   <td className="px-6 py-4">
                     <button
@@ -305,13 +302,10 @@ export function UserManagementPage() {
                     </button>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-2.5 py-1 rounded-full text-xs ${
-                      user.status === 'active' ? 'bg-green-100 text-green-700' :
-                      user.status === 'inactive' ? 'bg-slate-100 text-slate-700' :
-                      'bg-red-100 text-red-700'
-                    }`}>
-                      {user.status === 'active' ? 'Hoạt động' : user.status === 'inactive' ? 'Không hoạt động' : 'Bị khóa'}
-                    </span>
+                    <StatusTag 
+                      label={user.status === 'active' ? 'Hoạt động' : user.status === 'inactive' ? 'Không hoạt động' : 'Bị khóa'} 
+                      variant={user.status === 'active' ? 'green' : user.status === 'inactive' ? 'slate' : 'red'} 
+                    />
                   </td>
                   <td className="px-6 py-4 text-sm text-slate-600">{user.lastLogin}</td>
                   <td className="px-6 py-4">
@@ -492,19 +486,14 @@ export function UserManagementPage() {
                   </div>
                   <div>
                     <div className="text-xs text-slate-500 mb-1">Vai trò</div>
-                    <span className="px-2.5 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">
-                      {selectedUser.role}
-                    </span>
+                    <StatusTag label={selectedUser.role} variant="blue" />
                   </div>
                   <div>
                     <div className="text-xs text-slate-500 mb-1">Trạng thái</div>
-                    <span className={`px-2.5 py-1 rounded-full text-xs ${
-                      selectedUser.status === 'active' ? 'bg-green-100 text-green-700' :
-                      selectedUser.status === 'inactive' ? 'bg-slate-100 text-slate-700' :
-                      'bg-red-100 text-red-700'
-                    }`}>
-                      {selectedUser.status === 'active' ? 'Hoạt động' : selectedUser.status === 'inactive' ? 'Không hoạt động' : 'Bị khóa'}
-                    </span>
+                    <StatusTag 
+                      label={selectedUser.status === 'active' ? 'Hoạt động' : selectedUser.status === 'inactive' ? 'Không hoạt động' : 'Bị khóa'} 
+                      variant={selectedUser.status === 'active' ? 'green' : selectedUser.status === 'inactive' ? 'slate' : 'red'} 
+                    />
                   </div>
                   <div>
                     <div className="text-xs text-slate-500 mb-1">Đăng nhập gần nhất</div>

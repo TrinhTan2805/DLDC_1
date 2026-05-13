@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Plus, Search, Server, Eye, Edit, Trash2, CheckCircle, XCircle, PlayCircle, PauseCircle, Activity, Download, Upload, X, Save, Send, AlertCircle, Copy, Check, FileDown, FileJson, FileSpreadsheet, FileCode } from 'lucide-react';
+import { StatusTag } from '../../common/StatusTag';
 import { APIFormFields } from './APIFormFields';
 import { APITestModal } from './APITestModal';
 
@@ -266,48 +267,35 @@ export function APIManagementPage() {
   });
 
   const getStatusBadge = (status: string) => {
-    const styles = {
-      active: 'bg-green-100 text-green-700 border-green-200',
-      inactive: 'bg-slate-100 text-slate-600 border-slate-200',
-      error: 'bg-red-100 text-red-700 border-red-200'
-    };
     const labels = {
       active: 'Hoạt động',
       inactive: 'Tạm dừng',
       error: 'Lỗi'
     };
     return (
-      <span className={`px-2 py-1 text-xs border rounded-full ${styles[status as keyof typeof styles]}`}>
-        {labels[status as keyof typeof labels]}
-      </span>
+      <StatusTag 
+        label={labels[status as keyof typeof labels]} 
+        variant={status === 'active' ? 'green' : status === 'inactive' ? 'slate' : 'red'} 
+      />
     );
   };
 
   const getTypeBadge = (type: string) => {
-    return type === 'active' ? (
-      <span className="px-2 py-1 text-xs bg-blue-100 text-blue-700 border border-blue-200 rounded-full flex items-center gap-1 w-fit">
-        <Upload className="w-3 h-3" />
-        Chủ động
-      </span>
-    ) : (
-      <span className="px-2 py-1 text-xs bg-purple-100 text-purple-700 border border-purple-200 rounded-full flex items-center gap-1 w-fit">
-        <Download className="w-3 h-3" />
-        Thụ động
-      </span>
+    return (
+      <StatusTag 
+        label={type === 'active' ? 'Chủ động' : 'Thụ động'} 
+        variant={type === 'active' ? 'blue' : 'purple'} 
+        icon={type === 'active' ? <Upload className="w-3 h-3" /> : <Download className="w-3 h-3" />}
+      />
     );
   };
 
   const getMethodBadge = (method: string) => {
-    const styles = {
-      GET: 'bg-green-100 text-green-700',
-      POST: 'bg-blue-100 text-blue-700',
-      PUT: 'bg-amber-100 text-amber-700',
-      DELETE: 'bg-red-100 text-red-700'
-    };
     return (
-      <span className={`px-2 py-0.5 text-xs rounded ${styles[method as keyof typeof styles]}`}>
-        {method}
-      </span>
+      <StatusTag 
+        label={method} 
+        variant={method === 'GET' ? 'green' : method === 'POST' ? 'blue' : method === 'PUT' ? 'orange' : 'red'} 
+      />
     );
   };
 

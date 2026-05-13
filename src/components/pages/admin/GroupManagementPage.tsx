@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Search, Plus, Edit, Trash2, Users, Eye, UserPlus, Lock, Settings, ChevronRight, ChevronDown } from 'lucide-react';
 import { StatsCard } from '../../common/StatsCard';
+import { StatusTag } from '../../common/StatusTag';
 import { UsersRound } from 'lucide-react';
 
 interface Group {
@@ -576,9 +577,7 @@ export function GroupManagementPage() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
                     <h3 className="text-slate-900">{group.name}</h3>
-                    <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">
-                      {group.code}
-                    </span>
+                    <StatusTag label={group.code} variant="blue" />
                   </div>
                   <p className="text-sm text-slate-600 mb-1">{group.description}</p>
                   <p className="text-xs text-slate-500">{group.department}</p>
@@ -613,11 +612,10 @@ export function GroupManagementPage() {
                 </div>
                 <div>
                   <div className="text-xs text-slate-500 mb-1">Trạng thái</div>
-                  <span className={`px-2 py-0.5 rounded-full text-xs ${
-                    group.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-700'
-                  }`}>
-                    {group.status === 'active' ? 'Hoạt động' : 'Không hoạt động'}
-                  </span>
+                  <StatusTag 
+                    label={group.status === 'active' ? 'Hoạt động' : 'Không hoạt động'} 
+                    variant={group.status === 'active' ? 'green' : 'slate'} 
+                  />
                 </div>
               </div>
 
@@ -771,9 +769,7 @@ export function GroupManagementPage() {
                   </div>
                   <div>
                     <div className="text-xs text-slate-500 mb-1">Mã nhóm</div>
-                    <span className="px-2.5 py-1 bg-blue-100 text-blue-700 rounded text-xs">
-                      {selectedGroup.code}
-                    </span>
+                    <StatusTag label={selectedGroup.code} variant="blue" />
                   </div>
                   <div className="col-span-2">
                     <div className="text-xs text-slate-500 mb-1">Mô tả</div>
@@ -785,11 +781,10 @@ export function GroupManagementPage() {
                   </div>
                   <div>
                     <div className="text-xs text-slate-500 mb-1">Trạng thái</div>
-                    <span className={`px-2.5 py-1 rounded-full text-xs ${
-                      selectedGroup.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-700'
-                    }`}>
-                      {selectedGroup.status === 'active' ? 'Hoạt động' : 'Không hoạt động'}
-                    </span>
+                    <StatusTag 
+                      label={selectedGroup.status === 'active' ? 'Hoạt động' : 'Không hoạt động'} 
+                      variant={selectedGroup.status === 'active' ? 'green' : 'slate'} 
+                    />
                   </div>
                 </div>
               </div>

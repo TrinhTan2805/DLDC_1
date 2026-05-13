@@ -31,6 +31,7 @@ import {
   Lock,
   Unlock
 } from 'lucide-react';
+import { StatusTag } from '../common/StatusTag';
 import { PageHeader } from '../common/PageHeader';
 import { AttributeManagementModal } from '../masterdata/AttributeManagementModal';
 import { MergeRuleModal } from '../masterdata/MergeRuleModal';
@@ -625,9 +626,10 @@ export function MasterDataPage() {
                       <td className="px-4 py-3 text-sm text-slate-600">{entity.attributes.length}</td>
                       <td className="px-4 py-3 text-sm text-slate-600">{entity.version}</td>
                       <td className="px-4 py-3">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs ${statusColors[entity.status]}`}>
-                          {statusLabels[entity.status]}
-                        </span>
+                        <StatusTag 
+                          label={statusLabels[entity.status]} 
+                          variant={entity.status === 'published' ? 'blue' : entity.status === 'approved' ? 'green' : entity.status === 'review' ? 'amber' : entity.status === 'rejected' ? 'red' : 'slate'} 
+                        />
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-2">
@@ -729,9 +731,10 @@ export function MasterDataPage() {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-slate-900">{entity.name}</h3>
-                      <span className={`px-2.5 py-1 rounded-full text-xs ${statusColors[entity.status]}`}>
-                        {statusLabels[entity.status]}
-                      </span>
+                      <StatusTag 
+                        label={statusLabels[entity.status]} 
+                        variant={entity.status === 'published' ? 'blue' : entity.status === 'approved' ? 'green' : entity.status === 'review' ? 'amber' : entity.status === 'rejected' ? 'red' : 'slate'} 
+                      />
                       {entity.isPublished && (
                         <span className="px-2.5 py-1 bg-emerald-100 text-emerald-700 text-xs rounded-full flex items-center gap-1">
                           <Globe className="w-3 h-3" />
@@ -879,9 +882,10 @@ export function MasterDataPage() {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-slate-900">{entity.name}</h3>
-                      <span className="px-2.5 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full">
-                        Chờ phê duyệt
-                      </span>
+                      <StatusTag 
+                        label="Chờ phê duyệt" 
+                        variant="amber" 
+                      />
                     </div>
                     <p className="text-sm text-slate-600 mb-3">{entity.description}</p>
                     <div className="grid grid-cols-3 gap-4 text-sm">
@@ -981,14 +985,16 @@ export function MasterDataPage() {
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-slate-900">{entity.name}</h3>
                       {entity.isPublished ? (
-                        <span className="px-2.5 py-1 bg-emerald-100 text-emerald-700 text-xs rounded-full flex items-center gap-1">
-                          <Globe className="w-3 h-3" />
-                          Đã công khai
-                        </span>
+                        <StatusTag 
+                          label="Đã công khai" 
+                          variant="emerald" 
+                          icon={<Globe className="w-3 h-3" />}
+                        />
                       ) : (
-                        <span className="px-2.5 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
-                          Sẵn sàng công khai
-                        </span>
+                        <StatusTag 
+                          label="Sẵn sàng công khai" 
+                          variant="blue" 
+                        />
                       )}
                     </div>
                     <p className="text-sm text-slate-600 mb-3">{entity.description}</p>
@@ -1100,7 +1106,7 @@ export function MasterDataPage() {
                         <p className="text-sm text-slate-900">Công khai dữ liệu chủ "Công dân"</p>
                         <p className="text-xs text-slate-500">bởi Lãnh đạo C • 25/01/2024 10:30</p>
                       </div>
-                      <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">Công khai</span>
+                      <StatusTag label="Công khai" variant="green" />
                     </div>
                   </div>
                 </div>
@@ -1116,7 +1122,7 @@ export function MasterDataPage() {
                         <p className="text-sm text-slate-900">Phê duyệt dữ liệu chủ "Công dân"</p>
                         <p className="text-xs text-slate-500">bởi Trần Thị B • 20/01/2024 14:20</p>
                       </div>
-                      <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">Phê duyệt</span>
+                      <StatusTag label="Phê duyệt" variant="blue" />
                     </div>
                   </div>
                 </div>
@@ -1132,7 +1138,7 @@ export function MasterDataPage() {
                         <p className="text-sm text-slate-900">Cập nhật phiên bản 2.1.0</p>
                         <p className="text-xs text-slate-500">bởi Nguyễn Văn A • 15/01/2024 09:15</p>
                       </div>
-                      <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded">Cập nhật</span>
+                      <StatusTag label="Cập nhật" variant="purple" />
                     </div>
                     <div className="text-xs text-slate-600 mt-2">
                       <p>• Thêm thuộc tính "Nơi ĐKHK"</p>
@@ -1151,7 +1157,7 @@ export function MasterDataPage() {
                         <p className="text-sm text-slate-900">Tạo dữ liệu chủ "Công dân"</p>
                         <p className="text-xs text-slate-500">bởi Nguyễn Văn A • 10/01/2024 08:00</p>
                       </div>
-                      <span className="px-2 py-1 bg-slate-100 text-slate-700 text-xs rounded">Tạo mới</span>
+                      <StatusTag label="Tạo mới" variant="slate" />
                     </div>
                   </div>
                 </div>
@@ -1238,9 +1244,10 @@ export function MasterDataPage() {
                       <td className="px-4 py-3 text-sm text-slate-600">{entity.version}</td>
                       <td className="px-4 py-3 text-sm text-slate-600">{entity.recordCount?.toLocaleString() || 0}</td>
                       <td className="px-4 py-3">
-                        <span className={`px-2.5 py-1 rounded-full text-xs ${statusColors[entity.status]}`}>
-                          {statusLabels[entity.status]}
-                        </span>
+                        <StatusTag 
+                          label={statusLabels[entity.status]} 
+                          variant={entity.status === 'published' ? 'blue' : entity.status === 'approved' ? 'green' : entity.status === 'review' ? 'amber' : entity.status === 'rejected' ? 'red' : 'slate'} 
+                        />
                       </td>
                       <td className="px-4 py-3">
                         <button
@@ -1452,9 +1459,10 @@ export function MasterDataPage() {
                 </div>
                 <div>
                   <label className="block text-sm text-slate-500 mb-1">Trạng thái</label>
-                  <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs ${statusColors[viewingEntity.status]}`}>
-                    {statusLabels[viewingEntity.status]}
-                  </span>
+                  <StatusTag 
+                    label={statusLabels[viewingEntity.status]} 
+                    variant={viewingEntity.status === 'published' ? 'blue' : viewingEntity.status === 'approved' ? 'green' : viewingEntity.status === 'review' ? 'amber' : viewingEntity.status === 'rejected' ? 'red' : 'slate'} 
+                  />
                 </div>
                 <div className="col-span-2">
                   <label className="block text-sm text-slate-500 mb-1">Tên dữ liệu chủ</label>

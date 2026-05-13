@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
 import { Search, Filter, Upload, Download, Eye, Send, Trash2, RotateCcw, Globe, CheckCircle2, XCircle, Clock, History as HistoryIcon, Database, FileText, GitCompare, Calendar } from 'lucide-react';
+import { StatusTag } from '../../common/StatusTag';
 import { DataDetailModal } from '../../common/DataDetailModal';
 import { EditDataModal } from '../../common/EditDataModal';
 import { ApprovalModal } from '../../common/ApprovalModal';
@@ -614,30 +614,22 @@ export function MasterDataAPage() {
                     </td>
                     <td className="px-4 py-3 text-sm text-slate-900">{record.updateDate}</td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex px-2 py-1 text-xs rounded border ${getStatusColor(record.status)}`}>
-                        {getStatusText(record.status)}
-                      </span>
+                      <StatusTag 
+                        label={getStatusText(record.status)} 
+                        variant={record.status === 'processed' ? 'green' : 'blue'} 
+                      />
                     </td>
                     <td className="px-4 py-3">
-                      <button
-                        onClick={() => {
-                          if (record.approvalStatus === 'pending') {
-                            setApprovalRecord(record);
-                          }
-                        }}
-                        className={`inline-flex px-2 py-1 text-xs rounded border ${getApprovalStatusColor(record.approvalStatus)} ${
-                          record.approvalStatus === 'pending' ? 'cursor-pointer hover:ring-2 hover:ring-blue-300' : ''
-                        }`}
-                        title={record.approvalStatus === 'pending' ? 'Click để phê duyệt' : ''}
-                        disabled={record.approvalStatus !== 'pending'}
-                      >
-                        {getApprovalStatusText(record.approvalStatus)}
-                      </button>
+                      <StatusTag 
+                        label={getApprovalStatusText(record.approvalStatus)} 
+                        variant={record.approvalStatus === 'approved' ? 'green' : record.approvalStatus === 'pending' ? 'blue' : 'red'} 
+                      />
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex px-2 py-1 text-xs rounded border ${getPublicStatusColor(record.publicStatus)}`}>
-                        {getPublicStatusText(record.publicStatus)}
-                      </span>
+                      <StatusTag 
+                        label={getPublicStatusText(record.publicStatus)} 
+                        variant={record.publicStatus === 'published' ? 'green' : 'red'} 
+                      />
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1">
@@ -733,9 +725,10 @@ export function MasterDataAPage() {
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex px-2 py-1 text-xs rounded border ${getApprovalStatusColor(record.approvalStatus)}`}>
-                        {getApprovalStatusText(record.approvalStatus)}
-                      </span>
+                      <StatusTag 
+                        label={getApprovalStatusText(record.approvalStatus)} 
+                        variant="blue" 
+                      />
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
@@ -1345,9 +1338,7 @@ export function MasterDataAPage() {
                             📅 {record.birthDate} • 🆔 {record.cccdNumber}
                           </div>
                         </div>
-                        <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">
-                          Phiên bản hiện tại: v4
-                        </span>
+                        <StatusTag label="Phiên bản hiện tại: v4" variant="purple" />
                       </div>
                     </div>
 

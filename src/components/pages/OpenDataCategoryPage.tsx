@@ -18,6 +18,7 @@ import {
   Upload,
   Share2
 } from 'lucide-react';
+import { StatusTag } from '../common/StatusTag';
 
 interface OpenDataCategory {
   id: string;
@@ -577,12 +578,17 @@ export function OpenDataCategoryPage() {
                       <td className="px-4 py-3 text-sm text-slate-600">{category.dataType}</td>
                       <td className="px-4 py-3 text-sm text-slate-600">{category.managingUnit}</td>
                       <td className="px-4 py-3">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs ${statusColors[category.status]}`}>
-                          {category.status === 'approved' && <CheckCircle className="w-3 h-3" />}
-                          {category.status === 'pending' && <Clock className="w-3 h-3" />}
-                          {category.status === 'rejected' && <AlertCircle className="w-3 h-3" />}
-                          {statusLabels[category.status]}
-                        </span>
+                        <StatusTag 
+                          label={statusLabels[category.status]} 
+                          variant={category.status === 'published' ? 'indigo' : category.status === 'approved' ? 'green' : category.status === 'pending' ? 'amber' : category.status === 'rejected' ? 'red' : 'slate'}
+                          icon={
+                            <>
+                              {category.status === 'approved' && <CheckCircle className="w-3 h-3" />}
+                              {category.status === 'pending' && <Clock className="w-3 h-3" />}
+                              {category.status === 'rejected' && <AlertCircle className="w-3 h-3" />}
+                            </>
+                          }
+                        />
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-2">
@@ -657,9 +663,7 @@ export function OpenDataCategoryPage() {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-slate-900">{category.name}</h3>
-                      <span className="px-2.5 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full">
-                        Chờ phê duyệt
-                      </span>
+                      <StatusTag label="Chờ phê duyệt" variant="amber" />
                     </div>
                     <p className="text-sm text-slate-600 mb-3">{category.description}</p>
                     <div className="grid grid-cols-3 gap-4 text-sm">
@@ -768,18 +772,15 @@ export function OpenDataCategoryPage() {
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-slate-900">{category.name}</h3>
                       {category.isPublished ? (
-                        <span className="px-2.5 py-1 bg-emerald-100 text-emerald-700 text-xs rounded-full flex items-center gap-1">
-                          <Globe className="w-3 h-3" />
-                          Đã công bố - {shareScopeLabels[category.shareScope || 'internal']}
-                        </span>
+                        <StatusTag 
+                          label={`Đã công bố - ${shareScopeLabels[category.shareScope || 'internal']}`} 
+                          variant="emerald" 
+                          icon={<Globe className="w-3 h-3" />} 
+                        />
                       ) : category.proposedForPublish ? (
-                        <span className="px-2.5 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full">
-                          Đề xuất công bố
-                        </span>
+                        <StatusTag label="Đề xuất công bố" variant="amber" />
                       ) : (
-                        <span className="px-2.5 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
-                          Sẵn sàng công bố
-                        </span>
+                        <StatusTag label="Sẵn sàng công bố" variant="blue" />
                       )}
                     </div>
                     <p className="text-sm text-slate-600 mb-3">{category.description}</p>
@@ -948,9 +949,10 @@ export function OpenDataCategoryPage() {
                       <td className="px-4 py-3 text-sm text-slate-600">{category.dataType}</td>
                       <td className="px-4 py-3 text-sm text-slate-600">{category.managingUnit}</td>
                       <td className="px-4 py-3">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs ${statusColors[category.status]}`}>
-                          {statusLabels[category.status]}
-                        </span>
+                        <StatusTag 
+                          label={statusLabels[category.status]} 
+                          variant={category.status === 'published' ? 'indigo' : category.status === 'approved' ? 'green' : category.status === 'pending' ? 'amber' : category.status === 'rejected' ? 'red' : 'slate'} 
+                        />
                       </td>
                       <td className="px-4 py-3 text-sm text-slate-600">
                         {category.shareScope ? shareScopeLabels[category.shareScope] : '-'}
@@ -1190,9 +1192,10 @@ export function OpenDataCategoryPage() {
                 </div>
                 <div>
                   <label className="block text-sm text-slate-500 mb-1">Trạng thái</label>
-                  <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs ${statusColors[viewingCategory.status]}`}>
-                    {statusLabels[viewingCategory.status]}
-                  </span>
+                  <StatusTag 
+                    label={statusLabels[viewingCategory.status]} 
+                    variant={viewingCategory.status === 'published' ? 'indigo' : viewingCategory.status === 'approved' ? 'green' : viewingCategory.status === 'pending' ? 'amber' : viewingCategory.status === 'rejected' ? 'red' : 'slate'} 
+                  />
                 </div>
                 <div className="col-span-2">
                   <label className="block text-sm text-slate-500 mb-1">Tên danh mục</label>

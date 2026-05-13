@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
 import { Download, FileText, GitCompare, Calendar, User, Edit, CheckCircle, XCircle, Search, Filter as FilterIcon, Eye } from 'lucide-react';
+import { StatusTag } from '../../common/StatusTag';
 
 // Mock data for change history
 const mockHistoryData = {
@@ -455,15 +455,14 @@ export function HistoryTab({ records }: HistoryTabProps) {
                       {getRecordName(record.recordCode)}
                     </td>
                     <td className="px-4 py-3 text-sm text-slate-900">
-                      <span className="inline-flex items-center justify-center w-8 h-8 bg-purple-100 text-purple-700 rounded-full text-xs">
-                        v{record.version}
-                      </span>
+                      <StatusTag label={`v${record.version}`} variant="purple" />
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs rounded-full border ${getActionColor(record.action)}`}>
-                        {getActionIcon(record.action)}
-                        {record.action}
-                      </span>
+                      <StatusTag 
+                        label={record.action} 
+                        variant={record.action === 'Tạo mới' ? 'blue' : record.action === 'Chỉnh sửa' ? 'orange' : record.action === 'Phê duyệt' ? 'green' : 'red'} 
+                        icon={getActionIcon(record.action)}
+                      />
                     </td>
                     <td className="px-4 py-3 text-sm text-slate-900">
                       <div className="flex items-center gap-2">
@@ -589,9 +588,10 @@ export function HistoryTab({ records }: HistoryTabProps) {
                           {/* Header */}
                           <div className="bg-white px-4 py-3 border-b border-slate-200 flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                              <span className={`px-3 py-1 rounded-full text-sm border ${getActionColor(item.action)}`}>
-                                {item.action}
-                              </span>
+                              <StatusTag 
+                                label={item.action} 
+                                variant={item.action === 'Tạo mới' ? 'blue' : item.action === 'Chỉnh sửa' ? 'orange' : item.action === 'Phê duyệt' ? 'green' : 'red'} 
+                              />
                               <span className="text-sm text-slate-600">
                                 Phiên bản <strong className="text-slate-900">{item.version}</strong>
                               </span>
@@ -784,13 +784,12 @@ export function HistoryTab({ records }: HistoryTabProps) {
             <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
               {/* Version Info Badge */}
               <div className="flex items-center gap-3 mb-6">
-                <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg border ${getActionColor(selectedDetailRecord.action)}`}>
-                  {getActionIcon(selectedDetailRecord.action)}
-                  <span>{selectedDetailRecord.action}</span>
-                </span>
-                <span className="inline-flex items-center justify-center px-4 py-2 bg-purple-100 text-purple-700 rounded-lg border border-purple-200">
-                  Phiên bản {selectedDetailRecord.version}
-                </span>
+                <StatusTag 
+                  label={selectedDetailRecord.action} 
+                  variant={selectedDetailRecord.action === 'Tạo mới' ? 'blue' : selectedDetailRecord.action === 'Chỉnh sửa' ? 'orange' : selectedDetailRecord.action === 'Phê duyệt' ? 'green' : 'red'} 
+                  icon={getActionIcon(selectedDetailRecord.action)}
+                />
+                <StatusTag label={`Phiên bản ${selectedDetailRecord.version}`} variant="purple" />
               </div>
 
               {/* Basic Info */}
@@ -971,7 +970,7 @@ export function HistoryTab({ records }: HistoryTabProps) {
                       <div className="text-sm text-slate-600">Phiên bản hiện tại</div>
                       <div className="text-xs text-slate-500">{selectedHistory[0]?.date || 'N/A'} - {selectedHistory[0]?.user || 'N/A'}</div>
                     </div>
-                    <span className="ml-auto px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">Đang sử dụng</span>
+                    <StatusTag label="Đang sử dụng" variant="purple" />
                   </div>
                   {selectedHistory[0]?.note && (
                     <p className="text-sm text-slate-600 bg-slate-50 rounded p-2">
@@ -1000,7 +999,7 @@ export function HistoryTab({ records }: HistoryTabProps) {
                         {selectedHistory.find(h => h.version === selectedRestoreVersion)?.date || 'N/A'} - {selectedHistory.find(h => h.version === selectedRestoreVersion)?.user || 'N/A'}
                       </div>
                     </div>
-                    <span className="ml-auto px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs">Khôi phục</span>
+                    <StatusTag label="Khôi phục" variant="green" />
                   </div>
                   {selectedHistory.find(h => h.version === selectedRestoreVersion)?.note && (
                     <p className="text-sm text-slate-600 bg-slate-50 rounded p-2">
