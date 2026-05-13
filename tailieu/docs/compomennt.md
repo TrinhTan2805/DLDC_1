@@ -305,13 +305,24 @@ Dưới đây là danh sách các component đã được xây dựng và cần 
 - Cung cấp tính năng chọn trang, xem tổng số bản ghi và điều chỉnh số dòng hiển thị trên mỗi trang.
 
 **Ví dụ hiển thị:**
-<div style="margin-top: 8px; display: flex; align-items: center; justify-content: space-between; font-size: 14px; max-width: 500px;">
-  <span style="color: #64748b;">Hiển thị 1 - 10 / 50</span>
-  <div style="display: flex; gap: 4px;">
-    <div style="padding: 4px 12px; border: 1px solid #e2e8f0; border-radius: 4px; color: #94a3b8; cursor: not-allowed;">Trang trước</div>
-    <div style="padding: 4px 12px; border: 1px solid #2563eb; background: #2563eb; color: white; border-radius: 4px; cursor: pointer;">1</div>
-    <div style="padding: 4px 12px; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer;">2</div>
-    <div style="padding: 4px 12px; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer;">Sau</div>
+<div style="margin-top: 8px; display: flex; align-items: center; justify-content: space-between; font-size: 14px; max-width: 600px; flex-wrap: wrap; gap: 12px;">
+  <div style="display: flex; align-items: center; gap: 8px;">
+    <span style="color: #64748b;">Hiển thị</span>
+    <div style="padding: 4px 8px; border: 1px solid #e2e8f0; border-radius: 4px; background: white; display: flex; align-items: center; gap: 4px; cursor: pointer;">
+      <span>10</span>
+      <span style="font-size: 10px; color: #64748b;">▼</span>
+    </div>
+    <span style="color: #64748b;">bản ghi / trang</span>
+  </div>
+  
+  <div style="display: flex; align-items: center; gap: 12px;">
+    <span style="color: #64748b;">1 - 10 / 50</span>
+    <div style="display: flex; gap: 4px;">
+      <div style="padding: 4px 12px; border: 1px solid #e2e8f0; border-radius: 4px; color: #94a3b8; cursor: not-allowed;">Trước</div>
+      <div style="padding: 4px 12px; border: 1px solid #2563eb; background: #2563eb; color: white; border-radius: 4px; cursor: pointer;">1</div>
+      <div style="padding: 4px 12px; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer;">2</div>
+      <div style="padding: 4px 12px; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer;">Sau</div>
+    </div>
   </div>
 </div>
 

@@ -8,11 +8,27 @@ const methodData = [
   { name: 'File excel', value: 15 },
 ];
 
-const sourceData = [
+const sourceDataAll = [
   { name: 'Cục hành chính tư pháp', value: 345 },
   { name: 'Cục thi hành án', value: 287 },
   { name: 'Cục bổ trợ tư pháp', value: 256 },
   { name: 'Vụ Hợp tác quốc tế', value: 178 },
+  { name: 'Bộ Nội vụ', value: 210 },
+  { name: 'Bộ Công an', value: 190 },
+];
+
+const sourceDataInternal = [
+  { name: 'Cục hành chính tư pháp', value: 345 },
+  { name: 'Cục thi hành án', value: 287 },
+  { name: 'Cục bổ trợ tư pháp', value: 256 },
+  { name: 'Vụ Hợp tác quốc tế', value: 178 },
+];
+
+const sourceDataExternal = [
+  { name: 'Bộ Nội vụ', value: 210 },
+  { name: 'Bộ Công an', value: 190 },
+  { name: 'Bộ Tài chính', value: 150 },
+  { name: 'Bộ Y tế', value: 120 },
 ];
 
 const resultData = [
@@ -22,12 +38,12 @@ const resultData = [
 ];
 
 const timeDataToday = [
-  { name: '00:00', value: 123 },
-  { name: '04:00', value: 87 },
-  { name: '08:00', value: 245 },
-  { name: '12:00', value: 389 },
-  { name: '16:00', value: 421 },
-  { name: '20:00', value: 165 },
+  { name: '0h-4h', value: 123 },
+  { name: '4h-8h', value: 87 },
+  { name: '8h-12h', value: 245 },
+  { name: '12h-16h', value: 389 },
+  { name: '16h-20h', value: 421 },
+  { name: '20h-24h', value: 165 },
 ];
 
 const timeDataThisWeek = [
@@ -62,20 +78,6 @@ const timeDataThisYear = [
   { name: 'T12', value: 9100 },
 ];
 
-const trendData = [
-  { id: 'trend-1', name: 'T1', value: 645000 },
-  { id: 'trend-2', name: 'T2', value: 658000 },
-  { id: 'trend-3', name: 'T3', value: 670000 },
-  { id: 'trend-4', name: 'T4', value: 685000 },
-  { id: 'trend-5', name: 'T5', value: 692000 },
-  { id: 'trend-6', name: 'T6', value: 705000 },
-  { id: 'trend-7', name: 'T7', value: 718000 },
-  { id: 'trend-8', name: 'T8', value: 710000 },
-  { id: 'trend-9', name: 'T9', value: 725000 },
-  { id: 'trend-10', name: 'T10', value: 732000 },
-  { id: 'trend-11', name: 'T11', value: 745000 },
-  { id: 'trend-12', name: 'T12', value: 758000 },
-];
 
 interface ChartCardProps {
   title: string;
@@ -167,53 +169,6 @@ function SummaryCard({ title, value, icon, bgColor, iconColor }: SummaryCardProp
   );
 }
 
-function TrendChart() {
-  return (
-    <div className="bg-white rounded-lg border border-slate-200 p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h3 className="text-slate-900">Xu hướng Thu thập</h3>
-          <p className="text-sm text-slate-500 mt-1">12 tháng</p>
-        </div>
-      </div>
-
-      {/* Chart */}
-      <div className="w-full h-64">
-        <ResponsiveContainer width="100%" height={256}>
-          <LineChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-            <XAxis 
-              dataKey="name" 
-              tick={{ fill: '#64748b', fontSize: 12 }}
-              axisLine={{ stroke: '#e2e8f0' }}
-            />
-            <YAxis 
-              tick={{ fill: '#64748b', fontSize: 12 }}
-              axisLine={{ stroke: '#e2e8f0' }}
-            />
-            <Tooltip 
-              contentStyle={{
-                backgroundColor: 'white',
-                border: '1px solid #e2e8f0',
-                borderRadius: '8px',
-                fontSize: '12px'
-              }}
-            />
-            <Line 
-              type="monotone" 
-              dataKey="value" 
-              stroke="#3b82f6" 
-              strokeWidth={2}
-              dot={{ fill: '#3b82f6', r: 4 }}
-              activeDot={{ r: 6 }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-  );
-}
 
 export function CollectionDashboard() {
   const [timeFilter, setTimeFilter] = React.useState('Hôm nay');
@@ -230,6 +185,20 @@ export function CollectionDashboard() {
 
   const currentTimeData = getTimeData();
   const timeTotal = currentTimeData.reduce((acc, curr) => acc + curr.value, 0);
+
+  const [sourceSystemFilter, setSourceSystemFilter] = React.useState('Trong ngành');
+
+  const getSourceData = () => {
+    switch(sourceSystemFilter) {
+      case 'Trong ngành': return sourceDataInternal;
+      case 'Ngoài ngành': return sourceDataExternal;
+      case 'Tất cả hệ thống':
+      default: return sourceDataAll;
+    }
+  };
+
+  const currentSourceData = getSourceData();
+  const sourceTotal = currentSourceData.reduce((acc, curr) => acc + curr.value, 0);
 
   return (
     <div className="space-y-6">
@@ -258,8 +227,6 @@ export function CollectionDashboard() {
         />
       </div>
 
-      {/* Trend Chart - Full Width */}
-      <TrendChart />
 
       {/* Row 1 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -270,8 +237,11 @@ export function CollectionDashboard() {
         />
         <ChartCard
           title="Biểu đồ thu thập dữ liệu theo nguồn cung cấp dữ liệu"
-          total={1480}
-          data={sourceData}
+          total={sourceTotal}
+          data={currentSourceData}
+          filterValue={sourceSystemFilter}
+          onFilterChange={setSourceSystemFilter}
+          filterOptions={['Trong ngành', 'Ngoài ngành']}
         />
       </div>
 
