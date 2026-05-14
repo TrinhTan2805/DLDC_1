@@ -1,4 +1,4 @@
-import { X, Search, Filter, Download, XCircle, CheckCircle, AlertCircle, Eye, RefreshCw, Calendar, ArrowUp, FileText, FileDown } from 'lucide-react';
+import { X, Search, Filter, Download, XCircle, CheckCircle, AlertCircle, Eye, RefreshCw, Calendar, ArrowUp, FileText, FileDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 
 export interface DeathCertModalProps {
@@ -87,6 +87,10 @@ export function DeathCertModal({
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
   const [viewingPdfUrl, setViewingPdfUrl] = useState<string | null>(null);
   
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
   if (!isOpen && !isInline) return null;
 
   // Mock data
@@ -184,59 +188,13 @@ export function DeathCertModal({
       signerPosition: 'Phó Chủ tịch UBND',
       implementer: 'Lê Thị F',
       notes: ''
-    },
-    {
-      id: '3',
-      status: 'error',
-      hasError: true,
-      errorMessage: 'Thiếu thông tin người đi khai tử',
-      deathNoticeNumber: 'GBT-2024-003',
-      deceasedName: 'Lê Minh',
-      deceasedGender: 'Nam',
-      deathHour: 22,
-      deathMinute: 45,
-      deathDate: '01/01/2024',
-      syncDate: '02/01/2024 10:20:15',
-      
-      fileId: '',
-      recordCode: 'KT-2024-009999',
-      registrationNumber: '9999/2024',
-      bookNumber: '5',
-      pageNumber: '88',
-
-      deceasedBirthDate: '05/12/1980',
-      deceasedEthnicity: 'Kinh',
-      deceasedNationality: 'Việt Nam',
-      deceasedResidence: '789 Trần Phú, Hải Châu, Đà Nẵng',
-      deceasedIdIssueDate: '12/12/2012',
-      deceasedIdIssuePlace: 'Công an Đà Nẵng',
-      deceasedIdNumber: '048080005555',
-      deceasedPersonalId: '048080005555',
-      deathDateWords: 'Mùng một tháng một năm hai nghìn không trăm hai mươi tư',
-      deathPlace: 'Bệnh viện Đà Nẵng',
-      deathCause: 'Tai nạn giao thông',
-      deathNoticeIssueDate: '02/01/2024',
-      deathNoticeIssuePlace: 'Bệnh viện Đà Nẵng',
-
-      declarerName: '', // Missing
-      declarerRelationship: '', // Missing
-      declarerIdIssueDate: '',
-      declarerIdIssuePlace: '',
-      declarerIdNumber: '',
-      declarerPersonalId: '',
-
-      registrationPlace: 'UBND Phường Thạch Thang, Quận Hải Châu, Đà Nẵng',
-      registrationDate: '05/01/2024',
-      registrationType: 'Khai tử quá hạn',
-      signerName: 'Trần Văn G',
-      signerPosition: 'Chủ tịch UBND Phường',
-      implementer: 'Nguyễn Thị H',
-      notes: 'Bổ sung CMND của người khai'
     }
   ];
 
+  const totalPages = Math.ceil(totalRecords / itemsPerPage);
+
   return (
-    <>
+    <div className="death-cert-modal">
       {/* Backdrop */}
       {!isInline && <div className="fixed inset-0 bg-black/50 z-50" onClick={onClose} />}
       
@@ -244,7 +202,7 @@ export function DeathCertModal({
       <div className={isInline ? "w-full" : "fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"}>
         <div className={`bg-white ${isInline ? "border border-slate-200 rounded-xl overflow-hidden" : "rounded-lg shadow-xl max-w-[95vw] w-full max-h-[90vh] pointer-events-auto"} flex flex-col`}>
           {/* Header */}
-          <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+          <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0 bg-white sticky top-0 z-20">
             <div>
               <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
             </div>
@@ -264,7 +222,7 @@ export function DeathCertModal({
           {/* Content */}
           <div className="flex-1 overflow-hidden flex flex-col">
             {activeTab === 'list' && (
-              <>
+              <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Search & Actions */}
                 <div className="px-6 py-4 border-b border-slate-200 flex-shrink-0 bg-white">
                   <div className="flex items-center justify-between gap-4">
@@ -313,23 +271,23 @@ export function DeathCertModal({
                       <div className="grid grid-cols-4 gap-4 relative z-10">
                         <div>
                           <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 ml-1">Họ tên người chết</label>
-                          <input type="text" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm" placeholder="Nhập họ tên..." />
+                          <input aria-label="Input" type="text" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm" placeholder="Nhập họ tên..." />
                         </div>
                         <div>
                           <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 ml-1">Số giấy báo tử</label>
-                          <input type="text" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm" placeholder="Số giấy báo tử..." />
+                          <input aria-label="Input" type="text" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm" placeholder="Số giấy báo tử..." />
                         </div>
                         <div>
                           <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 ml-1">Từ ngày</label>
                           <div className="relative">
-                            <input type="date" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm appearance-none" />
+                            <input aria-label="Input" type="date" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm appearance-none" />
                             <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                           </div>
                         </div>
                         <div>
                           <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 ml-1">Đến ngày</label>
                           <div className="relative">
-                            <input type="date" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm appearance-none" />
+                            <input aria-label="Input" type="date" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm appearance-none" />
                             <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                           </div>
                         </div>
@@ -348,7 +306,7 @@ export function DeathCertModal({
                   )}
                 </div>
 
-                {/* Table */}
+                {/* Table Container */}
                 <div className="flex-1 overflow-auto bg-white">
                   <table className="w-full border-collapse">
                     <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
@@ -367,7 +325,7 @@ export function DeathCertModal({
                     <tbody className="divide-y divide-slate-100">
                       {records.map((record, index) => (
                         <tr key={record.id} className="hover:bg-blue-50/30 transition-all group">
-                          <td className="px-4 py-4 text-center text-sm text-slate-500 font-medium">{(index + 1).toString().padStart(2, '0')}</td>
+                          <td className="px-4 py-4 text-center text-sm text-slate-500 font-medium">{((currentPage - 1) * itemsPerPage + index + 1).toString().padStart(2, '0')}</td>
                           <td className="px-4 py-4 text-center text-sm font-semibold text-slate-900 font-mono">{record.deathNoticeNumber}</td>
                           <td className="px-4 py-4 text-center text-sm font-semibold text-slate-900">{record.deceasedName}</td>
                           <td className="px-4 py-4 text-center text-sm text-slate-600 font-medium">{record.deceasedGender}</td>
@@ -409,78 +367,78 @@ export function DeathCertModal({
                   </table>
                 </div>
 
-                {/* Pagination */}
-                <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between bg-slate-50/50">
-                  <div className="text-sm text-slate-600 font-medium">
-                    Hiển thị <span className="text-slate-900 font-bold">1-{records.length}</span> trong tổng số <span className="text-slate-900 font-bold">{totalRecords}</span> bản ghi
-                  </div>
+                {/* Pagination UI - According to rule 5.14 */}
+                <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between bg-white flex-wrap gap-4">
                   <div className="flex items-center gap-2">
-                    <button className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-white text-sm font-bold transition-colors">Trước</button>
-                    <button className="w-9 h-9 bg-blue-600 text-white rounded-lg text-sm font-bold shadow-md">1</button>
-                    <button className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-white text-sm font-bold transition-colors">Sau</button>
+                    <span className="text-sm text-slate-500">Hiển thị</span>
+                    <div className="relative group">
+                      <select aria-label="Records per page"
+                        className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm appearance-none pr-8 cursor-pointer font-medium text-slate-700"
+                        value={itemsPerPage}
+                        onChange={(e) => {
+                          setItemsPerPage(Number(e.target.value));
+                          setCurrentPage(1);
+                        }}
+                      >
+                        <option value={10}>10</option>
+                        <option value={20}>20</option>
+                        <option value={50}>50</option>
+                        <option value={100}>100</option>
+                      </select>
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </div>
+                    <span className="text-sm text-slate-500 font-medium">bản ghi / trang</span>
                   </div>
-                </div>
-              </>
-            )}
+                  
+                  <div className="flex items-center gap-6">
+                    <span className="text-sm text-slate-500 font-medium">
+                      {totalRecords > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, totalRecords)} / {totalRecords}
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className="px-4 py-1.5 border border-slate-200 rounded-lg text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 active:scale-95 text-slate-700"
+                      >
+                        Trước
+                      </button>
+                      
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                          let pageNum = i + 1;
+                          if (totalPages > 5 && currentPage > 3) {
+                            pageNum = currentPage - 3 + i + 1;
+                            if (pageNum > totalPages) pageNum = totalPages - (4 - i);
+                          }
+                          return (
+                            <button
+                              key={pageNum}
+                              onClick={() => setCurrentPage(pageNum)}
+                              className={`w-9 h-9 rounded-lg text-sm font-bold transition-all active:scale-90 ${
+                                currentPage === pageNum
+                                  ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
+                                  : 'border border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300'
+                              }`}
+                            >
+                              {pageNum}
+                            </button>
+                          );
+                        })}
+                      </div>
 
-            {activeTab === 'sync' && (
-              <div className="flex-1 overflow-auto p-6">
-                <div className="mb-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <h3 className="text-sm font-medium text-slate-900">Tổng số lần đồng bộ đợt 3 lần</h3>
-                    <button className="text-xs text-blue-600 hover:underline flex items-center gap-1">
-                      <RefreshCw className="w-3 h-3" />
-                      Làm mới
-                    </button>
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages || totalPages === 0}
+                        className="px-4 py-1.5 border border-slate-200 rounded-lg text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 active:scale-95 text-slate-700"
+                      >
+                        Sau
+                      </button>
+                    </div>
                   </div>
-                </div>
-
-                {/* Sync History Table - keeping same as example */}
-                <div className="border border-slate-200 rounded-lg overflow-hidden">
-                  <table className="w-full text-sm">
-                    <thead className="bg-slate-50 border-b border-slate-200">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-slate-700 uppercase">Thời gian</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-slate-700 uppercase">Trạng thái</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-slate-700 uppercase">Thêm mới</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-slate-700 uppercase">Cập nhật</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-slate-700 uppercase">Lỗi</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-slate-700 uppercase">Tổng số</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-slate-700 uppercase">Thời lượng</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-200">
-                      <tr className="hover:bg-slate-50">
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-1 text-slate-600">
-                            <Calendar className="w-3 h-3" />
-                            <span>15/12/2025 14:30:25</span>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 rounded text-xs">
-                            <CheckCircle className="w-3 h-3" />
-                            Thành công
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-1 text-blue-600">
-                            <ArrowUp className="w-3 h-3" />
-                            <span className="font-medium">10</span>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-slate-900">2</td>
-                        <td className="px-4 py-3 text-slate-900">0</td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-1 text-slate-900">
-                            <ArrowUp className="w-3 h-3" />
-                            <span className="font-medium">12</span>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-slate-600">1.2s</td>
-                      </tr>
-                    </tbody>
-                  </table>
                 </div>
               </div>
             )}
@@ -490,13 +448,13 @@ export function DeathCertModal({
 
       {/* Record Detail Modal */}
       {selectedRecord && (
-        <>
+        <div className="record-detail-modal-container">
           <div className="fixed inset-0 bg-black/50 z-[60]" onClick={() => setSelectedRecord(null)} />
           
           <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
             <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden">
               {/* Header */}
-              <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0">
+              <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0 bg-slate-50/50 sticky top-0 z-20">
                 <h3 className="text-lg font-semibold text-slate-900">Chi tiết bản ghi</h3>
                 <button
                   onClick={() => setSelectedRecord(null)}
@@ -645,87 +603,88 @@ export function DeathCertModal({
               </div>
             </div>
           </div>
-        </>
+        </div>
       )}
 
       {/* PDF Viewer Modal */}
       {viewingPdfUrl && (
-        <div className="fixed inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 1100 }}>
-          {/* Nền tối sâu sang trọng */}
-          <div 
-            className="absolute inset-0 bg-slate-950/95 backdrop-blur-sm animate-in fade-in duration-500 pointer-events-auto" 
-            onClick={() => setViewingPdfUrl(null)} 
-          />
-          
-          {/* Nút thao tác ở góc trên (Floating Top Controls) */}
-          <div className="absolute top-6 right-6 flex items-center gap-4 pointer-events-auto" style={{ zIndex: 1105 }}>
-            <a 
-              href={viewingPdfUrl} 
-              download
-              title="Tải về bản gốc"
-              className="w-11 h-11 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-full backdrop-blur-md border border-white/10 transition-all active:scale-90"
-            >
-              <FileDown className="w-5 h-5" />
-            </a>
-            <button 
-              onClick={() => setViewingPdfUrl(null)}
-              className="w-11 h-11 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-full backdrop-blur-md border border-white/10 transition-all active:scale-90"
-              title="Đóng trình xem"
-            >
-              <X className="w-6 h-6" />
-            </button>
-          </div>
-
-          {/* Vùng hiển thị tài liệu */}
-          <div className="relative w-full h-full flex flex-col items-center justify-center p-6 sm:p-14 pointer-events-none">
-            <div className="w-full max-w-5xl h-full bg-white shadow-[0_0_80px_rgba(0,0,0,0.6)] rounded-sm overflow-hidden animate-in fade-in zoom-in-95 duration-500 pointer-events-auto relative z-10 flex items-center justify-center bg-slate-200">
-               {/* Note: Iframe handles the PDF */}
-              <iframe 
-                src={`${viewingPdfUrl}#toolbar=0&navpanes=0&scrollbar=1`} 
-                className="w-full h-full border-none"
-                title="Premium PDF Viewer"
-              />
+        <div className="pdf-viewer-modal-container">
+          <div className="fixed inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 1100 }}>
+            {/* Backdrop */}
+            <div 
+              className="absolute inset-0 bg-slate-950/95 backdrop-blur-sm animate-in fade-in duration-500 pointer-events-auto" 
+              onClick={() => setViewingPdfUrl(null)} 
+            />
+            
+            {/* Top Controls */}
+            <div className="absolute top-6 right-6 flex items-center gap-4 pointer-events-auto" style={{ zIndex: 1105 }}>
+              <a 
+                href={viewingPdfUrl} 
+                download
+                title="Tải về bản gốc"
+                className="w-11 h-11 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-full backdrop-blur-md border border-white/10 transition-all active:scale-90"
+              >
+                <FileDown className="w-5 h-5" />
+              </a>
+              <button 
+                onClick={() => setViewingPdfUrl(null)}
+                className="w-11 h-11 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-full backdrop-blur-md border border-white/10 transition-all active:scale-90"
+                title="Đóng trình xem"
+              >
+                <X className="w-6 h-6" />
+              </button>
             </div>
 
-            {/* Google Drive-style Floating BOTTOM Toolbar */}
-            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-8 px-8 py-3.5 bg-slate-900/95 backdrop-blur-2xl border border-white/10 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] text-white animate-in slide-in-from-bottom-6 duration-700 pointer-events-auto z-20">
-              <div className="flex items-center gap-4 pr-8 border-r border-white/10">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Trang</span>
-                <div className="flex items-center gap-2">
-                  <input 
-                    type="text" 
-                    defaultValue="1" 
-                    className="w-9 h-9 bg-white/10 border border-white/20 rounded-lg text-center text-sm font-black focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                    title="Trang hiện tại"
-                  />
-                  <span className="text-sm font-medium text-slate-400">/ 1</span>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-5 px-2">
-                <button className="w-9 h-9 flex items-center justify-center hover:bg-white/10 rounded-full transition-all active:scale-75" title="Thu nhỏ">
-                  <span className="text-2xl font-light">−</span>
-                </button>
-                <div className="flex items-center gap-2 bg-white/5 px-4 py-1.5 rounded-lg border border-white/5">
-                  <Search className="w-4 h-4 text-blue-400" />
-                  <span className="text-sm font-black tracking-tighter">100%</span>
-                </div>
-                <button className="w-9 h-9 flex items-center justify-center hover:bg-white/10 rounded-full transition-all active:scale-75" title="Phóng to">
-                  <span className="text-2xl font-light">+</span>
-                </button>
+            {/* Document Area */}
+            <div className="relative w-full h-full flex flex-col items-center justify-center p-6 sm:p-14 pointer-events-none">
+              <div className="w-full max-w-5xl h-full bg-white shadow-[0_0_80px_rgba(0,0,0,0.6)] rounded-sm overflow-hidden animate-in fade-in zoom-in-95 duration-500 pointer-events-auto relative z-10 flex items-center justify-center bg-slate-200">
+                <iframe 
+                  src={`${viewingPdfUrl}#toolbar=0&navpanes=0&scrollbar=1`} 
+                  className="w-full h-full border-none"
+                  title="PDF Viewer"
+                />
               </div>
 
-              <div className="flex items-center gap-3 pl-8 border-l border-white/10">
-                <div className="flex flex-col items-end">
-                   <span className="text-[9px] font-black text-emerald-400 uppercase tracking-tighter">Verified Original</span>
-                   <span className="text-[8px] text-slate-500 font-bold uppercase tracking-widest">DLDC System</span>
+              {/* Bottom Toolbar */}
+              <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-8 px-8 py-3.5 bg-slate-900/95 backdrop-blur-2xl border border-white/10 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] text-white animate-in slide-in-from-bottom-6 duration-700 pointer-events-auto z-20">
+                <div className="flex items-center gap-4 pr-8 border-r border-white/10">
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Trang</span>
+                  <div className="flex items-center gap-2">
+                    <input 
+                      type="text" 
+                      defaultValue="1" 
+                      className="w-9 h-9 bg-white/10 border border-white/20 rounded-lg text-center text-sm font-black focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                      title="Trang hiện tại"
+                    />
+                    <span className="text-sm font-medium text-slate-400">/ 1</span>
+                  </div>
                 </div>
-                <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
+                
+                <div className="flex items-center gap-5 px-2">
+                  <button className="w-9 h-9 flex items-center justify-center hover:bg-white/10 rounded-full transition-all active:scale-75" title="Thu nhỏ">
+                    <span className="text-2xl font-light">−</span>
+                  </button>
+                  <div className="flex items-center gap-2 bg-white/5 px-4 py-1.5 rounded-lg border border-white/5">
+                    <Search className="w-4 h-4 text-blue-400" />
+                    <span className="text-sm font-black tracking-tighter">100%</span>
+                  </div>
+                  <button className="w-9 h-9 flex items-center justify-center hover:bg-white/10 rounded-full transition-all active:scale-75" title="Phóng to">
+                    <span className="text-2xl font-light">+</span>
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-3 pl-8 border-l border-white/10">
+                  <div className="flex flex-col items-end">
+                    <span className="text-[9px] font-black text-emerald-400 uppercase tracking-tighter">Verified Original</span>
+                    <span className="text-[8px] text-slate-500 font-bold uppercase tracking-widest">DLDC System</span>
+                  </div>
+                  <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

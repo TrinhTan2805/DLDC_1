@@ -125,7 +125,7 @@ export function CivilRegistryChangeModal({
       <div className={isInline ? "w-full" : "fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"}>
         <div className={`bg-white ${isInline ? "border border-slate-200 rounded-xl overflow-hidden" : "rounded-lg shadow-xl max-w-[95vw] w-full max-h-[90vh] pointer-events-auto"} flex flex-col`}>
           {/* Header */}
-          <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+          <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0 bg-white sticky top-0 z-20">
             <div>
               <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
             </div>
@@ -145,7 +145,7 @@ export function CivilRegistryChangeModal({
           {/* Content */}
           <div className="flex-1 overflow-hidden flex flex-col">
             {activeTab === 'list' && (
-              <>
+              <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Search & Actions */}
                 <div className="px-6 py-4 border-b border-slate-200 flex-shrink-0 bg-white">
                   <div className="flex items-center justify-between gap-4">
@@ -293,7 +293,7 @@ export function CivilRegistryChangeModal({
                     <button className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-white text-sm font-bold transition-colors">Sau</button>
                   </div>
                 </div>
-              </>
+              </div>
             )}
 
             {activeTab === 'sync' && (
@@ -314,7 +314,9 @@ export function CivilRegistryChangeModal({
             <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden">
               {/* Header */}
               <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0">
-                <h3 className="text-lg font-semibold text-slate-900">Chi tiết bản ghi</h3>
+                <h3 className="text-lg font-semibold text-slate-900">
+                  Chi tiết bản ghi
+                </h3>
                 <button
                   onClick={() => setSelectedRecord(null)}
                   className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600"

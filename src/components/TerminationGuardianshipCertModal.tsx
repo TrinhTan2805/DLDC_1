@@ -1,4 +1,4 @@
-import { X, Search, Filter, Download, XCircle, CheckCircle, AlertCircle, Eye, FileText, RefreshCw, Calendar } from 'lucide-react';
+import { X, Search, Filter, Download, XCircle, CheckCircle, AlertCircle, Eye, FileText, RefreshCw, Calendar, ArrowUp } from 'lucide-react';
 import { useState } from 'react';
 
 export interface TerminationGuardianshipCertModalProps {
@@ -140,30 +140,34 @@ export function TerminationGuardianshipCertModal({
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/50 z-50" onClick={onClose}></div>
+      {/* Backdrop */}
+      {!isInline && <div className="fixed inset-0 bg-black/50 z-50" onClick={onClose} />}
       
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-        <div className="bg-white rounded-lg shadow-xl max-w-[95vw] w-full max-h-[90vh] flex flex-col pointer-events-auto">
+      {/* Container */}
+      <div className={isInline ? "w-full" : "fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"}>
+        <div className={`bg-white ${isInline ? "border border-slate-200 rounded-xl overflow-hidden" : "rounded-lg shadow-xl max-w-[95vw] w-full max-h-[90vh] pointer-events-auto"} flex flex-col`}>
           {/* Header */}
-          <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+          <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0 bg-white sticky top-0 z-20">
             <div>
               <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
             </div>
-            <button
-               onClick={onClose}
-               className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600"
-               title="Đóng"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            {!isInline && (
+              <button
+                 onClick={onClose}
+                 className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600"
+                 title="Đóng"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
           </div>
 
 
 
-          {/* Content */}
-          <div className="flex-1 overflow-hidden flex flex-col">
+          {/* Content Area */}
+          <div className="flex-1 overflow-hidden flex flex-col bg-slate-50">
             {activeTab === 'list' && (
-              <>
+              <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Search & Actions */}
                 <div className="px-6 py-4 border-b border-slate-200 flex-shrink-0 bg-white">
                   <div className="flex items-center justify-between gap-4">
@@ -219,7 +223,7 @@ export function TerminationGuardianshipCertModal({
                           <input type="text" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm" placeholder="Mã hồ sơ..." />
                         </div>
                         <div>
-                          <label className="block text-[10px) font-bold text-slate-500 uppercase mb-1.5 ml-1">Từ ngày</label>
+                          <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 ml-1">Từ ngày</label>
                           <div className="relative">
                             <input type="date" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm appearance-none" />
                             <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
@@ -309,12 +313,6 @@ export function TerminationGuardianshipCertModal({
                     <button className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-white text-sm font-bold transition-colors">Sau</button>
                   </div>
                 </div>
-              </>
-            )}
-
-            {activeTab === 'sync' && (
-               <div className="flex-1 overflow-auto p-6 flex justify-center items-center">
-                 <div className="text-slate-400">Chưa có lịch sử đồng bộ chi tiết.</div>
               </div>
             )}
           </div>
@@ -323,18 +321,20 @@ export function TerminationGuardianshipCertModal({
 
       {/* Record Detail Modal */}
       {selectedRecord && (
-        <>
+        <div className="record-detail-modal-container">
           <div className="fixed inset-0 bg-black/50 z-[60]" onClick={() => setSelectedRecord(null)}></div>
           
           <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
             <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden">
-              <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0">
+              {/* Header */}
+              <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0 bg-slate-50/50 sticky top-0 z-20">
                 <h3 className="text-lg font-semibold text-slate-900">
                   Chi tiết hồ sơ chấm dứt giám hộ <span className="text-blue-600">#{selectedRecord.recordCode}</span>
                 </h3>
                 <button
                   onClick={() => setSelectedRecord(null)}
                   className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600"
+                  title="Đóng chi tiết"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -482,7 +482,7 @@ export function TerminationGuardianshipCertModal({
               </div>
             </div>
           </div>
-        </>
+        </div>
       )}
     </>
   );

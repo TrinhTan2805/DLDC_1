@@ -379,9 +379,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                         onChange={(e) => setEndDate(e.target.value)}
                       />
                       <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
-                    </div>
-                  </div>
-                </div>
+                    </>
               )}
             </div>
 
@@ -588,9 +586,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                     </button>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
+              </>
         )}
 
         {/* Tab: Quản lý nhật ký */}
@@ -746,10 +742,8 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                         <div className="text-xs text-red-600">
                           Số lần thử: {selectedService.errorDetails.attemptCount} | Lần thử cuối: {selectedService.errorDetails.lastAttempt}
                         </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                      </>
+                )}
               </div>
             </div>
 
@@ -770,9 +764,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
               >
                 Gửi thông báo hệ thống nguồn
               </button>
-            </div>
-          </div>
-        </div>
+            </>
       )}
       {/* Inactive Confirmation Modal */}
       {showInactiveModal && (

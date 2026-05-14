@@ -1,5 +1,5 @@
 // Standardized Registry Modal - Marriage Detail
-import { X, Search, Filter, Download, FileDown, XCircle, CheckCircle, AlertCircle, Eye, RefreshCw, Calendar, ArrowUp, Plus, Trash2, Edit2 } from 'lucide-react';
+import { X, Search, Filter, Download, FileDown, XCircle, CheckCircle, AlertCircle, Eye, RefreshCw, Calendar, ArrowUp, Plus, Trash2, Edit2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 
 interface MarriageDetailModalProps {
@@ -79,9 +79,6 @@ export function MarriageDetailModal({
   const [activeTab, setActiveTab] = useState('list');
   const [selectedRecord, setSelectedRecord] = useState<MarriageRecord | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [isSortOpen, setIsSortOpen] = useState(false);
-  
-  // Filter System States
   const [filterConditions, setFilterConditions] = useState<any[]>([
     { id: '1', logic: 'AND', field: 'husbandName', operator: '=', type: 'Text', value: '' }
   ]);
@@ -93,14 +90,9 @@ export function MarriageDetailModal({
     value: ''
   });
 
-  const openValueModal = (condition: any) => {
-    setValueModal({
-      isOpen: true,
-      conditionId: condition.id,
-      type: condition.type || 'Text',
-      value: condition.value || ''
-    });
-  };
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const saveValue = () => {
     setFilterConditions(prev => prev.map(c => 
@@ -191,8 +183,10 @@ export function MarriageDetailModal({
     }
   ];
 
+  const totalPages = Math.ceil(totalRecords / itemsPerPage);
+
   return (
-    <>
+    <div className="marriage-detail-modal">
       {/* Value Entry Modal */}
       {valueModal.isOpen && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4">
@@ -213,6 +207,7 @@ export function MarriageDetailModal({
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">Kiểu dữ liệu</label>
                 <select 
+                  aria-label="Select type"
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 bg-white"
                   value={valueModal.type}
                   onChange={(e) => setValueModal({ ...valueModal, type: e.target.value })}
@@ -225,7 +220,7 @@ export function MarriageDetailModal({
               
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">Giá trị</label>
-                <input 
+                <input aria-label="Value"
                   type={valueModal.type === 'Date' ? 'date' : valueModal.type === 'Number' ? 'number' : 'text'}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
                   value={valueModal.value}
@@ -262,7 +257,7 @@ export function MarriageDetailModal({
       <div className={isInline ? "w-full" : "fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"}>
         <div className={`bg-white ${isInline ? "border border-slate-200 rounded-xl overflow-hidden" : "rounded-lg shadow-xl max-w-7xl w-full max-h-[90vh] pointer-events-auto"} flex flex-col`}>
           {/* Header */}
-          <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+          <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0 bg-white sticky top-0 z-20">
             <div>
               <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
             </div>
@@ -278,9 +273,9 @@ export function MarriageDetailModal({
           </div>
 
           {/* Content Area */}
-          <div className="flex-1 overflow-hidden flex flex-col">
+          <div className="flex-1 overflow-hidden flex flex-col bg-slate-50">
             {activeTab === 'list' && (
-              <>
+              <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Search & Actions */}
                 <div className="px-6 py-4 border-b border-slate-200 flex-shrink-0 bg-white">
                   <div className="flex items-center justify-between gap-4">
@@ -332,7 +327,7 @@ export function MarriageDetailModal({
                       </div>
 
                       <div className="space-y-3 relative z-10">
-                        {filterConditions.map((condition, index) => (
+                        {filterConditions.map((condition: any, index: number) => (
                           <div key={condition.id} className="flex items-center gap-3">
                             <div className="w-20 flex-shrink-0">
                               {index > 0 && (
@@ -419,7 +414,7 @@ export function MarriageDetailModal({
                   )}
                 </div>
 
-                {/* Table */}
+                {/* Table Container */}
                 <div className="flex-1 overflow-auto bg-white">
                   <table className="w-full border-collapse">
                     <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
@@ -437,7 +432,7 @@ export function MarriageDetailModal({
                     <tbody className="divide-y divide-slate-100">
                       {records.map((record, index) => (
                         <tr key={record.id} className="hover:bg-blue-50/30 transition-all group">
-                          <td className="px-4 py-4 text-center text-sm text-slate-500 font-medium">{(index + 1).toString().padStart(2, '0')}</td>
+                          <td className="px-4 py-4 text-center text-sm text-slate-500 font-medium">{((currentPage - 1) * itemsPerPage + index + 1).toString().padStart(2, '0')}</td>
                           <td className="px-4 py-4 text-center text-sm font-semibold text-slate-900">{record.husbandName}</td>
                           <td className="px-4 py-4 text-center text-sm text-slate-600 font-medium font-mono">{record.husbandBirthDate}</td>
                           <td className="px-4 py-4 text-center text-sm font-semibold text-slate-900">{record.wifeName}</td>
@@ -478,18 +473,80 @@ export function MarriageDetailModal({
                   </table>
                 </div>
 
-                {/* Pagination */}
-                <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between bg-slate-50/50">
-                  <div className="text-sm text-slate-600 font-medium">
-                    Hiển thị <span className="text-slate-900 font-bold">1-{records.length}</span> trong tổng số <span className="text-slate-900 font-bold">{totalRecords}</span> bản ghi
-                  </div>
+                {/* Pagination UI - According to rule 5.14 */}
+                <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between bg-white flex-wrap gap-4">
                   <div className="flex items-center gap-2">
-                    <button className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-white text-sm font-bold transition-colors">Trước</button>
-                    <button className="w-9 h-9 bg-blue-600 text-white rounded-lg text-sm font-bold shadow-md">1</button>
-                    <button className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-white text-sm font-bold transition-colors">Sau</button>
+                    <span className="text-sm text-slate-500">Hiển thị</span>
+                    <div className="relative group">
+                      <select aria-label="Records per page"
+                        className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm appearance-none pr-8 cursor-pointer font-medium text-slate-700"
+                        value={itemsPerPage}
+                        onChange={(e) => {
+                          setItemsPerPage(Number(e.target.value));
+                          setCurrentPage(1);
+                        }}
+                      >
+                        <option value={10}>10</option>
+                        <option value={20}>20</option>
+                        <option value={50}>50</option>
+                        <option value={100}>100</option>
+                      </select>
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </div>
+                    <span className="text-sm text-slate-500 font-medium">bản ghi / trang</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-6">
+                    <span className="text-sm text-slate-500 font-medium">
+                      {totalRecords > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, totalRecords)} / {totalRecords}
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className="px-4 py-1.5 border border-slate-200 rounded-lg text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 active:scale-95 text-slate-700"
+                      >
+                        Trước
+                      </button>
+                      
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                          let pageNum = i + 1;
+                          if (totalPages > 5 && currentPage > 3) {
+                            pageNum = currentPage - 3 + i + 1;
+                            if (pageNum > totalPages) pageNum = totalPages - (4 - i);
+                          }
+                          return (
+                            <button
+                              key={pageNum}
+                              onClick={() => setCurrentPage(pageNum)}
+                              className={`w-9 h-9 rounded-lg text-sm font-bold transition-all active:scale-90 ${
+                                currentPage === pageNum
+                                  ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
+                                  : 'border border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300'
+                              }`}
+                            >
+                              {pageNum}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages || totalPages === 0}
+                        className="px-4 py-1.5 border border-slate-200 rounded-lg text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 active:scale-95 text-slate-700"
+                      >
+                        Sau
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </>
+              </div>
             )}
           </div>
         </div>
@@ -497,7 +554,7 @@ export function MarriageDetailModal({
 
       {/* Record Detail Modal */}
       {selectedRecord && (
-        <>
+        <div className="record-detail-modal-container">
           <div className="fixed inset-0 bg-black/60 z-[60] backdrop-blur-sm" onClick={() => setSelectedRecord(null)}></div>
           
           <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
@@ -678,8 +735,8 @@ export function MarriageDetailModal({
               </div>
             </div>
           </div>
-        </>
+        </div>
       )}
-    </>
+    </div>
   );
 }
