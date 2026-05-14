@@ -704,7 +704,6 @@ export function DataDetailModal({
                       <th className="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Số định danh</th>
                       <th className="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Ngày đăng ký</th>
                       <th className="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Ngày đồng bộ</th>
-                      <th className="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Văn bản</th>
                       <th className="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Trạng thái</th>
                       <th className="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Thao tác</th>
                     </tr>
@@ -740,20 +739,6 @@ export function DataDetailModal({
                         <td className="px-4 py-4 text-center text-sm text-slate-600 font-medium font-mono">{record.idNumber}</td>
                         <td className="px-4 py-4 text-center text-sm text-slate-600 font-medium font-mono">{record.registrationDate}</td>
                         <td className="px-4 py-4 text-center text-sm text-slate-500 font-medium font-mono whitespace-nowrap">{record.syncDate}</td>
-                        <td className="px-4 py-4 text-center">
-                          {record.pdfUrl ? (
-                            <button
-                              onClick={() => setViewingPdfUrl(record.pdfUrl!)}
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-600 rounded-full text-[10px] font-bold uppercase tracking-wider border border-blue-100 hover:bg-blue-100 transition-colors"
-                              title="Xem văn bản đính kèm"
-                            >
-                              <FileText className="w-3.5 h-3.5" />
-                              Xem
-                            </button>
-                          ) : (
-                            <span className="text-slate-400 text-xs">—</span>
-                          )}
-                        </td>
                         <td className="px-4 py-4 text-center">
                           <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border shadow-sm whitespace-nowrap ${
                             record.approvalStatus === 'Đã đồng bộ' 

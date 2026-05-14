@@ -20,9 +20,7 @@ export function MergeSplitModal({ isOpen, onClose, sourceFields, onMergeSubmit, 
   const [selectedMergeFields, setSelectedMergeFields] = useState<string[]>(initialData?.fields || []);
 
   const [splitSource, setSplitSource] = useState(initialData?.source || '');
-  const [splitRule, setSplitRule] = useState(initialData?.rule || 'Theo ký tự phân tách');
-  const [splitSeparator, setSplitSeparator] = useState(initialData?.separator || '');
-  const [splitResults, setSplitResults] = useState(initialData?.results || [{ id: '1', name: 'Tên cột 1', type: 'NVARCHAR' }, { id: '2', name: 'Tên cột 2', type: 'NVARCHAR' }]);
+  const [splitResults, setSplitResults] = useState(initialData?.results || [{ id: '1', name: 'Tên cột 1', type: 'NVARCHAR', regex: '' }, { id: '2', name: 'Tên cột 2', type: 'NVARCHAR', regex: '' }]);
 
   // Reset state when modal opens or initialData changes
   React.useEffect(() => {
@@ -34,11 +32,9 @@ export function MergeSplitModal({ isOpen, onClose, sourceFields, onMergeSubmit, 
       setSelectedMergeFields(initialData?.fields || []);
       
       setSplitSource(initialData?.source || '');
-      setSplitRule(initialData?.rule || 'Theo ký tự phân tách');
-      setSplitSeparator(initialData?.separator || '');
       setSplitResults(initialData?.results || [
-        { id: '1', name: 'Tên cột 1', type: 'NVARCHAR' }, 
-        { id: '2', name: 'Tên cột 2', type: 'NVARCHAR' }
+        { id: '1', name: 'Tên cột 1', type: 'NVARCHAR', regex: '' }, 
+        { id: '2', name: 'Tên cột 2', type: 'NVARCHAR', regex: '' }
       ]);
     }
   }, [isOpen, initialData, mode]);
@@ -48,7 +44,11 @@ export function MergeSplitModal({ isOpen, onClose, sourceFields, onMergeSubmit, 
   };
 
   const addSplitResult = () => {
-    setSplitResults([...splitResults, { id: Date.now().toString(), name: `Tên cột ${splitResults.length + 1}`, type: 'NVARCHAR' }]);
+    setSplitResults([...splitResults, { id: Date.now().toString(), name: `Tên cột ${splitResults.length + 1}`, type: 'NVARCHAR', regex: '' }]);
+  };
+
+  const updateSplitResult = (id: string, field: string, value: string) => {
+    setSplitResults(splitResults.map(r => r.id === id ? { ...r, [field]: value } : r));
   };
 
   const removeSplitResult = (id: string) => {
@@ -66,8 +66,7 @@ export function MergeSplitModal({ isOpen, onClose, sourceFields, onMergeSubmit, 
     } else {
       onSplitSubmit({
         source: splitSource,
-        rule: splitRule,
-        separator: splitSeparator,
+        rule: 'Regex',
         results: splitResults
       });
     }
@@ -173,11 +172,11 @@ export function MergeSplitModal({ isOpen, onClose, sourceFields, onMergeSubmit, 
             </div>
           </div>
         ) : (
-          <div className="space-y-5">
+          <div className="space-y-6">
             <div className="space-y-2">
-              <label className="text-[12px] font-bold text-slate-700">Cột nguồn</label>
+              <label className="text-[13px] font-bold text-slate-800">Cột nguồn</label>
               <select 
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 bg-white"
+                className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 bg-white"
                 value={splitSource}
                 onChange={e => setSplitSource(e.target.value)}
               >
@@ -185,56 +184,59 @@ export function MergeSplitModal({ isOpen, onClose, sourceFields, onMergeSubmit, 
                 {sourceFields.map((f, i) => <option key={i} value={f.name}>{f.name}</option>)}
               </select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-[12px] font-bold text-slate-700">Quy tắc tách</label>
-                <select 
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 bg-white"
-                  value={splitRule}
-                  onChange={e => setSplitRule(e.target.value)}
-                >
-                  <option>Theo ký tự phân tách</option>
-                  <option>Theo độ dài cố định</option>
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-[12px] font-bold text-slate-700">Ký tự phân tách</label>
-                <input 
-                  type="text" 
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-blue-500"
-                  value={splitSeparator}
-                  onChange={e => setSplitSeparator(e.target.value)}
-                />
-              </div>
-            </div>
+
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <label className="text-[12px] font-bold text-slate-700">Các cột kết quả</label>
-                <button onClick={addSplitResult} className="flex items-center gap-1.5 px-3 py-1 text-[11px] font-bold text-slate-600 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors">
-                  <Plus className="w-3 h-3" />
+                <div>
+                  <h3 className="text-[13px] font-bold text-slate-800">Các cột kết quả</h3>
+                  <p className="text-[11px] text-slate-500 mt-0.5">Mỗi cột nhập một biểu thức Regex áp dụng trên cột nguồn để lấy giá trị.</p>
+                </div>
+                <button onClick={addSplitResult} className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-bold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors shadow-sm">
+                  <Plus className="w-3.5 h-3.5" />
                   Thêm cột
                 </button>
               </div>
-              <div className="space-y-3 max-h-[160px] overflow-y-auto pr-1 custom-scrollbar">
+              <div className="space-y-4 max-h-[250px] overflow-y-auto pr-1 custom-scrollbar">
                 {splitResults.map((res, idx) => (
-                  <div key={res.id} className="flex items-center gap-3">
-                    <input 
-                      type="text" 
-                      className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
-                      placeholder={`Tên cột ${idx + 1}`}
-                      defaultValue={res.name}
-                    />
-                    <select className="w-[120px] px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 bg-white">
-                      <option>NVARCHAR</option>
-                      <option>VARCHAR</option>
-                    </select>
-                    <button onClick={() => removeSplitResult(res.id)} className="p-2 text-slate-400 hover:text-red-500 transition-colors">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                  <div key={res.id} className="p-3 border border-slate-200 rounded-xl bg-slate-50/50 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-md bg-slate-100 text-slate-500 flex items-center justify-center text-[10px] font-bold shrink-0">
+                        #{idx + 1}
+                      </div>
+                      <input 
+                        type="text" 
+                        className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 bg-white"
+                        placeholder={`Tên cột ${idx + 1}`}
+                        value={res.name}
+                        onChange={(e) => updateSplitResult(res.id, 'name', e.target.value)}
+                      />
+                      <select 
+                        className="w-[130px] px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 bg-white"
+                        value={res.type}
+                        onChange={(e) => updateSplitResult(res.id, 'type', e.target.value)}
+                      >
+                        <option>NVARCHAR</option>
+                        <option>VARCHAR</option>
+                        <option>INT</option>
+                      </select>
+                      <button onClick={() => removeSplitResult(res.id)} className="p-2 text-rose-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <div className="pl-9">
+                      <input 
+                        type="text" 
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] text-slate-600 focus:outline-none focus:border-blue-500 bg-white"
+                        placeholder="Biểu thức Regex (VD: ^(\d{4}) hoặc nhóm bắt (.+)@)"
+                        value={res.regex || ''}
+                        onChange={(e) => updateSplitResult(res.id, 'regex', e.target.value)}
+                      />
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
+
           </div>
         )}
       </div>

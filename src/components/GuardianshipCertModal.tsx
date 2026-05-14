@@ -313,7 +313,6 @@ export function GuardianshipCertModal({
                         <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Loại giám hộ</th>
                         <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Loại đăng ký</th>
                         <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Tình trạng</th>
-                        <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Văn bản</th>
                         <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Trạng thái</th>
                         <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Thao tác</th>
                       </tr>
@@ -331,19 +330,6 @@ export function GuardianshipCertModal({
                              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border shadow-sm whitespace-nowrap ${record.guardianshipStatus === 'Đang giám hộ' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' : 'bg-slate-50 text-slate-600 border-slate-100'}`}>
                                {record.guardianshipStatus}
                              </span>
-                          </td>
-                          <td className="px-4 py-4 text-center">
-                            {record.hasPdf ? (
-                              <button
-                                onClick={handlePdfView}
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-600 rounded-full text-[10px] font-bold uppercase tracking-wider border border-blue-100 hover:bg-blue-100 transition-colors shadow-sm"
-                              >
-                                <FileText className="w-3.5 h-3.5" />
-                                Xem
-                              </button>
-                            ) : (
-                              <span className="text-slate-400 text-xs">—</span>
-                            )}
                           </td>
                           <td className="px-4 py-4 text-center">
                             {record.status === 'approved' && (
