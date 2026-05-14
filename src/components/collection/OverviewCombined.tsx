@@ -120,11 +120,11 @@ export function OverviewCombined() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
-        return <span className="px-3 py-1 rounded-full text-xs bg-green-100 text-green-700">Hoạt động</span>;
+        return <span className="px-3 py-1 rounded-full text-sm bg-green-100 text-green-700">Hoạt động</span>;
       case 'inactive':
-        return <span className="px-3 py-1 rounded-full text-xs bg-slate-100 text-slate-700">Dừng</span>;
+        return <span className="px-3 py-1 rounded-full text-sm bg-slate-100 text-slate-700">Dừng</span>;
       case 'maintenance':
-        return <span className="px-3 py-1 rounded-full text-xs bg-orange-100 text-orange-700">Bảo trì</span>;
+        return <span className="px-3 py-1 rounded-full text-sm bg-orange-100 text-orange-700">Bảo trì</span>;
       default:
         return null;
     }
@@ -137,17 +137,17 @@ export function OverviewCombined() {
       'PUT': 'bg-orange-100 text-orange-700',
       'DELETE': 'bg-red-100 text-red-700',
     };
-    return <span className={`px-3 py-1 rounded text-xs ${colors[method]}`}>{method}</span>;
+    return <span className={`px-3 py-1 rounded text-sm ${colors[method]}`}>{method}</span>;
   };
 
   const getDataStatusBadge = (status: string) => {
     switch (status) {
       case 'collected':
-        return <span className="px-3 py-1 rounded-full text-xs bg-green-100 text-green-700">Đã thu thập</span>;
+        return <span className="px-3 py-1 rounded-full text-sm bg-green-100 text-green-700">Đã thu thập</span>;
       case 'pending':
-        return <span className="px-3 py-1 rounded-full text-xs bg-orange-100 text-orange-700">Đang xử lý</span>;
+        return <span className="px-3 py-1 rounded-full text-sm bg-orange-100 text-orange-700">Đang xử lý</span>;
       case 'not-started':
-        return <span className="px-3 py-1 rounded-full text-xs bg-slate-100 text-slate-700">Chưa bắt đầu</span>;
+        return <span className="px-3 py-1 rounded-full text-sm bg-slate-100 text-slate-700">Chưa bắt đầu</span>;
       default:
         return null;
     }
@@ -156,11 +156,11 @@ export function OverviewCombined() {
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case 'high':
-        return <span className="px-3 py-1 rounded-full text-xs bg-red-100 text-red-700">Cao</span>;
+        return <span className="px-3 py-1 rounded-full text-sm bg-red-100 text-red-700">Cao</span>;
       case 'medium':
-        return <span className="px-3 py-1 rounded-full text-xs bg-yellow-100 text-yellow-700">Trung bình</span>;
+        return <span className="px-3 py-1 rounded-full text-sm bg-yellow-100 text-yellow-700">Trung bình</span>;
       case 'low':
-        return <span className="px-3 py-1 rounded-full text-xs bg-blue-100 text-blue-700">Thấp</span>;
+        return <span className="px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-700">Thấp</span>;
       default:
         return null;
     }
@@ -192,10 +192,10 @@ export function OverviewCombined() {
               <div className="bg-blue-50 p-2 rounded-lg">
                 <Database className="w-5 h-5 text-blue-600" />
               </div>
-              <p className="text-slate-500 text-sm">Tổng nguồn</p>
+              <p className="text-slate-500 text-base">Tổng nguồn</p>
             </div>
             <p className="text-2xl text-slate-900">24</p>
-            <p className="text-xs text-green-600 mt-1">+2 so với tháng trước</p>
+            <p className="text-sm text-green-600 mt-1">+2 so với tháng trước</p>
           </div>
 
           <div className="bg-white rounded-lg border border-slate-200 p-4">
@@ -203,10 +203,10 @@ export function OverviewCombined() {
               <div className="bg-green-50 p-2 rounded-lg">
                 <CheckCircle className="w-5 h-5 text-green-600" />
               </div>
-              <p className="text-slate-500 text-sm">Thành công</p>
+              <p className="text-slate-500 text-base">Thành công</p>
             </div>
             <p className="text-2xl text-green-600">18</p>
-            <p className="text-xs text-green-600 mt-1">75% tỷ lệ thành công</p>
+            <p className="text-sm text-green-600 mt-1">75% tỷ lệ thành công</p>
           </div>
 
           <div className="bg-white rounded-lg border border-slate-200 p-4">
@@ -214,10 +214,10 @@ export function OverviewCombined() {
               <div className="bg-orange-50 p-2 rounded-lg">
                 <Clock className="w-5 h-5 text-orange-600" />
               </div>
-              <p className="text-slate-500 text-sm">Đang xử lý</p>
+              <p className="text-slate-500 text-base">Đang xử lý</p>
             </div>
             <p className="text-2xl text-orange-600">4</p>
-            <p className="text-xs text-slate-500 mt-1">Đồng bộ trong 24h</p>
+            <p className="text-sm text-slate-500 mt-1">Đồng bộ trong 24h</p>
           </div>
 
           <div className="bg-white rounded-lg border border-slate-200 p-4">
@@ -225,10 +225,10 @@ export function OverviewCombined() {
               <div className="bg-red-50 p-2 rounded-lg">
                 <XCircle className="w-5 h-5 text-red-600" />
               </div>
-              <p className="text-slate-500 text-sm">Lỗi</p>
+              <p className="text-slate-500 text-base">Lỗi</p>
             </div>
             <p className="text-2xl text-red-600">2</p>
-            <p className="text-xs text-red-600 mt-1">Cần xử lý ngay</p>
+            <p className="text-sm text-red-600 mt-1">Cần xử lý ngay</p>
           </div>
 
           <div className="bg-white rounded-lg border border-slate-200 p-4">
@@ -236,10 +236,10 @@ export function OverviewCombined() {
               <div className="bg-purple-50 p-2 rounded-lg">
                 <FileCheck className="w-5 h-5 text-purple-600" />
               </div>
-              <p className="text-slate-500 text-sm">Hôm nay</p>
+              <p className="text-slate-500 text-base">Hôm nay</p>
             </div>
             <p className="text-2xl text-purple-600">45,678</p>
-            <p className="text-xs text-green-600 mt-1">+12.5% so với hôm qua</p>
+            <p className="text-sm text-green-600 mt-1">+12.5% so với hôm qua</p>
           </div>
         </div>
 
@@ -342,14 +342,14 @@ export function OverviewCombined() {
               placeholder="Tìm kiếm API theo tên hoặc endpoint..."
               value={searchAPI}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchAPI(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <select aria-label="Select box"
             title="Bộ lọc trạng thái"
             value={filterStatus}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilterStatus(e.target.value)}
-            className="px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Tất cả trạng thái</option>
             <option value="active">Hoạt động</option>
@@ -364,14 +364,14 @@ export function OverviewCombined() {
             <table className="w-full">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">TÊN API</th>
-                  <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">ENDPOINT</th>
-                  <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">PHƯƠNG THỨC</th>
-                  <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">TRẠNG THÁI</th>
-                  <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">TỶ LỆ TC</th>
-                  <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">THỜI GIAN</th>
-                  <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">TỔNG CALLS</th>
-                  <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">THAO TÁC</th>
+                  <th className="px-4 py-3 text-left text-sm text-slate-600 uppercase tracking-wider">TÊN API</th>
+                  <th className="px-4 py-3 text-left text-sm text-slate-600 uppercase tracking-wider">ENDPOINT</th>
+                  <th className="px-4 py-3 text-left text-sm text-slate-600 uppercase tracking-wider">PHƯƠNG THỨC</th>
+                  <th className="px-4 py-3 text-left text-sm text-slate-600 uppercase tracking-wider">TRẠNG THÁI</th>
+                  <th className="px-4 py-3 text-left text-sm text-slate-600 uppercase tracking-wider">TỶ LỆ TC</th>
+                  <th className="px-4 py-3 text-left text-sm text-slate-600 uppercase tracking-wider">THỜI GIAN</th>
+                  <th className="px-4 py-3 text-left text-sm text-slate-600 uppercase tracking-wider">TỔNG CALLS</th>
+                  <th className="px-4 py-3 text-left text-sm text-slate-600 uppercase tracking-wider">THAO TÁC</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
@@ -379,11 +379,11 @@ export function OverviewCombined() {
                   <tr key={api.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-4 py-3">
                       <div>
-                        <p className="text-sm text-slate-900">{api.name}</p>
-                        <p className="text-xs text-slate-500">{api.frequency} • {api.lastCall}</p>
+                        <p className="text-base text-slate-900">{api.name}</p>
+                        <p className="text-sm text-slate-500">{api.frequency} • {api.lastCall}</p>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-sm text-slate-700 font-mono">{api.endpoint}</td>
+                    <td className="px-4 py-3 text-base text-slate-700 font-mono">{api.endpoint}</td>
                     <td className="px-4 py-3">{getMethodBadge(api.method)}</td>
                     <td className="px-4 py-3">{getStatusBadge(api.status)}</td>
                     <td className="px-4 py-3">
@@ -394,11 +394,11 @@ export function OverviewCombined() {
                             style={{ width: `${api.successRate}%` }}
                           ></div>
                         </div>
-                        <span className="text-sm text-slate-700">{api.successRate}%</span>
+                        <span className="text-base text-slate-700">{api.successRate}%</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-sm text-slate-700">{api.avgResponseTime}</td>
-                    <td className="px-4 py-3 text-sm text-slate-700">{api.totalCalls.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-base text-slate-700">{api.avgResponseTime}</td>
+                    <td className="px-4 py-3 text-base text-slate-700">{api.totalCalls.toLocaleString()}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <button title="Bắt đầu" className="p-1.5 text-green-600 hover:bg-green-50 rounded transition-colors">

@@ -94,14 +94,14 @@ function ChartCard({ title, total, data, filterValue, onFilterChange, filterOpti
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-slate-900">{title}</h3>
-        <span className="text-sm text-slate-500">Tổng số: {total.toLocaleString()}</span>
+        <span className="text-base text-slate-500">Tổng số: {total.toLocaleString()}</span>
       </div>
 
       {/* Controls */}
       {filterOptions && filterOptions.length > 0 && (
         <div className="flex items-center gap-3 mb-4">
           <select aria-label="Select box" 
-            className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-base text-slate-700 focus:outline-none focus:ring-2 focus:ring-green-500"
             title="Chọn khoảng thời gian"
             value={filterValue}
             onChange={(e) => onFilterChange && onFilterChange(e.target.value)}
@@ -120,11 +120,11 @@ function ChartCard({ title, total, data, filterValue, onFilterChange, filterOpti
             <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
             <XAxis 
               dataKey="name" 
-              tick={{ fill: '#64748b', fontSize: 12 }}
+              tick={{ fill: '#64748b', fontSize: 16 }}
               axisLine={{ stroke: '#e2e8f0' }}
             />
             <YAxis 
-              tick={{ fill: '#64748b', fontSize: 12 }}
+              tick={{ fill: '#64748b', fontSize: 16 }}
               axisLine={{ stroke: '#e2e8f0' }}
             />
             <Tooltip 
@@ -132,7 +132,7 @@ function ChartCard({ title, total, data, filterValue, onFilterChange, filterOpti
                 backgroundColor: 'white',
                 border: '1px solid #e2e8f0',
                 borderRadius: '8px',
-                fontSize: '12px'
+                fontSize: '16px'
               }}
             />
             <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} />
@@ -161,7 +161,7 @@ function SummaryCard({ title, value, icon, bgColor, iconColor }: SummaryCardProp
           </div>
         </div>
         <div className="flex-1">
-          <p className="text-sm text-slate-600 mb-1">{title}</p>
+          <p className="text-base text-slate-600 mb-1">{title}</p>
           <p className="text-2xl font-semibold text-slate-900">{value.toLocaleString()}</p>
         </div>
       </div>
