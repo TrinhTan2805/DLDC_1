@@ -701,19 +701,17 @@ const menuItems: MenuItem[] = [
           },
         ],
       },
+      {
+        id: "notifications",
+        icon: Bell,
+        label: "Quản lý thông báo",
+      },
+      {
+        id: "user-guide",
+        icon: HelpCircle,
+        label: "Hướng dẫn sử dụng",
+      },
     ],
-  },
-  {
-    id: "notifications",
-    icon: Bell,
-    label: "Quản lý thông báo",
-    color: "text-orange-600",
-  },
-  {
-    id: "user-guide",
-    icon: HelpCircle,
-    label: "Hướng dẫn sử dụng",
-    color: "text-violet-600",
   },
 ];
 
@@ -914,7 +912,7 @@ export function Sidebar({
                             title={subItem.label}
                             aria-label={subItem.label}
                             className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-all text-sm ${isGroupHeader
-                              ? "bg-slate-100 text-slate-700 font-medium hover:bg-slate-200"
+                              ? "text-slate-700 font-medium hover:bg-slate-50"
                               : isSubActive
                                 ? "bg-blue-50 text-blue-700"
                                 : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"

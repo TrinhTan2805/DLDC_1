@@ -374,53 +374,6 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
             </div>
           </div>
 
-          <div className="pt-2">
-            <button
-              type="button"
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="flex items-center gap-2 text-base text-[#5c6e81] hover:text-slate-900 transition-colors"
-            >
-              Thông tin mở rộng {isExpanded ? <ChevronUp className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-            </button>
-
-            {isExpanded && (
-              <div className="mt-4 p-5 bg-white border border-slate-200 shadow-sm rounded-lg space-y-4 animate-in slide-in-from-top-2 duration-200">
-                <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-                  <div>
-                    <label className="block text-sm text-slate-700 font-medium mb-1.5">Mã CSDL</label>
-                    <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Code" />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-slate-700 font-medium mb-1.5">Mô tả CSDL</label>
-                    <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Mô tả CSDL" />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm text-slate-700 font-medium mb-1.5">Tên ứng dụng</label>
-                    <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tên ứng dụng" />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-slate-700 font-medium mb-1.5">Người quản lý</label>
-                    <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Người quản lý" />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm text-slate-700 font-medium mb-1.5">Thư điện tử của quản lý</label>
-                    <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Thư điện tử của quản lý" />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-slate-700 font-medium mb-1.5">Số điện thoại của quản lý</label>
-                    <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Số điện thoại của quản lý" />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm text-slate-700 font-medium mb-1.5">Phòng ban quản lý</label>
-                    <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Phòng ban quản lý" />
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
         </div>
       )}
     </div>

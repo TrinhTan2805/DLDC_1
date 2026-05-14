@@ -1153,7 +1153,6 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                 <option value="Chuyển đôi từ unix timestamp">Chuyển đôi từ unix timestamp</option>
                                 <option value="Thời gian">Thời gian</option>
                                 <option value="Ngày tháng">Ngày tháng</option>
-                                <option value="Chuỗi">Chuỗi</option>
                                 <option value="Tiền tệ">Tiền tệ</option>
                               </select>
                             </div>

@@ -170,7 +170,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                 ) : (
                   <>
                     <LogIn className="w-5 h-5" />
-                    <span>Đăng nhập</span>
+                    <span>Đăng nhập bằng SSO</span>
                   </>
                 )}
               </button>
