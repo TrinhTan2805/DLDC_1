@@ -131,6 +131,7 @@ Dưới đây là danh sách các component đã được xây dựng và cần 
 - Border: 1px solid `border`.
 - Trạng thái Focus: Hiển thị ring màu `primary`.
 - **Disabled (Vô hiệu hóa):** Trạng thái không thể nhập liệu. Nền xám nhạt (`bg-slate-100`), chữ mờ (`opacity-50`), con trỏ `not-allowed`.
+- **Trường bắt buộc (Required):** Nhãn đi kèm dấu sao đỏ (`*`). Khi có lỗi (validation), border chuyển sang màu `destructive` (#dc2626) và hiển thị thông báo lỗi cỡ 12px bên dưới.
 
 **Ví dụ hiển thị:**
 <div style="margin-top: 8px; display: flex; gap: 16px; flex-wrap: wrap;">
@@ -142,7 +143,15 @@ Dưới đây là danh sách các component đã được xây dựng và cần 
     <label style="display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px; color: #64748b;">Mã định danh (Disabled)</label>
     <input type="text" value="ID_00123" disabled style="width: 100%; max-width: 350px; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px; outline: none; background: #f1f5f9; color: #64748b; cursor: not-allowed; opacity: 0.8;" />
   </div>
+  <div>
+    <label style="display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px; color: #dc2626;">Email <span style="color: #dc2626;">*</span></label>
+    <input type="text" value="email-khong-hop-le" style="width: 100%; max-width: 350px; padding: 8px 12px; border: 1px solid #dc2626; border-radius: 6px; font-size: 14px; outline: none; background: #fef2f2;" />
+    <span style="display: block; font-size: 12px; color: #dc2626; margin-top: 4px;">Email không đúng định dạng</span>
+  </div>
 </div>
+
+**Minh họa trường bắt buộc và lỗi validation:**
+![Ví dụ trường bắt buộc](temp_images/mandatory_input_example.png)
 
 ### 5.3. Bảng dữ liệu (Table)
 - Header: Nền xám nhạt (`muted`), chữ in đậm. Có quy định **Sticky Header** (Cố định tiêu đề khi cuộn) đối với các bảng dài.
