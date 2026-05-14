@@ -111,7 +111,7 @@ export function GenericDataTable({
   const dataListContent = (
     <div className="space-y-6">
       {/* Actions Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-1 rounded-xl">
+      <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-1 rounded-lg">
         <div className="flex-1 flex items-center gap-3">
           {/* Search */}
           <div className="relative flex-1 max-w-md">
@@ -129,7 +129,7 @@ export function GenericDataTable({
             {/* Advanced Search */}
             <button
               onClick={() => setShowAdvancedSearch(true)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 transition-all font-semibold text-sm shadow-sm"
+              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 transition-all font-medium text-sm shadow-sm"
             >
               <Filter className="w-4 h-4" />
               Lọc nâng cao
@@ -138,7 +138,7 @@ export function GenericDataTable({
             {/* Import */}
             <button
               onClick={() => setShowImport(true)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 transition-all font-semibold text-sm shadow-sm"
+              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 transition-all font-medium text-sm shadow-sm"
             >
               <Upload className="w-4 h-4" />
               Nhập dữ liệu
@@ -150,7 +150,7 @@ export function GenericDataTable({
           {/* Export */}
           <button
             onClick={handleExport}
-            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all font-bold text-sm shadow-md active:scale-95"
+            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all font-medium text-sm shadow-md active:scale-95"
           >
             <Download className="w-4 h-4" />
             Kết xuất
@@ -160,7 +160,7 @@ export function GenericDataTable({
           {onSync && (
             <button
               onClick={onSync}
-              className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-bold text-sm shadow-md active:scale-95"
+              className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-medium text-sm shadow-md active:scale-95"
             >
               <RefreshCw className="w-4 h-4" />
               Đồng bộ ngay
@@ -172,11 +172,11 @@ export function GenericDataTable({
       {/* Active Filters */}
       {Object.keys(filters).length > 0 && (
         <div className="flex flex-wrap items-center gap-2 px-1">
-          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mr-2">Bộ lọc:</span>
+          <span className="text-xs font-medium text-slate-400 uppercase tracking-wider mr-2">Bộ lọc:</span>
           {Object.entries(filters).map(([key, value]) => (
             <span
               key={key}
-              className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 border border-blue-100 rounded-full text-xs font-semibold"
+              className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 border border-blue-100 rounded-full text-xs font-medium"
             >
               <span className="opacity-60">{key}:</span> {String(value)}
               <button
@@ -193,7 +193,7 @@ export function GenericDataTable({
           ))}
           <button
             onClick={() => setFilters({})}
-            className="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors ml-2"
+            className="text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors ml-2"
           >
             Xóa tất cả bộ lọc
           </button>
@@ -201,26 +201,26 @@ export function GenericDataTable({
       )}
 
       {/* Table */}
-      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+      <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-center text-sm font-medium text-slate-500">
                   STT
                 </th>
-                <th className="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <th className="px-4 py-4 text-center text-sm font-medium text-slate-500">
                   Tình trạng
                 </th>
                 {columns.map((col) => (
                   <th
                     key={col.key}
-                    className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider"
+                    className="px-4 py-3 text-center text-sm font-medium text-slate-500"
                   >
                     {col.label}
                   </th>
                 ))}
-                <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-center text-sm font-medium text-slate-500">
                   Thao tác
                 </th>
               </tr>
@@ -229,28 +229,28 @@ export function GenericDataTable({
               {paginatedData.length > 0 ? (
                 paginatedData.map((item, index) => (
                   <tr key={item.id} className="hover:bg-blue-50/30 transition-all group">
-                    <td className="px-6 py-4 text-sm text-slate-500 text-center font-medium">
+                    <td className="px-4 py-3 text-sm text-slate-500 text-center font-medium">
                       {(startIndex + index + 1).toString().padStart(2, '0')}
                     </td>
                     <td className="px-4 py-4 text-center">
                       {item.originalData && Object.keys(item.originalData).length > 0 ? (
                         <button
                           onClick={() => handleViewDetail(item)}
-                          className="text-[10px] font-bold uppercase tracking-tighter px-2.5 py-1 bg-amber-100 text-amber-700 rounded-full hover:bg-amber-200 transition-all shadow-sm"
+                          className="text-xs font-medium uppercase tracking-tighter px-2.5 py-1 bg-amber-100 text-amber-700 rounded-full hover:bg-amber-200 transition-all shadow-sm"
                           title="Click để xem thông tin đã sửa"
                         >
                           Đã hiệu chỉnh
                         </button>
                       ) : (
-                        <span className="text-[10px] font-bold uppercase tracking-tighter px-2.5 py-1 bg-slate-100 text-slate-500 rounded-full">Nguyên bản</span>
+                        <span className="text-xs font-medium uppercase tracking-tighter px-2.5 py-1 bg-slate-100 text-slate-500 rounded-full">Nguyên bản</span>
                       )}
                     </td>
                     {columns.map((col) => (
-                      <td key={col.key} className="px-6 py-4 text-sm text-slate-700 text-center font-medium group-hover:text-slate-900 transition-colors">
+                      <td key={col.key} className="px-4 py-3 text-sm text-slate-700 text-center font-medium group-hover:text-slate-950 transition-colors">
                         {item[col.key]}
                       </td>
                     ))}
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-3">
                       <div className="flex items-center justify-center gap-1">
                         <ActionIconButton action="view" onClick={() => handleViewDetailSimple(item)} title="Xem chi tiết" />
                         {onEdit && (
@@ -281,54 +281,70 @@ export function GenericDataTable({
         </div>
 
         {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between bg-white">
-            <div className="text-sm text-slate-500 font-medium">
-              Hiển thị <span className="text-slate-900">{startIndex + 1}</span> - <span className="text-slate-900">{Math.min(startIndex + itemsPerPage, filteredData.length)}</span> trong tổng số <span className="text-blue-600 font-bold">{filteredData.length}</span> bản ghi
+        {totalPages > 0 && (
+          <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-slate-600">Hiển thị</span>
+              <select 
+                className="px-2 py-1 border border-slate-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-900"
+                title="Số bản ghi trên trang"
+              >
+                <option>10</option>
+                <option>20</option>
+                <option>50</option>
+                <option>100</option>
+              </select>
+              <span className="text-sm text-slate-600">bản ghi/trang</span>
             </div>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setCurrentPage(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="p-2 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-              >
-                Trước
-              </button>
-              <div className="flex gap-1 px-2">
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let pageNum;
-                  if (totalPages <= 5) {
-                    pageNum = i + 1;
-                  } else if (currentPage <= 3) {
-                    pageNum = i + 1;
-                  } else if (currentPage >= totalPages - 2) {
-                    pageNum = totalPages - 4 + i;
-                  } else {
-                    pageNum = currentPage - 2 + i;
-                  }
-                  
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => setCurrentPage(pageNum)}
-                      className={`w-9 h-9 rounded-lg text-sm font-bold transition-all shadow-sm ${
-                        currentPage === pageNum
-                          ? 'bg-blue-600 text-white shadow-blue-200'
-                          : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                      }`}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
+            
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-slate-600">
+                {startIndex + 1} - {Math.min(startIndex + itemsPerPage, filteredData.length)} / {filteredData.length}
+              </span>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium"
+                >
+                  Trước
+                </button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
+                    
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`px-3 py-1.5 rounded text-sm font-medium transition-all ${
+                          currentPage === pageNum
+                            ? 'bg-blue-600 text-white border border-blue-600'
+                            : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                </div>
+                <button
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium"
+                >
+                  Sau
+                </button>
               </div>
-              <button
-                onClick={() => setCurrentPage(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="p-2 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-              >
-                Sau
-              </button>
             </div>
           </div>
         )}

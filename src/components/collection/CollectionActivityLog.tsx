@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Filter, Download, Eye, Calendar } from 'lucide-react';
+import { Search, Filter, Download, Eye, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ActivityLog {
   id: number;
@@ -7,11 +7,11 @@ interface ActivityLog {
   user: string;
   action: string;
   method: string;
-  ministry: string;
   status: 'success' | 'failed';
   details: string;
   ipAddress: string;
   browser: string;
+  ministry: string;
 }
 
 const activityLogs: ActivityLog[] = [
@@ -79,17 +79,24 @@ const activityLogs: ActivityLog[] = [
 
 export function CollectionActivityLog() {
   const [selectedLog, setSelectedLog] = useState<ActivityLog | null>(null);
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  const totalPages = Math.ceil(activityLogs.length / itemsPerPage);
+  const currentLogs = activityLogs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-slate-900 mb-1">Quản lý nhật ký thu thập dữ liệu</h2>
+        <h2 className="text-slate-900 mb-1 font-bold">Quản lý nhật ký thu thập dữ liệu</h2>
         <p className="text-slate-500 text-sm">Theo dõi và quản lý các hoạt động liên quan đến thu thập dữ liệu</p>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg border border-slate-200 p-4">
+      <div className="bg-white rounded-lg border border-slate-200 p-4 shadow-sm">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Search */}
           <div className="lg:col-span-2">
@@ -98,7 +105,7 @@ export function CollectionActivityLog() {
               <input aria-label="Input field"
                 type="text"
                 placeholder="Tìm kiếm theo người dùng, hành động, phương thức..."
-                className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
               />
             </div>
           </div>
@@ -107,7 +114,7 @@ export function CollectionActivityLog() {
           <div>
             <div className="relative">
               <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <select aria-label="Select box" className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none">
+              <select aria-label="Select box" className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white">
                 <option value="">Tất cả hành động</option>
                 <option value="add">Thêm mới</option>
                 <option value="edit">Chỉnh sửa</option>
@@ -120,7 +127,7 @@ export function CollectionActivityLog() {
 
           {/* Filter Ministry */}
           <div>
-            <select aria-label="Select box" className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select aria-label="Select box" className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
               <option value="">Tất cả bộ ban ngành</option>
               <option value="moha">Bộ Nội vụ</option>
               <option value="moet">Bộ Giáo dục và Đào tạo</option>
@@ -151,7 +158,7 @@ export function CollectionActivityLog() {
 
           {/* Filter Status */}
           <div>
-            <select aria-label="Select box" className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select aria-label="Select box" className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
               <option value="">Tất cả trạng thái</option>
               <option value="success">Thành công</option>
               <option value="failed">Thất bại</option>
@@ -160,7 +167,7 @@ export function CollectionActivityLog() {
 
           {/* Export */}
           <div>
-            <button className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-slate-300 rounded-lg text-sm hover:bg-slate-50 transition-colors">
+            <button className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors shadow-sm">
               <Download className="w-4 h-4" />
               Kết xuất
             </button>
@@ -168,36 +175,36 @@ export function CollectionActivityLog() {
         </div>
       </div>
 
-      {/* Results */}
+      {/* Results Count */}
       <div className="flex items-center justify-between">
-        <p className="text-sm text-slate-600">Tìm thấy <span className="font-medium">{activityLogs.length}</span> nhật ký</p>
+        <p className="text-sm text-slate-600">Tìm thấy <span className="font-bold text-blue-600">{activityLogs.length}</span> nhật ký</p>
       </div>
 
       {/* Activity Log Table */}
-      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Thời gian</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Người dùng</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Hành động</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Phương thức</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Bộ ban ngành</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Trạng thái</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Thao tác</th>
+                <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider w-12">STT</th>
+                <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Thời gian</th>
+                <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Người dùng</th>
+                <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Hành động</th>
+                <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Phương thức</th>
+                <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Trạng thái</th>
+                <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider w-20">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
-              {activityLogs.map((log) => (
-                <tr key={log.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-6 py-4 text-sm text-slate-900">{log.timestamp}</td>
-                  <td className="px-6 py-4 text-sm text-slate-900">{log.user}</td>
-                  <td className="px-6 py-4 text-sm text-slate-700">{log.action}</td>
-                  <td className="px-6 py-4 text-sm text-slate-700">{log.method}</td>
-                  <td className="px-6 py-4 text-sm text-slate-700">{log.ministry}</td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex px-3 py-1 rounded-full text-xs ${
+              {currentLogs.map((log, index) => (
+                <tr key={log.id} className="hover:bg-blue-50/30 transition-colors">
+                  <td className="px-6 py-4 text-center text-sm text-slate-500 font-medium">{((currentPage - 1) * itemsPerPage + index + 1).toString().padStart(2, '0')}</td>
+                  <td className="px-6 py-4 text-center text-sm text-slate-900 font-mono">{log.timestamp}</td>
+                  <td className="px-6 py-4 text-center text-sm text-slate-900 font-semibold">{log.user}</td>
+                  <td className="px-6 py-4 text-center text-sm text-slate-700">{log.action}</td>
+                  <td className="px-6 py-4 text-center text-sm text-slate-700">{log.method}</td>
+                  <td className="px-6 py-4 text-center">
+                    <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${
                       log.status === 'success' 
                         ? 'bg-green-100 text-green-700' 
                         : 'bg-red-100 text-red-700'
@@ -205,10 +212,10 @@ export function CollectionActivityLog() {
                       {log.status === 'success' ? 'Thành công' : 'Thất bại'}
                     </span>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 text-center">
                     <button 
                       onClick={() => setSelectedLog(log)}
-                      className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                      className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-full transition-all"
                       title="Xem chi tiết"
                     >
                       <Eye className="w-4 h-4" />
@@ -219,38 +226,112 @@ export function CollectionActivityLog() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination UI - According to rule 5.14 */}
+        <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between bg-white flex-wrap gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-slate-500">Hiển thị</span>
+            <div className="relative group">
+              <select aria-label="Records per page"
+                className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm appearance-none pr-8 cursor-pointer font-medium text-slate-700"
+                value={itemsPerPage}
+                onChange={(e) => {
+                  setItemsPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+              >
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+            <span className="text-sm text-slate-500 font-medium">bản ghi / trang</span>
+          </div>
+          
+          <div className="flex items-center gap-6">
+            <span className="text-sm text-slate-500 font-medium">
+              {activityLogs.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, activityLogs.length)} / {activityLogs.length}
+            </span>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-1.5 border border-slate-200 rounded-lg text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 active:scale-95 text-slate-700"
+              >
+                Trước
+              </button>
+              
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum = i + 1;
+                  if (totalPages > 5 && currentPage > 3) {
+                    pageNum = currentPage - 3 + i + 1;
+                    if (pageNum > totalPages) pageNum = totalPages - (4 - i);
+                  }
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setCurrentPage(pageNum)}
+                      className={`w-9 h-9 rounded-lg text-sm font-bold transition-all active:scale-90 ${
+                        currentPage === pageNum
+                          ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
+                          : 'border border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages || totalPages === 0}
+                className="px-4 py-1.5 border border-slate-200 rounded-lg text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 active:scale-95 text-slate-700"
+              >
+                Sau
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Detail Modal */}
       {selectedLog && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full">
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-              <h3 className="text-slate-900">Chi tiết nhật ký hoạt động</h3>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-white rounded-xl max-w-2xl w-full shadow-2xl animate-in zoom-in-95 duration-300">
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
+              <h3 className="text-slate-900 font-bold">Chi tiết nhật ký hoạt động</h3>
               <button
                 onClick={() => setSelectedLog(null)}
-                className="p-1 hover:bg-slate-100 rounded transition-colors"
+                className="p-1 hover:bg-slate-200 rounded-full transition-colors"
               >
-                <span className="text-slate-500">&times;</span>
+                <X className="w-5 h-5 text-slate-400" />
               </button>
             </div>
-            <div className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+            <div className="p-6 space-y-6">
+              <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <p className="text-xs text-slate-500 mb-1">Thời gian</p>
-                  <p className="text-sm text-slate-900">{selectedLog.timestamp}</p>
+                  <p className="text-xs text-slate-500 mb-1 uppercase font-bold tracking-wider">Thời gian</p>
+                  <p className="text-sm text-slate-900 font-mono">{selectedLog.timestamp}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500 mb-1">Người dùng</p>
-                  <p className="text-sm text-slate-900">{selectedLog.user}</p>
+                  <p className="text-xs text-slate-500 mb-1 uppercase font-bold tracking-wider">Người dùng</p>
+                  <p className="text-sm text-slate-900 font-bold">{selectedLog.user}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500 mb-1">Hành động</p>
-                  <p className="text-sm text-slate-900">{selectedLog.action}</p>
+                  <p className="text-xs text-slate-500 mb-1 uppercase font-bold tracking-wider">Hành động</p>
+                  <p className="text-sm text-slate-900 font-medium">{selectedLog.action}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500 mb-1">Trạng thái</p>
-                  <span className={`inline-flex px-3 py-1 rounded-full text-xs ${
+                  <p className="text-xs text-slate-500 mb-1 uppercase font-bold tracking-wider">Trạng thái</p>
+                  <span className={`inline-flex px-3 py-1 rounded-full text-xs font-bold ${
                     selectedLog.status === 'success' 
                       ? 'bg-green-100 text-green-700' 
                       : 'bg-red-100 text-red-700'
@@ -259,31 +340,31 @@ export function CollectionActivityLog() {
                   </span>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500 mb-1">Phương thức</p>
+                  <p className="text-xs text-slate-500 mb-1 uppercase font-bold tracking-wider">Phương thức</p>
                   <p className="text-sm text-slate-900">{selectedLog.method}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500 mb-1">Bộ ban ngành</p>
+                  <p className="text-xs text-slate-500 mb-1 uppercase font-bold tracking-wider">Bộ ban ngành</p>
                   <p className="text-sm text-slate-900">{selectedLog.ministry}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500 mb-1">Địa chỉ IP</p>
-                  <p className="text-sm text-slate-900">{selectedLog.ipAddress}</p>
+                  <p className="text-xs text-slate-500 mb-1 uppercase font-bold tracking-wider">Địa chỉ IP</p>
+                  <p className="text-sm text-slate-900 font-mono">{selectedLog.ipAddress}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500 mb-1">Trình duyệt</p>
+                  <p className="text-xs text-slate-500 mb-1 uppercase font-bold tracking-wider">Trình duyệt</p>
                   <p className="text-sm text-slate-900">{selectedLog.browser}</p>
                 </div>
               </div>
-              <div>
-                <p className="text-xs text-slate-500 mb-1">Chi tiết</p>
-                <p className="text-sm text-slate-900">{selectedLog.details}</p>
+              <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                <p className="text-xs text-slate-500 mb-2 uppercase font-bold tracking-wider">Chi tiết</p>
+                <p className="text-sm text-slate-900 leading-relaxed">{selectedLog.details}</p>
               </div>
             </div>
-            <div className="px-6 py-4 border-t border-slate-200 flex justify-end">
+            <div className="px-6 py-4 border-t border-slate-200 flex justify-end bg-slate-50/50">
               <button
                 onClick={() => setSelectedLog(null)}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 transition-all shadow-md shadow-blue-100 active:scale-95"
               >
                 Đóng
               </button>

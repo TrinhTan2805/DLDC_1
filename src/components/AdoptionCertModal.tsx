@@ -259,7 +259,6 @@ export function AdoptionCertModal({
   ];
 
   const handlePdfView = () => {
-     // User explicitly asked to skip PDF viewer logic for now
      alert('Chức năng xem file chi tiết sẽ được bổ sung sau.');
   };
 
@@ -272,7 +271,7 @@ export function AdoptionCertModal({
       <div className={isInline ? "w-full" : "fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"}>
         <div className={`bg-white ${isInline ? "border border-slate-200 rounded-xl overflow-hidden" : "rounded-lg shadow-xl max-w-[95vw] w-full max-h-[90vh] pointer-events-auto"} flex flex-col`}>
           {/* Header */}
-          <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+          <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0 bg-white sticky top-0 z-20">
             <div>
               <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
             </div>
@@ -290,9 +289,9 @@ export function AdoptionCertModal({
 
 
           {/* Content Area */}
-          <div className="flex-1 overflow-hidden flex flex-col">
+          <div className="flex-1 overflow-hidden flex flex-col bg-slate-50">
             {activeTab === 'list' && (
-              <>
+              <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Search & Actions */}
                 <div className="px-6 py-4 border-b border-slate-200 flex-shrink-0 bg-white">
                   <div className="flex items-center justify-between gap-4">
@@ -453,12 +452,6 @@ export function AdoptionCertModal({
                     <button className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-white text-sm font-bold transition-colors">Sau</button>
                   </div>
                 </div>
-              </>
-            )}
-
-            {activeTab === 'sync' && (
-               <div className="flex-1 overflow-auto p-6 flex justify-center items-center">
-                 <div className="text-slate-400">Chưa có lịch sử đồng bộ chi tiết.</div>
               </div>
             )}
           </div>
@@ -467,13 +460,13 @@ export function AdoptionCertModal({
 
       {/* Record Detail Modal */}
       {selectedRecord && (
-        <>
+        <div className="record-detail-modal-container">
           <div className="fixed inset-0 bg-black/50 z-[60]" onClick={() => setSelectedRecord(null)} />
           
           <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
             <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden">
               {/* Header */}
-              <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0">
+              <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0 bg-slate-50/50 sticky top-0 z-20">
                 <h3 className="text-lg font-semibold text-slate-900">Chi tiết bản ghi đăng ký nuôi con nuôi</h3>
                 <button
                   onClick={() => setSelectedRecord(null)}
@@ -610,7 +603,7 @@ export function AdoptionCertModal({
               </div>
             </div>
           </div>
-        </>
+        </div>
       )}
     </>
   );
