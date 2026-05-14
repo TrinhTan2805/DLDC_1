@@ -50,7 +50,7 @@ export function BaseModal({
           onClick={(e: MouseEvent) => e.stopPropagation()}
         >
           {/* Header Section */}
-          <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10 shadow-sm shadow-slate-900/5">
+          <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10 shadow-sm shadow-slate-900/5">
             <div className="flex items-center">
               {customHeaderIcon}
               <div>

@@ -1480,9 +1480,10 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                           <td className="px-6 py-4 text-center text-[13px] text-slate-700">{item.creator}</td>
                           <td className="px-6 py-4 text-center text-[13px] text-slate-700">{item.time}</td>
                           <td className="px-6 py-4 text-center">
-                            <span className="inline-block px-3 py-1 bg-[#28a745] text-white text-[11px] font-bold rounded">
-                              {item.status}
-                            </span>
+                            <StatusTag 
+                              label={item.status === 'SUCCESSFUL' ? 'Thành công' : item.status} 
+                              variant={item.status === 'SUCCESSFUL' ? 'emerald' : 'red'} 
+                            />
                           </td>
                           <td className="px-6 py-4 text-center">
                             <button
@@ -1490,7 +1491,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                               className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-all inline-flex items-center justify-center"
                               title="Xem chi tiết"
                             >
-                              <Eye className="w-[18px] h-[18px]" />
+                              <Eye className="w-5 h-5" />
                             </button>
                           </td>
                         </tr>
@@ -1742,52 +1743,50 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
             onClick={() => setIsHistoryDetailModalOpen(false)}
           >
             <div
-              className="w-full max-w-4xl bg-white rounded-md shadow-2xl flex flex-col animate-in zoom-in-95 duration-200 overflow-hidden"
+              className="w-full max-w-4xl bg-white rounded-md shadow-2xl flex flex-col animate-in zoom-in-95 duration-200 overflow-hidden relative"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between px-4 py-3 bg-[#314a5d] text-white rounded-t-md">
-                <h3 className="text-[15px] font-bold">Xem chi tiết lịch sử hoạt động</h3>
-                <button
-                  onClick={() => setIsHistoryDetailModalOpen(false)}
-                  className="w-6 h-6 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-                >
-                  <X className="w-4 h-4 text-white" />
-                </button>
-              </div>
+              <button 
+                onClick={() => setIsHistoryDetailModalOpen(false)}
+                className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all z-20"
+                title="Đóng"
+              >
+                <X className="w-5 h-5" />
+              </button>
 
-              <div className="p-4">
-                <div className="grid grid-cols-2 gap-x-6 gap-y-0 text-[12px]">
+              <div className="p-8">
+                <div className="grid grid-cols-2 gap-x-10 gap-y-0 text-[13px]">
                   {/* Column 1 */}
                   <div className="flex flex-col">
-                    <div className="flex px-3 py-2.5 bg-slate-50 border-b border-white">
+                    <div className="flex px-3 py-3 bg-slate-50/50 border-b border-white">
                       <div className="w-[140px] font-bold text-slate-700">Mã yêu cầu:</div>
                       <div className="flex-1 text-slate-700 text-right">{selectedHistory?.id}</div>
                     </div>
-                    <div className="flex px-3 py-2.5 border-b border-white">
+                    <div className="flex px-3 py-3 border-b border-white">
                       <div className="w-[140px] font-bold text-slate-700">Tên CSDL:</div>
                       <div className="flex-1 text-slate-700 text-right truncate">{selectedHistory?.dbName}</div>
                     </div>
-                    <div className="flex px-3 py-2.5 bg-slate-50 border-b border-white">
+                    <div className="flex px-3 py-3 bg-slate-50/50 border-b border-white">
                       <div className="w-[140px] font-bold text-slate-700">Trạng thái:</div>
                       <div className="flex-1 text-slate-700 text-right">{selectedHistory?.status}</div>
                     </div>
-                    <div className="flex px-3 py-2.5 border-b border-white">
+                    <div className="flex px-3 py-3 border-b border-white">
                       <div className="w-[200px] font-bold text-slate-700">Số liệu không đạt chuẩn đã được khắc phục:</div>
                       <div className="flex-1 text-slate-700 text-right">{selectedHistory?.fixedRecords}</div>
                     </div>
-                    <div className="flex px-3 py-2.5 bg-slate-50 border-b border-white">
+                    <div className="flex px-3 py-3 bg-slate-50/50 border-b border-white">
                       <div className="w-[140px] font-bold text-slate-700">Hoạt động khắc phục:</div>
-                      <div className="flex-1 text-slate-700 text-right">{selectedHistory?.fixAction}</div>
+                      <div className="flex-1 text-slate-700 text-right">{selectedHistory?.fixAction || ''}</div>
                     </div>
-                    <div className="flex px-3 py-2.5 border-b border-white">
+                    <div className="flex px-3 py-3 border-b border-white">
                       <div className="w-[140px] font-bold text-slate-700">Mã lỗi:</div>
                       <div className="flex-1 text-slate-700 text-right">{selectedHistory?.errorCode}</div>
                     </div>
-                    <div className="flex px-3 py-2.5 bg-slate-50 border-b border-white">
+                    <div className="flex px-3 py-3 bg-slate-50/50 border-b border-white">
                       <div className="w-[140px] font-bold text-slate-700">Thông Tin máy chủ:</div>
                       <div className="flex-1 text-slate-700 text-right">{selectedHistory?.serverId}</div>
                     </div>
-                    <div className="flex px-3 py-2.5 border-b border-white">
+                    <div className="flex px-3 py-3 border-b border-white">
                       <div className="w-[140px] font-bold text-slate-700">Loại:</div>
                       <div className="flex-1 text-slate-700 text-right">{selectedHistory?.type}</div>
                     </div>
@@ -1795,27 +1794,27 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
 
                   {/* Column 2 */}
                   <div className="flex flex-col">
-                    <div className="flex px-3 py-2.5 bg-slate-50 border-b border-white">
+                    <div className="flex px-3 py-3 bg-slate-50/50 border-b border-white">
                       <div className="w-[140px] font-bold text-slate-700">Người tạo:</div>
                       <div className="flex-1 text-slate-700 text-right">{selectedHistory?.creator}</div>
                     </div>
-                    <div className="flex px-3 py-2.5 border-b border-white">
+                    <div className="flex px-3 py-3 border-b border-white">
                       <div className="w-[140px] font-bold text-slate-700">Thời gian khởi tạo:</div>
                       <div className="flex-1 text-slate-700 text-right">{selectedHistory?.time}</div>
                     </div>
-                    <div className="flex px-3 py-2.5 bg-slate-50 border-b border-white">
+                    <div className="flex px-3 py-3 bg-slate-50/50 border-b border-white">
                       <div className="w-[160px] font-bold text-slate-700">Thời gian kết nối lần cuối:</div>
                       <div className="flex-1 text-slate-700 text-right">{selectedHistory?.lastConnectTime}</div>
                     </div>
-                    <div className="flex px-3 py-2.5 border-b border-white">
+                    <div className="flex px-3 py-3 border-b border-white">
                       <div className="w-[140px] font-bold text-slate-700">Thời gian bắt đầu:</div>
                       <div className="flex-1 text-slate-700 text-right">{selectedHistory?.startTime}</div>
                     </div>
-                    <div className="flex px-3 py-2.5 bg-slate-50 border-b border-white">
+                    <div className="flex px-3 py-3 bg-slate-50/50 border-b border-white">
                       <div className="w-[140px] font-bold text-slate-700">Thời gian hoàn thành:</div>
                       <div className="flex-1 text-slate-700 text-right">{selectedHistory?.endTime}</div>
                     </div>
-                    <div className="flex px-3 py-2.5 border-b border-white">
+                    <div className="flex px-3 py-3 border-b border-white">
                       <div className="w-[140px] font-bold text-slate-700">Thời gian xử lý:</div>
                       <div className="flex-1 text-slate-700 text-right">{selectedHistory?.processingTime}</div>
                     </div>
@@ -1830,15 +1829,15 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
       {(isDeleteDataModalOpen || isEditMappingCheckModalOpen) && (
         <Portal>
           <div className="fixed inset-0 bg-black/60 z-[99999] flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-              <div className="p-6">
-                <div className="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center mb-6 mx-auto">
-                  <AlertCircle className="w-8 h-8 text-rose-600" />
+            <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+              <div className="p-8">
+                <div className="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center mb-8 mx-auto">
+                  <AlertCircle className="w-10 h-10 text-rose-600" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-800 text-center mb-3">
+                <h3 className="text-2xl font-bold text-slate-800 text-center mb-4">
                   {isDeleteDataModalOpen ? 'Xác nhận xóa ánh xạ?' : 'Yêu cầu xóa dữ liệu'}
                 </h3>
-                <p className="text-slate-500 text-center text-[15px] leading-relaxed mb-8">
+                <p className="text-slate-500 text-center text-[16px] leading-relaxed mb-10 px-4">
                   Hệ thống yêu cầu bạn phải <strong>xóa toàn bộ dữ liệu đã thu thập và xử lý</strong> trước khi thực hiện {isDeleteDataModalOpen ? 'xóa' : 'chỉnh sửa'} cấu hình ánh xạ để đảm bảo tính nhất quán của dữ liệu.
                 </p>
                 <div className="flex flex-col gap-3">
@@ -1852,7 +1851,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                       }
                       triggerToast('Thành công!', 'Xóa dữ liệu thành công.');
                     }}
-                    className="w-full py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-all shadow-lg shadow-red-100"
+                    className="w-full py-3.5 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-all shadow-lg shadow-red-100 active:scale-95"
                   >
                     Xác nhận xóa dữ liệu
                   </button>
@@ -1861,7 +1860,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                       setIsDeleteDataModalOpen(false);
                       setIsEditMappingCheckModalOpen(false);
                     }}
-                    className="w-full py-3 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-all"
+                    className="w-full py-3.5 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-all active:scale-95"
                   >
                     Hủy bỏ
                   </button>
@@ -1895,21 +1894,24 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
         </Portal>
       )}
 
-      {/* Update Data Success Modal */}
       <BaseModal
         isOpen={isUpdateSuccessModalOpen}
         onClose={() => setIsUpdateSuccessModalOpen(false)}
         title="Chuyển đổi dữ liệu"
         maxWidth="max-w-md"
       >
-        <div className="py-12 flex flex-col items-center">
-          <p className="text-slate-700 text-[16px] font-semibold text-center leading-relaxed px-8 mb-10">
-            Khởi tạo yêu cầu cập nhật dữ liệu dữ liệu thành công!
+        <div className="flex flex-col items-center py-4">
+          <div className="w-14 h-14 bg-emerald-50 rounded-full flex items-center justify-center mb-5 ring-4 ring-emerald-50/30">
+            <CheckCircle className="w-7 h-7 text-emerald-600" />
+          </div>
+          <p className="text-slate-800 text-[15px] font-bold text-center leading-relaxed px-4 mb-6">
+            Khởi tạo yêu cầu cập nhật dữ liệu thành công!
           </p>
-          <div className="flex justify-end w-full">
+          <div className="flex justify-center w-full">
             <button 
               onClick={() => setIsUpdateSuccessModalOpen(false)}
-              className="px-6 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition-all shadow-sm"
+              style={{ padding: '8px 16px', borderRadius: '6px', fontWeight: 500 }}
+              className="bg-white text-[#020817] border border-[#e2e8f0] text-sm hover:bg-slate-50 transition-all shadow-sm active:scale-95"
             >
               Đóng
             </button>
