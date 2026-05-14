@@ -276,9 +276,9 @@ export function DataMappingModal({ isOpen, onClose, targetDatabase, sourceDatase
                         )}
                       </div>
                       <div className="flex items-center gap-3 text-[11px] text-slate-500 font-medium">
-                        <span>Type: <span className="text-slate-700">{field.type}</span></span>
-                        {field.length && <span>Length: {field.length}</span>}
-                        {field.nullable && <span className="italic">Nullable: true</span>}
+                        <span>Kiểu: <span className="text-slate-700">{field.type}</span></span>
+                        {field.length && <span>Độ dài: {field.length}</span>}
+                        {field.nullable && <span className="italic">Cho phép Null: true</span>}
                       </div>
                       {field.sourceInfo && (
                         <p className="text-[10px] text-orange-600/80 mt-1 font-medium italic">{field.sourceInfo}</p>
@@ -424,9 +424,9 @@ export function DataMappingModal({ isOpen, onClose, targetDatabase, sourceDatase
                             {field.isPk && <span className="text-[10px] text-slate-400 font-bold uppercase">PK</span>}
                           </div>
                           <div className="flex items-center gap-3 text-[11px] text-slate-500 font-medium">
-                            <span>Type: <span className="text-slate-700 uppercase">{field.type}</span></span>
-                            {field.length && <span>Length: {field.length}</span>}
-                            {field.nullable && <span className="italic">Nullable: true</span>}
+                            <span>Kiểu: <span className="text-slate-700 uppercase">{field.type}</span></span>
+                            {field.length && <span>Độ dài: {field.length}</span>}
+                            {field.nullable && <span className="italic">Cho phép Null: true</span>}
                           </div>
                           {isSelected && (
                             <div className="mt-2 text-[10px] text-slate-500">

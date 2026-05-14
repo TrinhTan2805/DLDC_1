@@ -17,15 +17,15 @@ const StatsCard = ({ title, value, change, isPositive, icon: Icon, color }: Stat
         <Icon className="w-5 h-5" />
       </div>
       {change && (
-        <div className={`flex items-center text-xs font-medium ${isPositive ? 'text-emerald-600' : 'text-rose-600'}`}>
+        <div className={`flex items-center text-base font-medium ${isPositive ? 'text-emerald-600' : 'text-rose-600'}`}>
           {isPositive ? <ArrowUpRight className="w-3 h-3 mr-0.5" /> : <ArrowDownRight className="w-3 h-3 mr-0.5" />}
           {change}
         </div>
       )}
     </div>
     <div>
-      <h3 className="text-slate-500 text-sm font-medium mb-1">{title}</h3>
-      <p className="text-2xl font-bold text-slate-900">{value}</p>
+      <h3 className="text-slate-500 text-base font-medium mb-1">{title}</h3>
+      <p className="text-base font-bold text-slate-900">{value}</p>
     </div>
   </div>
 );
@@ -40,22 +40,22 @@ interface DataCardProps {
 const DataCard = ({ title, count, status, onViewDetail }: DataCardProps) => (
   <div className="bg-white p-5 rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition-all group cursor-pointer" onClick={onViewDetail}>
     <div className="flex items-start justify-end mb-2">
-      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+      <span className={`px-2.5 py-1 rounded-full text-base font-bold uppercase tracking-wider ${
         status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'
       }`}>
         {status === 'active' ? 'Hoạt động' : 'Tạm dừng'}
       </span>
     </div>
-    <h4 className="text-slate-900 font-semibold mb-2 group-hover:text-blue-700 transition-colors line-clamp-2 min-h-[40px]">
+    <h4 className="text-slate-900 text-base font-bold mb-2 group-hover:text-blue-700 transition-colors line-clamp-2 min-h-[48px]">
       {title}
     </h4>
     <div className="flex items-center justify-between mt-auto">
-      <div className="text-xs text-slate-500">
+      <div className="text-base text-slate-500">
         {count ? `${count.toLocaleString()} bản ghi` : '0 bản ghi'}
       </div>
-      <div className="text-blue-600 text-xs font-bold flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="text-blue-600 text-base font-bold flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
         Xem chi tiết
-        <ArrowUpRight className="w-3 h-3 ml-1" />
+        <ArrowUpRight className="w-4 h-4 ml-1" />
       </div>
     </div>
   </div>
@@ -96,20 +96,20 @@ export function ViewCollectedDataPage({ onNavigate }: { onNavigate?: (id: string
   return (
     <div className="space-y-6">
       <div>
-        <div className="flex items-center gap-2 text-sm text-slate-500 mb-2">
+        <div className="flex items-center gap-2 text-base text-slate-500 mb-2">
           <span>Thu thập</span>
           <span className="text-slate-300">/</span>
           <span className="text-slate-900 font-medium">Xem dữ liệu thu thập</span>
         </div>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Tổng quan dữ liệu thu thập</h1>
-            <p className="text-slate-500 text-sm mt-1 mb-4">Theo dõi trạng thái và thống kê dữ liệu từ tất cả các nguồn hệ thống</p>
+            <h1 className="text-base font-bold text-slate-900 uppercase tracking-tight">Tổng quan dữ liệu thu thập</h1>
+            <p className="text-base text-slate-500 mt-2 mb-4">Theo dõi trạng thái và thống kê dữ liệu từ tất cả các nguồn hệ thống</p>
             
-            <div className="flex items-center gap-2 p-1 bg-slate-100 rounded-lg w-fit">
+            <div className="flex items-center gap-2 p-1 bg-slate-100 rounded-lg w-fit shadow-sm">
               <button
                 onClick={() => setActiveTab('internal')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                className={`px-6 py-2 rounded-md text-base font-bold transition-all ${
                   activeTab === 'internal' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -117,7 +117,7 @@ export function ViewCollectedDataPage({ onNavigate }: { onNavigate?: (id: string
               </button>
               <button
                 onClick={() => setActiveTab('external')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                className={`px-6 py-2 rounded-md text-base font-bold transition-all ${
                   activeTab === 'external' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -165,13 +165,13 @@ export function ViewCollectedDataPage({ onNavigate }: { onNavigate?: (id: string
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white p-4 rounded-xl border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             type="text"
             placeholder="Tìm kiếm theo tên CSDL, hệ thống..."
-            className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -185,7 +185,7 @@ export function ViewCollectedDataPage({ onNavigate }: { onNavigate?: (id: string
               <List className="w-4 h-4" />
             </button>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+          <button className="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg text-base text-slate-700 hover:bg-slate-50 transition-colors bg-white font-medium">
             <Filter className="w-4 h-4" />
             Lọc
           </button>
@@ -194,7 +194,7 @@ export function ViewCollectedDataPage({ onNavigate }: { onNavigate?: (id: string
 
       {/* Grid of Cards */}
       {filteredDatabases.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pb-12">
           {filteredDatabases.map((db) => (
             <DataCard 
               key={db.id} 
@@ -210,8 +210,8 @@ export function ViewCollectedDataPage({ onNavigate }: { onNavigate?: (id: string
           <div className="p-4 bg-slate-50 rounded-full mb-4">
             <Search className="w-8 h-8 text-slate-300" />
           </div>
-          <h3 className="text-slate-900 font-semibold mb-1">Không tìm thấy dữ liệu</h3>
-          <p className="text-slate-500 text-sm max-w-xs">Không có kết quả nào khớp với từ khóa "{searchTerm}". Vui lòng thử lại với từ khóa khác.</p>
+          <h3 className="text-slate-900 text-base font-bold mb-1">Không tìm thấy dữ liệu</h3>
+          <p className="text-slate-500 text-base max-w-xs">Không có kết quả nào khớp với từ khóa "{searchTerm}". Vui lòng thử lại với từ khóa khác.</p>
         </div>
       )}
     </div>

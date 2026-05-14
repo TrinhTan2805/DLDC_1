@@ -177,8 +177,8 @@ export function StructureLoadingConfig() {
       {/* HEADER INFO SECTION */}
       <div className="px-6 py-4 bg-white border-b border-slate-200 shrink-0 flex justify-between items-center">
         <div>
-          <h3 className="text-sm font-semibold text-slate-800">Cấu hình bảng và trường</h3>
-          <p className="text-xs text-slate-500 mt-0.5">Kết nối đã được thiết lập. Nhấn Nạp cấu trúc để lấy danh sách bảng và trường.</p>
+          <h3 className="text-base font-semibold text-slate-800">Cấu hình bảng và trường</h3>
+          <p className="text-sm text-slate-500 mt-0.5">Kết nối đã được thiết lập. Nhấn Nạp cấu trúc để lấy danh sách bảng và trường.</p>
         </div>
       </div>
 
@@ -187,7 +187,7 @@ export function StructureLoadingConfig() {
           {/* CỘT TRÁI: DANH SÁCH BẢNG */}
           <div className="w-1/3 min-w-[300px] border-r border-slate-200 flex flex-col bg-slate-50">
         <div className="p-4 border-b border-slate-200 bg-white shrink-0">
-          <h3 className="font-bold text-slate-800 text-sm mb-3 flex items-center gap-2">
+          <h3 className="text-base font-bold text-slate-800 mb-3 flex items-center gap-2">
             <Database className="w-4 h-4 text-blue-600" />
             Danh sách bảng
           </h3>
@@ -198,7 +198,7 @@ export function StructureLoadingConfig() {
               placeholder="Tìm kiếm bảng..." 
               value={searchTable}
               onChange={(e) => setSearchTable(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
         </div>
@@ -211,7 +211,7 @@ export function StructureLoadingConfig() {
               checked={filteredTables.length > 0 && selectedTables.size === filteredTables.length}
               onChange={toggleAllTables}
             />
-            <span className="text-sm font-semibold text-slate-700">Chọn tất cả</span>
+            <span className="text-base font-semibold text-slate-700">Chọn tất cả</span>
           </div>
 
           <div className="space-y-1">
@@ -233,7 +233,7 @@ export function StructureLoadingConfig() {
                     onClick={(e) => e.stopPropagation()}
                   />
                   <FileText className={`w-4 h-4 ${isActive ? 'text-blue-600' : 'text-slate-500'}`} />
-                  <span className={`text-sm flex-1 truncate ${isActive ? 'font-semibold text-blue-800' : 'text-slate-700 font-medium'}`}>
+                  <span className={`text-base flex-1 truncate ${isActive ? 'font-semibold text-blue-800' : 'text-slate-700 font-medium'}`}>
                     {tableSettings[table.id]?.displayName || table.name}
                   </span>
                 </div>
@@ -265,7 +265,7 @@ export function StructureLoadingConfig() {
                       placeholder="Nhập tên hiển thị cho bảng..." 
                       value={tableSettings[activeTable.id]?.displayName || ''}
                       onChange={(e) => updateTableSetting(activeTable.id, 'displayName', e.target.value)}
-                      className="flex-1 bg-transparent border-0 p-0 text-sm focus:outline-none focus:ring-0 text-slate-900 font-medium placeholder:text-slate-400"
+                      className="flex-1 bg-transparent border-0 p-0 text-base focus:outline-none focus:ring-0 text-slate-900 font-medium placeholder:text-slate-400"
                     />
                   </div>
                 </div>
@@ -276,13 +276,13 @@ export function StructureLoadingConfig() {
                   placeholder="Tìm kiếm trường..." 
                   value={searchField}
                   onChange={(e) => setSearchField(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
+                  className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
                 />
               </div>
             </div>
 
             <div className="flex-1 overflow-x-auto overflow-y-auto custom-scrollbar relative">
-              <table className="w-full min-w-[800px] text-left text-sm border-collapse">
+              <table className="w-full min-w-[800px] text-left text-base border-collapse">
                 <thead className="bg-slate-50 sticky top-0 z-10 border-b border-slate-200">
                   <tr>
                     <th className="px-4 py-3 w-12 text-center">
@@ -293,11 +293,11 @@ export function StructureLoadingConfig() {
                         onChange={toggleAllFieldsInActiveTable}
                       />
                     </th>
-                    <th className="px-4 py-3 font-bold text-slate-700 w-48">Tên trường</th>
-                    <th className="px-4 py-3 font-bold text-slate-700 w-32">Kiểu dữ liệu</th>
-                    <th className="px-4 py-3 font-bold text-slate-700 w-24 text-center">Allow null</th>
-                    <th className="px-4 py-3 font-bold text-slate-700 w-24 text-center">Khóa chính</th>
-                    <th className="px-4 py-3 font-bold text-slate-700 min-w-[200px]">Tên hiển thị</th>
+                    <th className="px-4 py-3 text-base font-semibold text-slate-500 w-48">Tên trường</th>
+                    <th className="px-4 py-3 text-base font-semibold text-slate-500 w-32">Kiểu dữ liệu</th>
+                    <th className="px-4 py-3 text-base font-semibold text-slate-500 w-24 text-center">Allow null</th>
+                    <th className="px-4 py-3 text-base font-semibold text-slate-500 w-24 text-center">Khóa chính</th>
+                    <th className="px-4 py-3 text-base font-semibold text-slate-500 min-w-[200px]">Tên hiển thị</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -322,7 +322,7 @@ export function StructureLoadingConfig() {
                             disabled={!isSelected}
                             value={settings.name !== undefined ? settings.name : field.name}
                             onChange={(e) => updateFieldSetting(activeTable.id, field.id, 'name', e.target.value)}
-                            className="w-full px-2.5 py-1.5 border border-slate-300 rounded text-[13px] font-mono font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200"
+                            className="w-full px-2.5 py-1.5 border border-slate-300 rounded text-base font-mono font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200"
                           />
                         </td>
                         <td className="px-4 py-2.5">
@@ -331,7 +331,7 @@ export function StructureLoadingConfig() {
                             disabled={!isSelected}
                             value={settings.dataType !== undefined ? settings.dataType : field.dataType}
                             onChange={(e) => updateFieldSetting(activeTable.id, field.id, 'dataType', e.target.value)}
-                            className="w-full px-2.5 py-1.5 border border-slate-300 rounded text-[12px] font-mono text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200"
+                            className="w-full px-2.5 py-1.5 border border-slate-300 rounded text-base font-mono text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200"
                           />
                         </td>
                         <td className="px-4 py-2.5 text-center">
@@ -359,7 +359,7 @@ export function StructureLoadingConfig() {
                             placeholder="Tên hiển thị thân thiện"
                             value={settings.displayName || ''}
                             onChange={(e) => updateFieldSetting(activeTable.id, field.id, 'displayName', e.target.value)}
-                            className="w-full px-2.5 py-1.5 border border-slate-300 rounded text-[13px] focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-400 disabled:border-slate-200"
+                            className="w-full px-2.5 py-1.5 border border-slate-300 rounded text-base focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-400 disabled:border-slate-200"
                           />
                         </td>
                       </tr>

@@ -1,13 +1,15 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { Search, ChevronDown, ChevronUp, AlertTriangle, Send, Download, Eye, Lock, EyeOff, SquarePen, X, Network, Plus, Trash2, ArrowLeftRight, Database, Clock } from 'lucide-react';
+import { Search, ChevronDown, ChevronUp, AlertTriangle, AlertCircle, CheckCircle, Send, Download, Eye, Lock, EyeOff, SquarePen, X, Network, Plus, Trash2, ArrowLeftRight, Database, Clock } from 'lucide-react';
 
 import { DataMappingModal } from './DataMappingModal';
 import { SelectTargetDatabaseModal } from './SelectTargetDatabaseModal';
 import { TargetDatabaseConfigModal } from './TargetDatabaseConfigModal';
+import { ScheduleManagementModal } from './ScheduleManagementModal';
 import { TargetDatabase } from './mockTargetDatabases';
 import { StatusTag } from '../../common/StatusTag';
 import { BaseModal } from '../../common/BaseModal';
+import { Portal } from '../../common/Portal';
 
 export interface ProcessingDatasetItem {
   id: string;
@@ -25,25 +27,39 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
   const [searchQuery, setSearchQuery] = useState('');
   const [searchDatasetQuery, setSearchDatasetQuery] = useState('');
   const [activeServiceId, setActiveServiceId] = useState(datasets[0]?.id || '');
-  const [activeTab, setActiveTab] = useState(isOnlyTransform ? 'transform' : 'clean');
+  const [activeTab, setActiveTab] = useState(isOnlyTransform ? 'transform' : 'mapping');
   const [isSendPopupOpen, setIsSendPopupOpen] = useState(false);
   const [isEditClassifyModalOpen, setIsEditClassifyModalOpen] = useState(false);
-  
+  const [isDeleteDataModalOpen, setIsDeleteDataModalOpen] = useState(false);
+  const [isEditMappingCheckModalOpen, setIsEditMappingCheckModalOpen] = useState(false);
+  const [isUpdateSuccessModalOpen, setIsUpdateSuccessModalOpen] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastConfig, setToastConfig] = useState({ title: '', message: '' });
+
+  const triggerToast = (title: string, message: string) => {
+    setToastConfig({ title, message });
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
+  };
+
   // Mapping Flow States
   const [isSelectDBModalOpen, setIsSelectDBModalOpen] = useState(false);
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [isTargetConfigModalOpen, setIsTargetConfigModalOpen] = useState(false);
   const [isMappingModalOpen, setIsMappingModalOpen] = useState(false);
+  const [isHistoryDetailModalOpen, setIsHistoryDetailModalOpen] = useState(false);
+  const [selectedHistory, setSelectedHistory] = useState<any>(null);
   const [selectedTargetDB, setSelectedTargetDB] = useState<TargetDatabase | null>(null);
   const [targetConfigData, setTargetConfigData] = useState<any>(null);
-  const [formatRules, setFormatRules] = useState<{id: number, field: string, rule: string, action: string, replacementValue: string, isSaved: boolean}[]>([]);
+  const [formatRules, setFormatRules] = useState<{ id: number, field: string, rule: string, action: string, replacementValue: string, isSaved: boolean }[]>([]);
   const [validityRules, setValidityRules] = useState<{
-    id: number, 
-    field: string, 
-    rule: string, 
-    value: string, 
+    id: number,
+    field: string,
+    rule: string,
+    value: string,
     conditions: { id: string; field: string; operator: string; value: string }[],
-    action: string, 
-    replacementValue: string, 
+    action: string,
+    replacementValue: string,
     isSaved: boolean
   }[]>([]);
 
@@ -65,15 +81,15 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
 
   // Validity Rules Handlers
   const handleAddValidityRule = () => {
-    setValidityRules(prev => [...prev, { 
-      id: Date.now(), 
-      field: '', 
-      rule: '', 
-      value: '', 
+    setValidityRules(prev => [...prev, {
+      id: Date.now(),
+      field: '',
+      rule: '',
+      value: '',
       conditions: [{ id: `cond-${Date.now()}`, field: '', operator: '=', value: '' }],
-      action: '', 
-      replacementValue: '', 
-      isSaved: false 
+      action: '',
+      replacementValue: '',
+      isSaved: false
     }]);
   };
 
@@ -111,7 +127,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
   };
 
   // Missing Value Rules Handlers
-  const [missingValueRules, setMissingValueRules] = useState<{id: number, field: string, type: string, sourceValue: string, value: string, isSaved: boolean}[]>([]);
+  const [missingValueRules, setMissingValueRules] = useState<{ id: number, field: string, type: string, sourceValue: string, value: string, isSaved: boolean }[]>([]);
 
   const handleAddMissingValueRule = () => {
     setMissingValueRules(prev => [...prev, { id: Date.now(), field: '', type: '', sourceValue: '', value: '', isSaved: false }]);
@@ -130,7 +146,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
   };
 
   // Transform Rules Handlers
-  const [transformRules, setTransformRules] = useState<{id: number, field: string, type: string, info: string, value: string, isSaved: boolean}[]>([]);
+  const [transformRules, setTransformRules] = useState<{ id: number, field: string, type: string, info: string, value: string, isSaved: boolean }[]>([]);
 
   const handleAddTransformRule = () => {
     setTransformRules(prev => [...prev, { id: Date.now(), field: '', type: '', info: '', value: '', isSaved: false }]);
@@ -149,7 +165,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
   };
 
   // Reference Rules Handlers
-  const [referenceRules, setReferenceRules] = useState<{id: number, field: string, refTable: string, refField: string, action: string, isSaved: boolean}[]>([]);
+  const [referenceRules, setReferenceRules] = useState<{ id: number, field: string, refTable: string, refField: string, action: string, isSaved: boolean }[]>([]);
 
   const handleAddReferenceRule = () => {
     setReferenceRules(prev => [...prev, { id: Date.now(), field: '', refTable: '', refField: '', action: '', isSaved: false }]);
@@ -287,9 +303,13 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
   ];
 
   const mockHistory = [
-    { stt: '1', time: '14:30 20/10/2023', type: 'Áp dụng quy tắc Làm sạch', progress: '5400/5400 bản ghi', status: 'Hoàn thành' },
-    { stt: '2', time: '12:00 20/10/2023', type: 'Chạy Biến đổi dữ liệu', progress: '45230/45230 bản ghi', status: 'Hoàn thành' },
-    { stt: '3', time: '09:15 20/10/2023', type: 'Đồng bộ hệ thống nguồn', progress: '125/400 bản ghi', status: 'Đang xử lý' },
+    { id: '2961', dbName: 'CSDL_CongDan_TongHop_3', type: 'NEW', creator: 'administrator', time: '27-02-2026 14:18:21', status: 'SUCCESSFUL', fixedRecords: 481, fixAction: '', errorCode: '', serverId: '-1', startTime: '27-02-2026 14:18:31', endTime: '27-02-2026 14:19:25', processingTime: '55s', lastConnectTime: '' },
+    { id: '2962', dbName: 'CSDL_CongDan_TongHop_3', type: 'DELETE', creator: 'administrator', time: '27-02-2026 14:17:47', status: 'SUCCESSFUL', fixedRecords: 0, fixAction: '', errorCode: '', serverId: '-1', startTime: '27-02-2026 14:17:50', endTime: '27-02-2026 14:18:00', processingTime: '10s', lastConnectTime: '' },
+    { id: '2963', dbName: 'CSDL_CongDan_TongHop_3', type: 'NEW', creator: 'administrator', time: '27-02-2026 14:13:41', status: 'SUCCESSFUL', fixedRecords: 120, fixAction: '', errorCode: '', serverId: '-1', startTime: '27-02-2026 14:13:45', endTime: '27-02-2026 14:14:00', processingTime: '15s', lastConnectTime: '' },
+    { id: '2964', dbName: 'CSDL_CongDan_TongHop_3', type: 'DELETE', creator: 'administrator', time: '27-02-2026 14:12:19', status: 'SUCCESSFUL', fixedRecords: 0, fixAction: '', errorCode: '', serverId: '-1', startTime: '27-02-2026 14:12:20', endTime: '27-02-2026 14:12:30', processingTime: '10s', lastConnectTime: '' },
+    { id: '2965', dbName: 'CSDL_CongDan_TongHop_3', type: 'NEW', creator: 'administrator', time: '27-02-2026 13:48:16', status: 'SUCCESSFUL', fixedRecords: 350, fixAction: '', errorCode: '', serverId: '-1', startTime: '27-02-2026 13:48:20', endTime: '27-02-2026 13:49:00', processingTime: '40s', lastConnectTime: '' },
+    { id: '2966', dbName: 'CSDL_CongDan_TongHop_3', type: 'DELETE', creator: 'administrator', time: '27-02-2026 13:44:06', status: 'SUCCESSFUL', fixedRecords: 0, fixAction: '', errorCode: '', serverId: '-1', startTime: '27-02-2026 13:44:10', endTime: '27-02-2026 13:44:15', processingTime: '5s', lastConnectTime: '' },
+    { id: '2967', dbName: 'CSDL_CongDan_TongHop_3', type: 'NEW', creator: 'administrator', time: '27-02-2026 12:20:06', status: 'SUCCESSFUL', fixedRecords: 500, fixAction: '', errorCode: '', serverId: '-1', startTime: '27-02-2026 12:20:10', endTime: '27-02-2026 12:21:00', processingTime: '50s', lastConnectTime: '' },
   ];
 
   const allServices = datasets;
@@ -307,9 +327,9 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
           <h2 className="text-[15px] font-bold text-slate-800">Danh mục dữ liệu</h2>
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input 
-              type="text" 
-              placeholder="Tìm kiếm dữ liệu..." 
+            <input
+              type="text"
+              placeholder="Tìm kiếm dữ liệu..."
               value={searchDatasetQuery}
               onChange={(e: any) => setSearchDatasetQuery(e.target.value)}
               className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-md text-[13px] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-shadow bg-slate-50/50 hover:bg-white"
@@ -319,18 +339,18 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
         <div className="flex-1 overflow-y-auto py-2 custom-scrollbar">
           {filteredServices.map((service) => (
             <button
- key={service.id}
- title={service.name}
- onClick={() => setActiveServiceId(service.id)}
- className={`w-full text-left px-5 py-3 border-b border-slate-50 hover:bg-blue-50/30 transition-colors flex flex-col ${activeServiceId === service.id
- ? 'bg-blue-50/60 border-l-4 border-l-blue-600 pl-[16px]'
- : 'border-l-4 border-l-transparent'
- }`}
- >
- <div className={`text-[13px] leading-relaxed ${activeServiceId === service.id ? 'text-blue-700 ' : 'text-slate-600 font-medium'}`}>
- {service.name}
- </div>
- </button>
+              key={service.id}
+              title={service.name}
+              onClick={() => setActiveServiceId(service.id)}
+              className={`w-full text-left px-5 py-3 border-b border-slate-50 hover:bg-blue-50/30 transition-colors flex flex-col ${activeServiceId === service.id
+                ? 'bg-blue-50/60 border-l-4 border-l-blue-600 pl-[16px]'
+                : 'border-l-4 border-l-transparent'
+                }`}
+            >
+              <div className={`text-[13px] leading-relaxed ${activeServiceId === service.id ? 'text-blue-700 ' : 'text-slate-600 font-medium'}`}>
+                {service.name}
+              </div>
+            </button>
           ))}
         </div>
       </div>
@@ -351,6 +371,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                 <Send className="w-5 h-5" />
               </button>
               <button
+                onClick={() => setIsUpdateSuccessModalOpen(true)}
                 title="Cập nhật dữ liệu"
                 className="p-2.5 bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-xl hover:bg-indigo-100 transition-all shadow-sm active:scale-95"
               >
@@ -363,55 +384,67 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                 <Trash2 className="w-5 h-5" />
               </button>
               <button
+                onClick={() => setIsScheduleModalOpen(true)}
                 title="Thêm lịch biểu"
                 className="p-2.5 bg-amber-50 text-amber-600 border border-amber-200 rounded-xl hover:bg-amber-100 transition-all shadow-sm active:scale-95"
               >
                 <Clock className="w-5 h-5" />
               </button>
-              
+
               <div className="w-px h-6 bg-slate-200 mx-2" />
-              
-              <button
-                onClick={handleOpenTargetConfig}
-                title="Cấu hình ánh xạ"
-                className="p-2.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-xl hover:bg-blue-100 transition-all shadow-sm active:scale-95"
-              >
-                <ArrowLeftRight className="w-5 h-5" />
-              </button>
+
             </div>
           </div>
           <p className="text-sm text-slate-500 mb-6">Nguồn dữ liệu: {systemName} | Dữ liệu {activeService.name.toLowerCase()}</p>
 
           {/* Stats Overview */}
           <div className="grid grid-cols-5 gap-4 mb-8">
-            <div className="bg-white p-4 rounded-xl border border-blue-100 flex flex-col justify-center">
-              <span className="text-[11px] font-bold text-blue-500 uppercase tracking-wider mb-2">Số lượng Thu thập</span>
+            <div className="bg-white p-4 rounded-xl border border-blue-100 flex flex-col justify-center shadow-sm">
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Số lượng Thu thập</span>
               <span className="text-3xl font-bold text-blue-600">50,000</span>
             </div>
-            <div className="bg-white p-4 rounded-xl border border-emerald-100 flex flex-col justify-center">
-              <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2">Đã Làm sạch</span>
+            <div className="bg-white p-4 rounded-xl border border-emerald-100 flex flex-col justify-center shadow-sm">
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Đã Làm sạch</span>
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-bold text-emerald-600">49,850</span>
+                <span className="text-[11px] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded">99.7%</span>
               </div>
             </div>
-            <div className="bg-white p-4 rounded-xl border border-indigo-100 flex flex-col justify-center">
-              <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2">Đã Chuẩn hóa</span>
+            <div className="bg-white p-4 rounded-xl border border-indigo-100 flex flex-col justify-center shadow-sm">
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Đã Chuẩn hóa</span>
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-bold text-indigo-600">45,230</span>
+                <span className="text-[11px] font-bold text-indigo-500 bg-indigo-50 px-1.5 py-0.5 rounded">90.4%</span>
               </div>
             </div>
-            <div className="bg-white p-4 rounded-xl border border-purple-100 flex flex-col justify-center">
-              <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2">Đã Biến đổi</span>
+            <div className="bg-white p-4 rounded-xl border border-purple-100 flex flex-col justify-center shadow-sm">
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Đã Biến đổi</span>
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-bold text-purple-600">45,230</span>
+                <span className="text-[11px] font-bold text-purple-500 bg-purple-50 px-1.5 py-0.5 rounded">90.4%</span>
               </div>
             </div>
-
+            <div className="bg-white p-4 rounded-xl border border-rose-100 flex flex-col justify-center shadow-sm">
+              <span className="text-[11px] font-bold text-rose-500 uppercase tracking-wider mb-2">Danh sách lỗi</span>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-bold text-rose-600">12</span>
+                <span className="text-[11px] font-bold text-rose-400">0.02%</span>
+              </div>
+            </div>
           </div>
 
           {/* Tabs */}
           {!isOnlyTransform && (
             <div className="flex border-b border-slate-200 mb-6">
+              <button
+                onClick={() => setActiveTab('mapping')}
+                className={`pb-3 px-4 text-sm font-medium border-b-2 mr-4 transition-colors ${activeTab === 'mapping'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                  }`}
+              >
+                Cấu hình ánh xạ
+              </button>
               <button
                 onClick={() => setActiveTab('clean')}
                 className={`pb-3 px-4 text-sm font-medium border-b-2 mr-4 transition-colors ${activeTab === 'clean'
@@ -419,7 +452,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                   : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
                   }`}
               >
-                Làm sạch
+                Làm sạch (4)
               </button>
               <button
                 onClick={() => setActiveTab('standardize')}
@@ -428,7 +461,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                   : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
                   }`}
               >
-                Chuẩn hóa
+                Chuẩn hóa (3)
               </button>
               <button
                 onClick={() => setActiveTab('transform')}
@@ -437,7 +470,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                   : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
                   }`}
               >
-                Biến đổi
+                Biến đổi (3)
               </button>
 
               <button
@@ -461,7 +494,89 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
             </div>
           )}
 
-          <div className="pb-32 overflow-y-auto max-h-[calc(100vh-320px)] pr-2 custom-scrollbar">
+          <div className="pt-4 pb-32 overflow-y-auto max-h-[calc(100vh-320px)] pr-2 custom-scrollbar">
+            {activeTab === 'mapping' && (
+              <div className="flex flex-col">
+                {!selectedTargetDB ? (
+                  <div className="flex flex-col items-center justify-center pt-48 pb-60 bg-white border-2 border-dashed border-slate-200 rounded-2xl shadow-sm">
+                    <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mb-8 shadow-inner">
+                      <ArrowLeftRight className="w-10 h-10 text-blue-600" />
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-800 mb-3">Chưa có cấu hình ánh xạ</h3>
+                    <p className="text-slate-500 text-[15px] mb-10 max-w-lg text-center leading-relaxed">
+                      Thiết lập ánh xạ giữa các trường của CSDL thu thập sang CSDL xử lý để bắt đầu áp dụng các quy tắc làm sạch, chuẩn hóa và biến đổi.
+                    </p>
+                    <button
+                      onClick={handleOpenTargetConfig}
+                      className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-all active:scale-95 shadow-sm whitespace-nowrap"
+                    >
+                      Cấu hình ánh xạ
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-[15px] font-bold text-slate-800">Bảng ánh xạ đã cấu hình</h3>
+                        <p className="text-[13px] text-slate-500 mt-1">Tổng cộng 5 trường được ánh xạ</p>
+                      </div>
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => setIsDeleteDataModalOpen(true)}
+                          className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-all active:scale-95 shadow-sm"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          Xóa ánh xạ
+                        </button>
+                        <button
+                          onClick={() => setIsEditMappingCheckModalOpen(true)}
+                          className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-all active:scale-95 shadow-sm"
+                        >
+                          <ArrowLeftRight className="w-4 h-4" />
+                          Chỉnh sửa ánh xạ
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="bg-slate-50/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
+                            <th className="px-6 py-4">Trường nguồn</th>
+                            <th className="px-6 py-4">Kiểu</th>
+                            <th className="px-6 py-4 text-center w-20"></th>
+                            <th className="px-6 py-4">Trường đích</th>
+                            <th className="px-6 py-4">Kiểu</th>
+                            <th className="px-6 py-4">Ghi chú</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {[
+                            { source: 'HOCSINH.ID', sourceType: 'INT', target: 'CongDan.ID', targetType: 'INT', note: 'Khóa chính' },
+                            { source: 'HOCSINH.HOTEN', sourceType: 'NVARCHAR(255)', target: 'CongDan.HoTen', targetType: 'NVARCHAR(255)', note: '' },
+                            { source: 'HOCSINH.NGAYSINH', sourceType: 'DATE', target: 'CongDan.NgaySinh', targetType: 'DATE', note: '' },
+                            { source: 'HOCSINH.GIOITINH', sourceType: 'VARCHAR(10)', target: 'CongDan.GioiTinh', targetType: 'VARCHAR(10)', note: '' },
+                            { source: 'HOCSINH.DIP_RefId', sourceType: 'VARCHAR(4000)', target: 'CongDan.DIP_RefId', targetType: 'VARCHAR(4000)', note: 'Tham chiếu' },
+                          ].map((mapping, idx) => (
+                            <tr key={idx} className="hover:bg-slate-50/30 transition-colors">
+                              <td className="px-6 py-4 text-[13px] font-bold text-slate-700">{mapping.source}</td>
+                              <td className="px-6 py-4 text-[12px] text-slate-500 font-mono">{mapping.sourceType}</td>
+                              <td className="px-6 py-4 text-center">
+                                <ArrowLeftRight className="w-4 h-4 text-slate-300 mx-auto" />
+                              </td>
+                              <td className="px-6 py-4 text-[13px] font-bold text-slate-900">{mapping.target}</td>
+                              <td className="px-6 py-4 text-[12px] text-slate-500 font-mono">{mapping.targetType}</td>
+                              <td className="px-6 py-4 text-[13px] text-slate-500 italic">{mapping.note}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {activeTab === 'clean' && (
               <div className="flex flex-col">
                 <RuleAccordion id="clean-1" title="Kiểm tra quy tắc về chuẩn định dạng">
@@ -472,11 +587,11 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                           <div key={rule.id} className={`flex gap-8 items-end p-5 rounded-xl border transition-all relative group ${rule.isSaved ? 'bg-slate-50 border-slate-200' : 'bg-white border-blue-200 shadow-sm'}`}>
                             <div className="flex-1 space-y-2">
                               <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Trường áp dụng</label>
-                              <select 
+                              <select
                                 disabled={rule.isSaved}
                                 value={rule.field}
                                 onChange={(e) => handleUpdateRule(rule.id, 'field', e.target.value)}
-                                title="Trường áp dụng" 
+                                title="Trường áp dụng"
                                 className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                               >
                                 <option value="">-- Chọn trường --</option>
@@ -486,14 +601,14 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                 <option value="Địa chỉ">Địa chỉ</option>
                               </select>
                             </div>
-                            
+
                             <div className="flex-1 space-y-2">
                               <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Quy tắc định dạng</label>
-                              <select 
+                              <select
                                 disabled={rule.isSaved}
                                 value={rule.rule}
                                 onChange={(e) => handleUpdateRule(rule.id, 'rule', e.target.value)}
-                                title="Quy tắc định dạng" 
+                                title="Quy tắc định dạng"
                                 className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                               >
                                 <option value="">-- Chọn quy tắc --</option>
@@ -507,11 +622,11 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                             <div className="flex-[1.5] space-y-2">
                               <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Xử lý ngoại lệ</label>
                               <div className="flex gap-3">
-                                <select 
+                                <select
                                   disabled={rule.isSaved}
                                   value={rule.action}
                                   onChange={(e) => handleUpdateRule(rule.id, 'action', e.target.value)}
-                                  title="Xử lý ngoại lệ" 
+                                  title="Xử lý ngoại lệ"
                                   className={`flex-1 px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                                 >
                                   <option value="">-- Chọn xử lý --</option>
@@ -519,20 +634,20 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                 </select>
                               </div>
                             </div>
-                            
+
                             <div className="flex items-center gap-1 mb-1">
                               {rule.isSaved && (
-                                <button 
+                                <button
                                   onClick={() => handleEditRule(rule.id)}
-                                  title="Chỉnh sửa" 
+                                  title="Chỉnh sửa"
                                   className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                                 >
                                   <SquarePen className="w-4 h-4" />
                                 </button>
                               )}
-                              <button 
+                              <button
                                 onClick={() => setFormatRules(prev => prev.filter(r => r.id !== rule.id))}
-                                title="Xóa quy tắc" 
+                                title="Xóa quy tắc"
                                 className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all"
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -544,7 +659,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                     )}
 
                     <div className="flex items-center justify-between mt-2 px-1">
-                      <button 
+                      <button
                         onClick={handleAddRule}
                         className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-md active:scale-95"
                       >
@@ -553,7 +668,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                       </button>
 
                       {formatRules.some(r => !r.isSaved) && (
-                        <button 
+                        <button
                           onClick={handleSaveRules}
                           className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-all shadow-sm active:scale-95"
                         >
@@ -570,18 +685,18 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                       <div className="space-y-6">
                         {validityRules.map((rule) => {
                           const isGroup = rule.rule === 'AND' || rule.rule === 'OR';
-                          
+
                           return (
                             <div key={rule.id} className={`p-6 rounded-2xl border transition-all relative ${rule.isSaved ? 'bg-slate-50 border-slate-200' : 'bg-white border-blue-200 shadow-lg'}`}>
                               {!isGroup ? (
                                 <div className="flex gap-8 items-end">
                                   <div className="flex-1 space-y-2">
                                     <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Trường áp dụng</label>
-                                    <select 
+                                    <select
                                       disabled={rule.isSaved}
                                       value={rule.field}
                                       onChange={(e) => handleUpdateValidityRule(rule.id, 'field', e.target.value)}
-                                      title="Trường áp dụng" 
+                                      title="Trường áp dụng"
                                       className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                                     >
                                       <option value="">-- Chọn trường --</option>
@@ -591,15 +706,15 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                       <option value="Địa chỉ">Địa chỉ</option>
                                     </select>
                                   </div>
-                                  
+
                                   <div className="flex-[2] grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                       <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Điều kiện hợp lệ</label>
-                                      <select 
+                                      <select
                                         disabled={rule.isSaved}
                                         value={rule.rule}
                                         onChange={(e) => handleUpdateValidityRule(rule.id, 'rule', e.target.value)}
-                                        title="Điều kiện hợp lệ" 
+                                        title="Điều kiện hợp lệ"
                                         className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                                       >
                                         <option value="">-- Chọn điều kiện --</option>
@@ -629,7 +744,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                               label={tag.trim()}
                                               variant="blue"
                                               icon={!rule.isSaved && (
-                                                <button 
+                                                <button
                                                   onClick={() => {
                                                     const tags = rule.value.split(',').filter((_, i) => i !== idx);
                                                     handleUpdateValidityRule(rule.id, 'value', tags.join(','));
@@ -642,7 +757,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                             />
                                           ))}
                                           {!rule.isSaved && (
-                                            <input 
+                                            <input
                                               type="text"
                                               placeholder="Nhập giá trị..."
                                               className="flex-1 bg-transparent border-none outline-none text-[13px] text-slate-700 min-w-[120px] px-1"
@@ -663,7 +778,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                           )}
                                         </div>
                                       ) : (
-                                        <input 
+                                        <input
                                           type="text"
                                           disabled={rule.isSaved}
                                           value={rule.value}
@@ -674,20 +789,20 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                       )}
                                     </div>
                                   </div>
-                                  
+
                                   <div className="flex items-center gap-1 mb-1">
                                     {rule.isSaved && (
-                                      <button 
+                                      <button
                                         onClick={() => handleEditValidityRule(rule.id)}
-                                        title="Chỉnh sửa" 
+                                        title="Chỉnh sửa"
                                         className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                                       >
                                         <SquarePen className="w-4 h-4" />
                                       </button>
                                     )}
-                                    <button 
+                                    <button
                                       onClick={() => setValidityRules(prev => prev.filter(r => r.id !== rule.id))}
-                                      title="Xóa quy tắc" 
+                                      title="Xóa quy tắc"
                                       className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all"
                                     >
                                       <Trash2 className="w-4 h-4" />
@@ -697,7 +812,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                               ) : (
                                 <div className="space-y-4">
                                   <div className="flex items-center justify-between">
-                                    <select 
+                                    <select
                                       disabled={rule.isSaved}
                                       value={rule.rule}
                                       onChange={(e) => handleUpdateValidityRule(rule.id, 'rule', e.target.value)}
@@ -707,7 +822,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                       <option value="AND">AND</option>
                                       <option value="OR">OR</option>
                                     </select>
-                                    <button 
+                                    <button
                                       onClick={() => setValidityRules(prev => prev.filter(r => r.id !== rule.id))}
                                       title="Xóa quy tắc"
                                       className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all"
@@ -715,7 +830,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                       <Trash2 className="w-4 h-4" />
                                     </button>
                                   </div>
-                                  
+
                                   <div className="space-y-3">
                                     <div className="flex gap-4 items-center px-1">
                                       <div className="flex-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Trường áp dụng</div>
@@ -725,7 +840,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                     </div>
                                     {rule.conditions.map((cond, idx) => (
                                       <div key={cond.id} className="flex gap-4 items-center">
-                                        <select 
+                                        <select
                                           disabled={rule.isSaved}
                                           value={cond.field}
                                           onChange={(e) => handleUpdateValidityCondition(rule.id, cond.id, 'field', e.target.value)}
@@ -739,7 +854,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                           <option value="Ngày sinh">Ngày sinh</option>
                                           <option value="Địa chỉ">Địa chỉ</option>
                                         </select>
-                                        <select 
+                                        <select
                                           disabled={rule.isSaved}
                                           value={cond.operator}
                                           onChange={(e) => handleUpdateValidityCondition(rule.id, cond.id, 'operator', e.target.value)}
@@ -755,7 +870,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                           <option value="IN">IN</option>
                                           <option value="NOT IN">NOT IN</option>
                                         </select>
-                                        <input 
+                                        <input
                                           type="text"
                                           disabled={rule.isSaved}
                                           value={cond.value}
@@ -764,7 +879,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                           className={`flex-1 px-3 py-2 rounded-lg text-sm transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 text-slate-500' : 'bg-white border-slate-300 border text-slate-700'}`}
                                         />
                                         {!rule.isSaved && rule.conditions.length > 1 && (
-                                          <button 
+                                          <button
                                             onClick={() => handleRemoveValidityCondition(rule.id, cond.id)}
                                             title="Xóa điều kiện"
                                             className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded transition-all"
@@ -775,9 +890,9 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                       </div>
                                     ))}
                                   </div>
-                                  
+
                                   {!rule.isSaved && (
-                                    <button 
+                                    <button
                                       onClick={() => handleAddValidityCondition(rule.id)}
                                       className="w-8 h-8 flex items-center justify-center bg-blue-600 text-white rounded shadow-sm hover:bg-blue-700 transition-all active:scale-95"
                                     >
@@ -790,11 +905,11 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                               <div className="flex-[1.5] space-y-2 mt-6 pt-6 border-t border-slate-100">
                                 <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Xử lý ngoại lệ</label>
                                 <div className="flex gap-3">
-                                  <select 
+                                  <select
                                     disabled={rule.isSaved}
                                     value={rule.action}
                                     onChange={(e) => handleUpdateValidityRule(rule.id, 'action', e.target.value)}
-                                    title="Xử lý ngoại lệ" 
+                                    title="Xử lý ngoại lệ"
                                     className={`flex-1 px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                                   >
                                     <option value="">-- Chọn xử lý --</option>
@@ -809,7 +924,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                     )}
 
                     <div className="flex items-center justify-between mt-2 px-1">
-                      <button 
+                      <button
                         onClick={handleAddValidityRule}
                         className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-md active:scale-95"
                       >
@@ -818,7 +933,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                       </button>
 
                       {validityRules.some(r => !r.isSaved) && (
-                        <button 
+                        <button
                           onClick={handleSaveValidityRules}
                           className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-all shadow-sm active:scale-95"
                         >
@@ -836,11 +951,11 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                           <div key={rule.id} className={`flex gap-6 items-end p-5 rounded-xl border transition-all relative group ${rule.isSaved ? 'bg-slate-50 border-slate-200' : 'bg-white border-blue-200 shadow-sm'}`}>
                             <div className="flex-1 space-y-2">
                               <label className="block text-[11px] font-medium text-slate-500 uppercase tracking-wider">Trường áp dụng</label>
-                              <select 
+                              <select
                                 disabled={rule.isSaved}
                                 value={rule.field}
                                 onChange={(e) => handleUpdateMissingValueRule(rule.id, 'field', e.target.value)}
-                                title="Trường áp dụng" 
+                                title="Trường áp dụng"
                                 className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                               >
                                 <option value="">-- Chọn trường --</option>
@@ -850,14 +965,14 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                 <option value="Địa chỉ">Địa chỉ</option>
                               </select>
                             </div>
-                            
+
                             <div className="flex-1 space-y-2">
                               <label className="block text-[11px] font-medium text-slate-500 uppercase tracking-wider">Chọn điều kiện</label>
-                              <select 
+                              <select
                                 disabled={rule.isSaved}
                                 value={rule.type}
                                 onChange={(e) => handleUpdateMissingValueRule(rule.id, 'type', e.target.value)}
-                                title="Chọn điều kiện" 
+                                title="Chọn điều kiện"
                                 className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                               >
                                 <option value="">-- Chọn điều kiện --</option>
@@ -870,7 +985,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
 
                             <div className="flex-1 space-y-2">
                               <label className="block text-[11px] font-medium text-slate-500 uppercase tracking-wider">Nhập giá trị nguồn</label>
-                              <input 
+                              <input
                                 type="text"
                                 disabled={rule.isSaved}
                                 value={rule.sourceValue || ''}
@@ -882,7 +997,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
 
                             <div className="flex-1 space-y-2">
                               <label className="block text-[11px] font-medium text-slate-500 uppercase tracking-wider">Giá trị thay thế</label>
-                              <input 
+                              <input
                                 type="text"
                                 disabled={rule.isSaved}
                                 value={rule.value}
@@ -891,20 +1006,20 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                 className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                               />
                             </div>
-                            
+
                             <div className="flex items-center gap-1 mb-1">
                               {rule.isSaved && (
-                                <button 
+                                <button
                                   onClick={() => handleEditMissingValueRule(rule.id)}
-                                  title="Chỉnh sửa" 
+                                  title="Chỉnh sửa"
                                   className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                                 >
                                   <SquarePen className="w-4 h-4" />
                                 </button>
                               )}
-                              <button 
+                              <button
                                 onClick={() => setMissingValueRules(prev => prev.filter(r => r.id !== rule.id))}
-                                title="Xóa" 
+                                title="Xóa"
                                 className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all"
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -916,7 +1031,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                     )}
 
                     <div className="flex items-center justify-between mt-2 px-1">
-                      <button 
+                      <button
                         onClick={handleAddMissingValueRule}
                         className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-md active:scale-95"
                       >
@@ -925,7 +1040,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                       </button>
 
                       {missingValueRules.some(r => !r.isSaved) && (
-                        <button 
+                        <button
                           onClick={handleSaveMissingValueRules}
                           className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-all shadow-sm active:scale-95"
                         >
@@ -945,10 +1060,10 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                     <div className="grid grid-cols-3 gap-6">
                       <div className="space-y-2">
                         <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Trường làm khóa đối sánh</label>
-                        <select 
+                        <select
                           value={matchingConfig.field}
                           onChange={(e) => handleUpdateMatchingConfig('field', e.target.value)}
-                          title="Trường làm khóa đối sánh" 
+                          title="Trường làm khóa đối sánh"
                           className="w-full px-3.5 py-2.5 rounded-lg text-[13px] bg-white border border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all focus:outline-none"
                         >
                           <option value="">-- Chọn trường --</option>
@@ -958,13 +1073,13 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                           <option value="email">Email</option>
                         </select>
                       </div>
-                      
+
                       <div className="space-y-2">
                         <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Xử lý ngoại lệ</label>
-                        <select 
+                        <select
                           value={matchingConfig.action}
                           onChange={(e) => handleUpdateMatchingConfig('action', e.target.value)}
-                          title="Xử lý ngoại lệ" 
+                          title="Xử lý ngoại lệ"
                           className="w-full px-3.5 py-2.5 rounded-lg text-[13px] bg-white border border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all focus:outline-none"
                         >
                           <option value="">-- Chọn xử lý --</option>
@@ -976,11 +1091,11 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
 
                       <div className="space-y-2">
                         <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Cột căn cứ sắp xếp</label>
-                        <select 
+                        <select
                           disabled={!(matchingConfig.action === 'Giữ bản ghi mới nhất' || matchingConfig.action === 'Giữ bản ghi cũ nhất')}
                           value={matchingConfig.sortField}
                           onChange={(e) => handleUpdateMatchingConfig('sortField', e.target.value)}
-                          title="Cột căn cứ sắp xếp" 
+                          title="Cột căn cứ sắp xếp"
                           className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${!(matchingConfig.action === 'Giữ bản ghi mới nhất' || matchingConfig.action === 'Giữ bản ghi cũ nhất') ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                         >
                           <option value="">-- Chọn trường --</option>
@@ -1000,11 +1115,11 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                           <div key={rule.id} className={`flex gap-6 items-end p-5 rounded-xl border transition-all relative group ${rule.isSaved ? 'bg-slate-50 border-slate-200' : 'bg-white border-blue-200 shadow-sm'}`}>
                             <div className="flex-1 space-y-2">
                               <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Trường áp dụng</label>
-                              <select 
+                              <select
                                 disabled={rule.isSaved}
                                 value={rule.field}
                                 onChange={(e) => handleUpdateReferenceRule(rule.id, 'field', e.target.value)}
-                                title="Trường áp dụng" 
+                                title="Trường áp dụng"
                                 className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                               >
                                 <option value="">-- Chọn trường --</option>
@@ -1015,14 +1130,14 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                 <option value="quoc_tich">Quốc tịch</option>
                               </select>
                             </div>
-                            
+
                             <div className="flex-1 space-y-2">
                               <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Bảng tham chiếu</label>
-                              <select 
+                              <select
                                 disabled={rule.isSaved}
                                 value={rule.refTable}
                                 onChange={(e) => handleUpdateReferenceRule(rule.id, 'refTable', e.target.value)}
-                                title="Bảng tham chiếu" 
+                                title="Bảng tham chiếu"
                                 className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                               >
                                 <option value="">-- Chọn bảng --</option>
@@ -1036,11 +1151,11 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
 
                             <div className="flex-1 space-y-2">
                               <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Trường tham chiếu</label>
-                              <select 
+                              <select
                                 disabled={rule.isSaved}
                                 value={rule.refField}
                                 onChange={(e) => handleUpdateReferenceRule(rule.id, 'refField', e.target.value)}
-                                title="Trường tham chiếu" 
+                                title="Trường tham chiếu"
                                 className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                               >
                                 <option value="">-- Chọn trường --</option>
@@ -1052,11 +1167,11 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
 
                             <div className="flex-1 space-y-2">
                               <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Hành động</label>
-                              <select 
+                              <select
                                 disabled={rule.isSaved}
                                 value={rule.action}
                                 onChange={(e) => handleUpdateReferenceRule(rule.id, 'action', e.target.value)}
-                                title="Hành động" 
+                                title="Hành động"
                                 className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                               >
                                 <option value="">-- Chọn hành động --</option>
@@ -1066,20 +1181,20 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                 <option value="Đánh dấu cảnh báo">Đánh dấu cảnh báo</option>
                               </select>
                             </div>
-                            
+
                             <div className="flex items-center gap-1 mb-1">
                               {rule.isSaved && (
-                                <button 
+                                <button
                                   onClick={() => handleEditReferenceRule(rule.id)}
-                                  title="Chỉnh sửa" 
+                                  title="Chỉnh sửa"
                                   className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                                 >
                                   <SquarePen className="w-4 h-4" />
                                 </button>
                               )}
-                              <button 
+                              <button
                                 onClick={() => setReferenceRules(prev => prev.filter(r => r.id !== rule.id))}
-                                title="Xóa" 
+                                title="Xóa"
                                 className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -1091,7 +1206,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                     )}
 
                     <div className="flex items-center justify-between mt-2 px-1">
-                      <button 
+                      <button
                         onClick={handleAddReferenceRule}
                         className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-md active:scale-95"
                       >
@@ -1100,7 +1215,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                       </button>
 
                       {referenceRules.some(r => !r.isSaved) && (
-                        <button 
+                        <button
                           onClick={handleSaveReferenceRules}
                           className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-all shadow-sm active:scale-95"
                         >
@@ -1123,11 +1238,11 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                           <div key={rule.id} className={`flex gap-6 items-end p-5 rounded-xl border transition-all relative group ${rule.isSaved ? 'bg-slate-50 border-slate-200' : 'bg-white border-blue-200 shadow-sm'}`}>
                             <div className="flex-1 space-y-2">
                               <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Trường áp dụng</label>
-                              <select 
+                              <select
                                 disabled={rule.isSaved}
                                 value={rule.field}
                                 onChange={(e) => handleUpdateTransformRule(rule.id, 'field', e.target.value)}
-                                title="Trường áp dụng" 
+                                title="Trường áp dụng"
                                 className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                               >
                                 <option value="">-- Chọn trường --</option>
@@ -1137,14 +1252,14 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                 <option value="Địa chỉ">Địa chỉ</option>
                               </select>
                             </div>
-                            
+
                             <div className="flex-1 space-y-2">
                               <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Kiểu dữ liệu</label>
-                              <select 
+                              <select
                                 disabled={rule.isSaved}
                                 value={rule.type}
                                 onChange={(e) => handleUpdateTransformRule(rule.id, 'type', e.target.value)}
-                                title="Kiểu dữ liệu" 
+                                title="Kiểu dữ liệu"
                                 className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                               >
                                 <option value="">-- Chọn kiểu --</option>
@@ -1159,11 +1274,11 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
 
                             <div className="flex-1 space-y-2">
                               <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Thông tin chuyển đổi</label>
-                              <select 
+                              <select
                                 disabled={rule.isSaved}
                                 value={rule.info}
                                 onChange={(e) => handleUpdateTransformRule(rule.id, 'info', e.target.value)}
-                                title="Thông tin chuyển đổi" 
+                                title="Thông tin chuyển đổi"
                                 className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                               >
                                 <option value="">-- Chọn thông tin --</option>
@@ -1177,7 +1292,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
 
                             <div className="flex-1 space-y-2">
                               <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Giá trị</label>
-                              <input 
+                              <input
                                 type="text"
                                 disabled={rule.isSaved}
                                 value={rule.value}
@@ -1186,20 +1301,20 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                 className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                               />
                             </div>
-                            
+
                             <div className="flex items-center gap-1 mb-1">
                               {rule.isSaved && (
-                                <button 
+                                <button
                                   onClick={() => handleEditTransformRule(rule.id)}
-                                  title="Chỉnh sửa" 
+                                  title="Chỉnh sửa"
                                   className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                                 >
                                   <SquarePen className="w-4 h-4" />
                                 </button>
                               )}
-                              <button 
+                              <button
                                 onClick={() => setTransformRules(prev => prev.filter(r => r.id !== rule.id))}
-                                title="Xóa" 
+                                title="Xóa"
                                 className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -1211,7 +1326,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                     )}
 
                     <div className="flex items-center justify-between mt-2 px-1">
-                      <button 
+                      <button
                         onClick={handleAddTransformRule}
                         className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-md active:scale-95"
                       >
@@ -1220,7 +1335,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                       </button>
 
                       {transformRules.some(r => !r.isSaved) && (
-                        <button 
+                        <button
                           onClick={handleSaveTransformRules}
                           className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-all shadow-sm active:scale-95"
                         >
@@ -1313,8 +1428,8 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                         <tr key={idx} className="hover:bg-blue-50/30 transition-all group">
                           <td className="px-6 py-4 text-center text-sm font-semibold text-slate-900">{item.field}</td>
                           <td className="px-6 py-4 text-center">
-                            <StatusTag 
-                              label={item.publicLevel} 
+                            <StatusTag
+                              label={item.publicLevel}
                               variant={item.publicLevel === 'Công khai hạn chế' ? 'blue' : item.publicLevel === 'Nội bộ' ? 'orange' : 'red'}
                               icon={
                                 <>
@@ -1326,9 +1441,9 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                             />
                           </td>
                           <td className="px-6 py-4 text-center">
-                            <StatusTag 
-                              label={item.sensLevel} 
-                              variant={item.sensLevel === 'Thấp' ? 'emerald' : item.sensLevel === 'Cao' ? 'red' : 'red'} 
+                            <StatusTag
+                              label={item.sensLevel}
+                              variant={item.sensLevel === 'Thấp' ? 'emerald' : item.sensLevel === 'Cao' ? 'red' : 'red'}
                             />
                           </td>
                         </tr>
@@ -1345,37 +1460,48 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input type="text" placeholder="Tìm kiếm theo tên quy tắc, thời gian..." className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" />
                 </div>
-                <div className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
+                <div className="bg-white border border-slate-200 overflow-hidden">
                   <table className="w-full border-collapse">
-                    <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
+                    <thead className="bg-[#e9ecef] border-b border-slate-300">
                       <tr>
-                        <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap w-20">STT</th>
-                        <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap w-48">Thời gian</th>
-                        <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Loại xử lý</th>
-                        <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap w-32">Trạng thái</th>
+                        <th className="px-6 py-4 text-center text-[13px] font-bold text-slate-700 whitespace-nowrap w-24">Hoạt động</th>
+                        <th className="px-6 py-4 text-center text-[13px] font-bold text-slate-700 whitespace-nowrap">Loại</th>
+                        <th className="px-6 py-4 text-center text-[13px] font-bold text-slate-700 whitespace-nowrap">Người tạo</th>
+                        <th className="px-6 py-4 text-center text-[13px] font-bold text-slate-700 whitespace-nowrap">Thời gian</th>
+                        <th className="px-6 py-4 text-center text-[13px] font-bold text-slate-700 whitespace-nowrap">Trạng thái</th>
+                        <th className="px-6 py-4 text-center text-[13px] font-bold text-slate-700 whitespace-nowrap w-24">Thao tác</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {mockHistory.map((item, idx) => (
-                        <tr key={idx} className="hover:bg-blue-50/30 transition-all group">
-                          <td className="px-6 py-4 text-center text-sm font-semibold text-slate-500">{(idx + 1).toString().padStart(2, '0')}</td>
-                          <td className="px-6 py-4 text-center text-sm text-slate-600 font-medium font-mono">{item.time}</td>
-                          <td className="px-6 py-4 text-center">
-                            <div className="font-semibold text-slate-900 text-sm mb-1">{item.type}</div>
-                            <div className="text-xs text-slate-500 font-mono">{item.progress}</div>
-                          </td>
+                        <tr key={idx} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'} hover:bg-blue-50/30 transition-all`}>
+                          <td className="px-6 py-4 text-center text-[13px] text-slate-700">{idx + 1}</td>
+                          <td className="px-6 py-4 text-center text-[13px] text-slate-700">{item.type}</td>
+                          <td className="px-6 py-4 text-center text-[13px] text-slate-700">{item.creator}</td>
+                          <td className="px-6 py-4 text-center text-[13px] text-slate-700">{item.time}</td>
                           <td className="px-6 py-4 text-center">
                             <StatusTag 
-                              label={item.status} 
-                              variant={item.status === 'Đang xử lý' ? 'indigo' : item.status === 'Hoàn thành' ? 'emerald' : 'red'} 
+                              label={item.status === 'SUCCESSFUL' ? 'Thành công' : item.status} 
+                              variant={item.status === 'SUCCESSFUL' ? 'emerald' : 'red'} 
                             />
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <button
+                              onClick={() => { setSelectedHistory(item); setIsHistoryDetailModalOpen(true); }}
+                              className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-all inline-flex items-center justify-center"
+                              title="Xem chi tiết"
+                            >
+                              <Eye className="w-5 h-5" />
+                            </button>
                           </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
+                  <div className="py-3 text-center text-[13px] text-slate-700 border-t border-slate-200 bg-slate-50 hover:bg-slate-100 cursor-pointer transition-colors">
+                    Xem tất cả
+                  </div>
                 </div>
-                <div className="text-xs text-slate-500 mt-4">Hiển thị {mockHistory.length} bản ghi</div>
               </div>
             )}
           </div>
@@ -1456,7 +1582,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
             <p className="text-sm text-slate-500 mb-5 font-medium">
               Cấu hình mức độ cho các trường thông tin cụ thể (mức độ này sẽ ưu tiên ghi đè lên mức phân loại toàn bảng).
             </p>
-            
+
             <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
               <table className="w-full text-left border-collapse">
                 <thead>
@@ -1601,6 +1727,197 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
         targetDatabase={selectedTargetDB}
         sourceDatasetName={activeService.name}
       />
+
+      <ScheduleManagementModal
+        isOpen={isScheduleModalOpen}
+        onClose={() => setIsScheduleModalOpen(false)}
+        systemName={systemName}
+        datasetName={activeService.name}
+      />
+
+      {/* History Detail Modal */}
+      {isHistoryDetailModalOpen && (
+        <Portal>
+          <div
+            className="fixed inset-0 bg-black/60 z-[99999] flex items-center justify-center p-4"
+            onClick={() => setIsHistoryDetailModalOpen(false)}
+          >
+            <div
+              className="w-full max-w-4xl bg-white rounded-md shadow-2xl flex flex-col animate-in zoom-in-95 duration-200 overflow-hidden relative"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button 
+                onClick={() => setIsHistoryDetailModalOpen(false)}
+                className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all z-20"
+                title="Đóng"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="p-8">
+                <div className="grid grid-cols-2 gap-x-10 gap-y-0 text-[13px]">
+                  {/* Column 1 */}
+                  <div className="flex flex-col">
+                    <div className="flex px-3 py-3 bg-slate-50/50 border-b border-white">
+                      <div className="w-[140px] font-bold text-slate-700">Mã yêu cầu:</div>
+                      <div className="flex-1 text-slate-700 text-right">{selectedHistory?.id}</div>
+                    </div>
+                    <div className="flex px-3 py-3 border-b border-white">
+                      <div className="w-[140px] font-bold text-slate-700">Tên CSDL:</div>
+                      <div className="flex-1 text-slate-700 text-right truncate">{selectedHistory?.dbName}</div>
+                    </div>
+                    <div className="flex px-3 py-3 bg-slate-50/50 border-b border-white">
+                      <div className="w-[140px] font-bold text-slate-700">Trạng thái:</div>
+                      <div className="flex-1 text-slate-700 text-right">{selectedHistory?.status}</div>
+                    </div>
+                    <div className="flex px-3 py-3 border-b border-white">
+                      <div className="w-[200px] font-bold text-slate-700">Số liệu không đạt chuẩn đã được khắc phục:</div>
+                      <div className="flex-1 text-slate-700 text-right">{selectedHistory?.fixedRecords}</div>
+                    </div>
+                    <div className="flex px-3 py-3 bg-slate-50/50 border-b border-white">
+                      <div className="w-[140px] font-bold text-slate-700">Hoạt động khắc phục:</div>
+                      <div className="flex-1 text-slate-700 text-right">{selectedHistory?.fixAction || ''}</div>
+                    </div>
+                    <div className="flex px-3 py-3 border-b border-white">
+                      <div className="w-[140px] font-bold text-slate-700">Mã lỗi:</div>
+                      <div className="flex-1 text-slate-700 text-right">{selectedHistory?.errorCode}</div>
+                    </div>
+                    <div className="flex px-3 py-3 bg-slate-50/50 border-b border-white">
+                      <div className="w-[140px] font-bold text-slate-700">Thông Tin máy chủ:</div>
+                      <div className="flex-1 text-slate-700 text-right">{selectedHistory?.serverId}</div>
+                    </div>
+                    <div className="flex px-3 py-3 border-b border-white">
+                      <div className="w-[140px] font-bold text-slate-700">Loại:</div>
+                      <div className="flex-1 text-slate-700 text-right">{selectedHistory?.type}</div>
+                    </div>
+                  </div>
+
+                  {/* Column 2 */}
+                  <div className="flex flex-col">
+                    <div className="flex px-3 py-3 bg-slate-50/50 border-b border-white">
+                      <div className="w-[140px] font-bold text-slate-700">Người tạo:</div>
+                      <div className="flex-1 text-slate-700 text-right">{selectedHistory?.creator}</div>
+                    </div>
+                    <div className="flex px-3 py-3 border-b border-white">
+                      <div className="w-[140px] font-bold text-slate-700">Thời gian khởi tạo:</div>
+                      <div className="flex-1 text-slate-700 text-right">{selectedHistory?.time}</div>
+                    </div>
+                    <div className="flex px-3 py-3 bg-slate-50/50 border-b border-white">
+                      <div className="w-[160px] font-bold text-slate-700">Thời gian kết nối lần cuối:</div>
+                      <div className="flex-1 text-slate-700 text-right">{selectedHistory?.lastConnectTime}</div>
+                    </div>
+                    <div className="flex px-3 py-3 border-b border-white">
+                      <div className="w-[140px] font-bold text-slate-700">Thời gian bắt đầu:</div>
+                      <div className="flex-1 text-slate-700 text-right">{selectedHistory?.startTime}</div>
+                    </div>
+                    <div className="flex px-3 py-3 bg-slate-50/50 border-b border-white">
+                      <div className="w-[140px] font-bold text-slate-700">Thời gian hoàn thành:</div>
+                      <div className="flex-1 text-slate-700 text-right">{selectedHistory?.endTime}</div>
+                    </div>
+                    <div className="flex px-3 py-3 border-b border-white">
+                      <div className="w-[140px] font-bold text-slate-700">Thời gian xử lý:</div>
+                      <div className="flex-1 text-slate-700 text-right">{selectedHistory?.processingTime}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Portal>
+      )}
+      {/* Delete Data Confirmation Modal */}
+      {(isDeleteDataModalOpen || isEditMappingCheckModalOpen) && (
+        <Portal>
+          <div className="fixed inset-0 bg-black/60 z-[99999] flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+              <div className="p-8">
+                <div className="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center mb-8 mx-auto">
+                  <AlertCircle className="w-10 h-10 text-rose-600" />
+                </div>
+                <h3 className="text-2xl font-bold text-slate-800 text-center mb-4">
+                  {isDeleteDataModalOpen ? 'Xác nhận xóa ánh xạ?' : 'Yêu cầu xóa dữ liệu'}
+                </h3>
+                <p className="text-slate-500 text-center text-[16px] leading-relaxed mb-10 px-4">
+                  Hệ thống yêu cầu bạn phải <strong>xóa toàn bộ dữ liệu đã thu thập và xử lý</strong> trước khi thực hiện {isDeleteDataModalOpen ? 'xóa' : 'chỉnh sửa'} cấu hình ánh xạ để đảm bảo tính nhất quán của dữ liệu.
+                </p>
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={() => {
+                      const wasDelete = isDeleteDataModalOpen;
+                      setIsDeleteDataModalOpen(false);
+                      setIsEditMappingCheckModalOpen(false);
+                      if (wasDelete) {
+                        setSelectedTargetDB(null);
+                      }
+                      triggerToast('Thành công!', 'Xóa dữ liệu thành công.');
+                    }}
+                    className="w-full py-3.5 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-all shadow-lg shadow-red-100 active:scale-95"
+                  >
+                    Xác nhận xóa dữ liệu
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsDeleteDataModalOpen(false);
+                      setIsEditMappingCheckModalOpen(false);
+                    }}
+                    className="w-full py-3.5 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-all active:scale-95"
+                  >
+                    Hủy bỏ
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Portal>
+      )}
+
+      {/* Toast Notification */}
+      {showToast && (
+        <Portal>
+          <div className="fixed top-24 right-6 z-[1000000] transform transition-all duration-300 ease-out">
+            <div className="flex items-center gap-4 px-5 py-4 bg-white border border-slate-200 rounded-xl shadow-2xl min-w-[320px] ring-1 ring-black/5">
+              <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center flex-shrink-0">
+                <CheckCircle className="w-6 h-6 text-emerald-600" />
+              </div>
+              <div>
+                <p className="text-[15px] font-bold text-slate-900">{toastConfig.title}</p>
+                <p className="text-[13px] text-slate-500">{toastConfig.message}</p>
+              </div>
+              <button 
+                onClick={() => setShowToast(false)}
+                className="ml-auto p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </Portal>
+      )}
+
+      <BaseModal
+        isOpen={isUpdateSuccessModalOpen}
+        onClose={() => setIsUpdateSuccessModalOpen(false)}
+        title="Chuyển đổi dữ liệu"
+        maxWidth="max-w-md"
+      >
+        <div className="flex flex-col items-center py-4">
+          <div className="w-14 h-14 bg-emerald-50 rounded-full flex items-center justify-center mb-5 ring-4 ring-emerald-50/30">
+            <CheckCircle className="w-7 h-7 text-emerald-600" />
+          </div>
+          <p className="text-slate-800 text-[15px] font-bold text-center leading-relaxed px-4 mb-6">
+            Khởi tạo yêu cầu cập nhật dữ liệu thành công!
+          </p>
+          <div className="flex justify-center w-full">
+            <button 
+              onClick={() => setIsUpdateSuccessModalOpen(false)}
+              style={{ padding: '8px 16px', borderRadius: '6px', fontWeight: 500 }}
+              className="bg-white text-[#020817] border border-[#e2e8f0] text-sm hover:bg-slate-50 transition-all shadow-sm active:scale-95"
+            >
+              Đóng
+            </button>
+          </div>
+        </div>
+      </BaseModal>
     </div>
   );
 }

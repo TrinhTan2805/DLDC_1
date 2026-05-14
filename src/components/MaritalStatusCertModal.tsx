@@ -487,135 +487,62 @@ export function MaritalStatusCertModal({
 
               {/* Content */}
               <div className="p-6 flex-1 overflow-auto bg-white text-slate-900">
-                <div className="flex flex-col gap-3">
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Mã hồ sơ</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.recordCode || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Tệp đính kèm</div>
-                    <div className="text-sm text-blue-600 font-medium">{selectedRecord.fileId || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Số đăng ký</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.registrationNumber || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Số quyển</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.bookNumber || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Trang số</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.pageNumber || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên người được cấp</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.grantedPersonName || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Giới tính</div>
-                    <div className="text-sm text-slate-900">{selectedRecord.grantedPersonGender || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Ngày, tháng, năm sinh</div>
-                    <div className="text-sm text-slate-900">{selectedRecord.grantedPersonBirthDate || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Nơi sinh</div>
-                    <div className="text-sm text-slate-900">{selectedRecord.grantedPersonBirthPlace || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Dân tộc</div>
-                    <div className="text-sm text-slate-900">{selectedRecord.grantedPersonEthnicity || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Quốc tịch</div>
-                    <div className="text-sm text-slate-900">{selectedRecord.grantedPersonNationality || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Số GTTT</div>
-                    <div className="text-sm text-slate-900">{selectedRecord.grantedPersonIdNumber || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Ngày cấp GTTT</div>
-                    <div className="text-sm text-slate-900">{selectedRecord.grantedPersonIdIssueDate || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Nơi cấp GTTT</div>
-                    <div className="text-sm text-slate-900">{selectedRecord.grantedPersonIdIssuePlace || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Số định danh cá nhân</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.grantedPersonPersonalId || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Trong thời gian cư trú tại</div>
-                    <div className="text-sm text-slate-900">{selectedRecord.residenceAddress || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Từ ngày</div>
-                    <div className="text-sm text-slate-900">{selectedRecord.residenceFromDate || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Đến ngày</div>
-                    <div className="text-sm text-slate-900">{selectedRecord.residenceToDate || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Tình trạng hôn nhân</div>
-                    <div className="text-sm text-slate-900 font-medium text-blue-700">{selectedRecord.maritalStatus || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Mục đích sử dụng</div>
-                    <div className="text-sm text-slate-900">{selectedRecord.purposeOfUse || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên người đề nghị</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.requesterName || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Quan hệ với người được cấp</div>
-                    <div className="text-sm text-slate-900">{selectedRecord.requesterRelationship || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Số GTTT người đề nghị</div>
-                    <div className="text-sm text-slate-900">{selectedRecord.requesterIdNumber || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Ngày cấp GTTT người đề nghị</div>
-                    <div className="text-sm text-slate-900">{selectedRecord.requesterIdIssueDate || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Nơi cấp GTTT người đề nghị</div>
-                    <div className="text-sm text-slate-900">{selectedRecord.requesterIdIssuePlace || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Số định danh cá nhân người đề nghị</div>
-                    <div className="text-sm text-slate-900">{selectedRecord.requesterPersonalId || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Ngày, tháng, năm cấp giấy</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.certIssueDate || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Nơi cấp giấy XNTTHN</div>
-                    <div className="text-sm text-slate-900">{selectedRecord.certIssuePlace || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Người ký</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.signerName || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Chức vụ</div>
-                    <div className="text-sm text-slate-900">{selectedRecord.signerPosition || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Người thực hiện</div>
-                    <div className="text-sm text-slate-900">{selectedRecord.implementer || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Ghi chú</div>
-                    <div className="text-sm text-slate-600 italic whitespace-pre-wrap">{selectedRecord.notes || '-'}</div>
-                  </div>
+                <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+                  {[
+                    { label: 'Mã hồ sơ', value: selectedRecord.recordCode },
+                    { label: 'Tệp đính kèm', value: selectedRecord.fileId, isBlue: true },
+                    { label: 'Số đăng ký', value: selectedRecord.registrationNumber },
+                    { label: 'Số quyển', value: selectedRecord.bookNumber },
+                    { label: 'Trang số', value: selectedRecord.pageNumber },
+                    
+                    { label: 'Họ, chữ đệm, tên người được cấp', value: selectedRecord.grantedPersonName },
+                    { label: 'Giới tính', value: selectedRecord.grantedPersonGender },
+                    { label: 'Ngày, tháng, năm sinh', value: selectedRecord.grantedPersonBirthDate },
+                    { label: 'Nơi sinh', value: selectedRecord.grantedPersonBirthPlace },
+                    { label: 'Dân tộc', value: selectedRecord.grantedPersonEthnicity },
+                    
+                    { label: 'Quốc tịch', value: selectedRecord.grantedPersonNationality },
+                    { label: 'Số GTTT', value: selectedRecord.grantedPersonIdNumber },
+                    { label: 'Ngày cấp GTTT', value: selectedRecord.grantedPersonIdIssueDate },
+                    { label: 'Nơi cấp GTTT', value: selectedRecord.grantedPersonIdIssuePlace },
+                    { label: 'Số định danh cá nhân', value: selectedRecord.grantedPersonPersonalId },
+                    
+                    { label: 'Trong thời gian cư trú tại', value: selectedRecord.residenceAddress },
+                    { label: 'Từ ngày', value: selectedRecord.residenceFromDate },
+                    { label: 'Đến ngày', value: selectedRecord.residenceToDate },
+                    { label: 'Tình trạng hôn nhân', value: selectedRecord.maritalStatus, isBlue: true },
+                    { label: 'Mục đích sử dụng', value: selectedRecord.purposeOfUse },
+                    
+                    { label: 'Họ, chữ đệm, tên người đề nghị', value: selectedRecord.requesterName },
+                    { label: 'Quan hệ với người được cấp', value: selectedRecord.requesterRelationship },
+                    { label: 'Số GTTT người đề nghị', value: selectedRecord.requesterIdNumber },
+                    { label: 'Ngày cấp GTTT người đề nghị', value: selectedRecord.requesterIdIssueDate },
+                    { label: 'Nơi cấp GTTT người đề nghị', value: selectedRecord.requesterIdIssuePlace },
+                    
+                    { label: 'Số định danh cá nhân người đề nghị', value: selectedRecord.requesterPersonalId },
+                    { label: 'Ngày, tháng, năm cấp giấy', value: selectedRecord.certIssueDate },
+                    { label: 'Nơi cấp giấy XNTTHN', value: selectedRecord.certIssuePlace },
+                    { label: 'Người ký', value: selectedRecord.signerName },
+                    { label: 'Chức vụ', value: selectedRecord.signerPosition },
+                    
+                    { label: 'Người thực hiện', value: selectedRecord.implementer },
+                    { label: 'Ghi chú', value: selectedRecord.notes, isItalic: true, colSpan2: true }
+                  ].reduce<any[]>((acc, field, index, arr) => {
+                    acc.push(
+                      <div key={`field-${index}`} className={`space-y-1 ${field.colSpan2 ? 'col-span-2' : ''}`}>
+                        <div className="text-[14px] text-slate-500">{field.label}</div>
+                        <div className={`text-[12px] ${field.isBlue ? 'text-blue-600' : 'text-slate-900'} ${field.isItalic ? 'italic whitespace-pre-wrap text-slate-600' : ''}`}>
+                          {field.value || '-'}
+                        </div>
+                      </div>
+                    );
+                    if ((index + 1) % 5 === 0 && index !== arr.length - 1) {
+                      acc.push(
+                        <div key={`sep-${index}`} className="col-span-2 border-b border-slate-200/60 my-1"></div>
+                      );
+                    }
+                    return acc;
+                  }, [])}
                 </div>
               </div>
 

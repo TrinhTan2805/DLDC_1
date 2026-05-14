@@ -50,7 +50,7 @@ export function AgentModal({ isOpen, onClose, onSave, editingData }: AgentModalP
       <div className="bg-white rounded-lg shadow-xl w-full max-w-lg overflow-hidden border border-slate-200">
         {/* Header */}
         <div className="bg-blue-600 px-6 py-4 flex items-center justify-between text-white">
-          <h2 className="text-xl font-bold">{editingData ? 'Cập nhật trạm kết nối' : 'Thêm trạm kết nối'}</h2>
+          <h2 className="text-base font-bold uppercase tracking-tight">{editingData ? 'Cập nhật trạm kết nối' : 'Thêm trạm kết nối'}</h2>
           <button onClick={onClose} className="hover:bg-white/20 p-1 rounded-full transition-colors">
             <X className="w-5 h-5" />
           </button>

@@ -318,7 +318,6 @@ export function DeathCertModal({
                         <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Giờ chết</th>
                         <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Phút chết</th>
                         <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Ngày chết</th>
-                        <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Văn bản</th>
                         <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Trạng thái</th>
                         <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Thao tác</th>
                       </tr>
@@ -333,20 +332,6 @@ export function DeathCertModal({
                           <td className="px-4 py-4 text-center text-sm text-slate-600 font-medium font-mono">{record.deathHour.toString().padStart(2, '0')}</td>
                           <td className="px-4 py-4 text-center text-sm text-slate-600 font-medium font-mono">{record.deathMinute.toString().padStart(2, '0')}</td>
                           <td className="px-4 py-4 text-center text-sm text-slate-600 font-medium font-mono">{record.deathDate}</td>
-                          <td className="px-4 py-4 text-center">
-                            {record.pdfUrl ? (
-                              <button
-                                onClick={() => setViewingPdfUrl(record.pdfUrl!)}
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-600 rounded-full text-[10px] font-bold uppercase tracking-wider border border-blue-100 hover:bg-blue-100 transition-colors shadow-sm"
-                                title="Xem văn bản đính kèm"
-                              >
-                                <FileText className="w-3.5 h-3.5" />
-                                Xem
-                              </button>
-                            ) : (
-                              <span className="text-slate-400 text-xs">—</span>
-                            )}
-                          </td>
                           <td className="px-4 py-4 text-center">
                             {record.status === 'approved' && (
                               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-50 text-green-700 rounded-full text-[10px] font-bold uppercase tracking-wider border border-green-100 shadow-sm whitespace-nowrap">

@@ -20,13 +20,13 @@ const typeConfig = {
     icon: Trash2,
     iconColor: 'text-red-600',
     iconBg: 'bg-red-50',
-    confirmBg: 'bg-red-600 hover:bg-red-700'
+    confirmBg: 'bg-[#dc2626] hover:bg-red-700'
   },
   warning: {
     icon: AlertTriangle,
     iconColor: 'text-amber-600',
     iconBg: 'bg-amber-50',
-    confirmBg: 'bg-amber-600 hover:bg-amber-700'
+    confirmBg: 'bg-[#dc2626] hover:bg-red-700'
   },
   info: {
     icon: Info,
@@ -38,7 +38,7 @@ const typeConfig = {
     icon: CheckCircle2,
     iconColor: 'text-emerald-600',
     iconBg: 'bg-emerald-50',
-    confirmBg: 'bg-emerald-600 hover:bg-emerald-700'
+    confirmBg: 'bg-blue-600 hover:bg-blue-700'
   }
 };
 
@@ -102,21 +102,21 @@ export function ConfirmModal({
             {/* Bottom Section: Actions */}
             <div className="mt-6 flex gap-3">
               <button
- type="button"
- onClick={() => {
- onConfirm();
- onClose();
- }}
- className={`flex-1 py-2.5 ${config.confirmBg} text-white rounded-xl transition-colors text-sm shadow-sm`}
- >
- {confirmText}
- </button>
-              <button
- type="button"
- onClick={onClose}
- className="flex-1 py-2.5 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 transition-colors text-sm border border-slate-200"
- >
+                type="button"
+                onClick={onClose}
+                className="flex-1 py-2.5 bg-white text-[#020817] rounded-[6px] hover:bg-slate-50 transition-colors text-base border border-[#e2e8f0] font-medium shadow-sm"
+              >
                 {cancelText}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onConfirm();
+                  onClose();
+                }}
+                className={`flex-1 py-2.5 ${config.confirmBg} text-white rounded-lg transition-colors text-base shadow-sm font-medium`}
+              >
+                {confirmText}
               </button>
             </div>
             

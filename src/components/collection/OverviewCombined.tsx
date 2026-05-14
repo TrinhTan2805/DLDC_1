@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Database, CheckCircle, XCircle, Clock, FileCheck, TrendingUp, Activity, Server, Zap, Search, Download, Plus, Eye, Edit2, Trash2, Play, Pause, Settings, FileText } from 'lucide-react';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { AddDataSourceForm } from './AddDataSourceForm';
+import { StatusTag } from '../common/StatusTag';
 
 // Data for Dashboard Charts
 const collectionByDay = [
@@ -120,34 +121,34 @@ export function OverviewCombined() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
-        return <span className="px-3 py-1 rounded-full text-sm bg-green-100 text-green-700">Hoạt động</span>;
+        return <StatusTag label="Hoạt động" variant="green" />;
       case 'inactive':
-        return <span className="px-3 py-1 rounded-full text-sm bg-slate-100 text-slate-700">Dừng</span>;
+        return <StatusTag label="Dừng" variant="slate" />;
       case 'maintenance':
-        return <span className="px-3 py-1 rounded-full text-sm bg-orange-100 text-orange-700">Bảo trì</span>;
+        return <StatusTag label="Bảo trì" variant="orange" />;
       default:
         return null;
     }
   };
 
   const getMethodBadge = (method: string) => {
-    const colors: Record<string, string> = {
-      'GET': 'bg-blue-100 text-blue-700',
-      'POST': 'bg-green-100 text-green-700',
-      'PUT': 'bg-orange-100 text-orange-700',
-      'DELETE': 'bg-red-100 text-red-700',
+    const variants: Record<string, 'blue' | 'green' | 'orange' | 'red'> = {
+      'GET': 'blue',
+      'POST': 'green',
+      'PUT': 'orange',
+      'DELETE': 'red',
     };
-    return <span className={`px-3 py-1 rounded text-sm ${colors[method]}`}>{method}</span>;
+    return <StatusTag label={method} variant={variants[method]} />;
   };
 
   const getDataStatusBadge = (status: string) => {
     switch (status) {
       case 'collected':
-        return <span className="px-3 py-1 rounded-full text-sm bg-green-100 text-green-700">Đã thu thập</span>;
+        return <StatusTag label="Đã thu thập" variant="green" />;
       case 'pending':
-        return <span className="px-3 py-1 rounded-full text-sm bg-orange-100 text-orange-700">Đang xử lý</span>;
+        return <StatusTag label="Đang xử lý" variant="orange" />;
       case 'not-started':
-        return <span className="px-3 py-1 rounded-full text-sm bg-slate-100 text-slate-700">Chưa bắt đầu</span>;
+        return <StatusTag label="Chưa bắt đầu" variant="slate" />;
       default:
         return null;
     }
@@ -172,11 +173,11 @@ export function OverviewCombined() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <TrendingUp className="w-6 h-6 text-blue-600" />
-          <h2 className="text-slate-900">Tổng quan Thu thập Dữ liệu</h2>
+          <h2 className="text-base font-bold text-slate-900 uppercase tracking-tight">Tổng quan Thu thập Dữ liệu</h2>
         </div>
         <button
           onClick={() => setShowAddForm(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-base font-medium shadow-sm"
         >
           <Plus className="w-5 h-5" />
           Thêm nguồn dữ liệu
@@ -194,7 +195,7 @@ export function OverviewCombined() {
               </div>
               <p className="text-slate-500 text-base">Tổng nguồn</p>
             </div>
-            <p className="text-2xl text-slate-900">24</p>
+            <p className="text-base font-semibold text-slate-900">24</p>
             <p className="text-sm text-green-600 mt-1">+2 so với tháng trước</p>
           </div>
 
@@ -205,7 +206,7 @@ export function OverviewCombined() {
               </div>
               <p className="text-slate-500 text-base">Thành công</p>
             </div>
-            <p className="text-2xl text-green-600">18</p>
+            <p className="text-base font-semibold text-green-600">18</p>
             <p className="text-sm text-green-600 mt-1">75% tỷ lệ thành công</p>
           </div>
 
@@ -216,7 +217,7 @@ export function OverviewCombined() {
               </div>
               <p className="text-slate-500 text-base">Đang xử lý</p>
             </div>
-            <p className="text-2xl text-orange-600">4</p>
+            <p className="text-base font-semibold text-orange-600">4</p>
             <p className="text-sm text-slate-500 mt-1">Đồng bộ trong 24h</p>
           </div>
 
@@ -227,7 +228,7 @@ export function OverviewCombined() {
               </div>
               <p className="text-slate-500 text-base">Lỗi</p>
             </div>
-            <p className="text-2xl text-red-600">2</p>
+            <p className="text-base font-semibold text-red-600">2</p>
             <p className="text-sm text-red-600 mt-1">Cần xử lý ngay</p>
           </div>
 
@@ -238,7 +239,7 @@ export function OverviewCombined() {
               </div>
               <p className="text-slate-500 text-base">Hôm nay</p>
             </div>
-            <p className="text-2xl text-purple-600">45,678</p>
+            <p className="text-base font-semibold text-purple-600">45,678</p>
             <p className="text-sm text-green-600 mt-1">+12.5% so với hôm qua</p>
           </div>
         </div>
@@ -247,7 +248,7 @@ export function OverviewCombined() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Collection by Day */}
           <div className="bg-white rounded-lg border border-slate-200 p-6">
-            <h3 className="text-slate-900 mb-4">Thu thập theo ngày trong tuần</h3>
+            <h3 className="text-base font-semibold text-slate-900 mb-4">Thu thập theo ngày trong tuần</h3>
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={collectionByDay}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -261,7 +262,7 @@ export function OverviewCombined() {
 
           {/* Collection by Source */}
           <div className="bg-white rounded-lg border border-slate-200 p-6">
-            <h3 className="text-slate-900 mb-4">Phân bổ theo nguồn dữ liệu</h3>
+            <h3 className="text-base font-semibold text-slate-900 mb-4">Phân bổ theo nguồn dữ liệu</h3>
             <ResponsiveContainer width="100%" height={280}>
               <PieChart>
                 <Pie
@@ -285,7 +286,7 @@ export function OverviewCombined() {
 
           {/* Trend Data */}
           <div className="bg-white rounded-lg border border-slate-200 p-6">
-            <h3 className="text-slate-900 mb-4">Xu hướng thu thập 7 ngày qua</h3>
+            <h3 className="text-base font-semibold text-slate-900 mb-4">Xu hướng thu thập 7 ngày qua</h3>
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={trendData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -299,7 +300,7 @@ export function OverviewCombined() {
 
           {/* API Status */}
           <div className="bg-white rounded-lg border border-slate-200 p-6">
-            <h3 className="text-slate-900 mb-4">Trạng thái API</h3>
+            <h3 className="text-base font-semibold text-slate-900 mb-4">Trạng thái API</h3>
             <ResponsiveContainer width="100%" height={280}>
               <PieChart>
                 <Pie
@@ -330,7 +331,7 @@ export function OverviewCombined() {
       <div className="space-y-6">
         <div className="flex items-center gap-2">
           <Server className="w-6 h-6 text-blue-600" />
-          <h2 className="text-slate-900">Quản lý Phương thức Thu thập</h2>
+          <h2 className="text-base font-bold text-slate-900 uppercase tracking-tight">Quản lý Phương thức Thu thập</h2>
         </div>
 
         {/* Search and Filters */}
@@ -364,23 +365,23 @@ export function OverviewCombined() {
             <table className="w-full">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th className="px-4 py-3 text-left text-sm text-slate-600 uppercase tracking-wider">TÊN API</th>
-                  <th className="px-4 py-3 text-left text-sm text-slate-600 uppercase tracking-wider">ENDPOINT</th>
-                  <th className="px-4 py-3 text-left text-sm text-slate-600 uppercase tracking-wider">PHƯƠNG THỨC</th>
-                  <th className="px-4 py-3 text-left text-sm text-slate-600 uppercase tracking-wider">TRẠNG THÁI</th>
-                  <th className="px-4 py-3 text-left text-sm text-slate-600 uppercase tracking-wider">TỶ LỆ TC</th>
-                  <th className="px-4 py-3 text-left text-sm text-slate-600 uppercase tracking-wider">THỜI GIAN</th>
-                  <th className="px-4 py-3 text-left text-sm text-slate-600 uppercase tracking-wider">TỔNG CALLS</th>
-                  <th className="px-4 py-3 text-left text-sm text-slate-600 uppercase tracking-wider">THAO TÁC</th>
+                  <th className="px-4 py-3 text-left text-base font-semibold text-slate-500 whitespace-nowrap">TÊN API</th>
+                  <th className="px-4 py-3 text-left text-base font-semibold text-slate-500 whitespace-nowrap">ENDPOINT</th>
+                  <th className="px-4 py-3 text-left text-base font-semibold text-slate-500 whitespace-nowrap">PHƯƠNG THỨC</th>
+                  <th className="px-4 py-3 text-left text-base font-semibold text-slate-500 whitespace-nowrap">TRẠNG THÁI</th>
+                  <th className="px-4 py-3 text-left text-base font-semibold text-slate-500 whitespace-nowrap">TỶ LỆ TC</th>
+                  <th className="px-4 py-3 text-left text-base font-semibold text-slate-500 whitespace-nowrap">THỜI GIAN</th>
+                  <th className="px-4 py-3 text-left text-base font-semibold text-slate-500 whitespace-nowrap">TỔNG CALLS</th>
+                  <th className="px-4 py-3 text-left text-base font-semibold text-slate-500 whitespace-nowrap">THAO TÁC</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
                 {filteredAPIs.map((api) => (
-                  <tr key={api.id} className="hover:bg-slate-50 transition-colors">
+                  <tr key={api.id} className="hover:bg-slate-50 transition-colors border-b border-slate-100">
                     <td className="px-4 py-3">
                       <div>
-                        <p className="text-base text-slate-900">{api.name}</p>
-                        <p className="text-sm text-slate-500">{api.frequency} • {api.lastCall}</p>
+                        <p className="text-base text-slate-900 font-medium">{api.name}</p>
+                        <p className="text-base text-slate-500 mt-1">{api.frequency} • {api.lastCall}</p>
                       </div>
                     </td>
                     <td className="px-4 py-3 text-base text-slate-700 font-mono">{api.endpoint}</td>
@@ -401,13 +402,13 @@ export function OverviewCombined() {
                     <td className="px-4 py-3 text-base text-slate-700">{api.totalCalls.toLocaleString()}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <button title="Bắt đầu" className="p-1.5 text-green-600 hover:bg-green-50 rounded transition-colors">
+                        <button title="Bắt đầu" className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors">
                           <Play className="w-4 h-4" />
                         </button>
-                        <button title="Xem" className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors">
+                        <button title="Xem" className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
                           <Eye className="w-4 h-4" />
                         </button>
-                        <button title="Cài đặt" className="p-1.5 text-orange-600 hover:bg-orange-50 rounded transition-colors">
+                        <button title="Cài đặt" className="p-1.5 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors">
                           <Settings className="w-4 h-4" />
                         </button>
                       </div>

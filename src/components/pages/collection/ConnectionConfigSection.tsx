@@ -53,13 +53,13 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
     <div className="space-y-5" onChange={resetTestState}>
       {/* Phương thức kết nối */}
       <div>
-        <label htmlFor="conn-type" className="block text-sm text-slate-700 font-medium mb-2">
+        <label htmlFor="conn-type" className="block text-base text-slate-700 font-medium mb-2">
           Phương thức kết nối <span className="text-red-500">*</span>
         </label>
         <select aria-label="Select box"
           id="conn-type"
           title="Phương thức kết nối"
-          className={`w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${isEdit ? 'bg-slate-100 text-slate-500 cursor-not-allowed' : ''}`}
+          className={`w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 ${isEdit ? 'bg-slate-100 text-slate-500 cursor-not-allowed' : ''}`}
           value={connectionType}
           onChange={(e) => setConnectionType(e.target.value)}
           disabled={isEdit}
@@ -73,23 +73,23 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
       {connectionType === 'API' && (
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-slate-700 mb-1">Tên api<span className="text-red-500">*</span></label>
-            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tên api" />
+            <label className="block text-base text-slate-700 mb-1">Tên api<span className="text-red-500">*</span></label>
+            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tên api" />
           </div>
           <div>
-            <label className="block text-sm text-slate-700 mb-1">URL<span className="text-red-500">*</span></label>
-            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="URL" />
+            <label className="block text-base text-slate-700 mb-1">URL<span className="text-red-500">*</span></label>
+            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="URL" />
           </div>
 
           <div>
-            <label className="block text-sm text-slate-700 mb-2">Headers1</label>
+            <label className="block text-base text-slate-700 mb-2">Headers1</label>
             <div className="border border-slate-200 rounded-lg overflow-hidden mb-3">
-              <table className="w-full text-left text-sm">
+              <table className="w-full text-left text-base">
                 <thead className="bg-slate-50 border-b border-slate-200">
                   <tr>
-                    <th className="px-4 py-3 font-bold text-slate-800 w-16">STT</th>
-                    <th className="px-4 py-3 font-bold text-slate-800 w-1/3">Key</th>
-                    <th className="px-4 py-3 font-bold text-slate-800 w-1/3">Value</th>
+                    <th className="px-4 py-3 text-base font-semibold text-slate-800">STT</th>
+                    <th className="px-4 py-3 text-base font-semibold text-slate-800">Key</th>
+                    <th className="px-4 py-3 text-base font-semibold text-slate-800">Value</th>
                     <th className="px-4 py-3 font-bold text-slate-800">Thao tác</th>
                   </tr>
                 </thead>
@@ -97,10 +97,10 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
                   {headers1.map((h, index) => (
                     <tr key={h.id} className="bg-white">
                       <td className="px-4 py-3 text-slate-700 font-medium">{index + 1}</td>
-                      <td className="px-4 py-3"><input type="text" className="w-full px-3 py-1.5 border border-slate-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" placeholder="KeyHeader" /></td>
-                      <td className="px-4 py-3"><input type="text" className="w-full px-3 py-1.5 border border-slate-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" placeholder="ValueHeader" /></td>
+                      <td className="px-4 py-3"><input type="text" className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm" placeholder="KeyHeader" /></td>
+                      <td className="px-4 py-3"><input type="text" className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm" placeholder="ValueHeader" /></td>
                       <td className="px-4 py-3">
-                        <button type="button" onClick={() => removeHeader1(h.id)} className="px-4 py-1.5 bg-red-500 text-white text-sm font-medium rounded hover:bg-red-600 transition-colors">Xóa</button>
+                        <button type="button" onClick={() => removeHeader1(h.id)} className="px-4 py-1.5 bg-red-500 text-white text-base font-medium rounded-lg hover:bg-red-600 transition-colors shadow-sm">Xóa</button>
                       </td>
                     </tr>
                   ))}
@@ -108,29 +108,29 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
               </table>
             </div>
             <div className="flex justify-end">
-              <button type="button" onClick={addHeader1} className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition-colors">Thêm mới</button>
+              <button type="button" onClick={addHeader1} className="px-4 py-2 bg-blue-600 text-white text-base font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm">Thêm mới</button>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm text-slate-700 mb-1">Máy chủ thực thi<span className="text-red-500">*</span></label>
-            <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+            <label className="block text-base text-slate-700 mb-1">Máy chủ thực thi<span className="text-red-500">*</span></label>
+            <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
               <option value="">Chọn Máy chủ thực thi</option>
               <option value="worker1">Máy chủ thực thi 1</option>
               <option value="worker2">Máy chủ thực thi 2</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm text-slate-700 mb-1">Trạm kết nối<span className="text-red-500">*</span></label>
-            <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+            <label className="block text-base text-slate-700 mb-1">Trạm kết nối<span className="text-red-500">*</span></label>
+            <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
               <option value="">Chọn Trạm kết nối</option>
               <option value="agent1">Trạm kết nối 1</option>
               <option value="agent2">Trạm kết nối 2</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm text-slate-700 mb-1">Method<span className="text-red-500">*</span></label>
-            <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" defaultValue="POST">
+            <label className="block text-base text-slate-700 mb-1">Method<span className="text-red-500">*</span></label>
+            <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" defaultValue="POST">
               <option value="GET">GET</option>
               <option value="POST">POST</option>
               <option value="PUT">PUT</option>
@@ -139,7 +139,7 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
           </div>
 
           <div>
-            <label className="block text-sm text-slate-700 mb-1">Authorization</label>
+            <label className="block text-base text-slate-700 mb-1">Authorization</label>
             <select
               value={authorization}
               onChange={(e) => {
@@ -148,7 +148,7 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
                   setIsExpanded(true);
                 }
               }}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
             >
               <option value="No Authen">No Authen</option>
               <option value="Basic Authen">Basic Authen</option>
@@ -157,8 +157,8 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
           </div>
 
           <div>
-            <label className="block text-sm text-slate-700 mb-1">Body</label>
-            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Body" />
+            <label className="block text-base text-slate-700 mb-1">Body</label>
+            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Body" />
           </div>
 
           <div className="pt-2">
@@ -275,13 +275,13 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
       {connectionType === 'FILE' && (
         <div className="space-y-6">
           <div>
-            <label className="block text-sm text-slate-700 font-medium mb-1.5">Tên File CSDL <span className="text-red-500">*</span></label>
-            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tên File CSDL" />
+            <label className="block text-base text-slate-700 font-medium mb-1.5">Tên File CSDL <span className="text-red-500">*</span></label>
+            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tên File CSDL" />
           </div>
 
           <div>
-            <label className="block text-sm text-slate-700 font-medium mb-1.5">Máy chủ thực thi <span className="text-red-500">*</span></label>
-            <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+            <label className="block text-base text-slate-700 font-medium mb-1.5">Máy chủ thực thi <span className="text-red-500">*</span></label>
+            <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
               <option value="">Chọn Máy chủ thực thi</option>
               <option value="worker1">Máy chủ thực thi 1</option>
               <option value="worker2">Máy chủ thực thi 2</option>
@@ -289,8 +289,8 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
           </div>
 
           <div>
-            <label className="block text-sm text-slate-700 font-medium mb-1.5">Trạm kết nối <span className="text-red-500">*</span></label>
-            <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+            <label className="block text-base text-slate-700 font-medium mb-1.5">Trạm kết nối <span className="text-red-500">*</span></label>
+            <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
               <option value="">Chọn Trạm kết nối</option>
               <option value="agent1">Trạm kết nối 1</option>
               <option value="agent2">Trạm kết nối 2</option>
@@ -298,17 +298,17 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
           </div>
 
           <div>
-            <label className="block text-sm text-slate-700 font-medium mb-1.5">Tập tin tải lên <span className="text-red-500">*</span></label>
+            <label className="block text-base text-slate-700 font-medium mb-1.5">Tập tin tải lên <span className="text-red-500">*</span></label>
             <div className="border-2 border-dashed border-slate-200 rounded-xl p-8 bg-slate-50/50 flex flex-col items-center justify-center gap-3 group hover:bg-slate-50 hover:border-blue-400 transition-all cursor-pointer">
               <div className="text-slate-400 group-hover:text-blue-500 transition-colors">
                 <Upload className="w-10 h-10" />
               </div>
               <div className="text-center">
-                <p className="text-sm text-slate-600">Kéo và thả tập tin vào đây hoặc</p>
+                <p className="text-base text-slate-600">Kéo và thả tập tin vào đây hoặc</p>
                 <button type="button" className="mt-2 px-4 py-1.5 bg-white border border-slate-200 rounded text-xs text-slate-700 shadow-sm hover:bg-slate-50">Chọn tập tin</button>
               </div>
             </div>
-            <p className="mt-3 text-[13px] text-slate-500">
+            <p className="mt-3 text-sm text-slate-500">
               Các định dạng cho phép: <span className="font-bold text-slate-700 italic">CSV, XLS, XLSX</span>
             </p>
           </div>
@@ -320,17 +320,17 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
         <div className="space-y-6">
           <div className="grid grid-cols-2 gap-x-6 gap-y-4">
             <div>
-              <label className="block text-sm text-slate-700 font-medium mb-1.5">Tên CSDL <span className="text-red-500">*</span></label>
-              <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tên CSDL" />
+              <label className="block text-base text-slate-700 font-medium mb-1.5">Tên CSDL <span className="text-red-500">*</span></label>
+              <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tên CSDL" />
             </div>
             <div>
-              <label className="block text-sm text-slate-700 font-medium mb-1.5">Tên CSDL gốc <span className="text-red-500">*</span></label>
-              <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tên CSDL gốc" />
+              <label className="block text-base text-slate-700 font-medium mb-1.5">Tên CSDL gốc <span className="text-red-500">*</span></label>
+              <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tên CSDL gốc" />
             </div>
 
             <div>
-              <label className="block text-sm text-slate-700 font-medium mb-1.5">Kiểu CSDL <span className="text-red-500">*</span></label>
-              <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" defaultValue="DBT_ORACLE_10g">
+              <label className="block text-base text-slate-700 font-medium mb-1.5">Kiểu CSDL <span className="text-red-500">*</span></label>
+              <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" defaultValue="DBT_ORACLE_10g">
                 <option value="DBT_ORACLE_10g">DBT_ORACLE_10g</option>
                 <option value="POSTGRESQL">PostgreSql</option>
                 <option value="MYSQL">MySql</option>
@@ -338,8 +338,8 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
               </select>
             </div>
             <div>
-              <label className="block text-sm text-slate-700 font-medium mb-1.5">Trạm kết nối <span className="text-red-500">*</span></label>
-              <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+              <label className="block text-base text-slate-700 font-medium mb-1.5">Trạm kết nối <span className="text-red-500">*</span></label>
+              <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
                 <option value="">Chọn Trạm kết nối</option>
                 <option value="agent1">Trạm kết nối 1</option>
                 <option value="agent2">Trạm kết nối 2</option>
@@ -347,30 +347,30 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
             </div>
 
             <div>
-              <label className="block text-sm text-slate-700 font-medium mb-1.5">Máy chủ thực thi <span className="text-red-500">*</span></label>
-              <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+              <label className="block text-base text-slate-700 font-medium mb-1.5">Máy chủ thực thi <span className="text-red-500">*</span></label>
+              <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
                 <option value="">Chọn Máy chủ thực thi</option>
                 <option value="worker1">Máy chủ thực thi 1</option>
                 <option value="worker2">Máy chủ thực thi 2</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm text-slate-700 font-medium mb-1.5">Địa chỉ CSDL <span className="text-red-500">*</span></label>
-              <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Địa chỉ CSDL" />
+              <label className="block text-base text-slate-700 font-medium mb-1.5">Địa chỉ CSDL <span className="text-red-500">*</span></label>
+              <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Địa chỉ CSDL" />
             </div>
 
             <div>
-              <label className="block text-sm text-slate-700 font-medium mb-1.5">Cổng kết nối <span className="text-red-500">*</span></label>
-              <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Cổng kết nối" />
+              <label className="block text-base text-slate-700 font-medium mb-1.5">Cổng kết nối <span className="text-red-500">*</span></label>
+              <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Cổng kết nối" />
             </div>
             <div>
-              <label className="block text-sm text-slate-700 font-medium mb-1.5">Tài khoản <span className="text-red-500">*</span></label>
-              <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tài khoản" />
+              <label className="block text-base text-slate-700 font-medium mb-1.5">Tài khoản <span className="text-red-500">*</span></label>
+              <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tài khoản" />
             </div>
 
             <div>
-              <label className="block text-sm text-slate-700 font-medium mb-1.5">Mật khẩu <span className="text-red-500">*</span></label>
-              <input type="password" size={1} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Mật khẩu" />
+              <label className="block text-base text-slate-700 font-medium mb-1.5">Mật khẩu <span className="text-red-500">*</span></label>
+              <input type="password" size={1} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Mật khẩu" />
             </div>
           </div>
 

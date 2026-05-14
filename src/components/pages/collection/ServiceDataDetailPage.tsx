@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X, ChevronLeft, ChevronRight, Download, Filter, Search, Eye } from 'lucide-react';
 import { DataDetailModal } from '../../DataDetailModal';
+import { StatusTag } from '../../common/StatusTag';
 
 interface ServiceDataDetailPageProps {
   isOpen: boolean;
@@ -349,17 +350,17 @@ export function ServiceDataDetailPage({ isOpen, onClose, service }: ServiceDataD
           <table className="w-full border-collapse">
             <thead className="bg-slate-50 border-b border-slate-200 sticky top-0">
               <tr>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">STT</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Mã bản ghi</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Họ và tên</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">CMND/CCCD</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Ngày sinh</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Số điện thoại</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Địa chỉ</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Loại</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Trạng thái</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Thời gian thu thập</th>
-                <th className="px-4 py-3 text-center text-xs text-slate-600 uppercase">Thao tác</th>
+                <th className="px-4 py-3 text-left text-base font-semibold text-slate-500 whitespace-nowrap w-12">STT</th>
+                <th className="px-4 py-3 text-left text-base font-semibold text-slate-500 whitespace-nowrap">Mã bản ghi</th>
+                <th className="px-4 py-3 text-left text-base font-semibold text-slate-500 whitespace-nowrap">Họ và tên</th>
+                <th className="px-4 py-3 text-left text-base font-semibold text-slate-500 whitespace-nowrap">CMND/CCCD</th>
+                <th className="px-4 py-3 text-left text-base font-semibold text-slate-500 whitespace-nowrap">Ngày sinh</th>
+                <th className="px-4 py-3 text-left text-base font-semibold text-slate-500 whitespace-nowrap">Số điện thoại</th>
+                <th className="px-4 py-3 text-left text-base font-semibold text-slate-500 whitespace-nowrap">Địa chỉ</th>
+                <th className="px-4 py-3 text-left text-base font-semibold text-slate-500 whitespace-nowrap">Loại</th>
+                <th className="px-4 py-3 text-left text-base font-semibold text-slate-500 whitespace-nowrap">Trạng thái</th>
+                <th className="px-4 py-3 text-left text-base font-semibold text-slate-500 whitespace-nowrap">Thời gian thu thập</th>
+                <th className="px-4 py-3 text-center text-base font-semibold text-slate-500 whitespace-nowrap">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -371,63 +372,61 @@ export function ServiceDataDetailPage({ isOpen, onClose, service }: ServiceDataD
                 </tr>
               ) : (
                 currentRecords.map((record, index) => (
-                  <tr key={record.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-4 py-3 text-sm text-slate-600">{startIndex + index + 1}</td>
-                    <td className="px-4 py-3 text-sm text-slate-900 font-mono">{record.recordId}</td>
-                    <td className="px-4 py-3 text-sm text-slate-900">{record.fullName}</td>
-                    <td className="px-4 py-3 text-sm text-slate-900 font-mono">
+                  <tr key={record.id} className="hover:bg-slate-50 transition-colors border-b border-slate-100">
+                    <td className="px-4 py-3 text-base text-slate-600">{startIndex + index + 1}</td>
+                    <td className="px-4 py-3 text-base text-slate-900 font-mono">{record.recordId}</td>
+                    <td className="px-4 py-3 text-base text-slate-900">{record.fullName}</td>
+                    <td className="px-4 py-3 text-base text-slate-900 font-mono">
                       {record.status === 'error' && record.errorField === 'idNumber' ? (
                         <span className="text-orange-600">{record.idNumber}</span>
                       ) : (
                         record.idNumber
                       )}
                     </td>
-                    <td className="px-4 py-3 text-sm text-slate-900">
+                    <td className="px-4 py-3 text-base text-slate-900">
                       {record.status === 'error' && record.errorField === 'birthDate' ? (
                         <span className="text-orange-600">{record.birthDate}</span>
                       ) : (
                         record.birthDate
                       )}
                     </td>
-                    <td className="px-4 py-3 text-sm text-slate-900 font-mono">
+                    <td className="px-4 py-3 text-base text-slate-900 font-mono">
                       {record.status === 'error' && record.errorField === 'phoneNumber' ? (
                         <span className="text-orange-600">{record.phoneNumber}</span>
                       ) : (
                         record.phoneNumber
                       )}
                     </td>
-                    <td className="px-4 py-3 text-sm text-slate-600 max-w-xs truncate" title={record.address}>
+                    <td className="px-4 py-3 text-base text-slate-600 max-w-xs truncate" title={record.address}>
                       {record.address}
                     </td>
-                    <td className="px-4 py-3 text-sm">
-                      <span className={`inline-flex px-2 py-1 rounded text-xs ${
-                        record.recordType === 'Mới' 
-                          ? 'bg-blue-100 text-blue-700' 
-                          : 'bg-green-100 text-green-700'
-                      }`}>
-                        {record.recordType}
-                      </span>
+                    <td className="px-4 py-3 text-base">
+                      <StatusTag 
+                        label={record.recordType} 
+                        variant={record.recordType === 'Mới' ? 'blue' : 'green'} 
+                      />
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex flex-col gap-1">
-                        <span className={`inline-flex px-2 py-1 rounded text-xs w-fit ${record.statusColor}`}>
-                          {record.statusText}
-                        </span>
+                        <StatusTag 
+                          label={record.statusText} 
+                          variant={record.status === 'valid' ? 'green' : 'orange'} 
+                        />
                         {record.status === 'error' && record.errorMessage && (
-                          <span className="text-xs text-orange-600">{record.errorMessage}</span>
+                          <span className="text-xs text-orange-600 ml-1">{record.errorMessage}</span>
                         )}
                         {record.status === 'error' && record.errorProcessStatus && (
-                          <span className={`inline-flex px-1.5 py-0.5 rounded text-[10px] w-fit mt-1 border ${
-                            record.errorProcessStatus === 'sent' ? 'bg-blue-50 text-blue-600 border-blue-200' :
-                            record.errorProcessStatus === 'updated' ? 'bg-green-50 text-green-600 border-green-200' :
-                            'bg-slate-50 text-slate-500 border-slate-200'
-                          }`}>
-                            {record.errorProcessText}
-                          </span>
+                          <div className="mt-1">
+                            <StatusTag 
+                              label={record.errorProcessText} 
+                              variant={record.errorProcessStatus === 'sent' ? 'blue' : record.errorProcessStatus === 'updated' ? 'green' : 'slate'} 
+                              className="scale-90 origin-left"
+                            />
+                          </div>
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-sm text-slate-600">{record.collectedAt}</td>
+                    <td className="px-4 py-3 text-base text-slate-600">{record.collectedAt}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-center">
                         <button

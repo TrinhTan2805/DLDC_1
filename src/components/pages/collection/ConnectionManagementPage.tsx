@@ -13,7 +13,7 @@ export function ConnectionManagementPage() {
         <div className="flex items-center gap-8">
           <button
             onClick={() => setActiveTab('source-systems')}
-            className={`py-4 px-2 border-b-2 transition-all flex items-center gap-2 font-medium text-sm ${
+            className={`py-4 px-2 border-b-2 transition-all flex items-center gap-2 font-medium text-base ${
               activeTab === 'source-systems'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-500 hover:text-slate-700'
@@ -24,7 +24,7 @@ export function ConnectionManagementPage() {
           </button>
           <button
             onClick={() => setActiveTab('agents')}
-            className={`py-4 px-2 border-b-2 transition-all flex items-center gap-2 font-medium text-sm ${
+            className={`py-4 px-2 border-b-2 transition-all flex items-center gap-2 font-medium text-base ${
               activeTab === 'agents'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-500 hover:text-slate-700'

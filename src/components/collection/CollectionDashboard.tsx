@@ -93,7 +93,7 @@ function ChartCard({ title, total, data, filterValue, onFilterChange, filterOpti
     <div className="bg-white rounded-lg border border-slate-200 p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-slate-900">{title}</h3>
+        <h3 className="text-base font-semibold text-slate-900">{title}</h3>
         <span className="text-base text-slate-500">Tổng số: {total.toLocaleString()}</span>
       </div>
 
@@ -162,7 +162,7 @@ function SummaryCard({ title, value, icon, bgColor, iconColor }: SummaryCardProp
         </div>
         <div className="flex-1">
           <p className="text-base text-slate-600 mb-1">{title}</p>
-          <p className="text-2xl font-semibold text-slate-900">{value.toLocaleString()}</p>
+          <p className="text-base font-semibold text-slate-900">{value.toLocaleString()}</p>
         </div>
       </div>
     </div>
@@ -215,8 +215,8 @@ export function CollectionDashboard() {
           title="Tổng số bản ghi thu thập ngoài ngành"
           value={1345280}
           icon={<Building2 className="w-7 h-7" />}
-          bgColor="bg-green-50"
-          iconColor="text-green-600"
+          bgColor="bg-blue-50"
+          iconColor="text-blue-600"
         />
         <SummaryCard
           title="Tổng số bản ghi thu thập trong ngành"

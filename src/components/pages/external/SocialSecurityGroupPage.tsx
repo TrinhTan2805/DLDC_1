@@ -150,7 +150,7 @@ export function SocialSecurityGroupPage({ mode = 'thu thập', context = 'thu th
                   </div>
                   {/* Number display */}
                   <div className="flex items-baseline gap-2">
-                    <span className="text-xl font-semibold text-slate-700">{stat.value}</span>
+                    <span className="text-base font-semibold text-slate-700">{stat.value}</span>
                     <span className={`text-xs font-medium ${stat.change.startsWith('-') ? 'text-red-500' : 'text-green-500'}`}>
                       {stat.change.startsWith('-') ? '▼' : '▲'} {stat.change}
                     </span>
@@ -165,7 +165,7 @@ export function SocialSecurityGroupPage({ mode = 'thu thập', context = 'thu th
       {/* Chart Section */}
       <div className="bg-white rounded-lg border border-slate-200 p-6">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-slate-900">Biểu đồ thu thập dữ liệu theo phương thức thu thập</h3>
+          <h3 className="text-base font-semibold text-slate-900">Biểu đồ thu thập dữ liệu theo phương thức thu thập</h3>
           <div className="flex items-center gap-2 text-sm text-slate-600">
             <span>Tổng số: 100</span>
             <button className="px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2">

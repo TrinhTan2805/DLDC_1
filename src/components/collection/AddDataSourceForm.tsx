@@ -407,13 +407,13 @@ export function AddDataSourceForm({ onBack }: AddDataSourceFormProps) {
           <button
             type="button"
             onClick={handleCancel}
-            className="px-6 py-2 border border-slate-300 rounded-lg text-sm hover:bg-slate-50 transition-colors"
+            className="px-6 py-2 border border-slate-300 rounded-lg text-base hover:bg-slate-50 transition-colors font-medium shadow-sm"
           >
             Hủy bỏ
           </button>
           <button
             type="submit"
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg text-base hover:bg-blue-700 transition-colors font-medium shadow-sm"
           >
             Thêm mới
           </button>
