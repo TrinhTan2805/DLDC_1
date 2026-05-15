@@ -89,6 +89,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
   ];
 
   return (
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -101,7 +102,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
           </button>
           <div>
             <h2 className="text-slate-900 font-bold text-lg">Thêm mới Thông tin kết nối</h2>
-            <p className="text-sm text-slate-500 mt-0.5">Thiết lập tham số kết nối hệ thống nguồn (Collection Setup)</p>
+            <p className="text-base text-slate-500 mt-0.5">Thiết lập tham số kết nối hệ thống nguồn (Collection Setup)</p>
           </div>
         </div>
       </div>
@@ -114,14 +115,14 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex-1 py-4 text-sm font-medium border-b-2 transition-colors ${
+              className={`flex-1 py-4 text-base font-medium border-b-2 transition-colors ${
                 activeTab === tab.id
                   ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
               }`}
             >
               <div className="flex items-center justify-center gap-2">
-                <span className={`flex items-center justify-center w-5 h-5 rounded-full text-xs ${
+                <span className={`flex items-center justify-center w-5 h-5 rounded-full text-base ${
                   activeTab === tab.id ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'
                 }`}>
                   {tab.step}
@@ -139,7 +140,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="grid grid-cols-2 gap-6">
                 <div className="col-span-2 relative">
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Tên đơn vị (Nguồn thu thập) <span className="text-red-500">*</span></label>
+                  <label className="block text-base font-medium text-slate-700 mb-2">Tên đơn vị (Nguồn thu thập) <span className="text-red-500">*</span></label>
                   <input aria-label="Input field"
                     type="text"
                     value={donViSearch}
@@ -158,7 +159,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                       {filteredDonVi.map(dv => (
                         <div
                           key={dv.id}
-                          className="px-4 py-2 hover:bg-slate-50 cursor-pointer text-sm flex items-center justify-between"
+                          className="px-4 py-2 hover:bg-slate-50 cursor-pointer text-base flex items-center justify-between"
                           onMouseDown={(e) => {
                             e.preventDefault(); 
                             setDonViSearch(dv.name);
@@ -167,12 +168,12 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                           }}
                         >
                           <span className="font-medium text-slate-700">{dv.name}</span>
-                          <span className="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">{dv.classification}</span>
+                          <span className="text-base text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">{dv.classification}</span>
                         </div>
                       ))}
                       {donViSearch && filteredDonVi.length === 0 && (
                         <div 
-                          className="px-4 py-3 hover:bg-blue-50 cursor-pointer text-sm text-blue-600 font-medium flex items-center gap-2 border-t border-slate-100"
+                          className="px-4 py-3 hover:bg-blue-50 cursor-pointer text-base text-blue-600 font-medium flex items-center gap-2 border-t border-slate-100"
                           onMouseDown={(e) => {
                             e.preventDefault(); 
                             setShowDonViDropdown(false);
@@ -188,7 +189,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Tên kết nối <span className="text-red-500">*</span></label>
+                  <label className="block text-base font-medium text-slate-700 mb-2">Tên kết nối <span className="text-red-500">*</span></label>
                   <input aria-label="Input field"
                     required type="text"
                     value={formData.connectionName}
@@ -198,7 +199,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Mã kết nối <span className="text-red-500">*</span></label>
+                  <label className="block text-base font-medium text-slate-700 mb-2">Mã kết nối <span className="text-red-500">*</span></label>
                   <input aria-label="Input field"
                     required type="text"
                     value={formData.connectionCode}
@@ -211,7 +212,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
 
               <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Loại kết nối <span className="text-red-500">*</span></label>
+                  <label className="block text-base font-medium text-slate-700 mb-2">Loại kết nối <span className="text-red-500">*</span></label>
                   <select aria-label="Select box"
                     required
                     value={formData.connectionType}
@@ -227,7 +228,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Trạng thái <span className="text-red-500">*</span></label>
+                  <label className="block text-base font-medium text-slate-700 mb-2">Trạng thái <span className="text-red-500">*</span></label>
                   <select aria-label="Select box"
                     required
                     value={formData.status}
@@ -241,7 +242,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Mô tả chi tiết</label>
+                <label className="block text-base font-medium text-slate-700 mb-2">Mô tả chi tiết</label>
                 <textarea aria-label="Text input"
                   rows={3}
                   value={formData.description}
@@ -257,7 +258,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
           {activeTab === 'provider' && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
-                <label className="block text-sm font-medium text-slate-700 mb-2">Tên đơn vị (Đã chọn từ Tab Thông tin chung)</label>
+                <label className="block text-base font-medium text-slate-700 mb-2">Tên đơn vị (Đã chọn từ Tab Thông tin chung)</label>
                 <div className="flex items-center gap-3">
                   <input aria-label="Input field"
                     type="text"
@@ -266,7 +267,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                     className="flex-1 px-4 py-2 border border-slate-200 rounded-lg bg-white text-slate-700 font-medium focus:outline-none"
                   />
                   {formData.providerName && (
-                    <span className={`px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap border ${formData.providerType === 'internal' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}>
+                    <span className={`px-3 py-2 rounded-lg text-base font-medium whitespace-nowrap border ${formData.providerType === 'internal' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}>
                       {formData.providerType === 'internal' ? 'Trong ngành' : 'Ngoài ngành'}
                     </span>
                   )}
@@ -276,7 +277,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
               <div className="grid grid-cols-2 gap-6">
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Người đầu mối (Contact Person)</label>
+                  <label className="block text-base font-medium text-slate-700 mb-2">Người đầu mối (Contact Person)</label>
                   <input aria-label="Input field"
                     type="text"
                     value={formData.contactPerson}
@@ -287,7 +288,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Số điện thoại</label>
+                    <label className="block text-base font-medium text-slate-700 mb-2">Số điện thoại</label>
                     <input aria-label="Input field"
                       type="text"
                       value={formData.phoneNumber}
@@ -297,7 +298,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Email hỗ trợ</label>
+                    <label className="block text-base font-medium text-slate-700 mb-2">Email hỗ trợ</label>
                     <input aria-label="Input field"
                       type="email"
                       value={formData.contactEmail}
@@ -315,7 +316,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
           {activeTab === 'connection' && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2 text-blue-700 bg-blue-50 px-3 py-1.5 rounded-md inline-flex text-sm font-medium">
+                <div className="flex items-center gap-2 text-blue-700 bg-blue-50 px-3 py-1.5 rounded-md inline-flex text-base font-medium">
                   {formData.connectionType.includes('API') ? <Globe2 className="w-4 h-4" /> 
                     : formData.connectionType.includes('Database') ? <Database className="w-4 h-4" /> 
                     : <Server className="w-4 h-4" />}
@@ -323,7 +324,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                 </div>
                 <button 
                   type="button" onClick={handleTestConnection}
-                  className="px-4 py-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-md text-sm font-medium transition-colors border border-slate-300"
+                  className="px-4 py-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-md text-base font-medium transition-colors border border-slate-300"
                 >
                   Kiểm tra Kết nối (Ping)
                 </button>
@@ -333,7 +334,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
               {formData.connectionType === 'API RESTful' && (
                 <div className="grid grid-cols-2 gap-6">
                   <div className="col-span-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Base URL / Endpoint <span className="text-red-500">*</span></label>
+                    <label className="block text-base font-medium text-slate-700 mb-2">Base URL / Endpoint <span className="text-red-500">*</span></label>
                     <input aria-label="Input field"
                       required type="text"
                       value={formData.endpointUrl}
@@ -343,7 +344,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Phương thức xác thực <span className="text-red-500">*</span></label>
+                    <label className="block text-base font-medium text-slate-700 mb-2">Phương thức xác thực <span className="text-red-500">*</span></label>
                     <select aria-label="Select box"
                       value={formData.authMethod}
                       onChange={(e) => setFormData({ ...formData, authMethod: e.target.value })}
@@ -356,7 +357,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Timeout chờ phản hồi (ms) <span className="text-red-500">*</span></label>
+                    <label className="block text-base font-medium text-slate-700 mb-2">Timeout chờ phản hồi (ms) <span className="text-red-500">*</span></label>
                     <input aria-label="Input field"
                       required type="number"
                       value={formData.timeout}
@@ -368,7 +369,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                   {/* Auth Fields Context */}
                   {(formData.authMethod === 'API Key' || formData.authMethod === 'Bearer Token') && (
                     <div className="col-span-2">
-                      <label className="block text-sm font-medium text-slate-700 mb-2">{formData.authMethod} Value</label>
+                      <label className="block text-base font-medium text-slate-700 mb-2">{formData.authMethod} Value</label>
                       <div className="relative">
                         <input aria-label="Input field"
                           type={showPassword ? "text" : "password"}
@@ -385,11 +386,11 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                   {formData.authMethod === 'Basic Auth' && (
                     <>
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">Username</label>
+                        <label className="block text-base font-medium text-slate-700 mb-2">Username</label>
                         <input aria-label="Input field" type="text" value={formData.authUsername} onChange={(e) => setFormData({...formData, authUsername: e.target.value})} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">Password</label>
+                        <label className="block text-base font-medium text-slate-700 mb-2">Password</label>
                         <div className="relative">
                           <input aria-label="Input field" type={showPassword ? "text" : "password"} value={formData.authPassword} onChange={(e) => setFormData({...formData, authPassword: e.target.value})} className="w-full px-4 py-2 pr-10 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                           <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
@@ -407,16 +408,16 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                 <div className="grid grid-cols-2 gap-6">
                   <div className="grid grid-cols-2 gap-6 col-span-2">
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">Tên service <span className="text-red-500">*</span></label>
-                      <select aria-label="Select box" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                      <label className="block text-base font-medium text-slate-700 mb-2">Tên service <span className="text-red-500">*</span></label>
+                      <select aria-label="Select box" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-base">
                         <option value="">Chọn service</option>
                         <option value="CitizenService">CitizenService</option>
                         <option value="EnterpriseService">EnterpriseService</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">Phương thức gọi <span className="text-red-500">*</span></label>
-                      <select aria-label="Select box" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                      <label className="block text-base font-medium text-slate-700 mb-2">Phương thức gọi <span className="text-red-500">*</span></label>
+                      <select aria-label="Select box" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-base">
                         <option value="">Chọn phương thức</option>
                         <option value="GetCitizenInfo">GetCitizenInfo</option>
                         <option value="UpdateCitizenInfo">UpdateCitizenInfo</option>
@@ -424,32 +425,32 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                     </div>
                   </div>
                   <div className="col-span-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-2">WSDL URL / Endpoint <span className="text-red-500">*</span></label>
+                    <label className="block text-base font-medium text-slate-700 mb-2">WSDL URL / Endpoint <span className="text-red-500">*</span></label>
                     <input aria-label="Input field" required type="text" value={formData.endpointUrl} onChange={(e) => setFormData({ ...formData, endpointUrl: e.target.value })} placeholder="http://server:port/service?wsdl" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Timeout (ms)</label>
+                    <label className="block text-base font-medium text-slate-700 mb-2">Timeout (ms)</label>
                     <input aria-label="Input field" type="number" defaultValue="30000" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">SSL Required</label>
-                    <select aria-label="Select box" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                    <label className="block text-base font-medium text-slate-700 mb-2">SSL Required</label>
+                    <select aria-label="Select box" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-base">
                       <option value="true">Bật (true)</option>
                       <option value="false">Tắt (false)</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Số lần thử</label>
+                    <label className="block text-base font-medium text-slate-700 mb-2">Số lần thử</label>
                     <input aria-label="Input field" type="number" defaultValue="3" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Khoảng cách retry (ms)</label>
+                    <label className="block text-base font-medium text-slate-700 mb-2">Khoảng cách retry (ms)</label>
                     <input aria-label="Input field" type="number" defaultValue="5000" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                   </div>
                   <div className="col-span-2 grid grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">WS-Security Auth</label>
-                      <select aria-label="Select box" value={formData.authMethod} onChange={(e) => setFormData({ ...formData, authMethod: e.target.value })} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                      <label className="block text-base font-medium text-slate-700 mb-2">WS-Security Auth</label>
+                      <select aria-label="Select box" value={formData.authMethod} onChange={(e) => setFormData({ ...formData, authMethod: e.target.value })} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-base">
                         <option value="No Auth">No Auth</option>
                         <option value="WSS UsernameToken">WSS (UsernameToken)</option>
                       </select>
@@ -459,11 +460,11 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                   {formData.authMethod === 'WSS UsernameToken' && (
                     <>
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">Username</label>
+                        <label className="block text-base font-medium text-slate-700 mb-2">Username</label>
                         <input aria-label="Input field" type="text" value={formData.authUsername} onChange={(e) => setFormData({...formData, authUsername: e.target.value})} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">Password</label>
+                        <label className="block text-base font-medium text-slate-700 mb-2">Password</label>
                         <div className="relative">
                           <input aria-label="Input field" type={showPassword ? "text" : "password"} value={formData.authPassword} onChange={(e) => setFormData({...formData, authPassword: e.target.value})} className="w-full px-4 py-2 pr-10 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                           <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
@@ -475,8 +476,8 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                   )}
 
                   <div className="col-span-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-2">XML Payload Template (Tùy chọn)</label>
-                    <textarea aria-label="Text input" rows={4} value={formData.xmlPayload} onChange={(e) => setFormData({ ...formData, xmlPayload: e.target.value })} placeholder="<soapenv:Envelope>...</soapenv:Envelope>" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-mono text-sm" />
+                    <label className="block text-base font-medium text-slate-700 mb-2">XML Payload Template (Tùy chọn)</label>
+                    <textarea aria-label="Text input" rows={4} value={formData.xmlPayload} onChange={(e) => setFormData({ ...formData, xmlPayload: e.target.value })} placeholder="<soapenv:Envelope>...</soapenv:Envelope>" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-mono text-base" />
                   </div>
                 </div>
               )}
@@ -485,53 +486,53 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
               {formData.connectionType.includes('Database') && (
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Host / IP <span className="text-red-500">*</span></label>
+                    <label className="block text-base font-medium text-slate-700 mb-2">Host / IP <span className="text-red-500">*</span></label>
                     <input aria-label="Input field" required type="text" value={formData.hostIp} onChange={(e) => setFormData({ ...formData, hostIp: e.target.value })} placeholder="192.168.1.100" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Port <span className="text-red-500">*</span></label>
+                    <label className="block text-base font-medium text-slate-700 mb-2">Port <span className="text-red-500">*</span></label>
                     <input aria-label="Input field" required type="number" value={formData.port} onChange={(e) => setFormData({ ...formData, port: e.target.value })} placeholder={formData.connectionType === 'Database Oracle' ? '1521' : '5432'} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                    <label className="block text-base font-medium text-slate-700 mb-2">
                       {formData.connectionType === 'Database Oracle' ? 'Service Name / SID' : 'Database Name'} <span className="text-red-500">*</span>
                     </label>
                     <input aria-label="Input field" required type="text" value={formData.dbNameOrSid} onChange={(e) => setFormData({ ...formData, dbNameOrSid: e.target.value })} placeholder={formData.connectionType === 'Database Oracle' ? 'ORCL' : 'dldc_db'} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Schema (Optional)</label>
+                    <label className="block text-base font-medium text-slate-700 mb-2">Schema (Optional)</label>
                     <input aria-label="Input field" type="text" value={formData.dbSchema} onChange={(e) => setFormData({ ...formData, dbSchema: e.target.value })} placeholder={formData.connectionType === 'Database Oracle' ? 'HR' : 'public'} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                   </div>
 
                   <div className="col-span-2 grid grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">Query/Table</label>
+                      <label className="block text-base font-medium text-slate-700 mb-2">Query/Table</label>
                       <input aria-label="Input field" type="text" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="VD: SELECT * FROM..." />
                     </div>
                   </div>
 
                   <div className="col-span-2 grid grid-cols-3 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">Connection Pool Size</label>
+                      <label className="block text-base font-medium text-slate-700 mb-2">Connection Pool Size</label>
                       <input aria-label="Input field" type="number" defaultValue="10" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">Timeout (giây)</label>
+                      <label className="block text-base font-medium text-slate-700 mb-2">Timeout (giây)</label>
                       <input aria-label="Input field" type="number" defaultValue="30" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">Batch Size</label>
+                      <label className="block text-base font-medium text-slate-700 mb-2">Batch Size</label>
                       <input aria-label="Input field" type="number" defaultValue="1000" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Username <span className="text-red-500">*</span></label>
+                    <label className="block text-base font-medium text-slate-700 mb-2">Username <span className="text-red-500">*</span></label>
                     <input aria-label="Input field" required type="text" value={formData.authUsername} onChange={(e) => setFormData({ ...formData, authUsername: e.target.value })} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Password <span className="text-red-500">*</span></label>
+                    <label className="block text-base font-medium text-slate-700 mb-2">Password <span className="text-red-500">*</span></label>
                     <div className="relative">
                       <input aria-label="Input field" required type={showPassword ? "text" : "password"} value={formData.authPassword} onChange={(e) => setFormData({ ...formData, authPassword: e.target.value })} className="w-full px-4 py-2 pr-10 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                       <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
@@ -542,8 +543,8 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                   
                   {formData.connectionType === 'Database Oracle' && (
                      <div className="col-span-2">
-                      <label className="block text-sm font-medium text-slate-700 mb-2">TNS Connection String (Nếu dùng TNS thay cho tham số rời)</label>
-                      <textarea aria-label="Text input" rows={2} value={formData.connectString} onChange={(e) => setFormData({ ...formData, connectString: e.target.value })} placeholder="(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=192.168.1.10)(PORT=1521))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=ORCL)))" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-mono text-sm" />
+                      <label className="block text-base font-medium text-slate-700 mb-2">TNS Connection String (Nếu dùng TNS thay cho tham số rời)</label>
+                      <textarea aria-label="Text input" rows={2} value={formData.connectString} onChange={(e) => setFormData({ ...formData, connectString: e.target.value })} placeholder="(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=192.168.1.10)(PORT=1521))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=ORCL)))" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-mono text-base" />
                     </div>
                   )}
                 </div>
@@ -553,19 +554,19 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
               {formData.connectionType === 'Giao thức File (FTP/SFTP)' && (
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Host / IP <span className="text-red-500">*</span></label>
+                    <label className="block text-base font-medium text-slate-700 mb-2">Host / IP <span className="text-red-500">*</span></label>
                     <input aria-label="Input field" required type="text" value={formData.hostIp} onChange={(e) => setFormData({ ...formData, hostIp: e.target.value })} placeholder="192.168.1.100" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Port <span className="text-red-500">*</span></label>
+                    <label className="block text-base font-medium text-slate-700 mb-2">Port <span className="text-red-500">*</span></label>
                     <input aria-label="Input field" required type="number" value={formData.port} onChange={(e) => setFormData({ ...formData, port: e.target.value })} placeholder="21 / 22" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Username <span className="text-red-500">*</span></label>
+                    <label className="block text-base font-medium text-slate-700 mb-2">Username <span className="text-red-500">*</span></label>
                     <input aria-label="Input field" required type="text" value={formData.authUsername} onChange={(e) => setFormData({...formData, authUsername: e.target.value})} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Password <span className="text-red-500">*</span></label>
+                    <label className="block text-base font-medium text-slate-700 mb-2">Password <span className="text-red-500">*</span></label>
                     <div className="relative">
                       <input aria-label="Input field" required type={showPassword ? "text" : "password"} value={formData.authPassword} onChange={(e) => setFormData({...formData, authPassword: e.target.value})} className="w-full px-4 py-2 pr-10 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                       <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
@@ -574,11 +575,11 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Đường dẫn thư mục (Directory Path) <span className="text-red-500">*</span></label>
+                    <label className="block text-base font-medium text-slate-700 mb-2">Đường dẫn thư mục (Directory Path) <span className="text-red-500">*</span></label>
                     <input aria-label="Input field" required type="text" value={formData.directoryPath} onChange={(e) => setFormData({...formData, directoryPath: e.target.value})} placeholder="/files/export/" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Timeout (giây)</label>
+                    <label className="block text-base font-medium text-slate-700 mb-2">Timeout (giây)</label>
                     <input aria-label="Input field" type="number" defaultValue="30" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                   </div>
                 </div>
@@ -588,8 +589,8 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
               {formData.connectionType === 'Upload File' && (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-200">
-                     <h3 className="text-sm font-medium text-slate-700">Tải file dữ liệu lên hệ thống</h3>
-                     <button type="button" className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1 transition-colors">
+                     <h3 className="text-base font-medium text-slate-700">Tải file dữ liệu lên hệ thống</h3>
+                     <button type="button" className="text-blue-600 hover:text-blue-800 text-base font-medium flex items-center gap-1 transition-colors">
                        <Download className="w-4 h-4"/> Tải file mẫu (.xlsx)
                      </button>
                   </div>
@@ -598,12 +599,12 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                     <div className="bg-white p-3 rounded-full shadow-sm mb-3 group-hover:scale-110 transition-transform">
                       <Upload className="w-6 h-6 text-blue-500" />
                     </div>
-                    <p className="text-sm font-semibold text-slate-700 mb-1">Kéo thả file dữ liệu vào đây</p>
-                    <p className="text-xs text-slate-500 mb-4">hoặc nhấn để chọn file từ máy tính</p>
+                    <p className="text-base font-semibold text-slate-700 mb-1">Kéo thả file dữ liệu vào đây</p>
+                    <p className="text-base text-slate-500 mb-4">hoặc nhấn để chọn file từ máy tính</p>
                     <span className="px-3 py-1 bg-slate-200 text-slate-600 text-[10px] rounded uppercase font-bold tracking-wider">Hỗ trợ: .xlsx, .xls (Tối đa 50MB)</span>
                   </div>
 
-                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-100 flex items-start gap-2 mt-4 text-sm text-blue-700">
+                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-100 flex items-start gap-2 mt-4 text-base text-blue-700">
                     <span className="font-semibold whitespace-nowrap">Lưu ý hệ thống:</span>
                     <span>Chỉ cho phép định dạng file excel (.xlsx, .xls) và dung lượng tối đa là 50MB.</span>
                   </div>
@@ -624,7 +625,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Tần suất đồng bộ <span className="text-red-500">*</span></label>
+                  <label className="block text-base font-medium text-slate-700 mb-2">Tần suất đồng bộ <span className="text-red-500">*</span></label>
                   <select aria-label="Select box"
                     required
                     value={formData.syncFrequency}
@@ -638,7 +639,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Chiến lược Thu thập <span className="text-red-500">*</span></label>
+                  <label className="block text-base font-medium text-slate-700 mb-2">Chiến lược Thu thập <span className="text-red-500">*</span></label>
                   <select aria-label="Select box"
                     required
                     value={formData.syncStrategy}
@@ -653,7 +654,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
 
               {formData.syncStrategy === 'Delta Load' && (
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Trường Khóa chính / Trường Timestamp (Primary Key) <span className="text-red-500">*</span></label>
+                  <label className="block text-base font-medium text-slate-700 mb-2">Trường Khóa chính / Trường Timestamp (Primary Key) <span className="text-red-500">*</span></label>
                   <input aria-label="Input field"
                     required type="text"
                     value={formData.primaryKey}
@@ -666,7 +667,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
 
               <div className="grid grid-cols-3 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Kích thước lô (Batch Size)</label>
+                  <label className="block text-base font-medium text-slate-700 mb-2">Kích thước lô (Batch Size)</label>
                   <select aria-label="Select box"
                     value={formData.batchSize}
                     onChange={(e) => setFormData({ ...formData, batchSize: e.target.value })}
@@ -678,7 +679,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Số lần thử lại khi lỗi</label>
+                  <label className="block text-base font-medium text-slate-700 mb-2">Số lần thử lại khi lỗi</label>
                   <input aria-label="Input field"
                     type="number" max="10" min="0" required
                     value={formData.retryLimit}
@@ -687,7 +688,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Hành động sau sự cố</label>
+                  <label className="block text-base font-medium text-slate-700 mb-2">Hành động sau sự cố</label>
                   <select aria-label="Select box"
                     value={formData.actionAfterFailure}
                     onChange={(e) => setFormData({ ...formData, actionAfterFailure: e.target.value })}
@@ -736,7 +737,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
             
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Tên đơn vị</label>
+                <label className="block text-base font-medium text-slate-700 mb-2">Tên đơn vị</label>
                 <input aria-label="Input field"
                   type="text"
                   value={donViSearch}
@@ -745,7 +746,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Nguồn thu thập <span className="text-red-500">*</span></label>
+                <label className="block text-base font-medium text-slate-700 mb-2">Nguồn thu thập <span className="text-red-500">*</span></label>
                 <div className="flex gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
                   <label className="flex items-center gap-2 cursor-pointer relative">
                     <input aria-label="Input field"
@@ -756,7 +757,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                       onChange={() => setNewDonViClassification('Trong ngành')}
                       className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-slate-300"
                     />
-                    <span className="text-sm font-medium text-slate-700">Trong ngành</span>
+                    <span className="text-base font-medium text-slate-700">Trong ngành</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer relative">
                     <input aria-label="Input field"
@@ -767,7 +768,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                       onChange={() => setNewDonViClassification('Ngoài ngành')}
                       className="w-4 h-4 text-orange-600 focus:ring-orange-500 border-slate-300"
                     />
-                    <span className="text-sm font-medium text-slate-700">Ngoài ngành</span>
+                    <span className="text-base font-medium text-slate-700">Ngoài ngành</span>
                   </label>
                 </div>
               </div>
@@ -777,7 +778,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
               <button
                 type="button"
                 onClick={() => setShowCreateDonViModal(false)}
-                className="px-4 py-2 text-slate-700 hover:bg-slate-100 border border-slate-300 rounded-lg text-sm font-medium transition-colors"
+                className="px-4 py-2 text-slate-700 hover:bg-slate-100 border border-slate-300 rounded-lg text-base font-medium transition-colors"
               >
                 Hủy bỏ
               </button>
@@ -789,7 +790,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                   setFormData({ ...formData, providerName: newDv.name, providerType: newDv.classification === 'Trong ngành' ? 'internal' : 'external' });
                   setShowCreateDonViModal(false);
                 }}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-base font-medium transition-colors"
               >
                 Xác nhận lưu
               </button>
@@ -797,6 +798,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }

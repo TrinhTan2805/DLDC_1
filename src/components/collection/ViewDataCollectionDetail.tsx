@@ -12,21 +12,21 @@ export function ViewDataCollectionDetail({ data, onBack, onEdit }: ViewDataColle
     switch (status) {
       case 'collected':
         return (
-          <span className="px-3 py-1.5 rounded-lg text-sm bg-green-100 text-green-700 flex items-center gap-2 w-fit">
+          <span className="px-3 py-1.5 rounded-lg text-base bg-green-100 text-green-700 flex items-center gap-2 w-fit">
             <CheckCircle className="w-4 h-4" />
             Đã thu thập
           </span>
         );
       case 'pending':
         return (
-          <span className="px-3 py-1.5 rounded-lg text-sm bg-orange-100 text-orange-700 flex items-center gap-2 w-fit">
+          <span className="px-3 py-1.5 rounded-lg text-base bg-orange-100 text-orange-700 flex items-center gap-2 w-fit">
             <Clock className="w-4 h-4" />
             Đang xử lý
           </span>
         );
       case 'not-started':
         return (
-          <span className="px-3 py-1.5 rounded-lg text-sm bg-slate-100 text-slate-700 flex items-center gap-2 w-fit">
+          <span className="px-3 py-1.5 rounded-lg text-base bg-slate-100 text-slate-700 flex items-center gap-2 w-fit">
             <AlertCircle className="w-4 h-4" />
             Chưa bắt đầu
           </span>
@@ -39,11 +39,11 @@ export function ViewDataCollectionDetail({ data, onBack, onEdit }: ViewDataColle
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case 'high':
-        return <span className="px-3 py-1.5 rounded-lg text-sm bg-red-100 text-red-700">Cao</span>;
+        return <span className="px-3 py-1.5 rounded-lg text-base bg-red-100 text-red-700">Cao</span>;
       case 'medium':
-        return <span className="px-3 py-1.5 rounded-lg text-sm bg-yellow-100 text-yellow-700">Trung bình</span>;
+        return <span className="px-3 py-1.5 rounded-lg text-base bg-yellow-100 text-yellow-700">Trung bình</span>;
       case 'low':
-        return <span className="px-3 py-1.5 rounded-lg text-sm bg-blue-100 text-blue-700">Thấp</span>;
+        return <span className="px-3 py-1.5 rounded-lg text-base bg-blue-100 text-blue-700">Thấp</span>;
       default:
         return null;
     }
@@ -52,7 +52,8 @@ export function ViewDataCollectionDetail({ data, onBack, onEdit }: ViewDataColle
   const categoryColor = data.category === 'external' ? 'blue' : 'green';
 
   return (
-    <div className="space-y-6">
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
+      <div className="space-y-6 min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -64,7 +65,7 @@ export function ViewDataCollectionDetail({ data, onBack, onEdit }: ViewDataColle
           </button>
           <div>
             <h2 className="text-slate-900">Chi tiết Dữ liệu Cần Thu thập</h2>
-            <p className="text-sm text-slate-500 mt-0.5">Thông tin chi tiết về dữ liệu</p>
+            <p className="text-base text-slate-500 mt-0.5">Thông tin chi tiết về dữ liệu</p>
           </div>
         </div>
         <button
@@ -100,7 +101,7 @@ export function ViewDataCollectionDetail({ data, onBack, onEdit }: ViewDataColle
           ></div>
           <p
             className={{
-              'px-3 py-1.5 rounded-lg text-sm inline-block': true,
+              'px-3 py-1.5 rounded-lg text-base inline-block': true,
               'bg-blue-100 text-blue-700': data.category === 'external',
               'bg-green-100 text-green-700': data.category === 'internal'
             }}
@@ -119,7 +120,7 @@ export function ViewDataCollectionDetail({ data, onBack, onEdit }: ViewDataColle
         <div className="p-6 space-y-6">
           {/* Tên dữ liệu */}
           <div>
-            <label className="block text-xs text-slate-500 uppercase tracking-wider mb-2">Tên dữ liệu</label>
+            <label className="block text-base text-slate-500 uppercase tracking-wider mb-2">Tên dữ liệu</label>
             <div className="flex items-start gap-3">
               <FileText className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
               <p className="text-slate-900">{data.dataName}</p>
@@ -128,7 +129,7 @@ export function ViewDataCollectionDetail({ data, onBack, onEdit }: ViewDataColle
 
           {/* Cơ quan */}
           <div>
-            <label className="block text-xs text-slate-500 uppercase tracking-wider mb-2">
+            <label className="block text-base text-slate-500 uppercase tracking-wider mb-2">
               {data.category === 'external' ? 'Cơ quan nguồn' : 'Cục/Vụ'}
             </label>
             <div className="flex items-center gap-3">
@@ -139,14 +140,14 @@ export function ViewDataCollectionDetail({ data, onBack, onEdit }: ViewDataColle
 
           {/* Mô tả */}
           <div>
-            <label className="block text-xs text-slate-500 uppercase tracking-wider mb-2">Mô tả</label>
+            <label className="block text-base text-slate-500 uppercase tracking-wider mb-2">Mô tả</label>
             <p className="text-slate-700 bg-slate-50 rounded-lg p-4">{data.description}</p>
           </div>
 
           {/* Grid Info */}
           <div className="grid grid-cols-2 gap-6 pt-4 border-t border-slate-200">
             <div>
-              <label className="block text-xs text-slate-500 uppercase tracking-wider mb-2">Loại dữ liệu</label>
+              <label className="block text-base text-slate-500 uppercase tracking-wider mb-2">Loại dữ liệu</label>
               <div className="flex items-center gap-2">
                 <FileType className="w-4 h-4 text-slate-600" />
                 <p className="text-slate-900">{data.dataType}</p>
@@ -154,12 +155,12 @@ export function ViewDataCollectionDetail({ data, onBack, onEdit }: ViewDataColle
             </div>
 
             <div>
-              <label className="block text-xs text-slate-500 uppercase tracking-wider mb-2">Định dạng</label>
-              <span className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-sm inline-block">{data.format}</span>
+              <label className="block text-base text-slate-500 uppercase tracking-wider mb-2">Định dạng</label>
+              <span className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-base inline-block">{data.format}</span>
             </div>
 
             <div>
-              <label className="block text-xs text-slate-500 uppercase tracking-wider mb-2">Tần suất thu thập</label>
+              <label className="block text-base text-slate-500 uppercase tracking-wider mb-2">Tần suất thu thập</label>
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-slate-600" />
                 <p className="text-slate-900">{data.frequency}</p>
@@ -167,17 +168,17 @@ export function ViewDataCollectionDetail({ data, onBack, onEdit }: ViewDataColle
             </div>
 
             <div>
-              <label className="block text-xs text-slate-500 uppercase tracking-wider mb-2">Mức độ ưu tiên</label>
+              <label className="block text-base text-slate-500 uppercase tracking-wider mb-2">Mức độ ưu tiên</label>
               {getPriorityBadge(data.priority)}
             </div>
 
             <div>
-              <label className="block text-xs text-slate-500 uppercase tracking-wider mb-2">Trạng thái</label>
+              <label className="block text-base text-slate-500 uppercase tracking-wider mb-2">Trạng thái</label>
               {getStatusBadge(data.status)}
             </div>
 
             <div>
-              <label className="block text-xs text-slate-500 uppercase tracking-wider mb-2">Cập nhật lần cuối</label>
+              <label className="block text-base text-slate-500 uppercase tracking-wider mb-2">Cập nhật lần cuối</label>
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-slate-600" />
                 <p className="text-slate-900">{data.lastUpdate}</p>
@@ -196,17 +197,17 @@ export function ViewDataCollectionDetail({ data, onBack, onEdit }: ViewDataColle
         <div className="p-6 space-y-4">
           <div className="grid grid-cols-2 gap-6">
             <div>
-              <label className="block text-xs text-slate-500 uppercase tracking-wider mb-2">STT</label>
+              <label className="block text-base text-slate-500 uppercase tracking-wider mb-2">STT</label>
               <p className="text-slate-900">#{data.stt}</p>
             </div>
             <div>
-              <label className="block text-xs text-slate-500 uppercase tracking-wider mb-2">Mã ID</label>
+              <label className="block text-base text-slate-500 uppercase tracking-wider mb-2">Mã ID</label>
               <p className="text-slate-900">DC-{String(data.id).padStart(4, '0')}</p>
             </div>
           </div>
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-            <p className="text-sm text-blue-800">
+            <p className="text-base text-blue-800">
               <strong>Ghi chú:</strong> Dữ liệu này thuộc nhóm {data.category === 'external' ? 'thu thập từ các cơ quan bên ngoài' : 'thu thập từ các hệ thống trong nội bộ'}.
             </p>
           </div>
@@ -228,20 +229,20 @@ export function ViewDataCollectionDetail({ data, onBack, onEdit }: ViewDataColle
         <div className="p-6 space-y-6">
           <div className="grid grid-cols-2 gap-6">
             <div>
-              <label className="block text-xs text-slate-500 uppercase tracking-wider mb-2">Phương thức kết nối</label>
+              <label className="block text-base text-slate-500 uppercase tracking-wider mb-2">Phương thức kết nối</label>
               <div className="flex items-center gap-2">
                 <Server className="w-4 h-4 text-slate-600" />
-                <span className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg text-sm inline-block">
+                <span className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg text-base inline-block">
                   {data.connectionMethod || 'API'}
                 </span>
               </div>
             </div>
 
             <div>
-              <label className="block text-xs text-slate-500 uppercase tracking-wider mb-2">Phương thức xác thực</label>
+              <label className="block text-base text-slate-500 uppercase tracking-wider mb-2">Phương thức xác thực</label>
               <div className="flex items-center gap-2">
                 <Key className="w-4 h-4 text-slate-600" />
-                <span className="px-3 py-1.5 bg-purple-100 text-purple-700 rounded-lg text-sm inline-block">
+                <span className="px-3 py-1.5 bg-purple-100 text-purple-700 rounded-lg text-base inline-block">
                   {data.authMethod || 'API Key'}
                 </span>
               </div>
@@ -249,10 +250,10 @@ export function ViewDataCollectionDetail({ data, onBack, onEdit }: ViewDataColle
           </div>
 
           <div>
-            <label className="block text-xs text-slate-500 uppercase tracking-wider mb-2">Endpoint</label>
+            <label className="block text-base text-slate-500 uppercase tracking-wider mb-2">Endpoint</label>
             <div className="flex items-start gap-2">
               <Link2 className="w-4 h-4 text-slate-600 mt-1 flex-shrink-0" />
-              <p className="text-slate-700 bg-slate-50 rounded-lg px-4 py-2.5 text-sm font-mono break-all flex-1">
+              <p className="text-slate-700 bg-slate-50 rounded-lg px-4 py-2.5 text-base font-mono break-all flex-1">
                 {data.endpoint || 'https://api.example.com/v1/data'}
               </p>
             </div>
@@ -260,7 +261,7 @@ export function ViewDataCollectionDetail({ data, onBack, onEdit }: ViewDataColle
 
           <div className="grid grid-cols-2 gap-6">
             <div>
-              <label className="block text-xs text-slate-500 uppercase tracking-wider mb-2">Username</label>
+              <label className="block text-base text-slate-500 uppercase tracking-wider mb-2">Username</label>
               <div className="flex items-center gap-2">
                 <User className="w-4 h-4 text-slate-600" />
                 <p className="text-slate-900">{data.username || 'admin_user'}</p>
@@ -268,7 +269,7 @@ export function ViewDataCollectionDetail({ data, onBack, onEdit }: ViewDataColle
             </div>
 
             <div>
-              <label className="block text-xs text-slate-500 uppercase tracking-wider mb-2">Port</label>
+              <label className="block text-base text-slate-500 uppercase tracking-wider mb-2">Port</label>
               <div className="flex items-center gap-2">
                 <Server className="w-4 h-4 text-slate-600" />
                 <p className="text-slate-900">{data.port || '443'}</p>
@@ -277,28 +278,28 @@ export function ViewDataCollectionDetail({ data, onBack, onEdit }: ViewDataColle
           </div>
 
           <div>
-            <label className="block text-xs text-slate-500 uppercase tracking-wider mb-2">API Key</label>
+            <label className="block text-base text-slate-500 uppercase tracking-wider mb-2">API Key</label>
             <div className="flex items-start gap-2">
               <Key className="w-4 h-4 text-slate-600 mt-1 flex-shrink-0" />
-              <p className="text-slate-700 bg-slate-50 rounded-lg px-4 py-2.5 text-sm font-mono">
+              <p className="text-slate-700 bg-slate-50 rounded-lg px-4 py-2.5 text-base font-mono">
                 {data.apiKey || '••••••••••••••••••••••••'}
               </p>
             </div>
           </div>
 
           <div>
-            <label className="block text-xs text-slate-500 uppercase tracking-wider mb-2">Password</label>
+            <label className="block text-base text-slate-500 uppercase tracking-wider mb-2">Password</label>
             <div className="flex items-start gap-2">
               <Lock className="w-4 h-4 text-slate-600 mt-1 flex-shrink-0" />
-              <p className="text-slate-700 bg-slate-50 rounded-lg px-4 py-2.5 text-sm font-mono">
+              <p className="text-slate-700 bg-slate-50 rounded-lg px-4 py-2.5 text-base font-mono">
                 {data.password || '••••••••••••'}
               </p>
             </div>
           </div>
 
           <div>
-            <label className="block text-xs text-slate-500 uppercase tracking-wider mb-2">Ghi chú kỹ thuật</label>
-            <p className="text-slate-700 bg-slate-50 rounded-lg p-4 text-sm">
+            <label className="block text-base text-slate-500 uppercase tracking-wider mb-2">Ghi chú kỹ thuật</label>
+            <p className="text-slate-700 bg-slate-50 rounded-lg p-4 text-base">
               {data.technicalNote || 'Kết nối qua HTTPS với chứng chỉ SSL. Timeout mặc định 30s.'}
             </p>
           </div>
@@ -307,10 +308,11 @@ export function ViewDataCollectionDetail({ data, onBack, onEdit }: ViewDataColle
 
       {/* Mockup Note */}
       <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-        <p className="text-sm text-amber-800">
+        <p className="text-base text-amber-800">
           <strong>Lưu ý:</strong> Đây là giao diện mockup xem chi tiết. Dữ liệu hiển thị chỉ mang tính minh họa.
         </p>
       </div>
+    </div>
     </div>
   );
 }

@@ -178,7 +178,7 @@ export function ScheduleManagementModal({ isOpen, onClose, systemName, datasetNa
   };
 
   return (
-    <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm" style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
       <div className="bg-white rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
@@ -197,7 +197,7 @@ export function ScheduleManagementModal({ isOpen, onClose, systemName, datasetNa
           </div>
           <button 
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-md transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -211,7 +211,8 @@ export function ScheduleManagementModal({ isOpen, onClose, systemName, datasetNa
                 <h3 className="text-[15px] font-semibold text-slate-800">Lịch biểu đã cấu hình</h3>
                 <button 
                   onClick={handleAddNew}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm"
+                  style={{ padding: '8px 16px', borderRadius: '6px', fontWeight: 500 }}
+                  className="flex items-center gap-2 bg-blue-600 text-white text-sm hover:bg-blue-700 transition-colors shadow-sm"
                 >
                   <Plus className="w-4 h-4" />
                   Thêm mới
@@ -470,7 +471,8 @@ export function ScheduleManagementModal({ isOpen, onClose, systemName, datasetNa
           {view === 'list' ? (
             <button
               onClick={onClose}
-              className="px-6 py-2.5 text-sm font-medium text-slate-600 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors shadow-sm"
+              style={{ padding: '8px 16px', borderRadius: '6px', fontWeight: 500 }}
+              className="text-sm text-slate-600 bg-white border border-slate-300 hover:bg-slate-50 transition-colors shadow-sm"
             >
               Đóng
             </button>
@@ -478,13 +480,15 @@ export function ScheduleManagementModal({ isOpen, onClose, systemName, datasetNa
             <>
               <button
                 onClick={() => setView('list')}
-                className="px-6 py-2.5 text-sm font-medium text-slate-600 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors shadow-sm"
+                style={{ padding: '8px 16px', borderRadius: '6px', fontWeight: 500 }}
+                className="text-sm text-slate-600 bg-white border border-slate-300 hover:bg-slate-50 transition-colors shadow-sm"
               >
                 Hủy
               </button>
               <button
                 onClick={handleSave}
-                className="px-6 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors shadow-sm"
+                style={{ padding: '8px 16px', borderRadius: '6px', fontWeight: 500 }}
+                className="text-sm text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm"
               >
                 {editingSchedule ? 'Cập nhật' : 'Thêm'}
               </button>

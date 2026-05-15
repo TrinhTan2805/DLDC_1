@@ -86,7 +86,7 @@ export function ProcessedDataPage({
   const data = getSampleData();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
       {/* Header Stats */}
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-lg p-4">

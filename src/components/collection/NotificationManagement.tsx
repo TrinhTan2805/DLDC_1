@@ -43,6 +43,7 @@ const notifications = [
 
 export function NotificationManagement() {
   return (
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
     <div className="space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -52,7 +53,7 @@ export function NotificationManagement() {
               <Send className="w-6 h-6 text-blue-600" />
             </div>
           </div>
-          <p className="text-gray-500 text-sm mb-1">Đã gửi (Hôm nay)</p>
+          <p className="text-gray-500 text-base mb-1">Đã gửi (Hôm nay)</p>
           <p className="text-gray-900">45</p>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -61,7 +62,7 @@ export function NotificationManagement() {
               <CheckCircle className="w-6 h-6 text-green-600" />
             </div>
           </div>
-          <p className="text-gray-500 text-sm mb-1">Thông báo thành công</p>
+          <p className="text-gray-500 text-base mb-1">Thông báo thành công</p>
           <p className="text-gray-900">41</p>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -70,7 +71,7 @@ export function NotificationManagement() {
               <XCircle className="w-6 h-6 text-red-600" />
             </div>
           </div>
-          <p className="text-gray-500 text-sm mb-1">Thông báo lỗi</p>
+          <p className="text-gray-500 text-base mb-1">Thông báo lỗi</p>
           <p className="text-gray-900">4</p>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -79,7 +80,7 @@ export function NotificationManagement() {
               <Bell className="w-6 h-6 text-orange-600" />
             </div>
           </div>
-          <p className="text-gray-500 text-sm mb-1">Chờ gửi</p>
+          <p className="text-gray-500 text-base mb-1">Chờ gửi</p>
           <p className="text-gray-900">2</p>
         </div>
       </div>
@@ -88,7 +89,7 @@ export function NotificationManagement() {
       <div className="bg-white rounded-lg border border-gray-200">
         <div className="px-6 py-4 border-b border-gray-200">
           <h3 className="text-gray-900">Danh sách thông báo</h3>
-          <p className="text-gray-500 text-sm mt-1">Lịch sử gửi thông báo đến hệ thống nguồn</p>
+          <p className="text-gray-500 text-base mt-1">Lịch sử gửi thông báo đến hệ thống nguồn</p>
         </div>
         <div className="p-6 space-y-6">
           {notifications.map((notification) => (
@@ -108,19 +109,19 @@ export function NotificationManagement() {
                     )}
                     <div>
                       <h4 className="text-gray-900 mb-1">{notification.subject}</h4>
-                      <p className="text-gray-600 text-sm">Gửi tới: {notification.source}</p>
-                      <p className="text-gray-500 text-sm">Email: {notification.recipient}</p>
+                      <p className="text-gray-600 text-base">Gửi tới: {notification.source}</p>
+                      <p className="text-gray-500 text-base">Email: {notification.recipient}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <span className={`px-4 py-2 rounded-full text-sm ${
+                    <span className={`px-4 py-2 rounded-full text-base ${
                       notification.status === 'sent' 
                         ? 'bg-blue-100 text-blue-700' 
                         : 'bg-orange-100 text-orange-700'
                     }`}>
                       {notification.status === 'sent' ? 'Đã gửi' : 'Chờ gửi'}
                     </span>
-                    <p className="text-gray-500 text-sm mt-2">{notification.sentTime}</p>
+                    <p className="text-gray-500 text-base mt-2">{notification.sentTime}</p>
                   </div>
                 </div>
               </div>
@@ -137,7 +138,7 @@ export function NotificationManagement() {
                     <h5 className="text-red-900 mb-3">Chi tiết lỗi:</h5>
                     <div className="space-y-2">
                       {notification.errorDetails.map((detail, idx) => (
-                        <div key={idx} className="bg-white rounded p-3 text-sm">
+                        <div key={idx} className="bg-white rounded p-3 text-base">
                           <p className="text-gray-900">
                             <span className="font-medium">Dòng {detail.line}:</span> Trường "{detail.field}"
                           </p>
@@ -150,20 +151,20 @@ export function NotificationManagement() {
 
                 {/* Transaction Info */}
                 <div className="bg-gray-50 rounded-lg p-4">
-                  <p className="text-gray-500 text-sm">Mã giao dịch: {notification.transaction}</p>
+                  <p className="text-gray-500 text-base">Mã giao dịch: {notification.transaction}</p>
                 </div>
               </div>
 
               {/* Actions */}
               <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
                 <div className="flex gap-3">
-                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-white text-sm">
+                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-white text-base">
                     Gửi lại
                   </button>
-                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-white text-sm">
+                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-white text-base">
                     Xem chi tiết
                   </button>
-                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-white text-sm">
+                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-white text-base">
                     Download
                   </button>
                 </div>
@@ -226,6 +227,7 @@ export function NotificationManagement() {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

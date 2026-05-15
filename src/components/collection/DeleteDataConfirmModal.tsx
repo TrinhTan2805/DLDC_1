@@ -14,6 +14,7 @@ export function DeleteDataConfirmModal({ data, onConfirm, onCancel }: DeleteData
   };
 
   return (
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg max-w-lg w-full shadow-xl">
         {/* Header */}
@@ -40,23 +41,23 @@ export function DeleteDataConfirmModal({ data, onConfirm, onCancel }: DeleteData
 
           <div className="bg-slate-50 rounded-lg p-4 space-y-3">
             <div>
-              <label className="block text-xs text-slate-500 uppercase tracking-wider mb-1">Tên dữ liệu</label>
+              <label className="block text-base text-slate-500 uppercase tracking-wider mb-1">Tên dữ liệu</label>
               <p className="text-slate-900">{data.dataName}</p>
             </div>
             
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs text-slate-500 uppercase tracking-wider mb-1">Cơ quan</label>
+                <label className="block text-base text-slate-500 uppercase tracking-wider mb-1">Cơ quan</label>
                 <p className="text-slate-900">{data.department}</p>
               </div>
               <div>
-                <label className="block text-xs text-slate-500 uppercase tracking-wider mb-1">Loại dữ liệu</label>
+                <label className="block text-base text-slate-500 uppercase tracking-wider mb-1">Loại dữ liệu</label>
                 <p className="text-slate-900">{data.dataType}</p>
               </div>
             </div>
 
             <div>
-              <label className="block text-xs text-slate-500 uppercase tracking-wider mb-1">Mã ID</label>
+              <label className="block text-base text-slate-500 uppercase tracking-wider mb-1">Mã ID</label>
               <p className="text-slate-900">DC-{String(data.id).padStart(4, '0')}</p>
             </div>
           </div>
@@ -65,10 +66,10 @@ export function DeleteDataConfirmModal({ data, onConfirm, onCancel }: DeleteData
             <div className="flex gap-3">
               <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
               <div className="space-y-1">
-                <p className="text-sm text-red-800">
+                <p className="text-base text-red-800">
                   <strong>Cảnh báo:</strong> Hành động này không thể hoàn tác!
                 </p>
-                <p className="text-sm text-red-700">
+                <p className="text-base text-red-700">
                   Tất cả thông tin liên quan đến dữ liệu này sẽ bị xóa vĩnh viễn khỏi hệ thống.
                 </p>
               </div>
@@ -96,12 +97,13 @@ export function DeleteDataConfirmModal({ data, onConfirm, onCancel }: DeleteData
         {/* Mockup Note */}
         <div className="px-6 pb-4">
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-            <p className="text-xs text-amber-800">
+            <p className="text-base text-amber-800">
               <strong>Lưu ý:</strong> Đây là modal mockup. Chức năng xóa chưa kết nối với backend thực tế.
             </p>
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

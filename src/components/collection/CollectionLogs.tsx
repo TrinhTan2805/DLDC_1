@@ -154,6 +154,7 @@ export function CollectionLogs() {
   };
 
   return (
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
     <div className="space-y-6">
       {/* Filters */}
       <div className="bg-white rounded-lg border border-gray-200 p-4">
@@ -171,7 +172,7 @@ export function CollectionLogs() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-gray-600 text-sm">Trạng thái:</span>
+            <span className="text-gray-600 text-base">Trạng thái:</span>
             <select aria-label="Select box"
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
@@ -197,7 +198,7 @@ export function CollectionLogs() {
           <div className="flex items-center gap-3">
             <CheckCircle className="w-8 h-8 text-green-600" />
             <div>
-              <p className="text-gray-500 text-sm">Thành công</p>
+              <p className="text-gray-500 text-base">Thành công</p>
               <p className="text-gray-900">
                 {logs.filter(l => l.status === 'success').length}
               </p>
@@ -208,7 +209,7 @@ export function CollectionLogs() {
           <div className="flex items-center gap-3">
             <XCircle className="w-8 h-8 text-red-600" />
             <div>
-              <p className="text-gray-500 text-sm">Lỗi</p>
+              <p className="text-gray-500 text-base">Lỗi</p>
               <p className="text-gray-900">
                 {logs.filter(l => l.status === 'error').length}
               </p>
@@ -219,7 +220,7 @@ export function CollectionLogs() {
           <div className="flex items-center gap-3">
             <Clock className="w-8 h-8 text-orange-600" />
             <div>
-              <p className="text-gray-500 text-sm">Cảnh báo</p>
+              <p className="text-gray-500 text-base">Cảnh báo</p>
               <p className="text-gray-900">
                 {logs.filter(l => l.status === 'warning').length}
               </p>
@@ -230,7 +231,7 @@ export function CollectionLogs() {
           <div className="flex items-center gap-3">
             <Info className="w-8 h-8 text-blue-600" />
             <div>
-              <p className="text-gray-500 text-sm">Thông tin</p>
+              <p className="text-gray-500 text-base">Thông tin</p>
               <p className="text-gray-900">
                 {logs.filter(l => l.status === 'info').length}
               </p>
@@ -243,7 +244,7 @@ export function CollectionLogs() {
       <div className="bg-white rounded-lg border border-gray-200">
         <div className="px-6 py-4 border-b border-gray-200">
           <h3 className="text-gray-900">Nhật ký thu thập dữ liệu</h3>
-          <p className="text-gray-500 text-sm mt-1">
+          <p className="text-gray-500 text-base mt-1">
             Hiển thị {filteredLogs.length} / {logs.length} bản ghi
           </p>
         </div>
@@ -261,9 +262,9 @@ export function CollectionLogs() {
                   <div className="flex items-start justify-between mb-2">
                     <div>
                       <h4 className="text-gray-900 mb-1">{log.source}</h4>
-                      <p className="text-gray-500 text-sm">{log.step}</p>
+                      <p className="text-gray-500 text-base">{log.step}</p>
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-sm ${getStatusBadge(log.status)}`}>
+                    <span className={`px-3 py-1 rounded-full text-base ${getStatusBadge(log.status)}`}>
                       {log.status === 'success' ? 'Thành công' :
                        log.status === 'error' ? 'Lỗi' :
                        log.status === 'warning' ? 'Cảnh báo' : 'Thông tin'}
@@ -272,7 +273,7 @@ export function CollectionLogs() {
                   
                   <p className="text-gray-700 mb-3">{log.message}</p>
                   
-                  <div className="flex items-center gap-6 text-sm text-gray-500">
+                  <div className="flex items-center gap-6 text-base text-gray-500">
                     <span>Mã GD: {log.transaction}</span>
                     <span>•</span>
                     <span>{log.time}</span>
@@ -288,29 +289,30 @@ export function CollectionLogs() {
         {/* Pagination */}
         <div className="px-6 py-4 border-t border-gray-200">
           <div className="flex items-center justify-between">
-            <p className="text-gray-500 text-sm">
+            <p className="text-gray-500 text-base">
               Hiển thị 1-{filteredLogs.length} của {logs.length} bản ghi
             </p>
             <div className="flex gap-2">
-              <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm">
+              <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-base">
                 Trước
               </button>
-              <button title="Hành động" aria-label="Hành động" className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm">
+              <button title="Hành động" aria-label="Hành động" className="px-4 py-2 bg-red-600 text-white rounded-lg text-base">
                 1
               </button>
-              <button title="Hành động" aria-label="Hành động" className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm">
+              <button title="Hành động" aria-label="Hành động" className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-base">
                 2
               </button>
-              <button title="Hành động" aria-label="Hành động" className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm">
+              <button title="Hành động" aria-label="Hành động" className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-base">
                 3
               </button>
-              <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm">
+              <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-base">
                 Sau
               </button>
             </div>
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

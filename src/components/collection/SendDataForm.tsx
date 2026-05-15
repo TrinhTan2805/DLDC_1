@@ -43,6 +43,7 @@ export function SendDataForm() {
   };
 
   return (
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
     <div className="space-y-6">
       {/* Instructions */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
@@ -50,7 +51,7 @@ export function SendDataForm() {
           <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
           <div>
             <h4 className="text-blue-900 mb-2">Hướng dẫn gửi dữ liệu</h4>
-            <ul className="text-blue-700 text-sm space-y-1">
+            <ul className="text-blue-700 text-base space-y-1">
               <li>• Dữ liệu phải tuân thủ chuẩn định dạng đã thống nhất (JSON, XML, CSV)</li>
               <li>• Kết nối phải sử dụng giao thức bảo mật (HTTPS, SSL/TLS)</li>
               <li>• Mỗi gói dữ liệu cần có mã nguồn và timestamp hợp lệ</li>
@@ -74,7 +75,7 @@ export function SendDataForm() {
           >
             <Database className="w-8 h-8 text-blue-600 mb-3" />
             <h4 className="text-gray-900 mb-1">API REST</h4>
-            <p className="text-gray-500 text-sm">Gửi qua API endpoint</p>
+            <p className="text-gray-500 text-base">Gửi qua API endpoint</p>
           </button>
 
           <button
@@ -87,7 +88,7 @@ export function SendDataForm() {
           >
             <FileText className="w-8 h-8 text-green-600 mb-3" />
             <h4 className="text-gray-900 mb-1">Upload File</h4>
-            <p className="text-gray-500 text-sm">Tải lên file dữ liệu</p>
+            <p className="text-gray-500 text-base">Tải lên file dữ liệu</p>
           </button>
 
           <button
@@ -100,7 +101,7 @@ export function SendDataForm() {
           >
             <Upload className="w-8 h-8 text-purple-600 mb-3" />
             <h4 className="text-gray-900 mb-1">SFTP</h4>
-            <p className="text-gray-500 text-sm">Truyền qua SFTP server</p>
+            <p className="text-gray-500 text-base">Truyền qua SFTP server</p>
           </button>
         </div>
       </div>
@@ -153,7 +154,7 @@ export function SendDataForm() {
               <textarea aria-label="Text input"
                 rows={10}
                 placeholder='{"records": [{"cccd": "001234567890", "ho_ten": "Nguyen Van A", ...}]}'
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 font-mono text-sm"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 font-mono text-base"
               ></textarea>
             </div>
 
@@ -202,7 +203,7 @@ export function SendDataForm() {
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 transition-colors cursor-pointer">
               <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
               <p className="text-gray-700 mb-1">Kéo thả file vào đây hoặc click để chọn</p>
-              <p className="text-gray-500 text-sm">Hỗ trợ: JSON, XML, CSV, Excel (Tối đa 100MB)</p>
+              <p className="text-gray-500 text-base">Hỗ trợ: JSON, XML, CSV, Excel (Tối đa 100MB)</p>
             </div>
 
             <div className="flex gap-3">
@@ -316,12 +317,12 @@ export function SendDataForm() {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-gray-700 text-sm">Thời gian</th>
-                <th className="px-6 py-3 text-left text-gray-700 text-sm">Nguồn</th>
-                <th className="px-6 py-3 text-left text-gray-700 text-sm">Phương thức</th>
-                <th className="px-6 py-3 text-left text-gray-700 text-sm">Số bản ghi</th>
-                <th className="px-6 py-3 text-left text-gray-700 text-sm">Trạng thái</th>
-                <th className="px-6 py-3 text-left text-gray-700 text-sm">Mã giao dịch</th>
+                <th className="px-6 py-3 text-left text-gray-700 text-base">Thời gian</th>
+                <th className="px-6 py-3 text-left text-gray-700 text-base">Nguồn</th>
+                <th className="px-6 py-3 text-left text-gray-700 text-base">Phương thức</th>
+                <th className="px-6 py-3 text-left text-gray-700 text-base">Số bản ghi</th>
+                <th className="px-6 py-3 text-left text-gray-700 text-base">Trạng thái</th>
+                <th className="px-6 py-3 text-left text-gray-700 text-base">Mã giao dịch</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -331,7 +332,7 @@ export function SendDataForm() {
                 <td className="px-6 py-4 text-gray-600">API</td>
                 <td className="px-6 py-4 text-gray-600">2,345</td>
                 <td className="px-6 py-4">
-                  <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">Thành công</span>
+                  <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-base">Thành công</span>
                 </td>
                 <td className="px-6 py-4 text-gray-600">TXN-2025120701234</td>
               </tr>
@@ -343,7 +344,7 @@ export function SendDataForm() {
                 <td className="px-6 py-4">
                   <span 
                     onClick={() => handleViewError('TXN-2025120701235')}
-                    className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm inline-flex items-center gap-1.5 cursor-pointer hover:bg-red-200 transition-colors"
+                    className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-base inline-flex items-center gap-1.5 cursor-pointer hover:bg-red-200 transition-colors"
                   >
                     <AlertCircle className="w-3.5 h-3.5" />
                     Có lỗi
@@ -368,7 +369,7 @@ export function SendDataForm() {
                 </div>
                 <div>
                   <h3 className="text-gray-900">Chi tiết lỗi</h3>
-                  <p className="text-sm text-gray-500">Mã giao dịch: {selectedError.id}</p>
+                  <p className="text-base text-gray-500">Mã giao dịch: {selectedError.id}</p>
                 </div>
               </div>
               <button 
@@ -387,10 +388,10 @@ export function SendDataForm() {
                   <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="px-2 py-0.5 bg-red-600 text-white rounded text-xs">{selectedError.code}</span>
+                      <span className="px-2 py-0.5 bg-red-600 text-white rounded text-base">{selectedError.code}</span>
                       <h4 className="text-red-900">{selectedError.title}</h4>
                     </div>
-                    <p className="text-red-700 text-sm">{selectedError.description}</p>
+                    <p className="text-red-700 text-base">{selectedError.description}</p>
                   </div>
                 </div>
               </div>
@@ -398,26 +399,26 @@ export function SendDataForm() {
               {/* Error Information Grid */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-gray-50 rounded-lg p-4">
-                  <p className="text-gray-500 text-sm mb-1">Thời gian xảy ra</p>
+                  <p className="text-gray-500 text-base mb-1">Thời gian xảy ra</p>
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-gray-600" />
                     <p className="text-gray-900">{selectedError.timestamp}</p>
                   </div>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-4">
-                  <p className="text-gray-500 text-sm mb-1">Nguồn dữ liệu</p>
+                  <p className="text-gray-500 text-base mb-1">Nguồn dữ liệu</p>
                   <div className="flex items-center gap-2">
                     <Database className="w-4 h-4 text-gray-600" />
                     <p className="text-gray-900">{selectedError.source}</p>
                   </div>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-4">
-                  <p className="text-gray-500 text-sm mb-1">Số bản ghi bị ảnh hưởng</p>
+                  <p className="text-gray-500 text-base mb-1">Số bản ghi bị ảnh hưởng</p>
                   <p className="text-gray-900">{selectedError.affectedRecords.toLocaleString()}</p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-4">
-                  <p className="text-gray-500 text-sm mb-1">Mã giao dịch</p>
-                  <p className="text-gray-900 font-mono text-sm">{selectedError.id}</p>
+                  <p className="text-gray-500 text-base mb-1">Mã giao dịch</p>
+                  <p className="text-gray-900 font-mono text-base">{selectedError.id}</p>
                 </div>
               </div>
 
@@ -427,13 +428,13 @@ export function SendDataForm() {
                   <AlertCircle className="w-4 h-4" />
                   Hướng dẫn khắc phục
                 </h4>
-                <p className="text-blue-700 text-sm">{selectedError.suggestion}</p>
+                <p className="text-blue-700 text-base">{selectedError.suggestion}</p>
               </div>
 
               {/* Technical Details */}
               <div className="border border-gray-200 rounded-lg p-4">
                 <h4 className="text-gray-900 mb-2">Chi tiết kỹ thuật</h4>
-                <div className="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-xs overflow-x-auto">
+                <div className="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-base overflow-x-auto">
                   {selectedError.technicalDetails}
                 </div>
               </div>
@@ -441,18 +442,18 @@ export function SendDataForm() {
 
             {/* Modal Footer */}
             <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex gap-3">
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">
+              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-base">
                 Gửi lại dữ liệu
               </button>
-              <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 text-sm">
+              <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 text-base">
                 Xem log đầy đủ
               </button>
-              <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 text-sm">
+              <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 text-base">
                 Báo cáo lỗi
               </button>
               <button 
                 onClick={() => setErrorModalOpen(false)}
-                className="ml-auto px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 text-sm"
+                className="ml-auto px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 text-base"
               >
                 Đóng
               </button>
@@ -460,6 +461,7 @@ export function SendDataForm() {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }

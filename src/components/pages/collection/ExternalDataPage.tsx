@@ -114,7 +114,8 @@ export function ExternalDataPage() {
   };
 
   return (
-    <div className="h-full flex flex-col bg-slate-50 p-6 space-y-6">
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
+      <div className="h-full flex flex-col bg-slate-50 p-6 space-y-6 min-h-screen">
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center border border-blue-100 shadow-sm">
@@ -221,7 +222,7 @@ export function ExternalDataPage() {
                         <Building2 className="w-10 h-10 opacity-20" />
                       </div>
                       <p className="text-base font-medium text-slate-600">Không tìm thấy nguồn dữ liệu nào.</p>
-                      <p className="text-sm text-slate-400 mt-1">Vui lòng thử lại với từ khóa khác.</p>
+                      <p className="text-base text-slate-400 mt-1">Vui lòng thử lại với từ khóa khác.</p>
                     </div>
                   </td>
                 </tr>
@@ -294,6 +295,7 @@ export function ExternalDataPage() {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
  }

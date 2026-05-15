@@ -94,7 +94,8 @@ export function ViewCollectedDataPage({ onNavigate }: { onNavigate?: (id: string
   );
 
   return (
-    <div className="space-y-6">
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
+      <div className="space-y-6 min-h-screen">
       <div>
         <div className="flex items-center gap-2 text-base text-slate-500 mb-2">
           <span>Thu thập</span>
@@ -214,6 +215,7 @@ export function ViewCollectedDataPage({ onNavigate }: { onNavigate?: (id: string
           <p className="text-slate-500 text-base max-w-xs">Không có kết quả nào khớp với từ khóa "{searchTerm}". Vui lòng thử lại với từ khóa khác.</p>
         </div>
       )}
+    </div>
     </div>
   );
 }

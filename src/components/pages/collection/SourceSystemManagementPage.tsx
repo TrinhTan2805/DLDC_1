@@ -66,7 +66,8 @@ export function SourceSystemManagementPage() {
   };
 
   return (
-    <div className="h-full flex flex-col bg-slate-50 p-6 space-y-6">
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
+      <div className="h-full flex flex-col bg-slate-50 p-6 space-y-6 min-h-screen">
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center border border-blue-100 shadow-sm">
@@ -105,8 +106,10 @@ export function SourceSystemManagementPage() {
       </div>
 
       {/* Table Card */}
-      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm flex flex-col flex-1 min-h-0">
-        <div className="overflow-x-auto flex-1">
+      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
+
+
+        <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
               <tr>
@@ -178,7 +181,7 @@ export function SourceSystemManagementPage() {
                         <Server className="w-10 h-10 opacity-20" />
                       </div>
                       <p className="text-base font-medium text-slate-600">Không tìm thấy hệ thống nguồn nào.</p>
-                      <p className="text-sm text-slate-400 mt-1">Vui lòng thử lại với từ khóa khác.</p>
+                      <p className="text-base text-slate-400 mt-1">Vui lòng thử lại với từ khóa khác.</p>
                     </div>
                   </td>
                 </tr>
@@ -187,8 +190,10 @@ export function SourceSystemManagementPage() {
           </table>
         </div>
 
-        {/* Pagination - Matching CollectionSetupPage style */}
-        <div className="px-6 py-3 border-t border-slate-200 flex items-center justify-between bg-white sticky bottom-0">
+
+
+        {/* Pagination - Moved back to Bottom */}
+        <div className="px-6 py-3 border-t border-slate-200 flex items-center justify-between bg-white">
           <div className="flex items-center gap-2">
             <span className="text-base text-slate-600">Hiển thị</span>
             <select 
@@ -265,6 +270,7 @@ export function SourceSystemManagementPage() {
         onClose={() => setIsDetailModalOpen(false)}
         data={viewingItem}
       />
+    </div>
     </div>
   );
 }

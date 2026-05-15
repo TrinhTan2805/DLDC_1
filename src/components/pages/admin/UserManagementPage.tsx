@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { Search, Plus, Edit, Trash2, Lock, Unlock, X, Eye, UserPlus, RefreshCw, Upload, Download, Users } from 'lucide-react';
 import { StatusTag } from '../../common/StatusTag';
 import { StatsCard } from '../../common/StatsCard';

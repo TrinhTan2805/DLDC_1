@@ -7,7 +7,8 @@ export function ConnectionManagementPage() {
   const [activeTab, setActiveTab] = useState<'source-systems' | 'agents'>('source-systems');
 
   return (
-    <div className="flex flex-col h-full bg-[#f8f9fa]">
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
+      <div className="flex flex-col h-full bg-[#f8f9fa] min-h-screen">
       {/* Tab Navigation */}
       <div className="bg-white border-b border-slate-200 px-6">
         <div className="flex items-center gap-8">
@@ -44,6 +45,7 @@ export function ConnectionManagementPage() {
           <AgentManagementPage />
         )}
       </div>
+    </div>
     </div>
   );
 }

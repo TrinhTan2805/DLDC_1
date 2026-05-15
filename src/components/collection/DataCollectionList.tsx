@@ -126,11 +126,11 @@ export function DataCollectionList() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'collected':
-        return <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs bg-green-100 text-green-700">Đã thu thập</span>;
+        return <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-base bg-green-100 text-green-700">Đã thu thập</span>;
       case 'pending':
-        return <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs bg-orange-100 text-orange-700">Đang xử lý</span>;
+        return <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-base bg-orange-100 text-orange-700">Đang xử lý</span>;
       case 'not-started':
-        return <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs bg-slate-100 text-slate-700">Chưa bắt đầu</span>;
+        return <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-base bg-slate-100 text-slate-700">Chưa bắt đầu</span>;
       default:
         return null;
     }
@@ -139,18 +139,19 @@ export function DataCollectionList() {
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case 'high':
-        return <span className="px-3 py-1 rounded-full text-xs bg-red-100 text-red-700">Cao</span>;
+        return <span className="px-3 py-1 rounded-full text-base bg-red-100 text-red-700">Cao</span>;
       case 'medium':
-        return <span className="px-3 py-1 rounded-full text-xs bg-yellow-100 text-yellow-700">Trung bình</span>;
+        return <span className="px-3 py-1 rounded-full text-base bg-yellow-100 text-yellow-700">Trung bình</span>;
       case 'low':
-        return <span className="px-3 py-1 rounded-full text-xs bg-blue-100 text-blue-700">Thấp</span>;
+        return <span className="px-3 py-1 rounded-full text-base bg-blue-100 text-blue-700">Thấp</span>;
       default:
         return null;
     }
   };
 
   return (
-    <div className="space-y-6">
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
+      <div className="space-y-6 min-h-screen">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <div className="bg-white rounded-lg border border-slate-200 p-4">
@@ -158,7 +159,7 @@ export function DataCollectionList() {
             <div className="bg-blue-50 p-2 rounded-lg">
               <FileText className="w-5 h-5 text-blue-600" />
             </div>
-            <p className="text-slate-500 text-sm">Tổng nguồn</p>
+            <p className="text-slate-500 text-base">Tổng nguồn</p>
           </div>
           <p className="text-2xl text-slate-900">{stats.total}</p>
         </div>
@@ -167,7 +168,7 @@ export function DataCollectionList() {
             <div className="bg-green-50 p-2 rounded-lg">
               <CheckCircle className="w-5 h-5 text-green-600" />
             </div>
-            <p className="text-slate-500 text-sm">Thành công</p>
+            <p className="text-slate-500 text-base">Thành công</p>
           </div>
           <p className="text-2xl text-green-600">{stats.success}</p>
         </div>
@@ -176,7 +177,7 @@ export function DataCollectionList() {
             <div className="bg-orange-50 p-2 rounded-lg">
               <Clock className="w-5 h-5 text-orange-600" />
             </div>
-            <p className="text-slate-500 text-sm">Đang xử lý</p>
+            <p className="text-slate-500 text-base">Đang xử lý</p>
           </div>
           <p className="text-2xl text-orange-600">{stats.processing}</p>
         </div>
@@ -185,7 +186,7 @@ export function DataCollectionList() {
             <div className="bg-red-50 p-2 rounded-lg">
               <XCircle className="w-5 h-5 text-red-600" />
             </div>
-            <p className="text-slate-500 text-sm">Lỗi</p>
+            <p className="text-slate-500 text-base">Lỗi</p>
           </div>
           <p className="text-2xl text-red-600">{stats.error}</p>
         </div>
@@ -194,7 +195,7 @@ export function DataCollectionList() {
             <div className="bg-purple-50 p-2 rounded-lg">
               <FileText className="w-5 h-5 text-purple-600" />
             </div>
-            <p className="text-slate-500 text-sm">Hiển thị</p>
+            <p className="text-slate-500 text-base">Hiển thị</p>
           </div>
           <p className="text-2xl text-purple-600">{stats.today.toLocaleString()}</p>
         </div>
@@ -204,7 +205,7 @@ export function DataCollectionList() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Pie Chart 1 - Phân loại theo loại dữ liệu */}
         <div className="bg-white rounded-lg border border-slate-200 p-6">
-          <h3 className="text-slate-900 mb-4 text-sm">Phân loại theo loại dữ liệu</h3>
+          <h3 className="text-slate-900 mb-4 text-base">Phân loại theo loại dữ liệu</h3>
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie
@@ -228,7 +229,7 @@ export function DataCollectionList() {
 
         {/* Bar Chart - Số lượng thu thập theo tháng */}
         <div className="bg-white rounded-lg border border-slate-200 p-6">
-          <h3 className="text-slate-900 mb-4 text-sm">Số lượng thu thập theo tháng</h3>
+          <h3 className="text-slate-900 mb-4 text-base">Số lượng thu thập theo tháng</h3>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={barData}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -244,7 +245,7 @@ export function DataCollectionList() {
 
         {/* Pie Chart 2 - Định dạng dữ liệu */}
         <div className="bg-white rounded-lg border border-slate-200 p-6">
-          <h3 className="text-slate-900 mb-4 text-sm">Phân bổ định dạng dữ liệu</h3>
+          <h3 className="text-slate-900 mb-4 text-base">Phân bổ định dạng dữ liệu</h3>
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie
@@ -268,7 +269,7 @@ export function DataCollectionList() {
 
         {/* Line Chart - Xu hướng thu thập */}
         <div className="bg-white rounded-lg border border-slate-200 p-6">
-          <h3 className="text-slate-900 mb-4 text-sm">Xu hướng thu thập theo ngày</h3>
+          <h3 className="text-slate-900 mb-4 text-base">Xu hướng thu thập theo ngày</h3>
           <ResponsiveContainer width="100%" height={250}>
             <LineChart data={lineData}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -286,7 +287,7 @@ export function DataCollectionList() {
 
       {/* Grouped Bar Chart - Phương thức thu thập */}
       <div className="bg-white rounded-lg border border-slate-200 p-6">
-        <h3 className="text-slate-900 mb-4 text-sm">Số lượng thu thập theo phương thức và thời gian</h3>
+        <h3 className="text-slate-900 mb-4 text-base">Số lượng thu thập theo phương thức và thời gian</h3>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={groupedBarData} layout="vertical">
             <CartesianGrid strokeDasharray="3 3" />
@@ -312,7 +313,7 @@ export function DataCollectionList() {
           placeholder="Tìm kiếm theo tên dữ liệu, cục, mô tả..."
           value={searchTerm}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
 
@@ -322,7 +323,7 @@ export function DataCollectionList() {
           title="Bộ lọc Cục"
           value={filterDepartment}
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilterDepartment(e.target.value)}
-          className="px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">Tất cả cục</option>
           {departments.map(dept => (
@@ -333,7 +334,7 @@ export function DataCollectionList() {
           title="Bộ lọc Trạng thái"
           value={filterStatus}
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilterStatus(e.target.value)}
-          className="px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">Tất cả trạng thái</option>
           <option value="collected">Đã thu thập</option>
@@ -344,7 +345,7 @@ export function DataCollectionList() {
           title="Bộ lọc Mức độ"
           value={filterPriority}
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilterPriority(e.target.value)}
-          className="px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">Tất cả mức độ</option>
           <option value="high">Cao</option>
@@ -355,21 +356,21 @@ export function DataCollectionList() {
 
       {/* Actions */}
       <div className="flex items-center justify-between">
-        <p className="text-sm text-slate-600">
+        <p className="text-base text-slate-600">
           Hiển thị <span>{filteredData.length}</span> / {dataCollectionList.length} dữ liệu
         </p>
         <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg text-sm hover:bg-slate-50 transition-colors">
+          <button className="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg text-base hover:bg-slate-50 transition-colors">
             <Download className="w-4 h-4" />
             Import Excel
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg text-sm hover:bg-slate-50 transition-colors">
+          <button className="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg text-base hover:bg-slate-50 transition-colors">
             <Download className="w-4 h-4" />
             Kết xuất
           </button>
           <button 
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-base hover:bg-red-700 transition-colors"
           >
             <Plus className="w-4 h-4" />
             Thêm dữ liệu mới
@@ -383,35 +384,35 @@ export function DataCollectionList() {
           <table className="w-full">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">STT</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">CƠ QUAN</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">TÊN DỮ LIỆU</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">LOẠI DỮ LIỆU</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">TẦN SUẤT</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">ĐỊNH DẠNG</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">MỨC ĐỘ</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">TRẠNG THÁI</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">CẬP NHẬT</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">THAO TÁC</th>
+                <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">STT</th>
+                <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">CƠ QUAN</th>
+                <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">TÊN DỮ LIỆU</th>
+                <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">LOẠI DỮ LIỆU</th>
+                <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">TẦN SUẤT</th>
+                <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">ĐỊNH DẠNG</th>
+                <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">MỨC ĐỘ</th>
+                <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">TRẠNG THÁI</th>
+                <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">CẬP NHẬT</th>
+                <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">THAO TÁC</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
               {filteredData.map((item) => (
                 <tr key={item.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-4 py-3 text-sm text-slate-900">{item.stt}</td>
-                  <td className="px-4 py-3 text-sm text-slate-700">{item.department}</td>
+                  <td className="px-4 py-3 text-base text-slate-900">{item.stt}</td>
+                  <td className="px-4 py-3 text-base text-slate-700">{item.department}</td>
                   <td className="px-4 py-3">
                     <div>
-                      <p className="text-sm text-slate-900">{item.dataName}</p>
-                      <p className="text-xs text-slate-500 mt-0.5">{item.description}</p>
+                      <p className="text-base text-slate-900">{item.dataName}</p>
+                      <p className="text-base text-slate-500 mt-0.5">{item.description}</p>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-700">{item.dataType}</td>
-                  <td className="px-4 py-3 text-sm text-slate-700">{item.frequency}</td>
-                  <td className="px-4 py-3 text-sm text-slate-700">{item.format}</td>
+                  <td className="px-4 py-3 text-base text-slate-700">{item.dataType}</td>
+                  <td className="px-4 py-3 text-base text-slate-700">{item.frequency}</td>
+                  <td className="px-4 py-3 text-base text-slate-700">{item.format}</td>
                   <td className="px-4 py-3">{getPriorityBadge(item.priority)}</td>
                   <td className="px-4 py-3">{getStatusBadge(item.status)}</td>
-                  <td className="px-4 py-3 text-sm text-slate-700">{item.lastUpdate}</td>
+                  <td className="px-4 py-3 text-base text-slate-700">{item.lastUpdate}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <button 
@@ -453,29 +454,29 @@ export function DataCollectionList() {
           <table className="w-full">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Thời gian</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Nguồn</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Phương thức</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Số bản ghi</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Trạng thái</th>
+                <th className="px-6 py-3 text-left text-base text-slate-600 uppercase tracking-wider">Thời gian</th>
+                <th className="px-6 py-3 text-left text-base text-slate-600 uppercase tracking-wider">Nguồn</th>
+                <th className="px-6 py-3 text-left text-base text-slate-600 uppercase tracking-wider">Phương thức</th>
+                <th className="px-6 py-3 text-left text-base text-slate-600 uppercase tracking-wider">Số bản ghi</th>
+                <th className="px-6 py-3 text-left text-base text-slate-600 uppercase tracking-wider">Trạng thái</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
               {activityLogs.map((log) => (
                 <tr key={log.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-6 py-4 text-sm text-slate-700">{log.time}</td>
-                  <td className="px-6 py-4 text-sm text-slate-700">{log.source}</td>
-                  <td className="px-6 py-4 text-sm text-slate-700">{log.method}</td>
-                  <td className="px-6 py-4 text-sm text-slate-700">{log.records}</td>
+                  <td className="px-6 py-4 text-base text-slate-700">{log.time}</td>
+                  <td className="px-6 py-4 text-base text-slate-700">{log.source}</td>
+                  <td className="px-6 py-4 text-base text-slate-700">{log.method}</td>
+                  <td className="px-6 py-4 text-base text-slate-700">{log.records}</td>
                   <td className="px-6 py-4">
                     {log.status === 'success' && (
-                      <span className="px-3 py-1 rounded-full text-xs bg-green-100 text-green-700">Thành công</span>
+                      <span className="px-3 py-1 rounded-full text-base bg-green-100 text-green-700">Thành công</span>
                     )}
                     {log.status === 'error' && (
-                      <span className="px-3 py-1 rounded-full text-xs bg-red-100 text-red-700">Thất bại</span>
+                      <span className="px-3 py-1 rounded-full text-base bg-red-100 text-red-700">Thất bại</span>
                     )}
                     {log.status === 'processing' && (
-                      <span className="px-3 py-1 rounded-full text-xs bg-yellow-100 text-yellow-700">Đang xử lý</span>
+                      <span className="px-3 py-1 rounded-full text-base bg-yellow-100 text-yellow-700">Đang xử lý</span>
                     )}
                   </td>
                 </tr>
@@ -550,6 +551,7 @@ export function DataCollectionList() {
         />
       )}
 
+    </div>
     </div>
   );
 }

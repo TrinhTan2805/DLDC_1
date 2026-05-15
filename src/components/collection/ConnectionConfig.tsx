@@ -41,12 +41,13 @@ export function ConnectionConfig() {
   const [showAddForm, setShowAddForm] = useState(false);
 
   return (
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-gray-900">Cấu hình kết nối nguồn dữ liệu</h3>
-          <p className="text-gray-500 text-sm mt-1">Quản lý các kênh kết nối với hệ thống nguồn</p>
+          <p className="text-gray-500 text-base mt-1">Quản lý các kênh kết nối với hệ thống nguồn</p>
         </div>
         <button className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700" onClick={() => setShowAddForm(true)}>
           <Plus className="w-5 h-5" />
@@ -60,11 +61,11 @@ export function ConnectionConfig() {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-gray-700 text-sm">Tên nguồn</th>
-                <th className="px-6 py-3 text-left text-gray-700 text-sm">Loại kết nối</th>
-                <th className="px-6 py-3 text-left text-gray-700 text-sm">Endpoint</th>
-                <th className="px-6 py-3 text-left text-gray-700 text-sm">Trạng thái</th>
-                <th className="px-6 py-3 text-left text-gray-700 text-sm">Thao tác</th>
+                <th className="px-6 py-3 text-left text-gray-700 text-base">Tên nguồn</th>
+                <th className="px-6 py-3 text-left text-gray-700 text-base">Loại kết nối</th>
+                <th className="px-6 py-3 text-left text-gray-700 text-base">Endpoint</th>
+                <th className="px-6 py-3 text-left text-gray-700 text-base">Trạng thái</th>
+                <th className="px-6 py-3 text-left text-gray-700 text-base">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -77,9 +78,9 @@ export function ConnectionConfig() {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-gray-600">{conn.type}</td>
-                  <td className="px-6 py-4 text-gray-600 text-sm max-w-xs truncate">{conn.endpoint}</td>
+                  <td className="px-6 py-4 text-gray-600 text-base max-w-xs truncate">{conn.endpoint}</td>
                   <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-sm ${
+                    <span className={`px-3 py-1 rounded-full text-base ${
                       conn.status === 'active' 
                         ? 'bg-green-100 text-green-700' 
                         : 'bg-gray-100 text-gray-700'
@@ -282,6 +283,7 @@ export function ConnectionConfig() {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

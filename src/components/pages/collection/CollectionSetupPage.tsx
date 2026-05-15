@@ -166,7 +166,8 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
   };
 
   return (
-    <div className="h-full flex flex-col bg-slate-50">
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
+      <div className="h-full flex flex-col bg-slate-50 min-h-screen">
       {/* Tabs */}
       <div className="bg-white border-b border-slate-200 px-6">
         <div className="flex gap-6">
@@ -645,7 +646,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                 <h3 className="text-base font-medium text-slate-950">
                   Chi tiết kiểm tra cấu trúc - {selectedService.statusText}
                 </h3>
-                <p className="text-sm mt-0.5 text-slate-600">
+                <p className="text-base mt-0.5 text-slate-600">
                   Dịch vụ: {selectedService.name} ({selectedService.code})
                 </p>
               </div>
@@ -662,22 +663,22 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
               <div className="space-y-5">
                 {/* Summary */}
                 <div>
-                  <h4 className="text-sm font-medium text-slate-950 mb-3">Tổng quan</h4>
+                  <h4 className="text-base font-medium text-slate-950 mb-3">Tổng quan</h4>
                   <div className="grid grid-cols-3 gap-4">
                     <div className="bg-slate-50 rounded-lg p-3">
-                      <div className="text-xs text-slate-600 mb-1">Tổng số bản ghi</div>
+                      <div className="text-base text-slate-600 mb-1">Tổng số bản ghi</div>
                       <div className="text-xl font-medium text-slate-950">
                         {selectedService.validationDetails.totalRecords.toLocaleString('vi-VN')}
                       </div>
                     </div>
                     <div className="bg-slate-50 rounded-lg p-3">
-                      <div className="text-xs text-slate-600 mb-1">Bản ghi hợp lệ</div>
+                      <div className="text-base text-slate-600 mb-1">Bản ghi hợp lệ</div>
                       <div className="text-xl font-medium text-green-600">
                         {selectedService.validationDetails.validRecords.toLocaleString('vi-VN')}
                       </div>
                     </div>
                     <div className="bg-slate-50 rounded-lg p-3">
-                      <div className="text-xs text-slate-600 mb-1">Bản ghi lỗi</div>
+                      <div className="text-base text-slate-600 mb-1">Bản ghi lỗi</div>
                       <div className="text-xl font-medium text-red-600">
                         {selectedService.validationDetails.invalidRecords.toLocaleString('vi-VN')}
                       </div>
@@ -688,23 +689,23 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                 {/* Error Details */}
                 {selectedService.validationDetails.errors && selectedService.validationDetails.errors.length > 0 && (
                   <div>
-                    <h4 className="text-sm font-medium text-slate-950 mb-3">Chi tiết lỗi</h4>
+                    <h4 className="text-base font-medium text-slate-950 mb-3">Chi tiết lỗi</h4>
                     <div className="space-y-3">
                       {selectedService.validationDetails.errors.map((error: any, index: number) => (
                         <div key={index} className="bg-white border border-slate-200 rounded-lg p-4">
                           <div className="flex items-start justify-between mb-3">
                             <div>
-                              <h5 className="font-medium text-slate-950 text-sm">{error.field}</h5>
-                              <p className="text-sm text-slate-600 mt-0.5">{error.message}</p>
+                              <h5 className="font-medium text-slate-950 text-base">{error.field}</h5>
+                              <p className="text-base text-slate-600 mt-0.5">{error.message}</p>
                             </div>
                             <StatusTag label={`${error.count} lỗi`} variant="red" />
                           </div>
                           {error.examples && (
                             <div className="mb-3">
-                              <div className="text-xs text-slate-500 mb-1.5">Ví dụ:</div>
+                              <div className="text-base text-slate-500 mb-1.5">Ví dụ:</div>
                               <div className="flex flex-wrap gap-2">
                                 {error.examples.map((example: string, idx: number) => (
-                                  <code key={idx} className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-mono">
+                                  <code key={idx} className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-base font-mono">
                                     {example}
                                   </code>
                                 ))}
@@ -712,7 +713,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                             </div>
                           )}
                           {error.expectedFormat && (
-                            <div className="text-xs text-slate-600 bg-slate-50 px-3 py-2 rounded">
+                            <div className="text-base text-slate-600 bg-slate-50 px-3 py-2 rounded">
                               <span className="font-medium text-slate-700">Định dạng mong đợi:</span> {error.expectedFormat}
                             </div>
                           )}
@@ -730,13 +731,13 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                         <AlertCircle className="w-4 h-4 text-red-600" />
                       </div>
                       <div className="flex-1">
-                        <h5 className="font-medium text-red-900 text-sm mb-1">
+                        <h5 className="font-medium text-red-900 text-base mb-1">
                           {selectedService.errorDetails.errorCode}: {selectedService.errorDetails.errorMessage}
                         </h5>
-                        <p className="text-sm text-red-700 mb-2">
+                        <p className="text-base text-red-700 mb-2">
                           {selectedService.errorDetails.errorDescription}
                         </p>
-                        <div className="text-xs text-red-600">
+                        <div className="text-base text-red-600">
                           Số lần thử: {selectedService.errorDetails.attemptCount} | Lần thử cuối: {selectedService.errorDetails.lastAttempt}
                         </div>
                         </div>
@@ -793,18 +794,18 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                   </div>
                   <div>
                     <div className="text-md font-medium text-red-900 mb-1">Cảnh báo gián đoạn dữ liệu</div>
-                    <p className="text-sm text-red-800/80 leading-relaxed font-medium">
+                    <p className="text-base text-red-800/80 leading-relaxed font-medium">
                       Bạn có chắc muốn ngừng hoạt động của dịch vụ <span className="font-medium text-red-900">{selectedService?.name}</span>? Hành động này sẽ khiến luồng dữ liệu bị gián đoạn cho đến khi được kích hoạt lại thủ công.
                     </p>
                   </div>
                 </div>
 
                 <div className="space-y-3">
-                  <label className="block text-sm font-medium text-slate-700 ml-1">
+                  <label className="block text-base font-medium text-slate-700 ml-1">
                     Lý do ngừng hoạt động <span className="text-red-500 font-black">*</span>
                   </label>
                   <textarea
-                    className="w-full px-5 py-4 border border-slate-200 rounded-lg focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 min-h-[140px] text-sm bg-slate-50/30 outline-none transition-all placeholder:text-slate-400 resize-none"
+                    className="w-full px-5 py-4 border border-slate-200 rounded-lg focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 min-h-[140px] text-base bg-slate-50/30 outline-none transition-all placeholder:text-slate-400 resize-none"
                     placeholder="Vui lòng nhập lý do cụ thể (ví dụ: Thay đổi cấu hình Máy chủ thực thi, bảo trì định kỳ hệ thống nguồn...)"
                     value={inactiveReason}
                     onChange={(e) => setInactiveReason(e.target.value)}
@@ -814,7 +815,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
               <div className="px-8 py-5 bg-slate-50/50 border-t border-slate-100 flex justify-end gap-4">
                 <button
                   onClick={() => setShowInactiveModal(false)}
-                  className="px-6 py-2.5 text-sm text-slate-600 hover:text-slate-950 hover:bg-slate-200 rounded-lg transition-all"
+                  className="px-6 py-2.5 text-base text-slate-600 hover:text-slate-950 hover:bg-slate-200 rounded-lg transition-all"
                 >
                   Hủy bỏ
                 </button>
@@ -825,7 +826,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                     setShowInactiveModal(false);
                     setInactiveReason('');
                   }}
-                  className="px-8 py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg text-sm hover:from-amber-700 hover:to-orange-700 transition-all shadow-lg shadow-amber-200 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed transform active:scale-95"
+                  className="px-8 py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg text-base hover:from-amber-700 hover:to-orange-700 transition-all shadow-lg shadow-amber-200 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed transform active:scale-95"
                 >
                   Xác nhận ngừng
                 </button>
@@ -834,6 +835,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
           </div>
         </Portal>
       )}
+    </div>
     </div>
   );
 }

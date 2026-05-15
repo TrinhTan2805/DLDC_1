@@ -66,7 +66,7 @@ export function ValidationDetailsModal({
       return (
         <button
           onClick={() => setSelectedRow(item)}
-          className="text-blue-600 hover:text-blue-700 text-sm underline"
+          className="text-blue-600 hover:text-blue-700 text-base underline"
         >
           Xem chi tiết
         </button>
@@ -78,6 +78,7 @@ export function ValidationDetailsModal({
   };
 
   return (
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
     <>
       {/* Main Modal */}
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -86,7 +87,7 @@ export function ValidationDetailsModal({
           <div className="flex items-center justify-between p-6 border-b border-slate-200">
             <div>
               <h3 className="text-slate-900 mb-1">{getTitle()} - {source}</h3>
-              <p className="text-sm text-slate-600">Mã giao dịch: {transaction} • Tổng: {data.length} mục</p>
+              <p className="text-base text-slate-600">Mã giao dịch: {transaction} • Tổng: {data.length} mục</p>
             </div>
             <div className="flex items-center gap-3">
               <button className="flex items-center gap-2 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors">
@@ -127,7 +128,7 @@ export function ValidationDetailsModal({
                   {getColumns().map((col) => (
                     <th
                       key={col}
-                      className="text-left px-4 py-3 text-sm text-slate-700 whitespace-nowrap"
+                      className="text-left px-4 py-3 text-base text-slate-700 whitespace-nowrap"
                     >
                       {col}
                     </th>
@@ -141,7 +142,7 @@ export function ValidationDetailsModal({
                     className="border-b border-slate-200 hover:bg-blue-50 transition-colors"
                   >
                     {getColumns().map((col) => (
-                      <td key={col} className="px-4 py-3 text-sm text-slate-900 whitespace-nowrap">
+                      <td key={col} className="px-4 py-3 text-base text-slate-900 whitespace-nowrap">
                         {renderCell(item, col, idx)}
                       </td>
                     ))}
@@ -154,7 +155,7 @@ export function ValidationDetailsModal({
           {/* Footer with Pagination */}
           <div className="p-6 border-t border-slate-200 bg-slate-50">
             <div className="flex items-center justify-between">
-              <p className="text-sm text-slate-600">
+              <p className="text-base text-slate-600">
                 Hiển thị {startIndex + 1}-{Math.min(startIndex + itemsPerPage, filteredData.length)} trong tổng số <span className="text-slate-900">{filteredData.length}</span> mục
               </p>
               <div className="flex items-center gap-2">
@@ -210,7 +211,7 @@ export function ValidationDetailsModal({
             <div className="p-6 space-y-4">
               {Object.entries(selectedRow).map(([key, value]) => (
                 <div key={key} className="border-b border-slate-200 pb-3 last:border-0">
-                  <p className="text-sm text-slate-600 mb-1 capitalize">{key.replace(/_/g, ' ')}</p>
+                  <p className="text-base text-slate-600 mb-1 capitalize">{key.replace(/_/g, ' ')}</p>
                   <p className="text-slate-900">{String(value)}</p>
                 </div>
               ))}
@@ -219,5 +220,6 @@ export function ValidationDetailsModal({
         </div>
       )}
     </>
+    </div>
   );
 }

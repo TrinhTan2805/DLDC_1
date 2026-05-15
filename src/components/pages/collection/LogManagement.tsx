@@ -220,7 +220,8 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
   const currentLogs = filteredLogs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
+      <div className="space-y-6 animate-in fade-in duration-500">
       {/* Search and Filters Section - Separated from Table */}
       <div className="space-y-4">
         {/* Row 1: Search and Buttons */}
@@ -567,6 +568,7 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }

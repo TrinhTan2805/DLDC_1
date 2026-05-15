@@ -17,8 +17,9 @@ import { StatusTag } from '../../common/StatusTag';
 const ConnectionSuccessModal = ({ isOpen, onClose, onContinue }: { isOpen: boolean, onClose: () => void, onContinue: () => void }) => {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-[450px] overflow-hidden flex flex-col relative">
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
+      <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="bg-white rounded-xl shadow-xl w-full max-w-[450px] overflow-hidden flex flex-col relative">
         <button onClick={onClose} aria-label="Đóng" className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 transition-colors z-10"><X className="w-4 h-4"/></button>
         <div className="p-6 pb-4 flex flex-col items-center">
           <div className="w-12 h-12 bg-green-50 text-green-600 rounded-full flex items-center justify-center mb-3">
@@ -32,6 +33,7 @@ const ConnectionSuccessModal = ({ isOpen, onClose, onContinue }: { isOpen: boole
           <button onClick={onContinue} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-base rounded-lg transition-colors shadow-sm font-medium">Tiếp tục</button>
         </div>
       </div>
+    </div>
     </div>
   );
 };
@@ -50,13 +52,13 @@ const ConnectionErrorModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: (
           <p className="text-slate-500 text-base mb-4 text-center px-4 leading-relaxed">Không thể kết nối đến Hệ thống đích (Destination API).</p>
           
           <div className="w-full text-left px-5">
-            <p className="text-sm font-bold text-slate-500 uppercase tracking-tight mb-1.5">Lỗi trả về</p>
-            <div className="bg-red-50/50 text-red-600 px-3 py-2 rounded-lg text-[11px] mb-4 font-medium border border-red-100">
+            <p className="text-base font-bold text-slate-500 uppercase tracking-tight mb-1.5">Lỗi trả về</p>
+            <div className="bg-red-50/50 text-red-600 px-3 py-2 rounded-lg text-[16px] mb-4 font-medium border border-red-100">
               Error 401 Unauthorized: Invalid API Key.
             </div>
 
-            <p className="text-sm font-bold text-slate-800 mb-1.5 uppercase tracking-tight">Hướng dẫn khắc phục</p>
-            <ul className="text-[11px] text-slate-600 space-y-1.5 mb-2 ml-4 list-disc marker:text-slate-400">
+            <p className="text-base font-bold text-slate-800 mb-1.5 uppercase tracking-tight">Hướng dẫn khắc phục</p>
+            <ul className="text-[16px] text-slate-600 space-y-1.5 mb-2 ml-4 list-disc marker:text-slate-400">
               <li>Kiểm tra lại giá trị <strong>API Key</strong> (tránh dư khoảng trắng).</li>
               <li>Xác nhận API Key còn hạn hoặc chưa bị thu hồi.</li>
               <li>Đảm bảo IP hệ thống đã được cấp phép (whitelist).</li>
@@ -82,16 +84,16 @@ const DataErrorModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
             <FileX className="w-6 h-6" strokeWidth={2} />
           </div>
           <h3 className="text-base font-bold text-slate-900 mb-1">Không có dữ liệu</h3>
-          <p className="text-slate-500 text-[12px] mb-4 text-center px-4 leading-relaxed">Kết nối thành công, nhưng không nhận được dữ liệu trả về.</p>
+          <p className="text-slate-500 text-[16px] mb-4 text-center px-4 leading-relaxed">Kết nối thành công, nhưng không nhận được dữ liệu trả về.</p>
           
           <div className="w-full text-left px-5">
-            <p className="text-sm font-bold text-slate-500 uppercase tracking-tight mb-1.5">Trạng thái kết nối</p>
-            <div className="bg-green-50/30 text-green-700 px-3 py-1.5 rounded-lg text-[11px] mb-4 flex items-center gap-1.5 border border-green-100">
+            <p className="text-base font-bold text-slate-500 uppercase tracking-tight mb-1.5">Trạng thái kết nối</p>
+            <div className="bg-green-50/30 text-green-700 px-3 py-1.5 rounded-lg text-[16px] mb-4 flex items-center gap-1.5 border border-green-100">
               <Check className="w-3 h-3"/> HTTP 200 OK (Thành công)
             </div>
 
-            <p className="text-sm font-bold text-slate-800 mb-1.5 uppercase tracking-tight">Hướng dẫn khắc phục</p>
-            <ul className="text-[11px] text-slate-600 space-y-1.5 mb-2 ml-4 list-disc marker:text-slate-400">
+            <p className="text-base font-bold text-slate-800 mb-1.5 uppercase tracking-tight">Hướng dẫn khắc phục</p>
+            <ul className="text-[16px] text-slate-600 space-y-1.5 mb-2 ml-4 list-disc marker:text-slate-400">
               <li>Kiểm tra lại format của <strong>Request Sample</strong>.</li>
               <li>Xác nhận thời điểm yêu cầu có dữ liệu trên nguồn.</li>
               <li>Đảm bảo các tham số (Params) được truyền đúng.</li>
@@ -276,7 +278,7 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
                         {filteredSourceSystems.map(ss => (
                           <div
                             key={ss.id}
-                            className="px-4 py-2 hover:bg-slate-50 cursor-pointer text-sm flex items-center justify-between"
+                            className="px-4 py-2 hover:bg-slate-50 cursor-pointer text-base flex items-center justify-between"
                             onMouseDown={(e) => {
                               e.preventDefault(); 
                               setSourceSystemName(ss.systemName);
@@ -285,7 +287,7 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
                           >
                             <div className="flex flex-col">
                               <span className="font-medium text-slate-700">{ss.systemName}</span>
-                              <span className="text-xs text-slate-500">{ss.unitName}</span>
+                              <span className="text-base text-slate-500">{ss.unitName}</span>
                             </div>
                             <StatusTag label={ss.sourceType} variant={ss.sourceType === 'Trong ngành' ? 'purple' : 'blue'} />
                           </div>
@@ -313,7 +315,7 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
                   <textarea aria-label="Text input" id="desc" title="Mô tả" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base transition-colors" rows={3} placeholder="Mô tả chi tiết" />
                 </div>
                 <div>
-                  <label className="block text-sm text-slate-600 mb-2">Đính kèm văn bản</label>
+                  <label className="block text-base text-slate-600 mb-2">Đính kèm văn bản</label>
                   <div className="border border-slate-300 rounded-lg p-3 text-center py-6">
                     <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
                     <p className="text-base text-slate-600">Click để chọn file PDF, DOCX</p>
@@ -519,7 +521,7 @@ export function EditServiceModal({ isOpen, onClose, service, initialTab }: Servi
                         {filteredSourceSystems.map(ss => (
                           <div
                             key={ss.id}
-                            className="px-4 py-2 hover:bg-slate-50 cursor-pointer text-sm flex items-center justify-between"
+                            className="px-4 py-2 hover:bg-slate-50 cursor-pointer text-base flex items-center justify-between"
                             onMouseDown={(e) => {
                               e.preventDefault(); 
                               setSourceSystemName(ss.systemName);
@@ -528,9 +530,9 @@ export function EditServiceModal({ isOpen, onClose, service, initialTab }: Servi
                           >
                             <div className="flex flex-col">
                               <span className="font-medium text-slate-700">{ss.systemName}</span>
-                              <span className="text-xs text-slate-500">{ss.unitName}</span>
+                              <span className="text-base text-slate-500">{ss.unitName}</span>
                             </div>
-                            <span className="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">{ss.sourceType}</span>
+                            <span className="text-base text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">{ss.sourceType}</span>
                           </div>
                         ))}
                       </div>
@@ -660,7 +662,7 @@ export function SettingsServiceModal({ isOpen, onClose, service }: ServiceModalP
             </div>
             <div>
               <span className="text-base font-medium text-slate-900">Tự động khởi động lại</span>
-              <p className="text-sm text-slate-500 mt-0.5">Tự động thực hiện lại tiến trình thu thập nếu gặp lỗi Network</p>
+              <p className="text-base text-slate-500 mt-0.5">Tự động thực hiện lại tiến trình thu thập nếu gặp lỗi Network</p>
             </div>
           </label>
         </div>
@@ -671,13 +673,13 @@ export function SettingsServiceModal({ isOpen, onClose, service }: ServiceModalP
             </div>
             <div>
               <span className="text-base font-medium text-slate-900">Ghi Log chi tiết (Debug Mode)</span>
-              <p className="text-sm text-slate-500 mt-0.5">Lưu trữ toàn bộ payload request/response để phục vụ kiểm tra lỗi</p>
+              <p className="text-base text-slate-500 mt-0.5">Lưu trữ toàn bộ payload request/response để phục vụ kiểm tra lỗi</p>
             </div>
           </label>
         </div>
         <div className="pt-3 border-t border-slate-100">
-          <label className="block text-sm font-medium text-slate-700 mb-1">Cảnh báo khi số bản ghi lỗi vượt quá (%)</label>
-          <input aria-label="Input field" type="number" defaultValue="10" title="Tỉ lệ lỗi (%)" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-slate-50" />
+          <label className="block text-base font-medium text-slate-700 mb-1">Cảnh báo khi số bản ghi lỗi vượt quá (%)</label>
+          <input aria-label="Input field" type="number" defaultValue="10" title="Tỉ lệ lỗi (%)" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base bg-slate-50" />
         </div>
       </div>
     </BaseModal>

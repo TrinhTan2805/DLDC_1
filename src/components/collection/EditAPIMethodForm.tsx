@@ -50,11 +50,12 @@ export function EditAPIMethodForm({ method, onBack, onSave }: EditAPIMethodFormP
   };
 
   return (
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
     <div className="space-y-6">
       {/* Header */}
       <div>
         <h2 className="text-slate-900 mb-1">Chỉnh sửa phương thức thu thập dữ liệu</h2>
-        <p className="text-slate-500 text-sm">Cập nhật thông tin phương thức thu thập dữ liệu qua API</p>
+        <p className="text-slate-500 text-base">Cập nhật thông tin phương thức thu thập dữ liệu qua API</p>
       </div>
 
       {/* Form */}
@@ -65,56 +66,56 @@ export function EditAPIMethodForm({ method, onBack, onSave }: EditAPIMethodFormP
             <h3 className="text-slate-900 mb-4">Thông tin cơ bản</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm text-slate-700 mb-2">
+                <label className="block text-base text-slate-700 mb-2">
                   Tên phương thức <span className="text-red-500">*</span>
                 </label>
                 <input aria-label="Input field"
                   type="text"
                   defaultValue={method.name}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-sm text-slate-700 mb-2">
+                <label className="block text-base text-slate-700 mb-2">
                   Bộ ban ngành <span className="text-red-500">*</span>
                 </label>
                 <input aria-label="Input field"
                   type="text"
                   defaultValue={method.ministry}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               <div>
-                <label className="block text-sm text-slate-700 mb-2">
+                <label className="block text-base text-slate-700 mb-2">
                   Cơ sở dữ liệu <span className="text-red-500">*</span>
                 </label>
                 <input aria-label="Input field"
                   type="text"
                   defaultValue={method.database}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-sm text-slate-700 mb-2">
+                <label className="block text-base text-slate-700 mb-2">
                   Tần suất thu thập <span className="text-red-500">*</span>
                 </label>
                 <input aria-label="Input field"
                   type="text"
                   defaultValue={method.frequency}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
 
             <div className="mt-4">
-              <label className="block text-sm text-slate-700 mb-2">Mô tả</label>
+              <label className="block text-base text-slate-700 mb-2">Mô tả</label>
               <textarea aria-label="Text input"
                 rows={3}
                 defaultValue={`Phương thức thu thập dữ liệu qua API từ ${method.ministry}. Dữ liệu được đồng bộ ${method.frequency.toLowerCase()} để đảm bảo tính cập nhật.`}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
               ></textarea>
             </div>
           </div>
@@ -132,7 +133,7 @@ export function EditAPIMethodForm({ method, onBack, onSave }: EditAPIMethodFormP
                   onChange={(e) => setAuthMethod(e.target.value)}
                   className="w-4 h-4 text-blue-600"
                 />
-                <span className="text-sm text-slate-700">Kết nối trực tiếp</span>
+                <span className="text-base text-slate-700">Kết nối trực tiếp</span>
               </label>
               <label className="flex items-center gap-3">
                 <input
@@ -143,7 +144,7 @@ export function EditAPIMethodForm({ method, onBack, onSave }: EditAPIMethodFormP
                   onChange={(e) => setAuthMethod(e.target.value)}
                   className="w-4 h-4 text-blue-600"
                 />
-                <span className="text-sm text-slate-700">Qua LGSP</span>
+                <span className="text-base text-slate-700">Qua LGSP</span>
               </label>
             </div>
           </div>
@@ -153,23 +154,23 @@ export function EditAPIMethodForm({ method, onBack, onSave }: EditAPIMethodFormP
             <h3 className="text-slate-900 mb-4">Thông tin API</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm text-slate-700 mb-2">
+                <label className="block text-base text-slate-700 mb-2">
                   API Endpoint <span className="text-red-500">*</span>
                 </label>
                 <input aria-label="Input field"
                   type="text"
                   defaultValue={method.endpoint}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm text-slate-700 mb-2">
+                <label className="block text-base text-slate-700 mb-2">
                   Phương thức HTTP <span className="text-red-500">*</span>
                 </label>
                 <select aria-label="Select box" 
                   defaultValue={method.method}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="GET">GET</option>
                   <option value="POST">POST</option>
@@ -181,11 +182,11 @@ export function EditAPIMethodForm({ method, onBack, onSave }: EditAPIMethodFormP
               {/* Headers */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <label className="block text-sm text-slate-700">Headers</label>
+                  <label className="block text-base text-slate-700">Headers</label>
                   <button
                     type="button"
                     onClick={addHeader}
-                    className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
+                    className="flex items-center gap-1 text-base text-blue-600 hover:text-blue-700"
                   >
                     <Plus className="w-4 h-4" />
                     Thêm header
@@ -199,14 +200,14 @@ export function EditAPIMethodForm({ method, onBack, onSave }: EditAPIMethodFormP
                         placeholder="Key"
                         value={header.key}
                         onChange={(e) => updateHeader(index, 'key', e.target.value)}
-                        className="flex-1 px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="flex-1 px-4 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                       <input aria-label="Input field"
                         type="text"
                         placeholder="Value"
                         value={header.value}
                         onChange={(e) => updateHeader(index, 'value', e.target.value)}
-                        className="flex-1 px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="flex-1 px-4 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                       {headers.length > 1 && (
                         <button
@@ -225,11 +226,11 @@ export function EditAPIMethodForm({ method, onBack, onSave }: EditAPIMethodFormP
               {/* Parameters */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <label className="block text-sm text-slate-700">Parameters</label>
+                  <label className="block text-base text-slate-700">Parameters</label>
                   <button
                     type="button"
                     onClick={addParameter}
-                    className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
+                    className="flex items-center gap-1 text-base text-blue-600 hover:text-blue-700"
                   >
                     <Plus className="w-4 h-4" />
                     Thêm parameter
@@ -243,14 +244,14 @@ export function EditAPIMethodForm({ method, onBack, onSave }: EditAPIMethodFormP
                         placeholder="Key"
                         value={param.key}
                         onChange={(e) => updateParameter(index, 'key', e.target.value)}
-                        className="flex-1 px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="flex-1 px-4 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                       <input aria-label="Input field"
                         type="text"
                         placeholder="Value"
                         value={param.value}
                         onChange={(e) => updateParameter(index, 'value', e.target.value)}
-                        className="flex-1 px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="flex-1 px-4 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                       {parameters.length > 1 && (
                         <button
@@ -273,12 +274,12 @@ export function EditAPIMethodForm({ method, onBack, onSave }: EditAPIMethodFormP
             <h3 className="text-slate-900 mb-4">Xác thực (Authentication)</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm text-slate-700 mb-2">
+                <label className="block text-base text-slate-700 mb-2">
                   Phương thức xác thực <span className="text-red-500">*</span>
                 </label>
                 <select aria-label="Select box" 
                   defaultValue="bearer"
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Không xác thực</option>
                   <option value="api-key">API Key</option>
@@ -289,11 +290,11 @@ export function EditAPIMethodForm({ method, onBack, onSave }: EditAPIMethodFormP
               </div>
 
               <div>
-                <label className="block text-sm text-slate-700 mb-2">API Key / Token</label>
+                <label className="block text-base text-slate-700 mb-2">API Key / Token</label>
                 <input aria-label="Input field"
                   type="password"
                   defaultValue="existing_token_value"
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
@@ -304,31 +305,31 @@ export function EditAPIMethodForm({ method, onBack, onSave }: EditAPIMethodFormP
             <h3 className="text-slate-900 mb-4">Thời gian chờ và thử lại</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm text-slate-700 mb-2">Timeout (ms)</label>
+                <label className="block text-base text-slate-700 mb-2">Timeout (ms)</label>
                 <input aria-label="Input field"
                   type="number"
                   defaultValue="30000"
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <p className="text-xs text-slate-500 mt-1">Thời gian chờ tối đa</p>
+                <p className="text-base text-slate-500 mt-1">Thời gian chờ tối đa</p>
               </div>
               <div>
-                <label className="block text-sm text-slate-700 mb-2">Số lần thử lại</label>
+                <label className="block text-base text-slate-700 mb-2">Số lần thử lại</label>
                 <input aria-label="Input field"
                   type="number"
                   defaultValue="3"
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <p className="text-xs text-slate-500 mt-1">Số lần thử lại khi lỗi</p>
+                <p className="text-base text-slate-500 mt-1">Số lần thử lại khi lỗi</p>
               </div>
               <div>
-                <label className="block text-sm text-slate-700 mb-2">Delay giữa các lần thử (ms)</label>
+                <label className="block text-base text-slate-700 mb-2">Delay giữa các lần thử (ms)</label>
                 <input aria-label="Input field"
                   type="number"
                   defaultValue="5000"
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <p className="text-xs text-slate-500 mt-1">Khoảng thời gian chờ</p>
+                <p className="text-base text-slate-500 mt-1">Khoảng thời gian chờ</p>
               </div>
             </div>
           </div>
@@ -346,7 +347,7 @@ export function EditAPIMethodForm({ method, onBack, onSave }: EditAPIMethodFormP
                   onChange={(e) => setStatus(e.target.value)}
                   className="w-4 h-4 text-blue-600"
                 />
-                <span className="text-sm text-slate-700">Hoạt động</span>
+                <span className="text-base text-slate-700">Hoạt động</span>
               </label>
               <label className="flex items-center gap-3">
                 <input
@@ -357,7 +358,7 @@ export function EditAPIMethodForm({ method, onBack, onSave }: EditAPIMethodFormP
                   onChange={(e) => setStatus(e.target.value)}
                   className="w-4 h-4 text-blue-600"
                 />
-                <span className="text-sm text-slate-700">Không hoạt động</span>
+                <span className="text-base text-slate-700">Không hoạt động</span>
               </label>
             </div>
           </div>
@@ -368,17 +369,18 @@ export function EditAPIMethodForm({ method, onBack, onSave }: EditAPIMethodFormP
       <div className="flex justify-end gap-3">
         <button
           onClick={onBack}
-          className="px-6 py-2 border border-slate-300 rounded-lg text-sm hover:bg-slate-50 transition-colors"
+          className="px-6 py-2 border border-slate-300 rounded-lg text-base hover:bg-slate-50 transition-colors"
         >
           Hủy bỏ
         </button>
         <button 
           onClick={onSave}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+          className="px-6 py-2 bg-blue-600 text-white rounded-lg text-base hover:bg-blue-700 transition-colors"
         >
           Lưu thay đổi
         </button>
       </div>
+    </div>
     </div>
   );
 }

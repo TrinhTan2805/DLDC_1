@@ -38,6 +38,7 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
   const categoryColor = data.category === 'external' ? 'blue' : 'green';
 
   return (
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -50,7 +51,7 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
           </button>
           <div>
             <h2 className="text-slate-900">Chỉnh sửa Dữ liệu Cần Thu thập</h2>
-            <p className="text-sm text-slate-500 mt-0.5">Cập nhật thông tin dữ liệu</p>
+            <p className="text-base text-slate-500 mt-0.5">Cập nhật thông tin dữ liệu</p>
           </div>
         </div>
       </div>
@@ -68,7 +69,7 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
               backgroundColor: categoryColor === 'blue' ? '#2563eb' : '#16a34a'
             }}
           ></div>
-          <p className={`text-sm text-${categoryColor}-900`}
+          <p className={`text-base text-${categoryColor}-900`}
             style={{
               color: categoryColor === 'blue' ? '#1e3a8a' : '#14532d'
             }}
@@ -84,7 +85,7 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
           <div className="grid grid-cols-2 gap-6">
             {/* Cơ quan/Cục */}
             <div>
-              <label className="block text-sm text-slate-700 mb-2">
+              <label className="block text-base text-slate-700 mb-2">
                 {data.category === 'external' ? 'Cơ quan nguồn' : 'Cục/Vụ'} <span className="text-red-500">*</span>
               </label>
               {data.category === 'external' ? (
@@ -92,7 +93,7 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
                   required
                   value={formData.department}
                   onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="Tòa án nhân dân tối cao">Tòa án nhân dân tối cao</option>
                   <option value="Cục Thống kê Trung ương">Cục Thống kê Trung ương</option>
@@ -110,7 +111,7 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
                   required
                   value={formData.department}
                   onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-green-500"
                 >
                   <option value="Cục Hành chính tư pháp">Cục Hành chính tư pháp</option>
                   <option value="Cục Quản lý thi hành án dân sự">Cục Quản lý thi hành án dân sự</option>
@@ -125,7 +126,7 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
 
             {/* Loại dữ liệu */}
             <div>
-              <label className="block text-sm text-slate-700 mb-2">
+              <label className="block text-base text-slate-700 mb-2">
                 Loại dữ liệu <span className="text-red-500">*</span>
               </label>
               <input aria-label="Input field"
@@ -134,14 +135,14 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
                 value={formData.dataType}
                 onChange={(e) => setFormData({ ...formData, dataType: e.target.value })}
                 placeholder="VD: Hộ tịch, Danh mục, Bảo trợ XH..."
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
 
           {/* Tên dữ liệu */}
           <div>
-            <label className="block text-sm text-slate-700 mb-2">
+            <label className="block text-base text-slate-700 mb-2">
               Tên dữ liệu <span className="text-red-500">*</span>
             </label>
             <input aria-label="Input field"
@@ -150,13 +151,13 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
               value={formData.dataName}
               onChange={(e) => setFormData({ ...formData, dataName: e.target.value })}
               placeholder="Nhập tên dữ liệu cần thu thập"
-              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           {/* Mô tả */}
           <div>
-            <label className="block text-sm text-slate-700 mb-2">
+            <label className="block text-base text-slate-700 mb-2">
               Mô tả
             </label>
             <textarea aria-label="Text input"
@@ -164,21 +165,21 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Mô tả chi tiết về dữ liệu này"
               rows={3}
-              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-6">
             {/* Tần suất */}
             <div>
-              <label className="block text-sm text-slate-700 mb-2">
+              <label className="block text-base text-slate-700 mb-2">
                 Tần suất thu thập <span className="text-red-500">*</span>
               </label>
               <select aria-label="Select box"
                 required
                 value={formData.frequency}
                 onChange={(e) => setFormData({ ...formData, frequency: e.target.value })}
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="Hằng ngày">Hằng ngày</option>
                 <option value="Hằng tuần">Hằng tuần</option>
@@ -190,14 +191,14 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
 
             {/* Định dạng */}
             <div>
-              <label className="block text-sm text-slate-700 mb-2">
+              <label className="block text-base text-slate-700 mb-2">
                 Định dạng <span className="text-red-500">*</span>
               </label>
               <select aria-label="Select box"
                 required
                 value={formData.format}
                 onChange={(e) => setFormData({ ...formData, format: e.target.value })}
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="JSON">JSON</option>
                 <option value="XML">XML</option>
@@ -210,14 +211,14 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
           <div className="grid grid-cols-2 gap-6">
             {/* Mức độ ưu tiên */}
             <div>
-              <label className="block text-sm text-slate-700 mb-2">
+              <label className="block text-base text-slate-700 mb-2">
                 Mức độ ưu tiên <span className="text-red-500">*</span>
               </label>
               <select aria-label="Select box"
                 required
                 value={formData.priority}
                 onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="high">Cao</option>
                 <option value="medium">Trung bình</option>
@@ -227,14 +228,14 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
 
             {/* Trạng thái */}
             <div>
-              <label className="block text-sm text-slate-700 mb-2">
+              <label className="block text-base text-slate-700 mb-2">
                 Trạng thái <span className="text-red-500">*</span>
               </label>
               <select aria-label="Select box"
                 required
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="not-started">Chưa bắt đầu</option>
                 <option value="pending">Đang xử lý</option>
@@ -247,14 +248,14 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
           <div className="pt-4 border-t border-slate-200">
             <div className="grid grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm text-slate-700 mb-2">
+                <label className="block text-base text-slate-700 mb-2">
                   Phương thức kết nối <span className="text-red-500">*</span>
                 </label>
                 <select aria-label="Select box"
                   required
                   value={formData.connectionMethod}
                   onChange={(e) => setFormData({ ...formData, connectionMethod: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="API">API</option>
                   <option value="FTP">FTP</option>
@@ -263,7 +264,7 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
                 </select>
               </div>
               <div>
-                <label className="block text-sm text-slate-700 mb-2">
+                <label className="block text-base text-slate-700 mb-2">
                   Endpoint <span className="text-red-500">*</span>
                 </label>
                 <input aria-label="Input field"
@@ -272,20 +273,20 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
                   value={formData.endpoint}
                   onChange={(e) => setFormData({ ...formData, endpoint: e.target.value })}
                   placeholder="Nhập endpoint"
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm text-slate-700 mb-2">
+                <label className="block text-base text-slate-700 mb-2">
                   Phương thức xác thực <span className="text-red-500">*</span>
                 </label>
                 <select aria-label="Select box"
                   required
                   value={formData.authMethod}
                   onChange={(e) => setFormData({ ...formData, authMethod: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="API Key">API Key</option>
                   <option value="Username/Password">Username/Password</option>
@@ -293,7 +294,7 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
                 </select>
               </div>
               <div>
-                <label className="block text-sm text-slate-700 mb-2">
+                <label className="block text-base text-slate-700 mb-2">
                   API Key
                 </label>
                 <input aria-label="Input field"
@@ -301,13 +302,13 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
                   value={formData.apiKey}
                   onChange={(e) => setFormData({ ...formData, apiKey: e.target.value })}
                   placeholder="Nhập API Key"
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm text-slate-700 mb-2">
+                <label className="block text-base text-slate-700 mb-2">
                   Username
                 </label>
                 <input aria-label="Input field"
@@ -315,11 +316,11 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
                   value={formData.username}
                   onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                   placeholder="Nhập Username"
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-sm text-slate-700 mb-2">
+                <label className="block text-base text-slate-700 mb-2">
                   Password
                 </label>
                 <input aria-label="Input field"
@@ -327,13 +328,13 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   placeholder="Nhập Password"
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm text-slate-700 mb-2">
+                <label className="block text-base text-slate-700 mb-2">
                   Port
                 </label>
                 <input aria-label="Input field"
@@ -341,11 +342,11 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
                   value={formData.port}
                   onChange={(e) => setFormData({ ...formData, port: e.target.value })}
                   placeholder="Nhập Port"
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-sm text-slate-700 mb-2">
+                <label className="block text-base text-slate-700 mb-2">
                   Ghi chú kỹ thuật
                 </label>
                 <textarea aria-label="Text input"
@@ -353,7 +354,7 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
                   onChange={(e) => setFormData({ ...formData, technicalNote: e.target.value })}
                   placeholder="Nhập ghi chú kỹ thuật"
                   rows={3}
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
@@ -363,11 +364,11 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
           <div className="pt-4 border-t border-slate-200">
             <div className="grid grid-cols-2 gap-6">
               <div>
-                <label className="block text-xs text-slate-500 uppercase tracking-wider mb-2">STT</label>
+                <label className="block text-base text-slate-500 uppercase tracking-wider mb-2">STT</label>
                 <p className="text-slate-900">#{data.stt}</p>
               </div>
               <div>
-                <label className="block text-xs text-slate-500 uppercase tracking-wider mb-2">Mã ID</label>
+                <label className="block text-base text-slate-500 uppercase tracking-wider mb-2">Mã ID</label>
                 <p className="text-slate-900">DC-{String(data.id).padStart(4, '0')}</p>
               </div>
             </div>
@@ -405,10 +406,11 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
 
       {/* Mockup Note */}
       <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-        <p className="text-sm text-amber-800">
+        <p className="text-base text-amber-800">
           <strong>Lưu ý:</strong> Đây là giao diện mockup chỉnh sửa. Chức năng cập nhật chưa kết nối với backend thực tế.
         </p>
       </div>
+    </div>
     </div>
   );
 }

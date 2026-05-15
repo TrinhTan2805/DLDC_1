@@ -77,13 +77,14 @@ export function CategoryManagementDetail({ categoryName, categoryId }: CategoryM
   const inactiveCount = mockCategoryData.filter(item => item.status === 'Không hoạt động').length;
 
   return (
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
     <div className="h-full flex flex-col bg-slate-50">
       {/* Header removed */}
       <div className="bg-white border-b border-slate-200 px-6">
         <div className="flex gap-6">
           <button
             onClick={() => setActiveTab('metadata')}
-            className={`pb-3 pt-4 text-sm transition-colors border-b-2 flex items-center gap-2 ${
+            className={`pb-3 pt-4 text-base transition-colors border-b-2 flex items-center gap-2 ${
               activeTab === 'metadata'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
@@ -94,7 +95,7 @@ export function CategoryManagementDetail({ categoryName, categoryId }: CategoryM
           </button>
           <button
             onClick={() => setActiveTab('list')}
-            className={`pb-3 pt-4 text-sm transition-colors border-b-2 flex items-center gap-2 ${
+            className={`pb-3 pt-4 text-base transition-colors border-b-2 flex items-center gap-2 ${
               activeTab === 'list'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
@@ -105,7 +106,7 @@ export function CategoryManagementDetail({ categoryName, categoryId }: CategoryM
           </button>
           <button
             onClick={() => setActiveTab('config')}
-            className={`pb-3 pt-4 text-sm transition-colors border-b-2 flex items-center gap-2 ${
+            className={`pb-3 pt-4 text-base transition-colors border-b-2 flex items-center gap-2 ${
               activeTab === 'config'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
@@ -116,7 +117,7 @@ export function CategoryManagementDetail({ categoryName, categoryId }: CategoryM
           </button>
           <button
             onClick={() => setActiveTab('history')}
-            className={`pb-3 pt-4 text-sm transition-colors border-b-2 flex items-center gap-2 ${
+            className={`pb-3 pt-4 text-base transition-colors border-b-2 flex items-center gap-2 ${
               activeTab === 'history'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
@@ -140,51 +141,51 @@ export function CategoryManagementDetail({ categoryName, categoryId }: CategoryM
                 <table className="w-full">
                   <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 w-20">STT</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600">Thông tin metadata</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600">Mô tả</th>
+                      <th className="px-4 py-3 text-left text-base text-slate-600 w-20">STT</th>
+                      <th className="px-4 py-3 text-left text-base text-slate-600">Thông tin metadata</th>
+                      <th className="px-4 py-3 text-left text-base text-slate-600">Mô tả</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     <tr className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-600">1</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">Tên tập dữ liệu</td>
-                      <td className="px-4 py-3 text-sm text-slate-600">Tên chính thức của dữ liệu</td>
+                      <td className="px-4 py-3 text-base text-slate-600">1</td>
+                      <td className="px-4 py-3 text-base text-slate-900">Tên tập dữ liệu</td>
+                      <td className="px-4 py-3 text-base text-slate-600">Tên chính thức của dữ liệu</td>
                     </tr>
                     <tr className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-600">2</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">Mô tả dữ liệu</td>
-                      <td className="px-4 py-3 text-sm text-slate-600">Nội dung, phạm vi, mục đích sử dụng</td>
+                      <td className="px-4 py-3 text-base text-slate-600">2</td>
+                      <td className="px-4 py-3 text-base text-slate-900">Mô tả dữ liệu</td>
+                      <td className="px-4 py-3 text-base text-slate-600">Nội dung, phạm vi, mục đích sử dụng</td>
                     </tr>
                     <tr className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-600">3</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">Lĩnh vực/Chủ đề</td>
-                      <td className="px-4 py-3 text-sm text-slate-600">Hộ tịch, Công chứng, THA, …</td>
+                      <td className="px-4 py-3 text-base text-slate-600">3</td>
+                      <td className="px-4 py-3 text-base text-slate-900">Lĩnh vực/Chủ đề</td>
+                      <td className="px-4 py-3 text-base text-slate-600">Hộ tịch, Công chứng, THA, …</td>
                     </tr>
                     <tr className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-600">4</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">Từ khóa</td>
-                      <td className="px-4 py-3 text-sm text-slate-600">Hỗ trợ tìm kiếm</td>
+                      <td className="px-4 py-3 text-base text-slate-600">4</td>
+                      <td className="px-4 py-3 text-base text-slate-900">Từ khóa</td>
+                      <td className="px-4 py-3 text-base text-slate-600">Hỗ trợ tìm kiếm</td>
                     </tr>
                     <tr className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-600">5</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">Ngôn ngữ</td>
-                      <td className="px-4 py-3 text-sm text-slate-600">vi, en</td>
+                      <td className="px-4 py-3 text-base text-slate-600">5</td>
+                      <td className="px-4 py-3 text-base text-slate-900">Ngôn ngữ</td>
+                      <td className="px-4 py-3 text-base text-slate-600">vi, en</td>
                     </tr>
                     <tr className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-600">6</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">Định dạng dữ liệu</td>
-                      <td className="px-4 py-3 text-sm text-slate-600">CSV, JSON, XML, API</td>
+                      <td className="px-4 py-3 text-base text-slate-600">6</td>
+                      <td className="px-4 py-3 text-base text-slate-900">Định dạng dữ liệu</td>
+                      <td className="px-4 py-3 text-base text-slate-600">CSV, JSON, XML, API</td>
                     </tr>
                     <tr className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-600">7</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">Phạm vi dữ liệu</td>
-                      <td className="px-4 py-3 text-sm text-slate-600">Toàn quốc / địa phương</td>
+                      <td className="px-4 py-3 text-base text-slate-600">7</td>
+                      <td className="px-4 py-3 text-base text-slate-900">Phạm vi dữ liệu</td>
+                      <td className="px-4 py-3 text-base text-slate-600">Toàn quốc / địa phương</td>
                     </tr>
                     <tr className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-600">8</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">Thời gian dữ liệu</td>
-                      <td className="px-4 py-3 text-sm text-slate-600">Từ năm – đến năm</td>
+                      <td className="px-4 py-3 text-base text-slate-600">8</td>
+                      <td className="px-4 py-3 text-base text-slate-900">Thời gian dữ liệu</td>
+                      <td className="px-4 py-3 text-base text-slate-600">Từ năm – đến năm</td>
                     </tr>
                   </tbody>
                 </table>
@@ -214,20 +215,20 @@ export function CategoryManagementDetail({ categoryName, categoryId }: CategoryM
                       type="text"
                       title="Tìm kiếm"
                       placeholder="Tìm kiếm theo họ tên, số giấy chứng nhận..."
-                      className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 text-sm whitespace-nowrap">
+                  <button className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 text-base whitespace-nowrap">
                     <Upload className="w-4 h-4" />
                     Nhập
                   </button>
-                  <button className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 text-sm whitespace-nowrap">
+                  <button className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 text-base whitespace-nowrap">
                     <Download className="w-4 h-4" />
                     Xuất
                   </button>
-                  <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-sm whitespace-nowrap">
+                  <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-base whitespace-nowrap">
                     <RefreshCw className="w-4 h-4" />
                     Đồng bộ
                   </button>
@@ -240,23 +241,23 @@ export function CategoryManagementDetail({ categoryName, categoryId }: CategoryM
               <table className="w-full">
                 <thead className="bg-slate-50 border-b border-slate-200">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600">STT</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600">Tình trạng</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600">Họ tên</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600">Ngày sinh</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600">Quốc tịch</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600">Số giấy chứng nhận</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600">Ngày đăng ký</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600">Trạng thái</th>
-                    <th className="px-4 py-3 text-center text-xs text-slate-600">Thao tác</th>
+                    <th className="px-4 py-3 text-left text-base text-slate-600">STT</th>
+                    <th className="px-4 py-3 text-left text-base text-slate-600">Tình trạng</th>
+                    <th className="px-4 py-3 text-left text-base text-slate-600">Họ tên</th>
+                    <th className="px-4 py-3 text-left text-base text-slate-600">Ngày sinh</th>
+                    <th className="px-4 py-3 text-left text-base text-slate-600">Quốc tịch</th>
+                    <th className="px-4 py-3 text-left text-base text-slate-600">Số giấy chứng nhận</th>
+                    <th className="px-4 py-3 text-left text-base text-slate-600">Ngày đăng ký</th>
+                    <th className="px-4 py-3 text-left text-base text-slate-600">Trạng thái</th>
+                    <th className="px-4 py-3 text-center text-base text-slate-600">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {mockListData.map((item, index) => (
                     <tr key={item.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-4 py-3 text-sm text-slate-600">{index + 1}</td>
+                      <td className="px-4 py-3 text-base text-slate-600">{index + 1}</td>
                       <td className="px-4 py-3">
-                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs ${
+                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-base ${
                           item.status === 'Mới' 
                             ? 'bg-green-50 text-green-700' 
                             : 'bg-blue-50 text-blue-700'
@@ -264,13 +265,13 @@ export function CategoryManagementDetail({ categoryName, categoryId }: CategoryM
                           {item.status}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-sm text-slate-900">{item.fullName}</td>
-                      <td className="px-4 py-3 text-sm text-slate-600">{item.birthDate}</td>
-                      <td className="px-4 py-3 text-sm text-slate-600">{item.nationality}</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">{item.certNumber}</td>
-                      <td className="px-4 py-3 text-sm text-slate-600">{item.regDate}</td>
+                      <td className="px-4 py-3 text-base text-slate-900">{item.fullName}</td>
+                      <td className="px-4 py-3 text-base text-slate-600">{item.birthDate}</td>
+                      <td className="px-4 py-3 text-base text-slate-600">{item.nationality}</td>
+                      <td className="px-4 py-3 text-base text-slate-900">{item.certNumber}</td>
+                      <td className="px-4 py-3 text-base text-slate-600">{item.regDate}</td>
                       <td className="px-4 py-3">
-                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs ${
+                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-base ${
                           item.state === 'Đã duyệt' 
                             ? 'bg-green-50 text-green-700' 
                             : 'bg-yellow-50 text-yellow-700'
@@ -300,17 +301,17 @@ export function CategoryManagementDetail({ categoryName, categoryId }: CategoryM
 
             {/* Pagination */}
             <div className="p-4 border-t border-slate-200 flex items-center justify-between">
-              <div className="text-sm text-slate-600">
+              <div className="text-base text-slate-600">
                 Hiển thị <span className="text-slate-900">1-{mockListData.length}</span> trong tổng số <span className="text-slate-900">{mockListData.length}</span> bản ghi
               </div>
               <div className="flex gap-2">
-                <button className="px-3 py-1 border border-slate-300 rounded text-sm text-slate-600 hover:bg-slate-50">
+                <button className="px-3 py-1 border border-slate-300 rounded text-base text-slate-600 hover:bg-slate-50">
                   Trước
                 </button>
-                <button title="Hành động" aria-label="Hành động" className="px-3 py-1 bg-blue-600 text-white rounded text-sm">
+                <button title="Hành động" aria-label="Hành động" className="px-3 py-1 bg-blue-600 text-white rounded text-base">
                   1
                 </button>
-                <button className="px-3 py-1 border border-slate-300 rounded text-sm text-slate-600 hover:bg-slate-50">
+                <button className="px-3 py-1 border border-slate-300 rounded text-base text-slate-600 hover:bg-slate-50">
                   Sau
                 </button>
               </div>
@@ -327,62 +328,62 @@ export function CategoryManagementDetail({ categoryName, categoryId }: CategoryM
               {/* Basic Info */}
               <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm text-slate-700 mb-2">Tên kết nối <span className="text-red-500">*</span></label>
+                  <label className="block text-base text-slate-700 mb-2">Tên kết nối <span className="text-red-500">*</span></label>
                   <input aria-label="Input field"
                     type="text"
                     title="Tên kết nối"
                     defaultValue={`Kết nối LGSP - ${categoryName}`}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-slate-700 mb-2">Mã dịch vụ <span className="text-red-500">*</span></label>
+                  <label className="block text-base text-slate-700 mb-2">Mã dịch vụ <span className="text-red-500">*</span></label>
                   <input aria-label="Input field"
                     type="text"
                     title="Mã dịch vụ"
                     defaultValue="LGSP_DV_001"
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
               {/* Connection Info */}
               <div className="border-t border-slate-200 pt-6">
-                <h3 className="text-sm text-slate-900 mb-4">Thông tin kết nối LGSP</h3>
+                <h3 className="text-base text-slate-900 mb-4">Thông tin kết nối LGSP</h3>
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm text-slate-700 mb-2">Endpoint URL <span className="text-red-500">*</span></label>
+                    <label className="block text-base text-slate-700 mb-2">Endpoint URL <span className="text-red-500">*</span></label>
                     <input aria-label="Input field"
                       type="text"
                       title="Endpoint URL"
                       defaultValue="https://lgsp.gov.vn/api/v2/data-sync"
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm text-slate-700 mb-2">Phương thức <span className="text-red-500">*</span></label>
-                    <select aria-label="Select box" title="Phương thức" className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label className="block text-base text-slate-700 mb-2">Phương thức <span className="text-red-500">*</span></label>
+                    <select aria-label="Select box" title="Phương thức" className="w-full px-4 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500">
                       <option>POST</option>
                       <option>GET</option>
                       <option>PUT</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm text-slate-700 mb-2">Client ID <span className="text-red-500">*</span></label>
+                    <label className="block text-base text-slate-700 mb-2">Client ID <span className="text-red-500">*</span></label>
                     <input aria-label="Input field"
                       type="text"
                       title="Client ID"
                       defaultValue="MOJ_DLDC_CLIENT_2024"
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm text-slate-700 mb-2">Client Secret <span className="text-red-500">*</span></label>
+                    <label className="block text-base text-slate-700 mb-2">Client Secret <span className="text-red-500">*</span></label>
                     <input aria-label="Input field"
                       type="password"
                       title="Client Secret"
                       defaultValue="••••••••••••••••"
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </div>
@@ -417,7 +418,7 @@ export function CategoryManagementDetail({ categoryName, categoryId }: CategoryM
                   <input aria-label="Input field"
                     type="date"
                     title="Từ ngày"
-                    className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div className="flex-1 relative">
@@ -425,10 +426,10 @@ export function CategoryManagementDetail({ categoryName, categoryId }: CategoryM
                   <input aria-label="Input field"
                     type="date"
                     title="Đến ngày"
-                    className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-sm">
+                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-base">
                   <Search className="w-4 h-4" />
                   Lọc
                 </button>
@@ -440,28 +441,28 @@ export function CategoryManagementDetail({ categoryName, categoryId }: CategoryM
               <table className="w-full">
                 <thead className="bg-slate-50 border-b border-slate-200">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600">STT</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600">Thời gian đồng bộ</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600">Nguồn dữ liệu</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600">Tổng số bản ghi</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600">Thành công</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600">Thất bại</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600">Trạng thái</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600">Người thực hiện</th>
-                    <th className="px-4 py-3 text-center text-xs text-slate-600">Thao tác</th>
+                    <th className="px-4 py-3 text-left text-base text-slate-600">STT</th>
+                    <th className="px-4 py-3 text-left text-base text-slate-600">Thời gian đồng bộ</th>
+                    <th className="px-4 py-3 text-left text-base text-slate-600">Nguồn dữ liệu</th>
+                    <th className="px-4 py-3 text-left text-base text-slate-600">Tổng số bản ghi</th>
+                    <th className="px-4 py-3 text-left text-base text-slate-600">Thành công</th>
+                    <th className="px-4 py-3 text-left text-base text-slate-600">Thất bại</th>
+                    <th className="px-4 py-3 text-left text-base text-slate-600">Trạng thái</th>
+                    <th className="px-4 py-3 text-left text-base text-slate-600">Người thực hiện</th>
+                    <th className="px-4 py-3 text-center text-base text-slate-600">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {mockSyncHistory.map((item, index) => (
                     <tr key={item.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-4 py-3 text-sm text-slate-600">{index + 1}</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">{item.syncTime}</td>
-                      <td className="px-4 py-3 text-sm text-slate-600">{item.source}</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">{item.recordCount.toLocaleString()}</td>
-                      <td className="px-4 py-3 text-sm text-green-600">{item.success.toLocaleString()}</td>
-                      <td className="px-4 py-3 text-sm text-red-600">{item.failed}</td>
+                      <td className="px-4 py-3 text-base text-slate-600">{index + 1}</td>
+                      <td className="px-4 py-3 text-base text-slate-900">{item.syncTime}</td>
+                      <td className="px-4 py-3 text-base text-slate-600">{item.source}</td>
+                      <td className="px-4 py-3 text-base text-slate-900">{item.recordCount.toLocaleString()}</td>
+                      <td className="px-4 py-3 text-base text-green-600">{item.success.toLocaleString()}</td>
+                      <td className="px-4 py-3 text-base text-red-600">{item.failed}</td>
                       <td className="px-4 py-3">
-                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs ${
+                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-base ${
                           item.status === 'Hoàn thành' 
                             ? 'bg-green-50 text-green-700' 
                             : 'bg-red-50 text-red-700'
@@ -470,7 +471,7 @@ export function CategoryManagementDetail({ categoryName, categoryId }: CategoryM
                           {item.status}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-sm text-slate-600">{item.user}</td>
+                      <td className="px-4 py-3 text-base text-slate-600">{item.user}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-center gap-2">
                           <button className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Xem chi tiết">
@@ -486,17 +487,17 @@ export function CategoryManagementDetail({ categoryName, categoryId }: CategoryM
 
             {/* Pagination */}
             <div className="p-4 border-t border-slate-200 flex items-center justify-between">
-              <div className="text-sm text-slate-600">
+              <div className="text-base text-slate-600">
                 Hiển thị <span className="text-slate-900">1-{mockSyncHistory.length}</span> trong tổng số <span className="text-slate-900">{mockSyncHistory.length}</span> bản ghi
               </div>
               <div className="flex gap-2">
-                <button className="px-3 py-1 border border-slate-300 rounded text-sm text-slate-600 hover:bg-slate-50">
+                <button className="px-3 py-1 border border-slate-300 rounded text-base text-slate-600 hover:bg-slate-50">
                   Trước
                 </button>
-                <button title="Hành động" aria-label="Hành động" className="px-3 py-1 bg-blue-600 text-white rounded text-sm">
+                <button title="Hành động" aria-label="Hành động" className="px-3 py-1 bg-blue-600 text-white rounded text-base">
                   1
                 </button>
-                <button className="px-3 py-1 border border-slate-300 rounded text-sm text-slate-600 hover:bg-slate-50">
+                <button className="px-3 py-1 border border-slate-300 rounded text-base text-slate-600 hover:bg-slate-50">
                   Sau
                 </button>
               </div>
@@ -504,6 +505,7 @@ export function CategoryManagementDetail({ categoryName, categoryId }: CategoryM
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 }

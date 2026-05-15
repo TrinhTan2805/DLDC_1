@@ -40,7 +40,7 @@ export function AddDataCollectionModal({ isOpen, onClose, onSave }: AddDataColle
       <button
         type="button"
         onClick={onClose}
-        className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium text-sm flex items-center gap-2"
+        className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium text-base flex items-center gap-2"
       >
         <X className="w-4 h-4" />
         Hủy bỏ
@@ -48,7 +48,7 @@ export function AddDataCollectionModal({ isOpen, onClose, onSave }: AddDataColle
       <button
         type="button"
         onClick={handleSubmit}
-        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm flex items-center gap-2"
+        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-base flex items-center gap-2"
       >
         <Save className="w-4 h-4" />
         Ghi nhận
@@ -57,6 +57,7 @@ export function AddDataCollectionModal({ isOpen, onClose, onSave }: AddDataColle
   );
 
   return (
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
     <BaseModal
       isOpen={isOpen}
       onClose={onClose}
@@ -68,7 +69,7 @@ export function AddDataCollectionModal({ isOpen, onClose, onSave }: AddDataColle
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Loại nguồn */}
         <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-2">
+          <label className="block text-base font-semibold text-slate-700 mb-2">
             Loại nguồn dữ liệu <span className="text-red-500">*</span>
           </label>
           <div className="grid grid-cols-2 gap-4">
@@ -90,8 +91,8 @@ export function AddDataCollectionModal({ isOpen, onClose, onSave }: AddDataColle
  {category === 'external' && <div className="w-2 h-2 rounded-full bg-white"></div>}
  </div>
  <div className="text-left">
- <p className="text-sm text-slate-900">Thu thập từ Bộ ngoài</p>
- <p className="text-xs text-slate-500 mt-0.5">Dữ liệu từ các cơ quan bên ngoài</p>
+ <p className="text-base text-slate-900">Thu thập từ Bộ ngoài</p>
+ <p className="text-base text-slate-500 mt-0.5">Dữ liệu từ các cơ quan bên ngoài</p>
  </div>
  </div>
  </button>
@@ -114,8 +115,8 @@ export function AddDataCollectionModal({ isOpen, onClose, onSave }: AddDataColle
  {category === 'internal' && <div className="w-2 h-2 rounded-full bg-white"></div>}
  </div>
  <div className="text-left">
- <p className="text-sm text-slate-900">Thu thập trong nội bộ</p>
- <p className="text-xs text-slate-500 mt-0.5">Dữ liệu từ các Cục/Vụ thuộc cấu trúc</p>
+ <p className="text-base text-slate-900">Thu thập trong nội bộ</p>
+ <p className="text-base text-slate-500 mt-0.5">Dữ liệu từ các Cục/Vụ thuộc cấu trúc</p>
  </div>
  </div>
  </button>
@@ -124,7 +125,7 @@ export function AddDataCollectionModal({ isOpen, onClose, onSave }: AddDataColle
 
         <div className="grid grid-cols-2 gap-6 bg-slate-50 p-5 rounded-xl border border-slate-100">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-base font-medium text-slate-700 mb-2">
               {category === 'external' ? 'Cơ quan nguồn' : 'Cục/Vụ'} <span className="text-red-500">*</span>
             </label>
             {category === 'external' ? (
@@ -134,7 +135,7 @@ export function AddDataCollectionModal({ isOpen, onClose, onSave }: AddDataColle
                 aria-label="Cơ quan nguồn"
                 value={formData.department}
                 onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               >
                 <option value="">Chọn cơ quan</option>
                 <option value="Tòa án nhân dân tối cao">Tòa án nhân dân tối cao</option>
@@ -148,7 +149,7 @@ export function AddDataCollectionModal({ isOpen, onClose, onSave }: AddDataColle
                 aria-label="Cục/Vụ"
                 value={formData.department}
                 onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white"
+                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-green-500 bg-white"
               >
                 <option value="">Chọn Cục/Vụ</option>
                 <option value="Cục Công nghệ Thông tin">Cục Công nghệ Thông tin</option>
@@ -157,7 +158,7 @@ export function AddDataCollectionModal({ isOpen, onClose, onSave }: AddDataColle
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-base font-medium text-slate-700 mb-2">
               Tên Dữ liệu <span className="text-red-500">*</span>
             </label>
             <input aria-label="Input field"
@@ -166,7 +167,7 @@ export function AddDataCollectionModal({ isOpen, onClose, onSave }: AddDataColle
               value={formData.dataName}
               onChange={(e) => setFormData({ ...formData, dataName: e.target.value })}
               placeholder="VD: Danh sách hộ tịch"
-              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
             />
           </div>
         </div>
@@ -174,7 +175,7 @@ export function AddDataCollectionModal({ isOpen, onClose, onSave }: AddDataColle
         <div className="grid grid-cols-2 gap-6 bg-slate-50 p-5 rounded-xl border border-slate-100 mt-4">
             {/* Tần suất */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-base font-medium text-slate-700 mb-2">
                 Tần suất thu thập <span className="text-red-500">*</span>
               </label>
               <select
@@ -183,7 +184,7 @@ export function AddDataCollectionModal({ isOpen, onClose, onSave }: AddDataColle
                 aria-label="Tần suất thu thập"
                 value={formData.frequency}
                 onChange={(e) => setFormData({ ...formData, frequency: e.target.value })}
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               >
                 <option value="Hằng ngày">Hằng ngày</option>
                 <option value="Hằng tuần">Hằng tuần</option>
@@ -192,7 +193,7 @@ export function AddDataCollectionModal({ isOpen, onClose, onSave }: AddDataColle
             </div>
             {/* Định dạng */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-base font-medium text-slate-700 mb-2">
                 Định dạng trả về <span className="text-red-500">*</span>
               </label>
               <select
@@ -201,7 +202,7 @@ export function AddDataCollectionModal({ isOpen, onClose, onSave }: AddDataColle
                 aria-label="Định dạng trả về"
                 value={formData.format}
                 onChange={(e) => setFormData({ ...formData, format: e.target.value })}
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               >
                 <option value="JSON">JSON (API)</option>
                 <option value="XML">XML (SOAP)</option>
@@ -211,5 +212,6 @@ export function AddDataCollectionModal({ isOpen, onClose, onSave }: AddDataColle
         </div>
       </form>
     </BaseModal>
+    </div>
   );
 }

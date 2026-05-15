@@ -102,16 +102,17 @@ export function DataFieldClassification({ tableName, tableSecurityLevel = 'noi-b
   };
 
   return (
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
     <div className="bg-white rounded-lg border border-slate-200">
       {/* Header */}
       <div className="px-6 py-4 border-b border-slate-200">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-slate-900">Phân loại Mức độ Bảo mật Trường Dữ liệu</h3>
-            <p className="text-sm text-slate-600 mt-1">Bảng: {tableName}</p>
+            <p className="text-base text-slate-600 mt-1">Bảng: {tableName}</p>
           </div>
           <div className="flex items-center gap-3">
-            <div className={`px-3 py-1.5 rounded-lg text-sm border ${
+            <div className={`px-3 py-1.5 rounded-lg text-base border ${
               tableSecurityLevel === 'nhay-cam' 
                 ? 'bg-red-50 text-red-700 border-red-200'
                 : tableSecurityLevel === 'bao-mat'
@@ -136,14 +137,14 @@ export function DataFieldClassification({ tableName, tableSecurityLevel = 'noi-b
         <div className="flex px-6 gap-2">
           <button
             onClick={() => setActiveTab('clean')}
-            className={`px-4 py-3 text-sm transition-all relative ${
+            className={`px-4 py-3 text-base transition-all relative ${
               activeTab === 'clean'
                 ? 'text-red-700 border-b-2 border-red-600'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             Dữ liệu Làm sạch
-            <span className={`ml-2 px-2 py-0.5 rounded text-xs ${
+            <span className={`ml-2 px-2 py-0.5 rounded text-base ${
               activeTab === 'clean' ? 'bg-red-100 text-red-700' : 'bg-slate-100 text-slate-600'
             }`}>
               {cleanFields.length}
@@ -151,14 +152,14 @@ export function DataFieldClassification({ tableName, tableSecurityLevel = 'noi-b
           </button>
           <button
             onClick={() => setActiveTab('normalize')}
-            className={`px-4 py-3 text-sm transition-all relative ${
+            className={`px-4 py-3 text-base transition-all relative ${
               activeTab === 'normalize'
                 ? 'text-yellow-700 border-b-2 border-yellow-600'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             Dữ liệu Chuẩn hóa
-            <span className={`ml-2 px-2 py-0.5 rounded text-xs ${
+            <span className={`ml-2 px-2 py-0.5 rounded text-base ${
               activeTab === 'normalize' ? 'bg-yellow-100 text-yellow-700' : 'bg-slate-100 text-slate-600'
             }`}>
               {normalizeFields.length}
@@ -166,14 +167,14 @@ export function DataFieldClassification({ tableName, tableSecurityLevel = 'noi-b
           </button>
           <button
             onClick={() => setActiveTab('transform')}
-            className={`px-4 py-3 text-sm transition-all relative ${
+            className={`px-4 py-3 text-base transition-all relative ${
               activeTab === 'transform'
                 ? 'text-green-700 border-b-2 border-green-600'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             Dữ liệu Biến đổi
-            <span className={`ml-2 px-2 py-0.5 rounded text-xs ${
+            <span className={`ml-2 px-2 py-0.5 rounded text-base ${
               activeTab === 'transform' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'
             }`}>
               {transformFields.length}
@@ -195,7 +196,7 @@ export function DataFieldClassification({ tableName, tableSecurityLevel = 'noi-b
             'text-green-600'
           }`} />
           <div className="flex-1">
-            <p className={`text-sm ${
+            <p className={`text-base ${
               activeTab === 'clean' ? 'text-red-800' :
               activeTab === 'normalize' ? 'text-yellow-800' :
               'text-green-800'
@@ -211,13 +212,13 @@ export function DataFieldClassification({ tableName, tableSecurityLevel = 'noi-b
         <table className="w-full">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200">
-              <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider w-1/4">
+              <th className="px-6 py-3 text-left text-base text-slate-600 uppercase tracking-wider w-1/4">
                 Tên trường
               </th>
-              <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider w-1/3">
+              <th className="px-6 py-3 text-left text-base text-slate-600 uppercase tracking-wider w-1/3">
                 Mức độ công khai
               </th>
-              <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider w-1/3">
+              <th className="px-6 py-3 text-left text-base text-slate-600 uppercase tracking-wider w-1/3">
                 Mức độ nhạy cảm
               </th>
             </tr>
@@ -227,15 +228,15 @@ export function DataFieldClassification({ tableName, tableSecurityLevel = 'noi-b
               <tr key={index} className="hover:bg-slate-50 transition-colors">
                 <td className="px-6 py-4">
                   <div>
-                    <div className="text-sm text-slate-900">{field.displayName}</div>
-                    <div className="text-xs text-slate-500 font-mono">{field.name}</div>
+                    <div className="text-base text-slate-900">{field.displayName}</div>
+                    <div className="text-base text-slate-500 font-mono">{field.name}</div>
                   </div>
                 </td>
                 <td className="px-6 py-4">
                   <select aria-label="Select box"
                     value={field.publicLevel}
                     onChange={(e) => handleFieldChange(index, 'publicLevel', e.target.value)}
-                    className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${publicLevelColors[field.publicLevel] || 'bg-white text-slate-700 border-slate-300'}`}
+                    className={`w-full px-3 py-2 border rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 ${publicLevelColors[field.publicLevel] || 'bg-white text-slate-700 border-slate-300'}`}
                   >
                     <option value="">Chọn mức độ</option>
                     <option value="cong-khai-toan-bo">Công khai toàn bộ</option>
@@ -248,7 +249,7 @@ export function DataFieldClassification({ tableName, tableSecurityLevel = 'noi-b
                   <select aria-label="Select box"
                     value={field.sensitivityLevel}
                     onChange={(e) => handleFieldChange(index, 'sensitivityLevel', e.target.value)}
-                    className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${sensitivityLevelColors[field.sensitivityLevel] || 'bg-white text-slate-700 border-slate-300'}`}
+                    className={`w-full px-3 py-2 border rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 ${sensitivityLevelColors[field.sensitivityLevel] || 'bg-white text-slate-700 border-slate-300'}`}
                   >
                     <option value="">Chọn mức độ</option>
                     <option value="thap">Thấp</option>
@@ -268,51 +269,52 @@ export function DataFieldClassification({ tableName, tableSecurityLevel = 'noi-b
         <div className="grid grid-cols-2 gap-6">
           {/* Legend Mức độ công khai */}
           <div>
-            <h4 className="text-xs text-slate-600 uppercase tracking-wider mb-2">Mức độ công khai:</h4>
+            <h4 className="text-base text-slate-600 uppercase tracking-wider mb-2">Mức độ công khai:</h4>
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-green-600"></div>
-                <span className="text-xs text-slate-700">Công khai toàn bộ - Không hạn chế truy cập</span>
+                <span className="text-base text-slate-700">Công khai toàn bộ - Không hạn chế truy cập</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-blue-600"></div>
-                <span className="text-xs text-slate-700">Công khai hạn chế - Có điều kiện truy cập</span>
+                <span className="text-base text-slate-700">Công khai hạn chế - Có điều kiện truy cập</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-amber-600"></div>
-                <span className="text-xs text-slate-700">Nội bộ - Chỉ nội bộ cơ quan</span>
+                <span className="text-base text-slate-700">Nội bộ - Chỉ nội bộ cơ quan</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-red-600"></div>
-                <span className="text-xs text-slate-700">Mật - Hạn chế nghiêm ngặt</span>
+                <span className="text-base text-slate-700">Mật - Hạn chế nghiêm ngặt</span>
               </div>
             </div>
           </div>
 
           {/* Legend Mức độ nhạy cảm */}
           <div>
-            <h4 className="text-xs text-slate-600 uppercase tracking-wider mb-2">Mức độ nhạy cảm:</h4>
+            <h4 className="text-base text-slate-600 uppercase tracking-wider mb-2">Mức độ nhạy cảm:</h4>
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-green-600"></div>
-                <span className="text-xs text-slate-700">Thấp - Thông tin công khai cơ bản</span>
+                <span className="text-base text-slate-700">Thấp - Thông tin công khai cơ bản</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-yellow-600"></div>
-                <span className="text-xs text-slate-700">Trung bình - Cần kiểm soát truy cập</span>
+                <span className="text-base text-slate-700">Trung bình - Cần kiểm soát truy cập</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-orange-600"></div>
-                <span className="text-xs text-slate-700">Cao - Thông tin cá nhân quan trọng</span>
+                <span className="text-base text-slate-700">Cao - Thông tin cá nhân quan trọng</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-red-600"></div>
-                <span className="text-xs text-slate-700">Rất cao - Thông tin nhạy cảm đặc biệt</span>
+                <span className="text-base text-slate-700">Rất cao - Thông tin nhạy cảm đặc biệt</span>
               </div>
             </div>
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

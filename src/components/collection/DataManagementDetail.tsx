@@ -134,13 +134,14 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
   ];
 
   return (
-    <div className="h-full flex flex-col bg-slate-50">
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
+      <div className="h-full flex flex-col bg-slate-50 min-h-screen">
       {/* Header removed */}
       <div className="bg-white border-b border-slate-200 px-6">
         <div className="flex gap-6">
           <button
             onClick={() => setActiveTab('list')}
-            className={`pb-3 pt-4 text-sm transition-colors border-b-2 flex items-center gap-2 ${
+            className={`pb-3 pt-4 text-base transition-colors border-b-2 flex items-center gap-2 ${
               activeTab === 'list'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
@@ -151,7 +152,7 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
           </button>
           <button
             onClick={() => setActiveTab('config')}
-            className={`pb-3 pt-4 text-sm transition-colors border-b-2 flex items-center gap-2 ${
+            className={`pb-3 pt-4 text-base transition-colors border-b-2 flex items-center gap-2 ${
               activeTab === 'config'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
@@ -162,7 +163,7 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
           </button>
           <button
             onClick={() => setActiveTab('history')}
-            className={`pb-3 pt-4 text-sm transition-colors border-b-2 flex items-center gap-2 ${
+            className={`pb-3 pt-4 text-base transition-colors border-b-2 flex items-center gap-2 ${
               activeTab === 'history'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
@@ -188,27 +189,27 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                     <input aria-label="Input field"
                       type="text"
                       placeholder="Tìm kiếm theo họ tên, số giấy chứng nhận..."
-                      className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <button 
                     onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
-                    className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 text-sm whitespace-nowrap"
+                    className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 text-base whitespace-nowrap"
                   >
                     <Filter className="w-4 h-4" />
                     Tìm kiếm nâng cao
                   </button>
                 </div>
                 <div className="flex gap-2">
-                  <button className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 text-sm whitespace-nowrap">
+                  <button className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 text-base whitespace-nowrap">
                     <Upload className="w-4 h-4" />
                     Nhập
                   </button>
-                  <button className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 text-sm whitespace-nowrap">
+                  <button className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 text-base whitespace-nowrap">
                     <Download className="w-4 h-4" />
                     Xuất
                   </button>
-                  <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-sm whitespace-nowrap">
+                  <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-base whitespace-nowrap">
                     <RefreshCw className="w-4 h-4" />
                     Đồng bộ
                   </button>
@@ -220,34 +221,34 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                 <div className="mt-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-xs text-slate-600 mb-1">Tình trạng</label>
-                      <select aria-label="Select box" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <label className="block text-base text-slate-600 mb-1">Tình trạng</label>
+                      <select aria-label="Select box" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">Tất cả</option>
                         <option>Mới</option>
                         <option>Cập nhật</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs text-slate-600 mb-1">Trạng thái</label>
-                      <select aria-label="Select box" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <label className="block text-base text-slate-600 mb-1">Trạng thái</label>
+                      <select aria-label="Select box" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">Tất cả</option>
                         <option>Đã duyệt</option>
                         <option>Chờ duyệt</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs text-slate-600 mb-1">Từ ngày - Đến ngày</label>
+                      <label className="block text-base text-slate-600 mb-1">Từ ngày - Đến ngày</label>
                       <div className="flex gap-2">
-                        <input aria-label="Input field" type="date" className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                        <input aria-label="Input field" type="date" className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <input aria-label="Input field" type="date" className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <input aria-label="Input field" type="date" className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
                       </div>
                     </div>
                   </div>
                   <div className="flex gap-2 mt-3">
-                    <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                    <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-base">
                       Tìm kiếm
                     </button>
-                    <button className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-sm">
+                    <button className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-base">
                       Đặt lại
                     </button>
                   </div>
@@ -260,23 +261,23 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
               <table className="w-full">
                 <thead className="bg-slate-50 border-b border-slate-200">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600">STT</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600">Tình trạng</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600">Họ tên</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600">Ngày sinh</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600">Quốc tịch</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600">Số giấy chứng nhận</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600">Ngày đăng ký</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600">Trạng thái</th>
-                    <th className="px-4 py-3 text-center text-xs text-slate-600">Thao tác</th>
+                    <th className="px-4 py-3 text-left text-base text-slate-600">STT</th>
+                    <th className="px-4 py-3 text-left text-base text-slate-600">Tình trạng</th>
+                    <th className="px-4 py-3 text-left text-base text-slate-600">Họ tên</th>
+                    <th className="px-4 py-3 text-left text-base text-slate-600">Ngày sinh</th>
+                    <th className="px-4 py-3 text-left text-base text-slate-600">Quốc tịch</th>
+                    <th className="px-4 py-3 text-left text-base text-slate-600">Số giấy chứng nhận</th>
+                    <th className="px-4 py-3 text-left text-base text-slate-600">Ngày đăng ký</th>
+                    <th className="px-4 py-3 text-left text-base text-slate-600">Trạng thái</th>
+                    <th className="px-4 py-3 text-center text-base text-slate-600">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {mockData.map((item, index) => (
                     <tr key={item.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-4 py-3 text-sm text-slate-600">{index + 1}</td>
+                      <td className="px-4 py-3 text-base text-slate-600">{index + 1}</td>
                       <td className="px-4 py-3">
-                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs ${
+                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-base ${
                           item.status === 'Mới' 
                             ? 'bg-green-50 text-green-700' 
                             : 'bg-blue-50 text-blue-700'
@@ -284,13 +285,13 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                           {item.status}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-sm text-slate-900">{item.fullName}</td>
-                      <td className="px-4 py-3 text-sm text-slate-600">{item.birthDate}</td>
-                      <td className="px-4 py-3 text-sm text-slate-600">{item.nationality}</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">{item.certNumber}</td>
-                      <td className="px-4 py-3 text-sm text-slate-600">{item.regDate}</td>
+                      <td className="px-4 py-3 text-base text-slate-900">{item.fullName}</td>
+                      <td className="px-4 py-3 text-base text-slate-600">{item.birthDate}</td>
+                      <td className="px-4 py-3 text-base text-slate-600">{item.nationality}</td>
+                      <td className="px-4 py-3 text-base text-slate-900">{item.certNumber}</td>
+                      <td className="px-4 py-3 text-base text-slate-600">{item.regDate}</td>
                       <td className="px-4 py-3">
-                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs ${
+                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-base ${
                           item.state === 'Đã duyệt' 
                             ? 'bg-green-50 text-green-700' 
                             : 'bg-yellow-50 text-yellow-700'
@@ -321,17 +322,17 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
 
             {/* Pagination */}
             <div className="p-4 border-t border-slate-200 flex items-center justify-between">
-              <div className="text-sm text-slate-600">
+              <div className="text-base text-slate-600">
                 Hiển thị <span className="text-slate-900">1-5</span> trong tổng số <span className="text-slate-900">5</span> bản ghi
               </div>
               <div className="flex gap-2">
-                <button className="px-3 py-1 border border-slate-300 rounded text-sm text-slate-600 hover:bg-slate-50">
+                <button className="px-3 py-1 border border-slate-300 rounded text-base text-slate-600 hover:bg-slate-50">
                   Trước
                 </button>
-                <button title="Hành động" aria-label="Hành động" className="px-3 py-1 bg-blue-600 text-white rounded text-sm">
+                <button title="Hành động" aria-label="Hành động" className="px-3 py-1 bg-blue-600 text-white rounded text-base">
                   1
                 </button>
-                <button className="px-3 py-1 border border-slate-300 rounded text-sm text-slate-600 hover:bg-slate-50">
+                <button className="px-3 py-1 border border-slate-300 rounded text-base text-slate-600 hover:bg-slate-50">
                   Sau
                 </button>
               </div>
@@ -347,12 +348,12 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <h3 className="text-slate-900">Danh sách kết nối API</h3>
-                  <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">● 2 hoạt động</span>
-                  <span className="text-sm text-slate-500">Tổng: 3</span>
+                  <span className="px-2 py-1 bg-green-100 text-green-700 text-base rounded">● 2 hoạt động</span>
+                  <span className="text-base text-slate-500">Tổng: 3</span>
                 </div>
                 <button 
                   onClick={() => setShowAddApiModal(true)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-sm"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-base"
                 >
                   <Plus className="w-4 h-4" />
                   Thêm kết nối
@@ -368,10 +369,10 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <h4 className="text-slate-900">API Danh mục giới tính</h4>
-                      <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">● Đang kết nối</span>
-                      <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded">API-KEY</span>
+                      <span className="px-2 py-1 bg-green-100 text-green-700 text-base rounded">● Đang kết nối</span>
+                      <span className="px-2 py-1 bg-purple-100 text-purple-700 text-base rounded">API-KEY</span>
                     </div>
-                    <p className="text-sm text-slate-500">
+                    <p className="text-base text-slate-500">
                       Kết nối API danh sách giới tính cho hệ thống LGSP
                     </p>
                   </div>
@@ -390,21 +391,21 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                     </button>
                   </div>
                 </div>
-                <div className="grid grid-cols-4 gap-4 text-sm">
+                <div className="grid grid-cols-4 gap-4 text-base">
                   <div>
-                    <div className="text-slate-500 text-xs mb-1">🔗 Endpoint</div>
+                    <div className="text-slate-500 text-base mb-1">🔗 Endpoint</div>
                     <div className="text-slate-900 truncate">/api/v1/categories/gender</div>
                   </div>
                   <div>
-                    <div className="text-slate-500 text-xs mb-1">🔄 Method</div>
+                    <div className="text-slate-500 text-base mb-1">🔄 Method</div>
                     <div className="text-slate-900">GET</div>
                   </div>
                   <div>
-                    <div className="text-slate-500 text-xs mb-1">⏱️ Response Time</div>
+                    <div className="text-slate-500 text-base mb-1">⏱️ Response Time</div>
                     <div className="text-slate-900">120ms</div>
                   </div>
                   <div>
-                    <div className="text-slate-500 text-xs mb-1">✅ Đăng bộ cuối</div>
+                    <div className="text-slate-500 text-base mb-1">✅ Đăng bộ cuối</div>
                     <div className="text-slate-900">09/12/2025 14:30:25</div>
                   </div>
                 </div>
@@ -416,10 +417,10 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <h4 className="text-slate-900">API Danh mục quốc tịch</h4>
-                      <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">● Đang kết nối</span>
-                      <span className="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs rounded">CLIENT-SECRET</span>
+                      <span className="px-2 py-1 bg-green-100 text-green-700 text-base rounded">● Đang kết nối</span>
+                      <span className="px-2 py-1 bg-indigo-100 text-indigo-700 text-base rounded">CLIENT-SECRET</span>
                     </div>
-                    <p className="text-sm text-slate-500">
+                    <p className="text-base text-slate-500">
                       Kết nối API danh sách quốc tịch
                     </p>
                   </div>
@@ -438,21 +439,21 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                     </button>
                   </div>
                 </div>
-                <div className="grid grid-cols-4 gap-4 text-sm">
+                <div className="grid grid-cols-4 gap-4 text-base">
                   <div>
-                    <div className="text-slate-500 text-xs mb-1">🔗 Endpoint</div>
+                    <div className="text-slate-500 text-base mb-1">🔗 Endpoint</div>
                     <div className="text-slate-900 truncate">/api/v1/categories/nationality</div>
                   </div>
                   <div>
-                    <div className="text-slate-500 text-xs mb-1">🔄 Method</div>
+                    <div className="text-slate-500 text-base mb-1">🔄 Method</div>
                     <div className="text-slate-900">GET</div>
                   </div>
                   <div>
-                    <div className="text-slate-500 text-xs mb-1">⏱️ Response Time</div>
+                    <div className="text-slate-500 text-base mb-1">⏱️ Response Time</div>
                     <div className="text-slate-900">93ms</div>
                   </div>
                   <div>
-                    <div className="text-slate-500 text-xs mb-1">✅ Đăng bộ cuối</div>
+                    <div className="text-slate-500 text-base mb-1">✅ Đăng bộ cuối</div>
                     <div className="text-slate-900">09/12/2025 14:45:10</div>
                   </div>
                 </div>
@@ -464,11 +465,11 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <h4 className="text-slate-900">API Backup (Dự phòng)</h4>
-                      <span className="px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded">● Ngừng hoạt động</span>
-                      <span className="px-2 py-1 bg-slate-100 text-slate-700 text-xs rounded">OAuth2</span>
-                      <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">Tạm dừng</span>
+                      <span className="px-2 py-1 bg-orange-100 text-orange-700 text-base rounded">● Ngừng hoạt động</span>
+                      <span className="px-2 py-1 bg-slate-100 text-slate-700 text-base rounded">OAuth2</span>
+                      <span className="px-2 py-1 bg-blue-100 text-blue-700 text-base rounded">Tạm dừng</span>
                     </div>
-                    <p className="text-sm text-slate-500">
+                    <p className="text-base text-slate-500">
                       Kết nối dự phòng khi hệ thống chính gặp sự cố
                     </p>
                   </div>
@@ -487,21 +488,21 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                     </button>
                   </div>
                 </div>
-                <div className="grid grid-cols-4 gap-4 text-sm">
+                <div className="grid grid-cols-4 gap-4 text-base">
                   <div>
-                    <div className="text-slate-500 text-xs mb-1">🔗 Endpoint</div>
+                    <div className="text-slate-500 text-base mb-1">🔗 Endpoint</div>
                     <div className="text-slate-900 truncate">/api/v1/backup</div>
                   </div>
                   <div>
-                    <div className="text-slate-500 text-xs mb-1">🔄 Method</div>
+                    <div className="text-slate-500 text-base mb-1">🔄 Method</div>
                     <div className="text-slate-900">GET</div>
                   </div>
                   <div>
-                    <div className="text-slate-500 text-xs mb-1">⏱️ Response Time</div>
+                    <div className="text-slate-500 text-base mb-1">⏱️ Response Time</div>
                     <div className="text-slate-900">-</div>
                   </div>
                   <div>
-                    <div className="text-slate-500 text-xs mb-1">✅ Đăng bộ cuối</div>
+                    <div className="text-slate-500 text-base mb-1">✅ Đăng bộ cuối</div>
                     <div className="text-slate-900">-</div>
                   </div>
                 </div>
@@ -525,21 +526,21 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                   <div className="p-6 space-y-6">
                     {/* Thông tin chung */}
                     <div>
-                      <h4 className="text-sm text-slate-700 mb-3">Thông tin chung</h4>
+                      <h4 className="text-base text-slate-700 mb-3">Thông tin chung</h4>
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-sm text-slate-600 mb-1">Tên service</label>
+                          <label className="block text-base text-slate-600 mb-1">Tên service</label>
                           <input aria-label="Input field"
                             type="text"
                             placeholder="Ví dụ: API danh mục quốc tịch"
-                            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm text-slate-600 mb-1">Mô tả</label>
+                          <label className="block text-base text-slate-600 mb-1">Mô tả</label>
                           <textarea aria-label="Text input"
                             rows={3}
-                            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         </div>
                       </div>
@@ -547,34 +548,34 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
 
                     {/* Cấu hình Endpoint */}
                     <div className="border-t border-slate-200 pt-4">
-                      <h4 className="text-sm text-slate-700 mb-3">Cấu hình Endpoint</h4>
+                      <h4 className="text-base text-slate-700 mb-3">Cấu hình Endpoint</h4>
                       <div>
-                        <label className="block text-sm text-slate-600 mb-1">Base URL</label>
+                        <label className="block text-base text-slate-600 mb-1">Base URL</label>
                         <input aria-label="Input field"
                           type="text"
                           placeholder="https://example.com"
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
                     </div>
 
                     {/* Thao tác Headers */}
                     <div className="border-t border-slate-200 pt-4">
-                      <h4 className="text-sm text-slate-700 mb-3">Thao tác Headers</h4>
+                      <h4 className="text-base text-slate-700 mb-3">Thao tác Headers</h4>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm text-slate-600 mb-1">Content-Type</label>
-                          <select aria-label="Select box" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                          <label className="block text-base text-slate-600 mb-1">Content-Type</label>
+                          <select aria-label="Select box" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option>application/json</option>
                             <option>application/xml</option>
                           </select>
                         </div>
                         <div>
-                          <label className="block text-sm text-slate-600 mb-1">Authorization</label>
+                          <label className="block text-base text-slate-600 mb-1">Authorization</label>
                           <input aria-label="Input field"
                             type="text"
                             placeholder="Bearer token"
-                            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         </div>
                       </div>
@@ -584,8 +585,8 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                     <div className="border-t border-slate-200 pt-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm text-slate-600 mb-1">Method</label>
-                          <select aria-label="Select box" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                          <label className="block text-base text-slate-600 mb-1">Method</label>
+                          <select aria-label="Select box" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option>GET</option>
                             <option>POST</option>
                             <option>PUT</option>
@@ -593,8 +594,8 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                           </select>
                         </div>
                         <div>
-                          <label className="block text-sm text-slate-600 mb-1">Loại API</label>
-                          <select aria-label="Select box" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                          <label className="block text-base text-slate-600 mb-1">Loại API</label>
+                          <select aria-label="Select box" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option>API-KEY</option>
                             <option>CLIENT-SECRET</option>
                             <option>OAuth2</option>
@@ -605,29 +606,29 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
 
                     {/* Retry & Timeout */}
                     <div className="border-t border-slate-200 pt-4">
-                      <h4 className="text-sm text-slate-700 mb-3">Cấu hình Retry</h4>
+                      <h4 className="text-base text-slate-700 mb-3">Cấu hình Retry</h4>
                       <div className="grid grid-cols-3 gap-4">
                         <div>
-                          <label className="block text-sm text-slate-600 mb-1">Số lần thử</label>
-                          <select aria-label="Select box" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                          <label className="block text-base text-slate-600 mb-1">Số lần thử</label>
+                          <select aria-label="Select box" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option>1</option>
                             <option>2</option>
                             <option>3</option>
                           </select>
                         </div>
                         <div>
-                          <label className="block text-sm text-slate-600 mb-1">API Key</label>
+                          <label className="block text-base text-slate-600 mb-1">API Key</label>
                           <input aria-label="Input field"
                             type="text"
-                            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm text-slate-600 mb-1">Khoảng cách</label>
+                          <label className="block text-base text-slate-600 mb-1">Khoảng cách</label>
                           <input aria-label="Input field"
                             type="text"
                             placeholder="1 phút"
-                            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         </div>
                       </div>
@@ -635,19 +636,19 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
 
                     {/* Request/Response Sample */}
                     <div className="border-t border-slate-200 pt-4">
-                      <h4 className="text-sm text-slate-700 mb-3">Request Sample</h4>
+                      <h4 className="text-base text-slate-700 mb-3">Request Sample</h4>
                       <textarea aria-label="Text input"
                         rows={3}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
                         placeholder='{"key": "value"}'
                       />
                     </div>
 
                     <div className="border-t border-slate-200 pt-4">
-                      <h4 className="text-sm text-slate-700 mb-3">Response Sample</h4>
+                      <h4 className="text-base text-slate-700 mb-3">Response Sample</h4>
                       <textarea aria-label="Text input"
                         rows={3}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
                         placeholder="Chưa có query param nào"
                       />
                     </div>
@@ -659,21 +660,21 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                           type="checkbox"
                           className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                         />
-                        <span className="text-sm text-slate-700">Kích hoạt kết nối</span>
+                        <span className="text-base text-slate-700">Kích hoạt kết nối</span>
                       </label>
                     </div>
 
                     {/* Buttons */}
                     <div className="flex gap-3 pt-4">
-                      <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                      <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-base">
                         Lưu kết nối
                       </button>
-                      <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm">
+                      <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-base">
                         Kiểm tra kết nối
                       </button>
                       <button 
                         onClick={() => setShowAddApiModal(false)}
-                        className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-sm"
+                        className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-base"
                       >
                         Hủy
                       </button>
@@ -690,10 +691,10 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
           <div className="bg-white rounded-lg border border-slate-200">
             {/* Summary Header */}
             <div className="p-4 border-b border-slate-200 flex items-center justify-between">
-              <div className="text-sm text-slate-600">
+              <div className="text-base text-slate-600">
                 Tổng số lần đồng bộ: <span className="text-slate-900">{mockSyncHistory.length} lần</span>
               </div>
-              <button className="text-sm text-blue-600 hover:text-blue-700 transition-colors">
+              <button className="text-base text-blue-600 hover:text-blue-700 transition-colors">
                 Làm mới
               </button>
             </div>
@@ -703,27 +704,27 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
               <table className="w-full">
                 <thead className="bg-slate-50 border-b border-slate-200">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Thời gian</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Trạng thái</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Thêm mới</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Cập nhật</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Lỗi</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Tổng số</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Thời lượng</th>
-                    <th className="px-4 py-3 text-center text-xs text-slate-600 uppercase">Thao tác</th>
+                    <th className="px-4 py-3 text-left text-base text-slate-600 uppercase">Thời gian</th>
+                    <th className="px-4 py-3 text-left text-base text-slate-600 uppercase">Trạng thái</th>
+                    <th className="px-4 py-3 text-left text-base text-slate-600 uppercase">Thêm mới</th>
+                    <th className="px-4 py-3 text-left text-base text-slate-600 uppercase">Cập nhật</th>
+                    <th className="px-4 py-3 text-left text-base text-slate-600 uppercase">Lỗi</th>
+                    <th className="px-4 py-3 text-left text-base text-slate-600 uppercase">Tổng số</th>
+                    <th className="px-4 py-3 text-left text-base text-slate-600 uppercase">Thời lượng</th>
+                    <th className="px-4 py-3 text-center text-base text-slate-600 uppercase">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {mockSyncHistory.map((item, index) => (
                     <tr key={item.id} className="hover:bg-slate-50 transition-colors">
                       <td className="px-4 py-3">
-                        <div className="flex items-center gap-2 text-sm text-slate-600">
+                        <div className="flex items-center gap-2 text-base text-slate-600">
                           <Calendar className="w-4 h-4 text-slate-400" />
                           {item.syncTime}
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`inline-flex items-center gap-1 text-sm ${
+                        <span className={`inline-flex items-center gap-1 text-base ${
                           item.status === 'Thành công' 
                             ? 'text-green-600' 
                             : 'text-orange-600'
@@ -737,20 +738,20 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <div className="flex items-center gap-1 text-sm text-green-600">
+                        <div className="flex items-center gap-1 text-base text-green-600">
                           <span className="text-slate-400">↗</span>
                           {item.added}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-sm text-slate-900">{item.updated}</td>
-                      <td className="px-4 py-3 text-sm text-red-600">{item.errors}</td>
+                      <td className="px-4 py-3 text-base text-slate-900">{item.updated}</td>
+                      <td className="px-4 py-3 text-base text-red-600">{item.errors}</td>
                       <td className="px-4 py-3">
-                        <div className="flex items-center gap-1 text-sm text-slate-900">
+                        <div className="flex items-center gap-1 text-base text-slate-900">
                           <Database className="w-4 h-4 text-slate-400" />
                           {item.total}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-sm text-slate-600">{item.duration}</td>
+                      <td className="px-4 py-3 text-base text-slate-600">{item.duration}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-center gap-2">
                           {item.status === 'Mất phần' && (
@@ -783,7 +784,7 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
             <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <h3 className="text-lg text-slate-900">Chi tiết bản ghi</h3>
-                <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs ${
+                <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-base ${
                   selectedRecord.status === 'Mới' 
                     ? 'bg-green-50 text-green-700' 
                     : 'bg-blue-50 text-blue-700'
@@ -805,18 +806,18 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                 <div className={`grid grid-cols-3 gap-4 p-3 rounded ${
                   selectedRecord.changes.fullName ? 'bg-blue-50' : ''
                 }`}>
-                  <div className="text-sm text-slate-600">Họ tên</div>
+                  <div className="text-base text-slate-600">Họ tên</div>
                   {selectedRecord.changes.fullName ? (
                     <div className="col-span-2">
-                      <div className="text-sm text-slate-400 line-through mb-1">
+                      <div className="text-base text-slate-400 line-through mb-1">
                         {selectedRecord.changes.fullName.old}
                       </div>
-                      <div className="text-sm text-blue-700">
+                      <div className="text-base text-blue-700">
                         {selectedRecord.changes.fullName.new}
                       </div>
                     </div>
                   ) : (
-                    <div className="col-span-2 text-sm text-slate-900">
+                    <div className="col-span-2 text-base text-slate-900">
                       {selectedRecord.fullName}
                     </div>
                   )}
@@ -826,18 +827,18 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                 <div className={`grid grid-cols-3 gap-4 p-3 rounded ${
                   selectedRecord.changes.birthDate ? 'bg-blue-50' : ''
                 }`}>
-                  <div className="text-sm text-slate-600">Ngày sinh</div>
+                  <div className="text-base text-slate-600">Ngày sinh</div>
                   {selectedRecord.changes.birthDate ? (
                     <div className="col-span-2">
-                      <div className="text-sm text-slate-400 line-through mb-1">
+                      <div className="text-base text-slate-400 line-through mb-1">
                         {selectedRecord.changes.birthDate.old}
                       </div>
-                      <div className="text-sm text-blue-700">
+                      <div className="text-base text-blue-700">
                         {selectedRecord.changes.birthDate.new}
                       </div>
                     </div>
                   ) : (
-                    <div className="col-span-2 text-sm text-slate-900">
+                    <div className="col-span-2 text-base text-slate-900">
                       {selectedRecord.birthDate}
                     </div>
                   )}
@@ -847,18 +848,18 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                 <div className={`grid grid-cols-3 gap-4 p-3 rounded ${
                   selectedRecord.changes.nationality ? 'bg-blue-50' : ''
                 }`}>
-                  <div className="text-sm text-slate-600">Quốc tịch</div>
+                  <div className="text-base text-slate-600">Quốc tịch</div>
                   {selectedRecord.changes.nationality ? (
                     <div className="col-span-2">
-                      <div className="text-sm text-slate-400 line-through mb-1">
+                      <div className="text-base text-slate-400 line-through mb-1">
                         {selectedRecord.changes.nationality.old}
                       </div>
-                      <div className="text-sm text-blue-700">
+                      <div className="text-base text-blue-700">
                         {selectedRecord.changes.nationality.new}
                       </div>
                     </div>
                   ) : (
-                    <div className="col-span-2 text-sm text-slate-900">
+                    <div className="col-span-2 text-base text-slate-900">
                       {selectedRecord.nationality}
                     </div>
                   )}
@@ -868,18 +869,18 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                 <div className={`grid grid-cols-3 gap-4 p-3 rounded ${
                   selectedRecord.changes.certNumber ? 'bg-blue-50' : ''
                 }`}>
-                  <div className="text-sm text-slate-600">Số giấy chứng nhận</div>
+                  <div className="text-base text-slate-600">Số giấy chứng nhận</div>
                   {selectedRecord.changes.certNumber ? (
                     <div className="col-span-2">
-                      <div className="text-sm text-slate-400 line-through mb-1">
+                      <div className="text-base text-slate-400 line-through mb-1">
                         {selectedRecord.changes.certNumber.old}
                       </div>
-                      <div className="text-sm text-blue-700">
+                      <div className="text-base text-blue-700">
                         {selectedRecord.changes.certNumber.new}
                       </div>
                     </div>
                   ) : (
-                    <div className="col-span-2 text-sm text-slate-900">
+                    <div className="col-span-2 text-base text-slate-900">
                       {selectedRecord.certNumber}
                     </div>
                   )}
@@ -889,18 +890,18 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                 <div className={`grid grid-cols-3 gap-4 p-3 rounded ${
                   selectedRecord.changes.regDate ? 'bg-blue-50' : ''
                 }`}>
-                  <div className="text-sm text-slate-600">Ngày đăng ký</div>
+                  <div className="text-base text-slate-600">Ngày đăng ký</div>
                   {selectedRecord.changes.regDate ? (
                     <div className="col-span-2">
-                      <div className="text-sm text-slate-400 line-through mb-1">
+                      <div className="text-base text-slate-400 line-through mb-1">
                         {selectedRecord.changes.regDate.old}
                       </div>
-                      <div className="text-sm text-blue-700">
+                      <div className="text-base text-blue-700">
                         {selectedRecord.changes.regDate.new}
                       </div>
                     </div>
                   ) : (
-                    <div className="col-span-2 text-sm text-slate-900">
+                    <div className="col-span-2 text-base text-slate-900">
                       {selectedRecord.regDate}
                     </div>
                   )}
@@ -910,19 +911,19 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                 <div className={`grid grid-cols-3 gap-4 p-3 rounded ${
                   selectedRecord.changes.state ? 'bg-blue-50' : ''
                 }`}>
-                  <div className="text-sm text-slate-600">Trạng thái</div>
+                  <div className="text-base text-slate-600">Trạng thái</div>
                   {selectedRecord.changes.state ? (
                     <div className="col-span-2">
-                      <div className="text-sm text-slate-400 line-through mb-1">
+                      <div className="text-base text-slate-400 line-through mb-1">
                         {selectedRecord.changes.state.old}
                       </div>
-                      <div className="text-sm text-blue-700">
+                      <div className="text-base text-blue-700">
                         {selectedRecord.changes.state.new}
                       </div>
                     </div>
                   ) : (
                     <div className="col-span-2">
-                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs ${
+                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-base ${
                         selectedRecord.state === 'Đã duyệt' 
                           ? 'bg-green-50 text-green-700' 
                           : 'bg-yellow-50 text-yellow-700'
@@ -938,7 +939,7 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
               {/* Summary Info */}
               {selectedRecord.status === 'Cập nhật' && Object.keys(selectedRecord.changes).length > 0 && (
                 <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <div className="flex items-center gap-2 text-sm text-blue-700">
+                  <div className="flex items-center gap-2 text-base text-blue-700">
                     <Info className="w-4 h-4" />
                     <span>Có {Object.keys(selectedRecord.changes).length} trường dữ liệu được cập nhật (được bôi xanh)</span>
                   </div>
@@ -949,7 +950,7 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
               <div className="flex gap-3 mt-6 pt-4 border-t border-slate-200">
                 <button 
                   onClick={() => setShowDetailModal(false)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-base"
                 >
                   Đóng
                 </button>
@@ -976,12 +977,12 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
             <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
               <div className="grid grid-cols-2 gap-4 border-b border-slate-100 pb-4">
                 <div>
-                  <label className="block text-xs text-slate-500 mb-1">Thời điểm chạy</label>
-                  <p className="text-sm font-mono text-slate-900">{selectedSyncRecord.syncTime}</p>
+                  <label className="block text-base text-slate-500 mb-1">Thời điểm chạy</label>
+                  <p className="text-base font-mono text-slate-900">{selectedSyncRecord.syncTime}</p>
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-500 mb-1">Trạng thái</label>
-                  <span className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-amber-100 text-amber-700 rounded font-medium">
+                  <label className="block text-base text-slate-500 mb-1">Trạng thái</label>
+                  <span className="inline-flex items-center gap-1 text-base px-2 py-1 bg-amber-100 text-amber-700 rounded font-medium">
                     Mất phần
                   </span>
                 </div>
@@ -989,16 +990,16 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
 
               <div className="grid grid-cols-3 gap-4 pb-4 border-b border-slate-100">
                 <div>
-                  <label className="block text-xs text-slate-500 mb-1">Số lượng lỗi</label>
-                  <p className="text-sm font-mono text-red-600 font-bold">{selectedSyncRecord.errors}</p>
+                  <label className="block text-base text-slate-500 mb-1">Số lượng lỗi</label>
+                  <p className="text-base font-mono text-red-600 font-bold">{selectedSyncRecord.errors}</p>
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-500 mb-1">Thời gian xử lý</label>
-                  <p className="text-sm text-slate-900">{selectedSyncRecord.duration}</p>
+                  <label className="block text-base text-slate-500 mb-1">Thời gian xử lý</label>
+                  <p className="text-base text-slate-900">{selectedSyncRecord.duration}</p>
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-500 mb-1">Mã lỗi</label>
-                  <p className="text-sm text-red-600 font-medium">D-PARTIAL</p>
+                  <label className="block text-base text-slate-500 mb-1">Mã lỗi</label>
+                  <p className="text-base text-red-600 font-medium">D-PARTIAL</p>
                 </div>
               </div>
 
@@ -1006,10 +1007,10 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                 <div className="bg-amber-50 border-b border-amber-100 px-4 py-3 flex items-center justify-between">
                    <div className="flex items-center gap-2 text-amber-800">
                       <Info className="w-4 h-4" />
-                      <h4 className="font-semibold text-sm">Chi tiết lỗi dữ liệu: Bản ghi thiếu trường bắt buộc</h4>
+                      <h4 className="font-semibold text-base">Chi tiết lỗi dữ liệu: Bản ghi thiếu trường bắt buộc</h4>
                    </div>
                 </div>
-                <table className="w-full text-left text-sm">
+                <table className="w-full text-left text-base">
                   <thead className="bg-[#f8f7f5] text-slate-700 font-medium border-b border-slate-200">
                     <tr>
                       <th className="px-4 py-2 w-1/4">ID bản ghi</th>
@@ -1019,31 +1020,31 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     <tr className="hover:bg-slate-50 transition-colors">
-                      <td className="px-4 py-3 font-mono text-xs text-slate-600">REC-001</td>
-                      <td className="px-4 py-3 font-mono text-xs text-slate-600 bg-slate-50 rounded border border-slate-100">{"{\"fullName\": \"Nguyễn Văn A\"}"}</td>
+                      <td className="px-4 py-3 font-mono text-base text-slate-600">REC-001</td>
+                      <td className="px-4 py-3 font-mono text-base text-slate-600 bg-slate-50 rounded border border-slate-100">{"{\"fullName\": \"Nguyễn Văn A\"}"}</td>
                       <td className="px-4 py-3">
                         <div className="flex flex-wrap gap-1.5">
-                           <span className="px-2 py-1 bg-red-50 text-red-700 border border-red-200 rounded text-xs font-mono font-medium">birthDate</span>
-                           <span className="px-2 py-1 bg-red-50 text-red-700 border border-red-200 rounded text-xs font-mono font-medium">nationality</span>
+                           <span className="px-2 py-1 bg-red-50 text-red-700 border border-red-200 rounded text-base font-mono font-medium">birthDate</span>
+                           <span className="px-2 py-1 bg-red-50 text-red-700 border border-red-200 rounded text-base font-mono font-medium">nationality</span>
                         </div>
                       </td>
                     </tr>
                     <tr className="hover:bg-slate-50 transition-colors">
-                      <td className="px-4 py-3 font-mono text-xs text-slate-600">REC-045</td>
-                      <td className="px-4 py-3 font-mono text-xs text-slate-600 bg-slate-50 rounded border border-slate-100">{"{\"fullName\": \"Trần Thị B\", \"nationality\": \"VN\"}"}</td>
+                      <td className="px-4 py-3 font-mono text-base text-slate-600">REC-045</td>
+                      <td className="px-4 py-3 font-mono text-base text-slate-600 bg-slate-50 rounded border border-slate-100">{"{\"fullName\": \"Trần Thị B\", \"nationality\": \"VN\"}"}</td>
                       <td className="px-4 py-3">
                         <div className="flex flex-wrap gap-1.5">
-                           <span className="px-2 py-1 bg-red-50 text-red-700 border border-red-200 rounded text-xs font-mono font-medium">birthDate</span>
+                           <span className="px-2 py-1 bg-red-50 text-red-700 border border-red-200 rounded text-base font-mono font-medium">birthDate</span>
                         </div>
                       </td>
                     </tr>
                     <tr className="hover:bg-slate-50 transition-colors">
-                      <td className="px-4 py-3 font-mono text-xs text-slate-600">REC-112</td>
-                      <td className="px-4 py-3 font-mono text-xs text-slate-600 bg-slate-50 rounded border border-slate-100">{"{\"fullName\": \"\"}"}</td>
+                      <td className="px-4 py-3 font-mono text-base text-slate-600">REC-112</td>
+                      <td className="px-4 py-3 font-mono text-base text-slate-600 bg-slate-50 rounded border border-slate-100">{"{\"fullName\": \"\"}"}</td>
                       <td className="px-4 py-3">
                         <div className="flex flex-wrap gap-1.5">
-                           <span className="px-2 py-1 bg-red-50 text-red-700 border border-red-200 rounded text-xs font-mono font-medium">fullName.EMPTY</span>
-                           <span className="px-2 py-1 bg-red-50 text-red-700 border border-red-200 rounded text-xs font-mono font-medium">certNumber</span>
+                           <span className="px-2 py-1 bg-red-50 text-red-700 border border-red-200 rounded text-base font-mono font-medium">fullName.EMPTY</span>
+                           <span className="px-2 py-1 bg-red-50 text-red-700 border border-red-200 rounded text-base font-mono font-medium">certNumber</span>
                         </div>
                       </td>
                     </tr>
@@ -1055,7 +1056,7 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
             <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200">
               <button
                 onClick={() => setShowSyncErrorModal(false)}
-                className="px-4 py-2 text-sm text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                className="px-4 py-2 text-base text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
               >
                 Đóng
               </button>
@@ -1063,6 +1064,7 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }

@@ -29,7 +29,7 @@ export function EditDataCollectionModal({ isOpen, onClose, onSave, initialData }
       <button
         type="button"
         onClick={onClose}
-        className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium text-sm flex items-center gap-2"
+        className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium text-base flex items-center gap-2"
       >
         <X className="w-4 h-4" />
         Hủy bỏ
@@ -37,7 +37,7 @@ export function EditDataCollectionModal({ isOpen, onClose, onSave, initialData }
       <button
         type="button"
         onClick={handleSubmit}
-        className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium text-sm flex items-center gap-2"
+        className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium text-base flex items-center gap-2"
       >
         <Save className="w-4 h-4" />
         Cập nhật
@@ -46,6 +46,7 @@ export function EditDataCollectionModal({ isOpen, onClose, onSave, initialData }
   );
 
   return (
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
     <BaseModal
       isOpen={isOpen}
       onClose={onClose}
@@ -57,7 +58,7 @@ export function EditDataCollectionModal({ isOpen, onClose, onSave, initialData }
       <form onSubmit={handleSubmit} className="space-y-6 flex flex-col">
         <div className="grid grid-cols-2 gap-6 bg-slate-50 p-5 rounded-xl border border-slate-100">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-base font-medium text-slate-700 mb-2">
               Cơ quan nguồn / Cục Vụ <span className="text-red-500">*</span>
             </label>
             <input aria-label="Input field"
@@ -67,11 +68,11 @@ export function EditDataCollectionModal({ isOpen, onClose, onSave, initialData }
               placeholder="Cơ quan nguồn / Cục Vụ"
               value={formData?.department || ''}
               onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
+              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-base font-medium text-slate-700 mb-2">
               Tên Dữ liệu <span className="text-red-500">*</span>
             </label>
             <input aria-label="Input field"
@@ -81,14 +82,14 @@ export function EditDataCollectionModal({ isOpen, onClose, onSave, initialData }
               placeholder="Tên Dữ liệu"
               value={formData?.dataName || ''}
               onChange={(e) => setFormData({ ...formData, dataName: e.target.value })}
-              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
+              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
             />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-6 bg-slate-50 p-5 rounded-xl border border-slate-100 mt-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-base font-medium text-slate-700 mb-2">
                 Tần suất thu thập <span className="text-red-500">*</span>
               </label>
               <select
@@ -97,7 +98,7 @@ export function EditDataCollectionModal({ isOpen, onClose, onSave, initialData }
                 aria-label="Tần suất thu thập"
                 value={formData?.frequency || 'Hằng ngày'}
                 onChange={(e) => setFormData({ ...formData, frequency: e.target.value })}
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
+                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
               >
                 <option value="Hằng ngày">Hằng ngày</option>
                 <option value="Hằng tuần">Hằng tuần</option>
@@ -105,7 +106,7 @@ export function EditDataCollectionModal({ isOpen, onClose, onSave, initialData }
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-base font-medium text-slate-700 mb-2">
                 Định dạng trả về <span className="text-red-500">*</span>
               </label>
               <select
@@ -114,7 +115,7 @@ export function EditDataCollectionModal({ isOpen, onClose, onSave, initialData }
                 aria-label="Định dạng trả về"
                 value={formData?.format || 'JSON'}
                 onChange={(e) => setFormData({ ...formData, format: e.target.value })}
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
+                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
               >
                 <option value="JSON">JSON (API)</option>
                 <option value="XML">XML (SOAP)</option>
@@ -124,5 +125,6 @@ export function EditDataCollectionModal({ isOpen, onClose, onSave, initialData }
         </div>
       </form>
     </BaseModal>
+    </div>
   );
 }

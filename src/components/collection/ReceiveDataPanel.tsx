@@ -137,6 +137,7 @@ export function ReceiveDataPanel() {
   };
 
   return (
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
     <div className="space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -146,7 +147,7 @@ export function ReceiveDataPanel() {
               <Database className="w-6 h-6 text-blue-600" />
             </div>
           </div>
-          <p className="text-gray-500 text-sm mb-1">Đang tiếp nhận</p>
+          <p className="text-gray-500 text-base mb-1">Đang tiếp nhận</p>
           <p className="text-gray-900">3</p>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -155,7 +156,7 @@ export function ReceiveDataPanel() {
               <CheckCircle className="w-6 h-6 text-green-600" />
             </div>
           </div>
-          <p className="text-gray-500 text-sm mb-1">Đã tiếp nhận (Hôm nay)</p>
+          <p className="text-gray-500 text-base mb-1">Đã tiếp nhận (Hôm nay)</p>
           <p className="text-gray-900">45</p>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -164,7 +165,7 @@ export function ReceiveDataPanel() {
               <FileText className="w-6 h-6 text-purple-600" />
             </div>
           </div>
-          <p className="text-gray-500 text-sm mb-1">Tổng bản ghi (Hôm nay)</p>
+          <p className="text-gray-500 text-base mb-1">Tổng bản ghi (Hôm nay)</p>
           <p className="text-gray-900">45,678</p>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -173,7 +174,7 @@ export function ReceiveDataPanel() {
               <Clock className="w-6 h-6 text-orange-600" />
             </div>
           </div>
-          <p className="text-gray-500 text-sm mb-1">Dung lượng (Hôm nay)</p>
+          <p className="text-gray-500 text-base mb-1">Dung lượng (Hôm nay)</p>
           <p className="text-gray-900">234.5 MB</p>
         </div>
       </div>
@@ -182,7 +183,7 @@ export function ReceiveDataPanel() {
       <div className="bg-white rounded-lg border border-gray-200">
         <div className="px-6 py-4 border-b border-gray-200">
           <h3 className="text-gray-900">Hàng đợi tiếp nhận dữ liệu</h3>
-          <p className="text-gray-500 text-sm mt-1">Danh sách dữ liệu đã tiếp nhận từ các hệ thống nguồn</p>
+          <p className="text-gray-500 text-base mt-1">Danh sách dữ liệu đã tiếp nhận từ các hệ thống nguồn</p>
         </div>
         <div className="p-6 space-y-4">
           {receivedData.map((item) => (
@@ -199,11 +200,11 @@ export function ReceiveDataPanel() {
                   </div>
                   <div>
                     <h4 className="text-gray-900 mb-1">{item.source}</h4>
-                    <p className="text-gray-500 text-sm">Mã nguồn: {item.sourceId}</p>
-                    <p className="text-gray-500 text-sm">Mã giao dịch: {item.transaction}</p>
+                    <p className="text-gray-500 text-base">Mã nguồn: {item.sourceId}</p>
+                    <p className="text-gray-500 text-base">Mã giao dịch: {item.transaction}</p>
                   </div>
                 </div>
-                <span className={`px-4 py-2 rounded-full text-sm ${
+                <span className={`px-4 py-2 rounded-full text-base ${
                   item.status === 'received' 
                     ? 'bg-green-100 text-green-700' 
                     : 'bg-blue-100 text-blue-700'
@@ -215,28 +216,28 @@ export function ReceiveDataPanel() {
               {/* Details Grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
                 <div>
-                  <p className="text-gray-500 text-sm mb-1">Thời gian tiếp nhận</p>
-                  <p className="text-gray-900 text-sm">{item.receiveTime}</p>
+                  <p className="text-gray-500 text-base mb-1">Thời gian tiếp nhận</p>
+                  <p className="text-gray-900 text-base">{item.receiveTime}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500 text-sm mb-1">Loại dữ liệu</p>
-                  <p className="text-gray-900 text-sm">{item.dataType}</p>
+                  <p className="text-gray-500 text-base mb-1">Loại dữ liệu</p>
+                  <p className="text-gray-900 text-base">{item.dataType}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500 text-sm mb-1">Định dạng</p>
-                  <p className="text-gray-900 text-sm">{item.format}</p>
+                  <p className="text-gray-500 text-base mb-1">Định dạng</p>
+                  <p className="text-gray-900 text-base">{item.format}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500 text-sm mb-1">Số bản ghi</p>
-                  <p className="text-gray-900 text-sm">{item.records.toLocaleString()}</p>
+                  <p className="text-gray-500 text-base mb-1">Số bản ghi</p>
+                  <p className="text-gray-900 text-base">{item.records.toLocaleString()}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500 text-sm mb-1">Dung lượng</p>
-                  <p className="text-gray-900 text-sm">{item.size}</p>
+                  <p className="text-gray-500 text-base mb-1">Dung lượng</p>
+                  <p className="text-gray-900 text-base">{item.size}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500 text-sm mb-1">Bước tiếp theo</p>
-                  <p className="text-blue-600 text-sm">{item.nextStep}</p>
+                  <p className="text-gray-500 text-base mb-1">Bước tiếp theo</p>
+                  <p className="text-blue-600 text-base">{item.nextStep}</p>
                 </div>
               </div>
 
@@ -249,30 +250,30 @@ export function ReceiveDataPanel() {
                   </div>
                   <div className="grid grid-cols-5 gap-3">
                     <div className="bg-white p-3 rounded-lg">
-                      <p className="text-gray-500 text-xs mb-1">Hợp lệ</p>
+                      <p className="text-gray-500 text-base mb-1">Hợp lệ</p>
                       <p className="text-green-600">{item.validationResults.passed.toLocaleString()}</p>
                     </div>
                     <div 
                       onClick={() => item.validationResults.failed > 0 && handleShowValidation(item, 'errors')}
                       className={`bg-white p-3 rounded-lg ${item.validationResults.failed > 0 ? 'cursor-pointer hover:bg-red-50 hover:border-red-300 border-2 border-transparent transition-all' : ''}`}
                     >
-                      <p className="text-gray-500 text-xs mb-1">Lỗi</p>
+                      <p className="text-gray-500 text-base mb-1">Lỗi</p>
                       <p className="text-red-600">{item.validationResults.failed.toLocaleString()}</p>
                     </div>
                     <div 
                       onClick={() => item.validationResults.warnings > 0 && handleShowValidation(item, 'warnings')}
                       className={`bg-white p-3 rounded-lg ${item.validationResults.warnings > 0 ? 'cursor-pointer hover:bg-orange-50 hover:border-orange-300 border-2 border-transparent transition-all' : ''}`}
                     >
-                      <p className="text-gray-500 text-xs mb-1">Cảnh báo</p>
+                      <p className="text-gray-500 text-base mb-1">Cảnh báo</p>
                       <p className="text-orange-600">{item.validationResults.warnings.toLocaleString()}</p>
                     </div>
                     <div 
                       onClick={() => item.validationResults.notifications > 0 && handleShowValidation(item, 'notifications')}
                       className={`bg-white p-3 rounded-lg ${item.validationResults.notifications > 0 ? 'cursor-pointer hover:bg-blue-50 hover:border-blue-300 border-2 border-transparent transition-all' : ''}`}
                     >
-                      <p className="text-gray-500 text-xs mb-1">Thông báo</p>
+                      <p className="text-gray-500 text-base mb-1">Thông báo</p>
                       {item.validationResults.notifications > 0 ? (
-                        <p className="text-blue-600 text-sm">{item.validationResults.notifications} gửi</p>
+                        <p className="text-blue-600 text-base">{item.validationResults.notifications} gửi</p>
                       ) : (
                         <p className="text-gray-400">-</p>
                       )}
@@ -281,9 +282,9 @@ export function ReceiveDataPanel() {
                       onClick={() => item.validationResults.responsesTotal > 0 && handleShowValidation(item, 'responses')}
                       className={`bg-white p-3 rounded-lg ${item.validationResults.responsesTotal > 0 ? 'cursor-pointer hover:bg-green-50 hover:border-green-300 border-2 border-transparent transition-all' : ''}`}
                     >
-                      <p className="text-gray-500 text-xs mb-1">Phản hồi</p>
+                      <p className="text-gray-500 text-base mb-1">Phản hồi</p>
                       {item.validationResults.responsesTotal > 0 ? (
-                        <p className={`text-sm ${item.validationResults.responsesReceived === item.validationResults.responsesTotal ? 'text-green-600' : 'text-orange-600'}`}>
+                        <p className={`text-base ${item.validationResults.responsesReceived === item.validationResults.responsesTotal ? 'text-green-600' : 'text-orange-600'}`}>
                           {item.validationResults.responsesReceived}/{item.validationResults.responsesTotal}
                         </p>
                       ) : (
@@ -298,7 +299,7 @@ export function ReceiveDataPanel() {
                 <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                   <div className="flex items-center gap-2">
                     <AlertTriangle className="w-5 h-5 text-yellow-600" />
-                    <p className="text-gray-900 text-sm">Chưa kiểm tra chất lượng - Nhấn "Kiểm tra ngay" để bắt đầu</p>
+                    <p className="text-gray-900 text-base">Chưa kiểm tra chất lượng - Nhấn "Kiểm tra ngay" để bắt đầu</p>
                   </div>
                 </div>
               )}
@@ -308,19 +309,19 @@ export function ReceiveDataPanel() {
                 {item.status === 'received' && (
                   <button 
                     onClick={() => handleViewData(item)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm inline-flex items-center gap-2"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-base inline-flex items-center gap-2"
                   >
                     <Eye className="w-4 h-4" />
                     Xem dữ liệu đã nhận
                   </button>
                 )}
-                <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm">
+                <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-base">
                   {item.status === 'received' ? 'Xem chi tiết' : 'Xem tiến độ'}
                 </button>
-                <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm">
+                <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-base">
                   Kiểm tra ngay
                 </button>
-                <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm">
+                <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-base">
                   Xem log
                 </button>
               </div>
@@ -340,7 +341,7 @@ export function ReceiveDataPanel() {
               <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
               <div className="flex-1">
                 <p className="text-gray-900">Tiếp nhận thành công từ Hộ tịch điện tử</p>
-                <p className="text-gray-500 text-sm mt-1">
+                <p className="text-gray-500 text-base mt-1">
                   Mã GD: TXN-2025120701234 • 2,345 bản ghi • 12.5 MB • 10:30:18 - 07/12/2025
                 </p>
               </div>
@@ -351,7 +352,7 @@ export function ReceiveDataPanel() {
               <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
               <div className="flex-1">
                 <p className="text-gray-900">Tiếp nhận thành công từ Thi hành án dân sự</p>
-                <p className="text-gray-500 text-sm mt-1">
+                <p className="text-gray-500 text-base mt-1">
                   Mã GD: TXN-2025120701235 • 1,892 bản ghi • 8.3 MB • 10:25:12 - 07/12/2025
                 </p>
               </div>
@@ -362,7 +363,7 @@ export function ReceiveDataPanel() {
               <Clock className="w-5 h-5 text-blue-600 mt-0.5" />
               <div className="flex-1">
                 <p className="text-gray-900">Đang tiếp nhận từ Công chứng</p>
-                <p className="text-gray-500 text-sm mt-1">
+                <p className="text-gray-500 text-base mt-1">
                   Mã GD: TXN-2025120701237 • Tiến độ: 45% • 10:15:45 - 07/12/2025
                 </p>
               </div>
@@ -398,6 +399,7 @@ export function ReceiveDataPanel() {
           data={getValidationModalData()}
         />
       )}
+    </div>
     </div>
   );
 }

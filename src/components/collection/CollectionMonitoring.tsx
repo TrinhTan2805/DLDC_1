@@ -99,11 +99,12 @@ const getStatusColor = (status: string) => {
 
 export function CollectionMonitoring() {
   return (
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
     <div className="space-y-6">
       <div className="bg-white rounded-lg border border-gray-200">
         <div className="px-6 py-4 border-b border-gray-200">
           <h3 className="text-gray-900">Theo dõi chi tiết quá trình thu thập</h3>
-          <p className="text-gray-500 text-sm mt-1">Giám sát từng bước trong quy trình thu thập dữ liệu</p>
+          <p className="text-gray-500 text-base mt-1">Giám sát từng bước trong quy trình thu thập dữ liệu</p>
         </div>
         <div className="p-6 space-y-6">
           {activeCollections.map((item) => (
@@ -113,9 +114,9 @@ export function CollectionMonitoring() {
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="text-gray-900 mb-1">{item.source}</h4>
-                    <p className="text-gray-500 text-sm">Mã giao dịch: {item.transaction}</p>
+                    <p className="text-gray-500 text-base">Mã giao dịch: {item.transaction}</p>
                   </div>
-                  <span className={`px-4 py-2 rounded-full text-sm border ${
+                  <span className={`px-4 py-2 rounded-full text-base border ${
                     item.status === 'completed' ? 'bg-green-100 text-green-700 border-green-200' :
                     item.status === 'processing' ? 'bg-blue-100 text-blue-700 border-blue-200' :
                     'bg-red-100 text-red-700 border-red-200'
@@ -129,8 +130,8 @@ export function CollectionMonitoring() {
               {/* Progress Bar */}
               <div className="px-6 py-3 bg-white border-b border-gray-200">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-gray-600 text-sm">Tiến độ</span>
-                  <span className="text-gray-900 text-sm">Bước {item.currentStep}/{item.totalSteps}</span>
+                  <span className="text-gray-600 text-base">Tiến độ</span>
+                  <span className="text-gray-900 text-base">Bước {item.currentStep}/{item.totalSteps}</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div 
@@ -170,9 +171,9 @@ export function CollectionMonitoring() {
                       <div className="flex-1 pb-4">
                         <div className="flex items-center justify-between mb-2">
                           <h5 className="text-gray-900">Bước {index + 1}: {step.name}</h5>
-                          <span className="text-gray-500 text-sm">{step.time}</span>
+                          <span className="text-gray-500 text-base">{step.time}</span>
                         </div>
-                        <p className={`text-sm ${
+                        <p className={`text-base ${
                           step.status === 'error' ? 'text-red-600' :
                           step.status === 'skipped' ? 'text-gray-500' :
                           'text-gray-600'
@@ -201,15 +202,15 @@ export function CollectionMonitoring() {
               <div className="flex-1">
                 <h4 className="text-red-900 mb-2">Hệ thống B - 45 lỗi được phát hiện</h4>
                 <div className="space-y-2">
-                  <div className="bg-white rounded p-3 text-sm">
+                  <div className="bg-white rounded p-3 text-base">
                     <p className="text-gray-900 mb-1"><span className="font-medium">Lỗi 1:</span> Thiếu trường bắt buộc "so_cccd"</p>
                     <p className="text-gray-600">Vị trí: Dòng 15, 23, 45 (3 bản ghi)</p>
                   </div>
-                  <div className="bg-white rounded p-3 text-sm">
+                  <div className="bg-white rounded p-3 text-base">
                     <p className="text-gray-900 mb-1"><span className="font-medium">Lỗi 2:</span> Định dạng ngày tháng không hợp lệ</p>
                     <p className="text-gray-600">Vị trí: Dòng 78, 92, 103 (3 bản ghi)</p>
                   </div>
-                  <div className="bg-white rounded p-3 text-sm">
+                  <div className="bg-white rounded p-3 text-base">
                     <p className="text-gray-900 mb-1"><span className="font-medium">Lỗi 3:</span> Dữ liệu trùng lặp</p>
                     <p className="text-gray-600">28 bản ghi bị trùng với dữ liệu đã có trong hệ thống</p>
                   </div>
@@ -219,6 +220,7 @@ export function CollectionMonitoring() {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

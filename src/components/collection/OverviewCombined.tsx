@@ -157,17 +157,18 @@ export function OverviewCombined() {
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case 'high':
-        return <span className="px-3 py-1 rounded-full text-sm bg-red-100 text-red-700">Cao</span>;
+        return <span className="px-3 py-1 rounded-full text-base bg-red-100 text-red-700">Cao</span>;
       case 'medium':
-        return <span className="px-3 py-1 rounded-full text-sm bg-yellow-100 text-yellow-700">Trung bình</span>;
+        return <span className="px-3 py-1 rounded-full text-base bg-yellow-100 text-yellow-700">Trung bình</span>;
       case 'low':
-        return <span className="px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-700">Thấp</span>;
+        return <span className="px-3 py-1 rounded-full text-base bg-blue-100 text-blue-700">Thấp</span>;
       default:
         return null;
     }
   };
 
   return (
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
     <div className="space-y-8">
       {/* Header with Add Button */}
       <div className="flex items-center justify-between">
@@ -196,7 +197,7 @@ export function OverviewCombined() {
               <p className="text-slate-500 text-base">Tổng nguồn</p>
             </div>
             <p className="text-base font-semibold text-slate-900">24</p>
-            <p className="text-sm text-green-600 mt-1">+2 so với tháng trước</p>
+            <p className="text-base text-green-600 mt-1">+2 so với tháng trước</p>
           </div>
 
           <div className="bg-white rounded-lg border border-slate-200 p-4">
@@ -207,7 +208,7 @@ export function OverviewCombined() {
               <p className="text-slate-500 text-base">Thành công</p>
             </div>
             <p className="text-base font-semibold text-green-600">18</p>
-            <p className="text-sm text-green-600 mt-1">75% tỷ lệ thành công</p>
+            <p className="text-base text-green-600 mt-1">75% tỷ lệ thành công</p>
           </div>
 
           <div className="bg-white rounded-lg border border-slate-200 p-4">
@@ -218,7 +219,7 @@ export function OverviewCombined() {
               <p className="text-slate-500 text-base">Đang xử lý</p>
             </div>
             <p className="text-base font-semibold text-orange-600">4</p>
-            <p className="text-sm text-slate-500 mt-1">Đồng bộ trong 24h</p>
+            <p className="text-base text-slate-500 mt-1">Đồng bộ trong 24h</p>
           </div>
 
           <div className="bg-white rounded-lg border border-slate-200 p-4">
@@ -229,7 +230,7 @@ export function OverviewCombined() {
               <p className="text-slate-500 text-base">Lỗi</p>
             </div>
             <p className="text-base font-semibold text-red-600">2</p>
-            <p className="text-sm text-red-600 mt-1">Cần xử lý ngay</p>
+            <p className="text-base text-red-600 mt-1">Cần xử lý ngay</p>
           </div>
 
           <div className="bg-white rounded-lg border border-slate-200 p-4">
@@ -240,7 +241,7 @@ export function OverviewCombined() {
               <p className="text-slate-500 text-base">Hôm nay</p>
             </div>
             <p className="text-base font-semibold text-purple-600">45,678</p>
-            <p className="text-sm text-green-600 mt-1">+12.5% so với hôm qua</p>
+            <p className="text-base text-green-600 mt-1">+12.5% so với hôm qua</p>
           </div>
         </div>
 
@@ -420,6 +421,7 @@ export function OverviewCombined() {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

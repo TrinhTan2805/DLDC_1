@@ -503,7 +503,7 @@ export function ProcessingRuleSetupPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
       {/* Stats */}
       <div className="grid grid-cols-5 gap-4">
         <div className="bg-white border border-slate-200 rounded-lg p-4">

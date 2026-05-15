@@ -175,6 +175,7 @@ import { ProcessingCooperationDeptPage } from '../pages/processing/ProcessingCoo
 import { ProcessingCooperationDbPage } from '../pages/processing/ProcessingCooperationDbPage';
 import { ProcessingCooperationPage } from '../pages/processing/ProcessingCooperationPage';
 import { TargetDatabaseManagementPage } from '../pages/processing/TargetDatabaseManagementPage';
+import { TargetDatabaseDetailPage } from '../pages/processing/TargetDatabaseDetailPage';
 import { NotificationBrowser } from '../notifications/NotificationBrowser';
 import { UserGuidePage } from '../pages/UserGuidePage';
 import { DataManagementDetail } from '../collection/DataManagementDetail';
@@ -336,6 +337,10 @@ const pageConfig: Record<string, { title: string; description: string }> = {
   'target-database-management': {
     title: 'Quản lý CSDL đích',
     description: 'Quản lý danh sách kết nối và cấu trúc các cơ sở dữ liệu đích'
+  },
+  'target-database-detail': {
+    title: 'Chi tiết CSDL đích',
+    description: 'Xem chi tiết thông tin và cấu trúc của cơ sở dữ liệu đích'
   }
 };
 
@@ -363,7 +368,8 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
   // User role - for demo purposes, set to 'leader' to show publish tab
   const userRole: 'leader' | 'staff' | 'admin' = 'leader';
 
-  const currentPageConfig = pageConfig[currentPage] || pageConfig.dashboard;
+  const basePage = currentPage.startsWith('target-database-detail-') ? 'target-database-detail' : currentPage;
+  const currentPageConfig = pageConfig[basePage] || pageConfig.dashboard;
 
   useEffect(() => {
     (window as any).navigateToPage = (pageId: string) => {
@@ -434,6 +440,7 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'processing-internal' && <DataProcessingPage initialCategory="Dữ liệu trong ngành" />}
             {currentPage === 'processed-data' && <ProcessedDataPage title="Dữ liệu đã xử lý" dataType="Toàn cục" />}
             {currentPage === 'target-database-management' && <TargetDatabaseManagementPage />}
+            {currentPage.startsWith('target-database-detail-') && <TargetDatabaseDetailPage databaseId={currentPage.replace('target-database-detail-', '')} />}
             {currentPage === 'category' && <CategoryManagementPage />}
             {currentPage === 'category-setup' && <CategorySetupPage userRole={userRole} />}
             {currentPage === 'category-a' && <CategoryAPage />}
@@ -959,6 +966,10 @@ const getBreadcrumbPath = (pageId: string): string[] => {
     // User Guide
     'user-guide': ['Hướng dẫn sử dụng'],
   };
+
+  if (pageId.startsWith('target-database-detail-')) {
+    return ['Xử lý dữ liệu', 'Quản lý CSDL đích', 'Chi tiết CSDL đích'];
+  }
 
   return breadcrumbMap[pageId] || [pageConfig[pageId]?.title || 'Trang chủ'];
 };

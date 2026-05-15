@@ -66,6 +66,7 @@ export function AddDataSourceForm({ onBack }: AddDataSourceFormProps) {
   };
 
   return (
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
@@ -77,7 +78,7 @@ export function AddDataSourceForm({ onBack }: AddDataSourceFormProps) {
         </button>
         <div>
           <h2 className="text-slate-900">Thêm mới phương thức thu thập dữ liệu</h2>
-          <p className="text-sm text-slate-500 mt-1">Thêm phương thức để thu thập dữ liệu mới qua API</p>
+          <p className="text-base text-slate-500 mt-1">Thêm phương thức để thu thập dữ liệu mới qua API</p>
         </div>
       </div>
 
@@ -88,7 +89,7 @@ export function AddDataSourceForm({ onBack }: AddDataSourceFormProps) {
           <h3 className="text-slate-900 mb-4">Thông tin cơ bản</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-slate-700 mb-2">
+              <label className="block text-base text-slate-700 mb-2">
                 Tên phương thức <span className="text-red-500">*</span>
               </label>
               <input aria-label="Input field"
@@ -97,11 +98,11 @@ export function AddDataSourceForm({ onBack }: AddDataSourceFormProps) {
                 placeholder="Nhập tên phương thức"
                 value={formData.methodName}
                 onChange={(e) => setFormData({ ...formData, methodName: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="block text-sm text-slate-700 mb-2">
+              <label className="block text-base text-slate-700 mb-2">
                 Bộ ban ngành <span className="text-red-500">*</span>
               </label>
               <input aria-label="Input field"
@@ -110,11 +111,11 @@ export function AddDataSourceForm({ onBack }: AddDataSourceFormProps) {
                 placeholder="Nhập tên bộ ban ngành"
                 value={formData.department}
                 onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="block text-sm text-slate-700 mb-2">
+              <label className="block text-base text-slate-700 mb-2">
                 Cơ sở dữ liệu <span className="text-red-500">*</span>
               </label>
               <input aria-label="Input field"
@@ -123,11 +124,11 @@ export function AddDataSourceForm({ onBack }: AddDataSourceFormProps) {
                 placeholder="Nhập tên cơ sở dữ liệu"
                 value={formData.database}
                 onChange={(e) => setFormData({ ...formData, database: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="block text-sm text-slate-700 mb-2">
+              <label className="block text-base text-slate-700 mb-2">
                 Tần suất thu thập <span className="text-red-500">*</span>
               </label>
               <input aria-label="Input field"
@@ -136,25 +137,25 @@ export function AddDataSourceForm({ onBack }: AddDataSourceFormProps) {
                 placeholder="Ví dụ: Hằng ngày, Hằng tuần, Hằng tháng"
                 value={formData.frequency}
                 onChange={(e) => setFormData({ ...formData, frequency: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
           <div className="mt-4">
-            <label className="block text-sm text-slate-700 mb-2">Mô tả</label>
+            <label className="block text-base text-slate-700 mb-2">Mô tả</label>
             <textarea aria-label="Text input"
               rows={3}
               placeholder="Nhập mô tả chi tiết về phương thức thu thập dữ liệu này"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
         </div>
 
         {/* Loại kết nối */}
         <div>
-          <label className="block text-sm text-slate-700 mb-3">Loại kết nối</label>
+          <label className="block text-base text-slate-700 mb-3">Loại kết nối</label>
           <div className="flex gap-4">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
@@ -165,7 +166,7 @@ export function AddDataSourceForm({ onBack }: AddDataSourceFormProps) {
                 onChange={(e) => setFormData({ ...formData, connectionType: e.target.value })}
                 className="w-4 h-4 text-blue-600"
               />
-              <span className="text-sm text-slate-700">Kết nối trực tiếp</span>
+              <span className="text-base text-slate-700">Kết nối trực tiếp</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
               <input
@@ -176,7 +177,7 @@ export function AddDataSourceForm({ onBack }: AddDataSourceFormProps) {
                 onChange={(e) => setFormData({ ...formData, connectionType: e.target.value })}
                 className="w-4 h-4 text-blue-600"
               />
-              <span className="text-sm text-slate-700">Qua ICGP</span>
+              <span className="text-base text-slate-700">Qua ICGP</span>
             </label>
           </div>
         </div>
@@ -186,7 +187,7 @@ export function AddDataSourceForm({ onBack }: AddDataSourceFormProps) {
           <h3 className="text-slate-900 mb-4">Thông tin API</h3>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm text-slate-700 mb-2">
+              <label className="block text-base text-slate-700 mb-2">
                 API Endpoint <span className="text-red-500">*</span>
               </label>
               <input aria-label="Input field"
@@ -195,18 +196,18 @@ export function AddDataSourceForm({ onBack }: AddDataSourceFormProps) {
                 placeholder="https://api.example.gov.vn/v1/data"
                 value={formData.apiEndpoint}
                 onChange={(e) => setFormData({ ...formData, apiEndpoint: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm text-slate-700 mb-2">
+              <label className="block text-base text-slate-700 mb-2">
                 Phương thức HTTP <span className="text-red-500">*</span>
               </label>
               <select aria-label="Select box"
                 value={formData.httpMethod}
                 onChange={(e) => setFormData({ ...formData, httpMethod: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="GET">GET</option>
                 <option value="POST">POST</option>
@@ -218,11 +219,11 @@ export function AddDataSourceForm({ onBack }: AddDataSourceFormProps) {
             {/* Headers */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm text-slate-700">Headers</label>
+                <label className="block text-base text-slate-700">Headers</label>
                 <button
                   type="button"
                   onClick={addHeader}
-                  className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                  className="text-base text-blue-600 hover:text-blue-700 flex items-center gap-1"
                 >
                   <Plus className="w-4 h-4" />
                   Thêm header
@@ -235,14 +236,14 @@ export function AddDataSourceForm({ onBack }: AddDataSourceFormProps) {
                     placeholder="Key"
                     value={header.key}
                     onChange={(e) => updateHeader(index, 'key', e.target.value)}
-                    className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <input aria-label="Input field"
                     type="text"
                     placeholder="Value"
                     value={header.value}
                     onChange={(e) => updateHeader(index, 'value', e.target.value)}
-                    className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <button
                     type="button"
@@ -258,11 +259,11 @@ export function AddDataSourceForm({ onBack }: AddDataSourceFormProps) {
             {/* Parameters */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm text-slate-700">Parameters</label>
+                <label className="block text-base text-slate-700">Parameters</label>
                 <button
                   type="button"
                   onClick={addParameter}
-                  className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                  className="text-base text-blue-600 hover:text-blue-700 flex items-center gap-1"
                 >
                   <Plus className="w-4 h-4" />
                   Thêm parameter
@@ -275,14 +276,14 @@ export function AddDataSourceForm({ onBack }: AddDataSourceFormProps) {
                     placeholder="Key"
                     value={param.key}
                     onChange={(e) => updateParameter(index, 'key', e.target.value)}
-                    className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <input aria-label="Input field"
                     type="text"
                     placeholder="Value"
                     value={param.value}
                     onChange={(e) => updateParameter(index, 'value', e.target.value)}
-                    className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <button
                     type="button"
@@ -302,13 +303,13 @@ export function AddDataSourceForm({ onBack }: AddDataSourceFormProps) {
           <h3 className="text-slate-900 mb-4">Xác thực (Authentication)</h3>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm text-slate-700 mb-2">
+              <label className="block text-base text-slate-700 mb-2">
                 Phương thức xác thực <span className="text-red-500">*</span>
               </label>
               <select aria-label="Select box"
                 value={formData.authMethod}
                 onChange={(e) => setFormData({ ...formData, authMethod: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="none">Không xác thực</option>
                 <option value="apikey">API Key</option>
@@ -320,13 +321,13 @@ export function AddDataSourceForm({ onBack }: AddDataSourceFormProps) {
 
             {formData.authMethod !== 'none' && (
               <div>
-                <label className="block text-sm text-slate-700 mb-2">API Key / Token</label>
+                <label className="block text-base text-slate-700 mb-2">API Key / Token</label>
                 <input aria-label="Input field"
                   type="text"
                   placeholder="Nhập API key hoặc token"
                   value={formData.apiKey}
                   onChange={(e) => setFormData({ ...formData, apiKey: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             )}
@@ -338,44 +339,44 @@ export function AddDataSourceForm({ onBack }: AddDataSourceFormProps) {
           <h3 className="text-slate-900 mb-4">Thiết gian chờ và tần suất</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm text-slate-700 mb-2">Timeout (ms)</label>
+              <label className="block text-base text-slate-700 mb-2">Timeout (ms)</label>
               <input aria-label="Input field"
                 type="number"
                 placeholder="30000"
                 value={formData.timeout}
                 onChange={(e) => setFormData({ ...formData, timeout: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <p className="text-xs text-slate-500 mt-1">Thời gian chờ tối đa</p>
+              <p className="text-base text-slate-500 mt-1">Thời gian chờ tối đa</p>
             </div>
             <div>
-              <label className="block text-sm text-slate-700 mb-2">Số lần thử lại</label>
+              <label className="block text-base text-slate-700 mb-2">Số lần thử lại</label>
               <input aria-label="Input field"
                 type="number"
                 placeholder="3"
                 value={formData.retries}
                 onChange={(e) => setFormData({ ...formData, retries: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <p className="text-xs text-slate-500 mt-1">Số lần thử lại khi lỗi</p>
+              <p className="text-base text-slate-500 mt-1">Số lần thử lại khi lỗi</p>
             </div>
             <div>
-              <label className="block text-sm text-slate-700 mb-2">Delay giữa các lần thử (ms)</label>
+              <label className="block text-base text-slate-700 mb-2">Delay giữa các lần thử (ms)</label>
               <input aria-label="Input field"
                 type="number"
                 placeholder="5000"
                 value={formData.retryDelay}
                 onChange={(e) => setFormData({ ...formData, retryDelay: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <p className="text-xs text-slate-500 mt-1">Khoảng thời gian chờ</p>
+              <p className="text-base text-slate-500 mt-1">Khoảng thời gian chờ</p>
             </div>
           </div>
         </div>
 
         {/* Trạng thái */}
         <div>
-          <label className="block text-sm text-slate-700 mb-3">Trạng thái</label>
+          <label className="block text-base text-slate-700 mb-3">Trạng thái</label>
           <div className="flex gap-4">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
@@ -386,7 +387,7 @@ export function AddDataSourceForm({ onBack }: AddDataSourceFormProps) {
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                 className="w-4 h-4 text-blue-600"
               />
-              <span className="text-sm text-slate-700">Hoạt động</span>
+              <span className="text-base text-slate-700">Hoạt động</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
               <input
@@ -397,7 +398,7 @@ export function AddDataSourceForm({ onBack }: AddDataSourceFormProps) {
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                 className="w-4 h-4 text-blue-600"
               />
-              <span className="text-sm text-slate-700">Không hoạt động</span>
+              <span className="text-base text-slate-700">Không hoạt động</span>
             </label>
           </div>
         </div>
@@ -419,6 +420,7 @@ export function AddDataSourceForm({ onBack }: AddDataSourceFormProps) {
           </button>
         </div>
       </form>
+    </div>
     </div>
   );
 }

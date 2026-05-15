@@ -159,7 +159,8 @@ export function DataMappingModal({ isOpen, onClose, targetDatabase, sourceDatase
       <button
         type="button"
         onClick={onClose}
-        className="px-6 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all"
+        style={{ padding: '8px 16px', borderRadius: '6px', fontWeight: 500 }}
+        className="text-sm text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-all"
       >
         Hủy
       </button>
@@ -169,7 +170,8 @@ export function DataMappingModal({ isOpen, onClose, targetDatabase, sourceDatase
           alert('Đã lưu cấu hình ánh xạ!');
           onClose();
         }}
-        className="px-8 py-2 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-all shadow-md shadow-blue-200"
+        style={{ padding: '8px 16px', borderRadius: '6px', fontWeight: 500 }}
+        className="text-sm text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-md active:scale-95"
       >
         Lưu cấu hình
       </button>
@@ -177,10 +179,11 @@ export function DataMappingModal({ isOpen, onClose, targetDatabase, sourceDatase
   );
 
   return (
-    <BaseModal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="Ánh xạ dữ liệu"
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
+      <BaseModal
+        isOpen={isOpen}
+        onClose={onClose}
+        title="Ánh xạ dữ liệu"
       subtitle="Liên kết bảng nguồn với CSDL Kho dữ liệu dùng chung"
       maxWidth="max-w-5xl"
       showCloseButton={true}
@@ -188,7 +191,8 @@ export function DataMappingModal({ isOpen, onClose, targetDatabase, sourceDatase
         <div className="flex items-center gap-2">
           <button 
             onClick={isAutoMapped ? resetMapping : handleAutoMap}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all shadow-sm font-medium text-[12px] ${isAutoMapped ? 'bg-red-50 border border-red-200 text-red-600 hover:bg-red-100' : 'bg-emerald-50 border border-emerald-200 text-emerald-600 hover:bg-emerald-100'}`}
+            style={{ padding: '6px 12px', borderRadius: '6px', fontWeight: 500 }}
+            className={`flex items-center gap-1.5 transition-all shadow-sm text-[12px] ${isAutoMapped ? 'bg-red-50 border border-red-200 text-red-600 hover:bg-red-100' : 'bg-emerald-50 border border-emerald-200 text-emerald-600 hover:bg-emerald-100'}`}
             title={isAutoMapped ? "Hủy chế độ tự động" : "Tự động tạo bảng và ánh xạ 1-1"}
           >
             {isAutoMapped ? <X className="w-3.5 h-3.5" /> : <Sparkles className="w-3.5 h-3.5" />}
@@ -196,7 +200,8 @@ export function DataMappingModal({ isOpen, onClose, targetDatabase, sourceDatase
           </button>
           <button 
             onClick={() => setIsMergeSplitModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-slate-200 text-slate-600 rounded-lg hover:bg-white hover:border-blue-300 hover:text-blue-600 transition-all shadow-sm font-medium text-[12px]"
+            style={{ padding: '6px 12px', borderRadius: '6px', fontWeight: 500 }}
+            className="flex items-center gap-1.5 bg-white border border-[#e2e8f0] text-[#020817] hover:bg-slate-50 transition-all shadow-sm text-[12px]"
           >
             <Merge className="w-3.5 h-3.5" />
             Gộp / Tách cột
@@ -454,5 +459,6 @@ export function DataMappingModal({ isOpen, onClose, targetDatabase, sourceDatase
         mode={editingField?.mode}
       />
     </BaseModal>
+    </div>
   );
 }

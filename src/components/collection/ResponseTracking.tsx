@@ -62,6 +62,7 @@ const responses = [
 
 export function ResponseTracking() {
   return (
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
     <div className="space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -71,7 +72,7 @@ export function ResponseTracking() {
               <CheckCircle className="w-6 h-6 text-green-600" />
             </div>
           </div>
-          <p className="text-gray-500 text-sm mb-1">Đã xác nhận</p>
+          <p className="text-gray-500 text-base mb-1">Đã xác nhận</p>
           <p className="text-gray-900">41</p>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -80,7 +81,7 @@ export function ResponseTracking() {
               <Clock className="w-6 h-6 text-blue-600" />
             </div>
           </div>
-          <p className="text-gray-500 text-sm mb-1">Đang chờ phản hồi</p>
+          <p className="text-gray-500 text-base mb-1">Đang chờ phản hồi</p>
           <p className="text-gray-900">3</p>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -89,7 +90,7 @@ export function ResponseTracking() {
               <XCircle className="w-6 h-6 text-red-600" />
             </div>
           </div>
-          <p className="text-gray-500 text-sm mb-1">Timeout</p>
+          <p className="text-gray-500 text-base mb-1">Timeout</p>
           <p className="text-gray-900">1</p>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -98,7 +99,7 @@ export function ResponseTracking() {
               <RefreshCw className="w-6 h-6 text-purple-600" />
             </div>
           </div>
-          <p className="text-gray-500 text-sm mb-1">Thời gian phản hồi TB</p>
+          <p className="text-gray-500 text-base mb-1">Thời gian phản hồi TB</p>
           <p className="text-gray-900">12 giây</p>
         </div>
       </div>
@@ -107,7 +108,7 @@ export function ResponseTracking() {
       <div className="bg-white rounded-lg border border-gray-200">
         <div className="px-6 py-4 border-b border-gray-200">
           <h3 className="text-gray-900">Theo dõi phản hồi từ hệ thống nguồn</h3>
-          <p className="text-gray-500 text-sm mt-1">Giám sát phản hồi xác nhận từ các hệ thống nguồn sau khi nhận thông báo</p>
+          <p className="text-gray-500 text-base mt-1">Giám sát phản hồi xác nhận từ các hệ thống nguồn sau khi nhận thông báo</p>
         </div>
         <div className="p-6 space-y-6">
           {responses.map((response, index) => (
@@ -129,10 +130,10 @@ export function ResponseTracking() {
                     {response.status === 'timeout' && <XCircle className="w-6 h-6 text-red-600 mt-1" />}
                     <div>
                       <h4 className="text-gray-900 mb-1">{response.source}</h4>
-                      <p className="text-gray-600 text-sm">Mã giao dịch: {response.transaction}</p>
+                      <p className="text-gray-600 text-base">Mã giao dịch: {response.transaction}</p>
                     </div>
                   </div>
-                  <span className={`px-4 py-2 rounded-full text-sm ${
+                  <span className={`px-4 py-2 rounded-full text-base ${
                     response.status === 'confirmed' ? 'bg-green-100 text-green-700' :
                     response.status === 'waiting' ? 'bg-blue-100 text-blue-700' :
                     'bg-red-100 text-red-700'
@@ -159,7 +160,7 @@ export function ResponseTracking() {
                     </div>
                     <div className="flex-1">
                       <p className="text-gray-900 mb-1">Đã gửi thông báo</p>
-                      <p className="text-gray-500 text-sm">{response.notificationSent}</p>
+                      <p className="text-gray-500 text-base">{response.notificationSent}</p>
                     </div>
                   </div>
 
@@ -173,8 +174,8 @@ export function ResponseTracking() {
                       </div>
                       <div className="flex-1">
                         <p className="text-gray-900 mb-1">Nhận được phản hồi</p>
-                        <p className="text-gray-500 text-sm mb-1">{response.responseReceived}</p>
-                        <p className="text-green-600 text-sm">Thời gian phản hồi: {response.responseTime}</p>
+                        <p className="text-gray-500 text-base mb-1">{response.responseReceived}</p>
+                        <p className="text-green-600 text-base">Thời gian phản hồi: {response.responseTime}</p>
                       </div>
                     </div>
                   ) : response.status === 'waiting' ? (
@@ -186,7 +187,7 @@ export function ResponseTracking() {
                       </div>
                       <div className="flex-1">
                         <p className="text-gray-900 mb-1">Đang chờ phản hồi...</p>
-                        <p className="text-blue-600 text-sm">Hệ thống đang chờ xác nhận từ nguồn</p>
+                        <p className="text-blue-600 text-base">Hệ thống đang chờ xác nhận từ nguồn</p>
                       </div>
                     </div>
                   ) : (
@@ -198,7 +199,7 @@ export function ResponseTracking() {
                       </div>
                       <div className="flex-1">
                         <p className="text-gray-900 mb-1">Không nhận được phản hồi</p>
-                        <p className="text-red-600 text-sm">Hết thời gian chờ (timeout 5 phút)</p>
+                        <p className="text-red-600 text-base">Hết thời gian chờ (timeout 5 phút)</p>
                       </div>
                     </div>
                   )}
@@ -210,15 +211,15 @@ export function ResponseTracking() {
                     <h5 className="text-green-900 mb-3">Nội dung phản hồi:</h5>
                     <div className="space-y-2">
                       <div className="bg-white rounded p-3">
-                        <p className="text-gray-500 text-sm mb-1">Trạng thái</p>
+                        <p className="text-gray-500 text-base mb-1">Trạng thái</p>
                         <p className="text-gray-900">{response.responseData.status}</p>
                       </div>
                       <div className="bg-white rounded p-3">
-                        <p className="text-gray-500 text-sm mb-1">Thông báo</p>
+                        <p className="text-gray-500 text-base mb-1">Thông báo</p>
                         <p className="text-gray-900">{response.responseData.message}</p>
                       </div>
                       <div className="bg-white rounded p-3">
-                        <p className="text-gray-500 text-sm mb-1">Hành động của hệ thống nguồn</p>
+                        <p className="text-gray-500 text-base mb-1">Hành động của hệ thống nguồn</p>
                         <p className="text-gray-900">{response.responseData.action}</p>
                       </div>
                     </div>
@@ -230,14 +231,14 @@ export function ResponseTracking() {
               <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
                 <div className="flex gap-3">
                   {response.status === 'timeout' && (
-                    <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">
+                    <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-base">
                       Gửi lại thông báo
                     </button>
                   )}
-                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-white text-sm">
+                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-white text-base">
                     Xem chi tiết
                   </button>
-                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-white text-sm">
+                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-white text-base">
                     Xem log đầy đủ
                   </button>
                 </div>
@@ -261,7 +262,7 @@ export function ResponseTracking() {
                 defaultValue="5"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
               />
-              <p className="text-gray-500 text-sm mt-1">Sau thời gian này, hệ thống sẽ đánh dấu là timeout</p>
+              <p className="text-gray-500 text-base mt-1">Sau thời gian này, hệ thống sẽ đánh dấu là timeout</p>
             </div>
             <div>
               <label className="flex items-center gap-3">
@@ -291,6 +292,7 @@ export function ResponseTracking() {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

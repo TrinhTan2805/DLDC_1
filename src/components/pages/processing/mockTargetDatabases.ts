@@ -51,6 +51,7 @@ export const initialTargetDatabases: TargetDatabase[] = [
 ];
 
 export const mockTables = [
+  { name: 'DIP_PERSON', description: 'Thông tin cá nhân' },
   { name: 'DM_DAN_TOC', description: 'Danh mục dân tộc' },
   { name: 'DM_QUOC_GIA', description: 'Danh mục quốc gia' },
   { name: 'DM_TON_GIAO', description: 'Danh mục tôn giáo' },
@@ -58,7 +59,16 @@ export const mockTables = [
   { name: 'HS_KHAI_SINH', description: 'Hồ sơ khai sinh' },
 ];
 
-export const mockColumns: Record<string, { name: string, type: string, length: string, description: string }[]> = {
+export const mockColumns: Record<string, { name: string, type: string, length: string, decimals?: string, notNull?: boolean, isKey?: boolean, description: string }[]> = {
+  'DIP_PERSON': [
+    { name: 'Dantoc', type: 'nvarchar(max)', length: '', decimals: '', notNull: true, isKey: false, description: '' },
+    { name: 'DiaChi', type: 'nvarchar(max)', length: '', decimals: '', notNull: false, isKey: false, description: '' },
+    { name: 'DIP_RefId', type: 'varchar', length: '4000', decimals: '', notNull: false, isKey: false, description: '' },
+    { name: 'Ho', type: 'nvarchar(max)', length: '', decimals: '', notNull: true, isKey: false, description: '' },
+    { name: 'Id', type: 'int', length: '', decimals: '', notNull: true, isKey: true, description: '' },
+    { name: 'Ten', type: 'nvarchar(max)', length: '', decimals: '', notNull: true, isKey: false, description: '' },
+    { name: 'Tuoi', type: 'int', length: '', decimals: '', notNull: true, isKey: false, description: '' },
+  ],
   'DM_DAN_TOC': [
     { name: 'ID', type: 'VARCHAR2', length: '50', description: 'Khóa chính' },
     { name: 'MA_DAN_TOC', type: 'VARCHAR2', length: '20', description: 'Mã dân tộc' },
@@ -96,5 +106,15 @@ export const mockColumns: Record<string, { name: string, type: string, length: s
     { name: 'QUOC_TICH', type: 'VARCHAR2', length: '20', description: 'Quốc tịch' },
     { name: 'HO_TEN_CHA', type: 'NVARCHAR2', length: '200', description: 'Họ tên cha' },
     { name: 'HO_TEN_ME', type: 'NVARCHAR2', length: '200', description: 'Họ tên mẹ' },
+  ]
+};
+
+export const mockTableData: Record<string, any[]> = {
+  'DIP_PERSON': [
+    { MaCongDan: 4, SoDDCN: '891734', HoTen: 'Nguyễn Văn Vĩ', NgaySinh: '1997-06-18 00:00:00.0', GioiTinh: 'Nam', DanToc: 'Kinh', TonGiao: 'Không', QuocTich: 'Việt Nam', NoiThuongTru: 'Nam Định', MaTinh: 18 },
+    { MaCongDan: 8, SoDDCN: '567898', HoTen: 'Nguyễn Đình Bắc', NgaySinh: '2003-01-01 00:00:00.0', GioiTinh: 'Nam', DanToc: 'Kinh', TonGiao: 'Không', QuocTich: 'Việt Nam', NoiThuongTru: 'Hà Nội', MaTinh: 29 },
+    { MaCongDan: 9, SoDDCN: '678899', HoTen: 'Nguyễn Văn Toàn', NgaySinh: '1996-04-12 00:00:00.0', GioiTinh: 'Nam', DanToc: 'Kinh', TonGiao: 'Không', QuocTich: 'Việt Nam', NoiThuongTru: 'Hải Dương', MaTinh: 34 },
+    { MaCongDan: 10, SoDDCN: '789910', HoTen: 'Nguyễn Công Phượng', NgaySinh: '1995-01-21 00:00:00.0', GioiTinh: 'Nam', DanToc: 'Kinh', TonGiao: 'Không', QuocTich: 'Việt Nam', NoiThuongTru: 'Mỹ Sơn', MaTinh: 43 },
+    { MaCongDan: 11, SoDDCN: '891011', HoTen: 'Nguyễn Tuấn Anh', NgaySinh: '1995-05-15 00:00:00.0', GioiTinh: 'Nam', DanToc: 'Kinh', TonGiao: 'Không', QuocTich: 'Việt Nam', NoiThuongTru: 'Thái Bình', MaTinh: 17 },
   ]
 };

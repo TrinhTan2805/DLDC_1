@@ -57,11 +57,11 @@ export function ViewDataRecordsList({ dataItem, onBack }: ViewDataRecordsListPro
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
-        return <span className="px-3 py-1 rounded-full text-xs bg-green-100 text-green-700">Hoàn thành</span>;
+        return <span className="px-3 py-1 rounded-full text-base bg-green-100 text-green-700">Hoàn thành</span>;
       case 'processing':
-        return <span className="px-3 py-1 rounded-full text-xs bg-blue-100 text-blue-700">Đang xử lý</span>;
+        return <span className="px-3 py-1 rounded-full text-base bg-blue-100 text-blue-700">Đang xử lý</span>;
       case 'error':
-        return <span className="px-3 py-1 rounded-full text-xs bg-red-100 text-red-700">Lỗi</span>;
+        return <span className="px-3 py-1 rounded-full text-base bg-red-100 text-red-700">Lỗi</span>;
       default:
         return null;
     }
@@ -80,7 +80,8 @@ export function ViewDataRecordsList({ dataItem, onBack }: ViewDataRecordsListPro
   };
 
   return (
-    <div className="space-y-6">
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
+      <div className="space-y-6 min-h-screen">
       {/* Header */}
       <div className="bg-white rounded-lg border border-slate-200 p-6">
         <div className="flex items-start justify-between mb-4">
@@ -98,8 +99,8 @@ export function ViewDataRecordsList({ dataItem, onBack }: ViewDataRecordsListPro
           </div>
           <div className="flex-1">
             <h2 className="text-slate-900 mb-1">{dataItem.dataName}</h2>
-            <p className="text-sm text-slate-600 mb-3">{dataItem.description}</p>
-            <div className="flex flex-wrap gap-4 text-sm">
+            <p className="text-base text-slate-600 mb-3">{dataItem.description}</p>
+            <div className="flex flex-wrap gap-4 text-base">
               <div className="flex items-center gap-2 text-slate-600">
                 <span className="text-slate-500">Cơ quan:</span>
                 <span>{dataItem.department}</span>
@@ -125,7 +126,7 @@ export function ViewDataRecordsList({ dataItem, onBack }: ViewDataRecordsListPro
       <div className="grid grid-cols-4 gap-4">
         <div className="bg-white rounded-lg border border-slate-200 p-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-slate-600">Tổng bản ghi</span>
+            <span className="text-base text-slate-600">Tổng bản ghi</span>
             <Database className="w-4 h-4 text-blue-600" />
           </div>
           <div className="text-2xl text-slate-900">{stats.total.toLocaleString()}</div>
@@ -133,7 +134,7 @@ export function ViewDataRecordsList({ dataItem, onBack }: ViewDataRecordsListPro
 
         <div className="bg-white rounded-lg border border-slate-200 p-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-slate-600">Hoàn thành</span>
+            <span className="text-base text-slate-600">Hoàn thành</span>
             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
           </div>
           <div className="text-2xl text-slate-900">{stats.completed.toLocaleString()}</div>
@@ -141,7 +142,7 @@ export function ViewDataRecordsList({ dataItem, onBack }: ViewDataRecordsListPro
 
         <div className="bg-white rounded-lg border border-slate-200 p-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-slate-600">Đang xử lý</span>
+            <span className="text-base text-slate-600">Đang xử lý</span>
             <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
           </div>
           <div className="text-2xl text-slate-900">{stats.processing.toLocaleString()}</div>
@@ -149,7 +150,7 @@ export function ViewDataRecordsList({ dataItem, onBack }: ViewDataRecordsListPro
 
         <div className="bg-white rounded-lg border border-slate-200 p-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-slate-600">Lỗi</span>
+            <span className="text-base text-slate-600">Lỗi</span>
             <div className="w-2 h-2 bg-red-500 rounded-full"></div>
           </div>
           <div className="text-2xl text-slate-900">{stats.error.toLocaleString()}</div>
@@ -165,7 +166,7 @@ export function ViewDataRecordsList({ dataItem, onBack }: ViewDataRecordsListPro
             placeholder="Tìm kiếm theo mã bản ghi, tên..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <button
@@ -185,7 +186,7 @@ export function ViewDataRecordsList({ dataItem, onBack }: ViewDataRecordsListPro
       {(advancedFilters.status || advancedFilters.dateFrom || advancedFilters.dateTo) && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm">
+            <div className="flex items-center gap-2 text-base">
               <Filter className="w-4 h-4 text-blue-600" />
               <span className="text-blue-900">Bộ lọc đang áp dụng:</span>
               {advancedFilters.status && (
@@ -215,7 +216,7 @@ export function ViewDataRecordsList({ dataItem, onBack }: ViewDataRecordsListPro
                 dateFrom: '',
                 dateTo: ''
               })}
-              className="text-sm text-blue-600 hover:text-blue-700"
+              className="text-base text-blue-600 hover:text-blue-700"
             >
               Xóa bộ lọc
             </button>
@@ -229,28 +230,28 @@ export function ViewDataRecordsList({ dataItem, onBack }: ViewDataRecordsListPro
           <table className="w-full">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">STT</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">MÃ BẢN GHI</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">TÊN BẢN GHI</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">NGUỒN</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">KÍCH THƯỚC</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">NGÀY GHI NHẬN</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">TRẠNG THÁI</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">THỜI GIAN TẠO</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">THAO TÁC</th>
+                <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">STT</th>
+                <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">MÃ BẢN GHI</th>
+                <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">TÊN BẢN GHI</th>
+                <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">NGUỒN</th>
+                <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">KÍCH THƯỚC</th>
+                <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">NGÀY GHI NHẬN</th>
+                <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">TRẠNG THÁI</th>
+                <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">THỜI GIAN TẠO</th>
+                <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">THAO TÁC</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
               {filteredRecords.map((record, index) => (
                 <tr key={record.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-4 py-3 text-sm text-slate-900">{index + 1}</td>
-                  <td className="px-4 py-3 text-sm text-blue-600 font-mono">{record.recordId}</td>
-                  <td className="px-4 py-3 text-sm text-slate-900">{record.name}</td>
-                  <td className="px-4 py-3 text-sm text-slate-700">{record.source}</td>
-                  <td className="px-4 py-3 text-sm text-slate-700">{record.size}</td>
-                  <td className="px-4 py-3 text-sm text-slate-700">{record.recordDate}</td>
+                  <td className="px-4 py-3 text-base text-slate-900">{index + 1}</td>
+                  <td className="px-4 py-3 text-base text-blue-600 font-mono">{record.recordId}</td>
+                  <td className="px-4 py-3 text-base text-slate-900">{record.name}</td>
+                  <td className="px-4 py-3 text-base text-slate-700">{record.source}</td>
+                  <td className="px-4 py-3 text-base text-slate-700">{record.size}</td>
+                  <td className="px-4 py-3 text-base text-slate-700">{record.recordDate}</td>
                   <td className="px-4 py-3">{getStatusBadge(record.status)}</td>
-                  <td className="px-4 py-3 text-sm text-slate-700">{record.createdAt}</td>
+                  <td className="px-4 py-3 text-base text-slate-700">{record.createdAt}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <button
@@ -281,19 +282,19 @@ export function ViewDataRecordsList({ dataItem, onBack }: ViewDataRecordsListPro
 
         {/* Pagination */}
         <div className="border-t border-slate-200 px-6 py-4 flex items-center justify-between">
-          <div className="text-sm text-slate-600">
+          <div className="text-base text-slate-600">
             Hiển thị <span className="text-slate-900">{filteredRecords.length}</span> / {stats.total.toLocaleString()} bản ghi
           </div>
           <div className="flex items-center gap-2">
-            <button className="px-3 py-1.5 border border-slate-300 rounded hover:bg-slate-50 text-sm">
+            <button className="px-3 py-1.5 border border-slate-300 rounded hover:bg-slate-50 text-base">
               Trước
             </button>
-            <button title="Hành động" aria-label="Hành động" className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm">1</button>
-            <button title="Hành động" aria-label="Hành động" className="px-3 py-1.5 border border-slate-300 rounded hover:bg-slate-50 text-sm">2</button>
-            <button title="Hành động" aria-label="Hành động" className="px-3 py-1.5 border border-slate-300 rounded hover:bg-slate-50 text-sm">3</button>
+            <button title="Hành động" aria-label="Hành động" className="px-3 py-1.5 bg-blue-600 text-white rounded text-base">1</button>
+            <button title="Hành động" aria-label="Hành động" className="px-3 py-1.5 border border-slate-300 rounded hover:bg-slate-50 text-base">2</button>
+            <button title="Hành động" aria-label="Hành động" className="px-3 py-1.5 border border-slate-300 rounded hover:bg-slate-50 text-base">3</button>
             <span className="px-2 text-slate-500">...</span>
-            <button title="Hành động" aria-label="Hành động" className="px-3 py-1.5 border border-slate-300 rounded hover:bg-slate-50 text-sm">10</button>
-            <button className="px-3 py-1.5 border border-slate-300 rounded hover:bg-slate-50 text-sm">
+            <button title="Hành động" aria-label="Hành động" className="px-3 py-1.5 border border-slate-300 rounded hover:bg-slate-50 text-base">10</button>
+            <button className="px-3 py-1.5 border border-slate-300 rounded hover:bg-slate-50 text-base">
               Sau
             </button>
           </div>
@@ -308,6 +309,7 @@ export function ViewDataRecordsList({ dataItem, onBack }: ViewDataRecordsListPro
           currentFilters={advancedFilters}
         />
       )}
+    </div>
     </div>
   );
 }

@@ -80,6 +80,7 @@ const processSteps = [
 
 export function CollectionProcessFlow() {
   return (
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
     <div className="space-y-6">
       {/* Process Flow Diagram */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -97,7 +98,7 @@ export function CollectionProcessFlow() {
       <div className="bg-white rounded-lg border border-gray-200">
         <div className="px-6 py-4 border-b border-gray-200">
           <h3 className="text-gray-900">Chi tiết các bước quy trình</h3>
-          <p className="text-gray-500 text-sm mt-1">Mô tả chi tiết từng bước trong quy trình thu thập dữ liệu</p>
+          <p className="text-gray-500 text-base mt-1">Mô tả chi tiết từng bước trong quy trình thu thập dữ liệu</p>
         </div>
         <div className="p-6 space-y-6">
           {processSteps.map((step, index) => (
@@ -113,7 +114,7 @@ export function CollectionProcessFlow() {
                       </div>
                       <div>
                         <h4 className="text-gray-900 mb-1">{step.name}</h4>
-                        <p className="text-blue-600 text-sm">Đối tượng: {step.actor}</p>
+                        <p className="text-blue-600 text-base">Đối tượng: {step.actor}</p>
                       </div>
                     </div>
                     <CheckCircle className="w-6 h-6 text-green-600" />
@@ -133,7 +134,7 @@ export function CollectionProcessFlow() {
                       {step.criteria.map((criterion, idx) => (
                         <div key={idx} className="flex items-start gap-2">
                           <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />
-                          <span className="text-gray-600 text-sm">{criterion}</span>
+                          <span className="text-gray-600 text-base">{criterion}</span>
                         </div>
                       ))}
                     </div>
@@ -161,23 +162,23 @@ export function CollectionProcessFlow() {
             </div>
             <div>
               <h4 className="text-gray-900 mb-1">Khi dữ liệu không đạt yêu cầu</h4>
-              <p className="text-gray-500 text-sm">Quy trình xử lý lỗi</p>
+              <p className="text-gray-500 text-base">Quy trình xử lý lỗi</p>
             </div>
           </div>
           <ul className="space-y-2">
-            <li className="flex items-start gap-2 text-gray-700 text-sm">
+            <li className="flex items-start gap-2 text-gray-700 text-base">
               <span className="text-red-600 mt-1">•</span>
               <span>Hệ thống dừng xử lý dữ liệu</span>
             </li>
-            <li className="flex items-start gap-2 text-gray-700 text-sm">
+            <li className="flex items-start gap-2 text-gray-700 text-base">
               <span className="text-red-600 mt-1">•</span>
               <span>Ghi log chi tiết lỗi vào hệ thống</span>
             </li>
-            <li className="flex items-start gap-2 text-gray-700 text-sm">
+            <li className="flex items-start gap-2 text-gray-700 text-base">
               <span className="text-red-600 mt-1">•</span>
               <span>Gửi thông báo lỗi đến hệ thống nguồn (Bước 4)</span>
             </li>
-            <li className="flex items-start gap-2 text-gray-700 text-sm">
+            <li className="flex items-start gap-2 text-gray-700 text-base">
               <span className="text-red-600 mt-1">•</span>
               <span>Chờ hệ thống nguồn điều chỉnh và gửi lại</span>
             </li>
@@ -191,29 +192,30 @@ export function CollectionProcessFlow() {
             </div>
             <div>
               <h4 className="text-gray-900 mb-1">Khi dữ liệu đạt yêu cầu</h4>
-              <p className="text-gray-500 text-sm">Quy trình xử lý thành công</p>
+              <p className="text-gray-500 text-base">Quy trình xử lý thành công</p>
             </div>
           </div>
           <ul className="space-y-2">
-            <li className="flex items-start gap-2 text-gray-700 text-sm">
+            <li className="flex items-start gap-2 text-gray-700 text-base">
               <span className="text-green-600 mt-1">•</span>
               <span>Lưu dữ liệu vào kho dữ liệu chung</span>
             </li>
-            <li className="flex items-start gap-2 text-gray-700 text-sm">
+            <li className="flex items-start gap-2 text-gray-700 text-base">
               <span className="text-green-600 mt-1">•</span>
               <span>Tạo mã giao dịch thành công</span>
             </li>
-            <li className="flex items-start gap-2 text-gray-700 text-sm">
+            <li className="flex items-start gap-2 text-gray-700 text-base">
               <span className="text-green-600 mt-1">•</span>
               <span>Gửi xác nhận thành công (Bước 5)</span>
             </li>
-            <li className="flex items-start gap-2 text-gray-700 text-sm">
+            <li className="flex items-start gap-2 text-gray-700 text-base">
               <span className="text-green-600 mt-1">•</span>
               <span>Chuyển sang bước xử lý dữ liệu tiếp theo</span>
             </li>
           </ul>
         </div>
       </div>
+    </div>
     </div>
   );
 }

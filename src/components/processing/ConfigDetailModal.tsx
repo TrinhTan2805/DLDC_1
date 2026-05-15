@@ -93,7 +93,8 @@ export function ConfigDetailModal({ config, onClose }: ConfigDetailModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-slate-200">
@@ -253,6 +254,7 @@ export function ConfigDetailModal({ config, onClose }: ConfigDetailModalProps) {
           onClose={() => setShowErrorListModal(false)}
         />
       )}
+      </div>
     </div>
   );
 }

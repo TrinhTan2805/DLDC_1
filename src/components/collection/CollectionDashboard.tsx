@@ -86,9 +86,10 @@ interface ChartCardProps {
   filterValue?: string;
   onFilterChange?: (value: string) => void;
   filterOptions?: string[];
+  renderFilter?: React.ReactNode;
 }
 
-function ChartCard({ title, total, data, filterValue, onFilterChange, filterOptions }: ChartCardProps) {
+function ChartCard({ title, total, data, filterValue, onFilterChange, filterOptions, renderFilter }: ChartCardProps) {
   return (
     <div className="bg-white rounded-lg border border-slate-200 p-6">
       {/* Header */}
@@ -98,6 +99,7 @@ function ChartCard({ title, total, data, filterValue, onFilterChange, filterOpti
       </div>
 
       {/* Controls */}
+      {renderFilter}
       {filterOptions && filterOptions.length > 0 && (
         <div className="flex items-center gap-3 mb-4">
           <select aria-label="Select box" 
@@ -171,19 +173,40 @@ function SummaryCard({ title, value, icon, bgColor, iconColor }: SummaryCardProp
 
 
 export function CollectionDashboard() {
-  const [timeFilter, setTimeFilter] = React.useState('Hôm nay');
+  const today = new Date().toISOString().split('T')[0];
+  const [fromDate, setFromDate] = React.useState('');
+  const [toDate, setToDate] = React.useState(today);
 
-  const getTimeData = () => {
-    switch(timeFilter) {
-      case 'Tuần này': return timeDataThisWeek;
-      case 'Tháng này': return timeDataThisMonth;
-      case 'Năm nay': return timeDataThisYear;
-      case 'Hôm nay':
-      default: return timeDataToday;
+  const handleFromDateChange = (val: string) => {
+    setFromDate(val);
+    if (toDate && val) {
+      const d1 = new Date(val);
+      const d2 = new Date(toDate);
+      const diff = (d2.getTime() - d1.getTime()) / (1000 * 3600 * 24);
+      if (diff > 6 || diff < 0) {
+        const newTo = new Date(d1);
+        newTo.setDate(d1.getDate() + 6);
+        const newToStr = newTo.toISOString().split('T')[0];
+        setToDate(newToStr > today ? today : newToStr);
+      }
     }
   };
 
-  const currentTimeData = getTimeData();
+  const handleToDateChange = (val: string) => {
+    setToDate(val);
+    if (fromDate && val) {
+      const d1 = new Date(fromDate);
+      const d2 = new Date(val);
+      const diff = (d2.getTime() - d1.getTime()) / (1000 * 3600 * 24);
+      if (diff > 6 || diff < 0) {
+        const newFrom = new Date(d2);
+        newFrom.setDate(d2.getDate() - 6);
+        setFromDate(newFrom.toISOString().split('T')[0]);
+      }
+    }
+  };
+
+  const currentTimeData = timeDataThisWeek;
   const timeTotal = currentTimeData.reduce((acc, curr) => acc + curr.value, 0);
 
   const [sourceSystemFilter, setSourceSystemFilter] = React.useState('Trong ngành');
@@ -201,7 +224,8 @@ export function CollectionDashboard() {
   const sourceTotal = currentSourceData.reduce((acc, curr) => acc + curr.value, 0);
 
   return (
-    <div className="space-y-6">
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
+      <div className="space-y-6">
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <SummaryCard
@@ -256,11 +280,34 @@ export function CollectionDashboard() {
           title="Biểu đồ thu thập dữ liệu theo thời gian"
           total={timeTotal}
           data={currentTimeData}
-          filterValue={timeFilter}
-          onFilterChange={setTimeFilter}
-          filterOptions={['Hôm nay', 'Tuần này', 'Tháng này', 'Năm nay']}
+          renderFilter={
+            <div className="flex items-center gap-3 mb-6">
+              <div className="flex-1">
+                <label className="text-sm text-slate-500 block mb-1.5 font-medium">Từ ngày</label>
+                <input 
+                  type="date" 
+                  max={toDate || today}
+                  value={fromDate}
+                  onChange={(e) => handleFromDateChange(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
+                />
+              </div>
+              <div className="flex-1">
+                <label className="text-sm text-slate-500 block mb-1.5 font-medium">Đến ngày</label>
+                <input 
+                  type="date" 
+                  max={today}
+                  min={fromDate}
+                  value={toDate}
+                  onChange={(e) => handleToDateChange(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
+                />
+              </div>
+            </div>
+          }
         />
       </div>
+    </div>
     </div>
   );
 }

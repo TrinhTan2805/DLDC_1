@@ -229,11 +229,11 @@ export function APIMethodsList({ onAddNew }: APIMethodsListProps) {
   const getDataStatusBadge = (status: string) => {
     switch (status) {
       case 'collected':
-        return <span className="px-3 py-1 rounded-full text-xs bg-green-100 text-green-700">Đã thu thập</span>;
+        return <span className="px-3 py-1 rounded-full text-base bg-green-100 text-green-700">Đã thu thập</span>;
       case 'pending':
-        return <span className="px-3 py-1 rounded-full text-xs bg-orange-100 text-orange-700">Đang xử lý</span>;
+        return <span className="px-3 py-1 rounded-full text-base bg-orange-100 text-orange-700">Đang xử lý</span>;
       case 'not-started':
-        return <span className="px-3 py-1 rounded-full text-xs bg-slate-100 text-slate-700">Chưa bắt đầu</span>;
+        return <span className="px-3 py-1 rounded-full text-base bg-slate-100 text-slate-700">Chưa bắt đầu</span>;
       default:
         return null;
     }
@@ -242,11 +242,11 @@ export function APIMethodsList({ onAddNew }: APIMethodsListProps) {
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case 'high':
-        return <span className="px-3 py-1 rounded-full text-xs bg-red-100 text-red-700">Cao</span>;
+        return <span className="px-3 py-1 rounded-full text-base bg-red-100 text-red-700">Cao</span>;
       case 'medium':
-        return <span className="px-3 py-1 rounded-full text-xs bg-yellow-100 text-yellow-700">Trung bình</span>;
+        return <span className="px-3 py-1 rounded-full text-base bg-yellow-100 text-yellow-700">Trung bình</span>;
       case 'low':
-        return <span className="px-3 py-1 rounded-full text-xs bg-blue-100 text-blue-700">Thấp</span>;
+        return <span className="px-3 py-1 rounded-full text-base bg-blue-100 text-blue-700">Thấp</span>;
       default:
         return null;
     }
@@ -278,6 +278,7 @@ export function APIMethodsList({ onAddNew }: APIMethodsListProps) {
   }
 
   return (
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
     <div className="space-y-6">
       {/* ========== DANH SÁCH DỮ LIỆU CẦN THU THẬT ========== */}
       <div className="space-y-6">
@@ -303,7 +304,7 @@ export function APIMethodsList({ onAddNew }: APIMethodsListProps) {
             placeholder="Tìm kiếm theo tên dữ liệu, cục..."
             value={searchData}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchData(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -313,7 +314,7 @@ export function APIMethodsList({ onAddNew }: APIMethodsListProps) {
             title="Bộ lọc cơ quan"
             value={departmentFilter}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setDepartmentFilter(e.target.value)}
-            className="px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Tất cả cơ quan</option>
             {uniqueDepartments.map(dept => (
@@ -333,7 +334,7 @@ export function APIMethodsList({ onAddNew }: APIMethodsListProps) {
         {(departmentFilter || advancedFilters.status || advancedFilters.dataType || advancedFilters.priority) && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm flex-wrap">
+              <div className="flex items-center gap-2 text-base flex-wrap">
                 <Filter className="w-4 h-4 text-blue-600" />
                 <span className="text-blue-900">Bộ lọc đang áp dụng:</span>
                 {departmentFilter && (
@@ -371,7 +372,7 @@ export function APIMethodsList({ onAddNew }: APIMethodsListProps) {
                     dateTo: ''
                   });
                 }}
-                className="text-sm text-blue-600 hover:text-blue-700"
+                className="text-base text-blue-600 hover:text-blue-700"
               >
                 Xóa bộ lọc
               </button>
@@ -385,7 +386,7 @@ export function APIMethodsList({ onAddNew }: APIMethodsListProps) {
             <div className="flex items-center gap-2 pt-4">
               <div className="w-1 h-6 bg-blue-600 rounded"></div>
               <h3 className="text-slate-900">Thu thập dữ liệu từ Bộ ngoài</h3>
-              <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">{externalData.length}</span>
+              <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-base rounded-full">{externalData.length}</span>
             </div>
 
             <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
@@ -393,35 +394,35 @@ export function APIMethodsList({ onAddNew }: APIMethodsListProps) {
                 <table className="w-full">
                   <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">STT</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">CƠ QUAN</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">TÊN DỮ LIỆU</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">LOẠI DỮ LIỆU</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">TẦN SUẤT</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">ĐỊNH DẠNG</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">MỨC ĐỘ</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">TRẠNG THÁI</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">CẬP NHẬT</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">THAO TÁC</th>
+                      <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">STT</th>
+                      <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">CƠ QUAN</th>
+                      <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">TÊN DỮ LIỆU</th>
+                      <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">LOẠI DỮ LIỆU</th>
+                      <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">TẦN SUẤT</th>
+                      <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">ĐỊNH DẠNG</th>
+                      <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">MỨC ĐỘ</th>
+                      <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">TRẠNG THÁI</th>
+                      <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">CẬP NHẬT</th>
+                      <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">THAO TÁC</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200">
                     {externalData.map((item) => (
                       <tr key={item.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-4 py-3 text-sm text-slate-900">{item.stt}</td>
-                        <td className="px-4 py-3 text-sm text-slate-700">{item.department}</td>
+                        <td className="px-4 py-3 text-base text-slate-900">{item.stt}</td>
+                        <td className="px-4 py-3 text-base text-slate-700">{item.department}</td>
                         <td className="px-4 py-3">
                           <div>
-                            <p className="text-sm text-slate-900">{item.dataName}</p>
-                            <p className="text-xs text-slate-500 mt-0.5">{item.description}</p>
+                            <p className="text-base text-slate-900">{item.dataName}</p>
+                            <p className="text-base text-slate-500 mt-0.5">{item.description}</p>
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-sm text-slate-700">{item.dataType}</td>
-                        <td className="px-4 py-3 text-sm text-slate-700">{item.frequency}</td>
-                        <td className="px-4 py-3 text-sm text-slate-700">{item.format}</td>
+                        <td className="px-4 py-3 text-base text-slate-700">{item.dataType}</td>
+                        <td className="px-4 py-3 text-base text-slate-700">{item.frequency}</td>
+                        <td className="px-4 py-3 text-base text-slate-700">{item.format}</td>
                         <td className="px-4 py-3">{getPriorityBadge(item.priority)}</td>
                         <td className="px-4 py-3">{getDataStatusBadge(item.status)}</td>
-                        <td className="px-4 py-3 text-sm text-slate-700">{item.lastUpdate}</td>
+                        <td className="px-4 py-3 text-base text-slate-700">{item.lastUpdate}</td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
                             <button
@@ -469,7 +470,7 @@ export function APIMethodsList({ onAddNew }: APIMethodsListProps) {
             <div className="flex items-center gap-2 pt-4">
               <div className="w-1 h-6 bg-green-600 rounded"></div>
               <h3 className="text-slate-900">Thu thập dữ liệu từ các Hệ thống trong nội bộ</h3>
-              <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">{internalData.length}</span>
+              <span className="px-2 py-0.5 bg-green-100 text-green-700 text-base rounded-full">{internalData.length}</span>
             </div>
 
             <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
@@ -477,35 +478,35 @@ export function APIMethodsList({ onAddNew }: APIMethodsListProps) {
                 <table className="w-full">
                   <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">STT</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">CƠ QUAN</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">TÊN DỮ LIỆU</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">LOẠI DỮ LIỆU</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">TẦN SUẤT</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">ĐỊNH DẠNG</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">MỨC ĐỘ</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">TRẠNG THÁI</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">CẬP NHẬT</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">THAO TÁC</th>
+                      <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">STT</th>
+                      <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">CƠ QUAN</th>
+                      <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">TÊN DỮ LIỆU</th>
+                      <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">LOẠI DỮ LIỆU</th>
+                      <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">TẦN SUẤT</th>
+                      <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">ĐỊNH DẠNG</th>
+                      <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">MỨC ĐỘ</th>
+                      <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">TRẠNG THÁI</th>
+                      <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">CẬP NHẬT</th>
+                      <th className="px-4 py-3 text-left text-base text-slate-600 uppercase tracking-wider">THAO TÁC</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200">
                     {internalData.map((item) => (
                       <tr key={item.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-4 py-3 text-sm text-slate-900">{item.stt}</td>
-                        <td className="px-4 py-3 text-sm text-slate-700">{item.department}</td>
+                        <td className="px-4 py-3 text-base text-slate-900">{item.stt}</td>
+                        <td className="px-4 py-3 text-base text-slate-700">{item.department}</td>
                         <td className="px-4 py-3">
                           <div>
-                            <p className="text-sm text-slate-900">{item.dataName}</p>
-                            <p className="text-xs text-slate-500 mt-0.5">{item.description}</p>
+                            <p className="text-base text-slate-900">{item.dataName}</p>
+                            <p className="text-base text-slate-500 mt-0.5">{item.description}</p>
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-sm text-slate-700">{item.dataType}</td>
-                        <td className="px-4 py-3 text-sm text-slate-700">{item.frequency}</td>
-                        <td className="px-4 py-3 text-sm text-slate-700">{item.format}</td>
+                        <td className="px-4 py-3 text-base text-slate-700">{item.dataType}</td>
+                        <td className="px-4 py-3 text-base text-slate-700">{item.frequency}</td>
+                        <td className="px-4 py-3 text-base text-slate-700">{item.format}</td>
                         <td className="px-4 py-3">{getPriorityBadge(item.priority)}</td>
                         <td className="px-4 py-3">{getDataStatusBadge(item.status)}</td>
-                        <td className="px-4 py-3 text-sm text-slate-700">{item.lastUpdate}</td>
+                        <td className="px-4 py-3 text-base text-slate-700">{item.lastUpdate}</td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
                             <button
@@ -565,6 +566,7 @@ export function APIMethodsList({ onAddNew }: APIMethodsListProps) {
           currentFilters={advancedFilters}
         />
       )}
+    </div>
     </div>
   );
 }

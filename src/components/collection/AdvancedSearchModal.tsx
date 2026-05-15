@@ -31,6 +31,7 @@ export function AdvancedSearchModal({ onClose, onSearch, currentFilters }: Advan
   };
 
   return (
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
@@ -41,7 +42,7 @@ export function AdvancedSearchModal({ onClose, onSearch, currentFilters }: Advan
             </div>
             <div>
               <h2 className="text-slate-900">Tìm kiếm nâng cao</h2>
-              <p className="text-sm text-slate-500">Lọc dữ liệu theo nhiều tiêu chí</p>
+              <p className="text-base text-slate-500">Lọc dữ liệu theo nhiều tiêu chí</p>
             </div>
           </div>
           <button
@@ -57,11 +58,11 @@ export function AdvancedSearchModal({ onClose, onSearch, currentFilters }: Advan
           <div className="grid grid-cols-2 gap-4">
             {/* Cơ quan */}
             <div>
-              <label className="block text-sm text-slate-700 mb-2">Cơ quan</label>
+              <label className="block text-base text-slate-700 mb-2">Cơ quan</label>
               <select aria-label="Select box"
                 value={filters.department}
                 onChange={(e) => setFilters({ ...filters, department: e.target.value })}
-                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Tất cả</option>
                 <option value="Tòa án nhân dân tối cao">Tòa án nhân dân tối cao</option>
@@ -87,11 +88,11 @@ export function AdvancedSearchModal({ onClose, onSearch, currentFilters }: Advan
 
             {/* Loại dữ liệu */}
             <div>
-              <label className="block text-sm text-slate-700 mb-2">Loại dữ liệu</label>
+              <label className="block text-base text-slate-700 mb-2">Loại dữ liệu</label>
               <select aria-label="Select box"
                 value={filters.dataType}
                 onChange={(e) => setFilters({ ...filters, dataType: e.target.value })}
-                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Tất cả</option>
                 <option value="Tòa án">Tòa án</option>
@@ -115,11 +116,11 @@ export function AdvancedSearchModal({ onClose, onSearch, currentFilters }: Advan
 
             {/* Tần suất */}
             <div>
-              <label className="block text-sm text-slate-700 mb-2">Tần suất</label>
+              <label className="block text-base text-slate-700 mb-2">Tần suất</label>
               <select aria-label="Select box"
                 value={filters.frequency}
                 onChange={(e) => setFilters({ ...filters, frequency: e.target.value })}
-                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Tất cả</option>
                 <option value="Hằng ngày">Hằng ngày</option>
@@ -132,11 +133,11 @@ export function AdvancedSearchModal({ onClose, onSearch, currentFilters }: Advan
 
             {/* Định dạng */}
             <div>
-              <label className="block text-sm text-slate-700 mb-2">Định dạng</label>
+              <label className="block text-base text-slate-700 mb-2">Định dạng</label>
               <select aria-label="Select box"
                 value={filters.format}
                 onChange={(e) => setFilters({ ...filters, format: e.target.value })}
-                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Tất cả</option>
                 <option value="JSON">JSON</option>
@@ -148,11 +149,11 @@ export function AdvancedSearchModal({ onClose, onSearch, currentFilters }: Advan
 
             {/* Trạng thái */}
             <div>
-              <label className="block text-sm text-slate-700 mb-2">Trạng thái</label>
+              <label className="block text-base text-slate-700 mb-2">Trạng thái</label>
               <select aria-label="Select box"
                 value={filters.status}
                 onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Tất cả</option>
                 <option value="collected">Đã thu thập</option>
@@ -163,11 +164,11 @@ export function AdvancedSearchModal({ onClose, onSearch, currentFilters }: Advan
 
             {/* Mức độ ưu tiên */}
             <div>
-              <label className="block text-sm text-slate-700 mb-2">Mức độ ưu tiên</label>
+              <label className="block text-base text-slate-700 mb-2">Mức độ ưu tiên</label>
               <select aria-label="Select box"
                 value={filters.priority}
                 onChange={(e) => setFilters({ ...filters, priority: e.target.value })}
-                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Tất cả</option>
                 <option value="high">Cao</option>
@@ -179,24 +180,24 @@ export function AdvancedSearchModal({ onClose, onSearch, currentFilters }: Advan
 
           {/* Thời gian cập nhật */}
           <div>
-            <label className="block text-sm text-slate-700 mb-2">Thời gian cập nhật</label>
+            <label className="block text-base text-slate-700 mb-2">Thời gian cập nhật</label>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs text-slate-500 mb-1">Từ ngày</label>
+                <label className="block text-base text-slate-500 mb-1">Từ ngày</label>
                 <input aria-label="Input field"
                   type="date"
                   value={filters.dateFrom}
                   onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-xs text-slate-500 mb-1">Đến ngày</label>
+                <label className="block text-base text-slate-500 mb-1">Đến ngày</label>
                 <input aria-label="Input field"
                   type="date"
                   value={filters.dateTo}
                   onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
@@ -228,6 +229,7 @@ export function AdvancedSearchModal({ onClose, onSearch, currentFilters }: Advan
           </div>
         </form>
       </div>
+    </div>
     </div>
   );
 }

@@ -111,6 +111,7 @@ export function DataValidationPanel() {
   };
 
   return (
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
     <div className="space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -120,7 +121,7 @@ export function DataValidationPanel() {
               <CheckCircle className="w-6 h-6 text-green-600" />
             </div>
           </div>
-          <p className="text-gray-500 text-sm mb-1">Đạt yêu cầu</p>
+          <p className="text-gray-500 text-base mb-1">Đạt yêu cầu</p>
           <p className="text-gray-900">18 giao dịch</p>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -129,7 +130,7 @@ export function DataValidationPanel() {
               <XCircle className="w-6 h-6 text-red-600" />
             </div>
           </div>
-          <p className="text-gray-500 text-sm mb-1">Không đạt</p>
+          <p className="text-gray-500 text-base mb-1">Không đạt</p>
           <p className="text-gray-900">2 giao dịch</p>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -138,7 +139,7 @@ export function DataValidationPanel() {
               <AlertTriangle className="w-6 h-6 text-orange-600" />
             </div>
           </div>
-          <p className="text-gray-500 text-sm mb-1">Cảnh báo</p>
+          <p className="text-gray-500 text-base mb-1">Cảnh báo</p>
           <p className="text-gray-900">34 lỗi</p>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -147,7 +148,7 @@ export function DataValidationPanel() {
               <Play className="w-6 h-6 text-blue-600" />
             </div>
           </div>
-          <p className="text-gray-500 text-sm mb-1">Đang kiểm tra</p>
+          <p className="text-gray-500 text-base mb-1">Đang kiểm tra</p>
           <p className="text-gray-900">3 giao dịch</p>
         </div>
       </div>
@@ -201,17 +202,17 @@ export function DataValidationPanel() {
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="text-gray-900 mb-1">{result.source}</h4>
-                      <p className="text-gray-500 text-sm">Mã giao dịch: {result.transaction}</p>
+                      <p className="text-gray-500 text-base">Mã giao dịch: {result.transaction}</p>
                     </div>
                     <div className="text-right">
-                      <span className={`px-4 py-2 rounded-full text-sm ${
+                      <span className={`px-4 py-2 rounded-full text-base ${
                         result.status === 'passed' 
                           ? 'bg-green-100 text-green-700' 
                           : 'bg-red-100 text-red-700'
                       }`}>
                         {result.status === 'passed' ? 'Đạt yêu cầu' : 'Không đạt'}
                       </span>
-                      <p className="text-gray-500 text-sm mt-2">Thời gian kiểm tra: {result.time}</p>
+                      <p className="text-gray-500 text-base mt-2">Thời gian kiểm tra: {result.time}</p>
                     </div>
                   </div>
                 </div>
@@ -220,32 +221,32 @@ export function DataValidationPanel() {
                 <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
                   <div className="grid grid-cols-6 gap-4">
                     <div>
-                      <p className="text-gray-500 text-sm mb-1">Tổng bản ghi</p>
+                      <p className="text-gray-500 text-base mb-1">Tổng bản ghi</p>
                       <p className="text-gray-900">{result.records.toLocaleString()}</p>
                     </div>
                     <div>
-                      <p className="text-gray-500 text-sm mb-1">Hợp lệ</p>
+                      <p className="text-gray-500 text-base mb-1">Hợp lệ</p>
                       <p className="text-green-600">{result.passed.toLocaleString()}</p>
                     </div>
                     <div 
                       onClick={() => result.failed > 0 && handleShowDetails(result, 'errors')}
                       className={result.failed > 0 ? 'cursor-pointer hover:bg-red-50 rounded-lg p-2 -m-2 transition-colors' : ''}
                     >
-                      <p className="text-gray-500 text-sm mb-1">Lỗi</p>
+                      <p className="text-gray-500 text-base mb-1">Lỗi</p>
                       <p className="text-red-600">{result.failed.toLocaleString()}</p>
                     </div>
                     <div 
                       onClick={() => result.warnings > 0 && handleShowDetails(result, 'warnings')}
                       className={result.warnings > 0 ? 'cursor-pointer hover:bg-orange-50 rounded-lg p-2 -m-2 transition-colors' : ''}
                     >
-                      <p className="text-gray-500 text-sm mb-1">Cảnh báo</p>
+                      <p className="text-gray-500 text-base mb-1">Cảnh báo</p>
                       <p className="text-orange-600">{result.warnings.toLocaleString()}</p>
                     </div>
                     <div 
                       onClick={() => result.notifications > 0 && handleShowDetails(result, 'notifications')}
                       className={result.notifications > 0 ? 'cursor-pointer hover:bg-blue-50 rounded-lg p-2 -m-2 transition-colors' : ''}
                     >
-                      <p className="text-gray-500 text-sm mb-1">Thông báo</p>
+                      <p className="text-gray-500 text-base mb-1">Thông báo</p>
                       {result.notifications > 0 ? (
                         <p className="text-blue-600">{result.notifications} đã gửi</p>
                       ) : (
@@ -256,7 +257,7 @@ export function DataValidationPanel() {
                       onClick={() => result.responsesTotal > 0 && handleShowDetails(result, 'responses')}
                       className={result.responsesTotal > 0 ? 'cursor-pointer hover:bg-green-50 rounded-lg p-2 -m-2 transition-colors' : ''}
                     >
-                      <p className="text-gray-500 text-sm mb-1">Phản hồi</p>
+                      <p className="text-gray-500 text-base mb-1">Phản hồi</p>
                       {result.responsesTotal > 0 ? (
                         <p className={result.responsesReceived === result.responsesTotal ? 'text-green-600' : 'text-orange-600'}>
                           {result.responsesReceived}/{result.responsesTotal}
@@ -279,7 +280,7 @@ export function DataValidationPanel() {
                         {detail.result === 'warning' && <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5" />}
                         <div className="flex-1">
                           <p className="text-gray-900 mb-1">{detail.rule}</p>
-                          <p className={`text-sm ${
+                          <p className={`text-base ${
                             detail.result === 'pass' ? 'text-green-600' :
                             detail.result === 'fail' ? 'text-red-600' : 'text-orange-600'
                           }`}>
@@ -300,7 +301,7 @@ export function DataValidationPanel() {
           <div className="p-6">
             <div className="mb-6">
               <h4 className="text-gray-900 mb-2">Quy tắc kiểm tra tự động</h4>
-              <p className="text-gray-500 text-sm">Cấu hình các quy tắc kiểm tra dữ liệu</p>
+              <p className="text-gray-500 text-base">Cấu hình các quy tắc kiểm tra dữ liệu</p>
             </div>
             <div className="space-y-3">
               {validationRules.map((rule) => (
@@ -314,7 +315,7 @@ export function DataValidationPanel() {
                     />
                     <div>
                       <p className="text-gray-900">{rule.name}</p>
-                      <span className={`inline-block px-2 py-1 rounded text-xs mt-1 ${
+                      <span className={`inline-block px-2 py-1 rounded text-base mt-1 ${
                         rule.priority === 'high' ? 'bg-red-100 text-red-700' :
                         rule.priority === 'medium' ? 'bg-orange-100 text-orange-700' :
                         'bg-gray-100 text-gray-700'
@@ -416,6 +417,7 @@ export function DataValidationPanel() {
           data={getModalData()}
         />
       )}
+    </div>
     </div>
   );
 }

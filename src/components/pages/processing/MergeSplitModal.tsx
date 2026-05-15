@@ -79,10 +79,18 @@ export function MergeSplitModal({ isOpen, onClose, sourceFields, onMergeSubmit, 
         Tạo {activeTab === 'merge' ? selectedMergeFields.length : splitResults.length} trường {activeTab === 'merge' ? 'gộp' : 'tách'} mới
       </div>
       <div className="flex gap-3">
-        <button onClick={onClose} className="px-5 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors">
+        <button
+          onClick={onClose}
+          style={{ padding: '8px 16px', borderRadius: '6px', fontWeight: 500 }}
+          className="text-sm text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 transition-colors"
+        >
           Hủy
         </button>
-        <button onClick={handleSubmit} className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
+        <button
+          onClick={handleSubmit}
+          style={{ padding: '8px 16px', borderRadius: '6px', fontWeight: 500 }}
+          className="text-sm text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm"
+        >
           Xác nhận
         </button>
       </div>
@@ -90,29 +98,32 @@ export function MergeSplitModal({ isOpen, onClose, sourceFields, onMergeSubmit, 
   );
 
   return (
-    <BaseModal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="Gộp / Tách cột"
-      subtitle="Tạo trường mới từ các cột nguồn trước khi ánh xạ"
-      maxWidth="max-w-2xl"
-      showCloseButton={true}
-      customHeaderIcon={<div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 mr-3"><Merge className="w-5 h-5" /></div>}
-      footer={footer}
-    >
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
+      <BaseModal
+        isOpen={isOpen}
+        onClose={onClose}
+        title="Gộp / Tách cột"
+        subtitle="Tạo trường mới từ các cột nguồn trước khi ánh xạ"
+        maxWidth="max-w-2xl"
+        showCloseButton={true}
+        customHeaderIcon={<div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 mr-3"><Merge className="w-5 h-5" /></div>}
+        footer={footer}
+      >
       <div className="flex flex-col gap-6 p-1">
         {/* Tabs */}
-        <div className="flex p-1 bg-slate-100 rounded-xl">
+        <div className="flex p-1 bg-slate-100 rounded-lg">
           <button 
             onClick={() => setActiveTab('merge')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === 'merge' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            style={{ borderRadius: '6px', fontWeight: 500 }}
+            className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm transition-all ${activeTab === 'merge' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
           >
             <Merge className="w-4 h-4" />
             Gộp cột
           </button>
           <button 
             onClick={() => setActiveTab('split')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === 'split' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            style={{ borderRadius: '6px', fontWeight: 500 }}
+            className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm transition-all ${activeTab === 'split' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
           >
             <Split className="w-4 h-4" />
             Tách cột
@@ -191,7 +202,11 @@ export function MergeSplitModal({ isOpen, onClose, sourceFields, onMergeSubmit, 
                   <h3 className="text-[13px] font-bold text-slate-800">Các cột kết quả</h3>
                   <p className="text-[11px] text-slate-500 mt-0.5">Mỗi cột nhập một biểu thức Regex áp dụng trên cột nguồn để lấy giá trị.</p>
                 </div>
-                <button onClick={addSplitResult} className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-bold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors shadow-sm">
+                <button
+                  onClick={addSplitResult}
+                  style={{ padding: '6px 12px', borderRadius: '6px', fontWeight: 500 }}
+                  className="flex items-center gap-1.5 text-[12px] text-[#020817] bg-white border border-[#e2e8f0] hover:bg-slate-50 transition-colors shadow-sm"
+                >
                   <Plus className="w-3.5 h-3.5" />
                   Thêm cột
                 </button>
@@ -241,5 +256,6 @@ export function MergeSplitModal({ isOpen, onClose, sourceFields, onMergeSubmit, 
         )}
       </div>
     </BaseModal>
+    </div>
   );
 }
