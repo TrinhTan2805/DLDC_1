@@ -132,11 +132,11 @@ export function AgentManagementPage() {
       </div>
 
       {/* Table Card */}
-      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm flex flex-col flex-1 min-h-0">
+        <div className="overflow-x-auto flex-1">
+          <table className="w-full text-left border-collapse collection-table" style={{ fontSize: '16px' }}>
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold text-base uppercase tracking-tight sticky top-0 z-10">
+              <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-tight sticky top-0 z-10">
                 <th className="py-4 px-6 w-16 text-center">STT</th>
                 <th className="py-4 px-6">Thông tin Trạm kết nối</th>
                 <th className="py-4 px-6 text-center">Số CSDL</th>
@@ -152,7 +152,7 @@ export function AgentManagementPage() {
                   .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
                   .map((item, index) => (
                     <tr key={item.id} className="hover:bg-slate-50 transition-all group">
-                      <td className="py-4 px-6 text-base text-slate-500 text-center font-medium">
+                      <td className="py-4 px-6 text-slate-500 text-center font-medium">
                         {(currentPage - 1) * itemsPerPage + index + 1}
                       </td>
                       <td className="py-4 px-6">
@@ -161,13 +161,13 @@ export function AgentManagementPage() {
                             <Monitor className="w-5 h-5 text-slate-600" />
                           </div>
                           <div>
-                            <div className="text-base font-bold text-slate-900 leading-tight">{item.name}</div>
-                            <div className="text-base text-slate-400 mt-1">ID: {item.id}</div>
+                            <div className="font-bold text-slate-900 leading-tight">{item.name}</div>
+                            <div className="text-slate-400 mt-1">ID: {item.id}</div>
                           </div>
                         </div>
                       </td>
                       <td className="py-4 px-6 text-center">
-                        <span className="text-base font-bold text-slate-700 bg-slate-100 px-2 py-1 rounded-md">
+                        <span className="font-bold text-slate-700 bg-slate-100 px-2 py-1 rounded-md">
                           {item.databases.length}
                         </span>
                       </td>
@@ -181,7 +181,7 @@ export function AgentManagementPage() {
                         </div>
                       </td>
                       <td className="py-4 px-6">
-                        <div className="text-base text-slate-600">{item.lastDbUpdate}</div>
+                        <div className="text-slate-600">{item.lastDbUpdate}</div>
                       </td>
                       <td className="py-4 px-6">
                         <div className="flex flex-col items-center gap-1.5">
@@ -242,11 +242,11 @@ export function AgentManagementPage() {
         </div>
 
         {/* Pagination */}
-        <div className="px-6 py-3 border-t border-slate-200 flex items-center justify-between bg-white">
+        <div className="px-6 py-3 border-t border-slate-200 flex items-center justify-between bg-white sticky bottom-0 collection-pagination" style={{ fontSize: '16px' }}>
           <div className="flex items-center gap-2">
-            <span className="text-base text-slate-600">Hiển thị</span>
+            <span className="text-slate-600">Hiển thị</span>
             <select 
-              className="px-2 py-1 border border-slate-300 rounded text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               title="Số bản ghi trên trang"
               value={itemsPerPage}
               onChange={(e) => {
@@ -259,18 +259,18 @@ export function AgentManagementPage() {
               <option value={50}>50</option>
               <option value={100}>100</option>
             </select>
-            <span className="text-base text-slate-600">bản ghi/trang</span>
+            <span className="text-slate-600">bản ghi/trang</span>
           </div>
           
           <div className="flex items-center gap-4">
-            <span className="text-base text-slate-600">
+            <span className="text-slate-600">
               {filteredData.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, filteredData.length)} / {filteredData.length}
             </span>
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : currentPage)}
                 disabled={currentPage === 1}
-                className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors text-base font-medium"
+                className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
               >
                 Trước
               </button>
@@ -279,7 +279,7 @@ export function AgentManagementPage() {
                 <button
                   key={page}
                   onClick={() => setCurrentPage(page)}
-                  className={`px-3 py-1.5 border rounded-lg text-base font-medium transition-colors ${
+                  className={`px-3 py-1.5 border rounded-lg font-medium transition-colors ${
                     currentPage === page
                       ? 'bg-blue-600 border-blue-600 text-white'
                       : 'border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
@@ -297,7 +297,7 @@ export function AgentManagementPage() {
                   }
                 }}
                 disabled={currentPage === Math.ceil(filteredData.length / itemsPerPage) || filteredData.length === 0}
-                className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors text-base font-medium"
+                className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
               >
                 Sau
               </button>
