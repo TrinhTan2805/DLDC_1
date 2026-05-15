@@ -331,32 +331,32 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
       {/* Table Container - Standalone Card */}
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
+            <table className="w-full border-collapse collection-table" style={{ fontSize: '16px' }}>
               <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
                 <tr>
-                  <th className="px-4 py-3 text-center text-base font-semibold text-slate-500 whitespace-nowrap w-12">STT</th>
-                  <th className="px-4 py-3 text-center text-base font-semibold text-slate-500 whitespace-nowrap">Người dùng</th>
-                  <th className="px-4 py-3 text-center text-base font-semibold text-slate-500 whitespace-nowrap">Hành động</th>
-                  <th className="px-4 py-3 text-center text-base font-semibold text-slate-500 whitespace-nowrap w-40">Thời gian</th>
-                  <th className="px-4 py-3 text-center text-base font-semibold text-slate-500 whitespace-nowrap w-28">Trạng thái</th>
-                  <th className="px-4 py-3 text-center text-base font-semibold text-slate-500 whitespace-nowrap w-20">Thao tác</th>
+                  <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap w-12">STT</th>
+                  <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Người dùng</th>
+                  <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Hành động</th>
+                  <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap w-40">Thời gian</th>
+                  <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap w-28">Trạng thái</th>
+                  <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap w-20">Thao tác</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {currentLogs.map((log, index) => (
                   <tr key={log.id} className="hover:bg-slate-50 transition-all group border-b border-slate-100">
-                    <td className="px-4 py-3 text-center text-base text-slate-500 font-normal">{((currentPage - 1) * itemsPerPage + index + 1).toString().padStart(2, '0')}</td>
+                    <td className="px-4 py-3 text-center text-slate-500 font-normal">{((currentPage - 1) * itemsPerPage + index + 1).toString().padStart(2, '0')}</td>
                     <td className="px-4 py-3 text-center">
                       <div>
-                        <div className="text-base font-medium text-blue-600 hover:underline cursor-pointer transition-colors">{log.user}</div>
-                        <div className="text-base text-slate-500 mt-0.5">{log.userName}</div>
+                        <div className="font-medium text-blue-600 hover:underline cursor-pointer transition-colors">{log.user}</div>
+                        <div className="text-slate-500 mt-0.5">{log.userName}</div>
                       </div>
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <div className="text-base font-medium text-slate-900">{log.action}</div>
-                      <div className="text-base text-slate-500 mt-0.5">{log.module}</div>
+                      <div className="font-medium text-slate-900">{log.action}</div>
+                      <div className="text-slate-500 mt-0.5">{log.module}</div>
                     </td>
-                    <td className="px-4 py-3 text-center text-base text-slate-500 font-normal font-mono whitespace-nowrap">{log.timestamp}</td>
+                    <td className="px-4 py-3 text-center text-slate-500 font-normal font-mono whitespace-nowrap">{log.timestamp}</td>
                     <td className="px-4 py-3 text-center">
                       <StatusTag 
                         label={log.status} 
@@ -383,7 +383,7 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
                     <td colSpan={6} className="px-4 py-16 text-center">
                       <div className="flex flex-col items-center justify-center text-slate-300">
                         <Search className="w-12 h-12 mb-3 opacity-20" />
-                        <p className="text-base font-medium">Không tìm thấy kết quả phù hợp</p>
+                        <p className="font-medium">Không tìm thấy kết quả phù hợp</p>
                       </div>
                     </td>
                   </tr>
@@ -393,11 +393,11 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
           </div>
 
           {/* Pagination */}
-          <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white sm:px-6">
+          <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white sm:px-6 collection-pagination" style={{ fontSize: '16px' }}>
             <div className="flex items-center gap-2">
-              <span className="text-base text-slate-600">Hiển thị</span>
+              <span className="text-slate-600">Hiển thị</span>
               <select 
-                className="px-2 py-1 border border-slate-300 rounded text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                 value={itemsPerPage}
                 onChange={(e) => {
                   setItemsPerPage(Number(e.target.value));
@@ -410,18 +410,18 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
                 <option value={50}>50</option>
                 <option value={100}>100</option>
               </select>
-              <span className="text-base text-slate-600">bản ghi/trang</span>
+              <span className="text-slate-600">bản ghi/trang</span>
             </div>
             
             <div className="flex items-center gap-4">
-              <span className="text-base text-slate-600">
+              <span className="text-slate-600">
                 {filteredLogs.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, filteredLogs.length)} / {filteredLogs.length}
               </span>
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors text-base font-medium"
+                  className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
                 >
                   Trước
                 </button>
@@ -430,7 +430,7 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
-                    className={`px-3 py-1.5 border rounded-lg text-base font-medium transition-colors ${
+                    className={`px-3 py-1.5 border rounded-lg font-medium transition-colors ${
                       currentPage === page
                         ? 'bg-blue-600 border-blue-600 text-white'
                         : 'border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
@@ -446,7 +446,7 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
                     if (currentPage < totalPages) setCurrentPage(prev => prev + 1);
                   }}
                   disabled={currentPage === Math.ceil(filteredLogs.length / itemsPerPage) || filteredLogs.length === 0}
-                  className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors text-base font-medium"
+                  className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
                 >
                   Sau
                 </button>

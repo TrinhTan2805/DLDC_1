@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { GenericProcessingPage } from '../processing/GenericProcessingPage';
+import { useState, useMemo } from 'react';
 import { UserCheck } from 'lucide-react';
-import { DatabaseTemplate } from '../DatabaseTemplate';
+import { DatabasePageTemplate } from '../collection/DatabasePageTemplate';
+import { NationalityAcquisitionModal } from '../../nationality-acquisition/NationalityAcquisitionModal';
 
 interface StatCard {
   id: string;
@@ -17,13 +17,6 @@ interface StatCard {
   processingRate?: number;
 }
 
-interface DatabaseRecord {
-  name: string;
-  category: string;
-  todayCount: number;
-  errorCount: number;
-}
-
 interface CaseManagementPageProps {
   mode?: 'thu thập' | 'xử lý';
   context?: 'thu thập' | 'chia sẻ';
@@ -31,8 +24,10 @@ interface CaseManagementPageProps {
 }
 
 export function CaseManagementPage({ mode = 'thu thập', context = 'thu thập', onBack }: CaseManagementPageProps) {
+  const [selectedId, setSelectedId] = useState('1');
+
   // Generate data for 3 types of nationality records
-  const generateData = () => {
+  const stats = useMemo(() => {
     const data = [
       { id: '1', title: `Dữ liệu Nhập Quốc tịch`, icon: UserCheck, color: 'blue', lastMonth: 2098, thisMonth: 3424, change: 63.2 },
       { id: '2', title: `Dữ liệu Thôi Quốc tịch`, icon: UserCheck, color: 'green', lastMonth: 189234, thisMonth: 224990, change: 4.05 },
@@ -54,29 +49,33 @@ export function CaseManagementPage({ mode = 'thu thập', context = 'thu thập'
         thisMonth: item.thisMonth,
       };
     });
-  };
+  }, []);
 
-  const stats = generateData();
-
-  if (mode === 'xử lý') {
-    return <GenericProcessingPage systemName="HT quản lý hồ sơ QT" datasets={stats.map((s, idx) => ({ id: s.id || `item_${idx}`, name: s.title }))} />;
-  }
-
-  const tableData: DatabaseRecord[] = [
-    { name: 'Thu thập dữ liệu Nhập Quốc tịch', category: 'Quốc tịch', todayCount: 20000, errorCount: 30 },
-    { name: 'Thu thập dữ liệu Thôi Quốc tịch', category: 'Quốc tịch', todayCount: 20000, errorCount: 30 },
-    { name: 'Thu thập dữ liệu Trở lại Quốc tịch', category: 'Quốc tịch', todayCount: 20000, errorCount: 30 },
-  ];
+  const sidebarItems = stats.map(s => ({ id: s.id, label: `Bộ dữ liệu ${s.title.toLowerCase()}` }));
 
   return (
-    <DatabaseTemplate
+    <DatabasePageTemplate
       title="Dữ liệu HT quản lý hồ sơ QT"
-      categoryName="Quốc tịch"
-      stats={stats}
-      tableData={tableData}
-      context={context}
-      mode={mode}
+      description="Quản lý và xem chi tiết dữ liệu từ Quốc tịch"
       onBack={onBack}
-    />
+      innerSidebarItems={sidebarItems}
+      activeId={selectedId}
+      onSelectDataType={(id) => setSelectedId(id)}
+    >
+      <div className="mt-4">
+        {selectedId === '1' ? (
+          <NationalityAcquisitionModal
+            isOpen={true}
+            onClose={() => {}}
+            isInline={true}
+            title="Dữ liệu Nhập Quốc tịch"
+          />
+        ) : (
+          <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
+            <p className="text-slate-500">Giao diện cho bộ dữ liệu này đang được cập nhật...</p>
+          </div>
+        )}
+      </div>
+    </DatabasePageTemplate>
   );
 }

@@ -5510,5 +5510,24 @@ table td [class*='text-slate-'], table td [class*='text-gray-'] {
 /* Xoa uppercase tren toan bo chu de khong gay kho chiu */
 .uppercase, .tracking-wider {
   text-transform: none !important;
-  letter-spacing: normal !important;
+}
+
+/* Cố định font-size 16px cho class text-[16px] vì build tĩnh có thể không nhận */
+.text-\[16px\] {
+  font-size: 16px !important;
+}
+
+/* Ghi đè riêng cho bảng Thu thập, tránh rule 14px !important của hệ thống */
+table.collection-table th, 
+table.collection-table thead th, 
+table.collection-table td, 
+table.collection-table tbody td {
+  font-size: 16px !important;
+}
+
+.collection-pagination,
+.collection-pagination span,
+.collection-pagination select,
+.collection-pagination button {
+  font-size: 16px !important;
 }

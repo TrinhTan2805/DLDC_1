@@ -1,5 +1,7 @@
 import { X, Search, Filter, Download, XCircle, CheckCircle, AlertCircle, Eye, FileText, RefreshCw, Calendar } from 'lucide-react';
 import { useState } from 'react';
+import { CivilRegistryChangeSearchFilter } from './civil-registry-change/CivilRegistryChangeSearchFilter';
+import { CivilRegistryChangeTable } from './civil-registry-change/CivilRegistryChangeTable';
 
 export interface CivilRegistryChangeModalProps {
   isOpen: boolean;
@@ -71,7 +73,12 @@ export function CivilRegistryChangeModal({
 }: CivilRegistryChangeModalProps) {
   const [activeTab, setActiveTab] = useState('list');
   const [selectedRecord, setSelectedRecord] = useState<CivilRegistryChangeRecord | null>(null);
-  const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [filterConditions, setFilterConditions] = useState<any[]>([]);
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   
   if (!isOpen && !isInline) return null;
 
@@ -122,14 +129,20 @@ export function CivilRegistryChangeModal({
       {!isInline && <div className="fixed inset-0 bg-black/50 z-50" onClick={onClose}></div>}
       
       {/* Container */}
-      <div className={isInline ? "w-full" : "fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"}>
-        <div className={`bg-white ${isInline ? "border border-slate-200 rounded-xl overflow-hidden" : "rounded-lg shadow-xl max-w-[95vw] w-full max-h-[90vh] pointer-events-auto"} flex flex-col`}>
+      <div className={isInline ? "w-full flex flex-col" : "fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"}>
+        {isInline && (
+          <div className="flex items-center justify-between mb-0">
+            <h2 className="text-xl font-bold text-slate-900">{title}</h2>
+          </div>
+        )}
+        
+        <div className={isInline ? "flex flex-col flex-1" : "bg-white rounded-lg shadow-xl max-w-7xl w-full max-h-[90vh] pointer-events-auto flex flex-col"}>
           {/* Header */}
-          <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0 bg-white sticky top-0 z-20">
-            <div>
-              <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
-            </div>
-            {!isInline && (
+          {!isInline && (
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0 bg-white sticky top-0 z-20 rounded-t-lg">
+              <div>
+                <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
+              </div>
               <button
                  onClick={onClose}
                  className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600"
@@ -137,161 +150,33 @@ export function CivilRegistryChangeModal({
               >
                 <X className="w-5 h-5" />
               </button>
-            )}
-          </div>
+            </div>
+          )}
 
-
-
-          {/* Content */}
-          <div className="flex-1 overflow-hidden flex flex-col">
+          {/* Content Area */}
+          <div className={`flex-1 overflow-hidden flex flex-col ${isInline ? '' : 'bg-white rounded-b-lg'}`}>
             {activeTab === 'list' && (
               <div className="flex-1 flex flex-col overflow-hidden">
-                {/* Search & Actions */}
-                <div className="px-6 py-4 border-b border-slate-200 flex-shrink-0 bg-white">
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex-1 flex items-center gap-3">
-                      <div className="relative flex-1">
-                        <input aria-label="Input field"
-                          type="text"
-                          placeholder="Tìm kiếm theo họ tên người được thay đổi, mã hồ sơ..."
-                          className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50 shadow-sm transition-all"
-                        />
-                        <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                      </div>
-                      
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
-                          className={`px-3 py-2 rounded-lg flex items-center gap-2 text-sm font-semibold transition-all shadow-sm border ${
-                            showAdvancedSearch ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                          }`}
-                        >
-                          <Filter className="w-4 h-4" />
-                          Lọc
-                        </button>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-3">
-                      <button className="p-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 transition-all shadow-sm" title="Tải lại">
-                        <RefreshCw className="w-4 h-4" />
-                      </button>
-                      <button className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all flex items-center gap-2 text-sm font-semibold shadow-sm">
-                        <Download className="w-4 h-4" />
-                        Kết xuất
-                      </button>
-                    </div>
-                  </div>
+                <CivilRegistryChangeSearchFilter
+                  isFilterOpen={isFilterOpen}
+                  setIsFilterOpen={setIsFilterOpen}
+                  filterConditions={filterConditions}
+                  setFilterConditions={setFilterConditions}
+                  onExport={() => alert('Đang kết xuất...')}
+                  onRefresh={() => {}}
+                  isInline={isInline}
+                />
 
-                  {/* Advanced Search Panel */}
-                  {showAdvancedSearch && (
-                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 mt-4 shadow-sm animate-in slide-in-from-top-2 duration-200 relative">
-                      <div className="absolute -top-2 left-64 w-4 h-4 bg-slate-50 border-t border-l border-slate-200 transform rotate-45"></div>
-                      <div className="flex items-center justify-between mb-4 relative z-10">
-                        <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Điều kiện lọc nâng cao</h4>
-                      </div>
-
-                      <div className="grid grid-cols-4 gap-4 relative z-10">
-                        <div>
-                          <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 ml-1">Người được thay đổi</label>
-                          <input type="text" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm" placeholder="Nhập họ tên..." />
-                        </div>
-                        <div>
-                          <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 ml-1">Mã hồ sơ</label>
-                          <input type="text" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm" placeholder="Mã hồ sơ..." />
-                        </div>
-                        <div>
-                          <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 ml-1">Từ ngày</label>
-                          <div className="relative">
-                            <input type="date" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm appearance-none" />
-                            <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 ml-1">Đến ngày</label>
-                          <div className="relative">
-                            <input type="date" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm appearance-none" />
-                            <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-6 pt-4 border-t border-slate-200 flex items-center gap-3 relative z-10">
-                        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-bold text-sm hover:bg-blue-700 flex items-center gap-2 shadow-md transition-all active:scale-95">
-                          <CheckCircle className="w-4 h-4" />
-                          Áp dụng bộ lọc
-                        </button>
-                        <button onClick={() => setShowAdvancedSearch(false)} className="px-4 py-2 bg-white border border-slate-300 text-slate-600 rounded-lg font-bold text-sm hover:bg-slate-50 transition-all">
-                          Xóa tất cả
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Table */}
-                <div className="flex-1 overflow-auto bg-white">
-                  <table className="w-full border-collapse">
-                    <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
-                      <tr>
-                        <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">STT</th>
-                        <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Mã hồ sơ</th>
-                        <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Người được thay đổi</th>
-                        <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">SĐD cá nhân</th>
-                        <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Người đi đăng ký</th>
-                        <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Quan hệ</th>
-                        <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Số GTT hộ tịch</th>
-                        <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Trạng thái</th>
-                        <th className="px-4 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Thao tác</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {records.map((record, index) => (
-                        <tr key={record.id} className="hover:bg-blue-50/30 transition-all group">
-                          <td className="px-4 py-4 text-center text-sm text-slate-500 font-medium">{(index + 1).toString().padStart(2, '0')}</td>
-                          <td className="px-4 py-4 text-center text-sm font-semibold text-slate-900 font-mono">{record.recordCode}</td>
-                          <td className="px-4 py-4 text-center text-sm font-semibold text-blue-700">{record.changedPersonName}</td>
-                          <td className="px-4 py-4 text-center text-sm text-slate-600 font-medium font-mono">{record.personalId}</td>
-                          <td className="px-4 py-4 text-center text-sm text-slate-900 font-medium">{record.registrantName}</td>
-                          <td className="px-4 py-4 text-center text-sm text-slate-600 font-medium">{record.relationship}</td>
-                          <td className="px-4 py-4 text-center text-sm text-slate-600 font-medium font-mono">{record.civilDocNumber}</td>
-                          <td className="px-4 py-4 text-center">
-                            {record.status === 'approved' && (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-50 text-green-700 rounded-full text-[10px] font-bold uppercase tracking-wider border border-green-100 shadow-sm whitespace-nowrap">
-                                <CheckCircle className="w-3.5 h-3.5" /> Đã duyệt
-                              </span>
-                            )}
-                            {record.status === 'pending' && (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full text-[10px] font-bold uppercase tracking-wider border border-amber-100 shadow-sm whitespace-nowrap">
-                                <AlertCircle className="w-3.5 h-3.5" /> Chờ duyệt
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-4 py-4 text-center">
-                            <button
-                              onClick={() => setSelectedRecord(record)}
-                              className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all"
-                              title="Xem chi tiết"
-                            >
-                              <Eye className="w-4.5 h-4.5" />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Pagination */}
-                <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between bg-slate-50/50">
-                  <div className="text-sm text-slate-600 font-medium">
-                    Hiển thị <span className="text-slate-900 font-bold">1-{records.length}</span> trong tổng số <span className="text-slate-900 font-bold">{totalRecords}</span> bản ghi
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-white text-sm font-bold transition-colors">Trước</button>
-                    <button className="w-9 h-9 bg-blue-600 text-white rounded-lg text-sm font-bold shadow-md">1</button>
-                    <button className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-white text-sm font-bold transition-colors">Sau</button>
-                  </div>
+                <div className={isInline ? "bg-white border border-slate-200 rounded-lg shadow-sm flex-1 flex flex-col overflow-hidden" : "flex-1 flex flex-col overflow-hidden"}>
+                  <CivilRegistryChangeTable
+                    records={records}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    itemsPerPage={itemsPerPage}
+                    setItemsPerPage={setItemsPerPage}
+                    totalRecords={totalRecords}
+                    onViewRecord={(record) => setSelectedRecord(record)}
+                  />
                 </div>
               </div>
             )}
