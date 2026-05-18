@@ -48,7 +48,7 @@ export function TargetDatabaseConfigModal({
       <button
         onClick={onBack}
         style={{ padding: '8px 16px', borderRadius: '6px', fontWeight: 500 }}
-        className="flex items-center gap-2 text-sm text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-all shadow-sm active:scale-95"
+        className="flex items-center gap-2 text-[13px] text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-all shadow-sm active:scale-95"
       >
         <ArrowLeft className="w-4 h-4" />
         Trở về
@@ -58,7 +58,7 @@ export function TargetDatabaseConfigModal({
         <button
           onClick={onDownloadTarget}
           style={{ padding: '8px 16px', borderRadius: '6px', fontWeight: 500 }}
-          className="flex items-center gap-2 text-sm text-blue-600 bg-blue-50 border border-blue-200 hover:bg-blue-100 transition-all active:scale-95"
+          className="flex items-center gap-2 text-[13px] text-blue-600 bg-blue-50 border border-blue-200 hover:bg-blue-100 transition-all active:scale-95"
         >
           <Search className="w-4 h-4" />
           Tải CSDL đích
@@ -67,7 +67,7 @@ export function TargetDatabaseConfigModal({
           onClick={() => onNext(formData)}
           disabled={isNextDisabled}
           style={{ padding: '8px 16px', borderRadius: '6px', fontWeight: 500 }}
-          className={`flex items-center gap-2 text-sm text-white transition-all shadow-md ${isNextDisabled
+          className={`flex items-center gap-2 text-[13px] text-white transition-all shadow-md ${isNextDisabled
             ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
             : 'bg-blue-600 hover:bg-blue-700 active:scale-95'
             }`}
@@ -80,7 +80,7 @@ export function TargetDatabaseConfigModal({
   );
 
   return (
-    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px' }}>
       <BaseModal
         isOpen={isOpen}
         onClose={onClose}

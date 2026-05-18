@@ -58,7 +58,7 @@ export function TargetDatabaseModal({ isOpen, onClose, onSave, editingData }: Ta
   };
 
   return createPortal(
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px', zIndex: 999999 }}>
+    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px', zIndex: 999999 }}>
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh] border border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-200">
         {/* Header */}
         <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10">

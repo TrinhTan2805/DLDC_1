@@ -43,7 +43,7 @@ export function ViewServiceModal({ isOpen, onClose, service }: ViewServiceModalP
           {/* HEADER */}
           <div className="px-8 py-6 bg-slate-50/50 border-b border-slate-100">
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2 text-base font-semibold text-slate-400 uppercase tracking-wider">
+              <div className="flex items-center gap-2 text-[13px] font-normal text-slate-400 uppercase tracking-wider">
                 <span>Danh sách dịch vụ</span>
                 <ChevronRight className="w-3 h-3" />
                 <span className="text-blue-600">Chi tiết dịch vụ</span>
@@ -59,7 +59,7 @@ export function ViewServiceModal({ isOpen, onClose, service }: ViewServiceModalP
                   {service.name || 'Dịch vụ chưa đặt tên'}
                 </h1>
 
-                <div className="flex flex-wrap items-center gap-3 text-base text-slate-600">
+                <div className="flex flex-wrap items-center gap-3 text-[13px] text-slate-600">
                   <StatusTag 
                     label={service.status === 'draft' ? 'Bản nháp' : service.status === 'inactive' ? 'Ngưng hoạt động' : 'Hoạt động'} 
                     variant={service.status === 'draft' ? 'slate' : service.status === 'inactive' ? 'gray' : 'green'} 
@@ -98,7 +98,7 @@ export function ViewServiceModal({ isOpen, onClose, service }: ViewServiceModalP
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as TabType)}
-                className={`flex items-center gap-2 px-6 py-4 border-b-2 text-base transition-all relative ${activeTab === tab.id
+                className={`flex items-center gap-2 px-6 py-4 border-b-2 text-[13px] transition-all relative ${activeTab === tab.id
                   ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-gray-300'
                   }`}
@@ -193,27 +193,27 @@ function TabGeneral({ service, sourceSystem, onEdit }: any) {
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <h3 className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+        <h3 className="text-[13px] font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
           <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
           Thông tin dịch vụ
         </h3>
         <div className="grid grid-cols-2 gap-x-12 gap-y-6">
 
           <div className="space-y-1">
-            <div className="text-base font-semibold text-slate-500 uppercase tracking-tight">Tên dịch vụ</div>
-            <div className="text-base text-slate-900 font-medium leading-relaxed">{service.name || '-'}</div>
+            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Tên dịch vụ</div>
+            <div className="text-[13px] text-slate-900 font-medium leading-relaxed">{service.name || '-'}</div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-base font-semibold text-slate-500 uppercase tracking-tight">Tên hệ thống nguồn</div>
-            <div className="text-base text-slate-900 font-medium leading-relaxed flex items-center gap-2">
+            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Tên hệ thống nguồn</div>
+            <div className="text-[13px] text-slate-900 font-medium leading-relaxed flex items-center gap-2">
               <Database className="w-4 h-4 text-blue-500" />
               {service.system || sourceSystem.systemName}
             </div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-base font-semibold text-slate-500 uppercase tracking-tight">Loại nguồn</div>
+            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Loại nguồn</div>
             <div>
               <StatusTag 
                 label={service.source} 
@@ -223,14 +223,14 @@ function TabGeneral({ service, sourceSystem, onEdit }: any) {
           </div>
 
           <div className="space-y-1">
-            <div className="text-base font-semibold text-slate-500 uppercase tracking-tight">Mức độ bảo mật dữ liệu</div>
+            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Mức độ bảo mật dữ liệu</div>
             <div>
               <StatusTag label={service.securityLevel || 'Nội bộ'} variant="blue" />
             </div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-base font-semibold text-slate-500 uppercase tracking-tight">Trạng thái dữ liệu</div>
+            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Trạng thái dữ liệu</div>
             <div>
               {(() => {
                 const dataStatus = service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY');
@@ -250,8 +250,8 @@ function TabGeneral({ service, sourceSystem, onEdit }: any) {
           </div>
 
           <div className="space-y-1 col-span-2">
-            <div className="text-base font-semibold text-slate-500 uppercase tracking-tight">Mô tả</div>
-            <div className="text-base text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-100 italic">
+            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Mô tả</div>
+            <div className="text-[13px] text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-100 italic">
               {service.description || 'Chưa có mô tả cho dịch vụ này.'}
             </div>
           </div>
@@ -260,7 +260,7 @@ function TabGeneral({ service, sourceSystem, onEdit }: any) {
       </div>
 
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <h3 className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+        <h3 className="text-[13px] font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
           <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
           Đính kèm văn bản
         </h3>
@@ -270,8 +270,8 @@ function TabGeneral({ service, sourceSystem, onEdit }: any) {
               <FileText className="w-5 h-5" />
             </div>
             <div>
-              <div className="text-base text-slate-800 font-medium">QĐ_Ketno_QuocTich_2025.pdf</div>
-              <div className="text-base text-slate-400 font-medium">245 KB • 10/04/2025</div>
+              <div className="text-[13px] text-slate-800 font-medium">QĐ_Ketno_QuocTich_2025.pdf</div>
+              <div className="text-[13px] text-slate-400 font-medium">245 KB • 10/04/2025</div>
             </div>
             <Download className="w-4 h-4 text-slate-400 ml-4 group-hover:text-blue-600" />
           </div>
@@ -281,8 +281,8 @@ function TabGeneral({ service, sourceSystem, onEdit }: any) {
               <FileText className="w-5 h-5" />
             </div>
             <div>
-              <div className="text-base text-slate-800 font-medium">BienBan_Nghiemthu_API.docx</div>
-              <div className="text-base text-slate-400 font-medium">118 KB • 10/04/2025</div>
+              <div className="text-[13px] text-slate-800 font-medium">BienBan_Nghiemthu_API.docx</div>
+              <div className="text-[13px] text-slate-400 font-medium">118 KB • 10/04/2025</div>
             </div>
             <Download className="w-4 h-4 text-slate-400 ml-4 group-hover:text-blue-600" />
           </div>
@@ -290,41 +290,41 @@ function TabGeneral({ service, sourceSystem, onEdit }: any) {
       </div>
 
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <h3 className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+        <h3 className="text-[13px] font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
           <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
           Thông tin hệ thống nguồn
         </h3>
         <div className="grid grid-cols-2 gap-x-12 gap-y-6">
           <div className="space-y-1">
-            <div className="text-base font-semibold text-slate-500 uppercase tracking-tight">Tên hệ thống</div>
-            <div className="text-base text-slate-900 font-medium leading-relaxed">{sourceSystem.systemName}</div>
+            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Tên hệ thống</div>
+            <div className="text-[13px] text-slate-900 font-medium leading-relaxed">{sourceSystem.systemName}</div>
           </div>
           <div className="space-y-1">
-            <div className="text-base font-semibold text-slate-500 uppercase tracking-tight">Tên đơn vị</div>
-            <div className="text-base text-slate-900 font-medium leading-relaxed">{sourceSystem.unitName}</div>
+            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Tên đơn vị</div>
+            <div className="text-[13px] text-slate-900 font-medium leading-relaxed">{sourceSystem.unitName}</div>
           </div>
           <div className="space-y-1">
-            <div className="text-base font-semibold text-slate-500 uppercase tracking-tight">Đầu mối liên hệ</div>
-            <div className="text-base text-slate-900 font-medium leading-relaxed flex items-center gap-2">
+            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Đầu mối liên hệ</div>
+            <div className="text-[13px] text-slate-900 font-medium leading-relaxed flex items-center gap-2">
               <User className="w-4 h-4 text-slate-400" />
               {sourceSystem.contactPerson}
             </div>
           </div>
           <div className="space-y-1 col-span-2">
-            <div className="text-base font-semibold text-slate-500 uppercase tracking-tight">Địa chỉ</div>
-            <div className="text-base text-slate-900 font-medium leading-relaxed italic">{sourceSystem.address}</div>
+            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Địa chỉ</div>
+            <div className="text-[13px] text-slate-900 font-medium leading-relaxed italic">{sourceSystem.address}</div>
           </div>
           <div className="space-y-1">
-            <div className="text-base font-semibold text-slate-500 uppercase tracking-tight">Số điện thoại</div>
-            <div className="text-base text-slate-900 font-medium leading-relaxed">{sourceSystem.phone}</div>
+            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Số điện thoại</div>
+            <div className="text-[13px] text-slate-900 font-medium leading-relaxed">{sourceSystem.phone}</div>
           </div>
           <div className="space-y-1">
-            <div className="text-base font-semibold text-slate-500 uppercase tracking-tight">Email</div>
-            <div className="text-base text-slate-900 font-medium leading-relaxed text-blue-600 underline underline-offset-4">{sourceSystem.email}</div>
+            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Email</div>
+            <div className="text-[13px] text-slate-900 font-medium leading-relaxed text-blue-600 underline underline-offset-4">{sourceSystem.email}</div>
           </div>
           <div className="space-y-1 col-span-2">
-            <div className="text-base font-semibold text-slate-500 uppercase tracking-tight">Ghi chú</div>
-            <div className="text-base text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-100">
+            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Ghi chú</div>
+            <div className="text-[13px] text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-100">
               {sourceSystem.note || 'Không có ghi chú.'}
             </div>
           </div>
@@ -332,7 +332,7 @@ function TabGeneral({ service, sourceSystem, onEdit }: any) {
       </div>
 
       <div className="flex justify-end pt-4 border-t border-slate-200 mt-6">
-        <button onClick={onEdit} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-base shadow-sm hover:bg-blue-700 transition-colors flex items-center gap-2 font-medium">
+        <button onClick={onEdit} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-[13px] shadow-sm hover:bg-blue-700 transition-colors flex items-center gap-2 font-medium">
           <Edit className="w-4 h-4" /> Chỉnh sửa
         </button>
       </div>
@@ -344,24 +344,24 @@ function TabContact({ sourceSystem }: any) {
   return (
     <div className="animate-in fade-in duration-300 space-y-6">
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <h3 className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+        <h3 className="text-[13px] font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
           <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
           Thông tin hệ thống nguồn
         </h3>
         <div className="grid grid-cols-2 gap-x-12 gap-y-8 max-w-5xl">
 
           <div className="space-y-1">
-            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Tên hệ thống</div>
-            <div className="text-xs text-slate-900 font-medium leading-relaxed">{sourceSystem.systemName}</div>
+            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Tên hệ thống</div>
+            <div className="text-[13px] text-slate-900 font-medium leading-relaxed">{sourceSystem.systemName}</div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Tên đơn vị</div>
-            <div className="text-xs text-slate-900 font-medium leading-relaxed">{sourceSystem.unitName}</div>
+            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Tên đơn vị</div>
+            <div className="text-[13px] text-slate-900 font-medium leading-relaxed">{sourceSystem.unitName}</div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Loại nguồn</div>
+            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Loại nguồn</div>
             <div>
               <StatusTag 
                 label={sourceSystem.sourceType} 
@@ -371,31 +371,31 @@ function TabContact({ sourceSystem }: any) {
           </div>
 
           <div className="space-y-1">
-            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Đầu mối liên hệ</div>
-            <div className="text-xs text-slate-900 font-medium leading-relaxed flex items-center gap-2">
+            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Đầu mối liên hệ</div>
+            <div className="text-[13px] text-slate-900 font-medium leading-relaxed flex items-center gap-2">
               <User className="w-4 h-4 text-slate-400" />
               {sourceSystem.contactPerson}
             </div>
           </div>
 
           <div className="space-y-1 col-span-2">
-            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Địa chỉ</div>
-            <div className="text-xs text-slate-900 font-medium leading-relaxed italic">{sourceSystem.address}</div>
+            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Địa chỉ</div>
+            <div className="text-[13px] text-slate-900 font-medium leading-relaxed italic">{sourceSystem.address}</div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Số điện thoại</div>
-            <div className="text-xs text-slate-900 font-medium leading-relaxed">{sourceSystem.phone}</div>
+            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Số điện thoại</div>
+            <div className="text-[13px] text-slate-900 font-medium leading-relaxed">{sourceSystem.phone}</div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Email</div>
-            <div className="text-xs text-slate-900 font-medium leading-relaxed text-blue-600 underline underline-offset-4">{sourceSystem.email}</div>
+            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Email</div>
+            <div className="text-[13px] text-slate-900 font-medium leading-relaxed text-blue-600 underline underline-offset-4">{sourceSystem.email}</div>
           </div>
 
           <div className="space-y-1 col-span-2">
-            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Ghi chú</div>
-            <div className="text-xs text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-100">
+            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Ghi chú</div>
+            <div className="text-[13px] text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-100">
               {sourceSystem.note || 'Không có ghi chú.'}
             </div>
           </div>
@@ -419,7 +419,7 @@ function TabConnection({ service, showApiKey, setShowApiKey, onEdit }: any) {
             'bg-slate-50 border-slate-200 text-slate-700'
         }`}>
         <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-3 font-bold text-sm uppercase tracking-tight">
+          <div className="flex items-center gap-3 font-bold text-[13px] uppercase tracking-tight">
             <div className={`w-2.5 h-2.5 rounded-full ${service.status === 'success' ? 'bg-green-600 animate-pulse' :
               service.status?.startsWith('failed_') ? 'bg-red-600' :
                 'bg-gray-400'
@@ -428,7 +428,7 @@ function TabConnection({ service, showApiKey, setShowApiKey, onEdit }: any) {
               service.status?.startsWith('failed_') ? 'Kết nối thất bại' :
                 service.status === 'inactive' ? 'Kết nối đang tạm ngưng' : 'Trạng thái bản nháp'}
           </div>
-          <div className="text-xs font-medium opacity-70 flex items-center gap-2">
+          <div className="text-[13px] font-medium opacity-70 flex items-center gap-2">
             <Clock className="w-3.5 h-3.5" />
             Kiểm tra lần cuối: {service.lastReceived || 'Vừa xong'}
           </div>
@@ -438,13 +438,13 @@ function TabConnection({ service, showApiKey, setShowApiKey, onEdit }: any) {
           <div className="bg-white/60 backdrop-blur-sm p-4 rounded-lg border border-black/5 mt-2 flex items-start gap-3">
             <AlertCircle className={`w-5 h-5 shrink-0 mt-0.5 ${service.status?.startsWith('failed_') ? 'text-red-500' : 'text-gray-500'}`} />
             <div>
-              <div className="text-sm font-medium mb-1">
+              <div className="text-[13px] font-medium mb-1">
                 {service.status === 'failed_agent' ? 'Lỗi từ Trạm kết nối' :
                   service.status === 'failed_worker' ? 'Lỗi từ Máy chủ thực thi' :
                     service.status === 'failed_auth' ? 'Lỗi xác thực' :
                       service.status === 'inactive' ? 'Lý do ngưng hoạt động' : 'Thông tin chi tiết'}
               </div>
-              <div className="text-sm leading-relaxed">
+              <div className="text-[13px] leading-relaxed">
                 {service.failureReason || service.inactiveReason || 'Không có thông tin chi tiết.'}
               </div>
             </div>
@@ -453,45 +453,45 @@ function TabConnection({ service, showApiKey, setShowApiKey, onEdit }: any) {
       </div>
 
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <h3 className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+        <h3 className="text-[13px] font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
           <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
           Cấu hình kết nối
         </h3>
         <div className="grid grid-cols-2 gap-x-12 gap-y-6 max-w-4xl">
           <div className="space-y-1 col-span-2">
-            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Phương thức kết nối</div>
-            <div className="text-base text-slate-900 font-medium">{connectionType === 'API' ? 'API' : connectionType === 'DB' ? 'Cơ sở dữ liệu' : 'Tải file'}</div>
+            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Phương thức kết nối</div>
+            <div className="text-[13px] text-slate-900 font-medium">{connectionType === 'API' ? 'API' : connectionType === 'DB' ? 'Cơ sở dữ liệu' : 'Tải file'}</div>
           </div>
 
           {connectionType === 'API' && (
             <>
               <div className="space-y-1">
-                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Tên api</div>
-                <div className="text-base text-slate-900 font-medium">API Lấy thông tin công dân</div>
+                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Tên api</div>
+                <div className="text-[13px] text-slate-900 font-medium">API Lấy thông tin công dân</div>
               </div>
               <div className="space-y-1">
-                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">URL</div>
-                <div className="text-base text-slate-900 font-medium font-mono">https://api.hotich.moj.gov.vn/api/v1/quoctich</div>
+                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">URL</div>
+                <div className="text-[13px] text-slate-900 font-medium font-mono">https://api.hotich.moj.gov.vn/api/v1/quoctich</div>
               </div>
               <div className="space-y-1">
-                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Máy chủ thực thi</div>
-                <div className="text-base text-slate-900 font-medium">Máy chủ thực thi 1</div>
+                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Máy chủ thực thi</div>
+                <div className="text-[13px] text-slate-900 font-medium">Máy chủ thực thi 1</div>
               </div>
               <div className="space-y-1">
-                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Trạm kết nối</div>
-                <div className="text-base text-slate-900 font-medium">Trạm kết nối 1</div>
+                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Trạm kết nối</div>
+                <div className="text-[13px] text-slate-900 font-medium">Trạm kết nối 1</div>
               </div>
               <div className="space-y-1">
-                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Method</div>
-                <div className="text-base text-slate-900 font-medium">GET</div>
+                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Method</div>
+                <div className="text-[13px] text-slate-900 font-medium">GET</div>
               </div>
               <div className="space-y-1">
-                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Authorization</div>
-                <div className="text-base text-slate-900 font-medium">Bearer Token</div>
+                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Authorization</div>
+                <div className="text-[13px] text-slate-900 font-medium">Bearer Token</div>
               </div>
               <div className="space-y-1 col-span-2">
-                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Body</div>
-                <div className="text-base text-slate-900 font-medium">-</div>
+                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Body</div>
+                <div className="text-[13px] text-slate-900 font-medium">-</div>
               </div>
             </>
           )}
@@ -499,36 +499,36 @@ function TabConnection({ service, showApiKey, setShowApiKey, onEdit }: any) {
           {connectionType === 'DB' && (
             <>
               <div className="space-y-1">
-                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Tên CSDL</div>
-                <div className="text-base text-slate-900 font-medium">HOTICH_PROD</div>
+                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Tên CSDL</div>
+                <div className="text-[13px] text-slate-900 font-medium">HOTICH_PROD</div>
               </div>
               <div className="space-y-1">
-                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Tên CSDL gốc</div>
-                <div className="text-base text-slate-900 font-medium">HOTICH_MASTER</div>
+                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Tên CSDL gốc</div>
+                <div className="text-[13px] text-slate-900 font-medium">HOTICH_MASTER</div>
               </div>
               <div className="space-y-1">
-                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Kiểu CSDL</div>
-                <div className="text-base text-slate-900 font-medium">POSTGRESQL</div>
+                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Kiểu CSDL</div>
+                <div className="text-[13px] text-slate-900 font-medium">POSTGRESQL</div>
               </div>
               <div className="space-y-1">
-                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Trạm kết nối</div>
-                <div className="text-base text-slate-900 font-medium">Trạm kết nối 1</div>
+                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Trạm kết nối</div>
+                <div className="text-[13px] text-slate-900 font-medium">Trạm kết nối 1</div>
               </div>
               <div className="space-y-1">
-                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Máy chủ thực thi</div>
-                <div className="text-base text-slate-900 font-medium">Máy chủ thực thi 1</div>
+                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Máy chủ thực thi</div>
+                <div className="text-[13px] text-slate-900 font-medium">Máy chủ thực thi 1</div>
               </div>
               <div className="space-y-1">
-                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Địa chỉ CSDL</div>
-                <div className="text-base text-slate-900 font-medium">192.168.1.100</div>
+                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Địa chỉ CSDL</div>
+                <div className="text-[13px] text-slate-900 font-medium">192.168.1.100</div>
               </div>
               <div className="space-y-1">
-                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Cổng kết nối</div>
-                <div className="text-base text-slate-900 font-medium">5432</div>
+                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Cổng kết nối</div>
+                <div className="text-[13px] text-slate-900 font-medium">5432</div>
               </div>
               <div className="space-y-1">
-                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Tài khoản</div>
-                <div className="text-base text-slate-900 font-medium">admin_db</div>
+                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Tài khoản</div>
+                <div className="text-[13px] text-slate-900 font-medium">admin_db</div>
               </div>
             </>
           )}
@@ -536,16 +536,16 @@ function TabConnection({ service, showApiKey, setShowApiKey, onEdit }: any) {
           {connectionType === 'FILE' && (
             <>
               <div className="space-y-1">
-                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Tên File CSDL</div>
-                <div className="text-base text-slate-900 font-medium">Data_Export_2024.csv</div>
+                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Tên File CSDL</div>
+                <div className="text-[13px] text-slate-900 font-medium">Data_Export_2024.csv</div>
               </div>
               <div className="space-y-1">
-                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Máy chủ thực thi</div>
-                <div className="text-base text-slate-900 font-medium">Máy chủ thực thi 1</div>
+                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Máy chủ thực thi</div>
+                <div className="text-[13px] text-slate-900 font-medium">Máy chủ thực thi 1</div>
               </div>
               <div className="space-y-1">
-                <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Trạm kết nối</div>
-                <div className="text-base text-slate-900 font-medium">Trạm kết nối 1</div>
+                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Trạm kết nối</div>
+                <div className="text-[13px] text-slate-900 font-medium">Trạm kết nối 1</div>
               </div>
             </>
           )}
@@ -554,7 +554,7 @@ function TabConnection({ service, showApiKey, setShowApiKey, onEdit }: any) {
       </div>
 
       <div className="flex justify-end pt-4 border-t border-slate-200 mt-6">
-        <button onClick={onEdit} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-base shadow-sm hover:bg-blue-700 transition-colors flex items-center gap-2 font-medium">
+        <button onClick={onEdit} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-[13px] shadow-sm hover:bg-blue-700 transition-colors flex items-center gap-2 font-medium">
           <Edit className="w-4 h-4" /> Chỉnh sửa
         </button>
       </div>
@@ -566,40 +566,40 @@ function TabCollection({ service, onEdit }: any) {
   return (
     <div className="animate-in fade-in duration-300 space-y-6">
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <h3 className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+        <h3 className="text-[13px] font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
           <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
           Cấu hình đồng bộ dữ liệu
         </h3>
         <div className="grid grid-cols-2 gap-x-12 gap-y-8 max-w-4xl">
 
           <div className="space-y-1">
-            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Loại tần suất</div>
-            <div className="text-base text-slate-900 font-medium">Cập nhật</div>
+            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Loại tần suất</div>
+            <div className="text-[13px] text-slate-900 font-medium">Cập nhật</div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Lặp lại</div>
-            <div className="text-base text-slate-900 font-medium">Hằng ngày</div>
+            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Lặp lại</div>
+            <div className="text-[13px] text-slate-900 font-medium">Hằng ngày</div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-sm font-semibold text-slate-500 uppercase tracking-tight">Lặp lại trong</div>
-            <div className="text-base text-slate-900 font-medium leading-tight">
+            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Lặp lại trong</div>
+            <div className="text-[13px] text-slate-900 font-medium leading-tight">
               1 ngày
             </div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-base font-semibold text-slate-500 uppercase tracking-tight">Thực hiện lúc</div>
-            <div className="text-base text-blue-700 font-medium flex items-center gap-2">
+            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Thực hiện lúc</div>
+            <div className="text-[13px] text-blue-700 font-medium flex items-center gap-2">
               <Clock className="w-4 h-4" />
               12:00
             </div>
           </div>
 
           <div className="space-y-1 col-span-2">
-            <div className="text-base font-semibold text-slate-500 uppercase tracking-tight">Mô tả tóm lược</div>
-            <div className="text-base text-slate-700 font-medium italic bg-blue-50/50 p-4 rounded-lg border border-blue-100 flex items-start gap-3">
+            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Mô tả tóm lược</div>
+            <div className="text-[13px] text-slate-700 font-medium italic bg-blue-50/50 p-4 rounded-lg border border-blue-100 flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
               Lặp lại mỗi 1 ngày lúc 12:00
             </div>
@@ -609,7 +609,7 @@ function TabCollection({ service, onEdit }: any) {
       </div>
 
       <div className="flex justify-end pt-4 border-t border-slate-200 mt-6">
-        <button onClick={onEdit} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-base shadow-sm hover:bg-blue-700 transition-colors flex items-center gap-2 font-medium">
+        <button onClick={onEdit} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-[13px] shadow-sm hover:bg-blue-700 transition-colors flex items-center gap-2 font-medium">
           <Edit className="w-4 h-4" /> Chỉnh sửa
         </button>
       </div>
@@ -671,15 +671,15 @@ function TabMapping({ onEdit }: { onEdit: () => void }) {
     <div className="space-y-4 animate-in fade-in duration-300">
       {/* ACTION BUTTONS */}
       <div className="flex justify-start gap-3">
-        <button className="flex items-center gap-2 px-4 py-2 bg-white text-[#020817] border border-[#e2e8f0] rounded-[6px] text-base hover:bg-slate-50 transition-all shadow-sm font-medium">
+        <button className="flex items-center gap-2 px-4 py-2 bg-white text-[#020817] border border-[#e2e8f0] rounded-[6px] text-[13px] hover:bg-slate-50 transition-all shadow-sm font-medium">
           <Download className="w-4 h-4" />
           Nạp cấu trúc
         </button>
-        <button onClick={onEdit} className="flex items-center gap-2 px-4 py-2 bg-white text-[#020817] border border-[#e2e8f0] rounded-[6px] text-base hover:bg-slate-50 transition-all shadow-sm font-medium">
+        <button onClick={onEdit} className="flex items-center gap-2 px-4 py-2 bg-white text-[#020817] border border-[#e2e8f0] rounded-[6px] text-[13px] hover:bg-slate-50 transition-all shadow-sm font-medium">
           <Edit className="w-4 h-4" />
           Sửa cấu trúc
         </button>
-        <button className="flex items-center gap-2 px-4 py-2 bg-white text-[#dc2626] border border-[#e2e8f0] rounded-[6px] text-base hover:bg-red-50 transition-all shadow-sm font-medium">
+        <button className="flex items-center gap-2 px-4 py-2 bg-white text-[#dc2626] border border-[#e2e8f0] rounded-[6px] text-[13px] hover:bg-red-50 transition-all shadow-sm font-medium">
           <Trash2 className="w-4 h-4" />
           Xóa cấu trúc
         </button>
@@ -694,7 +694,7 @@ function TabMapping({ onEdit }: { onEdit: () => void }) {
               <input
                 type="text"
                 placeholder="Tìm kiếm bảng..."
-                className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
+                className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
                 value={searchTable}
                 onChange={(e) => setSearchTable(e.target.value)}
               />
@@ -716,7 +716,7 @@ function TabMapping({ onEdit }: { onEdit: () => void }) {
                       <Database className="w-4 h-4" />
                     </div>
                     <div>
-                      <div className="text-sm ">{table.name}</div>
+                      <div className="text-[13px] ">{table.name}</div>
                       <div className="text-[11px] opacity-70">{table.label}</div>
                     </div>
                   </div>
@@ -730,15 +730,15 @@ function TabMapping({ onEdit }: { onEdit: () => void }) {
         <div className="flex-1 flex flex-col bg-white">
           <div className="p-4 border-b border-slate-200 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <h4 className="font-medium text-slate-800 text-sm">Danh sách trường:</h4>
-              <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-mono">{activeTable?.name}</span>
+              <h4 className="font-medium text-slate-800 text-[13px]">Danh sách trường:</h4>
+              <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-[13px] font-mono">{activeTable?.name}</span>
             </div>
             <div className="relative w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 type="text"
                 placeholder="Tìm kiếm trường..."
-                className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
+                className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
                 value={searchField}
                 onChange={(e) => setSearchField(e.target.value)}
               />
@@ -746,7 +746,7 @@ function TabMapping({ onEdit }: { onEdit: () => void }) {
           </div>
 
           <div className="flex-1 overflow-auto">
-            <table className="w-full text-left text-sm">
+            <table className="w-full text-left text-[13px]">
               <thead className="bg-slate-50 sticky top-0 z-10 border-b border-slate-200">
                 <tr>
                   <th className="px-4 py-3 font-semibold text-slate-700">Tên trường</th>
@@ -811,25 +811,25 @@ function TabHistory({ onGoToMapping }: { onGoToMapping?: () => void }) {
     <div className="animate-in fade-in duration-300">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <select aria-label="Select box" className="px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-200">
+          <select aria-label="Select box" className="px-3 py-2 border border-slate-300 rounded-lg text-[13px] text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-200">
             <option>Tất cả trạng thái</option>
             <option>Thành công</option>
             <option>Thất bại</option>
           </select>
           <div className="flex items-center border border-slate-300 rounded-lg overflow-hidden bg-white">
-            <input aria-label="Input field" type="text" className="px-3 py-2 text-sm w-28 text-center focus:outline-none border-r border-slate-200" defaultValue="01/04/2025" />
+            <input aria-label="Input field" type="text" className="px-3 py-2 text-[13px] w-28 text-center focus:outline-none border-r border-slate-200" defaultValue="01/04/2025" />
             <div className="px-2 text-slate-400 bg-slate-50 border-r border-slate-200 h-full flex items-center"><Calendar className="w-4 h-4" /></div>
-            <input aria-label="Input field" type="text" className="px-3 py-2 text-sm w-28 text-center focus:outline-none" defaultValue="10/04/2025" />
+            <input aria-label="Input field" type="text" className="px-3 py-2 text-[13px] w-28 text-center focus:outline-none" defaultValue="10/04/2025" />
             <div className="px-2 text-slate-400 bg-slate-50 border-l border-slate-200 h-full flex items-center"><Calendar className="w-4 h-4" /></div>
           </div>
         </div>
-        <button className="px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 font-medium hover:bg-slate-50 transition-colors bg-white">
+        <button className="px-4 py-2 border border-slate-300 rounded-lg text-[13px] text-slate-700 font-medium hover:bg-slate-50 transition-colors bg-white">
           Xuất CSV
         </button>
       </div>
 
       <div className="border border-slate-200 rounded-lg overflow-hidden">
-        <table className="w-full text-left text-sm">
+        <table className="w-full text-left text-[13px]">
           <thead className="bg-[#f8f7f5] text-slate-700 font-medium border-b border-slate-200">
             <tr>
               <th className="px-6 py-4">Thời điểm chạy</th>
@@ -881,11 +881,11 @@ function TabHistory({ onGoToMapping }: { onGoToMapping?: () => void }) {
           </button>
         </div>
         <div className="flex items-center gap-2 ml-auto z-20 absolute right-8 -mt-2">
-          <button className="px-4 py-2 border border-slate-300 rounded text-sm text-slate-600 bg-white hover:bg-slate-50 font-medium">Trang trước</button>
-          <button className="px-4 py-2 border border-slate-900 rounded text-sm text-white bg-slate-900 font-medium">1</button>
-          <button className="px-4 py-2 border border-slate-300 rounded text-sm text-slate-600 bg-white hover:bg-slate-50 font-medium">2</button>
-          <button className="px-4 py-2 border border-slate-300 rounded text-sm text-slate-600 bg-white hover:bg-slate-50 font-medium">3</button>
-          <button className="px-4 py-2 border border-slate-300 rounded text-sm text-slate-600 bg-white hover:bg-slate-50 font-medium">Trang sau</button>
+          <button className="px-4 py-2 border border-slate-300 rounded text-[13px] text-slate-600 bg-white hover:bg-slate-50 font-medium">Trang trước</button>
+          <button className="px-4 py-2 border border-slate-900 rounded text-[13px] text-white bg-slate-900 font-medium">1</button>
+          <button className="px-4 py-2 border border-slate-300 rounded text-[13px] text-slate-600 bg-white hover:bg-slate-50 font-medium">2</button>
+          <button className="px-4 py-2 border border-slate-300 rounded text-[13px] text-slate-600 bg-white hover:bg-slate-50 font-medium">3</button>
+          <button className="px-4 py-2 border border-slate-300 rounded text-[13px] text-slate-600 bg-white hover:bg-slate-50 font-medium">Trang sau</button>
         </div>
       </div>
     </div>
@@ -910,8 +910,8 @@ function ErrorDetailView({ log, onBack, onGoToMapping }: any) {
           <ArrowRight className="w-5 h-5 rotate-180" />
         </button>
         <div>
-          <h3 className="text-base font-medium text-slate-800">Chi tiết dữ liệu lỗi - Đợt chạy {log?.runTime.replace('\n', ' ')}</h3>
-          <p className="text-sm text-slate-500">Mã lỗi: {log?.errorCode} &mdash; {log?.status === 'partial_success' ? 'Hoàn thành một phần' : 'Thất bại'}</p>
+          <h3 className="text-[13px] font-medium text-slate-800">Chi tiết dữ liệu lỗi - Đợt chạy {log?.runTime.replace('\n', ' ')}</h3>
+          <p className="text-[13px] text-slate-500">Mã lỗi: {log?.errorCode} &mdash; {log?.status === 'partial_success' ? 'Hoàn thành một phần' : 'Thất bại'}</p>
         </div>
       </div>
 
@@ -924,17 +924,17 @@ function ErrorDetailView({ log, onBack, onGoToMapping }: any) {
                 <Activity className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="font-semibold text-slate-800 text-sm">Bản ghi thiếu trường bắt buộc</h4>
-                <p className="text-xs text-slate-500">2 bản ghi bị từ chối do thiếu dữ liệu mapping</p>
+                <h4 className="font-semibold text-slate-800 text-[13px]">Bản ghi thiếu trường bắt buộc</h4>
+                <p className="text-[13px] text-slate-500">2 bản ghi bị từ chối do thiếu dữ liệu mapping</p>
               </div>
             </div>
-            <button className="px-4 py-2 border border-slate-300 bg-white rounded text-sm text-slate-700 font-medium hover:bg-slate-50 flex items-center gap-2 shadow-sm transition-all focus:ring-2 focus:ring-slate-200">
+            <button className="px-4 py-2 border border-slate-300 bg-white rounded text-[13px] text-slate-700 font-medium hover:bg-slate-50 flex items-center gap-2 shadow-sm transition-all focus:ring-2 focus:ring-slate-200">
               <Download className="w-4 h-4" /> Xuất File Lỗi
             </button>
           </div>
 
           <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
-            <table className="w-full text-left text-sm">
+            <table className="w-full text-left text-[13px]">
               <thead className="bg-[#f8f7f5] text-slate-700 font-medium border-b border-slate-200">
                 <tr>
                   <th className="px-4 py-3 w-1/4">Record ID</th>
@@ -945,8 +945,8 @@ function ErrorDetailView({ log, onBack, onGoToMapping }: any) {
               <tbody className="divide-y divide-slate-100">
                 {missingRecords.map(rec => (
                   <tr key={rec.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-4 py-3 font-mono text-xs text-slate-600">{rec.id}</td>
-                    <td className="px-4 py-3 font-mono text-xs text-slate-600 bg-slate-50 p-2 rounded block mx-2 my-2 border border-slate-100">{rec.raw}</td>
+                    <td className="px-4 py-3 font-mono text-[13px] text-slate-600">{rec.id}</td>
+                    <td className="px-4 py-3 font-mono text-[13px] text-slate-600 bg-slate-50 p-2 rounded block mx-2 my-2 border border-slate-100">{rec.raw}</td>
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-1.5">
                         {rec.missing.map(m => (
@@ -969,22 +969,22 @@ function ErrorDetailView({ log, onBack, onGoToMapping }: any) {
                 <Database className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="font-semibold text-slate-800 text-sm">Phát hiện dữ liệu mới / thay đổi</h4>
-                <p className="text-xs text-slate-500">Một vài bản ghi trả về các trường dữ liệu bị thay đổi cấu trúc, không khớp với sơ đồ hiện tại</p>
+                <h4 className="font-semibold text-slate-800 text-[13px]">Phát hiện dữ liệu mới / thay đổi</h4>
+                <p className="text-[13px] text-slate-500">Một vài bản ghi trả về các trường dữ liệu bị thay đổi cấu trúc, không khớp với sơ đồ hiện tại</p>
               </div>
             </div>
             <div className="flex gap-3">
-              <button className="px-4 py-2 border border-slate-300 bg-white rounded text-sm text-slate-700 font-medium hover:bg-slate-50 shadow-sm transition-all focus:ring-2 focus:ring-slate-200">
+              <button className="px-4 py-2 border border-slate-300 bg-white rounded text-[13px] text-slate-700 font-medium hover:bg-slate-50 shadow-sm transition-all focus:ring-2 focus:ring-slate-200">
                 Bỏ qua
               </button>
-              <button onClick={onGoToMapping} className="px-4 py-2 bg-blue-600 rounded text-sm text-white font-medium hover:bg-blue-700 flex items-center gap-2 shadow-sm transition-all focus:ring-2 focus:ring-blue-500">
+              <button onClick={onGoToMapping} className="px-4 py-2 bg-blue-600 rounded text-[13px] text-white font-medium hover:bg-blue-700 flex items-center gap-2 shadow-sm transition-all focus:ring-2 focus:ring-blue-500">
                 <Shield className="w-4 h-4" /> Cấu hình ánh xạ ngay
               </button>
             </div>
           </div>
 
           <div className="border border-slate-200 rounded-xl overflow-hidden bg-[#fbfaf9] shadow-sm">
-            <table className="w-full text-left text-sm">
+            <table className="w-full text-left text-[13px]">
               <thead className="bg-[#fef7ec] text-[#bd6a1f] font-medium border-b border-[#fce8ce]">
                 <tr>
                   <th className="px-4 py-3 w-1/3">Tên trường mới phát hiện</th>
@@ -1043,11 +1043,11 @@ function TabChangelog() {
   return (
     <div className="animate-in fade-in duration-300">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-[15px] font-bold text-slate-800 uppercase tracking-wider">Nhật ký thay đổi thiết lập kết nối</h3>
+        <h3 className="text-[13px] font-bold text-slate-800 uppercase tracking-wider">Nhật ký thay đổi thiết lập kết nối</h3>
       </div>
 
       <div className="border border-slate-200 rounded-lg overflow-hidden bg-white">
-        <table className="w-full text-left text-sm whitespace-nowrap">
+        <table className="w-full text-left text-[13px] whitespace-nowrap">
           <thead className="bg-[#f8f7f5] text-slate-600 font-medium border-b border-slate-200">
             <tr>
               <th className="px-6 py-4">Thời điểm</th>
@@ -1073,14 +1073,14 @@ function TabChangelog() {
 
       {/* Pagination control */}
       <div className="flex items-center justify-between mt-6">
-        <div className="text-sm text-slate-500">
+        <div className="text-[13px] text-slate-500">
           Hiển thị bản ghi <span className="font-medium">{startIndex + 1}</span> - <span className="font-medium">{Math.min(startIndex + itemsPerPage, changelogs.length)}</span> trong tổng số <span className="font-medium">{changelogs.length}</span>
         </div>
         <div className="flex items-center gap-2 ml-auto z-20">
           <button
             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
             disabled={currentPage === 1}
-            className="px-4 py-2 border border-slate-300 rounded text-sm text-slate-600 bg-white hover:bg-slate-50 font-medium disabled:opacity-50"
+            className="px-4 py-2 border border-slate-300 rounded text-[13px] text-slate-600 bg-white hover:bg-slate-50 font-medium disabled:opacity-50"
           >
             Trang trước
           </button>
@@ -1089,7 +1089,7 @@ function TabChangelog() {
             <button
               key={page}
               onClick={() => setCurrentPage(page)}
-              className={`px-4 py-2 border rounded text-sm font-medium ${currentPage === page ? 'border-slate-900 text-white bg-slate-900' : 'border-slate-300 text-slate-600 bg-white hover:bg-slate-50'}`}
+              className={`px-4 py-2 border rounded text-[13px] font-medium ${currentPage === page ? 'border-slate-900 text-white bg-slate-900' : 'border-slate-300 text-slate-600 bg-white hover:bg-slate-50'}`}
             >
               {page}
             </button>
@@ -1098,7 +1098,7 @@ function TabChangelog() {
           <button
             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
-            className="px-4 py-2 border border-slate-300 rounded text-sm text-slate-600 bg-white hover:bg-slate-50 font-medium disabled:opacity-50"
+            className="px-4 py-2 border border-slate-300 rounded text-[13px] text-slate-600 bg-white hover:bg-slate-50 font-medium disabled:opacity-50"
           >
             Trang sau
           </button>
@@ -1134,7 +1134,7 @@ function TabActivityHistory({ onEdit }: { onEdit: () => void }) {
           <div className="flex items-center gap-3">
             <select 
               aria-label="Filter status"
-              className="border border-slate-300 rounded-lg px-4 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white min-w-[150px]"
+              className="border border-slate-300 rounded-lg px-4 py-2 text-[13px] text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white min-w-[150px]"
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
             >
@@ -1147,7 +1147,7 @@ function TabActivityHistory({ onEdit }: { onEdit: () => void }) {
         </div>
         
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+          <table className="w-full text-left text-[13px]">
             <thead className="bg-slate-50 text-slate-700 border-b border-slate-200 sticky top-0">
               <tr>
                 <th className="px-6 py-4 font-bold whitespace-nowrap">ID</th>
@@ -1175,8 +1175,8 @@ function TabActivityHistory({ onEdit }: { onEdit: () => void }) {
                   <td className="px-6 py-4 text-slate-600 font-medium">{row.time}</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-center gap-2">
-                      <button className="px-3 py-1 bg-teal-500 text-white rounded text-xs hover:bg-teal-600 transition-colors">Chi tiết</button>
-                      <button className="px-3 py-1 bg-rose-500 text-white rounded text-xs hover:bg-rose-600 transition-colors">Xóa</button>
+                      <button className="px-3 py-1 bg-teal-500 text-white rounded text-[13px] hover:bg-teal-600 transition-colors">Chi tiết</button>
+                      <button className="px-3 py-1 bg-rose-500 text-white rounded text-[13px] hover:bg-rose-600 transition-colors">Xóa</button>
                     </div>
                   </td>
                 </tr>

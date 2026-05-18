@@ -66,7 +66,7 @@ export function SourceSystemManagementPage() {
   };
 
   return (
-    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px' }}>
       <div className="h-full flex flex-col bg-slate-50 p-6 space-y-6 min-h-screen">
       {/* Header */}
       <div className="flex items-center gap-3">
@@ -74,8 +74,8 @@ export function SourceSystemManagementPage() {
           <Server className="w-6 h-6 text-blue-600" />
         </div>
         <div>
-          <h1 className="text-base font-bold text-slate-800 uppercase tracking-tight">Quản lý hệ thống nguồn</h1>
-          <p className="text-base text-slate-500 mt-1">Danh sách hệ thống nguồn cung cấp dữ liệu</p>
+          <h1 className="text-[20px] font-bold text-slate-800 uppercase tracking-tight" style={{ fontSize: '20px' }}>Quản lý hệ thống nguồn</h1>
+          <p className="text-[13px] text-slate-500 mt-1">Danh sách hệ thống nguồn cung cấp dữ liệu</p>
         </div>
       </div>
 
@@ -89,7 +89,7 @@ export function SourceSystemManagementPage() {
               placeholder="Tìm kiếm theo tên hệ thống, đơn vị hoặc loại nguồn..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+              className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
             />
           </div>
         </div>
@@ -97,7 +97,7 @@ export function SourceSystemManagementPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={handleAdd}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-base shadow-sm font-medium"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium"
           >
             <Plus className="w-4 h-4" />
             Thêm mới
@@ -113,12 +113,12 @@ export function SourceSystemManagementPage() {
           <table className="w-full text-left border-collapse">
             <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
               <tr>
-                <th className="py-3 px-4 text-center text-base font-semibold text-slate-500 whitespace-nowrap w-12">STT</th>
-                <th className="py-3 px-4 text-left text-base font-semibold text-slate-500 whitespace-nowrap">Tên hệ thống</th>
-                <th className="py-3 px-4 text-left text-base font-semibold text-slate-500 whitespace-nowrap">Tên đơn vị</th>
-                <th className="py-3 px-4 text-center text-base font-semibold text-slate-500 whitespace-nowrap">Loại nguồn</th>
-                <th className="py-3 px-4 text-center text-base font-semibold text-slate-500 whitespace-nowrap">Đầu mối liên hệ</th>
-                <th className="py-3 px-4 text-center text-base font-semibold text-slate-500 whitespace-nowrap w-32">Thao tác</th>
+                <th className="py-3 px-4 text-center text-[13px] font-semibold text-slate-500 whitespace-nowrap w-12">STT</th>
+                <th className="py-3 px-4 text-left text-[13px] font-semibold text-slate-500 whitespace-nowrap">Tên hệ thống</th>
+                <th className="py-3 px-4 text-left text-[13px] font-semibold text-slate-500 whitespace-nowrap">Tên đơn vị</th>
+                <th className="py-3 px-4 text-center text-[13px] font-semibold text-slate-500 whitespace-nowrap">Loại nguồn</th>
+                <th className="py-3 px-4 text-center text-[13px] font-semibold text-slate-500 whitespace-nowrap">Đầu mối liên hệ</th>
+                <th className="py-3 px-4 text-center text-[13px] font-semibold text-slate-500 whitespace-nowrap w-32">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">
@@ -127,14 +127,14 @@ export function SourceSystemManagementPage() {
                   .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
                   .map((item, index) => (
                     <tr key={item.id} className="hover:bg-slate-50 transition-all group border-b border-slate-100">
-                      <td className="py-4 px-4 text-base text-slate-500 text-center font-medium">
+                      <td className="py-4 px-4 text-[13px] text-slate-500 text-center font-medium">
                         {(currentPage - 1) * itemsPerPage + index + 1}
                       </td>
                       <td className="py-4 px-4">
-                        <div className="text-base font-semibold text-slate-900">{item.systemName}</div>
+                        <div className="text-[13px] font-semibold text-slate-900">{item.systemName}</div>
                       </td>
                       <td className="py-4 px-4">
-                        <div className="text-base text-slate-600">{item.unitName}</div>
+                        <div className="text-[13px] text-slate-600">{item.unitName}</div>
                       </td>
                       <td className="py-4 px-4 text-center">
                         <StatusTag 
@@ -143,8 +143,8 @@ export function SourceSystemManagementPage() {
                         />
                       </td>
                       <td className="py-4 px-4 text-center">
-                        <div className="text-base font-medium text-slate-900">{item.contactPerson || '-'}</div>
-                        <div className="text-base text-slate-500 mt-0.5">{item.phone}</div>
+                        <div className="text-[13px] font-medium text-slate-900">{item.contactPerson || '-'}</div>
+                        <div className="text-[13px] text-slate-500 mt-0.5">{item.phone}</div>
                       </td>
                       <td className="py-4 px-4">
                         <div className="flex items-center justify-center gap-2">
@@ -180,8 +180,8 @@ export function SourceSystemManagementPage() {
                       <div className="p-4 bg-slate-50 rounded-full mb-4">
                         <Server className="w-10 h-10 opacity-20" />
                       </div>
-                      <p className="text-base font-medium text-slate-600">Không tìm thấy hệ thống nguồn nào.</p>
-                      <p className="text-base text-slate-400 mt-1">Vui lòng thử lại với từ khóa khác.</p>
+                      <p className="text-[13px] font-medium text-slate-600">Không tìm thấy hệ thống nguồn nào.</p>
+                      <p className="text-[13px] text-slate-400 mt-1">Vui lòng thử lại với từ khóa khác.</p>
                     </div>
                   </td>
                 </tr>
@@ -195,9 +195,9 @@ export function SourceSystemManagementPage() {
         {/* Pagination - Moved back to Bottom */}
         <div className="px-6 py-3 border-t border-slate-200 flex items-center justify-between bg-white">
           <div className="flex items-center gap-2">
-            <span className="text-base text-slate-600">Hiển thị</span>
+            <span className="text-[13px] text-slate-600">Hiển thị</span>
             <select 
-              className="px-2 py-1 border border-slate-300 rounded text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              className="px-2 py-1 border border-slate-300 rounded text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               title="Số bản ghi trên trang"
               value={itemsPerPage}
               onChange={(e) => {
@@ -210,18 +210,18 @@ export function SourceSystemManagementPage() {
               <option value={50}>50</option>
               <option value={100}>100</option>
             </select>
-            <span className="text-base text-slate-600">bản ghi/trang</span>
+            <span className="text-[13px] text-slate-600">bản ghi/trang</span>
           </div>
           
           <div className="flex items-center gap-4">
-            <span className="text-base text-slate-600">
+            <span className="text-[13px] text-slate-600">
               {filteredData.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, filteredData.length)} / {filteredData.length}
             </span>
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : currentPage)}
                 disabled={currentPage === 1}
-                className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors text-base font-medium"
+                className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors text-[13px] font-medium"
               >
                 Trước
               </button>
@@ -230,7 +230,7 @@ export function SourceSystemManagementPage() {
                 <button
                   key={page}
                   onClick={() => setCurrentPage(page)}
-                  className={`px-3 py-1.5 border rounded-lg text-base font-medium transition-colors ${
+                  className={`px-3 py-1.5 border rounded-lg text-[13px] font-medium transition-colors ${
                     currentPage === page
                       ? 'bg-blue-600 border-blue-600 text-white'
                       : 'border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
@@ -248,7 +248,7 @@ export function SourceSystemManagementPage() {
                   }
                 }}
                 disabled={currentPage === Math.ceil(filteredData.length / itemsPerPage) || filteredData.length === 0}
-                className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors text-base font-medium"
+                className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors text-[13px] font-medium"
               >
                 Sau
               </button>

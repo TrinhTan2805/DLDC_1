@@ -160,7 +160,7 @@ export function DataMappingModal({ isOpen, onClose, targetDatabase, sourceDatase
         type="button"
         onClick={onClose}
         style={{ padding: '8px 16px', borderRadius: '6px', fontWeight: 500 }}
-        className="text-sm text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-all"
+        className="text-[13px] text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-all"
       >
         Hủy
       </button>
@@ -171,7 +171,7 @@ export function DataMappingModal({ isOpen, onClose, targetDatabase, sourceDatase
           onClose();
         }}
         style={{ padding: '8px 16px', borderRadius: '6px', fontWeight: 500 }}
-        className="text-sm text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-md active:scale-95"
+        className="text-[13px] text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-md active:scale-95"
       >
         Lưu cấu hình
       </button>
@@ -179,13 +179,14 @@ export function DataMappingModal({ isOpen, onClose, targetDatabase, sourceDatase
   );
 
   return (
-    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px' }}>
       <BaseModal
         isOpen={isOpen}
         onClose={onClose}
         title="Ánh xạ dữ liệu"
       subtitle="Liên kết bảng nguồn với CSDL Kho dữ liệu dùng chung"
       maxWidth="max-w-5xl"
+      className="force-13px"
       showCloseButton={true}
       headerActions={
         <div className="flex items-center gap-2">

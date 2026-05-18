@@ -13,6 +13,7 @@ interface BaseModalProps {
   showCloseButton?: boolean;
   customHeaderIcon?: ReactNode;
   headerActions?: ReactNode;
+  className?: string;
 }
 
 /**
@@ -30,7 +31,8 @@ export function BaseModal({
   maxWidth = 'max-w-2xl',
   showCloseButton = true,
   customHeaderIcon,
-  headerActions
+  headerActions,
+  className = ''
 }: BaseModalProps) {
   if (!isOpen) return null;
 
@@ -46,7 +48,7 @@ export function BaseModal({
         onClick={onClose}
       >
         <div 
-          className={`bg-white rounded-2xl shadow-2xl w-full ${maxWidth} max-h-[95vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300 ease-out`}
+          className={`bg-white rounded-2xl shadow-2xl w-full ${maxWidth} max-h-[95vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300 ease-out ${className}`}
           onClick={(e: MouseEvent) => e.stopPropagation()}
         >
           {/* Header Section */}

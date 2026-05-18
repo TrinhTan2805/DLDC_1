@@ -95,7 +95,7 @@ function ChartCard({ title, total, data, filterValue, onFilterChange, filterOpti
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-base font-semibold text-slate-900">{title}</h3>
-        <span className="text-base text-slate-500">Tổng số: {total.toLocaleString()}</span>
+        <span className="text-[13px] text-slate-500">Tổng số: {total.toLocaleString()}</span>
       </div>
 
       {/* Controls */}
@@ -103,7 +103,7 @@ function ChartCard({ title, total, data, filterValue, onFilterChange, filterOpti
       {filterOptions && filterOptions.length > 0 && (
         <div className="flex items-center gap-3 mb-4">
           <select aria-label="Select box" 
-            className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-base text-slate-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-[13px] text-slate-700 focus:outline-none focus:ring-2 focus:ring-green-500"
             title="Chọn khoảng thời gian"
             value={filterValue}
             onChange={(e) => onFilterChange && onFilterChange(e.target.value)}
@@ -122,11 +122,11 @@ function ChartCard({ title, total, data, filterValue, onFilterChange, filterOpti
             <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
             <XAxis 
               dataKey="name" 
-              tick={{ fill: '#64748b', fontSize: 16 }}
+              tick={{ fill: '#64748b', fontSize: 13 }}
               axisLine={{ stroke: '#e2e8f0' }}
             />
             <YAxis 
-              tick={{ fill: '#64748b', fontSize: 16 }}
+              tick={{ fill: '#64748b', fontSize: 13 }}
               axisLine={{ stroke: '#e2e8f0' }}
             />
             <Tooltip 
@@ -134,7 +134,7 @@ function ChartCard({ title, total, data, filterValue, onFilterChange, filterOpti
                 backgroundColor: 'white',
                 border: '1px solid #e2e8f0',
                 borderRadius: '8px',
-                fontSize: '16px'
+                fontSize: '13px'
               }}
             />
             <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} />
@@ -163,8 +163,8 @@ function SummaryCard({ title, value, icon, bgColor, iconColor }: SummaryCardProp
           </div>
         </div>
         <div className="flex-1">
-          <p className="text-base text-slate-600 mb-1">{title}</p>
-          <p className="text-base font-semibold text-slate-900">{value.toLocaleString()}</p>
+          <p className="text-[16px] text-slate-600 mb-1">{title}</p>
+          <p className="text-[16px] font-semibold text-slate-900">{value.toLocaleString()}</p>
         </div>
       </div>
     </div>
@@ -173,8 +173,13 @@ function SummaryCard({ title, value, icon, bgColor, iconColor }: SummaryCardProp
 
 
 export function CollectionDashboard() {
-  const today = new Date().toISOString().split('T')[0];
-  const [fromDate, setFromDate] = React.useState('');
+  const todayObj = new Date();
+  const today = todayObj.toISOString().split('T')[0];
+  const lastWeekObj = new Date(todayObj);
+  lastWeekObj.setDate(todayObj.getDate() - 6);
+  const lastWeek = lastWeekObj.toISOString().split('T')[0];
+
+  const [fromDate, setFromDate] = React.useState(lastWeek);
   const [toDate, setToDate] = React.useState(today);
 
   const handleFromDateChange = (val: string) => {
@@ -206,7 +211,30 @@ export function CollectionDashboard() {
     }
   };
 
-  const currentTimeData = timeDataThisWeek;
+  const currentTimeData = React.useMemo(() => {
+    const data = [];
+    const end = new Date(toDate || today);
+    const start = new Date(fromDate || lastWeek);
+    
+    let diffDays = Math.floor((end.getTime() - start.getTime()) / (1000 * 3600 * 24));
+    if (diffDays < 0) diffDays = 0;
+    
+    const mockValues = [120, 250, 180, 390, 420, 160, 90];
+    
+    for (let i = diffDays; i >= 0; i--) {
+      const d = new Date(end);
+      d.setDate(d.getDate() - i);
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const val = mockValues[(diffDays - i) % 7];
+      data.push({
+        name: `${day}/${month}`,
+        value: val
+      });
+    }
+    return data;
+  }, [fromDate, toDate]);
+
   const timeTotal = currentTimeData.reduce((acc, curr) => acc + curr.value, 0);
 
   const [sourceSystemFilter, setSourceSystemFilter] = React.useState('Trong ngành');
@@ -283,24 +311,24 @@ export function CollectionDashboard() {
           renderFilter={
             <div className="flex items-center gap-3 mb-6">
               <div className="flex-1">
-                <label className="text-sm text-slate-500 block mb-1.5 font-medium">Từ ngày</label>
+                <label className="text-[13px] text-slate-500 block mb-1.5 font-medium">Từ ngày</label>
                 <input 
                   type="date" 
                   max={toDate || today}
                   value={fromDate}
                   onChange={(e) => handleFromDateChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
                 />
               </div>
               <div className="flex-1">
-                <label className="text-sm text-slate-500 block mb-1.5 font-medium">Đến ngày</label>
+                <label className="text-[13px] text-slate-500 block mb-1.5 font-medium">Đến ngày</label>
                 <input 
                   type="date" 
                   max={today}
                   min={fromDate}
                   value={toDate}
                   onChange={(e) => handleToDateChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
                 />
               </div>
             </div>

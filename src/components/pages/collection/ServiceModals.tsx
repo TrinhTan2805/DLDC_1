@@ -235,7 +235,7 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-3 text-base transition-colors relative flex items-center gap-2 ${
+                className={`px-4 py-3 text-[13px] transition-colors relative flex items-center gap-2 ${
                   activeTab === tab.id ? 'text-blue-600 bg-white' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
@@ -252,12 +252,12 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
             {activeTab === 'general' && (
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="add-name" className="block text-base text-slate-600 mb-1">Tên dịch vụ <span className="text-red-500">*</span></label>
-                  <input aria-label="Input field" id="add-name" title="Tên dịch vụ" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base transition-colors" placeholder="VD: API dịch vụ dữ liệu quốc tịch" />
+                  <label htmlFor="add-name" className="block text-[13px] text-slate-600 mb-1">Tên dịch vụ <span className="text-red-500">*</span></label>
+                  <input aria-label="Input field" id="add-name" title="Tên dịch vụ" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] transition-colors" placeholder="VD: API dịch vụ dữ liệu quốc tịch" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="col-span-2 relative">
-                    <label htmlFor="add-source-system" className="block text-base text-slate-600 mb-1">Tên hệ thống nguồn <span className="text-red-500">*</span></label>
+                    <label htmlFor="add-source-system" className="block text-[13px] text-slate-600 mb-1">Tên hệ thống nguồn <span className="text-red-500">*</span></label>
                     <input aria-label="Input field" 
                       id="add-source-system" 
                       title="Tên hệ thống nguồn" 
@@ -269,7 +269,7 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
                       }} 
                       onFocus={() => setShowSourceDropdown(true)}
                       onBlur={() => setTimeout(() => setShowSourceDropdown(false), 200)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base transition-colors" 
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] transition-colors" 
                       placeholder="Tìm kiếm hoặc chọn hệ thống nguồn..." 
                     />
                     
@@ -278,7 +278,7 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
                         {filteredSourceSystems.map(ss => (
                           <div
                             key={ss.id}
-                            className="px-4 py-2 hover:bg-slate-50 cursor-pointer text-base flex items-center justify-between"
+                            className="px-4 py-2 hover:bg-slate-50 cursor-pointer text-[13px] flex items-center justify-between"
                             onMouseDown={(e) => {
                               e.preventDefault(); 
                               setSourceSystemName(ss.systemName);
@@ -287,7 +287,7 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
                           >
                             <div className="flex flex-col">
                               <span className="font-medium text-slate-700">{ss.systemName}</span>
-                              <span className="text-base text-slate-500">{ss.unitName}</span>
+                              <span className="text-[13px] text-slate-500">{ss.unitName}</span>
                             </div>
                             <StatusTag label={ss.sourceType} variant={ss.sourceType === 'Trong ngành' ? 'purple' : 'blue'} />
                           </div>
@@ -298,8 +298,8 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="col-span-2">
-                    <label htmlFor="add-security" className="block text-base text-slate-600 mb-1">Mức độ bảo mật dữ liệu</label>
-                    <select aria-label="Select box" id="add-security" title="Mức độ bảo mật dữ liệu" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base transition-colors bg-white">
+                    <label htmlFor="add-security" className="block text-[13px] text-slate-600 mb-1">Mức độ bảo mật dữ liệu</label>
+                    <select aria-label="Select box" id="add-security" title="Mức độ bảo mật dữ liệu" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] transition-colors bg-white">
                       <option value="">Chọn mức độ bảo mật</option>
                       <option value="Dữ liệu mở">Dữ liệu mở</option>
                       <option value="Dữ liệu nội bộ">Dữ liệu nội bộ</option>
@@ -311,14 +311,14 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
                   </div>
                 </div>
                 <div>
-                  <label htmlFor="desc" className="block text-base text-slate-600 mb-1">Mô tả</label>
-                  <textarea aria-label="Text input" id="desc" title="Mô tả" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base transition-colors" rows={3} placeholder="Mô tả chi tiết" />
+                  <label htmlFor="desc" className="block text-[13px] text-slate-600 mb-1">Mô tả</label>
+                  <textarea aria-label="Text input" id="desc" title="Mô tả" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] transition-colors" rows={3} placeholder="Mô tả chi tiết" />
                 </div>
                 <div>
-                  <label className="block text-base text-slate-600 mb-2">Đính kèm văn bản</label>
+                  <label className="block text-[13px] text-slate-600 mb-2">Đính kèm văn bản</label>
                   <div className="border border-slate-300 rounded-lg p-3 text-center py-6">
                     <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                    <p className="text-base text-slate-600">Click để chọn file PDF, DOCX</p>
+                    <p className="text-[13px] text-slate-600">Click để chọn file PDF, DOCX</p>
                   </div>
                 </div>
               </div>
@@ -334,11 +334,11 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
           <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50">
             <div>
               {activeTab === 'connection' && connectionType !== 'FILE' && (
-                <button type="button" onClick={handleTestConnection} className="px-4 py-2 text-base font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">Kiểm tra kết nối</button>
+                <button type="button" onClick={handleTestConnection} className="px-4 py-2 text-[13px] font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">Kiểm tra kết nối</button>
               )}
             </div>
             <div className="flex items-center gap-3">
-              <button type="button" onClick={onClose} className="px-4 py-2 text-base text-[#020817] bg-white border border-[#e2e8f0] rounded-[6px] hover:bg-slate-50 transition-colors font-medium shadow-sm">Hủy</button>
+              <button type="button" onClick={onClose} className="px-4 py-2 text-[13px] text-[#020817] bg-white border border-[#e2e8f0] rounded-[6px] hover:bg-slate-50 transition-colors font-medium shadow-sm">Hủy</button>
               {activeTab !== 'collection' ? (
                 <button 
                   type="button" 
@@ -346,12 +346,12 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
                     const currentIndex = tabs.findIndex(t => t.id === activeTab);
                     if (currentIndex < tabs.length - 1) setActiveTab(tabs[currentIndex + 1].id);
                   }} 
-                  className="px-4 py-2 text-base text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
+                  className="px-4 py-2 text-[13px] text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
                 >
                   Tiếp tục
                 </button>
               ) : (
-                <button type="button" onClick={handleSubmit} className="px-6 py-2 text-base text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm">Thêm</button>
+                <button type="button" onClick={handleSubmit} className="px-6 py-2 text-[13px] text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm">Thêm</button>
               )}
             </div>
           </div>
@@ -465,7 +465,7 @@ export function EditServiceModal({ isOpen, onClose, service, initialTab }: Servi
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="bg-white rounded-lg shadow-xl w-2/3 max-h-[95vh] overflow-hidden flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-          <h2 className="text-base text-slate-900 font-bold uppercase tracking-tight">Chỉnh sửa kết nối API - {service.name}</h2>
+          <h2 className="text-[13px] text-slate-900 font-bold uppercase tracking-tight">Chỉnh sửa kết nối API - {service.name}</h2>
           <button onClick={onClose} title="Đóng" className="p-1 hover:bg-slate-100 rounded transition-colors">
             <X className="w-5 h-5 text-slate-500" />
           </button>
@@ -478,7 +478,7 @@ export function EditServiceModal({ isOpen, onClose, service, initialTab }: Servi
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-3 text-base transition-colors relative flex items-center gap-2 ${
+                className={`px-4 py-3 text-[13px] transition-colors relative flex items-center gap-2 ${
                   activeTab === tab.id ? 'text-blue-600 bg-white' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
@@ -495,12 +495,12 @@ export function EditServiceModal({ isOpen, onClose, service, initialTab }: Servi
             {activeTab === 'general' && (
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="edit-name" className="block text-base text-slate-600 mb-1">Tên dịch vụ <span className="text-red-500">*</span></label>
-                  <input aria-label="Input field" id="edit-name" title="Tên dịch vụ" type="text" defaultValue={service.name} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base transition-colors" placeholder="VD: API dịch vụ dữ liệu quốc tịch" />
+                  <label htmlFor="edit-name" className="block text-[13px] text-slate-600 mb-1">Tên dịch vụ <span className="text-red-500">*</span></label>
+                  <input aria-label="Input field" id="edit-name" title="Tên dịch vụ" type="text" defaultValue={service.name} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] transition-colors" placeholder="VD: API dịch vụ dữ liệu quốc tịch" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="col-span-2 relative">
-                    <label htmlFor="edit-source-system" className="block text-base text-slate-600 mb-1">Tên hệ thống nguồn <span className="text-red-500">*</span></label>
+                    <label htmlFor="edit-source-system" className="block text-[13px] text-slate-600 mb-1">Tên hệ thống nguồn <span className="text-red-500">*</span></label>
                     <input aria-label="Input field" 
                       id="edit-source-system" 
                       title="Tên hệ thống nguồn" 
@@ -512,7 +512,7 @@ export function EditServiceModal({ isOpen, onClose, service, initialTab }: Servi
                       }} 
                       onFocus={() => setShowSourceDropdown(true)}
                       onBlur={() => setTimeout(() => setShowSourceDropdown(false), 200)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base transition-colors" 
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] transition-colors" 
                       placeholder="Tìm kiếm hoặc chọn hệ thống nguồn..." 
                     />
                     
@@ -521,7 +521,7 @@ export function EditServiceModal({ isOpen, onClose, service, initialTab }: Servi
                         {filteredSourceSystems.map(ss => (
                           <div
                             key={ss.id}
-                            className="px-4 py-2 hover:bg-slate-50 cursor-pointer text-base flex items-center justify-between"
+                            className="px-4 py-2 hover:bg-slate-50 cursor-pointer text-[13px] flex items-center justify-between"
                             onMouseDown={(e) => {
                               e.preventDefault(); 
                               setSourceSystemName(ss.systemName);
@@ -530,9 +530,9 @@ export function EditServiceModal({ isOpen, onClose, service, initialTab }: Servi
                           >
                             <div className="flex flex-col">
                               <span className="font-medium text-slate-700">{ss.systemName}</span>
-                              <span className="text-base text-slate-500">{ss.unitName}</span>
+                              <span className="text-[13px] text-slate-500">{ss.unitName}</span>
                             </div>
-                            <span className="text-base text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">{ss.sourceType}</span>
+                            <span className="text-[13px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">{ss.sourceType}</span>
                           </div>
                         ))}
                       </div>
@@ -541,8 +541,8 @@ export function EditServiceModal({ isOpen, onClose, service, initialTab }: Servi
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="col-span-2">
-                    <label htmlFor="edit-security" className="block text-base text-slate-600 mb-1">Mức độ bảo mật dữ liệu</label>
-                    <select aria-label="Select box" id="edit-security" title="Mức độ bảo mật dữ liệu" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base transition-colors bg-white">
+                    <label htmlFor="edit-security" className="block text-[13px] text-slate-600 mb-1">Mức độ bảo mật dữ liệu</label>
+                    <select aria-label="Select box" id="edit-security" title="Mức độ bảo mật dữ liệu" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] transition-colors bg-white">
                       <option value="">Chọn mức độ bảo mật</option>
                       <option value="Dữ liệu mở">Dữ liệu mở</option>
                       <option value="Dữ liệu nội bộ">Dữ liệu nội bộ</option>
@@ -554,14 +554,14 @@ export function EditServiceModal({ isOpen, onClose, service, initialTab }: Servi
                   </div>
                 </div>
                 <div>
-                  <label htmlFor="edit-desc" className="block text-base text-slate-600 mb-1">Mô tả</label>
-                  <textarea aria-label="Text input" id="edit-desc" title="Mô tả" defaultValue={service.description} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base transition-colors" rows={3} placeholder="Mô tả chi tiết" />
+                  <label htmlFor="edit-desc" className="block text-[13px] text-slate-600 mb-1">Mô tả</label>
+                  <textarea aria-label="Text input" id="edit-desc" title="Mô tả" defaultValue={service.description} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] transition-colors" rows={3} placeholder="Mô tả chi tiết" />
                 </div>
                 <div>
-                  <label className="block text-base text-slate-600 mb-2">Đính kèm văn bản</label>
+                  <label className="block text-[13px] text-slate-600 mb-2">Đính kèm văn bản</label>
                   <div className="border border-slate-300 rounded-lg p-3 text-center py-6">
                     <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                    <p className="text-base text-slate-600">Click để chọn file PDF, DOCX</p>
+                    <p className="text-[13px] text-slate-600">Click để chọn file PDF, DOCX</p>
                   </div>
                 </div>
               </div>
@@ -577,11 +577,11 @@ export function EditServiceModal({ isOpen, onClose, service, initialTab }: Servi
           <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50">
             <div>
               {activeTab === 'connection' && connectionType !== 'FILE' && (
-                <button type="button" onClick={handleTestConnection} className="px-4 py-2 text-base font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">Kiểm tra kết nối</button>
+                <button type="button" onClick={handleTestConnection} className="px-4 py-2 text-[13px] font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">Kiểm tra kết nối</button>
               )}
             </div>
             <div className="flex items-center gap-3">
-              <button type="button" onClick={onClose} className="px-4 py-2 text-base text-[#020817] bg-white border border-[#e2e8f0] rounded-[6px] hover:bg-slate-50 transition-colors font-medium shadow-sm">Hủy</button>
+              <button type="button" onClick={onClose} className="px-4 py-2 text-[13px] text-[#020817] bg-white border border-[#e2e8f0] rounded-[6px] hover:bg-slate-50 transition-colors font-medium shadow-sm">Hủy</button>
               {activeTab !== 'collection' ? (
                 <button 
                   type="button" 
@@ -589,12 +589,12 @@ export function EditServiceModal({ isOpen, onClose, service, initialTab }: Servi
                     const currentIndex = tabs.findIndex(t => t.id === activeTab);
                     if (currentIndex < tabs.length - 1) setActiveTab(tabs[currentIndex + 1].id);
                   }} 
-                  className="px-4 py-2 text-base text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
+                  className="px-4 py-2 text-[13px] text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
                 >
                   Tiếp tục
                 </button>
               ) : (
-                <button type="button" onClick={handleSubmit} className="px-6 py-2 text-base text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm">Cập nhật</button>
+                <button type="button" onClick={handleSubmit} className="px-6 py-2 text-[13px] text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm">Cập nhật</button>
               )}
             </div>
           </div>
@@ -646,8 +646,8 @@ export function SettingsServiceModal({ isOpen, onClose, service }: ServiceModalP
       maxWidth="max-w-md"
       footer={
         <div className="flex justify-end gap-3 w-full">
-           <button onClick={onClose} className="px-4 py-2 bg-white text-[#020817] border border-[#e2e8f0] rounded-[6px] hover:bg-slate-50 transition-colors font-medium shadow-sm text-base">Đóng</button>
-           <button onClick={() => { alert('Lưu cài đặt thành công'); onClose(); }} className="px-4 py-2 bg-blue-600 text-white flex items-center gap-2 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm text-base">
+           <button onClick={onClose} className="px-4 py-2 bg-white text-[#020817] border border-[#e2e8f0] rounded-[6px] hover:bg-slate-50 transition-colors font-medium shadow-sm text-[13px]">Đóng</button>
+           <button onClick={() => { alert('Lưu cài đặt thành công'); onClose(); }} className="px-4 py-2 bg-blue-600 text-white flex items-center gap-2 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm text-[13px]">
              <CheckCircle className="w-4 h-4"/> 
              Lưu cài đặt
            </button>
@@ -661,8 +661,8 @@ export function SettingsServiceModal({ isOpen, onClose, service }: ServiceModalP
               <input type="checkbox" className="rounded text-blue-600 focus:ring-blue-500 w-4 h-4" defaultChecked />
             </div>
             <div>
-              <span className="text-base font-medium text-slate-900">Tự động khởi động lại</span>
-              <p className="text-base text-slate-500 mt-0.5">Tự động thực hiện lại tiến trình thu thập nếu gặp lỗi Network</p>
+              <span className="text-[13px] font-medium text-slate-900">Tự động khởi động lại</span>
+              <p className="text-[13px] text-slate-500 mt-0.5">Tự động thực hiện lại tiến trình thu thập nếu gặp lỗi Network</p>
             </div>
           </label>
         </div>
@@ -672,14 +672,14 @@ export function SettingsServiceModal({ isOpen, onClose, service }: ServiceModalP
               <input type="checkbox" className="rounded text-blue-600 focus:ring-blue-500 w-4 h-4" defaultChecked />
             </div>
             <div>
-              <span className="text-base font-medium text-slate-900">Ghi Log chi tiết (Debug Mode)</span>
-              <p className="text-base text-slate-500 mt-0.5">Lưu trữ toàn bộ payload request/response để phục vụ kiểm tra lỗi</p>
+              <span className="text-[13px] font-medium text-slate-900">Ghi Log chi tiết (Debug Mode)</span>
+              <p className="text-[13px] text-slate-500 mt-0.5">Lưu trữ toàn bộ payload request/response để phục vụ kiểm tra lỗi</p>
             </div>
           </label>
         </div>
         <div className="pt-3 border-t border-slate-100">
-          <label className="block text-base font-medium text-slate-700 mb-1">Cảnh báo khi số bản ghi lỗi vượt quá (%)</label>
-          <input aria-label="Input field" type="number" defaultValue="10" title="Tỉ lệ lỗi (%)" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base bg-slate-50" />
+          <label className="block text-[13px] font-medium text-slate-700 mb-1">Cảnh báo khi số bản ghi lỗi vượt quá (%)</label>
+          <input aria-label="Input field" type="number" defaultValue="10" title="Tỉ lệ lỗi (%)" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] bg-slate-50" />
         </div>
       </div>
     </BaseModal>

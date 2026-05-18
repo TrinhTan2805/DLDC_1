@@ -9,8 +9,16 @@ import { ServiceDataDetailPage } from './ServiceDataDetailPage';
 import { Portal } from '../../common/Portal';
 import { StatusTag } from '../../common/StatusTag';
 
-export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: string) => void }) {
-  const [activeTab, setActiveTab] = useState<'service-setup' | 'version'>('service-setup');
+interface CollectionSetupPageProps {
+  onNavigate?: (pageId: string) => void;
+  activeTab?: 'service-setup' | 'version';
+  onTabChange?: (tab: 'service-setup' | 'version') => void;
+}
+
+export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTabChange }: CollectionSetupPageProps) {
+  const [localActiveTab, setLocalActiveTab] = useState<'service-setup' | 'version'>('service-setup');
+  const activeTab = propActiveTab || localActiveTab;
+  const setActiveTab = onTabChange || setLocalActiveTab;
   const location = useLocation();
   const navigate = useNavigate();
   const pathParts = location.pathname.split('/').filter(Boolean);
@@ -166,27 +174,29 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
   };
 
   return (
-    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px' }}>
       <div className="h-full flex flex-col bg-slate-50 min-h-screen">
       {/* Tabs */}
       <div className="bg-white border-b border-slate-200 px-6">
         <div className="flex gap-6">
           <button
             onClick={() => setActiveTab('service-setup')}
-            className={`pb-3 pt-4 text-base font-medium transition-colors border-b-2 ${activeTab === 'service-setup'
-              ? 'border-[#2563eb] text-[#2563eb]'
-              : 'border-transparent text-slate-600 hover:text-[#020817]'
+            className={`flex items-center gap-2 pb-3 pt-4 text-[13px] font-medium transition-colors border-b-2 ${activeTab === 'service-setup'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-slate-600 hover:text-slate-900'
               }`}
           >
+            <Settings className="w-5 h-5" />
             Thiết lập dịch vụ
           </button>
           <button
             onClick={() => setActiveTab('version')}
-            className={`pb-3 pt-4 text-base font-medium transition-colors border-b-2 ${activeTab === 'version'
-              ? 'border-[#2563eb] text-[#2563eb]'
-              : 'border-transparent text-slate-600 hover:text-[#020817]'
+            className={`flex items-center gap-2 pb-3 pt-4 text-[13px] font-medium transition-colors border-b-2 ${activeTab === 'version'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-slate-600 hover:text-slate-900'
               }`}
           >
+            <FileText className="w-5 h-5" />
             Quản lý nhật ký
           </button>
         </div>
@@ -257,7 +267,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                     <input aria-label="Input field"
                       type="text"
                       placeholder="Tìm kiếm theo tên dịch vụ, hệ thống nguồn"
-                      className="w-full px-4 py-2 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                      className="w-full px-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                       value={searchText}
                       onChange={(e) => setSearchText(e.target.value)}
                     />
@@ -277,10 +287,17 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => navigate('/collection-setup/add')}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-base shadow-sm font-medium"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium"
                   >
                     <Plus className="w-4 h-4" />
                     Thêm mới
+                  </button>
+                  <button
+                    onClick={handleExportServiceList}
+                    className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium"
+                  >
+                    <Download className="w-4 h-4" />
+                    Kết xuất
                   </button>
                 </div>
               </div>
@@ -291,9 +308,9 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                   <div className="absolute -top-2 right-[200px] w-4 h-4 bg-slate-50 border-t border-l border-slate-200 transform rotate-45"></div>
 
                   <div className="space-y-1.5 relative z-10">
-                    <label className="text-base font-medium text-slate-700">Loại kết nối</label>
+                    <label className="text-[13px] font-medium text-slate-700">Loại kết nối</label>
                     <select aria-label="Select box"
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                       value={typeFilter}
                       onChange={(e) => setTypeFilter(e.target.value)}
                     >
@@ -305,9 +322,9 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                   </div>
 
                   <div className="space-y-1.5 relative z-10">
-                    <label className="text-base font-medium text-slate-700">Nguồn dữ liệu</label>
+                    <label className="text-[13px] font-medium text-slate-700">Nguồn dữ liệu</label>
                     <select aria-label="Select box"
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                       value={sourceFilter}
                       onChange={(e) => setSourceFilter(e.target.value)}
                     >
@@ -318,9 +335,9 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                   </div>
 
                   <div className="space-y-1.5 relative z-10">
-                    <label className="text-base font-medium text-slate-700">Hệ thống nguồn</label>
+                    <label className="text-[13px] font-medium text-slate-700">Hệ thống nguồn</label>
                     <select aria-label="Select box"
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                       value={departmentFilter}
                       onChange={(e) => setDepartmentFilter(e.target.value)}
                     >
@@ -337,9 +354,9 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                   </div>
 
                   <div className="space-y-1.5 relative z-10">
-                    <label className="text-base font-medium text-slate-700">Trạng thái</label>
+                    <label className="text-[13px] font-medium text-slate-700">Trạng thái</label>
                     <select aria-label="Select box"
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
                     >
@@ -351,11 +368,11 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                   </div>
 
                   <div className="space-y-1.5 relative z-10">
-                    <label className="text-base font-medium text-slate-700">Thời gian từ</label>
+                    <label className="text-[13px] font-medium text-slate-700">Thời gian từ</label>
                     <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
                       <input aria-label="Input field"
                         type="date"
-                        className="w-full border-0 bg-transparent text-base focus:outline-none text-slate-700 p-0"
+                        className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-slate-700 p-0"
                         value={startDate}
                         onChange={(e) => setStartDate(e.target.value)}
                       />
@@ -364,11 +381,11 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                   </div>
 
                   <div className="space-y-1.5 relative z-10">
-                    <label className="text-base font-medium text-slate-700">Thời gian đến</label>
+                    <label className="text-[13px] font-medium text-slate-700">Thời gian đến</label>
                     <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
                       <input aria-label="Input field"
                         type="date"
-                        className="w-full border-0 bg-transparent text-base focus:outline-none text-slate-700 p-0"
+                        className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-slate-700 p-0"
                         value={endDate}
                         onChange={(e) => setEndDate(e.target.value)}
                       />
@@ -382,19 +399,19 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
             {/* Services Table */}
             <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
               <div className="overflow-x-auto">
-                <table className="w-full border-collapse collection-table" style={{ fontSize: '16px' }}>
+                <table className="w-full border-collapse collection-table text-[13px]">
                   <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-[1]">
                     <tr>
-                      <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap w-12">STT</th>
-                      <th className="px-4 py-3 text-left font-semibold text-slate-500 whitespace-nowrap">Tên dịch vụ</th>
-                      <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Loại nguồn</th>
-                      <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Phương thức kết nối</th>
-                      <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap w-20">Phiên bản</th>
-                      <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Hệ thống nguồn</th>
-                      <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Ngày tạo</th>
-                      <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Trạng thái dịch vụ</th>
-                      <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Trạng thái dữ liệu</th>
-                      <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap w-64">Thao tác</th>
+                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-12 text-[13px]">STT</th>
+                      <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Tên dịch vụ</th>
+                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Loại nguồn</th>
+                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Phương thức kết nối</th>
+                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-20 text-[13px]">Phiên bản</th>
+                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Hệ thống nguồn</th>
+                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Ngày tạo</th>
+                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái dịch vụ</th>
+                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái dữ liệu</th>
+                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-64 text-[13px]">Thao tác</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -402,11 +419,11 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                       .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
                       .map((service, index) => (
                         <tr key={service.id} className="hover:bg-slate-50 transition-all group border-b border-slate-100">
-                          <td className="px-4 py-3 text-center text-slate-500 font-medium">{index + 1}</td>
-                          <td className="px-4 py-3 text-left">
+                          <td className="px-4 py-3 text-center text-slate-500 font-medium text-[13px]">{index + 1}</td>
+                          <td className="px-4 py-3 text-left text-[13px]">
                             <div className="max-w-xs">
-                              <div className="font-medium text-slate-950 leading-snug">{service.name}</div>
-                              {service.description && <div className="text-slate-500 mt-1 line-clamp-2">{service.description}</div>}
+                              <div className="font-medium text-slate-950 leading-snug text-[13px]">{service.name}</div>
+                              {service.description && <div className="text-slate-500 mt-1 line-clamp-2 text-[13px]">{service.description}</div>}
                             </div>
                           </td>
                           <td className="px-4 py-3 text-center">
@@ -421,11 +438,11 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                               variant={service.type === 'SOAP' ? 'indigo' : service.type === 'REST' ? 'emerald' : 'amber'} 
                             />
                           </td>
-                          <td className="px-4 py-3 text-center text-slate-600 font-medium font-mono">{service.version}</td>
-                          <td className="px-4 py-3 text-center text-slate-600 font-medium max-w-[120px]">
+                          <td className="px-4 py-3 text-center text-slate-600 font-medium font-mono text-[13px]">{service.version}</td>
+                          <td className="px-4 py-3 text-center text-slate-600 font-medium max-w-[120px] text-[13px]">
                             <div className="leading-tight">{service.managingUnit}</div>
                           </td>
-                          <td className="px-4 py-3 text-center text-slate-500 font-medium font-mono whitespace-nowrap">
+                          <td className="px-4 py-3 text-center text-slate-500 font-medium font-mono whitespace-nowrap text-[13px]">
                             {service.updatedAt.split(' ').map((part: string, i: number) => (
                               <div key={i}>{part}</div>
                             ))}
@@ -526,11 +543,11 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                 </table>
               </div>
               {/* Pagination */}
-              <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white sm:px-6 collection-pagination" style={{ fontSize: '16px' }}>
+              <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white sm:px-6 collection-pagination text-[13px]">
                 <div className="flex items-center gap-2">
                   <span className="text-slate-600">Hiển thị</span>
                   <select aria-label="Select record count" 
-                    className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px]"
                     title="Số bản ghi trên trang"
                   >
                     <option>10</option>
@@ -549,7 +566,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                     <button
                       onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : currentPage)}
                       disabled={currentPage === 1}
-                      className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
+                      className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
                     >
                       Trước
                     </button>
@@ -558,7 +575,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                       <button
                         key={page}
                         onClick={() => setCurrentPage(page)}
-                        className={`px-3 py-1.5 border rounded-lg font-medium transition-colors ${
+                        className={`px-3 py-1.5 border rounded-lg font-medium text-[13px] transition-colors ${
                           currentPage === page
                             ? 'bg-blue-600 border-blue-600 text-white'
                             : 'border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
@@ -576,7 +593,7 @@ export function CollectionSetupPage({ onNavigate }: { onNavigate?: (pageId: stri
                         }
                       }}
                       disabled={currentPage === Math.ceil(filteredServices.length / itemsPerPage)}
-                      className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
+                      className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
                     >
                       Sau
                     </button>

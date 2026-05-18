@@ -81,7 +81,7 @@ export function AgentManagementPage() {
   };
 
   return (
-    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px' }}>
       <div className="h-full flex flex-col bg-slate-50 p-6 space-y-6 min-h-screen">
       {/* Header */}
       <div className="flex items-center gap-3">
@@ -89,8 +89,8 @@ export function AgentManagementPage() {
           <Monitor className="w-6 h-6 text-blue-600" />
         </div>
         <div>
-          <h1 className="text-base font-bold text-slate-800 uppercase tracking-tight">Quản lý Trạm kết nối</h1>
-          <p className="text-base text-slate-500 mt-1">Quản lý danh sách các trạm kết nối thu thập dữ liệu</p>
+          <h1 className="text-[20px] font-bold text-slate-800 uppercase tracking-tight" style={{ fontSize: '20px' }}>Quản lý Trạm kết nối</h1>
+          <p className="text-[13px] text-slate-500 mt-1">Quản lý danh sách các trạm kết nối thu thập dữ liệu</p>
         </div>
       </div>
 
@@ -104,14 +104,14 @@ export function AgentManagementPage() {
               placeholder="Tìm kiếm theo tên trạm, địa chỉ IP..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+              className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
             />
           </div>
           <div className="w-48">
             <select aria-label="Select box"
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="w-full px-4 py-2 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+              className="w-full px-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
             >
               <option value="all">Tất cả trạng thái</option>
               <option value="active">Hoạt động</option>
@@ -123,7 +123,7 @@ export function AgentManagementPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={handleAdd}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-base shadow-sm font-medium"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium"
           >
             <Plus className="w-4 h-4" />
             Thêm mới
@@ -134,7 +134,7 @@ export function AgentManagementPage() {
       {/* Table Card */}
       <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm flex flex-col flex-1 min-h-0">
         <div className="overflow-x-auto flex-1">
-          <table className="w-full text-left border-collapse collection-table" style={{ fontSize: '16px' }}>
+          <table className="w-full text-left border-collapse collection-table" style={{ fontSize: '13px' }}>
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-tight sticky top-0 z-10">
                 <th className="py-4 px-6 w-16 text-center">STT</th>
@@ -231,8 +231,8 @@ export function AgentManagementPage() {
                       <div className="p-4 bg-slate-50 rounded-full mb-4">
                         <Monitor className="w-10 h-10 opacity-20" />
                       </div>
-                      <p className="text-base font-medium text-slate-600">Không tìm thấy trạm kết nối nào.</p>
-                      <p className="text-base text-slate-400 mt-1">Vui lòng thử lại với từ khóa khác.</p>
+                      <p className="text-[13px] font-medium text-slate-600">Không tìm thấy trạm kết nối nào.</p>
+                      <p className="text-[13px] text-slate-400 mt-1">Vui lòng thử lại với từ khóa khác.</p>
                     </div>
                   </td>
                 </tr>
@@ -242,7 +242,7 @@ export function AgentManagementPage() {
         </div>
 
         {/* Pagination */}
-        <div className="px-6 py-3 border-t border-slate-200 flex items-center justify-between bg-white sticky bottom-0 collection-pagination" style={{ fontSize: '16px' }}>
+        <div className="px-6 py-3 border-t border-slate-200 flex items-center justify-between bg-white sticky bottom-0 collection-pagination" style={{ fontSize: '13px' }}>
           <div className="flex items-center gap-2">
             <span className="text-slate-600">Hiển thị</span>
             <select 

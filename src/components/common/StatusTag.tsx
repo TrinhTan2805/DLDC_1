@@ -22,7 +22,7 @@ export function StatusTag({ label, variant = 'blue', className = '', icon }: Sta
   };
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[16px] font-medium text-center whitespace-nowrap ${variants[variant]} ${className}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[13px] font-medium text-center whitespace-nowrap ${variants[variant]} ${className}`}>
       {icon}
       {label}
     </span>

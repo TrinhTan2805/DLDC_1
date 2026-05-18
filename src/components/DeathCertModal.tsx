@@ -279,127 +279,63 @@ export function DeathCertModal({
 
               {/* Content */}
               <div className="p-6 flex-1 overflow-auto bg-white text-slate-900">
-                <div className="flex flex-col gap-3">
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Mã hồ sơ</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.recordCode || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Tệp đính kèm</div>
-                    <div className="text-sm text-blue-600 font-medium">{selectedRecord.fileId || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Số đăng ký</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.registrationNumber || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Số quyển</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.bookNumber || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Trang số</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.pageNumber || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên người chết</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.deceasedName || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Giới tính</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.deceasedGender || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Ngày, tháng, năm sinh</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.deceasedBirthDate || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Dân tộc</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.deceasedEthnicity || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Quốc tịch</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.deceasedNationality || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Nơi cư trú</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.deceasedResidence || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Số GTTT</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.deceasedIdNumber || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Số định danh cá nhân</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.deceasedPersonalId || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Giờ, phút chết</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.deathHour}:{selectedRecord.deathMinute}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Ngày, tháng, năm chết</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.deathDate || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Ngày tháng năm chết (bằng chữ)</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.deathDateWords || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Nơi chết</div>
-                    <div className="text-sm text-slate-900 font-medium text-orange-700">{selectedRecord.deathPlace || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Nguyên nhân chết</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.deathCause || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Số Giấy báo tử/Số giấy tờ thay thế Giấy báo tử</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.deathNoticeNumber || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên người đi khai tử</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.declarerName || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Quan hệ với người chết</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.declarerRelationship || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Số GTTT người đi khai tử</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.declarerIdNumber || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Số định danh cá nhân người đi khai tử</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.declarerPersonalId || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Nơi đăng ký</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.registrationPlace || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Ngày đăng ký</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.registrationDate || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Loại đăng ký</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.registrationType || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Người ký</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.signerName || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Chức vụ</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.signerPosition || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Người thực hiện</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.implementer || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Ghi chú</div>
-                    <div className="text-sm text-slate-600 italic whitespace-pre-wrap">{selectedRecord.notes || '-'}</div>
-                  </div>
+                <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+                  {[
+                    { label: 'Mã hồ sơ', value: selectedRecord.recordCode },
+                    { label: 'Tệp đính kèm', value: selectedRecord.fileId, isBlue: true },
+                    { label: 'Số đăng ký', value: selectedRecord.registrationNumber },
+                    { label: 'Số quyển', value: selectedRecord.bookNumber },
+                    { label: 'Trang số', value: selectedRecord.pageNumber },
+                    { label: 'Họ, chữ đệm, tên người chết', value: selectedRecord.deceasedName },
+
+                    { label: 'Giới tính', value: selectedRecord.deceasedGender },
+                    { label: 'Ngày, tháng, năm sinh', value: selectedRecord.deceasedBirthDate },
+                    { label: 'Dân tộc', value: selectedRecord.deceasedEthnicity },
+                    { label: 'Quốc tịch', value: selectedRecord.deceasedNationality },
+                    { label: 'Nơi cư trú', value: selectedRecord.deceasedResidence },
+                    { label: 'Số GTTT', value: selectedRecord.deceasedIdNumber },
+
+                    { label: 'Số định danh cá nhân', value: selectedRecord.deceasedPersonalId },
+                    { 
+                      label: 'Giờ, phút chết', 
+                      value: (selectedRecord.deathHour !== undefined && selectedRecord.deathMinute !== undefined) 
+                        ? `${selectedRecord.deathHour.toString().padStart(2, '0')}:${selectedRecord.deathMinute.toString().padStart(2, '0')}` 
+                        : '' 
+                    },
+                    { label: 'Ngày, tháng, năm chết', value: selectedRecord.deathDate },
+                    { label: 'Ngày tháng năm chết (bằng chữ)', value: selectedRecord.deathDateWords },
+                    { label: 'Nơi chết', value: selectedRecord.deathPlace, isOrange: true },
+                    { label: 'Nguyên nhân chết', value: selectedRecord.deathCause },
+
+                    { label: 'Số Giấy báo tử/Số giấy tờ thay thế Giấy báo tử', value: selectedRecord.deathNoticeNumber },
+                    { label: 'Họ, chữ đệm, tên người đi khai tử', value: selectedRecord.declarerName },
+                    { label: 'Quan hệ với người chết', value: selectedRecord.declarerRelationship },
+                    { label: 'Số GTTT người đi khai tử', value: selectedRecord.declarerIdNumber },
+                    { label: 'Số định danh cá nhân người đi khai tử', value: selectedRecord.declarerPersonalId },
+                    { label: 'Nơi đăng ký', value: selectedRecord.registrationPlace },
+
+                    { label: 'Ngày đăng ký', value: selectedRecord.registrationDate },
+                    { label: 'Loại đăng ký', value: selectedRecord.registrationType },
+                    { label: 'Người ký', value: selectedRecord.signerName },
+                    { label: 'Chức vụ', value: selectedRecord.signerPosition },
+                    { label: 'Người thực hiện', value: selectedRecord.implementer },
+                    { label: 'Ghi chú', value: selectedRecord.notes, isItalic: true, colSpan2: true }
+                  ].reduce<any[]>((acc, field, index) => {
+                    if (index > 0 && index % 6 === 0) {
+                      acc.push(
+                        <div key={`divider-${index}`} className="col-span-2 border-t border-slate-200 my-2 w-full"></div>
+                      );
+                    }
+                    acc.push(
+                      <div key={`field-${index}`} className={`space-y-1 ${field.colSpan2 ? 'col-span-2' : ''}`}>
+                        <div className="text-[13px] font-semibold text-slate-700">{field.label}</div>
+                        <div className={`text-[13px] ${field.isBlue ? 'text-blue-600' : field.isOrange ? 'text-orange-700' : 'text-slate-900'} ${field.isItalic ? 'italic whitespace-pre-wrap text-slate-600' : ''}`}>
+                          {field.value || '-'}
+                        </div>
+                      </div>
+                    );
+                    return acc;
+                  }, [])}
                 </div>
               </div>
 

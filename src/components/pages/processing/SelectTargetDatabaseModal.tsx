@@ -24,7 +24,7 @@ export function SelectTargetDatabaseModal({ isOpen, onClose, onContinue }: Selec
       <button 
         onClick={onClose}
         style={{ padding: '8px 16px', borderRadius: '6px', fontWeight: 500 }}
-        className="text-sm text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-all"
+        className="text-[13px] text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-all"
       >
         Hủy
       </button>
@@ -32,7 +32,7 @@ export function SelectTargetDatabaseModal({ isOpen, onClose, onContinue }: Selec
         onClick={handleContinue}
         disabled={!selectedId}
         style={{ padding: '8px 16px', borderRadius: '6px', fontWeight: 500 }}
-        className={`flex items-center gap-2 text-sm text-white transition-all shadow-md ${
+        className={`flex items-center gap-2 text-[13px] text-white transition-all shadow-md ${
           selectedId 
             ? 'bg-blue-600 hover:bg-blue-700 active:scale-95' 
             : 'bg-slate-300 cursor-not-allowed shadow-none'
@@ -45,13 +45,14 @@ export function SelectTargetDatabaseModal({ isOpen, onClose, onContinue }: Selec
   );
 
   return (
-    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px' }}>
       <BaseModal
         isOpen={isOpen}
         onClose={onClose}
         title="Chọn Cơ sở dữ liệu đích"
         subtitle="Vui lòng chọn một kết nối CSDL để thực hiện ánh xạ"
         maxWidth="max-w-2xl"
+        className="force-13px"
         customHeaderIcon={
           <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 mr-4">
             <Database className="w-6 h-6" />
@@ -81,7 +82,7 @@ export function SelectTargetDatabaseModal({ isOpen, onClose, onContinue }: Selec
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-2">
-                  <div className="font-bold text-slate-800 text-[15px]">{db.name}</div>
+                  <div className="font-bold text-slate-800 text-[13px]">{db.name}</div>
                   <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200">
                     {db.type}
                   </span>

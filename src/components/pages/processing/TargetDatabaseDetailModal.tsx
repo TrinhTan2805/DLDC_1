@@ -20,7 +20,7 @@ export function TargetDatabaseDetailModal({ isOpen, onClose, data }: TargetDatab
   );
 
   return (
-    <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-md flex items-center justify-center z-[100] p-4" style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
+    <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-md flex items-center justify-center z-[100] p-4" style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px' }}>
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-6xl flex flex-col h-[90vh] border border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-300">
         {/* Header */}
         <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-white to-slate-50">

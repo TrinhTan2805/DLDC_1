@@ -277,127 +277,58 @@ export function GuardianshipCertModal({
 
               {/* Content */}
               <div className="p-6 flex-1 overflow-auto bg-white text-slate-900">
-                <div className="flex flex-col gap-3">
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Mã hồ sơ</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.recordCode || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên người được giám hộ</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.wardName || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Giới tính</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.wardGender || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Ngày, tháng, năm sinh</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.wardBirthDate || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Nơi sinh</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.wardBirthPlace || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Dân tộc</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.wardEthnicity || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Quốc tịch</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.wardNationality || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Số GTTT</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.wardIdNumber || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Nơi cư trú</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.wardResidence || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Lý do giám hộ</div>
-                    <div className="text-sm text-slate-900 font-medium italic">{selectedRecord.guardianshipReason || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên người giám hộ</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.guardianName || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Giới tính người giám hộ</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.guardianGender || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Ngày, tháng, năm sinh người giám hộ</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.guardianBirthDate || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Dân tộc người giám hộ</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.guardianEthnicity || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Quốc tịch người giám hộ</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.guardianNationality || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Số GTTT người giám hộ</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.guardianIdNumber || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Số định danh cá nhân người giám hộ</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.guardianPersonalId || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Nơi cư trú người giám hộ</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.guardianResidence || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Loại giám hộ</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.guardianshipType || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Loại đăng ký</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.registrationType || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Tình trạng giám hộ</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.guardianshipStatus || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Ngày đăng ký</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.registrationDate || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Nơi đăng ký</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.registrationPlace || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Người ký</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.signerName || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Chức vụ</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.signerPosition || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Họ, chữ đệm, tên người yêu cầu</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.requesterName || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Quan hệ với người được giám hộ</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.requesterRelationship || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Số GTTT người yêu cầu</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.requesterIdNumber || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Người thực hiện</div>
-                    <div className="text-sm text-slate-900 font-medium">{selectedRecord.implementerName || '-'}</div>
-                  </div>
-                  <div className="border border-slate-200 p-2 rounded">
-                    <div className="text-xs text-slate-600 mb-1">Ghi chú</div>
-                    <div className="text-sm text-slate-600 italic whitespace-pre-wrap">{selectedRecord.notes || '-'}</div>
-                  </div>
+                <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+                  {[
+                    { label: 'Mã hồ sơ', value: selectedRecord.recordCode },
+                    { label: 'Họ, chữ đệm, tên người được giám hộ', value: selectedRecord.wardName },
+                    { label: 'Giới tính', value: selectedRecord.wardGender },
+                    { label: 'Ngày, tháng, năm sinh', value: selectedRecord.wardBirthDate },
+                    { label: 'Nơi sinh', value: selectedRecord.wardBirthPlace },
+                    { label: 'Dân tộc', value: selectedRecord.wardEthnicity },
+
+                    { label: 'Quốc tịch', value: selectedRecord.wardNationality },
+                    { label: 'Số GTTT', value: selectedRecord.wardIdNumber },
+                    { label: 'Nơi cư trú', value: selectedRecord.wardResidence },
+                    { label: 'Lý do giám hộ', value: selectedRecord.guardianshipReason, isItalic: true },
+                    { label: 'Họ, chữ đệm, tên người giám hộ', value: selectedRecord.guardianName },
+                    { label: 'Giới tính người giám hộ', value: selectedRecord.guardianGender },
+
+                    { label: 'Ngày, tháng, năm sinh người giám hộ', value: selectedRecord.guardianBirthDate },
+                    { label: 'Dân tộc người giám hộ', value: selectedRecord.guardianEthnicity },
+                    { label: 'Quốc tịch người giám hộ', value: selectedRecord.guardianNationality },
+                    { label: 'Số GTTT người giám hộ', value: selectedRecord.guardianIdNumber },
+                    { label: 'Số định danh cá nhân người giám hộ', value: selectedRecord.guardianPersonalId },
+                    { label: 'Nơi cư trú người giám hộ', value: selectedRecord.guardianResidence },
+
+                    { label: 'Loại giám hộ', value: selectedRecord.guardianshipType },
+                    { label: 'Loại đăng ký', value: selectedRecord.registrationType },
+                    { label: 'Tình trạng giám hộ', value: selectedRecord.guardianshipStatus },
+                    { label: 'Ngày đăng ký', value: selectedRecord.registrationDate },
+                    { label: 'Nơi đăng ký', value: selectedRecord.registrationPlace },
+                    { label: 'Người ký', value: selectedRecord.signerName },
+
+                    { label: 'Chức vụ', value: selectedRecord.signerPosition },
+                    { label: 'Họ, chữ đệm, tên người yêu cầu', value: selectedRecord.requesterName },
+                    { label: 'Quan hệ với người được giám hộ', value: selectedRecord.requesterRelationship },
+                    { label: 'Số GTTT người yêu cầu', value: selectedRecord.requesterIdNumber },
+                    { label: 'Người thực hiện', value: selectedRecord.implementerName },
+                    { label: 'Ghi chú', value: selectedRecord.notes, isItalic: true, colSpan2: true }
+                  ].reduce<any[]>((acc, field, index) => {
+                    if (index > 0 && index % 6 === 0) {
+                      acc.push(
+                        <div key={`divider-${index}`} className="col-span-2 border-t border-slate-200 my-2 w-full"></div>
+                      );
+                    }
+                    acc.push(
+                      <div key={`field-${index}`} className={`space-y-1 ${field.colSpan2 ? 'col-span-2' : ''}`}>
+                        <div className="text-[13px] font-semibold text-slate-700">{field.label}</div>
+                        <div className={`text-[13px] ${field.isBlue ? 'text-blue-600' : 'text-slate-900'} ${field.isItalic ? 'italic whitespace-pre-wrap text-slate-600' : ''}`}>
+                          {field.value || '-'}
+                        </div>
+                      </div>
+                    );
+                    return acc;
+                  }, [])}
                 </div>
               </div>
 

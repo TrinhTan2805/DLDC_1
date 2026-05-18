@@ -98,13 +98,14 @@ export function MergeSplitModal({ isOpen, onClose, sourceFields, onMergeSubmit, 
   );
 
   return (
-    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px' }}>
       <BaseModal
         isOpen={isOpen}
         onClose={onClose}
         title="Gộp / Tách cột"
         subtitle="Tạo trường mới từ các cột nguồn trước khi ánh xạ"
         maxWidth="max-w-2xl"
+        className="force-13px"
         showCloseButton={true}
         customHeaderIcon={<div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 mr-3"><Merge className="w-5 h-5" /></div>}
         footer={footer}

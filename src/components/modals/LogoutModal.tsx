@@ -11,7 +11,7 @@ export function LogoutModal({ isOpen, onClose, onConfirm }: LogoutModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-sm">
+      <div className="bg-white rounded-lg shadow-xl w-[400px] max-w-[90vw]">
         <div className="flex items-center justify-between p-6 border-b border-slate-200">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center text-red-600">

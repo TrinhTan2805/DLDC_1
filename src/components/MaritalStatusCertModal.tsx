@@ -336,20 +336,20 @@ export function MaritalStatusCertModal({
                     
                     { label: 'Người thực hiện', value: selectedRecord.implementer },
                     { label: 'Ghi chú', value: selectedRecord.notes, isItalic: true, colSpan2: true }
-                  ].reduce<any[]>((acc, field, index, arr) => {
+                  ].reduce<any[]>((acc, field, index) => {
+                    if (index > 0 && index % 6 === 0) {
+                      acc.push(
+                        <div key={`divider-${index}`} className="col-span-2 border-t border-slate-200 my-2 w-full"></div>
+                      );
+                    }
                     acc.push(
                       <div key={`field-${index}`} className={`space-y-1 ${field.colSpan2 ? 'col-span-2' : ''}`}>
-                        <div className="text-[14px] text-slate-500">{field.label}</div>
-                        <div className={`text-[12px] ${field.isBlue ? 'text-blue-600' : 'text-slate-900'} ${field.isItalic ? 'italic whitespace-pre-wrap text-slate-600' : ''}`}>
+                        <div className="text-[13px] font-semibold text-slate-700">{field.label}</div>
+                        <div className={`text-[13px] ${field.isBlue ? 'text-blue-600' : 'text-slate-900'} ${field.isItalic ? 'italic whitespace-pre-wrap text-slate-600' : ''}`}>
                           {field.value || '-'}
                         </div>
                       </div>
                     );
-                    if ((index + 1) % 5 === 0 && index !== arr.length - 1) {
-                      acc.push(
-                        <div key={`sep-${index}`} className="col-span-2 border-b border-slate-200/60 my-1"></div>
-                      );
-                    }
                     return acc;
                   }, [])}
                 </div>
@@ -359,7 +359,7 @@ export function MaritalStatusCertModal({
               <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-end gap-3 flex-shrink-0 bg-white">
                 <button
                   onClick={() => setSelectedRecord(null)}
-                  className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 flex items-center gap-2 text-sm"
+                  className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 flex items-center gap-2 text-[13px]"
                 >
                   <XCircle className="w-4 h-4" />
                   Đóng

@@ -568,6 +568,5 @@ export function APIMethodsList({ onAddNew }: APIMethodsListProps) {
       )}
     </div>
     </div>
-    </div>
   );
 }

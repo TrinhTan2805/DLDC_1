@@ -5517,18 +5517,27 @@ table td [class*='text-slate-'], table td [class*='text-gray-'] {
 .text-\[16px\] {
   font-size: 16px !important;
 }
+.text-\[13px\] {
+  font-size: 13px !important;
+}
 
 /* Ghi đè riêng cho bảng Thu thập, tránh rule 14px !important của hệ thống */
 table.collection-table th, 
 table.collection-table thead th, 
 table.collection-table td, 
 table.collection-table tbody td {
-  font-size: 16px !important;
+  font-size: 13px !important;
 }
 
 .collection-pagination,
 .collection-pagination span,
 .collection-pagination select,
 .collection-pagination button {
-  font-size: 16px !important;
+  font-size: 13px !important;
+}
+
+/* Force 13px font size for mapping configuration modals */
+.force-13px,
+.force-13px :not(h3):not([style*="font-size"]):not([style*="font-size"] *):not(svg):not(path) {
+  font-size: 13px !important;
 }

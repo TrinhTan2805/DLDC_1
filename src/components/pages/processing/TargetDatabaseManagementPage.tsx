@@ -82,7 +82,7 @@ export function TargetDatabaseManagementPage() {
   const uniqueTypes = Array.from(new Set(data.map(item => item.type)));
 
   return (
-    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px' }}>
       <div className="h-full flex flex-col bg-slate-50 p-6 space-y-6 min-h-screen">
       {/* Header */}
       <div className="flex items-center gap-3">
@@ -90,8 +90,8 @@ export function TargetDatabaseManagementPage() {
           <Database className="w-6 h-6 text-blue-600" />
         </div>
         <div>
-          <h1 className="text-base font-bold text-slate-800 uppercase tracking-tight">Quản lý CSDL đích</h1>
-          <p className="text-base text-slate-500 mt-1">Quản lý danh sách kết nối và cấu trúc các cơ sở dữ liệu đích</p>
+          <h1 className="text-[20px] font-bold text-slate-800 uppercase tracking-tight" style={{ fontSize: '20px' }}>Quản lý CSDL đích</h1>
+          <p className="text-[13px] text-slate-500 mt-1">Quản lý danh sách kết nối và cấu trúc các cơ sở dữ liệu đích</p>
         </div>
       </div>
 
@@ -104,7 +104,7 @@ export function TargetDatabaseManagementPage() {
               placeholder="Tìm kiếm theo tên CSDL, Host hoặc Kiểu kết nối..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1 px-4 py-2 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+              className="flex-1 px-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
             />
             <button className="p-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-sm transition-all flex items-center justify-center shrink-0 active:scale-95">
               <Search className="w-5 h-5" />
@@ -120,7 +120,7 @@ export function TargetDatabaseManagementPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={handleAdd}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-base shadow-sm font-medium"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium"
             >
               <Plus className="w-4 h-4" />
               Thêm mới
@@ -132,11 +132,11 @@ export function TargetDatabaseManagementPage() {
         {showFilters && (
           <div className="flex items-center gap-4 p-4 bg-white border border-slate-200 rounded-lg shadow-sm animate-in fade-in slide-in-from-top-2">
             <div className="flex items-center gap-3">
-              <span className="text-base font-medium text-slate-700 whitespace-nowrap">Kiểu CSDL:</span>
+              <span className="text-[13px] font-medium text-slate-700 whitespace-nowrap">Kiểu CSDL:</span>
               <select
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value)}
-                className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="all">Tất cả</option>
                 {uniqueTypes.map(type => (
@@ -145,11 +145,11 @@ export function TargetDatabaseManagementPage() {
               </select>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-base font-medium text-slate-700 whitespace-nowrap">Trạng thái:</span>
+              <span className="text-[13px] font-medium text-slate-700 whitespace-nowrap">Trạng thái:</span>
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="all">Tất cả</option>
                 <option value="active">Hoạt động</option>
@@ -162,7 +162,7 @@ export function TargetDatabaseManagementPage() {
                 setFilterType('all');
                 setFilterStatus('all');
               }}
-              className="text-base text-blue-600 hover:underline font-medium ml-auto"
+              className="text-[13px] text-blue-600 hover:underline font-medium ml-auto"
             >
               Xóa bộ lọc
             </button>
@@ -176,37 +176,37 @@ export function TargetDatabaseManagementPage() {
           <table className="w-full text-left border-collapse">
             <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
               <tr>
-                <th className="py-3 px-6 w-16 text-center text-base font-semibold text-slate-500 whitespace-nowrap">STT</th>
-                <th className="py-3 px-6 text-base font-semibold text-slate-500 whitespace-nowrap">Cơ sở dữ liệu</th>
-                <th className="py-3 px-6 text-center text-base font-semibold text-slate-500 whitespace-nowrap">Kiểu</th>
-                <th className="py-3 px-6 text-base font-semibold text-slate-500 whitespace-nowrap">Cập nhật lần cuối</th>
-                <th className="py-3 px-6 text-center text-base font-semibold text-slate-500 whitespace-nowrap">Trạng thái</th>
-                <th className="py-3 px-6 text-center text-base font-semibold text-slate-500 whitespace-nowrap w-32">Thao tác</th>
+                <th className="py-3 px-6 w-16 text-center text-[13px] font-semibold text-slate-500 whitespace-nowrap">STT</th>
+                <th className="py-3 px-6 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Cơ sở dữ liệu</th>
+                <th className="py-3 px-6 text-center text-[13px] font-semibold text-slate-500 whitespace-nowrap">Kiểu</th>
+                <th className="py-3 px-6 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Cập nhật lần cuối</th>
+                <th className="py-3 px-6 text-center text-[13px] font-semibold text-slate-500 whitespace-nowrap">Trạng thái</th>
+                <th className="py-3 px-6 text-center text-[13px] font-semibold text-slate-500 whitespace-nowrap w-32">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">
               {filteredData.length > 0 ? (
                 filteredData.map((item, index) => (
                   <tr key={item.id} className="hover:bg-slate-50 transition-all group border-b border-slate-100">
-                    <td className="py-4 px-6 text-base text-slate-500 text-center font-medium">{(index + 1).toString().padStart(2, '0')}</td>
+                    <td className="py-4 px-6 text-[13px] text-slate-500 text-center font-medium">{(index + 1).toString().padStart(2, '0')}</td>
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-3">
                         <div className="p-2 bg-slate-100 rounded-lg group-hover:bg-white transition-colors">
                           <Server className="w-5 h-5 text-slate-600" />
                         </div>
                         <div>
-                          <p className="text-base font-bold text-slate-900 leading-tight">{item.name}</p>
-                          <p className="text-base text-slate-400 mt-1">Schema: {item.schema}</p>
+                          <p className="text-[13px] font-bold text-slate-900 leading-tight">{item.name}</p>
+                          <p className="text-[13px] text-slate-400 mt-1">Schema: {item.schema}</p>
                         </div>
                       </div>
                     </td>
                     <td className="py-4 px-6 text-center">
-                      <span className="inline-flex items-center px-3 py-1 rounded-md text-base font-bold uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200">
+                      <span className="inline-flex items-center px-3 py-1 rounded-md text-[13px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200">
                         {item.type}
                       </span>
                     </td>
                     <td className="py-4 px-6">
-                      <div className="text-base text-slate-600 font-medium">{item.lastUpdated || 'N/A'}</div>
+                      <div className="text-[13px] text-slate-600 font-medium">{item.lastUpdated || 'N/A'}</div>
                     </td>
                     <td className="py-4 px-6">
                       <div className="flex flex-col items-center gap-1.5">
@@ -259,8 +259,8 @@ export function TargetDatabaseManagementPage() {
                       <div className="p-4 bg-slate-50 rounded-full mb-4">
                         <Database className="w-10 h-10 opacity-20" />
                       </div>
-                      <p className="text-base font-medium text-slate-600">Không tìm thấy CSDL đích nào.</p>
-                      <p className="text-base text-slate-400 mt-1">Vui lòng thử lại với từ khóa hoặc bộ lọc khác.</p>
+                      <p className="text-[13px] font-medium text-slate-600">Không tìm thấy CSDL đích nào.</p>
+                      <p className="text-[13px] text-slate-400 mt-1">Vui lòng thử lại với từ khóa hoặc bộ lọc khác.</p>
                     </div>
                   </td>
                 </tr>
@@ -272,27 +272,27 @@ export function TargetDatabaseManagementPage() {
         {/* Pagination Style matched to Source Management */}
         <div className="px-6 py-3 border-t border-slate-200 bg-white flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-base text-slate-600">Hiển thị</span>
-            <select className="px-2 py-1 border border-slate-200 rounded-lg text-base bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <span className="text-[13px] text-slate-600">Hiển thị</span>
+            <select className="px-2 py-1 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option>10</option>
               <option>20</option>
               <option>50</option>
             </select>
-            <span className="text-base text-slate-600">bản ghi/trang</span>
+            <span className="text-[13px] text-slate-600">bản ghi/trang</span>
           </div>
 
           <div className="flex items-center gap-4">
-            <span className="text-base text-slate-600">
+            <span className="text-[13px] text-slate-600">
               Hiển thị 1-{filteredData.length} / {filteredData.length} bản ghi
             </span>
             <div className="flex items-center gap-1">
-              <button className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 opacity-50 cursor-not-allowed text-base font-medium">
+              <button className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 opacity-50 cursor-not-allowed text-[13px] font-medium">
                 Trước
               </button>
-              <button className="px-3 py-1.5 border border-blue-600 bg-blue-600 text-white rounded-lg text-base font-medium">
+              <button className="px-3 py-1.5 border border-blue-600 bg-blue-600 text-white rounded-lg text-[13px] font-medium">
                 1
               </button>
-              <button className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 opacity-50 cursor-not-allowed text-base font-medium">
+              <button className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 opacity-50 cursor-not-allowed text-[13px] font-medium">
                 Sau
               </button>
             </div>

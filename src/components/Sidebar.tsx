@@ -191,7 +191,7 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
               onNavigate(item.page);
             }
           }}
-          className={`w-full flex items-center justify-between ${paddingLeft} py-2.5 rounded-lg transition-colors mb-1 ${
+          className={`w-full flex items-center justify-between ${paddingLeft} py-2.5 rounded-lg transition-colors mb-1 text-xs ${
             isActive
               ? 'bg-blue-600 text-white shadow-sm'
               : 'text-gray-700 hover:bg-gray-100'
@@ -199,7 +199,7 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
         >
           <div className="flex items-center gap-3">
             {Icon && <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-gray-500'}`} />}
-            <span className={`text-sm ${isActive ? 'font-medium' : ''}`}>{item.title}</span>
+            <span className={`${isActive ? 'font-medium' : ''}`}>{item.title}</span>
           </div>
           {hasSubItems && (
             isExpanded ? (
@@ -276,7 +276,7 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
             <input
               type="text"
               placeholder="Tìm kiếm chức năng..."
-              className="w-full pl-10 pr-9 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+              className="w-full pl-10 pr-9 py-2 bg-gray-50 border border-gray-200 rounded-lg text-[12px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
