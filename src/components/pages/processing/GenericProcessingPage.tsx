@@ -1847,7 +1847,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                 triggerToast('Thành công!', 'Xóa dữ liệu thành công.');
               }}
               style={{ padding: '12px 16px', borderRadius: '6px', fontWeight: 500 }}
-              className="w-full bg-[#dc2626] text-white hover:bg-red-700 transition-all shadow-lg active:scale-95"
+              className="w-full bg-red-600 text-white hover:bg-red-700 transition-all shadow-lg active:scale-95"
             >
               Xác nhận xóa dữ liệu
             </button>

@@ -20,13 +20,13 @@ const typeConfig = {
     icon: Trash2,
     iconColor: 'text-red-600',
     iconBg: 'bg-red-50',
-    confirmBg: 'bg-[#dc2626] hover:bg-red-700'
+    confirmBg: 'bg-red-600 hover:bg-red-700'
   },
   warning: {
     icon: AlertTriangle,
     iconColor: 'text-amber-600',
     iconBg: 'bg-amber-50',
-    confirmBg: 'bg-[#dc2626] hover:bg-red-700'
+    confirmBg: 'bg-red-600 hover:bg-red-700'
   },
   info: {
     icon: Info,
