@@ -50,7 +50,7 @@ export function DatabaseTemplate({
     const data = [
       { id: '1', title: 'Hồ sơ khai sinh', icon: Baby, color: 'blue', lastMonth: 1245, thisMonth: 2179, collected: 3090, processed: 2987, shared: 2490 },
       { id: '2', title: 'Hồ sơ đăng ký kết hôn', icon: Heart, color: 'green', lastMonth: 1678543, thisMonth: 1746447, collected: 4567, processed: 4321, shared: 3890 },
-      { id: '3', title: 'Hồ sơ cấp GĐKN kết hôn', icon: FileCheck, color: 'purple', lastMonth: 1598234, thisMonth: 1826644, collected: 5234, processed: 5011, shared: 4756 },
+      { id: '3', title: 'Hồ sơ cấp Giấy xác nhận tình trạng hôn nhân', icon: FileCheck, color: 'purple', lastMonth: 1598234, thisMonth: 1826644, collected: 5234, processed: 5011, shared: 4756 },
       { id: '4', title: 'Hồ sơ đăng ký khai tử', icon: FileX, color: 'orange', lastMonth: 1612345, thisMonth: 1812533, collected: 2876, processed: 2654, shared: 2398 },
       { id: '5', title: 'Hồ sơ DK nhận cha, mẹ, con', icon: Users, color: 'blue', lastMonth: 1545678, thisMonth: 1879200, collected: 6123, processed: 5876, shared: 5432 },
       { id: '6', title: 'Hồ sơ đăng ký nuôi con nuôi', icon: UserCheck, color: 'green', lastMonth: 1687234, thisMonth: 1737644, collected: 1987, processed: 1865, shared: 1654 },
@@ -92,7 +92,15 @@ export function DatabaseTemplate({
     return <GenericProcessingPage systemName={categoryName} datasets={stats.map((s, idx) => ({ id: s.id || `item_${idx}`, name: s.title }))} />;
   }
 
-  const sidebarItems = stats.map(s => ({ id: s.id, label: `Bộ dữ liệu ${s.title.toLowerCase()}` }));
+  const sidebarItems = stats.map(s => {
+    if (s.title.toLowerCase().includes('tình trạng hôn nhân') || s.title.toLowerCase().includes('gđkn')) {
+      return { id: s.id, label: 'Bộ dữ liệu hồ sơ cấp Giấy xác nhận tình trạng hôn nhân' };
+    }
+    if (s.title.startsWith('Dữ liệu ') || s.title.startsWith('Bộ dữ liệu ')) {
+      return { id: s.id, label: s.title };
+    }
+    return { id: s.id, label: `Bộ dữ liệu ${s.title.toLowerCase()}` };
+  });
 
   return (
     <DatabasePageTemplate

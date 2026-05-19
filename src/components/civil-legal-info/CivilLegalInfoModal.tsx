@@ -188,7 +188,7 @@ export function CivilLegalInfoModal({
                       </div>
                       <div className="space-y-1">
                         <div className="text-[11px] text-slate-500 font-medium uppercase tracking-tight">Hệ thống nguồn</div>
-                        <div className="text-sm text-slate-900 font-medium">HT TTTG pháp lý dân sự</div>
+                        <div className="text-sm text-slate-900 font-medium">HT trợ giúp pháp lý</div>
                       </div>
                     </div>
                   </section>

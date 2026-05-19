@@ -54,14 +54,14 @@ export function CivilLegalInfoPage({ mode = 'thu thập', context = 'thu thập'
   const [selectedId, setSelectedId] = useState<string>(stats[0].id);
 
   if (mode === 'xử lý') {
-    return <GenericProcessingPage systemName="HTTT TTTG pháp lý dân sự" datasets={stats.map((s) => ({ id: s.id, name: s.title }))} />;
+    return <GenericProcessingPage systemName="HTTT trợ giúp pháp lý" datasets={stats.map((s) => ({ id: s.id, name: s.title }))} />;
   }
 
   const sidebarItems = stats.map(s => ({ id: s.id, label: s.title }));
 
   return (
     <DatabasePageTemplate
-      title="Dữ liệu HTTT TTTG pháp lý dân sự"
+      title="Dữ liệu HTTT trợ giúp pháp lý"
       description="Quản lý và xem chi tiết thông tin trợ giúp pháp lý dân sự"
       onBack={onBack}
       innerSidebarItems={sidebarItems}

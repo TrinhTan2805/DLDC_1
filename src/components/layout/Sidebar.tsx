@@ -159,8 +159,8 @@ const menuItems: MenuItem[] = [
               { id: "data-info-security-measures", label: "CSDL về biện pháp BD (4)", icon: Database },
               { id: "data-info-legal-national", label: "CSDL quốc gia về PL (5)", icon: Database },
               { id: "data-info-civil-legal-center", label: "CSDL TT Tư Pháp dân sự (2)", icon: Database },
-              { id: "data-info-civil-legal-info", label: "HTTT TTTG pháp lý dân sự (6)", icon: Database },
-              { id: "data-info-legal-center", label: "HTTT TG Pháp lý", icon: Database },
+              { id: "data-info-civil-legal-info", label: "HTTT trợ giúp pháp lý (6)", icon: Database },
+              { id: "data-info-legal-center", label: "Phần mềm tk ngành tư pháp phục vụ chia sẻ dữ liệu mở", icon: Database },
               { id: "data-info-family-base", label: "CSDL PB, GĐ và HG cơ sở (16)", icon: Database },
               { id: "data-info-auction", label: "CSDL quản lý đấu giá TS (24)", icon: Database },
               { id: "data-info-international", label: "CSDL Hợp tác quốc tế (6)", icon: Database },
@@ -239,12 +239,12 @@ const menuItems: MenuItem[] = [
               },
               {
                 id: "reconciliation-internal-civil-legal-info",
-                label: "HTTT TTTG pháp lý dân sự (6)",
+                label: "HTTT trợ giúp pháp lý (6)",
                 icon: Database,
               },
               {
                 id: "reconciliation-internal-legal-center",
-                label: "HTTT TG Pháp lý",
+                label: "Phần mềm tk ngành tư pháp phục vụ chia sẻ dữ liệu mở",
                 icon: Database,
               },
               {
@@ -326,12 +326,12 @@ const menuItems: MenuItem[] = [
           },
           {
             id: "processing-data-info-civil-legal-info",
-            label: "HTTT TTTG pháp lý dân sự (6)",
+            label: "HTTT trợ giúp pháp lý (6)",
             icon: Database,
           },
           {
             id: "processing-data-info-legal-center",
-            label: "HTTT TG Pháp lý",
+            label: "Phần mềm tk ngành tư pháp phục vụ chia sẻ dữ liệu mở",
             icon: Database,
           },
           {
@@ -554,7 +554,7 @@ const menuItems: MenuItem[] = [
               { id: "provisioning-shared-bpbd", label: "CSDL về biện pháp BĐ (4)", icon: Database },
               { id: "provisioning-shared-qgpl", label: "CSDL quốc gia về PL (5)", icon: Database },
               { id: "provisioning-shared-tttp", label: "CSDL TT Tư pháp dân sự (2)", icon: Database },
-              { id: "provisioning-shared-tgpl", label: "HTTT TG Pháp lý (6)", icon: Database },
+              { id: "provisioning-shared-tgpl", label: "Phần mềm tk ngành tư pháp phục vụ chia sẻ dữ liệu mở (6)", icon: Database },
               { id: "provisioning-shared-pbgd", label: "CSDL PB, GD và HG cơ sở (16)", icon: Database },
               { id: "provisioning-shared-dgts", label: "CSDL quản lý đấu giá TS (25)", icon: Database },
               { id: "provisioning-shared-htqt", label: "CSDL Hợp tác quốc tế (6)", icon: Database },
