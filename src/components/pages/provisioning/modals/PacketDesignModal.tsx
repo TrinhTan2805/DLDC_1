@@ -35,7 +35,7 @@ export function PacketDesignModal({ isOpen, onClose, service }: PacketDesignModa
         <div className="p-6 overflow-y-auto flex-1 space-y-6 bg-slate-50">
           <div className="bg-white p-5 rounded-lg border border-slate-200">
             <h4 className="font-medium text-slate-800 mb-4">Thông tin cấu hình</h4>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Định dạng dữ liệu</label>
                 <select title="Tùy chọn" aria-label="Tùy chọn" 
@@ -66,35 +66,37 @@ export function PacketDesignModal({ isOpen, onClose, service }: PacketDesignModa
               </button>
             </div>
             
-            <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-slate-600">
-                <tr>
-                  <th className="px-4 py-2 rounded-l-lg font-medium">Tên trường</th>
-                  <th className="px-4 py-2 font-medium">Kiểu dữ liệu</th>
-                  <th className="px-4 py-2 font-medium">Mô tả</th>
-                  <th className="px-4 py-2 rounded-r-lg font-medium w-16"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {fields.map(field => (
-                  <tr key={field.id} className="hover:bg-slate-50">
-                    <td className="px-4 py-3"><input placeholder="..." title="Nhập liệu" aria-label="Trường nhập liệu" type="text" className="w-full px-2 py-1 border border-slate-200 rounded" defaultValue={field.name} /></td>
-                    <td className="px-4 py-3">
-                      <select title="Tùy chọn" aria-label="Tùy chọn" className="w-full px-2 py-1 border border-slate-200 rounded" defaultValue={field.type}>
-                        <option value="string">String</option>
-                        <option value="number">Number</option>
-                        <option value="boolean">Boolean</option>
-                        <option value="datetime">DateTime</option>
-                      </select>
-                    </td>
-                    <td className="px-4 py-3"><input placeholder="..." title="Nhập liệu" aria-label="Trường nhập liệu" type="text" className="w-full px-2 py-1 border border-slate-200 rounded" defaultValue={field.description} /></td>
-                    <td className="px-4 py-3 text-center">
-                      <button title="Nút bấm" aria-label="Nút bấm" className="text-slate-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
-                    </td>
+            <div className="overflow-x-auto border border-slate-100 rounded-lg">
+              <table className="w-full text-left text-sm min-w-[500px]">
+                <thead className="bg-slate-50 text-slate-600">
+                  <tr>
+                    <th className="px-4 py-2 rounded-l-lg font-medium">Tên trường</th>
+                    <th className="px-4 py-2 font-medium">Kiểu dữ liệu</th>
+                    <th className="px-4 py-2 font-medium">Mô tả</th>
+                    <th className="px-4 py-2 rounded-r-lg font-medium w-16"></th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {fields.map(field => (
+                    <tr key={field.id} className="hover:bg-slate-50">
+                      <td className="px-4 py-3"><input placeholder="..." title="Nhập liệu" aria-label="Trường nhập liệu" type="text" className="w-full px-2 py-1 border border-slate-200 rounded" defaultValue={field.name} /></td>
+                      <td className="px-4 py-3">
+                        <select title="Tùy chọn" aria-label="Tùy chọn" className="w-full px-2 py-1 border border-slate-200 rounded" defaultValue={field.type}>
+                          <option value="string">String</option>
+                          <option value="number">Number</option>
+                          <option value="boolean">Boolean</option>
+                          <option value="datetime">DateTime</option>
+                        </select>
+                      </td>
+                      <td className="px-4 py-3"><input placeholder="..." title="Nhập liệu" aria-label="Trường nhập liệu" type="text" className="w-full px-2 py-1 border border-slate-200 rounded" defaultValue={field.description} /></td>
+                      <td className="px-4 py-3 text-center">
+                        <button title="Nút bấm" aria-label="Nút bấm" className="text-slate-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           <div className="bg-white p-5 rounded-lg border border-slate-200">

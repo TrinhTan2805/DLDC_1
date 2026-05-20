@@ -22,7 +22,7 @@ export function PacketDesignTab({ service }: PacketDesignTabProps) {
     <div className="space-y-6">
       <div className="bg-white p-5 rounded-lg border border-slate-200">
         <h4 className="font-medium text-slate-800 mb-4">Thông tin cấu hình</h4>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Định dạng dữ liệu</label>
             <select 
@@ -54,53 +54,55 @@ export function PacketDesignTab({ service }: PacketDesignTabProps) {
           </button>
         </div>
         
-        <table className="w-full text-left text-sm mb-2">
-          <thead className="bg-slate-50 text-slate-600">
-            <tr>
-              <th className="px-4 py-2 rounded-l-lg font-medium w-48">Tên bảng</th>
-              <th className="px-4 py-2 font-medium w-24">Bí danh</th>
-              <th className="px-4 py-2 font-medium w-32">Kiểu kết nối</th>
-              <th className="px-4 py-2 font-medium">Điều kiện kết nối (Join condition)</th>
-              <th className="px-4 py-2 rounded-r-lg font-medium w-12"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {tables.map((table, idx) => (
-              <tr key={table.id} className="hover:bg-slate-50">
-                <td className="px-4 py-3">
-                  <input aria-label="Tên bảng" type="text" className="w-full px-2 py-1.5 border border-slate-200 rounded text-slate-800 font-mono text-xs" defaultValue={table.name} />
-                </td>
-                <td className="px-4 py-3">
-                  <input aria-label="Bí danh" type="text" className="w-full px-2 py-1.5 border border-slate-200 rounded font-mono text-xs text-center" defaultValue={table.alias} />
-                </td>
-                <td className="px-4 py-3">
-                  {idx === 0 ? (
-                    <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded">BẢNG CHÍNH</span>
-                  ) : (
-                    <select aria-label="Kiểu kết nối" className="w-full px-2 py-1.5 border border-slate-200 rounded text-xs" defaultValue={table.type}>
-                      <option>INNER JOIN</option>
-                      <option>LEFT JOIN</option>
-                      <option>RIGHT JOIN</option>
-                    </select>
-                  )}
-                </td>
-                <td className="px-4 py-3">
-                    <input 
-                      aria-label="Điều kiện kết nối"
-                      type="text" 
-                      className="w-full px-2 py-1.5 border border-slate-200 rounded font-mono text-xs" 
-                    defaultValue={table.join} 
-                    placeholder={idx === 0 ? "Không có" : "Ví dụ: t1.id = t2.ref_id"} 
-                    disabled={idx === 0}
-                  />
-                </td>
-                <td className="px-4 py-3 text-center">
-                  {idx !== 0 && <button aria-label="Xóa bảng" className="text-slate-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>}
-                </td>
+        <div className="overflow-x-auto border border-slate-100 rounded-lg">
+          <table className="w-full text-left text-sm mb-2 min-w-[700px]">
+            <thead className="bg-slate-50 text-slate-600">
+              <tr>
+                <th className="px-4 py-2 rounded-l-lg font-medium w-48">Tên bảng</th>
+                <th className="px-4 py-2 font-medium w-24">Bí danh</th>
+                <th className="px-4 py-2 font-medium w-32">Kiểu kết nối</th>
+                <th className="px-4 py-2 font-medium">Điều kiện kết nối (Join condition)</th>
+                <th className="px-4 py-2 rounded-r-lg font-medium w-12"></th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {tables.map((table, idx) => (
+                <tr key={table.id} className="hover:bg-slate-50">
+                  <td className="px-4 py-3">
+                    <input aria-label="Tên bảng" type="text" className="w-full px-2 py-1.5 border border-slate-200 rounded text-slate-800 font-mono text-xs" defaultValue={table.name} />
+                  </td>
+                  <td className="px-4 py-3">
+                    <input aria-label="Bí danh" type="text" className="w-full px-2 py-1.5 border border-slate-200 rounded font-mono text-xs text-center" defaultValue={table.alias} />
+                  </td>
+                  <td className="px-4 py-3">
+                    {idx === 0 ? (
+                      <span className="inline-block px-2 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded">BẢNG CHÍNH</span>
+                    ) : (
+                      <select aria-label="Kiểu kết nối" className="w-full px-2 py-1.5 border border-slate-200 rounded text-xs" defaultValue={table.type}>
+                        <option>INNER JOIN</option>
+                        <option>LEFT JOIN</option>
+                        <option>RIGHT JOIN</option>
+                      </select>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                      <input 
+                        aria-label="Điều kiện kết nối"
+                        type="text" 
+                        className="w-full px-2 py-1.5 border border-slate-200 rounded font-mono text-xs" 
+                      defaultValue={table.join} 
+                      placeholder={idx === 0 ? "Không có" : "Ví dụ: t1.id = t2.ref_id"} 
+                      disabled={idx === 0}
+                    />
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    {idx !== 0 && <button aria-label="Xóa bảng" className="text-slate-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
         <p className="text-xs text-slate-500 italic mt-2">* Khi cấu hình nhiều bảng, hệ thống sẽ tự động tổng hợp dữ liệu thành một gói tin thống nhất.</p>
       </div>
 
@@ -112,39 +114,41 @@ export function PacketDesignTab({ service }: PacketDesignTabProps) {
           </button>
         </div>
         
-        <table className="w-full text-left text-sm">
-          <thead className="bg-slate-50 text-slate-600">
-            <tr>
-              <th className="px-4 py-2 rounded-l-lg font-medium w-48">Tên trường đích</th>
-              <th className="px-4 py-2 font-medium w-32">Kiểu dữ liệu</th>
-              <th className="px-4 py-2 font-medium w-48">Ánh xạ nguồn (Source)</th>
-              <th className="px-4 py-2 font-medium">Mô tả</th>
-              <th className="px-4 py-2 rounded-r-lg font-medium w-12"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {fields.map(field => (
-              <tr key={field.id} className="hover:bg-slate-50">
-                <td className="px-4 py-3"><input aria-label="Tên trường đích" type="text" className="w-full px-2 py-1.5 border border-slate-200 rounded" defaultValue={field.name} /></td>
-                <td className="px-4 py-3">
-                  <select aria-label="Kiểu dữ liệu" className="w-full px-2 py-1.5 border border-slate-200 rounded" defaultValue={field.type}>
-                    <option value="string">String</option>
-                    <option value="number">Number</option>
-                    <option value="boolean">Boolean</option>
-                    <option value="datetime">DateTime</option>
-                  </select>
-                </td>
-                <td className="px-4 py-3">
-                  <input aria-label="Ánh xạ nguồn" type="text" className="w-full px-2 py-1.5 border border-slate-200 rounded font-mono text-xs text-blue-600" defaultValue={field.source} placeholder="t1.column" />
-                </td>
-                <td className="px-4 py-3"><input aria-label="Mô tả trường" type="text" className="w-full px-2 py-1.5 border border-slate-200 rounded" defaultValue={field.description} /></td>
-                <td className="px-4 py-3 text-center">
-                  <button aria-label="Xóa trường" className="text-slate-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
-                </td>
+        <div className="overflow-x-auto border border-slate-100 rounded-lg">
+          <table className="w-full text-left text-sm min-w-[700px]">
+            <thead className="bg-slate-50 text-slate-600">
+              <tr>
+                <th className="px-4 py-2 rounded-l-lg font-medium w-48">Tên trường đích</th>
+                <th className="px-4 py-2 font-medium w-32">Kiểu dữ liệu</th>
+                <th className="px-4 py-2 font-medium w-48">Ánh xạ nguồn (Source)</th>
+                <th className="px-4 py-2 font-medium">Mô tả</th>
+                <th className="px-4 py-2 rounded-r-lg font-medium w-12"></th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {fields.map(field => (
+                <tr key={field.id} className="hover:bg-slate-50">
+                  <td className="px-4 py-3"><input aria-label="Tên trường đích" type="text" className="w-full px-2 py-1.5 border border-slate-200 rounded" defaultValue={field.name} /></td>
+                  <td className="px-4 py-3">
+                    <select aria-label="Kiểu dữ liệu" className="w-full px-2 py-1.5 border border-slate-200 rounded" defaultValue={field.type}>
+                      <option value="string">String</option>
+                      <option value="number">Number</option>
+                      <option value="boolean">Boolean</option>
+                      <option value="datetime">DateTime</option>
+                    </select>
+                  </td>
+                  <td className="px-4 py-3">
+                    <input aria-label="Ánh xạ nguồn" type="text" className="w-full px-2 py-1.5 border border-slate-200 rounded font-mono text-xs text-blue-600" defaultValue={field.source} placeholder="t1.column" />
+                  </td>
+                  <td className="px-4 py-3"><input aria-label="Mô tả trường" type="text" className="w-full px-2 py-1.5 border border-slate-200 rounded" defaultValue={field.description} /></td>
+                  <td className="px-4 py-3 text-center">
+                    <button aria-label="Xóa trường" className="text-slate-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div className="bg-white p-5 rounded-lg border border-slate-200">
