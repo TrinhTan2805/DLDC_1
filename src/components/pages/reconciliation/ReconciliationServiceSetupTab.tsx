@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Database, Plus, RefreshCw, Edit2, Trash2, Search } from 'lucide-react';
-import { AddServiceConfigModal } from './AddServiceConfigModal';
+import { AddServiceConfigModal, ReconciliationApiConfigFormData } from './AddServiceConfigModal';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 
 interface APIConfig {
@@ -24,7 +24,7 @@ export function ReconciliationServiceSetupTab() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedConfig, setSelectedConfig] = useState<APIConfig | null>(null);
 
-  const configs: APIConfig[] = [
+  const [configs, setConfigs] = useState<APIConfig[]>([
     {
       id: 'API-001',
       systemName: 'Hệ thống Hộ tịch điện tử',
@@ -64,7 +64,15 @@ export function ReconciliationServiceSetupTab() {
       lastCall: '2024-12-16 11:20:00',
       totalCalls: 8
     }
-  ];
+  ]);
+
+  const mapToFormData = (config: APIConfig): ReconciliationApiConfigFormData => ({
+    systemName: config.systemName,
+    systemCode: config.systemCode,
+    endpoint: config.endpoint,
+    method: config.method,
+    authType: config.authType,
+  });
 
   const filteredConfigs = configs.filter(config =>
     searchTerm === '' ||
@@ -76,6 +84,50 @@ export function ReconciliationServiceSetupTab() {
   const totalApis = configs.length;
   const activeApis = configs.filter(c => c.status === 'active').length;
   const totalCalls = configs.reduce((sum, c) => sum + c.totalCalls, 0);
+
+  const handleSaveConfig = (data: ReconciliationApiConfigFormData) => {
+    if (isEditModalOpen && selectedConfig) {
+      setConfigs((prev) =>
+        prev.map((item) =>
+          item.id === selectedConfig.id
+            ? {
+                ...item,
+                systemName: data.systemName,
+                systemCode: data.systemCode,
+                endpoint: data.endpoint,
+                method: data.method,
+                authType: data.authType,
+              }
+            : item,
+        ),
+      );
+      return;
+    }
+
+    const nextIndex = configs.length + 1;
+    const today = new Date().toISOString().slice(0, 10);
+    setConfigs((prev) => [
+      ...prev,
+      {
+        id: `API-${String(nextIndex).padStart(3, '0')}`,
+        systemName: data.systemName,
+        systemCode: data.systemCode,
+        endpoint: data.endpoint,
+        method: data.method,
+        authType: data.authType,
+        status: 'active',
+        statusText: 'Hoạt động',
+        statusColor: 'bg-green-100 text-green-700 border-green-200',
+        lastCall: `${today} 00:00:00`,
+        totalCalls: 0,
+      },
+    ]);
+  };
+
+  const handleDeleteConfig = () => {
+    if (!selectedConfig) return;
+    setConfigs((prev) => prev.filter((item) => item.id !== selectedConfig.id));
+  };
 
   return (
     <div className="space-y-6">
@@ -237,6 +289,8 @@ export function ReconciliationServiceSetupTab() {
           setSelectedConfig(null);
         }}
         isEdit={isEditModalOpen}
+        initialData={selectedConfig ? mapToFormData(selectedConfig) : null}
+        onSave={handleSaveConfig}
       />
 
       {/* Delete Confirm Modal */}
@@ -247,7 +301,7 @@ export function ReconciliationServiceSetupTab() {
           setSelectedConfig(null);
         }}
         onConfirm={() => {
-          console.log('Delete confirmed for', selectedConfig?.id);
+          handleDeleteConfig();
         }}
         itemName={selectedConfig?.systemName}
       />
