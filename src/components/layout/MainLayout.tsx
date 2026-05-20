@@ -638,8 +638,8 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'processing-security-measures' && <ProcessedDataPage title="CSDL về biện pháp BD" dataType="Biện pháp bảo đảm" />}
             {currentPage === 'processing-legal-national' && <ProcessedDataPage title="CSDL quốc gia về PL" dataType="Pháp luật quốc gia" />}
             {currentPage === 'processing-civil-legal-center' && <ProcessedDataPage title="CSDL TT Tư Pháp dân sự" dataType="Tư pháp dân sự" />}
-            {currentPage === 'processing-civil-legal-info' && <ProcessedDataPage title="HTTT TTTG pháp lý dân sự" dataType="Pháp lý dân sự" />}
-            {currentPage === 'processing-legal-center' && <ProcessedDataPage title="HTTT TG Pháp lý" dataType="Trợ giúp pháp lý" />}
+            {currentPage === 'processing-civil-legal-info' && <ProcessedDataPage title="HTTT trợ giúp pháp lý" dataType="Pháp lý dân sự" />}
+            {currentPage === 'processing-legal-center' && <ProcessedDataPage title="Phần mềm tk ngành tư pháp phục vụ chia sẻ dữ liệu mở" dataType="Trợ giúp pháp lý" />}
             {currentPage === 'processing-family-base' && <ProcessedDataPage title="CSDL PB, GĐ và HG cơ sở" dataType="Hòa giải cơ sở" />}
             {currentPage === 'processing-international' && <ProcessedDataPage title="CSDL Hợp tác quốc tế" dataType="Hợp tác quốc tế" />}
 
@@ -752,8 +752,8 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'reconciliation-internal-security-measures' && <InternalReconciliationPage databaseName="CSDL về biện pháp BD" databaseCode="BPBD" />}
             {currentPage === 'reconciliation-internal-legal-national' && <InternalReconciliationPage databaseName="CSDL quốc gia về PL" databaseCode="QGPL" />}
             {currentPage === 'reconciliation-internal-civil-legal-center' && <InternalReconciliationPage databaseName="CSDL TT Tư Pháp dân sự" databaseCode="TTPDS" />}
-            {currentPage === 'reconciliation-internal-civil-legal-info' && <InternalReconciliationPage databaseName="HTTT TTTG pháp lý dân sự" databaseCode="TTTGPLDS" />}
-            {currentPage === 'reconciliation-internal-legal-center' && <InternalReconciliationPage databaseName="HTTT TG Pháp lý" databaseCode="TGPL" />}
+            {currentPage === 'reconciliation-internal-civil-legal-info' && <InternalReconciliationPage databaseName="HTTT trợ giúp pháp lý" databaseCode="TTTGPLDS" />}
+            {currentPage === 'reconciliation-internal-legal-center' && <InternalReconciliationPage databaseName="Phần mềm tk ngành tư pháp phục vụ chia sẻ dữ liệu mở" databaseCode="TGPL" />}
             {currentPage === 'reconciliation-internal-family-base' && <InternalReconciliationPage databaseName="CSDL PB, GĐ và HG cơ sở" databaseCode="PBGDCS" />}
             {currentPage === 'reconciliation-internal-auction' && <InternalReconciliationPage databaseName="CSDL quản lý đấu giá TS" databaseCode="DAUGTS" />}
             {currentPage === 'reconciliation-internal-international' && <InternalReconciliationPage databaseName="CSDL Hợp tác quốc tế" databaseCode="HTQT" />}
@@ -836,8 +836,8 @@ const getBreadcrumbPath = (pageId: string): string[] => {
     'data-info-security-measures': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL về biện pháp BD'],
     'data-info-legal-national': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL quốc gia về PL'],
     'data-info-civil-legal-center': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL TT Tư Pháp dân sự'],
-    'data-info-civil-legal-info': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'HT TTTG pháp lý dân sự'],
-    'data-info-legal-center': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'HTTT TG Pháp lý'],
+    'data-info-civil-legal-info': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'HT trợ giúp pháp lý'],
+    'data-info-legal-center': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'Phần mềm tk ngành tư pháp phục vụ chia sẻ dữ liệu mở'],
     'data-info-family-base': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL PB, GĐ và HG cơ sở'],
     'data-info-auction': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL quản lý đấu giá TS'],
     'data-info-international': ['Quản lý thu thập', 'Xem dữ liệu thu thập', 'CSDL Hợp tác quốc tế'],
@@ -884,8 +884,8 @@ const getBreadcrumbPath = (pageId: string): string[] => {
     'reconciliation-internal-security-measures': ['Quản lý thu thập', 'Đối soát dữ liệu', 'Đối soát dữ liệu từ Bộ trong ngành', 'CSDL về biện pháp BD (4)'],
     'reconciliation-internal-legal-national': ['Quản lý thu thập', 'Đối soát dữ liệu', 'Đối soát dữ liệu từ Bộ trong ngành', 'CSDL quốc gia về PL (5)'],
     'reconciliation-internal-civil-legal-center': ['Quản lý thu thập', 'Đối soát dữ liệu', 'Đối soát dữ liệu từ Bộ trong ngành', 'CSDL TT Tư Pháp dân sự (2)'],
-    'reconciliation-internal-civil-legal-info': ['Quản lý thu thập', 'Đối soát dữ liệu', 'Đối soát dữ liệu từ Bộ trong ngành', 'HTTT TTTG pháp lý dân sự (6)'],
-    'reconciliation-internal-legal-center': ['Quản lý thu thập', 'Đối soát dữ liệu', 'Đối soát dữ liệu từ Bộ trong ngành', 'HTTT TG Pháp lý'],
+    'reconciliation-internal-civil-legal-info': ['Quản lý thu thập', 'Đối soát dữ liệu', 'Đối soát dữ liệu từ Bộ trong ngành', 'HTTT trợ giúp pháp lý (6)'],
+    'reconciliation-internal-legal-center': ['Quản lý thu thập', 'Đối soát dữ liệu', 'Đối soát dữ liệu từ Bộ trong ngành', 'Phần mềm tk ngành tư pháp phục vụ chia sẻ dữ liệu mở'],
     'reconciliation-internal-family-base': ['Quản lý thu thập', 'Đối soát dữ liệu', 'Đối soát dữ liệu từ Bộ trong ngành', 'CSDL PB, GĐ và HG cơ sở (16)'],
     'reconciliation-internal-auction': ['Quản lý thu thập', 'Đối soát dữ liệu', 'Đối soát dữ liệu từ Bộ trong ngành', 'CSDL quản lý đấu giá TS (24)'],
     'reconciliation-internal-international': ['Quản lý thu thập', 'Đối soát dữ liệu', 'Đối soát dữ liu từ Bộ trong ngành', 'CSDL Hợp tác quốc tế (6)'],
@@ -903,8 +903,8 @@ const getBreadcrumbPath = (pageId: string): string[] => {
     'processing-data-info-security-measures': ['Xử lý dữ liệu', 'CSDL Trong ngành', 'CSDL về biện pháp BD'],
     'processing-data-info-legal-national': ['Xử lý dữ liệu', 'CSDL Trong ngành', 'CSDL quốc gia về PL'],
     'processing-data-info-civil-legal-center': ['Xử lý dữ liệu', 'CSDL Trong ngành', 'CSDL TT Tư Pháp dân sự'],
-    'processing-data-info-civil-legal-info': ['Xử lý dữ liệu', 'CSDL Trong ngành', 'HT TTTG pháp lý dân sự'],
-    'processing-data-info-legal-center': ['Xử lý dữ liệu', 'CSDL Trong ngành', 'HTTT TG Pháp lý'],
+    'processing-data-info-civil-legal-info': ['Xử lý dữ liệu', 'CSDL Trong ngành', 'HT trợ giúp pháp lý'],
+    'processing-data-info-legal-center': ['Xử lý dữ liệu', 'CSDL Trong ngành', 'Phần mềm tk ngành tư pháp phục vụ chia sẻ dữ liệu mở'],
     'processing-data-info-family-base': ['Xử lý dữ liệu', 'CSDL Trong ngành', 'CSDL PB, GĐ và HG cơ sở'],
     'processing-data-info-auction': ['Xử lý dữ liệu', 'CSDL Trong ngành', 'CSDL quản lý đấu giá TS'],
     'processing-data-info-international': ['Xử lý dữ liệu', 'CSDL Trong ngành', 'CSDL Hợp tác quốc tế'],
@@ -955,8 +955,8 @@ const getBreadcrumbPath = (pageId: string): string[] => {
     'provision-data-info-security-measures': ['Điều phối dữ liệu', 'Dịch vụ cung cấp dữ liệu', 'CSDL Trong ngành', 'CSDL về biện pháp BD'],
     'provision-data-info-legal-national': ['Điều phối dữ liệu', 'Dịch vụ cung cấp dữ liệu', 'CSDL Trong ngành', 'CSDL quốc gia về PL'],
     'provision-data-info-civil-legal-center': ['Điều phối dữ liệu', 'Dịch vụ cung cấp dữ liệu', 'CSDL Trong ngành', 'CSDL TT Tư Pháp dân sự'],
-    'provision-data-info-civil-legal-info': ['Điều phối dữ liệu', 'Dịch vụ cung cấp dữ liệu', 'CSDL Trong ngành', 'HT TTTG pháp lý dân sự'],
-    'provision-data-info-legal-center': ['Điều phối dữ liệu', 'Dịch vụ cung cấp dữ liệu', 'CSDL Trong ngành', 'HTTT TG Pháp lý'],
+    'provision-data-info-civil-legal-info': ['Điều phối dữ liệu', 'Dịch vụ cung cấp dữ liệu', 'CSDL Trong ngành', 'HT trợ giúp pháp lý'],
+    'provision-data-info-legal-center': ['Điều phối dữ liệu', 'Dịch vụ cung cấp dữ liệu', 'CSDL Trong ngành', 'Phần mềm tk ngành tư pháp phục vụ chia sẻ dữ liệu mở'],
     'provision-data-info-family-base': ['Điều phối dữ liệu', 'Dịch vụ cung cấp dữ liệu', 'CSDL Trong ngành', 'CSDL PB, GĐ và HG cơ sở'],
     'provision-data-info-auction': ['Điều phối dữ liệu', 'Dịch vụ cung cấp dữ liệu', 'CSDL Trong ngành', 'CSDL quản lý đấu giá TS'],
     'provision-data-info-international': ['Điều phối dữ liệu', 'Dịch vụ cung cấp dữ liệu', 'CSDL Trong ngành', 'CSDL Hợp tác quốc tế'],

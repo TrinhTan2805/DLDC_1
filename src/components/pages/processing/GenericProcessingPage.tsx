@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { Search, ChevronDown, ChevronUp, AlertTriangle, AlertCircle, CheckCircle, Send, Download, Eye, Lock, EyeOff, SquarePen, X, Network, Plus, Trash2, ArrowLeftRight, Database, Clock, Check } from 'lucide-react';
+import { Search, ChevronDown, ChevronUp, AlertTriangle, AlertCircle, CheckCircle, Send, Download, Eye, Lock, EyeOff, SquarePen, X, Network, Plus, Trash2, ArrowLeftRight, Database, Clock, Check, Play, RefreshCw } from 'lucide-react';
 
 import { DataMappingModal } from './DataMappingModal';
 import { SelectTargetDatabaseModal } from './SelectTargetDatabaseModal';
@@ -28,7 +28,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
   const [searchQuery, setSearchQuery] = useState('');
   const [searchDatasetQuery, setSearchDatasetQuery] = useState('');
   const [activeServiceId, setActiveServiceId] = useState(datasets[0]?.id || '');
-  const [activeTab, setActiveTab] = useState(isOnlyTransform ? 'transform' : 'mapping');
+  const [activeTab, setActiveTab] = useState('mapping');
   const [isSendPopupOpen, setIsSendPopupOpen] = useState(false);
   const [isEditClassifyModalOpen, setIsEditClassifyModalOpen] = useState(false);
   const [isDeleteDataModalOpen, setIsDeleteDataModalOpen] = useState(false);
@@ -348,20 +348,20 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
               </button>
               <button
                 title="Chuyển đổi dữ liệu"
-                className="p-2.5 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-md hover:bg-emerald-100 transition-all shadow-sm active:scale-95"
+                className="p-2.5 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-md hover:bg-emerald-100 transition-all shadow-sm active:scale-95 flex items-center justify-center"
               >
-                <Send className="w-5 h-5" />
+                <Play className="w-5 h-5" />
               </button>
               <button
                 onClick={() => setIsUpdateSuccessModalOpen(true)}
                 title="Cập nhật dữ liệu"
-                className="p-2.5 bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-md hover:bg-indigo-100 transition-all shadow-sm active:scale-95"
+                className="p-2.5 bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-md hover:bg-indigo-100 transition-all shadow-sm active:scale-95 flex items-center justify-center"
               >
-                <Database className="w-5 h-5" />
+                <RefreshCw className="w-5 h-5" />
               </button>
               <button
                 title="Xóa dữ liệu"
-                className="p-2.5 bg-rose-50 text-rose-600 border border-rose-200 rounded-md hover:bg-rose-100 transition-all shadow-sm active:scale-95"
+                className="p-2.5 bg-red-50 text-red-600 border border-red-200 rounded-md hover:bg-red-100 transition-all shadow-sm active:scale-95 flex items-center justify-center"
               >
                 <Trash2 className="w-5 h-5" />
               </button>
@@ -416,82 +416,84 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
           </div>
 
           {/* Tabs */}
-          {!isOnlyTransform && (
-            <div className="flex border-b border-slate-200 mb-6">
-              <button
-                onClick={() => setActiveTab('mapping')}
-                className={`pb-3 px-4 font-medium border-b-2 mr-4 transition-colors ${activeTab === 'mapping'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                  }`}
-                style={{ fontSize: '13px' }}
-              >
-                Cấu hình ánh xạ
-              </button>
-              <button
-                onClick={() => setActiveTab('clean')}
-                className={`pb-3 px-4 font-medium border-b-2 mr-4 transition-colors ${activeTab === 'clean'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                  }`}
-                style={{ fontSize: '13px' }}
-              >
-                Làm sạch (4)
-              </button>
-              <button
-                onClick={() => setActiveTab('standardize')}
-                className={`pb-3 px-4 font-medium border-b-2 mr-4 transition-colors ${activeTab === 'standardize'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                  }`}
-                style={{ fontSize: '13px' }}
-              >
-                Chuẩn hóa (3)
-              </button>
-              <button
-                onClick={() => setActiveTab('transform')}
-                className={`pb-3 px-4 font-medium border-b-2 mr-4 transition-colors ${activeTab === 'transform'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                  }`}
-                style={{ fontSize: '13px' }}
-              >
-                Biến đổi (3)
-              </button>
+          <div className="flex border-b border-slate-200 mb-6">
+            <button
+              onClick={() => setActiveTab('mapping')}
+              className={`pb-3 px-4 font-medium border-b-2 mr-4 transition-colors ${activeTab === 'mapping'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                }`}
+              style={{ fontSize: '13px' }}
+            >
+              Cấu hình ánh xạ
+            </button>
+            {!isOnlyTransform && (
+              <>
+                <button
+                  onClick={() => setActiveTab('clean')}
+                  className={`pb-3 px-4 font-medium border-b-2 mr-4 transition-colors ${activeTab === 'clean'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                    }`}
+                  style={{ fontSize: '13px' }}
+                >
+                  Làm sạch (4)
+                </button>
+                <button
+                  onClick={() => setActiveTab('standardize')}
+                  className={`pb-3 px-4 font-medium border-b-2 mr-4 transition-colors ${activeTab === 'standardize'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                    }`}
+                  style={{ fontSize: '13px' }}
+                >
+                  Chuẩn hóa (3)
+                </button>
+              </>
+            )}
+            <button
+              onClick={() => setActiveTab('transform')}
+              className={`pb-3 px-4 font-medium border-b-2 mr-4 transition-colors ${activeTab === 'transform'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                }`}
+              style={{ fontSize: '13px' }}
+            >
+              Biến đổi (3)
+            </button>
 
-              <button
-                onClick={() => setActiveTab('classification')}
-                className={`pb-3 px-4 font-medium border-b-2 mr-4 transition-colors ${activeTab === 'classification'
-                  ? 'border-indigo-600 text-indigo-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                  }`}
-                style={{ fontSize: '13px' }}
-              >
-                Phân loại dữ liệu
-              </button>
-              <button
-                onClick={() => setActiveTab('history')}
-                className={`pb-3 px-4 font-medium border-b-2 transition-colors ${activeTab === 'history'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                  }`}
-                style={{ fontSize: '13px' }}
-              >
-                Lịch sử
-              </button>
-            </div>
-          )}
+            <button
+              onClick={() => setActiveTab('classification')}
+              className={`pb-3 px-4 font-medium border-b-2 mr-4 transition-colors ${activeTab === 'classification'
+                ? 'border-indigo-600 text-indigo-600'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                }`}
+              style={{ fontSize: '13px' }}
+            >
+              Phân loại dữ liệu
+            </button>
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`pb-3 px-4 font-medium border-b-2 transition-colors ${activeTab === 'history'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                }`}
+              style={{ fontSize: '13px' }}
+            >
+              Lịch sử
+            </button>
+          </div>
 
           <div className="pt-4 pb-32 overflow-y-auto max-h-[calc(100vh-320px)] pr-2 custom-scrollbar">
             {activeTab === 'mapping' && (
               <div className="flex flex-col">
                 {!selectedTargetDB ? (
-                  <div className="flex flex-col items-center justify-center pt-48 pb-60 bg-white border-2 border-dashed border-slate-200 rounded-2xl shadow-sm">
-                    <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mb-8 shadow-inner">
+                  <div className="flex flex-col items-center justify-center py-16 bg-white border-2 border-dashed border-slate-200 rounded-2xl shadow-sm">
+                    <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mb-4 shadow-inner">
                       <ArrowLeftRight className="w-10 h-10 text-blue-600" />
                     </div>
                     <h3 className="text-xl font-bold text-slate-800 mb-3">Chưa có cấu hình ánh xạ</h3>
-                    <p className="text-slate-500 mb-10 max-w-lg text-center leading-relaxed" style={{ fontSize: '13px' }}>
+                    <p className="text-slate-500 mb-6 max-w-lg text-center leading-relaxed" style={{ fontSize: '13px' }}>
                       Thiết lập ánh xạ giữa các trường của CSDL thu thập sang CSDL xử lý để bắt đầu áp dụng các quy tắc làm sạch, chuẩn hóa và biến đổi.
                     </p>
                     <button
