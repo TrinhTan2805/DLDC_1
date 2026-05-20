@@ -13,7 +13,8 @@ Hệ thống sử dụng bộ font **Inter** hiện đại, tối ưu cho màn h
 | **Tiêu đề chính (H1)** | 24px  | Medium (500) | `foreground` | Dùng cho tiêu đề trang |
 | **Tiêu đề phụ (H2)** | 20px | Medium (500) | `foreground` | Dùng cho tiêu đề khối/section |
 | **Tiêu đề nhỏ (H3)** | 18px | Medium (500) | `foreground` | Dùng cho tiêu đề nhóm |
-| **Văn bản nội dung (P)** | 16px | Regular (400) | `foreground` | Cỡ chữ mặc định |
+| **Văn bản nội dung (P)** | 13px | Regular (400) | `foreground` | Cỡ chữ mặc định |
+| **Menu** | 12px | Medium (500) | `foreground` | Dùng cho sidebar/menu |
 | **Nhãn (Label)** | 14px | Medium (500) | `foreground` | Dùng cho form |
 | **Chú thích (Small)** | 12px | Regular (400) | `muted-foreground` | Dùng cho mô tả nhỏ |
 | **Liên kết (Link)** | 16px | Medium (500) | `primary` (#2563eb) | Văn bản chứa liên kết (Hyperlink) |

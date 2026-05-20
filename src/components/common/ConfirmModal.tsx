@@ -65,7 +65,12 @@ export function ConfirmModal({
   return (
     <Portal>
       <div 
-        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[10000] p-4"
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
+        style={{ 
+          zIndex: 2147483647,
+          backdropFilter: 'blur(4px)', 
+          WebkitBackdropFilter: 'blur(4px)' 
+        }}
         onClick={onClose}
       >
         <div 
@@ -104,7 +109,7 @@ export function ConfirmModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 py-2.5 bg-white text-[#020817] rounded-[6px] hover:bg-slate-50 transition-colors text-base border border-[#e2e8f0] font-medium shadow-sm"
+                className="flex-1 py-2.5 bg-white text-[#020817] rounded-lg hover:bg-slate-50 transition-colors text-base border border-[#e2e8f0] font-medium shadow-sm"
               >
                 {cancelText}
               </button>

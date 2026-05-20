@@ -338,7 +338,7 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
               )}
             </div>
             <div className="flex items-center gap-3">
-              <button type="button" onClick={onClose} className="px-4 py-2 text-[13px] text-[#020817] bg-white border border-[#e2e8f0] rounded-[6px] hover:bg-slate-50 transition-colors font-medium shadow-sm">Hủy</button>
+              <button type="button" onClick={onClose} className="px-4 py-2 text-[13px] text-[#020817] bg-white border border-[#e2e8f0] rounded-lg hover:bg-slate-50 transition-colors font-medium shadow-sm">Hủy</button>
               {activeTab !== 'collection' ? (
                 <button 
                   type="button" 
@@ -581,7 +581,7 @@ export function EditServiceModal({ isOpen, onClose, service, initialTab }: Servi
               )}
             </div>
             <div className="flex items-center gap-3">
-              <button type="button" onClick={onClose} className="px-4 py-2 text-[13px] text-[#020817] bg-white border border-[#e2e8f0] rounded-[6px] hover:bg-slate-50 transition-colors font-medium shadow-sm">Hủy</button>
+              <button type="button" onClick={onClose} className="px-4 py-2 text-[13px] text-[#020817] bg-white border border-[#e2e8f0] rounded-lg hover:bg-slate-50 transition-colors font-medium shadow-sm">Hủy</button>
               {activeTab !== 'collection' ? (
                 <button 
                   type="button" 
@@ -618,20 +618,60 @@ export function EditServiceModal({ isOpen, onClose, service, initialTab }: Servi
 export function DeleteServiceModal({ isOpen, onClose, service }: ServiceModalProps) {
   if (!isOpen || !service) return null;
   return (
-    <ConfirmModal 
+    <BaseModal
       isOpen={isOpen}
       onClose={onClose}
-      onConfirm={() => {
-        alert('Đã xóa dịch vụ thành công!');
-      }}
-      title="Xác nhận xóa thiết lập"
-      subtitle="Hành động này không thể hoàn tác"
-      message={
-        <>Bạn có chắc chắn muốn xóa dịch vụ <strong>{service.name}</strong> không?</>
+      title="Thông báo"
+      maxWidth="max-w-lg"
+      footer={
+        <div className="flex justify-end gap-3 w-full">
+          <button 
+            onClick={onClose} 
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 active:scale-95 transition-all font-medium shadow-sm text-[13px]"
+          >
+            Đồng ý
+          </button>
+        </div>
       }
-      confirmText="Xóa dịch vụ"
-      type="delete"
-    />
+    >
+      <div className="pt-2 pb-4 space-y-5">
+        {/* Warning Icon & Bold Message */}
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-full bg-rose-50 flex items-center justify-center shrink-0">
+            <AlertTriangle className="w-6 h-6 text-rose-600" />
+          </div>
+          <div>
+            <h4 className="text-[15px] font-bold text-rose-600 leading-snug">
+              Không thể xóa CSDL
+            </h4>
+            <p className="text-[13px] text-slate-500 mt-1 font-medium">
+              CSDL đang được tích hợp: <span className="text-slate-900 font-semibold">{service.name}</span>
+            </p>
+          </div>
+        </div>
+
+        {/* Detailed Points Container */}
+        <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 space-y-3.5">
+          <div className="flex items-start gap-3">
+            <div className="w-5 h-5 rounded-full bg-rose-100 flex items-center justify-center shrink-0 mt-0.5 text-rose-600">
+              <span className="text-[11px] font-bold">✓</span>
+            </div>
+            <p className="text-[13px] text-slate-700 leading-relaxed font-medium">
+              Bạn phải thực hiện xóa dữ liệu và cấu trúc dữ liệu trước khi thực hiện thao tác.
+            </p>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <div className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center shrink-0 mt-0.5 text-amber-600">
+              <span className="text-[11px] font-bold">✓</span>
+            </div>
+            <p className="text-[13px] text-slate-700 leading-relaxed font-medium">
+              Hành động này sẽ ảnh hưởng tới các CSDL trích xuất đang sử dụng dữ liệu từ CSDL tích hợp này, các CSDL trích xuất đó sẽ không thể cập nhật dữ liệu thay đổi được nữa.
+            </p>
+          </div>
+        </div>
+      </div>
+    </BaseModal>
   );
 }
 
