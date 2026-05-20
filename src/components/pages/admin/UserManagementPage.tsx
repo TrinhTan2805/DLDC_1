@@ -92,12 +92,14 @@ const usersData: User[] = [
 ];
 
 const availableGroups = [
-  { id: 1, name: 'Quản trị viên', code: 'ADMIN' },
-  { id: 2, name: 'Nhóm Pháp luật Dân sự', code: 'PLDC' },
-  { id: 3, name: 'Nhóm Đăng ký Kinh doanh', code: 'DKKD' },
-  { id: 4, name: 'Nhóm Công chứng', code: 'CC' },
-  { id: 5, name: 'Biên tập viên', code: 'EDITOR' },
-  { id: 6, name: 'Người xem', code: 'VIEWER' },
+  { id: 1, name: 'Quản trị hệ thống', code: 'QTHT' },
+  { id: 2, name: 'Lãnh đạo Bộ phận quản trị', code: 'LDBPQT' },
+  { id: 3, name: 'Cán bộ nghiệp vụ Hộ tịch điện tử', code: 'HTDT' },
+  { id: 4, name: 'Cán bộ nghiệp vụ quản lý hồ sơ quốc tịch', code: 'HSQT' },
+  { id: 5, name: 'Cán bộ nghiệp vụ thi hành án dân sự', code: 'THADS' },
+  { id: 6, name: 'Cán bộ nghiệp vụ CSDL quốc gia về pháp luật', code: 'CSDLPL' },
+  { id: 7, name: 'Lãnh đạo nghiệp vụ Hộ tịch điện tử', code: 'LDHTDT' },
+  { id: 8, name: 'Lãnh đạo nghiệp vụ quản lý hồ sơ quốc tịch', code: 'LDHSQT' },
 ];
 
 type ModalType = 'add' | 'edit' | 'detail' | 'delete' | 'lock' | 'unlock' | 'assign-group' | 'reset-password' | 'import' | 'export' | 'sync' | null;

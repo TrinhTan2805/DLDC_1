@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Plus, Edit, Trash2, Users, Eye, UserPlus, Lock, Settings, ChevronRight, ChevronDown } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, Users, Eye, UserPlus, Lock, Settings, ChevronRight, ChevronDown, X } from 'lucide-react';
 import { StatsCard } from '../../common/StatsCard';
 import { StatusTag } from '../../common/StatusTag';
 import { UsersRound } from 'lucide-react';
@@ -16,6 +16,8 @@ interface Group {
   status: 'active' | 'inactive';
   members: Member[];
   functions: string[];
+  functionPermissions?: { [functionId: string]: string[] };
+  dataPermissions?: { [sourceId: string]: string[] };
 }
 
 interface Member {
@@ -155,64 +157,127 @@ const menuStructure: MenuItem[] = [
   }
 ];
 
+const dataSources = [
+  { id: 'vbqppl', name: 'CSDL Văn bản QPPL' },
+  { id: 'dkkd', name: 'CSDL Đăng ký kinh doanh' },
+  { id: 'cc', name: 'CSDL Công chứng' },
+  { id: 'tgpl', name: 'CSDL Trợ giúp pháp lý' },
+];
+
+const dataPermissionActions = [
+  { id: 'view_collected', name: 'Xem dữ liệu thu thập' },
+  { id: 'config_process', name: 'Cấu hình tham số xử lý' },
+  { id: 'view_category', name: 'Xem dữ liệu danh mục' },
+  { id: 'view_master', name: 'Xem dữ liệu chủ' },
+  { id: 'view_source', name: 'Xem dữ liệu nguồn' },
+  { id: 'config_api', name: 'Cấu hình API điều phối dữ liệu đi' }
+];
+
 const groupsData: Group[] = [
   { 
     id: 1, 
-    name: 'Nhóm Pháp luật Dân sự', 
-    code: 'PLDC', 
-    description: 'Quản lý và biên tập dữ liệu pháp luật dân sự', 
-    department: 'Vụ Pháp luật Dân sự', 
-    memberCount: 12, 
-    functionCount: 8, 
+    name: 'Quản trị hệ thống', 
+    code: 'QTHT', 
+    description: 'Quản trị toàn bộ hệ thống', 
+    department: 'Ban Quản trị', 
+    memberCount: 5, 
+    functionCount: 20, 
     createdDate: '01/01/2024', 
     status: 'active',
-    members: [
-      { id: 1, name: 'Nguyễn Văn An', email: 'nguyenvanan@moj.gov.vn', role: 'Trưởng nhóm' },
-      { id: 2, name: 'Trần Thị Bình', email: 'tranthibinh@moj.gov.vn', role: 'Thành viên' },
-    ],
-    functions: ['Xem dữ liệu', 'Chỉnh sửa dữ liệu', 'Xuất báo cáo', 'Xóa dữ liệu']
+    members: [],
+    functions: ['Toàn quyền']
   },
   { 
     id: 2, 
-    name: 'Nhóm Đăng ký Kinh doanh', 
-    code: 'DKKD', 
-    description: 'Quản lý dữ liệu đăng ký kinh doanh', 
-    department: 'Cục Đăng ký Quốc gia', 
-    memberCount: 25, 
-    functionCount: 12, 
-    createdDate: '05/01/2024', 
+    name: 'Lãnh đạo Bộ phận quản trị', 
+    code: 'LDBPQT', 
+    description: 'Lãnh đạo bộ phận quản trị hệ thống', 
+    department: 'Ban Quản trị', 
+    memberCount: 2, 
+    functionCount: 15, 
+    createdDate: '01/01/2024', 
     status: 'active',
-    members: [
-      { id: 3, name: 'Lê Văn Cường', email: 'levancuong@moj.gov.vn', role: 'Trưởng nhóm' },
-    ],
-    functions: ['Xem dữ liệu', 'Chỉnh sửa dữ liệu', 'Xuất báo cáo']
+    members: [],
+    functions: ['Xem báo cáo', 'Quản lý người dùng']
   },
   { 
     id: 3, 
-    name: 'Nhóm Công chứng', 
-    code: 'CC', 
-    description: 'Quản lý dữ liệu công chứng toàn quốc', 
-    department: 'Cục Công chứng', 
-    memberCount: 18, 
+    name: 'Cán bộ nghiệp vụ Hộ tịch điện tử', 
+    code: 'HTDT', 
+    description: 'Thực hiện nghiệp vụ hộ tịch điện tử', 
+    department: 'Cục Hộ tịch', 
+    memberCount: 30, 
     functionCount: 10, 
-    createdDate: '10/01/2024', 
+    createdDate: '05/01/2024', 
     status: 'active',
     members: [],
-    functions: ['Xem dữ liệu', 'Chỉnh sửa dữ liệu']
+    functions: ['Thêm dữ liệu', 'Sửa dữ liệu', 'Xem dữ liệu']
   },
   { 
     id: 4, 
-    name: 'Nhóm Trợ giúp pháp lý', 
-    code: 'TGPL', 
-    description: 'Quản lý dữ liệu trợ giúp pháp lý', 
-    department: 'Cục Bổ trợ tư pháp', 
-    memberCount: 8, 
-    functionCount: 6, 
+    name: 'Cán bộ nghiệp vụ quản lý hồ sơ quốc tịch', 
+    code: 'HSQT', 
+    description: 'Nghiệp vụ quản lý hồ sơ quốc tịch', 
+    department: 'Cục Quốc tịch', 
+    memberCount: 20, 
+    functionCount: 8, 
+    createdDate: '10/01/2024', 
+    status: 'active',
+    members: [],
+    functions: ['Thêm dữ liệu', 'Sửa dữ liệu', 'Xem dữ liệu']
+  },
+  { 
+    id: 5, 
+    name: 'Cán bộ nghiệp vụ thi hành án dân sự', 
+    code: 'THADS', 
+    description: 'Nghiệp vụ thi hành án dân sự', 
+    department: 'Tổng cục THADS', 
+    memberCount: 45, 
+    functionCount: 12, 
     createdDate: '15/01/2024', 
     status: 'active',
     members: [],
-    functions: ['Xem dữ liệu']
+    functions: ['Thêm dữ liệu', 'Sửa dữ liệu', 'Xem dữ liệu']
   },
+  { 
+    id: 6, 
+    name: 'Cán bộ nghiệp vụ CSDL quốc gia về pháp luật', 
+    code: 'CSDLPL', 
+    description: 'Nghiệp vụ CSDL quốc gia về pháp luật', 
+    department: 'Cục CNTT', 
+    memberCount: 15, 
+    functionCount: 14, 
+    createdDate: '20/01/2024', 
+    status: 'active',
+    members: [],
+    functions: ['Thêm dữ liệu', 'Sửa dữ liệu', 'Xem dữ liệu']
+  },
+  { 
+    id: 7, 
+    name: 'Lãnh đạo nghiệp vụ Hộ tịch điện tử', 
+    code: 'LDHTDT', 
+    description: 'Lãnh đạo phụ trách hộ tịch điện tử', 
+    department: 'Cục Hộ tịch', 
+    memberCount: 5, 
+    functionCount: 15, 
+    createdDate: '25/01/2024', 
+    status: 'active',
+    members: [],
+    functions: ['Xem dữ liệu', 'Duyệt dữ liệu', 'Báo cáo']
+  },
+  { 
+    id: 8, 
+    name: 'Lãnh đạo nghiệp vụ quản lý hồ sơ quốc tịch', 
+    code: 'LDHSQT', 
+    description: 'Lãnh đạo phụ trách quản lý hồ sơ quốc tịch', 
+    department: 'Cục Quốc tịch', 
+    memberCount: 4, 
+    functionCount: 15, 
+    createdDate: '01/02/2024', 
+    status: 'active',
+    members: [],
+    functions: ['Xem dữ liệu', 'Duyệt dữ liệu', 'Báo cáo']
+  }
 ];
 
 const availableUsers = [
@@ -235,11 +300,13 @@ const availableFunctions = [
 ];
 
 type ModalType = 'add' | 'edit' | 'detail' | 'delete' | 'add-members' | 'assign-functions' | null;
+type DetailTabType = 'info' | 'function' | 'data';
 
 export function GroupManagementPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [modalType, setModalType] = useState<ModalType>(null);
+  const [activeDetailTab, setActiveDetailTab] = useState<DetailTabType>('info');
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
   const [selectedFunctions, setSelectedFunctions] = useState<number[]>([]);
@@ -247,6 +314,7 @@ export function GroupManagementPage() {
   const [selectedMenuItem, setSelectedMenuItem] = useState<string>('dashboard');
   const [selectedMenuItems, setSelectedMenuItems] = useState<string[]>([]);
   const [selectedPermissions, setSelectedPermissions] = useState<{ [key: string]: string[] }>({});
+  const [selectedDataPermissions, setSelectedDataPermissions] = useState<{ [key: string]: string[] }>({});
   const [formData, setFormData] = useState({
     name: '',
     code: '',
@@ -265,7 +333,7 @@ export function GroupManagementPage() {
     return matchesSearch && matchesStatus;
   });
 
-  const handleOpenModal = (type: ModalType, group?: Group) => {
+  const handleOpenModal = (type: ModalType, group?: Group, tab: DetailTabType = 'info') => {
     setModalType(type);
     if (group) {
       setSelectedGroup(group);
@@ -277,6 +345,9 @@ export function GroupManagementPage() {
           department: group.department,
           status: group.status,
         });
+      }
+      if (type === 'detail') {
+        setActiveDetailTab(tab);
       }
     } else {
       setSelectedGroup(null);
@@ -297,6 +368,7 @@ export function GroupManagementPage() {
     setSelectedGroup(null);
     setSelectedUsers([]);
     setSelectedFunctions([]);
+    setActiveDetailTab('info');
   };
 
   const toggleUser = (userId: number) => {
@@ -627,7 +699,7 @@ export function GroupManagementPage() {
             {/* Actions */}
             <div className="px-6 py-3 bg-slate-50 border-t border-slate-200 flex gap-2">
               <button 
-                onClick={() => handleOpenModal('detail', group)}
+                onClick={() => handleOpenModal('detail', group, 'info')}
                 className="flex-1 px-3 py-1.5 text-sm bg-white border border-slate-300 text-slate-700 rounded hover:bg-slate-50 flex items-center justify-center gap-1.5"
               >
                 <Eye className="w-3.5 h-3.5" />
@@ -641,7 +713,7 @@ export function GroupManagementPage() {
                 Thành viên
               </button>
               <button 
-                onClick={() => handleOpenModal('assign-functions', group)}
+                onClick={() => handleOpenModal('detail', group, 'function')}
                 className="flex-1 px-3 py-1.5 text-sm bg-white border border-slate-300 text-slate-700 rounded hover:bg-slate-50 flex items-center justify-center gap-1.5"
               >
                 <Lock className="w-3.5 h-3.5" />
@@ -748,120 +820,349 @@ export function GroupManagementPage() {
         </div>
       )}
 
-      {/* Detail Modal */}
+      {/* Detail Modal with Tabs */}
       {modalType === 'detail' && selectedGroup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] flex flex-col">
             <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white">
-              <h3 className="text-slate-900">Chi tiết nhóm: {selectedGroup.name}</h3>
-              <button title="Thêm mới" aria-label="Thêm mới" onClick={handleCloseModal} className="text-slate-400 hover:text-slate-600">
-                <Plus className="w-5 h-5 rotate-45" />
+              <div>
+                <h3 className="text-slate-900">Chi tiết nhóm: {selectedGroup.name}</h3>
+                <p className="text-sm text-slate-600 mt-1">Mã nhóm: {selectedGroup.code}</p>
+              </div>
+              <button onClick={handleCloseModal} className="text-slate-400 hover:text-slate-600" title="Đóng">
+                <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-6">
-              {/* Basic Info */}
-              <div className="mb-6">
-                <h4 className="text-slate-900 mb-4 pb-2 border-b border-slate-200">Thông tin nhóm</h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-xs text-slate-500 mb-1">Tên nhóm</div>
-                    <div className="text-sm text-slate-900">{selectedGroup.name}</div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-slate-500 mb-1">Mã nhóm</div>
-                    <StatusTag label={selectedGroup.code} variant="blue" />
-                  </div>
-                  <div className="col-span-2">
-                    <div className="text-xs text-slate-500 mb-1">Mô tả</div>
-                    <div className="text-sm text-slate-900">{selectedGroup.description}</div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-slate-500 mb-1">Đơn vị</div>
-                    <div className="text-sm text-slate-900">{selectedGroup.department}</div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-slate-500 mb-1">Trạng thái</div>
-                    <StatusTag 
-                      label={selectedGroup.status === 'active' ? 'Hoạt động' : 'Không hoạt động'} 
-                      variant={selectedGroup.status === 'active' ? 'green' : 'slate'} 
-                    />
-                  </div>
-                </div>
-              </div>
+            
+            {/* Tabs Header */}
+            <div className="px-6 border-b border-slate-200 flex gap-6 bg-slate-50">
+              <button
+                onClick={() => setActiveDetailTab('info')}
+                className={`py-3 text-sm font-medium border-b-2 transition-colors ${
+                  activeDetailTab === 'info' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Thông tin & Thành viên
+              </button>
+              <button
+                onClick={() => setActiveDetailTab('function')}
+                className={`py-3 text-sm font-medium border-b-2 transition-colors ${
+                  activeDetailTab === 'function' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Phân quyền chức năng
+              </button>
+              <button
+                onClick={() => setActiveDetailTab('data')}
+                className={`py-3 text-sm font-medium border-b-2 transition-colors ${
+                  activeDetailTab === 'data' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Phân quyền dữ liệu
+              </button>
+            </div>
 
-              {/* Members */}
-              <div className="mb-6">
-                <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-200">
-                  <h4 className="text-slate-900">Danh sách thành viên ({selectedGroup.memberCount})</h4>
-                  <button 
-                    onClick={() => {
-                      handleCloseModal();
-                      setTimeout(() => handleOpenModal('add-members', selectedGroup), 100);
-                    }}
-                    className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
-                  >
-                    <UserPlus className="w-4 h-4" />
-                    Thêm thành viên
-                  </button>
+            {/* Tab Contents */}
+            <div className="flex-1 overflow-y-auto">
+              {activeDetailTab === 'info' && (
+                <div className="p-6">
+                  {/* Basic Info */}
+                  <div className="mb-6">
+                    <h4 className="text-slate-900 mb-4 pb-2 border-b border-slate-200">Thông tin chung</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <div className="text-xs text-slate-500 mb-1">Tên nhóm</div>
+                        <div className="text-sm text-slate-900">{selectedGroup.name}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-slate-500 mb-1">Mã nhóm</div>
+                        <StatusTag label={selectedGroup.code} variant="blue" />
+                      </div>
+                      <div className="col-span-2">
+                        <div className="text-xs text-slate-500 mb-1">Mô tả</div>
+                        <div className="text-sm text-slate-900">{selectedGroup.description}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-slate-500 mb-1">Đơn vị</div>
+                        <div className="text-sm text-slate-900">{selectedGroup.department}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-slate-500 mb-1">Trạng thái</div>
+                        <StatusTag 
+                          label={selectedGroup.status === 'active' ? 'Hoạt động' : 'Không hoạt động'} 
+                          variant={selectedGroup.status === 'active' ? 'green' : 'slate'} 
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Members */}
+                  <div className="mb-6">
+                    <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-200">
+                      <h4 className="text-slate-900">Danh sách thành viên ({selectedGroup.memberCount})</h4>
+                      <button 
+                        onClick={() => {
+                          handleCloseModal();
+                          setTimeout(() => handleOpenModal('add-members', selectedGroup), 100);
+                        }}
+                        className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                      >
+                        <UserPlus className="w-4 h-4" />
+                        Thêm thành viên
+                      </button>
+                    </div>
+                    {selectedGroup.members.length > 0 ? (
+                      <div className="space-y-2">
+                        {selectedGroup.members.map((member) => (
+                          <div key={member.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                            <div className="flex-1">
+                              <div className="text-sm text-slate-900">{member.name}</div>
+                              <div className="text-xs text-slate-500">{member.email} • {member.role}</div>
+                            </div>
+                            <button className="text-red-600 hover:text-red-700 p-1" title="Xóa khỏi nhóm">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-slate-500 text-sm">
+                        Chưa có thành viên nào trong nhóm
+                      </div>
+                    )}
+                  </div>
                 </div>
-                {selectedGroup.members.length > 0 ? (
-                  <div className="space-y-2">
-                    {selectedGroup.members.map((member) => (
-                      <div key={member.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+              )}
+
+              {activeDetailTab === 'function' && (
+                <div className="flex h-full min-h-[500px]">
+                  {/* Left Column - Menu Tree */}
+                  <div className="w-80 border-r border-slate-200 overflow-y-auto p-4 bg-slate-50">
+                    <h4 className="text-sm text-slate-700 mb-3 px-3">Danh sách chức năng</h4>
+                    
+                    <div className="mb-2">
+                      <label className="flex items-center gap-3 px-3 py-2.5 bg-blue-50 border border-blue-200 rounded-lg cursor-pointer hover:bg-blue-100">
+                        <input
+                          type="checkbox"
+                          checked={isAllMenuItemsSelected()}
+                          ref={(input) => {
+                            if (input) {
+                              input.indeterminate = isSomeMenuItemsSelected();
+                            }
+                          }}
+                          onChange={() => {
+                            if (isAllMenuItemsSelected()) {
+                              deselectAllMenuItems();
+                            } else {
+                              selectAllMenuItems();
+                            }
+                          }}
+                          className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                        />
                         <div className="flex-1">
-                          <div className="text-sm text-slate-900">{member.name}</div>
-                          <div className="text-xs text-slate-500">{member.email} • {member.role}</div>
+                          <div className="text-sm text-blue-900">
+                            {isAllMenuItemsSelected() 
+                              ? 'Bỏ chọn tất cả' 
+                              : isSomeMenuItemsSelected() 
+                                ? `Chọn tất cả (đã chọn ${selectedMenuItems.length}/${getAllSelectableMenuIds().length})` 
+                                : 'Chọn tất cả'}
+                          </div>
                         </div>
-                        <button className="text-red-600 hover:text-red-700 p-1" title="Xóa khỏi nhóm">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-slate-500 text-sm">
-                    Chưa có thành viên nào trong nhóm
-                  </div>
-                )}
-              </div>
+                      </label>
+                    </div>
 
-              {/* Functions */}
-              <div>
-                <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-200">
-                  <h4 className="text-slate-900">Quyền hạn ({selectedGroup.functionCount})</h4>
-                  <button 
-                    onClick={() => {
-                      handleCloseModal();
-                      setTimeout(() => handleOpenModal('assign-functions', selectedGroup), 100);
-                    }}
-                    className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
-                  >
-                    <Settings className="w-4 h-4" />
-                    Gán quyền
-                  </button>
+                    <div className="space-y-1">
+                      {renderMenuTree(menuStructure)}
+                    </div>
+                  </div>
+
+                  {/* Right Column - Permission Checkboxes */}
+                  <div className="flex-1 overflow-y-auto p-6">
+                    <h4 className="text-sm text-slate-700 mb-4">
+                      Chi tiết quyền chức năng
+                      {selectedMenuItems.length > 0 && (
+                        <span className="ml-2 text-blue-600">
+                          ({selectedMenuItems.length} chức năng đã chọn)
+                        </span>
+                      )}
+                    </h4>
+                    
+                    {getSelectedMenuFunctions().length > 0 ? (
+                      <div className="space-y-4">
+                        {getSelectedMenuFunctions().map((func) => (
+                          <div key={func.id} className="border border-slate-200 rounded-lg p-4">
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="text-sm font-medium text-slate-900">{func.name}</div>
+                              <label className="flex items-center gap-2 text-xs text-blue-600 cursor-pointer hover:text-blue-700">
+                                <input
+                                  type="checkbox"
+                                  checked={isAllPermissionsSelectedForFunction(func.id, func.actions)}
+                                  ref={(input) => {
+                                    if (input) {
+                                      input.indeterminate = isSomePermissionsSelectedForFunction(func.id, func.actions);
+                                    }
+                                  }}
+                                  onChange={() => {
+                                    if (isAllPermissionsSelectedForFunction(func.id, func.actions)) {
+                                      deselectAllPermissionsForFunction(func.id);
+                                    } else {
+                                      selectAllPermissionsForFunction(func.id, func.actions);
+                                    }
+                                  }}
+                                  className="w-3.5 h-3.5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                                />
+                                <span>Chọn tất cả</span>
+                              </label>
+                            </div>
+                            <div className="grid grid-cols-3 gap-3">
+                              {func.actions.map((action) => (
+                                <label
+                                  key={`${func.id}-${action}`}
+                                  className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded hover:bg-slate-50 cursor-pointer"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={(selectedPermissions[func.id] || []).includes(action)}
+                                    onChange={() => togglePermission(func.id, action)}
+                                    className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                                  />
+                                  <span className="text-sm text-slate-700">{action}</span>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12 text-slate-500 text-sm">
+                        Vui lòng chọn chức năng từ danh sách bên trái
+                      </div>
+                    )}
+                  </div>
                 </div>
-                {selectedGroup.functions.length > 0 ? (
-                  <div className="grid grid-cols-2 gap-2">
-                    {selectedGroup.functions.map((func, index) => (
-                      <div key={index} className="flex items-center justify-between p-2 bg-green-50 rounded">
-                        <div className="flex items-center gap-2 text-sm text-slate-700">
-                          <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                          {func}
-                        </div>
-                        <button className="text-red-600 hover:text-red-700 p-0.5" title="Xóa quyền">
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-slate-500 text-sm">
-                    Chưa có quyền nào được gán
-                  </div>
-                )}
-              </div>
+              )}
 
-              <div className="flex gap-3 mt-6 pt-6 border-t border-slate-200">
+              {activeDetailTab === 'data' && (
+                <div className="flex h-full min-h-[500px]">
+                  {/* Left Column - Data Sources */}
+                  <div className="w-80 border-r border-slate-200 overflow-y-auto p-4 bg-slate-50">
+                    <h4 className="text-sm text-slate-700 mb-3 px-3">Danh sách CSDL / Hệ thống nguồn</h4>
+                    <div className="space-y-1">
+                      {dataSources.map(source => {
+                        const isSelected = selectedMenuItems.includes(source.id);
+                        return (
+                          <div
+                            key={source.id}
+                            className={`flex items-center gap-2 px-3 py-2 rounded transition-colors cursor-pointer ${
+                              isSelected ? 'bg-blue-50' : 'hover:bg-slate-50'
+                            }`}
+                            onClick={() => toggleMenuItemSelection(source.id)}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => {}}
+                              className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer pointer-events-none"
+                            />
+                            <span className={`text-sm flex-1 ${isSelected ? 'text-blue-700 font-medium' : 'text-slate-700'}`}>
+                              {source.name}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Right Column - Data Permissions */}
+                  <div className="flex-1 overflow-y-auto p-6">
+                    <h4 className="text-sm text-slate-700 mb-4">
+                      Chi tiết quyền dữ liệu
+                      {selectedMenuItems.filter(id => dataSources.some(s => s.id === id)).length > 0 && (
+                        <span className="ml-2 text-blue-600">
+                          ({selectedMenuItems.filter(id => dataSources.some(s => s.id === id)).length} CSDL đã chọn)
+                        </span>
+                      )}
+                    </h4>
+
+                    {selectedMenuItems.filter(id => dataSources.some(s => s.id === id)).length > 0 ? (
+                      <div className="space-y-4">
+                        {selectedMenuItems.filter(id => dataSources.some(s => s.id === id)).map((sourceId) => {
+                          const source = dataSources.find(s => s.id === sourceId);
+                          if (!source) return null;
+                          const currentActions = selectedDataPermissions[sourceId] || [];
+                          const isAllActionsSelected = currentActions.length === dataPermissionActions.length;
+                          const isSomeActionsSelected = currentActions.length > 0 && !isAllActionsSelected;
+
+                          return (
+                            <div key={sourceId} className="border border-slate-200 rounded-lg p-4">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="text-sm font-medium text-slate-900">{source.name}</div>
+                                <label className="flex items-center gap-2 text-xs text-blue-600 cursor-pointer hover:text-blue-700">
+                                  <input
+                                    type="checkbox"
+                                    checked={isAllActionsSelected}
+                                    ref={(input) => {
+                                      if (input) input.indeterminate = isSomeActionsSelected;
+                                    }}
+                                    onChange={() => {
+                                      if (isAllActionsSelected) {
+                                        const newPerms = { ...selectedDataPermissions };
+                                        newPerms[sourceId] = [];
+                                        setSelectedDataPermissions(newPerms);
+                                      } else {
+                                        setSelectedDataPermissions({
+                                          ...selectedDataPermissions,
+                                          [sourceId]: dataPermissionActions.map(a => a.id)
+                                        });
+                                      }
+                                    }}
+                                    className="w-3.5 h-3.5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                                  />
+                                  <span>Chọn tất cả</span>
+                                </label>
+                              </div>
+                              <div className="grid grid-cols-2 gap-3">
+                                {dataPermissionActions.map((action) => (
+                                  <label
+                                    key={`${sourceId}-${action.id}`}
+                                    className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded hover:bg-slate-50 cursor-pointer"
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={currentActions.includes(action.id)}
+                                      onChange={() => {
+                                        const perms = { ...selectedDataPermissions };
+                                        const current = perms[sourceId] || [];
+                                        if (current.includes(action.id)) {
+                                          perms[sourceId] = current.filter(a => a !== action.id);
+                                        } else {
+                                          perms[sourceId] = [...current, action.id];
+                                        }
+                                        setSelectedDataPermissions(perms);
+                                      }}
+                                      className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                                    />
+                                    <span className="text-sm text-slate-700">{action.name}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12 text-slate-500 text-sm">
+                        Vui lòng chọn CSDL/Hệ thống nguồn từ danh sách bên trái
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-slate-200 flex justify-between bg-white flex-shrink-0">
+              {activeDetailTab === 'info' ? (
                 <button 
                   onClick={() => {
                     handleCloseModal();
@@ -869,15 +1170,25 @@ export function GroupManagementPage() {
                   }}
                   className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
-                  Chỉnh sửa
+                  Chỉnh sửa nhóm
                 </button>
+              ) : (
                 <button 
-                  onClick={handleCloseModal}
-                  className="px-6 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50"
+                  onClick={() => {
+                    // Xử lý lưu
+                    alert(`Đã lưu phân quyền ${activeDetailTab === 'function' ? 'chức năng' : 'dữ liệu'} thành công!`);
+                  }}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
-                  Đóng
+                  Lưu phân quyền
                 </button>
-              </div>
+              )}
+              <button 
+                onClick={handleCloseModal}
+                className="px-6 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50"
+              >
+                Đóng
+              </button>
             </div>
           </div>
         </div>
@@ -974,145 +1285,6 @@ export function GroupManagementPage() {
         </div>
       )}
 
-      {/* Assign Functions Modal */}
-      {modalType === 'assign-functions' && selectedGroup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] flex flex-col">
-            {/* Header */}
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0">
-              <div>
-                <h3 className="text-slate-900">Gán quyền cho nhóm</h3>
-                <p className="text-sm text-slate-600 mt-1">Nhóm: {selectedGroup.name}</p>
-              </div>
-              <button title="Thêm mới" aria-label="Thêm mới" onClick={handleCloseModal} className="text-slate-400 hover:text-slate-600">
-                <Plus className="w-5 h-5 rotate-45" />
-              </button>
-            </div>
-
-            {/* Body - 2 Columns */}
-            <div className="flex flex-1 overflow-hidden">
-              {/* Left Column - Menu Tree */}
-              <div className="w-80 border-r border-slate-200 overflow-y-auto p-4 bg-slate-50">
-                <h4 className="text-sm text-slate-700 mb-3 px-3">Danh sách chức năng</h4>
-                
-                {/* Select All Checkbox for Menu Items */}
-                <div className="mb-2">
-                  <label className="flex items-center gap-3 px-3 py-2.5 bg-blue-50 border border-blue-200 rounded-lg cursor-pointer hover:bg-blue-100">
-                    <input
-                      type="checkbox"
-                      checked={isAllMenuItemsSelected()}
-                      ref={(input) => {
-                        if (input) {
-                          input.indeterminate = isSomeMenuItemsSelected();
-                        }
-                      }}
-                      onChange={() => {
-                        if (isAllMenuItemsSelected()) {
-                          deselectAllMenuItems();
-                        } else {
-                          selectAllMenuItems();
-                        }
-                      }}
-                      className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                    />
-                    <div className="flex-1">
-                      <div className="text-sm text-blue-900">
-                        {isAllMenuItemsSelected() 
-                          ? 'Bỏ chọn tất cả' 
-                          : isSomeMenuItemsSelected() 
-                            ? `Chọn tất cả (đã chọn ${selectedMenuItems.length}/${getAllSelectableMenuIds().length})` 
-                            : 'Chọn tất cả'}
-                      </div>
-                    </div>
-                  </label>
-                </div>
-
-                <div className="space-y-1">
-                  {renderMenuTree(menuStructure)}
-                </div>
-              </div>
-
-              {/* Right Column - Permission Checkboxes */}
-              <div className="flex-1 overflow-y-auto p-6">
-                <h4 className="text-sm text-slate-700 mb-4">
-                  Vai trò
-                  {selectedMenuItems.length > 0 && (
-                    <span className="ml-2 text-blue-600">
-                      ({selectedMenuItems.length} chức năng đã chọn)
-                    </span>
-                  )}
-                </h4>
-                
-                {getSelectedMenuFunctions().length > 0 ? (
-                  <div className="space-y-4">
-                    {getSelectedMenuFunctions().map((func) => (
-                      <div key={func.id} className="border border-slate-200 rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="text-sm text-slate-900">{func.name}</div>
-                          {/* Select All for this function */}
-                          <label className="flex items-center gap-2 text-xs text-blue-600 cursor-pointer hover:text-blue-700">
-                            <input
-                              type="checkbox"
-                              checked={isAllPermissionsSelectedForFunction(func.id, func.actions)}
-                              ref={(input) => {
-                                if (input) {
-                                  input.indeterminate = isSomePermissionsSelectedForFunction(func.id, func.actions);
-                                }
-                              }}
-                              onChange={() => {
-                                if (isAllPermissionsSelectedForFunction(func.id, func.actions)) {
-                                  deselectAllPermissionsForFunction(func.id);
-                                } else {
-                                  selectAllPermissionsForFunction(func.id, func.actions);
-                                }
-                              }}
-                              className="w-3.5 h-3.5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                            />
-                            <span>Chọn tất cả</span>
-                          </label>
-                        </div>
-                        <div className="grid grid-cols-3 gap-3">
-                          {func.actions.map((action) => (
-                            <label
-                              key={`${func.id}-${action}`}
-                              className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded hover:bg-slate-50 cursor-pointer"
-                            >
-                              <input
-                                type="checkbox"
-                                checked={(selectedPermissions[func.id] || []).includes(action)}
-                                onChange={() => togglePermission(func.id, action)}
-                                className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                              />
-                              <span className="text-sm text-slate-700">{action}</span>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12 text-slate-500 text-sm">
-                    Vui lòng chọn chức năng từ danh sách bên trái
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="px-6 py-4 border-t border-slate-200 flex gap-3 flex-shrink-0">
-              <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                Lưu phân quyền
-              </button>
-              <button 
-                onClick={handleCloseModal}
-                className="px-6 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50"
-              >
-                Hủy
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Delete Confirmation */}
       {modalType === 'delete' && selectedGroup && (
