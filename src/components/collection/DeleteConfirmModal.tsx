@@ -73,6 +73,5 @@ export function DeleteConfirmModal({ method, onCancel, onConfirm }: DeleteConfir
       </div>
     </div>
     </div>
-    </div>
   );
 }
