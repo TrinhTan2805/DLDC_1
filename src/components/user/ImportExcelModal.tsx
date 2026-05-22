@@ -183,8 +183,8 @@ export function ImportExcelModal({ isOpen, onClose, onImport }: ImportExcelModal
   const errorCount = importData.filter(user => user.errors.length > 0).length;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white z-10">
           <div>
             <h3 className="text-slate-900">Nhập khẩu người dùng từ Excel</h3>
@@ -389,8 +389,8 @@ export function ImportExcelModal({ isOpen, onClose, onImport }: ImportExcelModal
 
       {/* Edit Modal */}
       {editingIndex !== null && editData && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => { setEditingIndex(null); setEditData(null); }}>
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white">
               <h3 className="text-slate-900">Chỉnh sửa bản ghi #{editingIndex + 1}</h3>
               <button

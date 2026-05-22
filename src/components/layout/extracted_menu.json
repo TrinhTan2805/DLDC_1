@@ -1,0 +1,1926 @@
+[
+  {
+    "id": "dashboard",
+    "name": "Tổng quan",
+    "functions": [
+      {
+        "id": "dashboard-func",
+        "name": "Tổng quan",
+        "actions": [
+          "Xem",
+          "Thêm",
+          "Sửa",
+          "Xóa",
+          "Xuất Excel"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "collection",
+    "name": "Quản lý thu thập",
+    "children": [
+      {
+        "id": "collection-dashboard",
+        "name": "Dashboard",
+        "functions": [
+          {
+            "id": "collection-dashboard-func",
+            "name": "Dashboard",
+            "actions": [
+              "Xem",
+              "Thêm",
+              "Sửa",
+              "Xóa",
+              "Xuất Excel"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "collection-setup",
+        "name": "Thiết lập thu thập",
+        "functions": [
+          {
+            "id": "collection-setup-func",
+            "name": "Thiết lập thu thập",
+            "actions": [
+              "Xem",
+              "Thêm",
+              "Sửa",
+              "Xóa",
+              "Xuất Excel"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "view-collected-data",
+        "name": "Xem dữ liệu thu thập",
+        "children": [
+          {
+            "id": "view-data-internal",
+            "name": "CSDL Trong ngành",
+            "children": [
+              {
+                "id": "data-info-civil-registry",
+                "name": "CSDL Hộ tịch điện tử",
+                "functions": [
+                  {
+                    "id": "data-info-civil-registry-func",
+                    "name": "CSDL Hộ tịch điện tử",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "data-info-case-management",
+                "name": "HT quản lý hồ sơ QT (3)",
+                "functions": [
+                  {
+                    "id": "data-info-case-management-func",
+                    "name": "HT quản lý hồ sơ QT (3)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "data-info-civil-judgment",
+                "name": "CSDL thi hành án dân sự (16)",
+                "functions": [
+                  {
+                    "id": "data-info-civil-judgment-func",
+                    "name": "CSDL thi hành án dân sự (16)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "data-info-security-measures",
+                "name": "CSDL về biện pháp BD (4)",
+                "functions": [
+                  {
+                    "id": "data-info-security-measures-func",
+                    "name": "CSDL về biện pháp BD (4)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "data-info-legal-national",
+                "name": "CSDL quốc gia về PL (5)",
+                "functions": [
+                  {
+                    "id": "data-info-legal-national-func",
+                    "name": "CSDL quốc gia về PL (5)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "data-info-civil-legal-center",
+                "name": "CSDL TT Tư Pháp dân sự (2)",
+                "functions": [
+                  {
+                    "id": "data-info-civil-legal-center-func",
+                    "name": "CSDL TT Tư Pháp dân sự (2)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "data-info-civil-legal-info",
+                "name": "HTTT trợ giúp pháp lý (6)",
+                "functions": [
+                  {
+                    "id": "data-info-civil-legal-info-func",
+                    "name": "HTTT trợ giúp pháp lý (6)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "data-info-legal-center",
+                "name": "Phần mềm tk ngành tư pháp phục vụ chia sẻ dữ liệu mở",
+                "functions": [
+                  {
+                    "id": "data-info-legal-center-func",
+                    "name": "Phần mềm tk ngành tư pháp phục vụ chia sẻ dữ liệu mở",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "data-info-family-base",
+                "name": "CSDL PB, GĐ và HG cơ sở (16)",
+                "functions": [
+                  {
+                    "id": "data-info-family-base-func",
+                    "name": "CSDL PB, GĐ và HG cơ sở (16)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "data-info-auction",
+                "name": "CSDL quản lý đấu giá TS (24)",
+                "functions": [
+                  {
+                    "id": "data-info-auction-func",
+                    "name": "CSDL quản lý đấu giá TS (24)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "data-info-international",
+                "name": "CSDL Hợp tác quốc tế (6)",
+                "functions": [
+                  {
+                    "id": "data-info-international-func",
+                    "name": "CSDL Hợp tác quốc tế (6)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "view-data-external",
+            "name": "CSDL Ngoài ngành",
+            "children": [
+              {
+                "id": "external-court-judgment",
+                "name": "CSDL Thông tin Bản án (1)",
+                "functions": [
+                  {
+                    "id": "external-court-judgment-func",
+                    "name": "CSDL Thông tin Bản án (1)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "external-category-group",
+                "name": "Danh mục (8)",
+                "functions": [
+                  {
+                    "id": "external-category-group-func",
+                    "name": "Danh mục (8)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "external-social-security",
+                "name": "BHXH và Giảm nghèo (7)",
+                "functions": [
+                  {
+                    "id": "external-social-security-func",
+                    "name": "BHXH và Giảm nghèo (7)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "external-meritorious-group",
+                "name": "Người có công (3)",
+                "functions": [
+                  {
+                    "id": "external-meritorious-group-func",
+                    "name": "Người có công (3)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "external-children-group",
+                "name": "Trẻ em (1)",
+                "functions": [
+                  {
+                    "id": "external-children-group-func",
+                    "name": "Trẻ em (1)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "collection-reconciliation",
+        "name": "Đối soát dữ liệu",
+        "children": [
+          {
+            "id": "reconciliation-external-ministry",
+            "name": "Đối soát dữ liệu từ Bộ ngoài ngành",
+            "children": [
+              {
+                "id": "reconciliation-external-categories",
+                "name": "Đối soát tổng hợp các danh mục từ Bộ ngành ngoài (qua Trung tâm dữ liệu Quốc gia)",
+                "functions": [
+                  {
+                    "id": "reconciliation-external-categories-func",
+                    "name": "Đối soát tổng hợp các danh mục từ Bộ ngành ngoài (qua Trung tâm dữ liệu Quốc gia)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "reconciliation-external-court-judgment",
+                "name": "Đối soát tổng hợp dữ liệu về Thông tin Bản án, quyết định",
+                "functions": [
+                  {
+                    "id": "reconciliation-external-court-judgment-func",
+                    "name": "Đối soát tổng hợp dữ liệu về Thông tin Bản án, quyết định",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "reconciliation-internal-ministry",
+            "name": "Đối soát dữ liệu từ Bộ trong ngành",
+            "children": [
+              {
+                "id": "reconciliation-internal-civil-registry",
+                "name": "CSDL Hộ tích điện tử",
+                "functions": [
+                  {
+                    "id": "reconciliation-internal-civil-registry-func",
+                    "name": "CSDL Hộ tích điện tử",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "reconciliation-internal-registry",
+                "name": "HT quản lý hồ sơ QT (3)",
+                "functions": [
+                  {
+                    "id": "reconciliation-internal-registry-func",
+                    "name": "HT quản lý hồ sơ QT (3)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "reconciliation-internal-civil-judgment",
+                "name": "CSDL thi hành án dân sự (16)",
+                "functions": [
+                  {
+                    "id": "reconciliation-internal-civil-judgment-func",
+                    "name": "CSDL thi hành án dân sự (16)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "reconciliation-internal-security-measures",
+                "name": "CSDL về biện pháp BD (4)",
+                "functions": [
+                  {
+                    "id": "reconciliation-internal-security-measures-func",
+                    "name": "CSDL về biện pháp BD (4)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "reconciliation-internal-legal-national",
+                "name": "CSDL quốc gia về PL (5)",
+                "functions": [
+                  {
+                    "id": "reconciliation-internal-legal-national-func",
+                    "name": "CSDL quốc gia về PL (5)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "reconciliation-internal-civil-legal-center",
+                "name": "CSDL TT Tư Pháp dân sự (2)",
+                "functions": [
+                  {
+                    "id": "reconciliation-internal-civil-legal-center-func",
+                    "name": "CSDL TT Tư Pháp dân sự (2)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "reconciliation-internal-civil-legal-info",
+                "name": "HTTT trợ giúp pháp lý (6)",
+                "functions": [
+                  {
+                    "id": "reconciliation-internal-civil-legal-info-func",
+                    "name": "HTTT trợ giúp pháp lý (6)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "reconciliation-internal-legal-center",
+                "name": "Phần mềm tk ngành tư pháp phục vụ chia sẻ dữ liệu mở",
+                "functions": [
+                  {
+                    "id": "reconciliation-internal-legal-center-func",
+                    "name": "Phần mềm tk ngành tư pháp phục vụ chia sẻ dữ liệu mở",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "reconciliation-internal-family-base",
+                "name": "CSDL PB, GĐ và HG cơ sở (16)",
+                "functions": [
+                  {
+                    "id": "reconciliation-internal-family-base-func",
+                    "name": "CSDL PB, GĐ và HG cơ sở (16)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "reconciliation-internal-auction",
+                "name": "CSDL quản lý đấu giá TS (24)",
+                "functions": [
+                  {
+                    "id": "reconciliation-internal-auction-func",
+                    "name": "CSDL quản lý đấu giá TS (24)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "reconciliation-internal-international",
+                "name": "CSDL Hợp tác quốc tế (6)",
+                "functions": [
+                  {
+                    "id": "reconciliation-internal-international-func",
+                    "name": "CSDL Hợp tác quốc tế (6)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "reconciliation-internal-statistics",
+                "name": "Thu thập số liệu thống kê",
+                "functions": [
+                  {
+                    "id": "reconciliation-internal-statistics-func",
+                    "name": "Thu thập số liệu thống kê",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "reconciliation-internal-notary",
+                "name": "HTTT các tổ chức hành nghề công chứng",
+                "functions": [
+                  {
+                    "id": "reconciliation-internal-notary-func",
+                    "name": "HTTT các tổ chức hành nghề công chứng",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "reconciliation-internal-authentication",
+                "name": "CSDL chứng thực",
+                "functions": [
+                  {
+                    "id": "reconciliation-internal-authentication-func",
+                    "name": "CSDL chứng thực",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "processing",
+    "name": "Xử lý dữ liệu",
+    "children": [
+      {
+        "id": "processing-internal",
+        "name": "CSDL Trong ngành",
+        "children": [
+          {
+            "id": "processing-data-info-civil-registry",
+            "name": "CSDL Hộ tịch điện tử",
+            "functions": [
+              {
+                "id": "processing-data-info-civil-registry-func",
+                "name": "CSDL Hộ tịch điện tử",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "processing-data-info-case-management",
+            "name": "HT quản lý hồ sơ QT (3)",
+            "functions": [
+              {
+                "id": "processing-data-info-case-management-func",
+                "name": "HT quản lý hồ sơ QT (3)",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "processing-data-info-civil-judgment",
+            "name": "CSDL thi hành án dân sự (16)",
+            "functions": [
+              {
+                "id": "processing-data-info-civil-judgment-func",
+                "name": "CSDL thi hành án dân sự (16)",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "processing-data-info-security-measures",
+            "name": "CSDL về biện pháp BD (4)",
+            "functions": [
+              {
+                "id": "processing-data-info-security-measures-func",
+                "name": "CSDL về biện pháp BD (4)",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "processing-data-info-legal-national",
+            "name": "CSDL quốc gia về PL (5)",
+            "functions": [
+              {
+                "id": "processing-data-info-legal-national-func",
+                "name": "CSDL quốc gia về PL (5)",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "processing-data-info-civil-legal-center",
+            "name": "CSDL TT Tư Pháp dân sự (2)",
+            "functions": [
+              {
+                "id": "processing-data-info-civil-legal-center-func",
+                "name": "CSDL TT Tư Pháp dân sự (2)",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "processing-data-info-civil-legal-info",
+            "name": "HTTT trợ giúp pháp lý (6)",
+            "functions": [
+              {
+                "id": "processing-data-info-civil-legal-info-func",
+                "name": "HTTT trợ giúp pháp lý (6)",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "processing-data-info-legal-center",
+            "name": "Phần mềm tk ngành tư pháp phục vụ chia sẻ dữ liệu mở",
+            "functions": [
+              {
+                "id": "processing-data-info-legal-center-func",
+                "name": "Phần mềm tk ngành tư pháp phục vụ chia sẻ dữ liệu mở",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "processing-data-info-family-base",
+            "name": "CSDL PB, GĐ và HG cơ sở (16)",
+            "functions": [
+              {
+                "id": "processing-data-info-family-base-func",
+                "name": "CSDL PB, GĐ và HG cơ sở (16)",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "processing-data-info-auction",
+            "name": "CSDL quản lý đấu giá TS (24)",
+            "functions": [
+              {
+                "id": "processing-data-info-auction-func",
+                "name": "CSDL quản lý đấu giá TS (24)",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "processing-data-info-international",
+            "name": "CSDL Hợp tác quốc tế (6)",
+            "functions": [
+              {
+                "id": "processing-data-info-international-func",
+                "name": "CSDL Hợp tác quốc tế (6)",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "processing-external",
+        "name": "CSDL Ngoài ngành",
+        "children": [
+          {
+            "id": "processing-external-court-judgment",
+            "name": "CSDL Thông tin Bản án (1)",
+            "functions": [
+              {
+                "id": "processing-external-court-judgment-func",
+                "name": "CSDL Thông tin Bản án (1)",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "processing-external-category-group",
+            "name": "Danh mục (8)",
+            "functions": [
+              {
+                "id": "processing-external-category-group-func",
+                "name": "Danh mục (8)",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "processing-external-social-security",
+            "name": "BHXH và Giảm nghèo (7)",
+            "functions": [
+              {
+                "id": "processing-external-social-security-func",
+                "name": "BHXH và Giảm nghèo (7)",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "processing-external-meritorious-group",
+            "name": "Người có công (3)",
+            "functions": [
+              {
+                "id": "processing-external-meritorious-group-func",
+                "name": "Người có công (3)",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "processing-external-children-group",
+            "name": "Trẻ em (1)",
+            "functions": [
+              {
+                "id": "processing-external-children-group-func",
+                "name": "Trẻ em (1)",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "category",
+    "name": "Quản lý danh mục",
+    "children": [
+      {
+        "id": "category-setup",
+        "name": "Thiết lập danh mục",
+        "functions": [
+          {
+            "id": "category-setup-func",
+            "name": "Thiết lập danh mục",
+            "actions": [
+              "Xem",
+              "Thêm",
+              "Sửa",
+              "Xóa",
+              "Xuất Excel"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "category-list",
+        "name": "Danh sách danh mục",
+        "children": [
+          {
+            "id": "category-a",
+            "name": "Biên tập danh mục A",
+            "functions": [
+              {
+                "id": "category-a-func",
+                "name": "Biên tập danh mục A",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "category-published-list",
+        "name": "Công khai danh mục",
+        "functions": [
+          {
+            "id": "category-published-list-func",
+            "name": "Công khai danh mục",
+            "actions": [
+              "Xem",
+              "Thêm",
+              "Sửa",
+              "Xóa",
+              "Xuất Excel"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "category-report-group",
+        "name": "Thống kê danh mục",
+        "children": [
+          {
+            "id": "category-report",
+            "name": "Khai thác báo cáo",
+            "functions": [
+              {
+                "id": "category-report-func",
+                "name": "Khai thác báo cáo",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "category-report-list",
+            "name": "Báo cáo thống kê danh sách danh mục",
+            "functions": [
+              {
+                "id": "category-report-list-func",
+                "name": "Báo cáo thống kê danh sách danh mục",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "category-report-exploitation",
+            "name": "Báo cáo tình trạng khai thác danh mục",
+            "functions": [
+              {
+                "id": "category-report-exploitation-func",
+                "name": "Báo cáo tình trạng khai thác danh mục",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "category-report-status",
+            "name": "Báo cáo trạng thái danh mục",
+            "functions": [
+              {
+                "id": "category-report-status-func",
+                "name": "Báo cáo trạng thái danh mục",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "category-report-version",
+            "name": "Báo cáo phiên bản danh mục",
+            "functions": [
+              {
+                "id": "category-report-version-func",
+                "name": "Báo cáo phiên bản danh mục",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "open-data",
+    "name": "Dữ liệu mở",
+    "children": [
+      {
+        "id": "open-data-setup",
+        "name": "Thiết lập danh mục",
+        "functions": [
+          {
+            "id": "open-data-setup-func",
+            "name": "Thiết lập danh mục",
+            "actions": [
+              "Xem",
+              "Thêm",
+              "Sửa",
+              "Xóa",
+              "Xuất Excel"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "open-data-category-list",
+        "name": "Danh sách danh mục",
+        "children": [
+          {
+            "id": "open-data-category-a",
+            "name": "Biên tập danh mục A",
+            "functions": [
+              {
+                "id": "open-data-category-a-func",
+                "name": "Biên tập danh mục A",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "open-data-published-list",
+        "name": "Công bố dữ liệu mở",
+        "functions": [
+          {
+            "id": "open-data-published-list-func",
+            "name": "Công bố dữ liệu mở",
+            "actions": [
+              "Xem",
+              "Thêm",
+              "Sửa",
+              "Xóa",
+              "Xuất Excel"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "open-data-report",
+        "name": "Thống kê dữ liệu mở",
+        "functions": [
+          {
+            "id": "open-data-report-func",
+            "name": "Thống kê dữ liệu mở",
+            "actions": [
+              "Xem",
+              "Thêm",
+              "Sửa",
+              "Xóa",
+              "Xuất Excel"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "master-data",
+    "name": "Quản lý dữ liệu chủ",
+    "children": [
+      {
+        "id": "master-data-scale-management",
+        "name": "Quản lý quy mô dữ liệu chủ",
+        "functions": [
+          {
+            "id": "master-data-scale-management-func",
+            "name": "Quản lý quy mô dữ liệu chủ",
+            "actions": [
+              "Xem",
+              "Thêm",
+              "Sửa",
+              "Xóa",
+              "Xuất Excel"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "master-data-update",
+        "name": "Cập nhật dữ liệu chủ",
+        "children": [
+          {
+            "id": "master-data-update-a",
+            "name": "Dữ liệu chủ A",
+            "functions": [
+              {
+                "id": "master-data-update-a-func",
+                "name": "Dữ liệu chủ A",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "master-data-reports",
+        "name": "Báo cáo tìm kiếm dữ liệu chủ",
+        "functions": [
+          {
+            "id": "master-data-reports-func",
+            "name": "Báo cáo tìm kiếm dữ liệu chủ",
+            "actions": [
+              "Xem",
+              "Thêm",
+              "Sửa",
+              "Xóa",
+              "Xuất Excel"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "data-provisioning",
+    "name": "Cung cấp dữ liệu",
+    "children": [
+      {
+        "id": "provisioning-service-setup",
+        "name": "Thiết lập điều phối dữ liệu",
+        "functions": [
+          {
+            "id": "provisioning-service-setup-func",
+            "name": "Thiết lập điều phối dữ liệu",
+            "actions": [
+              "Xem",
+              "Thêm",
+              "Sửa",
+              "Xóa",
+              "Xuất Excel"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "provisioning-api-management",
+        "name": "Quản lý API cung cấp & đối soát",
+        "functions": [
+          {
+            "id": "provisioning-api-management-func",
+            "name": "Quản lý API cung cấp & đối soát",
+            "actions": [
+              "Xem",
+              "Thêm",
+              "Sửa",
+              "Xóa",
+              "Xuất Excel"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "provisioning-data-request",
+        "name": "Cung cấp dữ liệu theo yêu cầu",
+        "functions": [
+          {
+            "id": "provisioning-data-request-func",
+            "name": "Cung cấp dữ liệu theo yêu cầu",
+            "actions": [
+              "Xem",
+              "Thêm",
+              "Sửa",
+              "Xóa",
+              "Xuất Excel"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "provisioning-monitoring",
+        "name": "Kiểm soát & giám sát cung cấp",
+        "functions": [
+          {
+            "id": "provisioning-monitoring-func",
+            "name": "Kiểm soát & giám sát cung cấp",
+            "actions": [
+              "Xem",
+              "Thêm",
+              "Sửa",
+              "Xóa",
+              "Xuất Excel"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "provisioning-service-catalog",
+        "name": "Danh mục dịch vụ cung cấp",
+        "children": [
+          {
+            "id": "provisioning-shared",
+            "name": "CSDL Trong ngành",
+            "children": [
+              {
+                "id": "provisioning-shared-hotich",
+                "name": "CSDL Hộ tịch điện tử (12)",
+                "functions": [
+                  {
+                    "id": "provisioning-shared-hotich-func",
+                    "name": "CSDL Hộ tịch điện tử (12)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "provisioning-shared-quoctich",
+                "name": "HT quản lý hồ sơ QT (3)",
+                "functions": [
+                  {
+                    "id": "provisioning-shared-quoctich-func",
+                    "name": "HT quản lý hồ sơ QT (3)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "provisioning-shared-tha",
+                "name": "CSDL thi hành án dân sự (16)",
+                "functions": [
+                  {
+                    "id": "provisioning-shared-tha-func",
+                    "name": "CSDL thi hành án dân sự (16)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "provisioning-shared-bpbd",
+                "name": "CSDL về biện pháp BĐ (4)",
+                "functions": [
+                  {
+                    "id": "provisioning-shared-bpbd-func",
+                    "name": "CSDL về biện pháp BĐ (4)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "provisioning-shared-qgpl",
+                "name": "CSDL quốc gia về PL (5)",
+                "functions": [
+                  {
+                    "id": "provisioning-shared-qgpl-func",
+                    "name": "CSDL quốc gia về PL (5)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "provisioning-shared-tttp",
+                "name": "CSDL TT Tư pháp dân sự (2)",
+                "functions": [
+                  {
+                    "id": "provisioning-shared-tttp-func",
+                    "name": "CSDL TT Tư pháp dân sự (2)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "provisioning-shared-tgpl",
+                "name": "Phần mềm tk ngành tư pháp phục vụ chia sẻ dữ liệu mở (6)",
+                "functions": [
+                  {
+                    "id": "provisioning-shared-tgpl-func",
+                    "name": "Phần mềm tk ngành tư pháp phục vụ chia sẻ dữ liệu mở (6)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "provisioning-shared-pbgd",
+                "name": "CSDL PB, GD và HG cơ sở (16)",
+                "functions": [
+                  {
+                    "id": "provisioning-shared-pbgd-func",
+                    "name": "CSDL PB, GD và HG cơ sở (16)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "provisioning-shared-dgts",
+                "name": "CSDL quản lý đấu giá TS (25)",
+                "functions": [
+                  {
+                    "id": "provisioning-shared-dgts-func",
+                    "name": "CSDL quản lý đấu giá TS (25)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "provisioning-shared-htqt",
+                "name": "CSDL Hợp tác quốc tế (6)",
+                "functions": [
+                  {
+                    "id": "provisioning-shared-htqt-func",
+                    "name": "CSDL Hợp tác quốc tế (6)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "provisioning-internal",
+            "name": "CSDL Ngoài ngành",
+            "children": [
+              {
+                "id": "provisioning-internal-banan",
+                "name": "CSDL Thông tin Bản án (1)",
+                "functions": [
+                  {
+                    "id": "provisioning-internal-banan-func",
+                    "name": "CSDL Thông tin Bản án (1)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "provisioning-internal-danhmuc",
+                "name": "Danh mục (8)",
+                "functions": [
+                  {
+                    "id": "provisioning-internal-danhmuc-func",
+                    "name": "Danh mục (8)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "provisioning-internal-bhxh",
+                "name": "BHXH và Giảm nghèo (7)",
+                "functions": [
+                  {
+                    "id": "provisioning-internal-bhxh-func",
+                    "name": "BHXH và Giảm nghèo (7)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "provisioning-internal-ncc",
+                "name": "Người có công (3)",
+                "functions": [
+                  {
+                    "id": "provisioning-internal-ncc-func",
+                    "name": "Người có công (3)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "provisioning-internal-treem",
+                "name": "Trẻ em (1)",
+                "functions": [
+                  {
+                    "id": "provisioning-internal-treem-func",
+                    "name": "Trẻ em (1)",
+                    "actions": [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "provisioning-open",
+            "name": "Dữ liệu mở (32)",
+            "functions": [
+              {
+                "id": "provisioning-open-func",
+                "name": "Dữ liệu mở (32)",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "provisioning-master",
+            "name": "Dữ liệu chủ (1)",
+            "functions": [
+              {
+                "id": "provisioning-master-func",
+                "name": "Dữ liệu chủ (1)",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "reconciliation-catalog",
+        "name": "Quy trình đối soát dữ liệu",
+        "functions": [
+          {
+            "id": "reconciliation-catalog-func",
+            "name": "Quy trình đối soát dữ liệu",
+            "actions": [
+              "Xem",
+              "Thêm",
+              "Sửa",
+              "Xóa",
+              "Xuất Excel"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "admin",
+    "name": "Quản trị & vận hành",
+    "children": [
+      {
+        "id": "connection-management",
+        "name": "Quản lý kết nối",
+        "functions": [
+          {
+            "id": "connection-management-func",
+            "name": "Quản lý kết nối",
+            "actions": [
+              "Xem",
+              "Thêm",
+              "Sửa",
+              "Xóa",
+              "Xuất Excel"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "target-database-management",
+        "name": "Quản lý CSDL đích",
+        "functions": [
+          {
+            "id": "target-database-management-func",
+            "name": "Quản lý CSDL đích",
+            "actions": [
+              "Xem",
+              "Thêm",
+              "Sửa",
+              "Xóa",
+              "Xuất Excel"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "admin-user-management-group",
+        "name": "Quản trị người dùng",
+        "children": [
+          {
+            "id": "admin-users",
+            "name": "Quản lý người dùng",
+            "functions": [
+              {
+                "id": "admin-users-func",
+                "name": "Quản lý người dùng",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "admin-groups",
+            "name": "Quản lý nhóm người dùng",
+            "functions": [
+              {
+                "id": "admin-groups-func",
+                "name": "Quản lý nhóm người dùng",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "admin-functions",
+            "name": "Danh sách chức năng",
+            "functions": [
+              {
+                "id": "admin-functions-func",
+                "name": "Danh sách chức năng",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "admin-roles",
+            "name": "Quản lý vai trò",
+            "functions": [
+              {
+                "id": "admin-roles-func",
+                "name": "Quản lý vai trò",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "admin-config-group",
+        "name": "Cấu hình hệ thống",
+        "children": [
+          {
+            "id": "admin-config",
+            "name": "Thiết lập cấu hình hệ thống",
+            "functions": [
+              {
+                "id": "admin-config-func",
+                "name": "Thiết lập cấu hình hệ thống",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "admin-password-rules",
+            "name": "Thiết lập quy tắc đặt mật khẩu",
+            "functions": [
+              {
+                "id": "admin-password-rules-func",
+                "name": "Thiết lập quy tắc đặt mật khẩu",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "admin-backup",
+            "name": "Sao lưu dự phòng",
+            "functions": [
+              {
+                "id": "admin-backup-func",
+                "name": "Sao lưu dự phòng",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "admin-logs-group",
+        "name": "Quản lý nhật ký",
+        "children": [
+          {
+            "id": "admin-access-log",
+            "name": "Nhật ký truy cập",
+            "functions": [
+              {
+                "id": "admin-access-log-func",
+                "name": "Nhật ký truy cập",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "admin-error-log",
+            "name": "Nhật ký các lỗi phát sinh",
+            "functions": [
+              {
+                "id": "admin-error-log-func",
+                "name": "Nhật ký các lỗi phát sinh",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "admin-account-log",
+            "name": "Nhật ký quản lý tài khoản",
+            "functions": [
+              {
+                "id": "admin-account-log-func",
+                "name": "Nhật ký quản lý tài khoản",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "admin-config-log",
+            "name": "Nhật ký thay đổi cấu hình",
+            "functions": [
+              {
+                "id": "admin-config-log-func",
+                "name": "Nhật ký thay đổi cấu hình",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "admin-statistics-group",
+        "name": "Thống kê & báo cáo",
+        "children": [
+          {
+            "id": "admin-statistics",
+            "name": "Xem biểu đồ thống kê",
+            "functions": [
+              {
+                "id": "admin-statistics-func",
+                "name": "Xem biểu đồ thống kê",
+                "actions": [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "notifications",
+        "name": "Quản lý thông báo",
+        "functions": [
+          {
+            "id": "notifications-func",
+            "name": "Quản lý thông báo",
+            "actions": [
+              "Xem",
+              "Thêm",
+              "Sửa",
+              "Xóa",
+              "Xuất Excel"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "user-guide",
+        "name": "Hướng dẫn sử dụng",
+        "functions": [
+          {
+            "id": "user-guide-func",
+            "name": "Hướng dẫn sử dụng",
+            "actions": [
+              "Xem",
+              "Thêm",
+              "Sửa",
+              "Xóa",
+              "Xuất Excel"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

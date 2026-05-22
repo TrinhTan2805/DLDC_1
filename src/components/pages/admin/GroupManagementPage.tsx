@@ -3,6 +3,48 @@ import { Search, Plus, Edit, Trash2, Users, Eye, UserPlus, Lock, Settings, Chevr
 import { StatsCard } from '../../common/StatsCard';
 import { StatusTag } from '../../common/StatusTag';
 import { UsersRound } from 'lucide-react';
+import { menuStructure, type MenuItem, type MenuFunction } from './menuStructure';
+
+// Filter menu structure to remove CSDL/Hệ thống nodes as per user request
+const filterMenuStructure = (items: MenuItem[]): MenuItem[] => {
+  return items
+    .map(item => {
+      // Remove database/system specific containers
+      if (
+        item.id === 'view-collected-data' ||
+        item.id === 'collection-reconciliation' ||
+        item.id === 'processing' ||
+        item.id === 'provisioning-service-catalog'
+      ) {
+        return null;
+      }
+      
+      if (item.children) {
+        const filteredChildren = filterMenuStructure(item.children);
+        if (filteredChildren.length === 0) {
+          if (!item.functions || item.functions.length === 0) {
+            return null;
+          }
+        }
+        return {
+          ...item,
+          children: filteredChildren
+        };
+      }
+      
+      return item;
+    })
+    .filter((item): item is MenuItem => item !== null);
+};
+
+const filteredMenuStructure = filterMenuStructure(menuStructure);
+
+interface Member {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+}
 
 interface Group {
   id: number;
@@ -16,162 +58,62 @@ interface Group {
   status: 'active' | 'inactive';
   members: Member[];
   functions: string[];
+  role?: string;
   functionPermissions?: { [functionId: string]: string[] };
-  dataPermissions?: { [sourceId: string]: string[] };
+  dataPermissions?: { [sourceId: string]: { [tableId: string]: string[] } };
 }
 
-interface Member {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-}
-
-interface MenuFunction {
+export interface DatabaseTable {
   id: string;
   name: string;
-  actions: string[];
 }
 
-interface MenuItem {
+export interface DataSource {
   id: string;
   name: string;
-  children?: MenuItem[];
-  functions?: MenuFunction[];
+  tables: DatabaseTable[];
 }
 
-const menuStructure: MenuItem[] = [
-  {
-    id: 'dashboard',
-    name: 'Tổng quan',
-    functions: [
-      { id: 'dashboard-main', name: 'Dashboard', actions: ['Xem', 'Xuất Excel'] }
-    ]
-  },
-  {
-    id: 'data-collection',
-    name: 'Quản lý thu thập CSDL',
-    children: [
-      {
-        id: 'legal-docs',
-        name: 'CSDL Văn bản QPPL',
-        functions: [
-          { id: 'legal-docs-list', name: 'Danh sách văn bản', actions: ['Xem', 'Thêm', 'Sửa', 'Xóa', 'Xuất Excel', 'Import Excel'] }
-        ]
-      },
-      {
-        id: 'business-reg',
-        name: 'CSDL Đăng ký kinh doanh',
-        functions: [
-          { id: 'business-reg-list', name: 'Danh sách đăng ký', actions: ['Xem', 'Thêm', 'Sửa', 'Xóa', 'Xuất Excel', 'Import Excel'] }
-        ]
-      },
-      {
-        id: 'notary',
-        name: 'CSDL Công chứng',
-        functions: [
-          { id: 'notary-list', name: 'Danh sách công chứng', actions: ['Xem', 'Thêm', 'Sửa', 'Xóa', 'Xuất Excel', 'Import Excel'] }
-        ]
-      },
-      {
-        id: 'legal-aid',
-        name: 'CSDL TGPL',
-        functions: [
-          { id: 'legal-aid-list', name: 'Danh sách TGPL', actions: ['Xem', 'Thêm', 'Sửa', 'Xóa', 'Xuất Excel', 'Import Excel'] }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'data-processing',
-    name: 'Xử lý dữ liệu',
-    children: [
-      {
-        id: 'internal-data',
-        name: 'Dữ liệu trong ngành',
-        functions: [
-          { id: 'internal-list', name: 'Danh sách dữ liệu', actions: ['Xem', 'Cấu hình xử lý', 'Sửa lỗi', 'Xuất Excel'] },
-          { id: 'internal-config', name: 'Cấu hình xử lý dữ liệu', actions: ['Xem', 'Thêm', 'Sửa', 'Xóa'] },
-          { id: 'internal-warnings', name: 'Danh sách dữ liệu cảnh báo', actions: ['Xem', 'Sửa', 'Xuất Excel'] },
-          { id: 'internal-history', name: 'Lịch sử xử lý', actions: ['Xem', 'Xuất Excel'] }
-        ]
-      },
-      {
-        id: 'external-data',
-        name: 'Dữ liệu ngoài ngành',
-        functions: [
-          { id: 'external-list', name: 'Danh sách dữ liệu', actions: ['Xem', 'Cấu hình xử lý', 'Sửa lỗi', 'Xuất Excel'] },
-          { id: 'external-config', name: 'Cấu hình xử lý dữ liệu', actions: ['Xem', 'Thêm', 'Sửa', 'Xóa'] },
-          { id: 'external-warnings', name: 'Danh sách dữ liệu cảnh báo', actions: ['Xem', 'Sửa', 'Xuất Excel'] },
-          { id: 'external-history', name: 'Lịch sử xử lý', actions: ['Xem', 'Xuất Excel'] }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'master-data',
-    name: 'Quản lý danh mục',
-    children: [
-      {
-        id: 'categories',
-        name: 'Danh mục dữ liệu',
-        functions: [
-          { id: 'category-list', name: 'Danh sách danh mục', actions: ['Xem', 'Thêm', 'Sửa', 'Xóa', 'Xuất Excel', 'Import Excel'] }
-        ]
-      },
-      {
-        id: 'sources',
-        name: 'Nguồn dữ liệu',
-        functions: [
-          { id: 'source-list', name: 'Danh sách nguồn', actions: ['Xem', 'Thêm', 'Sửa', 'Xóa'] }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'admin',
-    name: 'Quản lý hệ thống',
-    children: [
-      {
-        id: 'users',
-        name: 'Quản lý người dùng',
-        functions: [
-          { id: 'user-list', name: 'Danh sách người dùng', actions: ['Xem', 'Thêm', 'Sửa', 'Xóa', 'Khóa/Mở khóa', 'Xuất Excel'] }
-        ]
-      },
-      {
-        id: 'groups',
-        name: 'Quản lý nhóm',
-        functions: [
-          { id: 'group-list', name: 'Danh sách nhóm', actions: ['Xem', 'Thêm', 'Sửa', 'Xóa', 'Phân quyền'] }
-        ]
-      },
-      {
-        id: 'roles',
-        name: 'Quản lý vai trò',
-        functions: [
-          { id: 'role-list', name: 'Danh sách vai trò', actions: ['Xem', 'Thêm', 'Sửa', 'Xóa', 'Phân quyền'] }
-        ]
-      }
-    ]
-  }
+const commonTables: DatabaseTable[] = [
+  { id: 'tb_khaisinh', name: 'Bộ dữ liệu hồ sơ đăng ký khai sinh' },
+  { id: 'tb_kethon', name: 'Bộ dữ liệu hồ sơ đăng ký kết hôn' },
+  { id: 'tb_khaitu', name: 'Bộ dữ liệu hồ sơ đăng ký khai tử' },
+  { id: 'tb_nhanchamecon', name: 'Bộ dữ liệu hồ sơ đăng ký nhận cha, mẹ, con' },
+  { id: 'tb_nuoiconnuoi', name: 'Bộ dữ liệu hồ sơ đăng ký nuôi con nuôi' },
+  { id: 'tb_giamho', name: 'Bộ dữ liệu hồ sơ đăng ký giám hộ' },
+  { id: 'tb_chamdutgiamho', name: 'Bộ dữ liệu hồ sơ đăng ký chấm dứt giám hộ' },
+  { id: 'tb_thaydoi', name: 'Bộ hồ sơ đăng ký thay đổi, cải chính, bổ sung thông tin hộ tịch, xác định lại dân tộc' },
+  { id: 'tb_giamsatgiamho', name: 'Bộ dữ liệu hồ sơ đăng ký giám sát việc giám hộ' },
+  { id: 'tb_chamdutgiamsat', name: 'Bộ dữ liệu hồ sơ đăng ký chấm dứt giám sát việc giám hộ' },
+  { id: 'tb_ghichulyhon', name: 'Bộ dữ liệu hồ sơ ghi vào sổ việc ly hôn/hủy việc kết hôn đã thực hiện tại cơ quan có thẩm quyền của nước ngoài (ghi chú ly hôn)' },
 ];
 
-const dataSources = [
-  { id: 'vbqppl', name: 'CSDL Văn bản QPPL' },
-  { id: 'dkkd', name: 'CSDL Đăng ký kinh doanh' },
-  { id: 'cc', name: 'CSDL Công chứng' },
-  { id: 'tgpl', name: 'CSDL Trợ giúp pháp lý' },
+const otherTables: DatabaseTable[] = [
+  { id: 'tb_generic_1', name: 'Bảng dữ liệu chung 1' },
+  { id: 'tb_generic_2', name: 'Bảng dữ liệu chung 2' },
+  { id: 'tb_generic_3', name: 'Bảng danh mục' },
 ];
 
-const dataPermissionActions = [
-  { id: 'view_collected', name: 'Xem dữ liệu thu thập' },
-  { id: 'config_process', name: 'Cấu hình tham số xử lý' },
-  { id: 'view_category', name: 'Xem dữ liệu danh mục' },
-  { id: 'view_master', name: 'Xem dữ liệu chủ' },
-  { id: 'view_source', name: 'Xem dữ liệu nguồn' },
-  { id: 'config_api', name: 'Cấu hình API điều phối dữ liệu đi' }
+const dataSources: DataSource[] = [
+  { id: 'data-info-civil-registry', name: 'CSDL Hộ tịch điện tử', tables: commonTables },
+  { id: 'data-info-case-management', name: 'HT quản lý hồ sơ QT (3)', tables: otherTables },
+  { id: 'data-info-civil-judgment', name: 'CSDL thi hành án dân sự (16)', tables: otherTables },
+  { id: 'data-info-security-measures', name: 'CSDL về biện pháp BD (4)', tables: otherTables },
+  { id: 'data-info-legal-national', name: 'CSDL quốc gia về PL (5)', tables: otherTables },
+  { id: 'data-info-civil-legal-center', name: 'CSDL TT Tư Pháp dân sự (2)', tables: otherTables },
+  { id: 'data-info-civil-legal-info', name: 'HTTT trợ giúp pháp lý (6)', tables: otherTables },
+  { id: 'data-info-legal-center', name: 'Phần mềm tk ngành tư pháp phục vụ chia sẻ dữ liệu mở', tables: otherTables },
+  { id: 'data-info-family-base', name: 'CSDL PB, GĐ và HG cơ sở (16)', tables: otherTables },
+  { id: 'data-info-auction', name: 'CSDL quản lý đấu giá TS (24)', tables: otherTables },
+  { id: 'data-info-international', name: 'CSDL Hợp tác quốc tế (6)', tables: otherTables },
+  { id: 'external-court-judgment', name: 'CSDL Thông tin Bản án (1)', tables: otherTables },
+  { id: 'external-category-group', name: 'Danh mục (8)', tables: otherTables },
+  { id: 'external-social-security', name: 'BHXH và Giảm nghèo (7)', tables: otherTables },
+  { id: 'external-meritorious-group', name: 'Người có công (3)', tables: otherTables },
+  { id: 'external-children-group', name: 'Trẻ em (1)', tables: otherTables },
 ];
+
+const dataPermissionActions = ['Xem', 'Thêm', 'Sửa', 'Xóa', 'Xuất Excel'];
 
 const groupsData: Group[] = [
   { 
@@ -185,7 +127,8 @@ const groupsData: Group[] = [
     createdDate: '01/01/2024', 
     status: 'active',
     members: [],
-    functions: ['Toàn quyền']
+    functions: ['Toàn quyền'],
+    role: 'Quản trị hệ thống'
   },
   { 
     id: 2, 
@@ -198,7 +141,8 @@ const groupsData: Group[] = [
     createdDate: '01/01/2024', 
     status: 'active',
     members: [],
-    functions: ['Xem báo cáo', 'Quản lý người dùng']
+    functions: ['Xem báo cáo', 'Quản lý người dùng'],
+    role: 'Quản trị hệ thống'
   },
   { 
     id: 3, 
@@ -211,7 +155,8 @@ const groupsData: Group[] = [
     createdDate: '05/01/2024', 
     status: 'active',
     members: [],
-    functions: ['Thêm dữ liệu', 'Sửa dữ liệu', 'Xem dữ liệu']
+    functions: ['Thêm dữ liệu', 'Sửa dữ liệu', 'Xem dữ liệu'],
+    role: 'Quản trị nghiệp vụ'
   },
   { 
     id: 4, 
@@ -224,7 +169,8 @@ const groupsData: Group[] = [
     createdDate: '10/01/2024', 
     status: 'active',
     members: [],
-    functions: ['Thêm dữ liệu', 'Sửa dữ liệu', 'Xem dữ liệu']
+    functions: ['Thêm dữ liệu', 'Sửa dữ liệu', 'Xem dữ liệu'],
+    role: 'Quản trị nghiệp vụ'
   },
   { 
     id: 5, 
@@ -237,7 +183,8 @@ const groupsData: Group[] = [
     createdDate: '15/01/2024', 
     status: 'active',
     members: [],
-    functions: ['Thêm dữ liệu', 'Sửa dữ liệu', 'Xem dữ liệu']
+    functions: ['Thêm dữ liệu', 'Sửa dữ liệu', 'Xem dữ liệu'],
+    role: 'Quản trị nghiệp vụ'
   },
   { 
     id: 6, 
@@ -250,7 +197,8 @@ const groupsData: Group[] = [
     createdDate: '20/01/2024', 
     status: 'active',
     members: [],
-    functions: ['Thêm dữ liệu', 'Sửa dữ liệu', 'Xem dữ liệu']
+    functions: ['Thêm dữ liệu', 'Sửa dữ liệu', 'Xem dữ liệu'],
+    role: 'Quản trị nghiệp vụ'
   },
   { 
     id: 7, 
@@ -263,7 +211,8 @@ const groupsData: Group[] = [
     createdDate: '25/01/2024', 
     status: 'active',
     members: [],
-    functions: ['Xem dữ liệu', 'Duyệt dữ liệu', 'Báo cáo']
+    functions: ['Xem dữ liệu', 'Duyệt dữ liệu', 'Báo cáo'],
+    role: 'Người dùng cơ bản'
   },
   { 
     id: 8, 
@@ -276,7 +225,8 @@ const groupsData: Group[] = [
     createdDate: '01/02/2024', 
     status: 'active',
     members: [],
-    functions: ['Xem dữ liệu', 'Duyệt dữ liệu', 'Báo cáo']
+    functions: ['Xem dữ liệu', 'Duyệt dữ liệu', 'Báo cáo'],
+    role: 'Người dùng cơ bản'
   }
 ];
 
@@ -303,6 +253,7 @@ type ModalType = 'add' | 'edit' | 'detail' | 'delete' | 'add-members' | 'assign-
 type DetailTabType = 'info' | 'function' | 'data';
 
 export function GroupManagementPage() {
+  const [groups, setGroups] = useState<Group[]>(groupsData);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [modalType, setModalType] = useState<ModalType>(null);
@@ -314,16 +265,23 @@ export function GroupManagementPage() {
   const [selectedMenuItem, setSelectedMenuItem] = useState<string>('dashboard');
   const [selectedMenuItems, setSelectedMenuItems] = useState<string[]>([]);
   const [selectedPermissions, setSelectedPermissions] = useState<{ [key: string]: string[] }>({});
-  const [selectedDataPermissions, setSelectedDataPermissions] = useState<{ [key: string]: string[] }>({});
+  const [selectedDataPermissions, setSelectedDataPermissions] = useState<{ [sourceId: string]: { [tableId: string]: string[] } }>({});
+  const [expandedDataSources, setExpandedDataSources] = useState<string[]>([]);
+  
+  // State to hold actual saved permissions per group
+  const [savedMenuItems, setSavedMenuItems] = useState<{ [groupId: number]: string[] }>({});
+  const [savedPermissions, setSavedPermissions] = useState<{ [groupId: number]: { [key: string]: string[] } }>({});
+  const [savedDataPermissions, setSavedDataPermissions] = useState<{ [groupId: number]: { [sourceId: string]: { [tableId: string]: string[] } } }>({});
   const [formData, setFormData] = useState({
     name: '',
     code: '',
     description: '',
     department: '',
     status: 'active' as 'active' | 'inactive',
+    role: '',
   });
 
-  const filteredGroups = groupsData.filter(group => {
+  const filteredGroups = groups.filter(group => {
     const matchesSearch = group.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       group.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
       group.department.toLowerCase().includes(searchTerm.toLowerCase());
@@ -344,10 +302,22 @@ export function GroupManagementPage() {
           description: group.description,
           department: group.department,
           status: group.status,
+          role: group.role || '',
         });
       }
       if (type === 'detail') {
         setActiveDetailTab(tab);
+        if (tab === 'function') {
+          setSelectedMenuItems(savedMenuItems[group.id] || []);
+          setSelectedPermissions(savedPermissions[group.id] || {});
+          setSelectedDataPermissions(savedDataPermissions[group.id] || {});
+          setExpandedDataSources([]);
+        }
+      }
+      if (type === 'add-members') {
+        setSelectedUsers(group.members.map(m => m.id));
+      } else {
+        setSelectedUsers([]);
       }
     } else {
       setSelectedGroup(null);
@@ -357,10 +327,38 @@ export function GroupManagementPage() {
         description: '',
         department: '',
         status: 'active',
+        role: '',
       });
+      setSelectedUsers([]);
     }
-    setSelectedUsers([]);
     setSelectedFunctions([]);
+  };
+
+  const handleSaveMembers = () => {
+    if (!selectedGroup) return;
+
+    const usersToAdd = availableUsers
+      .filter(u => selectedUsers.includes(u.id))
+      .map(u => ({
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        role: u.department
+      }));
+
+    const updatedGroup = {
+      ...selectedGroup,
+      members: usersToAdd,
+      memberCount: usersToAdd.length
+    };
+
+    setGroups(prevGroups => prevGroups.map(group => 
+      group.id === selectedGroup.id ? updatedGroup : group
+    ));
+    
+    setSelectedGroup(updatedGroup);
+    alert('Đã lưu danh sách thành viên thành công!');
+    handleCloseModal();
   };
 
   const handleCloseModal = () => {
@@ -369,6 +367,56 @@ export function GroupManagementPage() {
     setSelectedUsers([]);
     setSelectedFunctions([]);
     setActiveDetailTab('info');
+  };
+
+  const handleSaveGroup = () => {
+    if (!formData.name || !formData.code || !formData.department || !formData.role) {
+      alert('Vui lòng điền đầy đủ các thông tin bắt buộc (*)!');
+      return;
+    }
+
+    if (modalType === 'add') {
+      if (groups.some(g => g.code.toUpperCase() === formData.code.toUpperCase())) {
+        alert('Mã nhóm đã tồn tại trong hệ thống!');
+        return;
+      }
+
+      const newGroup: Group = {
+        id: groups.length > 0 ? Math.max(...groups.map(g => g.id)) + 1 : 1,
+        name: formData.name,
+        code: formData.code.toUpperCase(),
+        description: formData.description,
+        department: formData.department,
+        status: formData.status,
+        role: formData.role,
+        memberCount: 0,
+        functionCount: 0,
+        createdDate: new Date().toLocaleDateString('vi-VN'),
+        members: [],
+        functions: []
+      };
+      setGroups([...groups, newGroup]);
+      alert('Thêm nhóm người dùng mới thành công!');
+    } else if (modalType === 'edit' && selectedGroup) {
+      setGroups(groups.map(g => g.id === selectedGroup.id ? {
+        ...g,
+        name: formData.name,
+        description: formData.description,
+        department: formData.department,
+        status: formData.status,
+        role: formData.role
+      } : g));
+      alert('Cập nhật nhóm người dùng thành công!');
+    }
+    handleCloseModal();
+  };
+
+  const handleDeleteGroup = () => {
+    if (selectedGroup) {
+      setGroups(groups.filter(g => g.id !== selectedGroup.id));
+      alert('Xóa nhóm người dùng thành công!');
+      handleCloseModal();
+    }
   };
 
   const toggleUser = (userId: number) => {
@@ -450,7 +498,7 @@ export function GroupManagementPage() {
       });
     };
     
-    traverse(menuStructure);
+    traverse(filteredMenuStructure);
     return selectableIds;
   };
 
@@ -498,39 +546,49 @@ export function GroupManagementPage() {
   const getSelectedMenuFunctions = (): MenuFunction[] => {
     const allFunctions: MenuFunction[] = [];
     
-    selectedMenuItems.forEach(menuId => {
-      for (const menu of menuStructure) {
-        if (menu.id === menuId && menu.functions) {
-          allFunctions.push(...menu.functions);
+    const findFunctions = (items: MenuItem[], targetId: string, currentPath: string[] = []) => {
+      for (const item of items) {
+        if (item.id === targetId && item.functions) {
+          const augmentedFunctions = item.functions.map(f => ({
+            ...f,
+            name: currentPath.length > 0 ? `${currentPath[0]} > ${f.name}` : f.name
+          }));
+          allFunctions.push(...augmentedFunctions);
+          return;
         }
-        if (menu.children) {
-          for (const child of menu.children) {
-            if (child.id === menuId && child.functions) {
-              allFunctions.push(...child.functions);
-            }
-          }
+        if (item.children) {
+          findFunctions(item.children, targetId, [...currentPath, item.name]);
         }
       }
+    };
+
+    selectedMenuItems.forEach(menuId => {
+      findFunctions(filteredMenuStructure, menuId);
     });
     
     return allFunctions;
   };
 
   const getCurrentMenuFunctions = (menuId: string): MenuFunction[] => {
-    // Tìm menu item dựa vào menuId
-    for (const menu of menuStructure) {
-      if (menu.id === menuId && menu.functions) {
-        return menu.functions;
-      }
-      if (menu.children) {
-        for (const child of menu.children) {
-          if (child.id === menuId && child.functions) {
-            return child.functions;
-          }
+    let result: MenuFunction[] = [];
+    
+    const findFunctions = (items: MenuItem[], targetId: string, currentPath: string[] = []) => {
+      for (const item of items) {
+        if (item.id === targetId && item.functions) {
+          result = item.functions.map(f => ({
+            ...f,
+            name: currentPath.length > 0 ? `${currentPath[0]} > ${f.name}` : f.name
+          }));
+          return;
+        }
+        if (item.children) {
+          findFunctions(item.children, targetId, [...currentPath, item.name]);
         }
       }
-    }
-    return [];
+    };
+    
+    findFunctions(filteredMenuStructure, menuId);
+    return result;
   };
 
   const hasChildrenWithFunctions = (item: MenuItem): boolean => {
@@ -652,7 +710,7 @@ export function GroupManagementPage() {
                     <StatusTag label={group.code} variant="blue" />
                   </div>
                   <p className="text-sm text-slate-600 mb-1">{group.description}</p>
-                  <p className="text-xs text-slate-500">{group.department}</p>
+                  <p className="text-xs text-slate-500">Đơn vị: {group.department} • Vai trò: <span className="font-semibold text-blue-600">{group.role || 'Chưa gán'}</span></p>
                 </div>
                 <div className="flex gap-2 ml-3">
                   <button 
@@ -726,14 +784,14 @@ export function GroupManagementPage() {
 
       {/* Add/Edit Modal */}
       {(modalType === 'add' || modalType === 'edit') && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={handleCloseModal}>
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white">
               <h3 className="text-slate-900">
                 {modalType === 'add' ? 'Thêm nhóm người dùng mới' : 'Chỉnh sửa nhóm người dùng'}
               </h3>
-              <button title="Thêm mới" aria-label="Thêm mới" onClick={handleCloseModal} className="text-slate-400 hover:text-slate-600">
-                <Plus className="w-5 h-5 rotate-45" />
+              <button title="Đóng" aria-label="Đóng" onClick={handleCloseModal} className="text-slate-400 hover:text-slate-600">
+                <X className="w-5 h-5" />
               </button>
             </div>
             <div className="p-6">
@@ -793,6 +851,21 @@ export function GroupManagementPage() {
                   </select>
                 </div>
                 <div>
+                  <label className="block text-sm text-slate-700 mb-2">
+                    Vai trò <span className="text-red-600">*</span>
+                  </label>
+                  <select
+                    value={formData.role}
+                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">-- Chọn vai trò --</option>
+                    <option value="Quản trị hệ thống">Quản trị hệ thống</option>
+                    <option value="Quản trị nghiệp vụ">Quản trị nghiệp vụ</option>
+                    <option value="Người dùng cơ bản">Người dùng cơ bản</option>
+                  </select>
+                </div>
+                <div>
                   <label className="block text-sm text-slate-700 mb-2">Trạng thái</label>
                   <select
                     value={formData.status}
@@ -805,7 +878,10 @@ export function GroupManagementPage() {
                 </div>
               </div>
               <div className="flex gap-3 mt-6">
-                <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <button 
+                  onClick={handleSaveGroup}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
                   {modalType === 'add' ? 'Thêm nhóm' : 'Lưu thay đổi'}
                 </button>
                 <button 
@@ -822,43 +898,17 @@ export function GroupManagementPage() {
 
       {/* Detail Modal with Tabs */}
       {modalType === 'detail' && selectedGroup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] flex flex-col">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={handleCloseModal}>
+          <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
             <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white">
               <div>
-                <h3 className="text-slate-900">Chi tiết nhóm: {selectedGroup.name}</h3>
+                <h3 className="text-slate-900">
+                  {activeDetailTab === 'function' ? 'Phân quyền chức năng' : 'Chi tiết nhóm'}: {selectedGroup.name}
+                </h3>
                 <p className="text-sm text-slate-600 mt-1">Mã nhóm: {selectedGroup.code}</p>
               </div>
               <button onClick={handleCloseModal} className="text-slate-400 hover:text-slate-600" title="Đóng">
                 <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            {/* Tabs Header */}
-            <div className="px-6 border-b border-slate-200 flex gap-6 bg-slate-50">
-              <button
-                onClick={() => setActiveDetailTab('info')}
-                className={`py-3 text-sm font-medium border-b-2 transition-colors ${
-                  activeDetailTab === 'info' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Thông tin & Thành viên
-              </button>
-              <button
-                onClick={() => setActiveDetailTab('function')}
-                className={`py-3 text-sm font-medium border-b-2 transition-colors ${
-                  activeDetailTab === 'function' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Phân quyền chức năng
-              </button>
-              <button
-                onClick={() => setActiveDetailTab('data')}
-                className={`py-3 text-sm font-medium border-b-2 transition-colors ${
-                  activeDetailTab === 'data' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Phân quyền dữ liệu
               </button>
             </div>
 
@@ -885,6 +935,10 @@ export function GroupManagementPage() {
                       <div>
                         <div className="text-xs text-slate-500 mb-1">Đơn vị</div>
                         <div className="text-sm text-slate-900">{selectedGroup.department}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-slate-500 mb-1">Vai trò</div>
+                        <div className="text-sm text-slate-900">{selectedGroup.role || 'Chưa gán vai trò'}</div>
                       </div>
                       <div>
                         <div className="text-xs text-slate-500 mb-1">Trạng thái</div>
@@ -919,7 +973,19 @@ export function GroupManagementPage() {
                               <div className="text-sm text-slate-900">{member.name}</div>
                               <div className="text-xs text-slate-500">{member.email} • {member.role}</div>
                             </div>
-                            <button className="text-red-600 hover:text-red-700 p-1" title="Xóa khỏi nhóm">
+                            <button 
+                              onClick={() => {
+                                const newMembers = selectedGroup.members.filter(m => m.id !== member.id);
+                                const updatedGroup = {
+                                  ...selectedGroup,
+                                  members: newMembers,
+                                  memberCount: newMembers.length
+                                };
+                                setSelectedGroup(updatedGroup);
+                                setGroups(prev => prev.map(g => g.id === updatedGroup.id ? updatedGroup : g));
+                              }}
+                              className="text-red-600 hover:text-red-700 p-1" title="Xóa khỏi nhóm"
+                            >
                               <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
@@ -972,7 +1038,7 @@ export function GroupManagementPage() {
                     </div>
 
                     <div className="space-y-1">
-                      {renderMenuTree(menuStructure)}
+                      {renderMenuTree(filteredMenuStructure)}
                     </div>
                   </div>
 
@@ -989,49 +1055,53 @@ export function GroupManagementPage() {
                     
                     {getSelectedMenuFunctions().length > 0 ? (
                       <div className="space-y-4">
-                        {getSelectedMenuFunctions().map((func) => (
-                          <div key={func.id} className="border border-slate-200 rounded-lg p-4">
-                            <div className="flex items-center justify-between mb-3">
-                              <div className="text-sm font-medium text-slate-900">{func.name}</div>
-                              <label className="flex items-center gap-2 text-xs text-blue-600 cursor-pointer hover:text-blue-700">
-                                <input
-                                  type="checkbox"
-                                  checked={isAllPermissionsSelectedForFunction(func.id, func.actions)}
-                                  ref={(input) => {
-                                    if (input) {
-                                      input.indeterminate = isSomePermissionsSelectedForFunction(func.id, func.actions);
-                                    }
-                                  }}
-                                  onChange={() => {
-                                    if (isAllPermissionsSelectedForFunction(func.id, func.actions)) {
-                                      deselectAllPermissionsForFunction(func.id);
-                                    } else {
-                                      selectAllPermissionsForFunction(func.id, func.actions);
-                                    }
-                                  }}
-                                  className="w-3.5 h-3.5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                                />
-                                <span>Chọn tất cả</span>
-                              </label>
-                            </div>
-                            <div className="grid grid-cols-3 gap-3">
-                              {func.actions.map((action) => (
-                                <label
-                                  key={`${func.id}-${action}`}
-                                  className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded hover:bg-slate-50 cursor-pointer"
-                                >
+                        {getSelectedMenuFunctions().map((func) => {
+                          // Table-by-table database/system level permission is removed, so we treat all functions as normal functions
+
+                          return (
+                            <div key={func.id} className="border border-slate-200 rounded-lg p-4 mb-4">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="text-sm font-medium text-slate-900">{func.name}</div>
+                                <label className="flex items-center gap-2 text-xs text-blue-600 cursor-pointer hover:text-blue-700">
                                   <input
                                     type="checkbox"
-                                    checked={(selectedPermissions[func.id] || []).includes(action)}
-                                    onChange={() => togglePermission(func.id, action)}
-                                    className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                                    checked={isAllPermissionsSelectedForFunction(func.id, func.actions)}
+                                    ref={(input) => {
+                                      if (input) {
+                                        input.indeterminate = isSomePermissionsSelectedForFunction(func.id, func.actions);
+                                      }
+                                    }}
+                                    onChange={() => {
+                                      if (isAllPermissionsSelectedForFunction(func.id, func.actions)) {
+                                        deselectAllPermissionsForFunction(func.id);
+                                      } else {
+                                        selectAllPermissionsForFunction(func.id, func.actions);
+                                      }
+                                    }}
+                                    className="w-3.5 h-3.5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
                                   />
-                                  <span className="text-sm text-slate-700">{action}</span>
+                                  <span>Chọn tất cả</span>
                                 </label>
-                              ))}
+                              </div>
+                              <div className="grid grid-cols-3 gap-3">
+                                {func.actions.map((action) => (
+                                  <label
+                                    key={`${func.id}-${action}`}
+                                    className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded hover:bg-slate-50 cursor-pointer"
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={(selectedPermissions[func.id] || []).includes(action)}
+                                      onChange={() => togglePermission(func.id, action)}
+                                      className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                                    />
+                                    <span className="text-sm text-slate-700">{action}</span>
+                                  </label>
+                                ))}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     ) : (
                       <div className="text-center py-12 text-slate-500 text-sm">
@@ -1042,122 +1112,7 @@ export function GroupManagementPage() {
                 </div>
               )}
 
-              {activeDetailTab === 'data' && (
-                <div className="flex h-full min-h-[500px]">
-                  {/* Left Column - Data Sources */}
-                  <div className="w-80 border-r border-slate-200 overflow-y-auto p-4 bg-slate-50">
-                    <h4 className="text-sm text-slate-700 mb-3 px-3">Danh sách CSDL / Hệ thống nguồn</h4>
-                    <div className="space-y-1">
-                      {dataSources.map(source => {
-                        const isSelected = selectedMenuItems.includes(source.id);
-                        return (
-                          <div
-                            key={source.id}
-                            className={`flex items-center gap-2 px-3 py-2 rounded transition-colors cursor-pointer ${
-                              isSelected ? 'bg-blue-50' : 'hover:bg-slate-50'
-                            }`}
-                            onClick={() => toggleMenuItemSelection(source.id)}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={isSelected}
-                              onChange={() => {}}
-                              className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer pointer-events-none"
-                            />
-                            <span className={`text-sm flex-1 ${isSelected ? 'text-blue-700 font-medium' : 'text-slate-700'}`}>
-                              {source.name}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
 
-                  {/* Right Column - Data Permissions */}
-                  <div className="flex-1 overflow-y-auto p-6">
-                    <h4 className="text-sm text-slate-700 mb-4">
-                      Chi tiết quyền dữ liệu
-                      {selectedMenuItems.filter(id => dataSources.some(s => s.id === id)).length > 0 && (
-                        <span className="ml-2 text-blue-600">
-                          ({selectedMenuItems.filter(id => dataSources.some(s => s.id === id)).length} CSDL đã chọn)
-                        </span>
-                      )}
-                    </h4>
-
-                    {selectedMenuItems.filter(id => dataSources.some(s => s.id === id)).length > 0 ? (
-                      <div className="space-y-4">
-                        {selectedMenuItems.filter(id => dataSources.some(s => s.id === id)).map((sourceId) => {
-                          const source = dataSources.find(s => s.id === sourceId);
-                          if (!source) return null;
-                          const currentActions = selectedDataPermissions[sourceId] || [];
-                          const isAllActionsSelected = currentActions.length === dataPermissionActions.length;
-                          const isSomeActionsSelected = currentActions.length > 0 && !isAllActionsSelected;
-
-                          return (
-                            <div key={sourceId} className="border border-slate-200 rounded-lg p-4">
-                              <div className="flex items-center justify-between mb-3">
-                                <div className="text-sm font-medium text-slate-900">{source.name}</div>
-                                <label className="flex items-center gap-2 text-xs text-blue-600 cursor-pointer hover:text-blue-700">
-                                  <input
-                                    type="checkbox"
-                                    checked={isAllActionsSelected}
-                                    ref={(input) => {
-                                      if (input) input.indeterminate = isSomeActionsSelected;
-                                    }}
-                                    onChange={() => {
-                                      if (isAllActionsSelected) {
-                                        const newPerms = { ...selectedDataPermissions };
-                                        newPerms[sourceId] = [];
-                                        setSelectedDataPermissions(newPerms);
-                                      } else {
-                                        setSelectedDataPermissions({
-                                          ...selectedDataPermissions,
-                                          [sourceId]: dataPermissionActions.map(a => a.id)
-                                        });
-                                      }
-                                    }}
-                                    className="w-3.5 h-3.5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                                  />
-                                  <span>Chọn tất cả</span>
-                                </label>
-                              </div>
-                              <div className="grid grid-cols-2 gap-3">
-                                {dataPermissionActions.map((action) => (
-                                  <label
-                                    key={`${sourceId}-${action.id}`}
-                                    className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded hover:bg-slate-50 cursor-pointer"
-                                  >
-                                    <input
-                                      type="checkbox"
-                                      checked={currentActions.includes(action.id)}
-                                      onChange={() => {
-                                        const perms = { ...selectedDataPermissions };
-                                        const current = perms[sourceId] || [];
-                                        if (current.includes(action.id)) {
-                                          perms[sourceId] = current.filter(a => a !== action.id);
-                                        } else {
-                                          perms[sourceId] = [...current, action.id];
-                                        }
-                                        setSelectedDataPermissions(perms);
-                                      }}
-                                      className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                                    />
-                                    <span className="text-sm text-slate-700">{action.name}</span>
-                                  </label>
-                                ))}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      <div className="text-center py-12 text-slate-500 text-sm">
-                        Vui lòng chọn CSDL/Hệ thống nguồn từ danh sách bên trái
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Footer */}
@@ -1175,7 +1130,11 @@ export function GroupManagementPage() {
               ) : (
                 <button 
                   onClick={() => {
-                    // Xử lý lưu
+                    if (selectedGroup) {
+                      setSavedMenuItems({ ...savedMenuItems, [selectedGroup.id]: selectedMenuItems });
+                      setSavedPermissions({ ...savedPermissions, [selectedGroup.id]: selectedPermissions });
+                      setSavedDataPermissions({ ...savedDataPermissions, [selectedGroup.id]: selectedDataPermissions });
+                    }
                     alert(`Đã lưu phân quyền ${activeDetailTab === 'function' ? 'chức năng' : 'dữ liệu'} thành công!`);
                   }}
                   className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -1196,15 +1155,15 @@ export function GroupManagementPage() {
 
       {/* Add Members Modal */}
       {modalType === 'add-members' && selectedGroup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={handleCloseModal}>
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white">
               <div>
                 <h3 className="text-slate-900">Thêm thành viên vào nhóm</h3>
                 <p className="text-sm text-slate-600 mt-1">Nhóm: {selectedGroup.name}</p>
               </div>
-              <button title="Thêm mới" aria-label="Thêm mới" onClick={handleCloseModal} className="text-slate-400 hover:text-slate-600">
-                <Plus className="w-5 h-5 rotate-45" />
+              <button title="Đóng" aria-label="Đóng" onClick={handleCloseModal} className="text-slate-400 hover:text-slate-600">
+                <X className="w-5 h-5" />
               </button>
             </div>
             <div className="p-6">
@@ -1268,10 +1227,10 @@ export function GroupManagementPage() {
               </div>
               <div className="flex gap-3 mt-6">
                 <button 
-                  disabled={selectedUsers.length === 0}
+                  onClick={handleSaveMembers}
                   className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed"
                 >
-                  Thêm {selectedUsers.length > 0 && `(${selectedUsers.length})`} thành viên
+                  Lưu {selectedUsers.length > 0 && `(${selectedUsers.length})`} thành viên
                 </button>
                 <button 
                   onClick={handleCloseModal}
@@ -1288,10 +1247,13 @@ export function GroupManagementPage() {
 
       {/* Delete Confirmation */}
       {modalType === 'delete' && selectedGroup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-            <div className="px-6 py-4 border-b border-slate-200">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={handleCloseModal}>
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full" onClick={e => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
               <h3 className="text-slate-900">Xác nhận xóa nhóm</h3>
+              <button title="Đóng" aria-label="Đóng" onClick={handleCloseModal} className="text-slate-400 hover:text-slate-600">
+                <X className="w-5 h-5" />
+              </button>
             </div>
             <div className="p-6">
               <p className="text-slate-700 mb-4">
@@ -1306,7 +1268,10 @@ export function GroupManagementPage() {
                 <li>Không thể hoàn tác!</li>
               </ul>
               <div className="flex gap-3">
-                <button className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                <button 
+                  onClick={handleDeleteGroup}
+                  className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                >
                   Xóa nhóm
                 </button>
                 <button 

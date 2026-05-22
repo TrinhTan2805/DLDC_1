@@ -45,8 +45,8 @@ export function ResetPasswordModal({ isOpen, onClose, user }: ResetPasswordModal
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg w-full max-w-md">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={handleClose}>
+      <div className="bg-white rounded-lg w-full max-w-md" onClick={e => e.stopPropagation()}>
         <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
