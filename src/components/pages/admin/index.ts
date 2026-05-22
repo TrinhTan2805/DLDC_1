@@ -11,3 +11,4 @@ export { ErrorLogPage } from './ErrorLogPage';
 export { AccountManagementLogPage } from './AccountManagementLogPage';
 export { ConfigChangeLogPage } from './ConfigChangeLogPage';
 export { LogRetentionConfigPage } from './LogRetentionConfigPage';
+export { RoleManagementPage } from './RoleManagementPage';

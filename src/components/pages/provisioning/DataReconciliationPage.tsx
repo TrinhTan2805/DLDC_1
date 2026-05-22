@@ -8,6 +8,17 @@ export function ProvisionReconciliationPage({ processId }: { processId?: string 
   // Find the specific process
   const process = reconciliationData.find(p => p.id === processId);
   const history = processId && reconciliationHistoryData[processId] ? reconciliationHistoryData[processId] : [];
+  const filteredHistory = history.filter((entry) => {
+    if (!searchTerm.trim()) return true;
+    const term = searchTerm.toLowerCase();
+    return (
+      entry.runDate.toLowerCase().includes(term) ||
+      entry.runType.toLowerCase().includes(term) ||
+      entry.targetSystem.toLowerCase().includes(term) ||
+      entry.status.toLowerCase().includes(term) ||
+      (entry.note || '').toLowerCase().includes(term)
+    );
+  });
 
   if (!process) {
     return (
@@ -153,7 +164,7 @@ export function ProvisionReconciliationPage({ processId }: { processId?: string 
               </tr>
             </thead>
             <tbody className="text-sm divide-y divide-slate-100">
-              {history.length > 0 ? history.map((entry) => (
+              {filteredHistory.length > 0 ? filteredHistory.map((entry) => (
                 <tr key={entry.id} className="hover:bg-slate-50/50 transition-colors">
                   <td className="py-3 px-4 font-medium text-slate-700">{entry.runDate}</td>
                   <td className="py-3 px-4">
@@ -184,7 +195,7 @@ export function ProvisionReconciliationPage({ processId }: { processId?: string 
               )) : (
                 <tr>
                   <td colSpan={8} className="py-8 text-center text-slate-500">
-                    Chưa có dữ liệu lịch sử đối soát cho tiến trình này.
+                    Không tìm thấy bản ghi lịch sử phù hợp.
                   </td>
                 </tr>
               )}
@@ -192,9 +203,9 @@ export function ProvisionReconciliationPage({ processId }: { processId?: string 
           </table>
         </div>
         
-        {history.length > 0 && (
+        {filteredHistory.length > 0 && (
           <div className="p-4 border-t border-slate-200 flex justify-between items-center text-sm text-slate-500">
-            <div>Hiển thị {history.length} bản ghi</div>
+            <div>Hiển thị {filteredHistory.length} bản ghi</div>
             <div className="flex gap-1">
               <button className="px-3 py-1 border border-slate-200 rounded hover:bg-slate-50 disabled:opacity-50">Trước</button>
               <button className="px-3 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded font-medium">1</button>

@@ -345,6 +345,21 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
     });
   };
 
+  const isAnyModalOpen = !!(
+    showWizard ||
+    showEditModal ||
+    genericConfirm?.isOpen ||
+    showDeleteModal ||
+    showDeleteAttributeModal ||
+    showAttributeModal ||
+    showSimpleApproveModal ||
+    showSimpleRejectModal ||
+    showReviewModal ||
+    showExpireRequestModal ||
+    showExpireApproveModal ||
+    showApprovalModal
+  );
+
   return (
     <div className="space-y-6">
       {/* Tabs Navigation */}
@@ -447,7 +462,8 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
       </div>
 
       {/* Modals Container */}
-      <Portal>
+      {isAnyModalOpen && (
+        <Portal>
         {/* Wizard chỉ dành cho Thêm mới */}
         <CategoryWizardModal
           isOpen={showWizard} onClose={() => setShowWizard(false)}
@@ -636,7 +652,8 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
           }}
         />
 
-      </Portal>
+        </Portal>
+      )}
     </div>
   );
 };

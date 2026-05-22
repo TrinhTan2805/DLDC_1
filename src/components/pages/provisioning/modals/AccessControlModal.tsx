@@ -59,24 +59,24 @@ export function AccessControlModal({ isOpen, onClose, service }: AccessControlMo
 
           <div className="bg-white p-5 rounded-lg border border-slate-200">
             <h4 className="font-medium text-slate-800 mb-4">Giới hạn truy cập (Rate Limit & Quota)</h4>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Số request tối đa / Giây</label>
-                <input placeholder="..." title="Nhập liệu" aria-label="Nhập số" type="number" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" defaultValue={100} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Số request tối đa / Ngày</label>
-                <input placeholder="..." title="Nhập liệu" aria-label="Nhập số" type="number" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" defaultValue={10000} />
-              </div>
-              <div className="col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1">Thời hạn cấp quyền (mặc định)</label>
-                <select title="Tùy chọn" aria-label="Tùy chọn" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
-                  <option value="unlimited">Không giới hạn</option>
-                  <option value="1y">1 năm</option>
-                  <option value="6m">6 tháng</option>
-                  <option value="custom">Tùy chỉnh...</option>
-                </select>
-              </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Số request tối đa / Giây</label>
+            <input placeholder="..." title="Nhập liệu" aria-label="Nhập số" type="number" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" defaultValue={100} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Số request tối đa / Ngày</label>
+            <input placeholder="..." title="Nhập liệu" aria-label="Nhập số" type="number" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" defaultValue={10000} />
+          </div>
+          <div className="col-span-1 md:col-span-2">
+            <label className="block text-sm font-medium text-slate-700 mb-1">Thời hạn cấp quyền (mặc định)</label>
+            <select title="Tùy chọn" aria-label="Tùy chọn" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
+              <option value="unlimited">Không giới hạn</option>
+              <option value="1y">1 năm</option>
+              <option value="6m">6 tháng</option>
+              <option value="custom">Tùy chỉnh...</option>
+            </select>
+          </div>
             </div>
           </div>
         </div>

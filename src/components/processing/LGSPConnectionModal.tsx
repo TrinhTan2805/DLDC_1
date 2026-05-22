@@ -289,5 +289,6 @@ export function LGSPConnectionModal({ isOpen, onClose }: LGSPConnectionModalProp
         </div>
       </div>
     </div>
+    </div>
   );
 }

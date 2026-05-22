@@ -38,7 +38,7 @@ export function AccessControlTab({ service }: AccessControlTabProps) {
 
       <div className="bg-white p-5 rounded-lg border border-slate-200">
         <h4 className="font-medium text-slate-800 mb-4">Giới hạn truy cập (Rate Limit & Quota)</h4>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Số request tối đa / Giây</label>
             <input aria-label="Số request tối đa mỗi giây" type="number" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" defaultValue={100} />
@@ -47,7 +47,7 @@ export function AccessControlTab({ service }: AccessControlTabProps) {
             <label className="block text-sm font-medium text-slate-700 mb-1">Số request tối đa / Ngày</label>
             <input aria-label="Số request tối đa mỗi ngày" type="number" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" defaultValue={10000} />
           </div>
-          <div className="col-span-2">
+          <div className="col-span-1 md:col-span-2">
             <label className="block text-sm font-medium text-slate-700 mb-1">Thời hạn cấp quyền (mặc định)</label>
             <select aria-label="Thời hạn cấp quyền" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
               <option value="unlimited">Không giới hạn</option>

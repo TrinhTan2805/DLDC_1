@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Filter, RefreshCw, Search, Plus, Eye, Edit, Settings as SettingsIcon, Trash2, FileText, Activity, Settings, AlertCircle, AlertTriangle, X, Download, Send, ChevronLeft, ChevronRight, Calendar, Wrench, Power, Layers, Database, Eraser } from 'lucide-react';
+import { Filter, RefreshCw, Search, Plus, Eye, Edit, Settings as SettingsIcon, Trash2, FileText, Activity, Settings, AlertCircle, AlertTriangle, X, Download, Send, ChevronLeft, ChevronRight, Calendar, Wrench, Power, Layers, Database, Eraser, CheckCircle } from 'lucide-react';
 import { AddServiceModal, EditServiceModal, DeleteServiceModal, SettingsServiceModal } from './ServiceModals';
 import { ViewServiceModal } from './ViewServiceModal';
 import { LogManagement } from './LogManagement';
@@ -8,6 +8,8 @@ import { mockCollectionServices } from './mockCollectionServices';
 import { ServiceDataDetailPage } from './ServiceDataDetailPage';
 import { Portal } from '../../common/Portal';
 import { StatusTag } from '../../common/StatusTag';
+import { BaseModal } from '../../common/BaseModal';
+import { ConfirmModal } from '../../common/ConfirmModal';
 
 interface CollectionSetupPageProps {
   onNavigate?: (pageId: string) => void;
@@ -36,6 +38,9 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
   const [showErrorDetailModal, setShowErrorDetailModal] = useState(false);
   const [showDataDetailPage, setShowDataDetailPage] = useState(false);
   const [showInactiveModal, setShowInactiveModal] = useState(false);
+  const [showUpdateSuccessModal, setShowUpdateSuccessModal] = useState(false);
+  const [showIntegrateWarningModal, setShowIntegrateWarningModal] = useState(false);
+  const [showDeleteDataConfirmModal, setShowDeleteDataConfirmModal] = useState(false);
   const [inactiveReason, setInactiveReason] = useState('');
   const [selectedService, setSelectedService] = useState<any>(null);
 
@@ -487,14 +492,20 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
                               <button
                                 className="p-1.5 text-emerald-500 hover:bg-emerald-50 rounded-lg transition-all"
                                 title="Cập nhật dữ liệu"
-                                onClick={() => alert(`Cập nhật dữ liệu cho ${service.name}`)}
+                                onClick={() => {
+                                  setSelectedService(service);
+                                  setShowUpdateSuccessModal(true);
+                                }}
                               >
                                 <RefreshCw className="w-4 h-4" />
                               </button>
                               <button
                                 className="p-1.5 text-indigo-500 hover:bg-indigo-50 rounded-lg transition-all"
                                 title="Tích hợp mới"
-                                onClick={() => alert(`Tích hợp mới cho ${service.name}`)}
+                                onClick={() => {
+                                  setSelectedService(service);
+                                  setShowIntegrateWarningModal(true);
+                                }}
                               >
                                 <Plus className="w-4 h-4" />
                               </button>
@@ -511,7 +522,10 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
                               <button
                                 className="p-1.5 text-orange-500 hover:bg-orange-50 rounded-[6px] transition-all"
                                 title="Xóa dữ liệu thu thập"
-                                onClick={() => alert(`Xóa dữ liệu thu thập của ${service.name}`)}
+                                onClick={() => {
+                                  setSelectedService(service);
+                                  setShowDeleteDataConfirmModal(true);
+                                }}
                               >
                                 <Eraser className="w-4 h-4" />
                               </button>
@@ -643,6 +657,102 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
         isOpen={showSettingsModal}
         onClose={() => setShowSettingsModal(false)}
         service={selectedService}
+      />
+      <BaseModal
+        isOpen={showUpdateSuccessModal}
+        onClose={() => setShowUpdateSuccessModal(false)}
+        title="Cập nhật dữ liệu"
+        maxWidth="max-w-md"
+      >
+        <div className="flex flex-col items-center py-4">
+          <div className="w-14 h-14 bg-emerald-50 rounded-full flex items-center justify-center mb-5 ring-4 ring-emerald-100">
+            <CheckCircle className="w-7 h-7 text-emerald-600" />
+          </div>
+          <p className="text-[13px] font-bold text-center leading-relaxed px-4 mb-6 text-slate-800">
+            Khởi tạo yêu cầu Cập nhật dữ liệu thành công!
+          </p>
+          {selectedService && (
+            <p className="text-[12px] text-slate-500 text-center mb-6 -mt-4 font-medium px-4">
+              Hệ thống đang tiến hành đồng bộ dữ liệu cho: <span className="text-slate-900 font-semibold">{selectedService.name}</span>
+            </p>
+          )}
+          <div className="flex justify-center w-full">
+            <button 
+              onClick={() => setShowUpdateSuccessModal(false)}
+              style={{ padding: '8px 24px', borderRadius: '6px', fontWeight: 500 }}
+              className="bg-blue-600 text-white text-[13px] hover:bg-blue-700 transition-all shadow-sm active:scale-95"
+            >
+              Đóng
+            </button>
+          </div>
+        </div>
+      </BaseModal>
+      <BaseModal
+        isOpen={showIntegrateWarningModal}
+        onClose={() => setShowIntegrateWarningModal(false)}
+        title="Thông báo"
+        maxWidth="max-w-lg"
+        footer={
+          <div className="flex justify-end gap-3 w-full">
+            <button 
+              onClick={() => setShowIntegrateWarningModal(false)} 
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 active:scale-95 transition-all font-medium shadow-sm text-[13px]"
+            >
+              Đồng ý
+            </button>
+          </div>
+        }
+      >
+        <div className="pt-2 pb-4 space-y-5">
+          {/* Warning Icon & Bold Message */}
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center shrink-0">
+              <AlertTriangle className="w-6 h-6 text-amber-600" />
+            </div>
+            <div>
+              <h4 className="text-[15px] font-bold text-slate-800 leading-snug">
+                Không thể tích hợp dữ liệu
+              </h4>
+              <p className="text-[13px] text-slate-500 mt-1 font-medium">
+                CSDL đang cấu hình: <span className="text-slate-900 font-semibold">{selectedService?.name}</span>
+              </p>
+            </div>
+          </div>
+
+          {/* Detailed Points Container */}
+          <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 space-y-3.5">
+            <div className="flex items-start gap-3">
+              <div className="w-5 h-5 rounded-full bg-rose-100 flex items-center justify-center shrink-0 mt-0.5 text-rose-600">
+                <span className="text-[11px] font-bold">✓</span>
+              </div>
+              <p className="text-[13px] text-slate-700 leading-relaxed font-medium">
+                Bạn phải thực hiện xóa dữ liệu trước khi thực hiện thao tác.
+              </p>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center shrink-0 mt-0.5 text-amber-600">
+                <span className="text-[11px] font-bold">✓</span>
+              </div>
+              <p className="text-[13px] text-slate-700 leading-relaxed font-medium">
+                Hành động này sẽ ảnh hưởng tới các CSDL trích xuất đang sử dụng dữ liệu từ CSDL tích hợp này, các CSDL trích xuất đó sẽ không thể cập nhật dữ liệu thay đổi được nữa.
+              </p>
+            </div>
+          </div>
+        </div>
+      </BaseModal>
+      <ConfirmModal
+        isOpen={showDeleteDataConfirmModal}
+        onClose={() => setShowDeleteDataConfirmModal(false)}
+        onConfirm={() => {
+          alert('Đã xóa dữ liệu thu thập thành công!');
+        }}
+        title="Thông báo"
+        subtitle="Cảnh báo hành động xóa dữ liệu"
+        message="Nếu bạn xóa dữ liệu sẽ không thể hoàn tác dữ liệu trong cơ sở dữ liệu. Bạn có chắc chắn muốn xóa dữ liệu không?"
+        confirmText="Đồng ý"
+        cancelText="Hủy bỏ"
+        type="warning"
       />
 
       {/* Service Data Detail Page */}
