@@ -225,8 +225,13 @@ export function ConfigChangeLogPage() {
   const [filterStatus, setFilterStatus] = useState('all');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
   const [selectedLog, setSelectedLog] = useState<ConfigLog | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const filteredLogs = configLogs.filter(log => {
     const matchesSearch = log.configName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -234,7 +239,9 @@ export function ConfigChangeLogPage() {
                          log.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = filterType === 'all' || log.configType === filterType;
     const matchesStatus = filterStatus === 'all' || log.status === filterStatus;
-    return matchesSearch && matchesType && matchesStatus;
+    const matchesStartDate = !startDate || log.timestamp.split(' ')[0] >= startDate.split('-').reverse().join('/');
+    const matchesEndDate = !endDate || log.timestamp.split(' ')[0] <= endDate.split('-').reverse().join('/');
+    return matchesSearch && matchesType && matchesStatus && matchesStartDate && matchesEndDate;
   });
 
   const handleViewDetail = (log: ConfigLog) => {
@@ -245,11 +252,6 @@ export function ConfigChangeLogPage() {
   const closeDetailModal = () => {
     setShowDetailModal(false);
     setSelectedLog(null);
-  };
-
-  const handleExportExcel = () => {
-    alert('Đang xuất file Excel...');
-    // Logic export Excel
   };
 
   const getConfigTypeIcon = (type: ConfigLog['configType']) => {
@@ -316,31 +318,48 @@ export function ConfigChangeLogPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 config-log-container">
+      <style>{`
+        .config-log-container,
+        .config-log-container .text-sm,
+        .config-log-container .text-xs:not(th),
+        .config-log-container input,
+        .config-log-container select,
+        .config-log-container button,
+        .config-log-container td,
+        .config-log-container option,
+        .config-log-container div.text-slate-600,
+        .config-log-container div.text-slate-700,
+        .config-log-container div.text-slate-500,
+        .config-log-container div.text-slate-900:not(.text-2xl) {
+          font-size: 13px !important;
+        }
+      `}</style>
+
       {/* Tabs */}
-      <div className="bg-white rounded-lg border border-slate-200">
-        <div className="flex border-b border-slate-200">
+      <div className="bg-white border-b border-slate-200 px-6 -mx-6 -mt-6 mb-6">
+        <div className="flex gap-6">
           <button
             onClick={() => setActiveTab('logs')}
-            className={`flex items-center gap-2 px-6 py-3 border-b-2 transition-colors ${
+            className={`flex items-center gap-2 pb-3 pt-4 text-[13px] font-medium transition-colors border-b-2 ${
               activeTab === 'logs'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
             }`}
           >
-            <FileText className="w-4 h-4" />
-            <span className="text-sm">Nhật ký thay đổi cấu hình</span>
+            <FileText className="w-5 h-5" />
+            Nhật ký thay đổi cấu hình
           </button>
           <button
             onClick={() => setActiveTab('retention')}
-            className={`flex items-center gap-2 px-6 py-3 border-b-2 transition-colors ${
+            className={`flex items-center gap-2 pb-3 pt-4 text-[13px] font-medium transition-colors border-b-2 ${
               activeTab === 'retention'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
             }`}
           >
-            <Clock className="w-4 h-4" />
-            <span className="text-sm">Quản lý thời gian lưu trữ nhật ký</span>
+            <Clock className="w-5 h-5" />
+            Quản lý thời gian lưu trữ nhật ký
           </button>
         </div>
       </div>
@@ -376,173 +395,237 @@ export function ConfigChangeLogPage() {
             />
           </div>
 
-          {/* Filters */}
-          <div className="bg-white rounded-lg border border-slate-200 p-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="lg:col-span-2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+          {/* Search and Filters Row */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex-1 flex items-center gap-3">
+                <div className="relative flex-1">
                   <input
                     type="text"
                     placeholder="Tìm kiếm tên cấu hình, người thực hiện..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                   />
                 </div>
-              </div>
-              <div>
-                <select
-                  value={filterType}
-                  onChange={(e) => setFilterType(e.target.value)}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                <button className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center">
+                  <Search className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={`p-2 rounded-lg transition-colors shadow-sm flex items-center justify-center border ${showFilters ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-[#e2e8f0] text-slate-600 hover:bg-slate-50'}`}
+                  title="Bộ lọc"
                 >
-                  <option value="all">Tất cả loại cấu hình</option>
-                  <option value="security">Bảo mật</option>
-                  <option value="system">Hệ thống</option>
-                  <option value="email">Email</option>
-                  <option value="backup">Sao lưu</option>
-                  <option value="notification">Thông báo</option>
-                  <option value="ui">Giao diện</option>
-                  <option value="database">CSDL</option>
-                  <option value="api">API</option>
-                </select>
+                  {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
+                </button>
               </div>
-              <div>
-                <select
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="all">Tất cả trạng thái</option>
-                  <option value="success">Thành công</option>
-                  <option value="failed">Thất bại</option>
-                </select>
-              </div>
-              <div className="md:col-span-2 lg:col-span-4">
-                <div className="flex items-center gap-2 border border-slate-300 rounded-lg px-3 py-2">
-                  <Calendar className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                  <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="flex-1 outline-none text-sm"
-                    placeholder="Từ ngày"
-                  />
-                  <span className="text-slate-400">-</span>
-                  <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="flex-1 outline-none text-sm"
-                    placeholder="Đến ngày"
-                  />
+            </div>
+
+            {/* Collapsible Filters Row */}
+            {showFilters && (
+              <div className="bg-slate-50 p-5 rounded-lg border border-slate-200 grid grid-cols-4 gap-4 mt-4 animate-in slide-in-from-top-2 duration-200 shadow-sm relative">
+                <div className="absolute -top-2 right-[200px] w-4 h-4 bg-slate-50 border-t border-l border-slate-200 transform rotate-45"></div>
+
+                <div className="space-y-1.5 relative z-10">
+                  <label className="text-[13px] font-medium text-slate-700">Loại cấu hình</label>
+                  <select
+                    value={filterType}
+                    onChange={(e) => setFilterType(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                  >
+                    <option value="all">Tất cả loại cấu hình</option>
+                    <option value="security">Bảo mật</option>
+                    <option value="system">Hệ thống</option>
+                    <option value="email">Email</option>
+                    <option value="backup">Sao lưu</option>
+                    <option value="notification">Thông báo</option>
+                    <option value="ui">Giao diện</option>
+                    <option value="database">CSDL</option>
+                    <option value="api">API</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1.5 relative z-10">
+                  <label className="text-[13px] font-medium text-slate-700">Trạng thái</label>
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                  >
+                    <option value="all">Tất cả trạng thái</option>
+                    <option value="success">Thành công</option>
+                    <option value="failed">Thất bại</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1.5 relative z-10">
+                  <label className="text-[13px] font-medium text-slate-700">Thời gian từ</label>
+                  <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
+                    <input
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-slate-700 p-0"
+                    />
+                    <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 relative z-10">
+                  <label className="text-[13px] font-medium text-slate-700">Thời gian đến</label>
+                  <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
+                    <input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-slate-700 p-0"
+                    />
+                    <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="flex gap-3 mt-4">
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm flex items-center gap-2">
-                <Filter className="w-4 h-4" />
-                Lọc
-              </button>
-              <button 
-                onClick={handleExportExcel}
-                className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 text-sm flex items-center gap-2"
-              >
-                <Download className="w-4 h-4" />
-                Xuất Excel
-              </button>
-            </div>
+            )}
           </div>
 
           {/* Config Logs Table */}
-          <div className="bg-white rounded-lg border border-slate-200">
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-              <h3 className="text-slate-900">Nhật ký thay đổi cấu hình ({filteredLogs.length} bản ghi)</h3>
-            </div>
+          <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-slate-50">
+              <table className="w-full border-collapse collection-table text-[13px]">
+                <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-[1]">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Người thực hiện</th>
-                    <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Thời gian</th>
-                    <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Loại cấu hình</th>
-                    <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Tên cấu hình</th>
-                    <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Giá trị cũ</th>
-                    <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Giá trị mới</th>
-                    <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">IP người thực hiện</th>
-                    <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Trạng thái</th>
-                    <th className="px-6 py-3 text-right text-xs text-slate-600 uppercase tracking-wider">Thao tác</th>
+                    <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-12 text-[13px]">STT</th>
+                    <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Người thực hiện</th>
+                    <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Thời gian</th>
+                    <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Loại cấu hình</th>
+                    <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Tên cấu hình</th>
+                    <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Giá trị cũ</th>
+                    <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Giá trị mới</th>
+                    <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">IP người thực hiện</th>
+                    <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái</th>
+                    <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-24 text-[13px]">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {filteredLogs.map((log) => (
-                    <tr key={log.id} className="hover:bg-slate-50">
-                      <td className="px-6 py-4">
-                        <div className="text-sm text-slate-900">{log.performedBy}</div>
-                        <div className="text-xs text-slate-500">@{log.performedById}</div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-slate-700 whitespace-nowrap">{log.timestamp}</td>
-                      <td className="px-6 py-4">
-                        <StatusTag 
-                          label={getConfigTypeLabel(log.configType)} 
-                          variant={log.configType === 'security' ? 'red' : log.configType === 'system' ? 'blue' : log.configType === 'email' ? 'purple' : log.configType === 'backup' ? 'green' : log.configType === 'notification' ? 'amber' : log.configType === 'ui' ? 'pink' : log.configType === 'database' ? 'indigo' : 'cyan'} 
-                          icon={getConfigTypeIcon(log.configType)}
-                        />
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm text-slate-900 max-w-xs truncate">{log.configName}</div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm text-red-700 bg-red-50 px-2 py-1 rounded border border-red-200 max-w-xs truncate">
-                          {log.oldValue}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm text-green-700 bg-green-50 px-2 py-1 rounded border border-green-200 max-w-xs truncate">
-                          {log.newValue}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <code className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-700">
-                          {log.ip}
-                        </code>
-                      </td>
-                      <td className="px-6 py-4">
-                        <StatusTag 
-                          label={log.status === 'success' ? 'Thành công' : 'Thất bại'} 
-                          variant={log.status === 'success' ? 'green' : 'red'} 
-                          icon={log.status === 'success' ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
-                        />
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center justify-end">
-                          <button
-                            onClick={() => handleViewDetail(log)}
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                            title="Xem chi tiết"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                  {filteredLogs
+                    .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                    .map((log, index) => (
+                      <tr key={log.id} className="hover:bg-slate-50 transition-all group border-b border-slate-100">
+                        <td className="px-4 py-3 text-center text-slate-500 font-medium text-[13px]">{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                        <td className="px-4 py-3 text-left text-[13px]">
+                          <div className="font-medium text-slate-950 leading-snug">{log.performedBy}</div>
+                          <div className="text-slate-500 mt-0.5 font-mono text-[13px]">@{log.performedById}</div>
+                        </td>
+                        <td className="px-4 py-3 text-left text-slate-700 whitespace-nowrap text-[13px]">{log.timestamp}</td>
+                        <td className="px-4 py-3 text-left text-[13px]">
+                          <StatusTag 
+                            label={getConfigTypeLabel(log.configType)} 
+                            variant={log.configType === 'security' ? 'red' : log.configType === 'system' ? 'blue' : log.configType === 'email' ? 'purple' : log.configType === 'backup' ? 'green' : log.configType === 'notification' ? 'amber' : log.configType === 'ui' ? 'pink' : log.configType === 'database' ? 'indigo' : 'cyan'} 
+                            icon={getConfigTypeIcon(log.configType)}
+                          />
+                        </td>
+                        <td className="px-4 py-3 text-left text-[13px]">
+                          <div className="font-medium text-slate-900 max-w-xs truncate">{log.configName}</div>
+                        </td>
+                        <td className="px-4 py-3 text-left text-[13px]">
+                          <div className="text-red-700 bg-red-50 px-2 py-0.5 rounded border border-red-200 max-w-xs truncate font-mono text-xs inline-block">
+                            {log.oldValue}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-left text-[13px]">
+                          <div className="text-green-700 bg-green-50 px-2 py-0.5 rounded border border-green-200 max-w-xs truncate font-mono text-xs inline-block">
+                            {log.newValue}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-left text-[13px]">
+                          <code className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-700 font-mono">
+                            {log.ip}
+                          </code>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <StatusTag 
+                            label={log.status === 'success' ? 'Thành công' : 'Thất bại'} 
+                            variant={log.status === 'success' ? 'green' : 'red'} 
+                            icon={log.status === 'success' ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                          />
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <div className="flex items-center justify-center">
+                            <button
+                              onClick={() => handleViewDetail(log)}
+                              className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
+                              title="Xem chi tiết"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>
             
             {/* Pagination */}
-            <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
-              <div className="text-sm text-slate-600">
-                Hiển thị 1-{filteredLogs.length} trong tổng số 1,845 bản ghi
+            <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white sm:px-6 collection-pagination text-[13px]">
+              <div className="flex items-center gap-2">
+                <span className="text-slate-600">Hiển thị</span>
+                <select
+                  value={itemsPerPage}
+                  onChange={(e) => {
+                    setItemsPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px]"
+                  title="Số bản ghi trên trang"
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                </select>
+                <span className="text-slate-600">bản ghi/trang</span>
               </div>
-              <div className="flex gap-2">
-                <button className="px-3 py-1 border border-slate-300 rounded text-sm hover:bg-slate-50">Trước</button>
-                <button title="Hành động" aria-label="Hành động" className="px-3 py-1 bg-blue-600 text-white rounded text-sm">1</button>
-                <button title="Hành động" aria-label="Hành động" className="px-3 py-1 border border-slate-300 rounded text-sm hover:bg-slate-50">2</button>
-                <button title="Hành động" aria-label="Hành động" className="px-3 py-1 border border-slate-300 rounded text-sm hover:bg-slate-50">3</button>
-                <button className="px-3 py-1 border border-slate-300 rounded text-sm hover:bg-slate-50">Sau</button>
+              
+              <div className="flex items-center gap-4">
+                <span className="text-slate-600">
+                  {filteredLogs.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, filteredLogs.length)} / {filteredLogs.length}
+                </span>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : currentPage)}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
+                  >
+                    Trước
+                  </button>
+                  
+                  {Array.from({ length: Math.ceil(filteredLogs.length / itemsPerPage) }, (_, i) => i + 1).map(page => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-1.5 border rounded-lg font-medium text-[13px] transition-colors ${
+                        currentPage === page
+                          ? 'bg-blue-600 border-blue-600 text-white'
+                          : 'border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+
+                  <button
+                    onClick={() => {
+                      const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
+                      if (currentPage < totalPages) {
+                        setCurrentPage(currentPage + 1);
+                      }
+                    }}
+                    disabled={currentPage === Math.ceil(filteredLogs.length / itemsPerPage) || filteredLogs.length === 0}
+                    className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
+                  >
+                    Sau
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -550,7 +633,7 @@ export function ConfigChangeLogPage() {
           {/* Detail Modal */}
           {showDetailModal && selectedLog && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-xl animate-fade-in">
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-slate-200">
                   <div className="flex items-center gap-3">
@@ -558,13 +641,15 @@ export function ConfigChangeLogPage() {
                       {getConfigTypeIcon(selectedLog.configType)}
                     </div>
                     <div>
-                      <h3 className="text-slate-900">Chi tiết thay đổi cấu hình</h3>
-                      <p className="text-sm text-slate-600 mt-0.5">{getConfigTypeLabel(selectedLog.configType)}</p>
+                      <h3 className="text-slate-900 font-semibold">Chi tiết thay đổi cấu hình</h3>
+                      <p className="text-sm text-slate-600 mt-0.5">Loại cấu hình: <span className="font-medium text-slate-950">{getConfigTypeLabel(selectedLog.configType)}</span></p>
                     </div>
                   </div>
                   <button
                     onClick={closeDetailModal}
-                    className="p-2 hover:bg-slate-100 rounded-lg transition-colors" title="Đóng" aria-label="Đóng"
+                    className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-slate-600" 
+                    title="Đóng" 
+                    aria-label="Đóng"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -574,18 +659,18 @@ export function ConfigChangeLogPage() {
                 <div className="p-6 space-y-6">
                   {/* Basic Info */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-slate-50 rounded-lg p-4">
-                      <div className="flex items-center gap-2 text-slate-600 mb-2">
+                    <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                      <div className="flex items-center gap-2 text-slate-500 mb-2">
                         <Clock className="w-4 h-4" />
-                        <span className="text-xs">Thời gian thay đổi</span>
+                        <span className="text-xs font-medium">Thời gian thay đổi</span>
                       </div>
-                      <div className="text-sm text-slate-900">{selectedLog.timestamp}</div>
+                      <div className="text-sm text-slate-900 font-semibold">{selectedLog.timestamp}</div>
                     </div>
 
-                    <div className="bg-slate-50 rounded-lg p-4">
-                      <div className="flex items-center gap-2 text-slate-600 mb-2">
+                    <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                      <div className="flex items-center gap-2 text-slate-500 mb-2">
                         <CheckCircle2 className="w-4 h-4" />
-                        <span className="text-xs">Trạng thái</span>
+                        <span className="text-xs font-medium">Trạng thái</span>
                       </div>
                       <StatusTag 
                         label={selectedLog.status === 'success' ? 'Thành công' : 'Thất bại'} 
@@ -599,7 +684,7 @@ export function ConfigChangeLogPage() {
                   <div className="border border-slate-200 rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-3">
                       <Settings className="w-4 h-4 text-blue-600" />
-                      <h4 className="text-sm text-slate-900">Thông tin cấu hình</h4>
+                      <h4 className="text-sm text-slate-900 font-semibold">Thông tin cấu hình</h4>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
@@ -612,7 +697,7 @@ export function ConfigChangeLogPage() {
                       </div>
                       <div>
                         <div className="text-xs text-slate-500 mb-1">Tên cấu hình</div>
-                        <div className="text-sm text-slate-900">{selectedLog.configName}</div>
+                        <div className="text-sm text-slate-900 font-semibold">{selectedLog.configName}</div>
                       </div>
                     </div>
                   </div>
@@ -621,22 +706,22 @@ export function ConfigChangeLogPage() {
                   <div className="border border-slate-200 rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-3">
                       <User className="w-4 h-4 text-green-600" />
-                      <h4 className="text-sm text-slate-900">Người thực hiện</h4>
+                      <h4 className="text-sm text-slate-900 font-semibold">Người thực hiện</h4>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       <div>
                         <div className="text-xs text-slate-500 mb-1">Họ tên</div>
-                        <div className="text-sm text-slate-900">{selectedLog.performedBy}</div>
+                        <div className="text-sm text-slate-900 font-semibold">{selectedLog.performedBy}</div>
                       </div>
                       <div>
                         <div className="text-xs text-slate-500 mb-1">Username</div>
-                        <code className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-700">
+                        <code className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-700 font-mono">
                           {selectedLog.performedById}
                         </code>
                       </div>
                       <div>
                         <div className="text-xs text-slate-500 mb-1">IP Address</div>
-                        <code className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-700">
+                        <code className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-700 font-mono">
                           {selectedLog.ip}
                         </code>
                       </div>
@@ -647,13 +732,13 @@ export function ConfigChangeLogPage() {
                   <div className="border border-slate-200 rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-3">
                       <ArrowRight className="w-4 h-4 text-purple-600" />
-                      <h4 className="text-sm text-slate-900">Thay đổi giá trị</h4>
+                      <h4 className="text-sm text-slate-900 font-semibold">Thay đổi giá trị</h4>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
                         <div className="text-xs text-slate-500 mb-2">Giá trị cũ</div>
                         <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                          <code className="text-sm text-red-800 whitespace-pre-wrap break-all">
+                          <code className="text-xs text-red-800 whitespace-pre-wrap break-all font-mono">
                             {selectedLog.oldValue}
                           </code>
                         </div>
@@ -661,7 +746,7 @@ export function ConfigChangeLogPage() {
                       <div>
                         <div className="text-xs text-slate-500 mb-2">Giá trị mới</div>
                         <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                          <code className="text-sm text-green-800 whitespace-pre-wrap break-all">
+                          <code className="text-xs text-green-800 whitespace-pre-wrap break-all font-mono">
                             {selectedLog.newValue}
                           </code>
                         </div>
@@ -673,7 +758,7 @@ export function ConfigChangeLogPage() {
                   <div className="border border-slate-200 rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-3">
                       <FileText className="w-4 h-4 text-cyan-600" />
-                      <h4 className="text-sm text-slate-900">Mô tả chi tiết</h4>
+                      <h4 className="text-sm text-slate-900 font-semibold">Mô tả chi tiết</h4>
                     </div>
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-3">
                       <div className="text-xs text-blue-700 mb-1">Mô tả</div>
@@ -683,7 +768,7 @@ export function ConfigChangeLogPage() {
                     {selectedLog.reason && (
                       <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
                         <div className="text-xs text-amber-700 mb-1">Lý do thay đổi</div>
-                        <p className="text-sm text-amber-900">{selectedLog.reason}</p>
+                        <p className="text-sm text-amber-900 font-medium">{selectedLog.reason}</p>
                       </div>
                     )}
                   </div>
@@ -694,7 +779,7 @@ export function ConfigChangeLogPage() {
                   <div className="flex justify-end">
                     <button
                       onClick={closeDetailModal}
-                      className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
+                      className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors font-medium"
                     >
                       Đóng
                     </button>

@@ -7,7 +7,6 @@ export { SecurityConfigPage } from './SecurityConfigPage';
 export { AccessLogPage } from './AccessLogPage';
 export { BackupPage } from './BackupPage';
 export { StatisticsPage } from './StatisticsPage';
-export { PasswordRuleConfigPage } from './PasswordRuleConfigPage';
 export { ErrorLogPage } from './ErrorLogPage';
 export { AccountManagementLogPage } from './AccountManagementLogPage';
 export { ConfigChangeLogPage } from './ConfigChangeLogPage';

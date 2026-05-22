@@ -3,6 +3,7 @@ import { MainLayout } from './components/layout/MainLayout';
 import { LoginPage } from './components/pages/LoginPage';
 import { auth } from './lib/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { Toaster } from './components/ui/sonner';
 
 // Main App Component
 export default function App() {
@@ -41,9 +42,19 @@ export default function App() {
 
   // Nếu chưa đăng nhập, hiển thị màn login
   if (!isLoggedIn) {
-    return <LoginPage onLogin={() => setIsLoggedIn(true)} />;
+    return (
+      <>
+        <LoginPage onLogin={() => setIsLoggedIn(true)} />
+        <Toaster />
+      </>
+    );
   }
 
   // Đã đăng nhập, hiển thị hệ thống chính với khả năng logout
-  return <MainLayout onLogout={handleLogout} />;
+  return (
+    <>
+      <MainLayout onLogout={handleLogout} />
+      <Toaster />
+    </>
+  );
 }

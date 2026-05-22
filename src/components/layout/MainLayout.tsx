@@ -87,7 +87,6 @@ import { ReconciliationSetupPage } from '../pages/ReconciliationSetupPage';
 import { SystemAdminPage } from '../pages/SystemAdminPage';
 import { UserManagementPage } from '../pages/admin/UserManagementPage';
 import { GroupManagementPage } from '../pages/admin/GroupManagementPage';
-import { PasswordRuleConfigPage } from '../pages/admin/PasswordRuleConfigPage';
 import { FunctionManagementPage } from '../pages/admin/FunctionManagementPage';
 import { SecurityConfigPage } from '../pages/admin/SecurityConfigPage';
 import { AccessLogPage } from '../pages/admin/AccessLogPage';
@@ -555,7 +554,6 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'admin' && <SystemAdminPage />}
             {currentPage === 'admin-users' && <UserManagementPage />}
             {currentPage === 'admin-groups' && <GroupManagementPage />}
-            {currentPage === 'admin-password-rules' && <PasswordRuleConfigPage />}
             {currentPage === 'admin-functions' && <FunctionManagementPage />}
             {currentPage === 'admin-function-config' && <SystemAdminPage initialTab="function-config" />}
             {currentPage === 'admin-config' && <SecurityConfigPage />}

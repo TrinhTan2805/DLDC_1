@@ -649,11 +649,6 @@ const menuItems: MenuItem[] = [
             icon: Sliders,
           },
           {
-            id: "admin-password-rules",
-            label: "Thiết lập quy tắc đặt mật khẩu",
-            icon: Key,
-          },
-          {
             id: "admin-backup",
             label: "Sao lưu dự phòng",
             icon: DatabaseBackup,

@@ -18,8 +18,8 @@ import {
   Database,
   Layers
 } from 'lucide-react';
-import { StatsCard } from '../../common/StatsCard';
 import { StatusTag } from '../../common/StatusTag';
+import { StatsCard } from '../../common/StatsCard';
 
 interface ErrorLog {
   id: number;
@@ -178,8 +178,13 @@ export function ErrorLogPage() {
   const [filterModule, setFilterModule] = useState('all');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
   const [selectedLog, setSelectedLog] = useState<ErrorLog | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const filteredLogs = errorLogs.filter(log => {
     const matchesSearch = log.errorMessage.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -187,7 +192,9 @@ export function ErrorLogPage() {
                          log.module.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesSeverity = filterSeverity === 'all' || log.severity === filterSeverity;
     const matchesModule = filterModule === 'all' || log.module === filterModule;
-    return matchesSearch && matchesSeverity && matchesModule;
+    const matchesStartDate = !startDate || log.timestamp.split(' ')[0] >= startDate.split('-').reverse().join('/');
+    const matchesEndDate = !endDate || log.timestamp.split(' ')[0] <= endDate.split('-').reverse().join('/');
+    return matchesSearch && matchesSeverity && matchesModule && matchesStartDate && matchesEndDate;
   });
 
   const handleViewDetail = (log: ErrorLog) => {
@@ -198,11 +205,6 @@ export function ErrorLogPage() {
   const closeDetailModal = () => {
     setShowDetailModal(false);
     setSelectedLog(null);
-  };
-
-  const handleExportExcel = () => {
-    alert('Đang xuất file Excel...');
-    // Logic export Excel
   };
 
   const getSeverityIcon = (severity: ErrorLog['severity']) => {
@@ -247,7 +249,24 @@ export function ErrorLogPage() {
   const uniqueModules = Array.from(new Set(errorLogs.map(log => log.module)));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 error-log-container">
+      <style>{`
+        .error-log-container,
+        .error-log-container .text-sm,
+        .error-log-container .text-xs:not(th),
+        .error-log-container input,
+        .error-log-container select,
+        .error-log-container button,
+        .error-log-container td,
+        .error-log-container option,
+        .error-log-container div.text-slate-600,
+        .error-log-container div.text-slate-700,
+        .error-log-container div.text-slate-500,
+        .error-log-container div.text-slate-900:not(.text-2xl) {
+          font-size: 13px !important;
+        }
+      `}</style>
+
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <StatsCard 
@@ -276,158 +295,222 @@ export function ErrorLogPage() {
         />
       </div>
 
-      {/* Filters */}
-      <div className="bg-white rounded-lg border border-slate-200 p-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          <div className="lg:col-span-2">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+      {/* Filters & Search Row */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex-1 flex items-center gap-3">
+            <div className="relative flex-1">
               <input
                 type="text"
                 placeholder="Tìm kiếm mã lỗi, thông báo, module..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
               />
             </div>
-          </div>
-          <div>
-            <select
-              value={filterSeverity}
-              onChange={(e) => setFilterSeverity(e.target.value)}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <button className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center">
+              <Search className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`p-2 rounded-lg transition-colors shadow-sm flex items-center justify-center border ${showFilters ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-[#e2e8f0] text-slate-600 hover:bg-slate-50'}`}
+              title="Bộ lọc"
             >
-              <option value="all">Tất cả mức độ</option>
-              <option value="critical">Nghiêm trọng</option>
-              <option value="error">Lỗi</option>
-              <option value="warning">Cảnh báo</option>
-              <option value="info">Thông tin</option>
-            </select>
+              {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
+            </button>
           </div>
-          <div>
-            <select
-              value={filterModule}
-              onChange={(e) => setFilterModule(e.target.value)}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">Tất cả module</option>
-              {uniqueModules.map(module => (
-                <option key={module} value={module}>{module}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <div className="flex items-center gap-2 border border-slate-300 rounded-lg px-3 py-2">
-              <Calendar className="w-4 h-4 text-slate-400 flex-shrink-0" />
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="flex-1 outline-none text-sm"
-                placeholder="Từ ngày"
-              />
-              <span className="text-slate-400">-</span>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="flex-1 outline-none text-sm"
-                placeholder="Đến ngày"
-              />
+        </div>
+
+        {/* Collapsible Filters Row */}
+        {showFilters && (
+          <div className="bg-slate-50 p-5 rounded-lg border border-slate-200 grid grid-cols-4 gap-4 mt-4 animate-in slide-in-from-top-2 duration-200 shadow-sm relative">
+            <div className="absolute -top-2 right-[200px] w-4 h-4 bg-slate-50 border-t border-l border-slate-200 transform rotate-45"></div>
+
+            <div className="space-y-1.5 relative z-10">
+              <label className="text-[13px] font-medium text-slate-700">Mức độ</label>
+              <select
+                value={filterSeverity}
+                onChange={(e) => setFilterSeverity(e.target.value)}
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+              >
+                <option value="all">Tất cả mức độ</option>
+                <option value="critical">Nghiêm trọng</option>
+                <option value="error">Lỗi</option>
+                <option value="warning">Cảnh báo</option>
+                <option value="info">Thông tin</option>
+              </select>
+            </div>
+
+            <div className="space-y-1.5 relative z-10">
+              <label className="text-[13px] font-medium text-slate-700">Module</label>
+              <select
+                value={filterModule}
+                onChange={(e) => setFilterModule(e.target.value)}
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+              >
+                <option value="all">Tất cả module</option>
+                {uniqueModules.map(module => (
+                  <option key={module} value={module}>{module}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-1.5 relative z-10">
+              <label className="text-[13px] font-medium text-slate-700">Thời gian từ</label>
+              <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-slate-700 p-0"
+                />
+                <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
+              </div>
+            </div>
+
+            <div className="space-y-1.5 relative z-10">
+              <label className="text-[13px] font-medium text-slate-700">Thời gian đến</label>
+              <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-slate-700 p-0"
+                />
+                <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
+              </div>
             </div>
           </div>
-        </div>
-        <div className="flex gap-3 mt-4">
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm flex items-center gap-2">
-            <Filter className="w-4 h-4" />
-            Lọc
-          </button>
-          <button 
-            onClick={handleExportExcel}
-            className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 text-sm flex items-center gap-2"
-          >
-            <Download className="w-4 h-4" />
-            Xuất Excel
-          </button>
-        </div>
+        )}
       </div>
 
       {/* Error Logs Table */}
-      <div className="bg-white rounded-lg border border-slate-200">
-        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-          <h3 className="text-slate-900">Nhật ký lỗi ({filteredLogs.length} bản ghi)</h3>
-        </div>
+      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-slate-50">
+          <table className="w-full border-collapse collection-table text-[13px]">
+            <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-[1]">
               <tr>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Thời gian</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Mức độ</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Module</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Mã lỗi</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Thông báo lỗi</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Người dùng</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Trạng thái</th>
-                <th className="px-6 py-3 text-right text-xs text-slate-600 uppercase tracking-wider">Thao tác</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-12 text-[13px]">STT</th>
+                <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Thời gian</th>
+                <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Mức độ</th>
+                <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Module</th>
+                <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Mã lỗi</th>
+                <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Thông báo lỗi</th>
+                <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Người dùng</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-24 text-[13px]">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filteredLogs.map((log) => (
-                <tr key={log.id} className="hover:bg-slate-50">
-                  <td className="px-6 py-4 text-sm text-slate-700 whitespace-nowrap">{log.timestamp}</td>
-                  <td className="px-6 py-4">
-                    <StatusTag 
-                      label={getSeverityLabel(log.severity)} 
-                      variant={log.severity === 'critical' ? 'red' : log.severity === 'error' ? 'orange' : log.severity === 'warning' ? 'yellow' : 'blue'} 
-                      icon={getSeverityIcon(log.severity)}
-                    />
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-700">{log.module}</td>
-                  <td className="px-6 py-4">
-                    <code className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-700">
-                      {log.errorCode}
-                    </code>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-700 max-w-md truncate">
-                    {log.errorMessage}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-600">
-                    {log.user || <span className="text-slate-400 italic">System</span>}
-                  </td>
-                  <td className="px-6 py-4">
-                    <StatusTag 
-                      label={log.resolved ? 'Đã xử lý' : 'Chưa xử lý'} 
-                      variant={log.resolved ? 'green' : 'red'} 
-                    />
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-end">
-                      <button
-                        onClick={() => handleViewDetail(log)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="Xem chi tiết"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {filteredLogs
+                .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                .map((log, index) => (
+                  <tr key={log.id} className="hover:bg-slate-50 transition-all group border-b border-slate-100">
+                    <td className="px-4 py-3 text-center text-slate-500 font-medium text-[13px]">{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                    <td className="px-4 py-3 text-left text-slate-700 whitespace-nowrap text-[13px]">{log.timestamp}</td>
+                    <td className="px-4 py-3 text-left text-[13px]">
+                      <StatusTag 
+                        label={getSeverityLabel(log.severity)} 
+                        variant={log.severity === 'critical' ? 'red' : log.severity === 'error' ? 'orange' : log.severity === 'warning' ? 'yellow' : 'blue'} 
+                        icon={getSeverityIcon(log.severity)}
+                      />
+                    </td>
+                    <td className="px-4 py-3 text-left text-slate-700 text-[13px]">{log.module}</td>
+                    <td className="px-4 py-3 text-left text-[13px]">
+                      <code className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-700 font-mono">
+                        {log.errorCode}
+                      </code>
+                    </td>
+                    <td className="px-4 py-3 text-left text-slate-700 max-w-md truncate text-[13px]" title={log.errorMessage}>
+                      {log.errorMessage}
+                    </td>
+                    <td className="px-4 py-3 text-left text-slate-600 text-[13px]">
+                      {log.user || <span className="text-slate-400 italic">System</span>}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <StatusTag 
+                        label={log.resolved ? 'Đã xử lý' : 'Chưa xử lý'} 
+                        variant={log.resolved ? 'green' : 'red'} 
+                      />
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex items-center justify-center">
+                        <button
+                          onClick={() => handleViewDetail(log)}
+                          className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
+                          title="Xem chi tiết"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>
         
         {/* Pagination */}
-        <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
-          <div className="text-sm text-slate-600">
-            Hiển thị 1-{filteredLogs.length} trong tổng số 1,247 bản ghi
+        <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white sm:px-6 collection-pagination text-[13px]">
+          <div className="flex items-center gap-2">
+            <span className="text-slate-600">Hiển thị</span>
+            <select
+              value={itemsPerPage}
+              onChange={(e) => {
+                setItemsPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px]"
+              title="Số bản ghi trên trang"
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+            </select>
+            <span className="text-slate-600">bản ghi/trang</span>
           </div>
-          <div className="flex gap-2">
-            <button className="px-3 py-1 border border-slate-300 rounded text-sm hover:bg-slate-50">Trước</button>
-            <button title="Hành động" aria-label="Hành động" className="px-3 py-1 bg-blue-600 text-white rounded text-sm">1</button>
-            <button title="Hành động" aria-label="Hành động" className="px-3 py-1 border border-slate-300 rounded text-sm hover:bg-slate-50">2</button>
-            <button title="Hành động" aria-label="Hành động" className="px-3 py-1 border border-slate-300 rounded text-sm hover:bg-slate-50">3</button>
-            <button className="px-3 py-1 border border-slate-300 rounded text-sm hover:bg-slate-50">Sau</button>
+          
+          <div className="flex items-center gap-4">
+            <span className="text-slate-600">
+              {filteredLogs.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, filteredLogs.length)} / {filteredLogs.length}
+            </span>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : currentPage)}
+                disabled={currentPage === 1}
+                className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
+              >
+                Trước
+              </button>
+              
+              {Array.from({ length: Math.ceil(filteredLogs.length / itemsPerPage) }, (_, i) => i + 1).map(page => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`px-3 py-1.5 border rounded-lg font-medium text-[13px] transition-colors ${
+                    currentPage === page
+                      ? 'bg-blue-600 border-blue-600 text-white'
+                      : 'border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+
+              <button
+                onClick={() => {
+                  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
+                  if (currentPage < totalPages) {
+                    setCurrentPage(currentPage + 1);
+                  }
+                }}
+                disabled={currentPage === Math.ceil(filteredLogs.length / itemsPerPage) || filteredLogs.length === 0}
+                className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
+              >
+                Sau
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -435,7 +518,7 @@ export function ErrorLogPage() {
       {/* Detail Modal */}
       {showDetailModal && selectedLog && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-5xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg max-w-5xl w-full max-h-[90vh] overflow-y-auto shadow-xl">
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-slate-200">
               <div className="flex items-center gap-3">
@@ -443,15 +526,17 @@ export function ErrorLogPage() {
                   {getSeverityIcon(selectedLog.severity)}
                 </div>
                 <div>
-                  <h3 className="text-slate-900">Chi tiết lỗi</h3>
+                  <h3 className="text-slate-900 font-semibold">Chi tiết lỗi</h3>
                   <p className="text-sm text-slate-600 mt-0.5">
-                    <code className="font-mono">{selectedLog.errorCode}</code>
+                    Mã lỗi: <code className="font-mono bg-slate-100 px-2 py-0.5 rounded border border-slate-200">{selectedLog.errorCode}</code>
                   </p>
                 </div>
               </div>
               <button
                 onClick={closeDetailModal}
-                className="p-2 hover:bg-slate-100 rounded-lg transition-colors" title="Đóng" aria-label="Đóng"
+                className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-slate-600" 
+                title="Đóng" 
+                aria-label="Đóng"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -460,35 +545,35 @@ export function ErrorLogPage() {
             {/* Error Info */}
             <div className="p-6 space-y-6">
               {/* Basic Info */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-slate-50 rounded-lg p-4">
-                  <div className="flex items-center gap-2 text-slate-600 mb-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                  <div className="flex items-center gap-2 text-slate-500 mb-2">
                     <Clock className="w-4 h-4" />
-                    <span className="text-xs">Thời gian</span>
+                    <span className="text-xs font-medium">Thời gian</span>
                   </div>
-                  <div className="text-sm text-slate-900">{selectedLog.timestamp}</div>
+                  <div className="text-sm text-slate-900 font-semibold">{selectedLog.timestamp}</div>
                 </div>
 
-                <div className="bg-slate-50 rounded-lg p-4">
-                  <div className="flex items-center gap-2 text-slate-600 mb-2">
+                <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                  <div className="flex items-center gap-2 text-slate-500 mb-2">
                     <Layers className="w-4 h-4" />
-                    <span className="text-xs">Module</span>
+                    <span className="text-xs font-medium">Module</span>
                   </div>
-                  <div className="text-sm text-slate-900">{selectedLog.module}</div>
+                  <div className="text-sm text-slate-900 font-semibold">{selectedLog.module}</div>
                 </div>
 
-                <div className="bg-slate-50 rounded-lg p-4">
-                  <div className="flex items-center gap-2 text-slate-600 mb-2">
+                <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                  <div className="flex items-center gap-2 text-slate-500 mb-2">
                     <Code className="w-4 h-4" />
-                    <span className="text-xs">Loại lỗi</span>
+                    <span className="text-xs font-medium">Loại lỗi</span>
                   </div>
-                  <div className="text-sm text-slate-900">{selectedLog.errorType}</div>
+                  <div className="text-sm text-slate-900 font-semibold font-mono">{selectedLog.errorType}</div>
                 </div>
 
-                <div className="bg-slate-50 rounded-lg p-4">
-                  <div className="flex items-center gap-2 text-slate-600 mb-2">
+                <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                  <div className="flex items-center gap-2 text-slate-500 mb-2">
                     <AlertCircle className="w-4 h-4" />
-                    <span className="text-xs">Trạng thái</span>
+                    <span className="text-xs font-medium">Trạng thái</span>
                   </div>
                   <StatusTag 
                     label={selectedLog.resolved ? 'Đã xử lý' : 'Chưa xử lý'} 
@@ -502,13 +587,13 @@ export function ErrorLogPage() {
                 <div className="border border-slate-200 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <Server className="w-4 h-4 text-blue-600" />
-                    <h4 className="text-sm text-slate-900">Thông tin request</h4>
+                    <h4 className="text-sm text-slate-900 font-semibold">Thông tin request</h4>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     {selectedLog.method && (
                       <div>
                         <div className="text-xs text-slate-500 mb-1">Method</div>
-                        <code className="text-xs bg-blue-50 px-2 py-1 rounded text-blue-700">
+                        <code className="text-xs bg-blue-50 px-2 py-1 rounded text-blue-700 font-mono">
                           {selectedLog.method}
                         </code>
                       </div>
@@ -516,7 +601,7 @@ export function ErrorLogPage() {
                     {selectedLog.url && (
                       <div className="md:col-span-2">
                         <div className="text-xs text-slate-500 mb-1">URL</div>
-                        <code className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-700 block truncate">
+                        <code className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-700 block truncate font-mono">
                           {selectedLog.url}
                         </code>
                       </div>
@@ -524,7 +609,7 @@ export function ErrorLogPage() {
                     {selectedLog.ip && (
                       <div>
                         <div className="text-xs text-slate-500 mb-1">IP Address</div>
-                        <code className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-700">
+                        <code className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-700 font-mono">
                           {selectedLog.ip}
                         </code>
                       </div>
@@ -543,7 +628,7 @@ export function ErrorLogPage() {
               <div className="border border-slate-200 rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <FileCode className="w-4 h-4 text-orange-600" />
-                  <h4 className="text-sm text-slate-900">Thông báo lỗi</h4>
+                  <h4 className="text-sm text-slate-900 font-semibold">Thông báo lỗi</h4>
                 </div>
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                   <p className="text-sm text-red-900">{selectedLog.errorMessage}</p>
@@ -555,10 +640,10 @@ export function ErrorLogPage() {
                 <div className="border border-slate-200 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <Database className="w-4 h-4 text-purple-600" />
-                    <h4 className="text-sm text-slate-900">Stack Trace</h4>
+                    <h4 className="text-sm text-slate-900 font-semibold">Stack Trace</h4>
                   </div>
                   <div className="bg-slate-900 rounded-lg p-4 overflow-x-auto">
-                    <pre className="text-xs text-green-400 font-mono whitespace-pre-wrap">
+                    <pre className="text-xs text-green-400 font-mono whitespace-pre-wrap leading-relaxed">
                       {selectedLog.stackTrace}
                     </pre>
                   </div>
@@ -571,17 +656,17 @@ export function ErrorLogPage() {
               <div className="flex justify-between items-center">
                 <div className="flex gap-2">
                   {!selectedLog.resolved && (
-                    <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                    <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
                       Đánh dấu đã xử lý
                     </button>
                   )}
-                  <button className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors">
+                  <button className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium">
                     Copy Stack Trace
                   </button>
                 </div>
                 <button
                   onClick={closeDetailModal}
-                  className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
+                  className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors font-medium"
                 >
                   Đóng
                 </button>
