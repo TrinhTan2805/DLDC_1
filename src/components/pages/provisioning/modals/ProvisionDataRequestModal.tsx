@@ -6,7 +6,7 @@ export interface CreateDataRequestPayload {
   dataType: string;
   fromDate: string;
   toDate: string;
-  format: 'excel' | 'csv' | 'json';
+  format: 'excel' | 'csv' | 'json' | 'xml';
   purpose: string;
 }
 
@@ -21,21 +21,14 @@ export function ProvisionDataRequestModal({ isOpen, onClose, onCreate }: Provisi
   const [dataType, setDataType] = React.useState('');
   const [fromDate, setFromDate] = React.useState('');
   const [toDate, setToDate] = React.useState('');
-  const [format, setFormat] = React.useState<'excel' | 'csv' | 'json'>('excel');
+  const [format, setFormat] = React.useState<'excel' | 'csv' | 'json' | 'xml'>('excel');
   const [purpose, setPurpose] = React.useState('');
 
   if (!isOpen) return null;
 
   const handleCreate = () => {
     if (!org.trim() || !dataType.trim()) return;
-    onCreate?.({
-      org: org.trim(),
-      dataType,
-      fromDate,
-      toDate,
-      format,
-      purpose: purpose.trim(),
-    });
+    onCreate?.({ org: org.trim(), dataType, fromDate, toDate, format, purpose: purpose.trim() });
     onClose();
   };
 
@@ -63,18 +56,10 @@ export function ProvisionDataRequestModal({ isOpen, onClose, onCreate }: Provisi
             <input value={toDate} onChange={(e) => setToDate(e.target.value)} type="date" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg" />
           </div>
           <div className="flex gap-4 text-sm">
-            <label className="flex items-center gap-2">
-              <input type="radio" checked={format === 'excel'} onChange={() => setFormat('excel')} />
-              Excel
-            </label>
-            <label className="flex items-center gap-2">
-              <input type="radio" checked={format === 'csv'} onChange={() => setFormat('csv')} />
-              CSV
-            </label>
-            <label className="flex items-center gap-2">
-              <input type="radio" checked={format === 'json'} onChange={() => setFormat('json')} />
-              JSON
-            </label>
+            <label className="flex items-center gap-2"><input type="radio" checked={format === 'excel'} onChange={() => setFormat('excel')} />Excel</label>
+            <label className="flex items-center gap-2"><input type="radio" checked={format === 'csv'} onChange={() => setFormat('csv')} />CSV</label>
+            <label className="flex items-center gap-2"><input type="radio" checked={format === 'json'} onChange={() => setFormat('json')} />JSON</label>
+            <label className="flex items-center gap-2"><input type="radio" checked={format === 'xml'} onChange={() => setFormat('xml')} />XML</label>
           </div>
           <textarea value={purpose} onChange={(e) => setPurpose(e.target.value)} rows={3} placeholder="Mục đích sử dụng dữ liệu" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg" />
         </div>
@@ -82,8 +67,7 @@ export function ProvisionDataRequestModal({ isOpen, onClose, onCreate }: Provisi
         <div className="px-6 py-4 border-t border-slate-200 flex justify-end space-x-3 bg-slate-50 rounded-b-xl">
           <button onClick={onClose} className="px-4 py-2 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors font-medium">Hủy bỏ</button>
           <button onClick={handleCreate} className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg flex items-center transition-colors font-medium">
-            <Check className="w-5 h-5 mr-2" />
-            Tạo yêu cầu
+            <Check className="w-5 h-5 mr-2" />Tạo yêu cầu
           </button>
         </div>
       </div>
