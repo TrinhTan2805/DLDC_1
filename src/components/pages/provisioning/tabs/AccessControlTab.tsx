@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Save, ShieldCheck } from 'lucide-react';
 import { ProvisionService } from '../../../../data/provisionServicesData';
 
@@ -7,6 +7,8 @@ interface AccessControlTabProps {
 }
 
 export function AccessControlTab({ service }: AccessControlTabProps) {
+  const [expiration, setExpiration] = useState('custom');
+
   return (
     <div className="space-y-6">
       <div className="bg-white p-5 rounded-lg border border-slate-200">
@@ -49,12 +51,29 @@ export function AccessControlTab({ service }: AccessControlTabProps) {
           </div>
           <div className="col-span-1 md:col-span-2">
             <label className="block text-sm font-medium text-slate-700 mb-1">Thời hạn cấp quyền (mặc định)</label>
-            <select aria-label="Thời hạn cấp quyền" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
+            <select 
+              aria-label="Thời hạn cấp quyền" 
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+              value={expiration}
+              onChange={(e) => setExpiration(e.target.value)}
+            >
               <option value="unlimited">Không giới hạn</option>
               <option value="1y">1 năm</option>
               <option value="6m">6 tháng</option>
               <option value="custom">Tùy chỉnh...</option>
             </select>
+            {expiration === 'custom' && (
+              <div className="mt-3 p-4 bg-amber-50 border border-amber-200 rounded-lg flex flex-col md:flex-row gap-4 animate-in fade-in slide-in-from-top-2">
+                <div className="flex-1">
+                  <label className="block text-xs font-bold text-amber-800 mb-1">Cấp quyền từ ngày</label>
+                  <input type="date" className="w-full px-3 py-2 border border-amber-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white" />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-xs font-bold text-amber-800 mb-1">Hết hạn vào ngày</label>
+                  <input type="date" className="w-full px-3 py-2 border border-amber-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white" />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
