@@ -5,6 +5,8 @@ import {
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { ProvisionExportReportModal } from './modals/ProvisionExportReportModal';
+import { AuditLogsTab } from './tabs/AuditLogsTab';
+import { ScrollText } from 'lucide-react';
 
 // High-fidelity mock stats based on API
 const apiMockStats: Record<string, {
@@ -83,7 +85,7 @@ const apiMockStats: Record<string, {
 };
 
 export function DataProvisionMonitoringPage() {
-  const [activeTab, setActiveTab] = useState<'luong_du_lieu' | 'bao_cao'>('luong_du_lieu');
+  const [activeTab, setActiveTab] = useState<'luong_du_lieu' | 'bao_cao' | 'nhat_ky'>('luong_du_lieu');
   const [showExportModal, setShowExportModal] = useState(false);
   
   // API monitoring select state
@@ -177,6 +179,17 @@ export function DataProvisionMonitoringPage() {
             >
               <BarChart3 className="w-4 h-4 mr-2" />
               Báo cáo hiệu năng đồ thị
+            </button>
+            <button
+              onClick={() => setActiveTab('nhat_ky')}
+              className={`whitespace-nowrap py-4 px-1 border-b-2 font-bold text-sm flex items-center transition-colors ${
+                activeTab === 'nhat_ky'
+                  ? 'border-amber-500 text-amber-600'
+                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+              }`}
+            >
+              <ScrollText className="w-4 h-4 mr-2" />
+              Nhật ký khai thác (Audit Logs)
             </button>
           </nav>
         </div>
@@ -379,6 +392,9 @@ export function DataProvisionMonitoringPage() {
               </div>
 
             </div>
+          )}
+          {activeTab === 'nhat_ky' && (
+            <AuditLogsTab />
           )}
         </div>
       </div>

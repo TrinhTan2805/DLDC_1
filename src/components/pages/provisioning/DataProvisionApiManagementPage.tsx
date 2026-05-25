@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { 
   Server, GitCompare, Shield, History, Search, Filter, Plus, 
-  Trash2, Edit3, Key, Clock, Calendar, CheckCircle2, XCircle, AlertTriangle 
+  Trash2, Edit3, Key, Clock, Calendar, CheckCircle2, XCircle, AlertTriangle, FileJson
 } from 'lucide-react';
+import { ApiDocumentationTab } from './tabs/ApiDocumentationTab';
 import { ProvisionApiModal } from './modals/ProvisionApiModal';
 import { ProvisionReconciliationApiModal } from './modals/ProvisionReconciliationApiModal';
 import { ProvisionAccessControlModal } from './modals/ProvisionAccessControlModal';
 import { ApiVersionCompareModal } from './modals/ApiVersionCompareModal';
 
 export function DataProvisionApiManagementPage() {
-  const [activeTab, setActiveTab] = useState<'api_cung_cap' | 'api_doi_soat' | 'phan_quyen' | 'phien_ban'>('api_cung_cap');
+  const [activeTab, setActiveTab] = useState<'api_cung_cap' | 'api_doi_soat' | 'phan_quyen' | 'phien_ban' | 'tai_lieu_api'>('api_cung_cap');
   const [searchTerm, setSearchTerm] = useState('');
   
   // Advanced Filter state
@@ -251,6 +252,19 @@ export function DataProvisionApiManagementPage() {
               <History className="w-4 h-4 mr-2" />
               Quản lý phiên bản ({versions.length})
             </button>
+
+            {/* Tab: Tài liệu API */}
+            <button
+              onClick={() => { setActiveTab('tai_lieu_api'); setSearchTerm(''); }}
+              className={`whitespace-nowrap py-4 px-1 border-b-2 font-bold text-sm flex items-center transition-colors ${
+                activeTab === 'tai_lieu_api'
+                  ? 'border-indigo-500 text-indigo-600'
+                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+              }`}
+            >
+              <FileJson className="w-4 h-4 mr-2" />
+              Tài liệu API (Swagger)
+            </button>
           </nav>
         </div>
 
@@ -258,7 +272,7 @@ export function DataProvisionApiManagementPage() {
         <div className="p-6">
           
           {/* General Search Panel for lists with Advanced Filter */}
-          {activeTab !== 'phan_quyen' && activeTab !== 'phien_ban' && (
+          {activeTab !== 'phan_quyen' && activeTab !== 'phien_ban' && activeTab !== 'tai_lieu_api' && (
             <div className="space-y-4 mb-6">
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1 relative">
@@ -697,6 +711,11 @@ export function DataProvisionApiManagementPage() {
               </div>
 
             </div>
+          )}
+
+          {/* TAB 5: TÀI LIỆU API (SWAGGER) */}
+          {activeTab === 'tai_lieu_api' && (
+            <ApiDocumentationTab />
           )}
 
         </div>

@@ -6,10 +6,21 @@ import { ProvisionServicePublishModal } from './modals/ProvisionServicePublishMo
 
 export function DataProvisionServiceSetupPage() {
   const [activeTab, setActiveTab] = useState<'setup' | 'approve' | 'publish'>('setup');
+  const [approvalFilter, setApprovalFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const [showServiceModal, setShowServiceModal] = useState(false);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [selectedService, setSelectedService] = useState<any>(null);
+
+  const mockApprovals = [
+    { name: 'DV_Hộ tịch điện tử', code: 'DV_001', type: 'Dữ liệu công dân', freq: 'Thời gian thực', protocol: 'REST API', status: 'pending', date: '2026-05-11' },
+    { name: 'DV_Thi hành án dân sự', code: 'DV_002', type: 'Thông tin bản án', freq: 'Hàng ngày', protocol: 'SOAP', status: 'approved', date: '2026-05-10' }
+  ];
+
+  const filteredApprovals = mockApprovals.filter(item => {
+    if (approvalFilter === 'all') return true;
+    return item.status === approvalFilter;
+  });
 
   return (
     <div className="space-y-6">
@@ -62,17 +73,25 @@ export function DataProvisionServiceSetupPage() {
             <div className="space-y-6">
               {/* Approval Sub-tabs */}
               <div className="flex border-b border-slate-100 mb-6">
-                <button className="px-6 py-2 border-b-2 border-amber-500 text-amber-600 font-bold text-xs uppercase tracking-widest">
-                  Tất cả (2)
+                <button 
+                  onClick={() => setApprovalFilter('all')}
+                  className={`px-6 py-2 border-b-2 font-bold text-xs uppercase tracking-widest transition-colors ${approvalFilter === 'all' ? 'border-amber-500 text-amber-600' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>
+                  Tất cả ({mockApprovals.length})
                 </button>
-                <button className="px-6 py-2 border-b-2 border-transparent text-slate-400 font-bold text-xs uppercase tracking-widest hover:text-slate-600">
-                  Chờ phê duyệt (1)
+                <button 
+                  onClick={() => setApprovalFilter('pending')}
+                  className={`px-6 py-2 border-b-2 font-bold text-xs uppercase tracking-widest transition-colors ${approvalFilter === 'pending' ? 'border-amber-500 text-amber-600' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>
+                  Chờ phê duyệt ({mockApprovals.filter(a => a.status === 'pending').length})
                 </button>
-                <button className="px-6 py-2 border-b-2 border-transparent text-slate-400 font-bold text-xs uppercase tracking-widest hover:text-slate-600">
-                  Đã phê duyệt (1)
+                <button 
+                  onClick={() => setApprovalFilter('approved')}
+                  className={`px-6 py-2 border-b-2 font-bold text-xs uppercase tracking-widest transition-colors ${approvalFilter === 'approved' ? 'border-amber-500 text-amber-600' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>
+                  Đã phê duyệt ({mockApprovals.filter(a => a.status === 'approved').length})
                 </button>
-                <button className="px-6 py-2 border-b-2 border-transparent text-slate-400 font-bold text-xs uppercase tracking-widest hover:text-slate-600">
-                  Từ chối (0)
+                <button 
+                  onClick={() => setApprovalFilter('rejected')}
+                  className={`px-6 py-2 border-b-2 font-bold text-xs uppercase tracking-widest transition-colors ${approvalFilter === 'rejected' ? 'border-amber-500 text-amber-600' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>
+                  Từ chối ({mockApprovals.filter(a => a.status === 'rejected').length})
                 </button>
               </div>
 
@@ -87,12 +106,14 @@ export function DataProvisionServiceSetupPage() {
               </div>
 
               {/* Approval Cards List */}
-              <div className="grid grid-cols-1 gap-4">
-                {[
-                  { name: 'DV_Hộ tịch điện tử', code: 'DV_001', type: 'Dữ liệu công dân', freq: 'Thời gian thực', protocol: 'REST API', status: 'pending', date: '2026-05-11' },
-                  { name: 'DV_Thi hành án dân sự', code: 'DV_002', type: 'Thông tin bản án', freq: 'Hàng ngày', protocol: 'SOAP', status: 'approved', date: '2026-05-10' }
-                ].map((item, idx) => (
-                  <div key={idx} className="p-6 bg-white border border-slate-200 rounded-xl hover:shadow-md transition-all group relative">
+              <div className="grid grid-cols-1 gap-4" key={approvalFilter}>
+                {filteredApprovals.length === 0 ? (
+                  <div className="text-center py-10 bg-slate-50 border border-slate-200 border-dashed rounded-xl animate-in fade-in">
+                    <p className="text-slate-500 text-sm font-medium">Không có dữ liệu phù hợp với bộ lọc hiện tại.</p>
+                  </div>
+                ) : (
+                  filteredApprovals.map((item, idx) => (
+                    <div key={idx} className="p-6 bg-white border border-slate-200 rounded-xl hover:shadow-md transition-all group relative animate-in fade-in slide-in-from-bottom-2" style={{ animationDuration: '300ms', animationDelay: `${idx * 50}ms`, animationFillMode: 'both' }}>
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                       <div className="flex items-start gap-4">
                         <div className={`p-3 rounded-xl ${item.status === 'pending' ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'}`}>
@@ -154,8 +175,9 @@ export function DataProvisionServiceSetupPage() {
                         Phê duyệt
                       </button>
                     </div>
-                  </div>
-                ))}
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           ) : (

@@ -480,6 +480,11 @@ const menuItems: MenuItem[] = [
         label: "Thống kê dữ liệu mở",
         icon: BarChart3,
       },
+      {
+        id: "open-data-public-portal",
+        label: "Cổng dữ liệu mở (Portal)",
+        icon: Globe,
+      },
     ],
   },
   {
@@ -517,6 +522,11 @@ const menuItems: MenuItem[] = [
     label: "Cung cấp dữ liệu",
     color: "text-amber-600",
     subItems: [
+      {
+        id: "provision-dashboard",
+        label: "Tổng quan cung cấp",
+        icon: LayoutDashboard,
+      },
       {
         id: "provisioning-service-setup",
         label: "Thiết lập điều phối dữ liệu",
