@@ -26,7 +26,16 @@ export function FunctionListPage() {
   };
 
   const modules = getModules();
-  const userGroups = ['Quản trị viên', 'Biên tập viên', 'Người xem', 'Nhóm Pháp luật Dân sự'];
+  const userGroups = [
+    'Quản trị hệ thống', 
+    'Lãnh đạo Bộ phận quản trị', 
+    'Cán bộ nghiệp vụ Hộ tịch điện tử', 
+    'Cán bộ nghiệp vụ quản lý hồ sơ quốc tịch', 
+    'Cán bộ nghiệp vụ thi hành án dân sự', 
+    'Cán bộ nghiệp vụ CSDL quốc gia về pháp luật', 
+    'Lãnh đạo nghiệp vụ Hộ tịch điện tử', 
+    'Lãnh đạo nghiệp vụ quản lý hồ sơ quốc tịch'
+  ];
 
   // Filter functions
   const filteredFunctions = functions.filter(func => {

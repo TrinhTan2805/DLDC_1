@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Plus, Edit, Trash2, Lock, Unlock, X, Eye, UserPlus, RefreshCw, Upload, Download, Users } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, Lock, Unlock, X, Eye, UserPlus, RefreshCw, Download, Users, Filter } from 'lucide-react';
 import { StatusTag } from '../../common/StatusTag';
 import { StatsCard } from '../../common/StatsCard';
 import { ResetPasswordModal } from '../../user/ResetPasswordModal';
@@ -16,19 +16,7 @@ interface User {
   role: string;
   groups: string[];
   permissions: string[];
-  status: 'active' | 'inactive' | 'locked';
-  createdDate: string;
-  lastLogin: string;
-}
-
-interface ImportUser {
-  name: string;
-  username: string;
-  email: string;
-  phone: string;
-  department: string;
-  role: string;
-  status: 'active' | 'inactive' | 'locked';
+  status: 'active' | 'inactive';
   errors: string[];
 }
 
@@ -45,7 +33,7 @@ const usersData: User[] = [
     permissions: ['Toàn quyền hệ thống', 'Quản lý người dùng', 'Cấu hình hệ thống'],
     status: 'active', 
     createdDate: '01/01/2024', 
-    lastLogin: '5 phút trước' 
+    lastLogin: '10:30:15 21:05:2026' 
   },
   { 
     id: 2, 
@@ -59,7 +47,7 @@ const usersData: User[] = [
     permissions: ['Xem dữ liệu', 'Chỉnh sửa dữ liệu', 'Xuất báo cáo'],
     status: 'active', 
     createdDate: '05/01/2024', 
-    lastLogin: '2 giờ trước' 
+    lastLogin: '08:15:00 20:05:2026' 
   },
   { 
     id: 3, 
@@ -73,7 +61,7 @@ const usersData: User[] = [
     permissions: ['Xem dữ liệu'],
     status: 'inactive', 
     createdDate: '10/01/2024', 
-    lastLogin: '2 ngày trước' 
+    lastLogin: '14:20:30 19:05:2026' 
   },
   { 
     id: 4, 
@@ -85,19 +73,21 @@ const usersData: User[] = [
     role: 'Biên tập viên',
     groups: ['Biên tập viên'],
     permissions: ['Xem dữ liệu', 'Chỉnh sửa dữ liệu'],
-    status: 'locked', 
+    status: 'inactive', 
     createdDate: '15/01/2024', 
-    lastLogin: '7 ngày trước' 
+    lastLogin: '09:05:10 14:05:2026' 
   },
 ];
 
 const availableGroups = [
-  { id: 1, name: 'Quản trị viên', code: 'ADMIN' },
-  { id: 2, name: 'Nhóm Pháp luật Dân sự', code: 'PLDC' },
-  { id: 3, name: 'Nhóm Đăng ký Kinh doanh', code: 'DKKD' },
-  { id: 4, name: 'Nhóm Công chứng', code: 'CC' },
-  { id: 5, name: 'Biên tập viên', code: 'EDITOR' },
-  { id: 6, name: 'Người xem', code: 'VIEWER' },
+  { id: 1, name: 'Quản trị hệ thống', code: 'QTHT' },
+  { id: 2, name: 'Lãnh đạo Bộ phận quản trị', code: 'LDBPQT' },
+  { id: 3, name: 'Cán bộ nghiệp vụ Hộ tịch điện tử', code: 'HTDT' },
+  { id: 4, name: 'Cán bộ nghiệp vụ quản lý hồ sơ quốc tịch', code: 'HSQT' },
+  { id: 5, name: 'Cán bộ nghiệp vụ thi hành án dân sự', code: 'THADS' },
+  { id: 6, name: 'Cán bộ nghiệp vụ CSDL quốc gia về pháp luật', code: 'CSDLPL' },
+  { id: 7, name: 'Lãnh đạo nghiệp vụ Hộ tịch điện tử', code: 'LDHTDT' },
+  { id: 8, name: 'Lãnh đạo nghiệp vụ quản lý hồ sơ quốc tịch', code: 'LDHSQT' },
 ];
 
 type ModalType = 'add' | 'edit' | 'detail' | 'delete' | 'lock' | 'unlock' | 'assign-group' | 'reset-password' | 'import' | 'export' | 'sync' | null;
@@ -105,6 +95,9 @@ type ModalType = 'add' | 'edit' | 'detail' | 'delete' | 'lock' | 'unlock' | 'ass
 export function UserManagementPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [showFilters, setShowFilters] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [modalType, setModalType] = useState<ModalType>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   
@@ -116,7 +109,7 @@ export function UserManagementPage() {
     phone: '',
     department: '',
     role: 'Người xem',
-    status: 'active' as 'active' | 'inactive' | 'locked',
+    status: 'active' as 'active' | 'inactive',
   });
 
   const [selectedGroups, setSelectedGroups] = useState<number[]>([]);
@@ -203,149 +196,231 @@ export function UserManagementPage() {
   return (
     <div className="space-y-6">
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <StatsCard icon={Users} iconColor="blue" title="Tổng người dùng" value="2,847" />
         <StatsCard icon={Users} iconColor="green" title="Đang hoạt động" value="2,654" />
-        <StatsCard icon={Users} iconColor="orange" title="Không hoạt động" value="158" />
-        <StatsCard icon={Users} iconColor="red" title="Bị khóa" value="35" />
+        <StatsCard icon={Users} iconColor="orange" title="Không hoạt động" value="193" />
       </div>
 
-      {/* Filters and Search */}
-      <div className="bg-white rounded-lg border border-slate-200 p-4">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Tìm kiếm theo tên, email, tên đăng nhập..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+      {/* Filters and Actions */}
+      <div className="mb-6">
+        {/* Row 1: Search and Buttons */}
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex-1 flex items-center gap-3">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                placeholder="Tìm kiếm theo tên, email, tên đăng nhập..."
+                className="w-full px-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <button className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center">
+              <Search className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`p-2 rounded-lg transition-colors shadow-sm flex items-center justify-center border ${showFilters ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-[#e2e8f0] text-slate-600 hover:bg-slate-50'}`}
+              title="Bộ lọc"
+            >
+              {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
+            </button>
           </div>
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">Tất cả trạng thái</option>
-            <option value="active">Đang hoạt động</option>
-            <option value="inactive">Không hoạt động</option>
-            <option value="locked">Bị khóa</option>
-          </select>
-          <button 
-            onClick={() => handleOpenModal('sync')}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
-          >
-            <RefreshCw className="w-4 h-4" />
-            Đồng bộ người dùng
-          </button>
-          <button 
-            onClick={() => handleOpenModal('import')}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
-          >
-            <Upload className="w-4 h-4" />
-            Nhập khẩu
-          </button>
-          <button 
-            onClick={() => handleOpenModal('export')}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
-          >
-            <Download className="w-4 h-4" />
-            Xuất khẩu
-          </button>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => handleOpenModal('add')}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium"
+            >
+              <Plus className="w-4 h-4" />
+              Thêm mới
+            </button>
+            <button
+              onClick={() => handleOpenModal('sync')}
+              className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Đồng bộ
+            </button>
+            <button
+              onClick={() => handleOpenModal('export')}
+              className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium"
+            >
+              <Download className="w-4 h-4" />
+              Kết xuất
+            </button>
+          </div>
         </div>
+
+        {/* Row 2: Filters (Collapsible) */}
+        {showFilters && (
+          <div className="bg-slate-50 p-5 rounded-lg border border-slate-200 grid grid-cols-4 gap-4 mt-4 animate-in slide-in-from-top-2 duration-200 shadow-sm relative">
+            <div className="absolute -top-2 right-[200px] w-4 h-4 bg-slate-50 border-t border-l border-slate-200 transform rotate-45"></div>
+
+            <div className="space-y-1.5 relative z-10">
+              <label className="text-[13px] font-medium text-slate-700">Trạng thái</label>
+              <select
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+              >
+                <option value="all">Tất cả trạng thái</option>
+                <option value="active">Đang hoạt động</option>
+                <option value="inactive">Không hoạt động</option>
+              </select>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Users Table */}
-      <div className="bg-white rounded-lg border border-slate-200">
-        <div className="px-6 py-4 border-b border-slate-200">
-          <h3 className="text-slate-900">Danh sách người dùng ({filteredUsers.length})</h3>
-        </div>
+      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-slate-50">
+          <table className="w-full border-collapse text-[13px]">
+            <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-[1]">
               <tr>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Họ tên</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Tên đăng nhập</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Email</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Đơn vị</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Vai trò</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Nhóm người dùng</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Trạng thái</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Đăng nhập</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Thao tác</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-12 text-[13px]">STT</th>
+                <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Họ tên</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Tên đăng nhập</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Email</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Đơn vị</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Vai trò</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Nhóm người dùng</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Đăng nhập</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filteredUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-slate-50">
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-slate-900">{user.name}</div>
-                    <div className="text-xs text-slate-500">{user.phone}</div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-700">{user.username}</td>
-                  <td className="px-6 py-4 text-sm text-slate-700">{user.email}</td>
-                  <td className="px-6 py-4 text-sm text-slate-700">{user.department}</td>
-                  <td className="px-6 py-4">
-                    <StatusTag label={user.role} variant="blue" />
-                  </td>
-                  <td className="px-6 py-4">
-                    <button
-                      onClick={() => {
-                        setSelectedUser(user);
-                        handleOpenModal('assign-group', user);
-                      }}
-                      className="text-sm text-blue-600 hover:text-blue-700 hover:underline flex items-center gap-1"
-                    >
-                      <UserPlus className="w-3 h-3" />
-                      {user.groups.length} nhóm
-                    </button>
-                  </td>
-                  <td className="px-6 py-4">
-                    <StatusTag 
-                      label={user.status === 'active' ? 'Hoạt động' : user.status === 'inactive' ? 'Không hoạt động' : 'Bị khóa'} 
-                      variant={user.status === 'active' ? 'green' : user.status === 'inactive' ? 'slate' : 'red'} 
-                    />
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-600">{user.lastLogin}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <button 
-                        onClick={() => handleOpenModal('detail', user)}
-                        className="text-green-600 hover:text-green-700" 
-                        title="Xem chi tiết"
+              {filteredUsers
+                .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                .map((user, index) => (
+                  <tr key={user.id} className="hover:bg-slate-50 transition-all group border-b border-slate-100">
+                    <td className="px-4 py-3 text-center text-slate-500 font-medium text-[13px]">{index + 1 + (currentPage - 1) * itemsPerPage}</td>
+                    <td className="px-4 py-3 text-left">
+                      <div className="font-medium text-slate-950 leading-snug text-[13px]">{user.name}</div>
+                      <div className="text-slate-500 mt-1 line-clamp-2 text-[13px]">{user.phone}</div>
+                    </td>
+                    <td className="px-4 py-3 text-center text-[13px] text-slate-700 font-medium">{user.username}</td>
+                    <td className="px-4 py-3 text-center text-[13px] text-slate-700">{user.email}</td>
+                    <td className="px-4 py-3 text-center text-[13px] text-slate-700 max-w-[120px]"><div className="leading-tight">{user.department}</div></td>
+                    <td className="px-4 py-3 text-center">
+                      <StatusTag label={user.role} variant="blue" />
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <button
+                        onClick={() => {
+                          setSelectedUser(user);
+                          handleOpenModal('assign-group', user);
+                        }}
+                        className="text-[13px] text-blue-600 hover:text-blue-700 hover:underline flex items-center justify-center gap-1 mx-auto"
                       >
-                        <Eye className="w-4 h-4" />
+                        <UserPlus className="w-3 h-3" />
+                        {user.groups.length} nhóm
                       </button>
-                      <button 
-                        onClick={() => handleOpenModal(user.status === 'locked' ? 'unlock' : 'lock', user)}
-                        className="text-orange-600 hover:text-orange-700" 
-                        title={user.status === 'locked' ? 'Mở khóa' : 'Khóa'}
-                      >
-                        {user.status === 'locked' ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
-                      </button>
-                      <button 
-                        onClick={() => handleOpenModal('reset-password', user)}
-                        className="text-blue-600 hover:text-blue-700" 
-                        title="Đặt lại mật khẩu"
-                      >
-                        <RefreshCw className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <StatusTag 
+                        label={user.status === 'active' ? 'Hoạt động' : 'Không hoạt động'} 
+                        variant={user.status === 'active' ? 'green' : 'slate'} 
+                      />
+                    </td>
+                    <td className="px-4 py-3 text-center text-[13px] text-slate-600 font-mono whitespace-nowrap">{user.lastLogin}</td>
+                    <td className="px-4 py-4 text-center">
+                      <div className="flex items-center justify-center gap-1">
+                        <button 
+                          onClick={() => handleOpenModal('detail', user)}
+                          className="p-1.5 text-slate-500 hover:text-[#2563eb] hover:bg-blue-50 rounded-lg transition-colors"
+                          title="Xem chi tiết"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={() => handleOpenModal(user.status === 'active' ? 'lock' : 'unlock', user)}
+                          className={`p-1.5 rounded-lg transition-colors ${user.status === 'active' ? 'text-orange-500 hover:bg-orange-50' : 'text-emerald-500 hover:bg-emerald-50'}`}
+                          title={user.status === 'active' ? "Ngừng hoạt động" : "Kích hoạt"}
+                        >
+                          {user.status === 'active' ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
+        </div>
+        
+        {/* Pagination */}
+        <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white sm:px-6 text-[13px]">
+          <div className="flex items-center gap-2">
+            <span className="text-slate-600">Hiển thị</span>
+            <select 
+              className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px]"
+              title="Số bản ghi trên trang"
+              value={itemsPerPage}
+              onChange={(e) => {
+                setItemsPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+            <span className="text-slate-600">bản ghi/trang</span>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <span className="text-slate-600">
+              {filteredUsers.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, filteredUsers.length)} / {filteredUsers.length}
+            </span>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : currentPage)}
+                disabled={currentPage === 1}
+                className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
+              >
+                Trước
+              </button>
+              
+              {Array.from({ length: Math.ceil(filteredUsers.length / itemsPerPage) }, (_, i) => i + 1).map(page => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`px-3 py-1.5 border rounded-lg font-medium text-[13px] transition-colors ${
+                    currentPage === page
+                      ? 'bg-blue-600 border-blue-600 text-white'
+                      : 'border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+
+              <button
+                onClick={() => {
+                  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+                  if (currentPage < totalPages) {
+                    setCurrentPage(currentPage + 1);
+                  }
+                }}
+                disabled={currentPage === Math.ceil(filteredUsers.length / itemsPerPage) || filteredUsers.length === 0}
+                className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
+              >
+                Sau
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Modals */}
       {(modalType === 'add' || modalType === 'edit') && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={handleCloseModal}>
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white z-10">
               <h3 className="text-slate-900">{modalType === 'add' ? 'Thêm người dùng mới' : 'Chỉnh sửa người dùng'}</h3>
               <button onClick={handleCloseModal} className="text-slate-400 hover:text-slate-600" title="Đóng" aria-label="Đóng">
                 <X className="w-5 h-5" />
@@ -430,7 +505,6 @@ export function UserManagementPage() {
                   >
                     <option value="active">Hoạt động</option>
                     <option value="inactive">Không hoạt động</option>
-                    <option value="locked">Bị khóa</option>
                   </select>
                 </div>
               </div>
@@ -452,9 +526,9 @@ export function UserManagementPage() {
 
       {/* Detail Modal */}
       {modalType === 'detail' && selectedUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={handleCloseModal}>
+          <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white z-10">
               <h3 className="text-slate-900">Chi tiết người dùng</h3>
               <button onClick={handleCloseModal} className="text-slate-400 hover:text-slate-600" title="Đóng" aria-label="Đóng">
                 <X className="w-5 h-5" />
@@ -492,8 +566,8 @@ export function UserManagementPage() {
                   <div>
                     <div className="text-xs text-slate-500 mb-1">Trạng thái</div>
                     <StatusTag 
-                      label={selectedUser.status === 'active' ? 'Hoạt động' : selectedUser.status === 'inactive' ? 'Không hoạt động' : 'Bị khóa'} 
-                      variant={selectedUser.status === 'active' ? 'green' : selectedUser.status === 'inactive' ? 'slate' : 'red'} 
+                      label={selectedUser.status === 'active' ? 'Hoạt động' : 'Không hoạt động'} 
+                      variant={selectedUser.status === 'active' ? 'green' : 'slate'} 
                     />
                   </div>
                   <div>
@@ -504,26 +578,13 @@ export function UserManagementPage() {
               </div>
 
               {/* Groups */}
-              <div className="mb-6">
+              <div>
                 <h4 className="text-slate-900 mb-4 pb-2 border-b border-slate-200">Nhóm người dùng ({selectedUser.groups.length})</h4>
                 <div className="flex flex-wrap gap-2">
                   {selectedUser.groups.map((group, index) => (
                     <span key={index} className="px-3 py-1.5 bg-purple-100 text-purple-700 rounded-lg text-sm">
                       {group}
                     </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Permissions */}
-              <div>
-                <h4 className="text-slate-900 mb-4 pb-2 border-b border-slate-200">Quyền hạn ({selectedUser.permissions.length})</h4>
-                <div className="space-y-2">
-                  {selectedUser.permissions.map((permission, index) => (
-                    <div key={index} className="flex items-center gap-2 text-sm text-slate-700">
-                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                      {permission}
-                    </div>
                   ))}
                 </div>
               </div>
@@ -543,9 +604,9 @@ export function UserManagementPage() {
 
       {/* Assign to Group Modal */}
       {modalType === 'assign-group' && selectedUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={handleCloseModal}>
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white z-10">
               <div>
                 <h3 className="text-slate-900">Gán nhóm người dùng</h3>
                 <p className="text-sm text-slate-600 mt-1">Người dùng: {selectedUser.name}</p>
@@ -592,8 +653,8 @@ export function UserManagementPage() {
 
       {/* Delete Confirmation */}
       {modalType === 'delete' && selectedUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={handleCloseModal}>
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full" onClick={e => e.stopPropagation()}>
             <div className="px-6 py-4 border-b border-slate-200">
               <h3 className="text-slate-900">Xác nhận xóa người dùng</h3>
             </div>
@@ -622,28 +683,23 @@ export function UserManagementPage() {
 
       {/* Lock/Unlock Confirmation */}
       {(modalType === 'lock' || modalType === 'unlock') && selectedUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={handleCloseModal}>
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full" onClick={e => e.stopPropagation()}>
             <div className="px-6 py-4 border-b border-slate-200">
               <h3 className="text-slate-900">
-                {modalType === 'lock' ? 'Xác nhận khóa tài khoản' : 'Xác nhận mở khóa tài khoản'}
+                {modalType === 'lock' ? 'Xác nhận ngừng hoạt động tài khoản' : 'Xác nhận kích hoạt tài khoản'}
               </h3>
             </div>
             <div className="p-6">
               <p className="text-slate-700 mb-4">
-                Bạn có chắc chắn muốn {modalType === 'lock' ? 'khóa' : 'mở khóa'} tài khoản của{' '}
+                Bạn có chắc chắn muốn {modalType === 'lock' ? 'ngừng hoạt động' : 'kích hoạt'} tài khoản của{' '}
                 <span className="font-semibold">{selectedUser.name}</span>?
               </p>
-              {modalType === 'lock' && (
-                <p className="text-sm text-orange-600">
-                  Người dùng sẽ không thể đăng nhập cho đến khi tài khoản được mở khóa.
-                </p>
-              )}
               <div className="flex gap-3 mt-6">
                 <button className={`px-6 py-2 text-white rounded-lg ${
                   modalType === 'lock' ? 'bg-orange-600 hover:bg-orange-700' : 'bg-green-600 hover:bg-green-700'
                 }`}>
-                  {modalType === 'lock' ? 'Khóa tài khoản' : 'Mở khóa'}
+                  {modalType === 'lock' ? 'Ngừng hoạt động' : 'Kích hoạt'}
                 </button>
                 <button 
                   onClick={handleCloseModal}
@@ -677,9 +733,9 @@ export function UserManagementPage() {
 
       {/* Export Modal */}
       {modalType === 'export' && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={handleCloseModal}>
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white z-10">
               <h3 className="text-slate-900">Xuất khẩu người dùng</h3>
               <button onClick={handleCloseModal} className="text-slate-400 hover:text-slate-600" title="Đóng" aria-label="Đóng">
                 <X className="w-5 h-5" />
@@ -712,8 +768,8 @@ export function UserManagementPage() {
 
       {/* Sync Users Modal */}
       {modalType === 'sync' && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={handleCloseModal}>
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full" onClick={e => e.stopPropagation()}>
             <div className="px-6 py-4 border-b border-slate-200">
               <h3 className="text-slate-900">Xác nhận đồng bộ người dùng</h3>
             </div>

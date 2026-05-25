@@ -89,6 +89,7 @@ import { UserManagementPage } from '../pages/admin/UserManagementPage';
 import { GroupManagementPage } from '../pages/admin/GroupManagementPage';
 import { PasswordRuleConfigPage } from '../pages/admin/PasswordRuleConfigPage';
 import { FunctionManagementPage } from '../pages/admin/FunctionManagementPage';
+import { RoleManagementPage } from '../pages/admin/RoleManagementPage';
 import { SecurityConfigPage } from '../pages/admin/SecurityConfigPage';
 import { AccessLogPage } from '../pages/admin/AccessLogPage';
 import { ErrorLogPage } from '../pages/admin/ErrorLogPage';
@@ -197,6 +198,10 @@ const pageConfig: Record<string, { title: string; description: string }> = {
   'admin-function-config': {
     title: 'Cấu hình quyền thao tác',
     description: 'Thiết lập quyền thao tác cho các chức năng'
+  },
+  'admin-roles': {
+    title: 'Quản lý vai trò',
+    description: 'Quản lý và phân quyền vai trò người dùng trong hệ thống'
   },
   dashboard: {
     title: 'Tổng quan hệ thống',
@@ -557,6 +562,7 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'admin-groups' && <GroupManagementPage />}
             {currentPage === 'admin-password-rules' && <PasswordRuleConfigPage />}
             {currentPage === 'admin-functions' && <FunctionManagementPage />}
+            {currentPage === 'admin-roles' && <RoleManagementPage />}
             {currentPage === 'admin-function-config' && <SystemAdminPage initialTab="function-config" />}
             {currentPage === 'admin-config' && <SecurityConfigPage />}
             {currentPage === 'admin-access-log' && <AccessLogPage />}

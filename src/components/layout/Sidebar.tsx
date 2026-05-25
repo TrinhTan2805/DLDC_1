@@ -635,6 +635,11 @@ const menuItems: MenuItem[] = [
             label: "Danh sách chức năng",
             icon: List,
           },
+          {
+            id: "admin-roles",
+            label: "Quản lý vai trò",
+            icon: ShieldIcon,
+          },
         ],
       },
       {

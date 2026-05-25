@@ -671,16 +671,16 @@ function TabMapping({ onEdit }: { onEdit: () => void }) {
     <div className="space-y-4 animate-in fade-in duration-300">
       {/* ACTION BUTTONS */}
       <div className="flex justify-start gap-3">
-        <button className="flex items-center gap-2 px-4 py-2 bg-white text-[#020817] border border-[#e2e8f0] rounded-[6px] text-[13px] hover:bg-slate-50 transition-all shadow-sm font-medium">
-          <Download className="w-4 h-4" />
+        <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md text-[13px] hover:bg-blue-700 transition-all shadow-sm font-medium border border-transparent">
+          <Download className="w-4 h-4 text-white" />
           Nạp cấu trúc
         </button>
-        <button onClick={onEdit} className="flex items-center gap-2 px-4 py-2 bg-white text-[#020817] border border-[#e2e8f0] rounded-[6px] text-[13px] hover:bg-slate-50 transition-all shadow-sm font-medium">
-          <Edit className="w-4 h-4" />
+        <button onClick={onEdit} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md text-[13px] hover:bg-blue-700 transition-all shadow-sm font-medium border border-transparent">
+          <Edit className="w-4 h-4 text-white" />
           Sửa cấu trúc
         </button>
-        <button className="flex items-center gap-2 px-4 py-2 bg-white text-[#dc2626] border border-[#e2e8f0] rounded-[6px] text-[13px] hover:bg-red-50 transition-all shadow-sm font-medium">
-          <Trash2 className="w-4 h-4" />
+        <button className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-md text-[13px] hover:bg-red-700 transition-all shadow-sm font-medium border border-transparent">
+          <Trash2 className="w-4 h-4 text-white" />
           Xóa cấu trúc
         </button>
       </div>
