@@ -279,9 +279,9 @@ export function DataProvisionMonitoringPage() {
               
               {/* Dynamic Recharts graphs showing dynamic stats based on chosen API */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="h-80 border border-slate-200 rounded-xl p-4 flex flex-col bg-white">
+                <div className="h-auto border border-slate-200 rounded-xl p-4 flex flex-col bg-white">
                   <h3 className="font-bold text-slate-700 mb-4 text-center text-xs uppercase tracking-wider">Lưu lượng truy cập API (7 ngày qua)</h3>
-                  <div className="flex-1 w-full min-h-0">
+                  <div className="w-full h-[250px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={stats.chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                         <defs>
@@ -300,9 +300,9 @@ export function DataProvisionMonitoringPage() {
                   </div>
                 </div>
 
-                <div className="h-80 border border-slate-200 rounded-xl p-4 flex flex-col bg-white">
+                <div className="h-auto border border-slate-200 rounded-xl p-4 flex flex-col bg-white">
                   <h3 className="font-bold text-slate-700 mb-4 text-center text-xs uppercase tracking-wider">Thống kê lỗi / Cảnh báo kết nối</h3>
-                  <div className="flex-1 w-full min-h-0">
+                  <div className="w-full h-[250px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={stats.chartData}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} horizontal={true} />
@@ -313,6 +313,68 @@ export function DataProvisionMonitoringPage() {
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
+                </div>
+              </div>
+
+              {/* Detailed Data Table */}
+              <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm mt-6">
+                <div className="px-5 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                  <h3 className="font-bold text-slate-800 text-sm flex items-center">
+                    <Database className="w-4 h-4 mr-2 text-amber-600" />
+                    Dữ liệu chi tiết lưu lượng (7 ngày qua)
+                  </h3>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead className="bg-slate-50 text-slate-500">
+                      <tr>
+                        <th className="px-6 py-3 font-semibold border-b border-slate-200">Ngày</th>
+                        <th className="px-6 py-3 font-semibold border-b border-slate-200 text-right">Lưu lượng truy cập</th>
+                        <th className="px-6 py-3 font-semibold border-b border-slate-200 text-right">Lỗi kết nối</th>
+                        <th className="px-6 py-3 font-semibold border-b border-slate-200 text-right">Tỷ lệ lỗi</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {stats.chartData.map((row, idx) => {
+                        const total = row['Luồng dữ liệu'] + row['Lỗi kết nối'];
+                        const errorRate = total > 0 ? ((row['Lỗi kết nối'] / total) * 100).toFixed(1) : '0.0';
+                        return (
+                          <tr key={idx} className="hover:bg-slate-50/70 transition-colors">
+                            <td className="px-6 py-3 font-medium text-slate-700">{row.name}</td>
+                            <td className="px-6 py-3 text-right text-slate-700 font-mono">{row['Luồng dữ liệu'].toLocaleString()}</td>
+                            <td className="px-6 py-3 text-right font-mono">
+                              {row['Lỗi kết nối'] > 0 ? (
+                                <span className="text-rose-600 font-bold">{row['Lỗi kết nối'].toLocaleString()}</span>
+                              ) : (
+                                <span className="text-slate-400">0</span>
+                              )}
+                            </td>
+                            <td className="px-6 py-3 text-right">
+                              {row['Lỗi kết nối'] > 0 ? (
+                                <span className="text-rose-600 font-medium">{errorRate}%</span>
+                              ) : (
+                                <span className="text-emerald-600 font-medium">0%</span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      {/* Summary row */}
+                      <tr className="bg-slate-50 font-bold text-slate-800">
+                        <td className="px-6 py-3">Tổng cộng</td>
+                        <td className="px-6 py-3 text-right font-mono">
+                          {stats.chartData.reduce((acc, row) => acc + row['Luồng dữ liệu'], 0).toLocaleString()}
+                        </td>
+                        <td className="px-6 py-3 text-right font-mono text-rose-600">
+                          {stats.chartData.reduce((acc, row) => acc + row['Lỗi kết nối'], 0).toLocaleString()}
+                        </td>
+                        <td className="px-6 py-3 text-right">
+                          {((stats.chartData.reduce((acc, row) => acc + row['Lỗi kết nối'], 0) / 
+                            (stats.chartData.reduce((acc, row) => acc + row['Luồng dữ liệu'] + row['Lỗi kết nối'], 0) || 1)) * 100).toFixed(1)}%
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
 
