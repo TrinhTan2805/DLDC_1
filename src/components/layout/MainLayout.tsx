@@ -443,8 +443,14 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'collection-log' && <LogManagement />}
             {(currentPage === 'connection-management' || currentPage.startsWith('connection-management/')) && (
               <ConnectionManagementPage 
-                activeTab={currentPage === 'connection-management/agents' ? 'agents' : 'source-systems'}
-                onTabChange={(tab) => setCurrentPage(`connection-management/${tab === 'agents' ? 'agents' : 'source-systems'}`)}
+                activeTab={
+                  currentPage === 'connection-management/agents' 
+                    ? 'agents' 
+                    : currentPage === 'connection-management/source-systems' 
+                      ? 'source-systems' 
+                      : 'units'
+                }
+                onTabChange={(tab) => setCurrentPage(`connection-management/${tab}`)}
               />
             )}
             {currentPage === 'collection-reconciliation' && <ReconciliationSetupPage />}
@@ -808,7 +814,12 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
 // Helper function to get breadcrumb path
 const getBreadcrumbPath = (pageId: string): string[] => {
   if (pageId === 'connection-management' || pageId.startsWith('connection-management/')) {
-    return ['Quản trị & vận hành', 'Quản lý kết nối', pageId === 'connection-management/agents' ? 'Trạm kết nối' : 'Hệ thống nguồn'];
+    const subPage = pageId === 'connection-management/agents' 
+      ? 'Trạm kết nối' 
+      : pageId === 'connection-management/source-systems' 
+        ? 'Hệ thống nguồn' 
+        : 'Quản lý đơn vị';
+    return ['Quản trị & vận hành', 'Quản lý kết nối', subPage];
   }
   if (pageId === 'collection-setup' || pageId.startsWith('collection-setup/')) {
     return ['Quản lý thu thập', 'Thiết lập thu thập', pageId === 'collection-setup/version' ? 'Quản lý nhật ký' : 'Thiết lập dịch vụ'];

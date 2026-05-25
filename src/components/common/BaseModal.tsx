@@ -39,9 +39,10 @@ export function BaseModal({
   return (
     <Portal>
       <div 
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
+        className="fixed inset-0 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
         style={{ 
           zIndex: 999999999,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
           backdropFilter: 'blur(4px)', 
           WebkitBackdropFilter: 'blur(4px)' 
         }}

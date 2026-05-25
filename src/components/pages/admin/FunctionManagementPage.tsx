@@ -45,36 +45,52 @@ const flattenMenuStructure = (items: any[], parentId: string | null = null): Loc
   return flatList;
 };
 
-const menuItems = flattenMenuStructure(menuStructure);
+// Filter menu structure to remove CSDL/Hệ thống nodes as per user request
+const filterMenuStructure = (items: any[]): any[] => {
+  const dynamicParentIds = [
+    'view-data-internal',
+    'view-data-external',
+    'reconciliation-external-ministry',
+    'reconciliation-internal-ministry',
+    'processing-internal',
+    'processing-external',
+    'provisioning-shared',
+    'provisioning-internal',
+    'reconciliation-catalog'
+  ];
 
-const systemPermissions: Permission[] = [
-  { id: 1, name: 'Thêm', code: 'ADD', description: 'Quyền thêm mới dữ liệu', enabled: true },
-  { id: 2, name: 'Sửa', code: 'EDIT', description: 'Quyền chỉnh sửa dữ liệu', enabled: true },
-  { id: 3, name: 'Xóa', code: 'DELETE', description: 'Quyền xóa dữ liệu', enabled: true },
-  { id: 4, name: 'Kết xuất', code: 'EXPORT', description: 'Quyền kết xuất dữ liệu ra file', enabled: true },
-  { id: 5, name: 'Trình duyệt', code: 'SUBMIT', description: 'Quyền gửi dữ liệu lên để duyệt', enabled: true },
-  { id: 6, name: 'Duyệt', code: 'APPROVE', description: 'Quyền phê duyệt dữ liệu', enabled: true },
-  { id: 7, name: 'Khóa', code: 'LOCK', description: 'Quyền khóa/mở khóa dữ liệu', enabled: true },
-  { id: 8, name: 'Xem', code: 'VIEW', description: 'Quyền xem chi tiết dữ liệu', enabled: false },
-  { id: 9, name: 'Tải lên', code: 'UPLOAD', description: 'Quyền tải file lên', enabled: false },
-  { id: 10, name: 'Làm mới', code: 'REFRESH', description: 'Quyền làm mới dữ liệu', enabled: false },
-];
+  return items
+    .map(item => {
+      if (dynamicParentIds.includes(item.id)) {
+        return {
+          ...item,
+          children: undefined
+        };
+      }
+      
+      if (item.children) {
+        const filteredChildren = filterMenuStructure(item.children);
+        return {
+          ...item,
+          children: filteredChildren
+        };
+      }
+      
+      return item;
+    });
+};
 
-type ModalType = 'addPermission' | 'editPermission' | 'addFunction' | null;
+const filteredMenuStructure = filterMenuStructure(menuStructure);
+const menuItems = flattenMenuStructure(filteredMenuStructure);
+
+type ModalType = 'addFunction' | null;
 
 export function FunctionManagementPage() {
   const [localMenuItems, setLocalMenuItems] = useState<LocalMenuItem[]>(menuItems);
   const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set([]));
   const [selectedMenu, setSelectedMenu] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [permissions, setPermissions] = useState<Permission[]>(systemPermissions);
   const [modalType, setModalType] = useState<ModalType>(null);
-  const [selectedPermission, setSelectedPermission] = useState<Permission | null>(null);
-  const [permissionForm, setPermissionForm] = useState({
-    name: '',
-    code: '',
-    description: '',
-  });
   
   const [formData, setFormData] = useState<FunctionDetail>({
     parentId: null,
@@ -175,65 +191,9 @@ export function FunctionManagementPage() {
     );
   };
 
-  const togglePermission = (permId: number) => {
-    setPermissions(permissions.map(p => 
-      p.id === permId ? { ...p, enabled: !p.enabled } : p
-    ));
-  };
-
-  const handleOpenPermissionModal = (type: ModalType, perm?: Permission) => {
-    setModalType(type);
-    if (perm) {
-      setSelectedPermission(perm);
-      setPermissionForm({
-        name: perm.name,
-        code: perm.code,
-        description: perm.description,
-      });
-    } else {
-      setSelectedPermission(null);
-      setPermissionForm({
-        name: '',
-        code: '',
-        description: '',
-      });
-    }
-  };
-
-  const handleClosePermissionModal = () => {
-    setModalType(null);
-    setSelectedPermission(null);
-  };
-
-  const handleSavePermission = () => {
-    if (modalType === 'addPermission') {
-      const newPermission: Permission = {
-        id: Math.max(...permissions.map(p => p.id)) + 1,
-        ...permissionForm,
-        enabled: false,
-      };
-      setPermissions([...permissions, newPermission]);
-    } else if (modalType === 'editPermission' && selectedPermission) {
-      setPermissions(permissions.map(p => 
-        p.id === selectedPermission.id 
-          ? { ...p, ...permissionForm }
-          : p
-      ));
-    }
-    handleClosePermissionModal();
-  };
-
-  const handleDeletePermission = (permId: number) => {
-    if (confirm('Bạn có chắc chắn muốn xóa quyền này?')) {
-      setPermissions(permissions.filter(p => p.id !== permId));
-    }
-  };
-
   const handleSave = () => {
-    const enabledPermissions = permissions.filter(p => p.enabled);
     console.log('Saving function:', formData);
-    console.log('With permissions:', enabledPermissions);
-    alert(`Đã lưu chức năng "${formData.name}" với ${enabledPermissions.length} quyền được áp dụng`);
+    alert(`Đã lưu chức năng "${formData.name}" thành công!`);
   };
 
   const handleRefresh = () => {
@@ -248,7 +208,6 @@ export function FunctionManagementPage() {
       type: '',
       active: true,
     });
-    setPermissions(permissions.map(p => ({ ...p, enabled: false })));
   };
 
   const handleDelete = () => {
@@ -274,22 +233,12 @@ export function FunctionManagementPage() {
   };
 
   const handleParentIdChange = (parentId: string | null) => {
-    if (!parentId) {
-      setAddFormData({ ...addFormData, parentId, order: 1 });
-      return;
-    }
-    const childrenCount = localMenuItems.filter(i => i.parentId === parentId).length;
-    let order = childrenCount + 1;
-    if (order === 1) order = 2; // satisfy "nếu đã có chức năng cha thì ô số thứ tự không được là 1"
-    setAddFormData({ ...addFormData, parentId, order });
+    setAddFormData({ ...addFormData, parentId });
   };
 
   const handleAddFunctionSave = () => {
     if (!addFormData.name || !addFormData.code) {
       return alert('Vui lòng nhập tên và mã chức năng');
-    }
-    if (addFormData.parentId && addFormData.order === 1) {
-      return alert('Nếu đã có chức năng cha thì số thứ tự không được là 1');
     }
 
     const newItem: LocalMenuItem = {
@@ -354,7 +303,7 @@ export function FunctionManagementPage() {
         </h2>
 
         <div className="mt-6 space-y-5">
-          {/* Row 1: Chức năng cha & Số thứ tự */}
+          {/* Row 1: Chức năng cha & Đường dẫn tới chức năng */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-slate-700 mb-2">
@@ -373,14 +322,18 @@ export function FunctionManagementPage() {
             </div>
             <div>
               <label className="block text-sm text-slate-700 mb-2">
-                Số thứ tự
+                Đường dẫn tới chức năng
               </label>
-              <input
-                type="number"
-                value={formData.order}
-                onChange={(e) => setFormData({ ...formData, order: Number(e.target.value) })}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-              />
+              <select
+                value={formData.path || ''}
+                onChange={(e) => setFormData({ ...formData, path: e.target.value })}
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
+              >
+                <option value="">Chọn chức năng</option>
+                {localMenuItems.map(item => (
+                  <option key={item.id} value={`/admin/${item.code}`}>{item.name}</option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -412,19 +365,7 @@ export function FunctionManagementPage() {
 
 
 
-          {/* Row 4: Đường dẫn (Path) */}
-          <div>
-            <label className="block text-sm text-slate-700 mb-2">
-              Đường dẫn (Path)
-            </label>
-            <input
-              type="text"
-              value={formData.path}
-              onChange={(e) => setFormData({ ...formData, path: e.target.value })}
-              placeholder="/quan-ly-danh-muc/toan-van-ban"
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-            />
-          </div>
+
 
           {/* Row 5: Component Path */}
           <div>
@@ -495,87 +436,7 @@ export function FunctionManagementPage() {
             </div>
           </div>
 
-          {/* Row 9: Danh sách quyền trong hệ thống */}
-          <div className="border-t border-slate-200 pt-5">
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <label className="block text-sm font-medium text-slate-700">
-                  Quyền thao tác trên màn hình
-                </label>
-                <p className="text-xs text-slate-500 mt-1">
-                  Tick chọn các quyền áp dụng cho chức năng này. Mục đích: để phân quyền cho người dùng/nhóm người dùng
-                </p>
-              </div>
-              <button
-                onClick={() => handleOpenPermissionModal('addPermission')}
-                className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 flex items-center gap-2 text-sm transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-                Thêm quyền
-              </button>
-            </div>
 
-            {/* Permissions Table */}
-            <div className="border border-slate-200 rounded-lg overflow-hidden">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-slate-50 border-b border-slate-200">
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 w-12">STT</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700">TÊN QUYỀN</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700">MÃ QUYỀN</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700">MÔ TẢ</th>
-                    <th className="px-4 py-3 text-center text-xs font-semibold text-slate-700 w-24">ÁP DỤNG</th>
-                    <th className="px-4 py-3 text-center text-xs font-semibold text-slate-700 w-24">THAO TÁC</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {permissions.map((perm, index) => (
-                    <tr key={perm.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                      <td className="px-4 py-3 text-sm text-slate-700">{index + 1}</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">{perm.name}</td>
-                      <td className="px-4 py-3 text-sm text-slate-700">
-                        <code className="px-2 py-1 bg-slate-100 rounded text-xs">{perm.code}</code>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-slate-600">{perm.description}</td>
-                      <td className="px-4 py-3 text-center">
-                        <input
-                          type="checkbox"
-                          checked={perm.enabled}
-                          onChange={() => togglePermission(perm.id)}
-                          className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500 cursor-pointer"
-                        />
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center justify-center gap-2">
-                          <button
-                            onClick={() => handleOpenPermissionModal('editPermission', perm)}
-                            className="text-blue-600 hover:text-blue-700 p-1 rounded hover:bg-blue-50 transition-colors"
-                            title="Sửa"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDeletePermission(perm.id)}
-                            className="text-red-600 hover:text-red-700 p-1 rounded hover:bg-red-50 transition-colors"
-                            title="Xóa"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Summary */}
-            <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-              <p className="text-sm text-blue-800">
-                <strong>{permissions.filter(p => p.enabled).length}</strong> quyền được áp dụng cho chức năng này
-              </p>
-            </div>
-          </div>
         </div>
 
         {/* Action Buttons */}
@@ -597,81 +458,7 @@ export function FunctionManagementPage() {
         </div>
       </div>
 
-      {/* Add/Edit Permission Modal */}
-      {(modalType === 'addPermission' || modalType === 'editPermission') && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full">
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-slate-900">
-                {modalType === 'addPermission' ? 'Thêm quyền mới' : 'Chỉnh sửa quyền'}
-              </h3>
-              <button 
-                onClick={handleClosePermissionModal} 
-                className="text-slate-400 hover:text-slate-600 transition-colors" title="Đóng" aria-label="Đóng"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="p-6">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Tên quyền <span className="text-red-600">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={permissionForm.name}
-                    onChange={(e) => setPermissionForm({ ...permissionForm, name: e.target.value })}
-                    placeholder="VD: Thêm"
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Mã quyền <span className="text-red-600">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={permissionForm.code}
-                    onChange={(e) => setPermissionForm({ ...permissionForm, code: e.target.value.toUpperCase() })}
-                    placeholder="VD: ADD"
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono"
-                  />
-                </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Mô tả
-                  </label>
-                  <textarea
-                    value={permissionForm.description}
-                    onChange={(e) => setPermissionForm({ ...permissionForm, description: e.target.value })}
-                    placeholder="VD: Quyền thêm mới dữ liệu"
-                    rows={3}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center justify-end gap-3 mt-6">
-                <button
-                  onClick={handleClosePermissionModal}
-                  className="px-4 py-2 text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
-                >
-                  Hủy
-                </button>
-                <button
-                  onClick={handleSavePermission}
-                  className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
-                >
-                  {modalType === 'addPermission' ? 'Thêm mới' : 'Lưu thay đổi'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
       {/* Add Function Modal */}
       {modalType === 'addFunction' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -701,17 +488,17 @@ export function FunctionManagementPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm text-slate-700 mb-2">Số thứ tự</label>
-                  <input
-                    type="number"
-                    value={addFormData.order}
-                    onChange={(e) => setAddFormData({ ...addFormData, order: Number(e.target.value) })}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                    min={addFormData.parentId ? 2 : 1}
-                  />
-                  {addFormData.parentId && addFormData.order === 1 && (
-                    <p className="text-red-500 text-xs mt-1">Không được là 1 khi đã có chức năng cha</p>
-                  )}
+                  <label className="block text-sm text-slate-700 mb-2">Đường dẫn tới chức năng</label>
+                  <select
+                    value={addFormData.path || ''}
+                    onChange={(e) => setAddFormData({ ...addFormData, path: e.target.value })}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
+                  >
+                    <option value="">Chọn chức năng</option>
+                    {localMenuItems.map(item => (
+                      <option key={item.id} value={`/admin/${item.code}`}>{item.name}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
@@ -736,16 +523,7 @@ export function FunctionManagementPage() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm text-slate-700 mb-2">Đường dẫn (Path)</label>
-                <input
-                  type="text"
-                  value={addFormData.path}
-                  onChange={(e) => setAddFormData({ ...addFormData, path: e.target.value })}
-                  placeholder="/quan-ly-danh-muc/toan-van-ban"
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                />
-              </div>
+
 
               <div>
                 <label className="block text-sm text-slate-700 mb-2">Component Path</label>

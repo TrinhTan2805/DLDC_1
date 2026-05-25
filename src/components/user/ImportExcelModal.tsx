@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { X, Upload, Download, AlertCircle, CheckCircle, Edit2, Trash2 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
-interface ImportUser {
+export interface ImportUser {
   name: string;
   username: string;
   email: string;

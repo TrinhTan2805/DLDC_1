@@ -3,7 +3,7 @@ import { Search, Plus, Edit, Trash2, Lock, Unlock, X, Eye, UserPlus, RefreshCw, 
 import { StatusTag } from '../../common/StatusTag';
 import { StatsCard } from '../../common/StatsCard';
 import { ResetPasswordModal } from '../../user/ResetPasswordModal';
-import { ImportExcelModal } from '../../user/ImportExcelModal';
+import { ImportExcelModal, type ImportUser } from '../../user/ImportExcelModal';
 import * as XLSX from 'xlsx';
 
 interface User {
@@ -93,12 +93,16 @@ const availableGroups = [
 type ModalType = 'add' | 'edit' | 'detail' | 'delete' | 'lock' | 'unlock' | 'assign-group' | 'reset-password' | 'import' | 'export' | 'sync' | null;
 
 export function UserManagementPage() {
+  const [users, setUsers] = useState<User[]>(usersData);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [filterDepartment, setFilterDepartment] = useState('all');
+  const [filterGroup, setFilterGroup] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [modalType, setModalType] = useState<ModalType>(null);
+  const [prevModalType, setPrevModalType] = useState<ModalType>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   
   // Form states
@@ -114,12 +118,20 @@ export function UserManagementPage() {
 
   const [selectedGroups, setSelectedGroups] = useState<number[]>([]);
 
-  const filteredUsers = usersData.filter(user => {
+  const departmentsList = Array.from(new Set(users.map(u => u.department).filter(Boolean)));
+  const groupsList = Array.from(new Set([
+    ...availableGroups.map(g => g.name),
+    ...users.flatMap(u => u.groups || [])
+  ].filter(Boolean)));
+
+  const filteredUsers = users.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.username.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'all' || user.status === filterStatus;
-    return matchesSearch && matchesStatus;
+    const matchesDepartment = filterDepartment === 'all' || user.department === filterDepartment;
+    const matchesGroup = filterGroup === 'all' || (user.groups && user.groups.includes(filterGroup));
+    return matchesSearch && matchesStatus && matchesDepartment && matchesGroup;
   });
 
   const handleOpenModal = (type: ModalType, user?: User) => {
@@ -136,6 +148,11 @@ export function UserManagementPage() {
           role: user.role,
           status: user.status,
         });
+      } else if (type === 'assign-group') {
+        const groupIds = availableGroups
+          .filter(ag => user.groups.includes(ag.name))
+          .map(ag => ag.id);
+        setSelectedGroups(groupIds);
       }
     } else {
       setSelectedUser(null);
@@ -152,9 +169,15 @@ export function UserManagementPage() {
   };
 
   const handleCloseModal = () => {
-    setModalType(null);
-    setSelectedUser(null);
-    setSelectedGroups([]);
+    if (prevModalType === 'detail' && selectedUser) {
+      setModalType('detail');
+      setPrevModalType(null);
+    } else {
+      setModalType(null);
+      setSelectedUser(null);
+      setSelectedGroups([]);
+      setPrevModalType(null);
+    }
   };
 
   const toggleGroup = (groupId: number) => {
@@ -162,6 +185,93 @@ export function UserManagementPage() {
       setSelectedGroups(selectedGroups.filter(id => id !== groupId));
     } else {
       setSelectedGroups([...selectedGroups, groupId]);
+    }
+  };
+
+  const handleSaveGroups = () => {
+    if (!selectedUser) return;
+    const newGroupNames = availableGroups
+      .filter(g => selectedGroups.includes(g.id))
+      .map(g => g.name);
+
+    const updatedUser = { ...selectedUser, groups: newGroupNames };
+    setUsers(users.map(u => u.id === selectedUser.id ? updatedUser : u));
+    setSelectedUser(updatedUser);
+
+    alert(`Đã cập nhật nhóm cho người dùng ${selectedUser.name} thành công!`);
+    
+    if (prevModalType === 'detail') {
+      setModalType('detail');
+      setPrevModalType(null);
+    } else {
+      handleCloseModal();
+    }
+  };
+
+  const handleSaveUser = () => {
+    if (!formData.name || !formData.username || !formData.email || !formData.department) {
+      alert('Vui lòng điền đầy đủ các thông tin bắt buộc (*)');
+      return;
+    }
+
+    if (modalType === 'add') {
+      if (users.some(u => u.username.toLowerCase() === formData.username.toLowerCase())) {
+        alert('Tên đăng nhập đã tồn tại trong hệ thống!');
+        return;
+      }
+
+      const newUser: User = {
+        id: users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1,
+        name: formData.name,
+        username: formData.username,
+        email: formData.email,
+        phone: formData.phone,
+        department: formData.department,
+        role: formData.role,
+        groups: [],
+        permissions: ['Xem dữ liệu'],
+        status: formData.status,
+        errors: []
+      };
+      (newUser as any).createdDate = new Date().toLocaleDateString('vi-VN');
+      (newUser as any).lastLogin = 'Chưa đăng nhập';
+
+      setUsers([newUser, ...users]);
+      alert('Thêm người dùng mới thành công!');
+    } else if (modalType === 'edit' && selectedUser) {
+      setUsers(users.map(u => {
+        if (u.id === selectedUser.id) {
+          return {
+            ...u,
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            department: formData.department,
+            role: formData.role,
+            status: formData.status
+          };
+        }
+        return u;
+      }));
+      alert('Cập nhật thông tin người dùng thành công!');
+    }
+    handleCloseModal();
+  };
+
+  const handleToggleUserStatus = () => {
+    if (selectedUser) {
+      const newStatus = selectedUser.status === 'active' ? 'inactive' : 'active';
+      setUsers(users.map(u => u.id === selectedUser.id ? { ...u, status: newStatus } : u));
+      alert(`Đã ${newStatus === 'active' ? 'kích hoạt' : 'ngừng hoạt động'} tài khoản của ${selectedUser.name} thành công!`);
+      handleCloseModal();
+    }
+  };
+
+  const handleDeleteUser = () => {
+    if (selectedUser) {
+      setUsers(users.filter(u => u.id !== selectedUser.id));
+      alert('Xóa người dùng thành công!');
+      handleCloseModal();
     }
   };
 
@@ -230,13 +340,6 @@ export function UserManagementPage() {
 
           <div className="flex items-center gap-3">
             <button
-              onClick={() => handleOpenModal('add')}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium"
-            >
-              <Plus className="w-4 h-4" />
-              Thêm mới
-            </button>
-            <button
               onClick={() => handleOpenModal('sync')}
               className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium"
             >
@@ -270,6 +373,34 @@ export function UserManagementPage() {
                 <option value="inactive">Không hoạt động</option>
               </select>
             </div>
+
+            <div className="space-y-1.5 relative z-10">
+              <label className="text-[13px] font-medium text-slate-700">Đơn vị</label>
+              <select
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                value={filterDepartment}
+                onChange={(e) => setFilterDepartment(e.target.value)}
+              >
+                <option value="all">Tất cả đơn vị</option>
+                {departmentsList.map((dept) => (
+                  <option key={dept} value={dept}>{dept}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-1.5 relative z-10">
+              <label className="text-[13px] font-medium text-slate-700">Nhóm người dùng</label>
+              <select
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                value={filterGroup}
+                onChange={(e) => setFilterGroup(e.target.value)}
+              >
+                <option value="all">Tất cả nhóm</option>
+                {groupsList.map((group) => (
+                  <option key={group} value={group}>{group}</option>
+                ))}
+              </select>
+            </div>
           </div>
         )}
       </div>
@@ -286,7 +417,6 @@ export function UserManagementPage() {
                 <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Email</th>
                 <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Đơn vị</th>
                 <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Vai trò</th>
-                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Nhóm người dùng</th>
                 <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái</th>
                 <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Đăng nhập</th>
                 <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Thao tác</th>
@@ -300,25 +430,12 @@ export function UserManagementPage() {
                     <td className="px-4 py-3 text-center text-slate-500 font-medium text-[13px]">{index + 1 + (currentPage - 1) * itemsPerPage}</td>
                     <td className="px-4 py-3 text-left">
                       <div className="font-medium text-slate-950 leading-snug text-[13px]">{user.name}</div>
-                      <div className="text-slate-500 mt-1 line-clamp-2 text-[13px]">{user.phone}</div>
                     </td>
                     <td className="px-4 py-3 text-center text-[13px] text-slate-700 font-medium">{user.username}</td>
                     <td className="px-4 py-3 text-center text-[13px] text-slate-700">{user.email}</td>
                     <td className="px-4 py-3 text-center text-[13px] text-slate-700 max-w-[120px]"><div className="leading-tight">{user.department}</div></td>
                     <td className="px-4 py-3 text-center">
                       <StatusTag label={user.role} variant="blue" />
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <button
-                        onClick={() => {
-                          setSelectedUser(user);
-                          handleOpenModal('assign-group', user);
-                        }}
-                        className="text-[13px] text-blue-600 hover:text-blue-700 hover:underline flex items-center justify-center gap-1 mx-auto"
-                      >
-                        <UserPlus className="w-3 h-3" />
-                        {user.groups.length} nhóm
-                      </button>
                     </td>
                     <td className="px-4 py-3 text-center">
                       <StatusTag 
@@ -509,7 +626,10 @@ export function UserManagementPage() {
                 </div>
               </div>
               <div className="flex gap-3 mt-6">
-                <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <button 
+                  onClick={handleSaveUser}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
                   {modalType === 'add' ? 'Thêm người dùng' : 'Lưu thay đổi'}
                 </button>
                 <button 
@@ -579,14 +699,30 @@ export function UserManagementPage() {
 
               {/* Groups */}
               <div>
-                <h4 className="text-slate-900 mb-4 pb-2 border-b border-slate-200">Nhóm người dùng ({selectedUser.groups.length})</h4>
-                <div className="flex flex-wrap gap-2">
-                  {selectedUser.groups.map((group, index) => (
-                    <span key={index} className="px-3 py-1.5 bg-purple-100 text-purple-700 rounded-lg text-sm">
-                      {group}
-                    </span>
-                  ))}
+                <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-200">
+                  <h4 className="text-slate-900 font-bold text-[14px]">Nhóm người dùng ({selectedUser.groups.length})</h4>
+                  <button
+                    onClick={() => {
+                      setPrevModalType('detail');
+                      handleOpenModal('assign-group', selectedUser);
+                    }}
+                    className="px-3 py-1.5 bg-blue-600 text-white hover:bg-blue-700 rounded-lg text-[12px] font-medium flex items-center gap-1.5 transition-colors shadow-sm"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    Thêm nhóm người dùng
+                  </button>
                 </div>
+                {selectedUser.groups.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {selectedUser.groups.map((group, index) => (
+                      <span key={index} className="px-3 py-1 bg-purple-50 text-purple-700 border border-purple-100 rounded-full text-[12px] font-medium">
+                        {group}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-slate-500 text-[13px] italic">Chưa tham gia nhóm nào.</div>
+                )}
               </div>
 
               <div className="flex gap-3 mt-6 pt-6 border-t border-slate-200">
@@ -624,7 +760,7 @@ export function UserManagementPage() {
                   >
                     <input
                       type="checkbox"
-                      checked={selectedGroups.includes(group.id) || selectedUser.groups.includes(group.name)}
+                      checked={selectedGroups.includes(group.id)}
                       onChange={() => toggleGroup(group.id)}
                       className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
                     />
@@ -636,7 +772,10 @@ export function UserManagementPage() {
                 ))}
               </div>
               <div className="flex gap-3">
-                <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <button 
+                  onClick={handleSaveGroups}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
                   Lưu thay đổi
                 </button>
                 <button 
@@ -666,7 +805,10 @@ export function UserManagementPage() {
                 Lưu ý: Hành động này không thể hoàn tác!
               </p>
               <div className="flex gap-3 mt-6">
-                <button className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                <button 
+                  onClick={handleDeleteUser}
+                  className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                >
                   Xóa người dùng
                 </button>
                 <button 
@@ -696,9 +838,12 @@ export function UserManagementPage() {
                 <span className="font-semibold">{selectedUser.name}</span>?
               </p>
               <div className="flex gap-3 mt-6">
-                <button className={`px-6 py-2 text-white rounded-lg ${
-                  modalType === 'lock' ? 'bg-orange-600 hover:bg-orange-700' : 'bg-green-600 hover:bg-green-700'
-                }`}>
+                <button 
+                  onClick={handleToggleUserStatus}
+                  className={`px-6 py-2 text-white rounded-lg ${
+                    modalType === 'lock' ? 'bg-orange-600 hover:bg-orange-700' : 'bg-green-600 hover:bg-green-700'
+                  }`}
+                >
                   {modalType === 'lock' ? 'Ngừng hoạt động' : 'Kích hoạt'}
                 </button>
                 <button 

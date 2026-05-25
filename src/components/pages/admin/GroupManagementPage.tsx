@@ -7,25 +7,29 @@ import { menuStructure, type MenuItem, type MenuFunction } from './menuStructure
 
 // Filter menu structure to remove CSDL/Hệ thống nodes as per user request
 const filterMenuStructure = (items: MenuItem[]): MenuItem[] => {
+  const dynamicParentIds = [
+    'view-data-internal',
+    'view-data-external',
+    'reconciliation-external-ministry',
+    'reconciliation-internal-ministry',
+    'processing-internal',
+    'processing-external',
+    'provisioning-shared',
+    'provisioning-internal',
+    'reconciliation-catalog'
+  ];
+
   return items
     .map(item => {
-      // Remove database/system specific containers
-      if (
-        item.id === 'view-collected-data' ||
-        item.id === 'collection-reconciliation' ||
-        item.id === 'processing' ||
-        item.id === 'provisioning-service-catalog'
-      ) {
-        return null;
+      if (dynamicParentIds.includes(item.id)) {
+        return {
+          ...item,
+          children: undefined
+        };
       }
       
       if (item.children) {
         const filteredChildren = filterMenuStructure(item.children);
-        if (filteredChildren.length === 0) {
-          if (!item.functions || item.functions.length === 0) {
-            return null;
-          }
-        }
         return {
           ...item,
           children: filteredChildren
@@ -33,8 +37,7 @@ const filterMenuStructure = (items: MenuItem[]): MenuItem[] => {
       }
       
       return item;
-    })
-    .filter((item): item is MenuItem => item !== null);
+    });
 };
 
 const filteredMenuStructure = filterMenuStructure(menuStructure);
@@ -261,7 +264,7 @@ export function GroupManagementPage() {
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
   const [selectedFunctions, setSelectedFunctions] = useState<number[]>([]);
-  const [expandedMenus, setExpandedMenus] = useState<string[]>(['data-collection']);
+  const [expandedMenus, setExpandedMenus] = useState<string[]>(['collection', 'view-collected-data', 'processing', 'data-provisioning']);
   const [selectedMenuItem, setSelectedMenuItem] = useState<string>('dashboard');
   const [selectedMenuItems, setSelectedMenuItems] = useState<string[]>([]);
   const [selectedPermissions, setSelectedPermissions] = useState<{ [key: string]: string[] }>({});
@@ -548,12 +551,20 @@ export function GroupManagementPage() {
     
     const findFunctions = (items: MenuItem[], targetId: string, currentPath: string[] = []) => {
       for (const item of items) {
-        if (item.id === targetId && item.functions) {
-          const augmentedFunctions = item.functions.map(f => ({
-            ...f,
-            name: currentPath.length > 0 ? `${currentPath[0]} > ${f.name}` : f.name
-          }));
-          allFunctions.push(...augmentedFunctions);
+        if (item.id === targetId) {
+          if (item.functions && item.functions.length > 0) {
+            const augmentedFunctions = item.functions.map(f => ({
+              ...f,
+              name: currentPath.length > 0 ? `${currentPath.join(' > ')} > ${f.name}` : f.name
+            }));
+            allFunctions.push(...augmentedFunctions);
+          } else if (!item.children || item.children.length === 0) {
+            allFunctions.push({
+              id: `${item.id}-func`,
+              name: currentPath.length > 0 ? `${currentPath.join(' > ')} > ${item.name}` : item.name,
+              actions: ['Xem', 'Thêm', 'Sửa', 'Xóa', 'Xuất Excel']
+            });
+          }
           return;
         }
         if (item.children) {
@@ -574,11 +585,19 @@ export function GroupManagementPage() {
     
     const findFunctions = (items: MenuItem[], targetId: string, currentPath: string[] = []) => {
       for (const item of items) {
-        if (item.id === targetId && item.functions) {
-          result = item.functions.map(f => ({
-            ...f,
-            name: currentPath.length > 0 ? `${currentPath[0]} > ${f.name}` : f.name
-          }));
+        if (item.id === targetId) {
+          if (item.functions && item.functions.length > 0) {
+            result = item.functions.map(f => ({
+              ...f,
+              name: currentPath.length > 0 ? `${currentPath.join(' > ')} > ${f.name}` : f.name
+            }));
+          } else if (!item.children || item.children.length === 0) {
+            result = [{
+              id: `${item.id}-func`,
+              name: currentPath.length > 0 ? `${currentPath.join(' > ')} > ${item.name}` : item.name,
+              actions: ['Xem', 'Thêm', 'Sửa', 'Xóa', 'Xuất Excel']
+            }];
+          }
           return;
         }
         if (item.children) {

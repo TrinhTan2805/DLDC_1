@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Search, Calendar, MinusCircle, Monitor, Database, History, Info } from 'lucide-react';
+import { X, Search, Calendar, MinusCircle, Monitor, Database, History } from 'lucide-react';
 
 interface AgentDetailModalProps {
   isOpen: boolean;
@@ -13,14 +13,19 @@ export function AgentDetailModal({ isOpen, onClose, data }: AgentDetailModalProp
   if (!isOpen || !data) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 font-sans">
-      <div className="bg-white rounded-lg shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden border border-slate-200 flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 font-sans" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+      <div className="bg-white rounded-lg shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden border border-slate-200 flex flex-col" style={{ fontSize: '13px' }}>
         {/* Header */}
-        <div className="bg-blue-600 px-6 py-4 flex items-center justify-between text-white shrink-0">
-          <h2 className="text-xl font-bold flex items-center gap-2">
-            <Monitor className="w-5 h-5" /> Thông tin Trạm kết nối
+        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white z-10 rounded-t-lg shrink-0">
+          <h2 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+            <Monitor className="w-5 h-5 text-blue-600" /> Chi tiết trạm kết nối
           </h2>
-          <button onClick={onClose} className="hover:bg-white/20 p-1 rounded-full transition-colors">
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-slate-400 hover:text-slate-600 transition-colors"
+            title="Đóng"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -30,7 +35,7 @@ export function AgentDetailModal({ isOpen, onClose, data }: AgentDetailModalProp
           <div className="flex gap-2">
             <button
               onClick={() => setActiveTab('agent')}
-              className={`px-6 py-2 rounded-t-lg font-medium text-sm transition-all ${
+              className={`px-6 py-2 rounded-t-lg font-medium text-[13px] transition-all ${
                 activeTab === 'agent' 
                 ? 'bg-white border-x border-t border-slate-200 text-blue-600 shadow-sm' 
                 : 'text-slate-500 hover:text-slate-700'
@@ -40,13 +45,13 @@ export function AgentDetailModal({ isOpen, onClose, data }: AgentDetailModalProp
             </button>
             <button
               onClick={() => setActiveTab('history')}
-              className={`px-6 py-2 rounded-t-lg font-medium text-sm transition-all ${
+              className={`px-6 py-2 rounded-t-lg font-medium text-[13px] transition-all ${
                 activeTab === 'history' 
                 ? 'bg-white border-x border-t border-slate-200 text-blue-600 shadow-sm' 
                 : 'text-slate-500 hover:text-slate-700'
               }`}
             >
-              History
+              Lịch sử thiết bị
             </button>
           </div>
         </div>
@@ -58,36 +63,36 @@ export function AgentDetailModal({ isOpen, onClose, data }: AgentDetailModalProp
               <div className="grid grid-cols-2 gap-8">
                 {/* DIP - DB Agent */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                  <h3 className="text-[13px] font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
                     <Database className="w-4 h-4 text-blue-600" /> DIP - DB Trạm kết nối
                   </h3>
                   <div className="border border-slate-200 rounded overflow-hidden">
-                    <table className="w-full text-sm">
+                    <table className="w-full text-[13px]">
                       <tbody className="divide-y divide-slate-100">
                         <tr className="bg-slate-50/30">
-                          <td className="px-4 py-2.5 font-bold text-slate-700 w-1/3 border-r border-slate-100 text-xs uppercase">ID:</td>
+                          <td className="px-4 py-2.5 font-bold text-slate-700 w-1/3 border-r border-slate-100 text-[11px] uppercase">ID:</td>
                           <td className="px-4 py-2.5 text-slate-600 font-mono">{data.dbAgentId || data.id}</td>
                         </tr>
                         <tr>
-                          <td className="px-4 py-2.5 font-bold text-slate-700 border-r border-slate-100 text-xs uppercase">Tên trạm:</td>
+                          <td className="px-4 py-2.5 font-bold text-slate-700 border-r border-slate-100 text-[11px] uppercase">Tên trạm:</td>
                           <td className="px-4 py-2.5 text-slate-600">{data.name}</td>
                         </tr>
                         <tr className="bg-slate-50/30">
-                          <td className="px-4 py-2.5 font-bold text-slate-700 border-r border-slate-100 text-xs uppercase">Khóa trạm:</td>
+                          <td className="px-4 py-2.5 font-bold text-slate-700 border-r border-slate-100 text-[11px] uppercase">Khóa trạm:</td>
                           <td className="px-4 py-2.5 text-slate-600 font-mono text-[11px] truncate max-w-[200px]" title={data.agentKey}>{data.agentKey}</td>
                         </tr>
                         <tr>
-                          <td className="px-4 py-2.5 font-bold text-slate-700 border-r border-slate-100 text-xs uppercase">Chu kỳ gọi:</td>
+                          <td className="px-4 py-2.5 font-bold text-slate-700 border-r border-slate-100 text-[11px] uppercase">Chu kỳ gọi:</td>
                           <td className="px-4 py-2.5 text-slate-600">{data.callCycle} giây</td>
                         </tr>
                         <tr className="bg-slate-50/30">
-                          <td className="px-4 py-2.5 font-bold text-slate-700 border-r border-slate-100 text-xs uppercase">Cập nhật CSDL:</td>
+                          <td className="px-4 py-2.5 font-bold text-slate-700 border-r border-slate-100 text-[11px] uppercase">Cập nhật CSDL:</td>
                           <td className="px-4 py-2.5 text-slate-600">{data.lastDbUpdate}</td>
                         </tr>
                         <tr>
-                          <td className="px-4 py-2.5 font-bold text-slate-700 border-r border-slate-100 text-xs uppercase">Trạng thái trạm:</td>
+                          <td className="px-4 py-2.5 font-bold text-slate-700 border-r border-slate-100 text-[11px] uppercase">Trạng thái trạm:</td>
                           <td className="px-4 py-2.5">
-                            <span className={`px-2 py-0.5 rounded text-xs font-medium ${data.status === 'active' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                            <span className={`px-2 py-0.5 rounded text-[11px] font-medium ${data.status === 'active' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
                               {data.status === 'active' ? 'Kích hoạt' : 'Không kích hoạt'}
                             </span>
                           </td>
@@ -99,31 +104,31 @@ export function AgentDetailModal({ isOpen, onClose, data }: AgentDetailModalProp
 
                 {/* DIP - File Agent */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                  <h3 className="text-[13px] font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
                     <Monitor className="w-4 h-4 text-emerald-600" /> DIP - File Trạm kết nối
                   </h3>
                   <div className="border border-slate-200 rounded overflow-hidden">
-                    <table className="w-full text-sm">
+                    <table className="w-full text-[13px]">
                       <tbody className="divide-y divide-slate-100">
                         <tr className="bg-slate-50/30">
-                          <td className="px-4 py-2.5 font-bold text-slate-700 w-1/3 border-r border-slate-100 text-xs uppercase">ID:</td>
+                          <td className="px-4 py-2.5 font-bold text-slate-700 w-1/3 border-r border-slate-100 text-[11px] uppercase">ID:</td>
                           <td className="px-4 py-2.5 text-slate-600 font-mono">{data.fileAgent?.id}</td>
                         </tr>
                         <tr>
-                          <td className="px-4 py-2.5 font-bold text-slate-700 border-r border-slate-100 text-xs uppercase">URL:</td>
+                          <td className="px-4 py-2.5 font-bold text-slate-700 border-r border-slate-100 text-[11px] uppercase">URL:</td>
                           <td className="px-4 py-2.5 text-blue-600 underline font-mono text-[11px]">{data.fileAgent?.url}</td>
                         </tr>
                         <tr className="bg-slate-50/30">
-                          <td className="px-4 py-2.5 font-bold text-slate-700 border-r border-slate-100 text-xs uppercase">Hoạt động:</td>
+                          <td className="px-4 py-2.5 font-bold text-slate-700 border-r border-slate-100 text-[11px] uppercase">Hoạt động:</td>
                           <td className="px-4 py-2.5">
-                            <span className={`flex items-center gap-1.5 ${data.fileAgent?.isActive ? 'text-green-600' : 'text-red-600'}`}>
+                            <span className={`flex items-center gap-1.5 text-[13px] ${data.fileAgent?.isActive ? 'text-green-600' : 'text-red-600'}`}>
                               <span className={`w-1.5 h-1.5 rounded-full ${data.fileAgent?.isActive ? 'bg-green-600' : 'bg-red-600'}`}></span>
                               {data.fileAgent?.isActive ? 'có hoạt động' : 'không hoạt động'}
                             </span>
                           </td>
                         </tr>
                         <tr>
-                          <td className="px-4 py-2.5 font-bold text-slate-700 border-r border-slate-100 text-xs uppercase">Trạng thái:</td>
+                          <td className="px-4 py-2.5 font-bold text-slate-700 border-r border-slate-100 text-[11px] uppercase">Trạng thái:</td>
                           <td className="px-4 py-2.5 text-slate-600">
                             {data.fileAgent?.status === 'active' ? 'Kích hoạt' : 'Không kích hoạt'}
                           </td>
@@ -136,11 +141,11 @@ export function AgentDetailModal({ isOpen, onClose, data }: AgentDetailModalProp
 
               {/* Database List */}
               <div className="space-y-4">
-                <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                <h3 className="text-[13px] font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
                   <Database className="w-4 h-4 text-slate-600" /> Danh sách cơ sở dữ liệu
                 </h3>
                 <div className="border border-slate-200 rounded-lg overflow-hidden shadow-sm">
-                  <table className="w-full text-left text-sm border-collapse">
+                  <table className="w-full text-left text-[13px] border-collapse">
                     <thead>
                       <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase text-[11px]">
                         <th className="px-4 py-3 border-r border-slate-200 text-center w-16">ID</th>
@@ -185,36 +190,36 @@ export function AgentDetailModal({ isOpen, onClose, data }: AgentDetailModalProp
               <div className="bg-slate-50/80 p-6 rounded-xl border border-slate-200 space-y-4">
                 <div className="grid grid-cols-2 gap-x-8 gap-y-4">
                   <div className="flex items-center gap-4">
-                    <label className="w-24 text-sm font-medium text-slate-700">Địa chỉ IP</label>
-                    <input type="text" className="flex-1 px-3 py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500/20 focus:outline-none bg-white h-10" />
+                    <label className="w-24 text-[13px] font-medium text-slate-700">Địa chỉ IP</label>
+                    <input type="text" className="flex-1 px-3 py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500/20 focus:outline-none bg-white h-10 text-[13px]" />
                   </div>
                   <div className="flex items-center gap-4">
-                    <label className="w-24 text-sm font-medium text-slate-700">Tên máy chủ</label>
-                    <input type="text" className="flex-1 px-3 py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500/20 focus:outline-none bg-white h-10" />
+                    <label className="w-24 text-[13px] font-medium text-slate-700">Tên máy chủ</label>
+                    <input type="text" className="flex-1 px-3 py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500/20 focus:outline-none bg-white h-10 text-[13px]" />
                   </div>
                   <div className="flex items-center gap-4">
-                    <label className="w-24 text-sm font-medium text-slate-700">Hành động</label>
-                    <input type="text" className="flex-1 px-3 py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500/20 focus:outline-none bg-white h-10" />
+                    <label className="w-24 text-[13px] font-medium text-slate-700">Hành động</label>
+                    <input type="text" className="flex-1 px-3 py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500/20 focus:outline-none bg-white h-10 text-[13px]" />
                   </div>
                   <div className="flex items-center gap-4">
-                    <label className="w-24 text-sm font-medium text-slate-700">Loại</label>
-                    <input type="text" className="flex-1 px-3 py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500/20 focus:outline-none bg-white h-10" />
+                    <label className="w-24 text-[13px] font-medium text-slate-700">Loại</label>
+                    <input type="text" className="flex-1 px-3 py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500/20 focus:outline-none bg-white h-10 text-[13px]" />
                   </div>
                   <div className="flex items-center gap-4">
-                    <label className="w-24 text-sm font-medium text-slate-700">Ngày</label>
+                    <label className="w-24 text-[13px] font-medium text-slate-700">Ngày</label>
                     <div className="flex-1 flex items-center gap-2">
                        <div className="relative flex-1">
-                          <input type="text" defaultValue="Từ ngày" className="w-full px-3 py-2 border border-slate-300 rounded focus:outline-none bg-white h-10 pr-10" />
+                          <input type="text" defaultValue="Từ ngày" className="w-full px-3 py-2 border border-slate-300 rounded focus:outline-none bg-white h-10 pr-10 text-[13px]" />
                           <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                        </div>
                        <div className="relative flex-1">
-                          <input type="text" defaultValue="Đến ngày" className="w-full px-3 py-2 border border-slate-300 rounded focus:outline-none bg-white h-10 pr-10" />
+                          <input type="text" defaultValue="Đến ngày" className="w-full px-3 py-2 border border-slate-300 rounded focus:outline-none bg-white h-10 pr-10 text-[13px]" />
                           <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                        </div>
                     </div>
                   </div>
                   <div className="flex justify-end items-end h-full">
-                    <button className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm">
+                    <button className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm text-[13px]">
                       <Search className="w-4 h-4" /> Tìm kiếm
                     </button>
                   </div>
@@ -223,11 +228,11 @@ export function AgentDetailModal({ isOpen, onClose, data }: AgentDetailModalProp
 
               {/* History Table */}
               <div className="space-y-4">
-                <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                <h3 className="text-[13px] font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
                   <History className="w-4 h-4 text-slate-600" /> Danh sách lịch sử thiết bị
                 </h3>
                 <div className="border border-slate-200 rounded-lg overflow-hidden shadow-sm">
-                  <table className="w-full text-left text-sm border-collapse">
+                  <table className="w-full text-left text-[13px] border-collapse">
                     <thead>
                       <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase text-[11px]">
                         <th className="px-6 py-3 border-r border-slate-200">Hành động</th>
@@ -266,9 +271,9 @@ export function AgentDetailModal({ isOpen, onClose, data }: AgentDetailModalProp
         {/* Footer */}
         <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex justify-end shrink-0">
           <button
- onClick={onClose}
- className="px-8 py-2 bg-slate-600 text-white rounded hover:bg-slate-700 transition-colors shadow-sm"
- >
+            onClick={onClose}
+            className="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-700 bg-white font-medium text-[13px] shadow-sm transition-colors"
+          >
             Đóng
           </button>
         </div>

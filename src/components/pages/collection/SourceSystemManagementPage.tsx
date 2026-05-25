@@ -3,9 +3,13 @@ import { Plus, Search, Edit, Trash2, Eye, Server, Download, X, ChevronLeft, Chev
 import { SourceSystemModal } from './SourceSystemModal';
 import { SourceSystemDetailModal } from './SourceSystemDetailModal';
 import { initialSourceSystems } from './mockSourceSystems';
-import { StatusTag } from '../../common/StatusTag';
+import { Unit } from './ConnectionManagementPage';
 
-export function SourceSystemManagementPage() {
+interface SourceSystemManagementPageProps {
+  units: Unit[];
+}
+
+export function SourceSystemManagementPage({ units }: SourceSystemManagementPageProps) {
   const [data, setData] = useState(initialSourceSystems);
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -22,8 +26,7 @@ export function SourceSystemManagementPage() {
   // Filtered data based on search term
   const filteredData = data.filter(item => 
     item.systemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.unitName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.sourceType.toLowerCase().includes(searchTerm.toLowerCase())
+    item.unitName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleAdd = () => {
@@ -86,7 +89,7 @@ export function SourceSystemManagementPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
-              placeholder="Tìm kiếm theo tên hệ thống, đơn vị hoặc loại nguồn..."
+              placeholder="Tìm kiếm theo tên hệ thống hoặc đơn vị..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
@@ -116,7 +119,6 @@ export function SourceSystemManagementPage() {
                 <th className="py-3 px-4 text-center text-[13px] font-semibold text-slate-500 whitespace-nowrap w-12">STT</th>
                 <th className="py-3 px-4 text-left text-[13px] font-semibold text-slate-500 whitespace-nowrap">Tên hệ thống</th>
                 <th className="py-3 px-4 text-left text-[13px] font-semibold text-slate-500 whitespace-nowrap">Tên đơn vị</th>
-                <th className="py-3 px-4 text-center text-[13px] font-semibold text-slate-500 whitespace-nowrap">Loại nguồn</th>
                 <th className="py-3 px-4 text-center text-[13px] font-semibold text-slate-500 whitespace-nowrap">Đầu mối liên hệ</th>
                 <th className="py-3 px-4 text-center text-[13px] font-semibold text-slate-500 whitespace-nowrap w-32">Thao tác</th>
               </tr>
@@ -135,12 +137,6 @@ export function SourceSystemManagementPage() {
                       </td>
                       <td className="py-4 px-4">
                         <div className="text-[13px] text-slate-600">{item.unitName}</div>
-                      </td>
-                      <td className="py-4 px-4 text-center">
-                        <StatusTag 
-                          label={item.sourceType} 
-                          variant={item.sourceType === 'Trong ngành' ? 'purple' : 'blue'} 
-                        />
                       </td>
                       <td className="py-4 px-4 text-center">
                         <div className="text-[13px] font-medium text-slate-900">{item.contactPerson || '-'}</div>
@@ -175,7 +171,7 @@ export function SourceSystemManagementPage() {
                   ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="py-20 text-center text-slate-400">
+                  <td colSpan={5} className="py-20 text-center text-slate-400">
                     <div className="flex flex-col items-center justify-center">
                       <div className="p-4 bg-slate-50 rounded-full mb-4">
                         <Server className="w-10 h-10 opacity-20" />
@@ -263,6 +259,7 @@ export function SourceSystemManagementPage() {
         onClose={() => setIsModalOpen(false)}
         onSave={handleSave}
         editingData={editingItem}
+        units={units}
       />
 
       <SourceSystemDetailModal
