@@ -77,16 +77,15 @@ export function CategoryWizardModal({
                 const isLocked = !entityId && item.s > 1;
                 return (
                   <button
- key={item.s}
- disabled={isLocked}
- onClick={() => setStep(item.s)}
- className={`flex items-center gap-2 py-4 px-6 border-b-2 text-[14px] whitespace-nowrap transition-colors ${
- isActive ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-blue-600'
- } ${isLocked ? 'opacity-40 cursor-not-allowed' : ''}`}
- >
- <item.icon className="w-4 h-4" />
- {item.label}
- </button>
+                    key={item.s}
+                    disabled={isLocked}
+                    onClick={() => setStep(item.s)}
+                    className={`flex items-center gap-2 py-4 px-6 border-b-2 text-[14px] whitespace-nowrap transition-colors ${isActive ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-blue-600'
+                      } ${isLocked ? 'opacity-40 cursor-not-allowed' : ''}`}
+                  >
+                    <item.icon className="w-4 h-4" />
+                    {item.label}
+                  </button>
                 );
               })}
             </div>
@@ -190,9 +189,9 @@ export function CategoryWizardModal({
               <div className="h-full flex flex-col animate-in slide-in-from-right-2 duration-400">
                 <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col">
                   <RelationshipsTab
-                     entities={entities}
-                     relationships={[]}
-                     setRelationships={() => {}}
+                    entities={entities}
+                    relationships={[]}
+                    setRelationships={() => { }}
                   />
                 </div>
               </div>
@@ -201,9 +200,9 @@ export function CategoryWizardModal({
               <div className="h-full flex flex-col animate-in slide-in-from-right-2 duration-400">
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
                   <VersionHistoryTab
-                     searchTerm=""
-                     setSearchTerm={() => {}}
-                     onViewDetail={() => {}}
+                    searchTerm=""
+                    setSearchTerm={() => { }}
+                    onViewDetail={() => { }}
                   />
                 </div>
               </div>
@@ -216,23 +215,23 @@ export function CategoryWizardModal({
               <button onClick={onClose} className="px-6 py-2.5 border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 text-sm transition-colors">Hủy bỏ</button>
               {step > 1 && (
                 <button onClick={() => setStep(step - 1)} className="px-6 py-2.5 border border-slate-200 text-slate-700 hover:bg-slate-50 text-sm flex items-center gap-2 transition-colors">
- <ChevronLeft className="w-4 h-4" /> Quay lại
- </button>
+                  <ChevronLeft className="w-4 h-4" /> Quay lại
+                </button>
               )}
             </div>
 
             <div className="flex gap-3">
               <button onClick={() => onSaveStep1('draft')} className="px-6 py-2.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl text-sm flex items-center gap-2 transition-colors">
- <Save className="w-4 h-4" /> Lưu tạm
- </button>
+                <Save className="w-4 h-4" /> Lưu tạm
+              </button>
               {step < 4 ? (
                 <button onClick={() => step === 1 ? onSaveStep1('next') : setStep(step + 1)} className="px-8 py-2.5 bg-blue-600 text-white hover:bg-blue-700 rounded-xl text-sm flex items-center gap-2 shadow-lg shadow-blue-100 transition-colors">
- Tiếp tục <ChevronRight className="w-4 h-4" />
- </button>
+                  Tiếp tục <ChevronRight className="w-4 h-4" />
+                </button>
               ) : (
                 <button onClick={() => onSaveStep1('submit')} className="px-10 py-2.5 bg-blue-600 text-white hover:bg-blue-700 rounded-xl text-sm flex items-center gap-2 shadow-lg shadow-blue-100 transition-colors">
- <Send className="w-4 h-4" /> Hoàn tất & Trình duyệt
- </button>
+                  <Send className="w-4 h-4" /> Hoàn tất & Trình duyệt
+                </button>
               )}
             </div>
           </div>

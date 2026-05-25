@@ -6,13 +6,13 @@ const puppeteer = require('puppeteer');
     await page.setViewport({ width: 1440, height: 900 });
 
     try {
-        await page.goto('http://localhost:3002', { waitUntil: 'networkidle2' });
-        
+        await page.goto('http://localhost:3000', { waitUntil: 'networkidle2' });
+
         // Login if needed
         const loginBtn = await page.$('button[type="submit"]');
         if (loginBtn) {
             await loginBtn.click();
-            await page.waitForNavigation({ waitUntil: 'networkidle2' }).catch(() => {});
+            await page.waitForNavigation({ waitUntil: 'networkidle2' }).catch(() => { });
         }
 
         // Wait a bit for sidebar to load
@@ -24,7 +24,7 @@ const puppeteer = require('puppeteer');
             const node = all.find(el => el.textContent.trim().includes('Quản lý thu thập'));
             if (node) node.click();
         });
-        
+
         await new Promise(r => setTimeout(r, 1000));
 
         // Click CSDL Trong nganh & Ngoai nganh to expand them

@@ -13,7 +13,7 @@ function ImageLogo() {
 function Container() {
   return (
     <div className="h-[19.98px] relative shrink-0 w-full" data-name="Container">
-      <p className="absolute font-normal leading-[20px] left-0 text-[#0f172b] text-[16px] text-nowrap top-[-2.25px]">Kho Dữ liệu dùng chung</p>
+      <p className="absolute font-normal leading-[20px] left-0 text-[#0f172b] text-[16px] text-nowrap top-[-2.25px]">Kho DLDC</p>
     </div>
   );
 }
@@ -21,7 +21,7 @@ function Container() {
 function Container1() {
   return (
     <div className="content-stretch flex h-[15.977px] items-start relative shrink-0 w-full" data-name="Container">
-      <p className="font-normal leading-[16px] relative shrink-0 text-[#62748e] text-[12px] text-nowrap">Hệ thống quản lý</p>
+      <p className="font-normal leading-[16px] relative shrink-0 text-[#62748e] text-[12px] text-nowrap">Hệ thống quản lý Bộ Tư Pháp</p>
     </div>
   );
 }

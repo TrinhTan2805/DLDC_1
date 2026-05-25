@@ -71,7 +71,7 @@ export function Dashboard() {
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <button 
+              <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
                 className="p-2 hover:bg-red-800 rounded-lg lg:hidden"
               >
@@ -81,9 +81,9 @@ export function Dashboard() {
                 <img src={imgLogo} alt="Logo" className="w-10 h-10" />
                 <div>
                   <h1 className="text-white">
-                    KHO DỮ LIỆU DÙNG CHUNG
+                    Kho DLDC
                   </h1>
-                  <p className="text-red-100 text-sm">Hệ thống Quản lý Kho Dữ liệu Chung</p>
+                  <p className="text-red-100 text-sm">Hệ thống quản lý Bộ Tư Pháp Kho Dữ liệu Chung</p>
                 </div>
               </div>
             </div>

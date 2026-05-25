@@ -4,7 +4,7 @@ import { GenericDataTable } from '../../common/GenericDataTable';
 export function StateCompensationPage() {
   return (
     <GenericDataTable
-      title="Hệ thống quản lý bồi thường nhà nước"
+      title="Hệ thống quản lý Bộ Tư Pháp bồi thường nhà nước"
       description="Quản lý hồ sơ bồi thường nhà nước"
       icon={Coins}
       iconColor="yellow"

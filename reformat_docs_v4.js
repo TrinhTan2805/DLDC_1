@@ -84,7 +84,7 @@ for (let i = 0; i < lines.length; i++) {
 // Nationality Section
 const nextSectionIdx = sections.length + 1;
 newLines.push('');
-newLines.push('## 4.2.3.' + nextSectionIdx + '. PM02.QLTT.TN.QT  Hệ thống quản lý hồ sơ quốc tịch');
+newLines.push('## 4.2.3.' + nextSectionIdx + '. PM02.QLTT.TN.QT  Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch');
 newLines.push('');
 newLines.push('### 4.2.3.' + nextSectionIdx + '.1 DC1-QT-DB-01 Dashboard Thu thập quốc tịch');
 newLines.push('');

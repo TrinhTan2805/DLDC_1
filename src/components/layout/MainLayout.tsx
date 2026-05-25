@@ -235,7 +235,7 @@ const pageConfig: Record<string, { title: string; description: string }> = {
     description: 'Danh mục dịch vụ cung cấp dữ liệu chủ'
   },
   'provisioning-shared-hotich': { title: 'CSDL Hộ tịch điện tử', description: 'Cung cấp dữ liệu CSDL Hộ tịch điện tử' },
-  'provisioning-shared-quoctich': { title: 'Hệ thống quản lý hồ sơ quốc tịch', description: 'Cung cấp dữ liệu Hệ thống quản lý hồ sơ quốc tịch' },
+  'provisioning-shared-quoctich': { title: 'Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch', description: 'Cung cấp dữ liệu Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch' },
   'provisioning-shared-tha': { title: 'Cơ sở dữ liệu thi hành án dân sự', description: 'Cung cấp dữ liệu Cơ sở dữ liệu thi hành án dân sự' },
   'provisioning-shared-bpbd': { title: 'Cơ sở dữ liệu về biện pháp bảo đảm', description: 'Cung cấp dữ liệu Cơ sở dữ liệu về biện pháp bảo đảm' },
   'provisioning-shared-qgpl': { title: 'CSDL quốc gia về pháp luật', description: 'Cung cấp dữ liệu CSDL quốc gia về pháp luật' },
@@ -244,13 +244,13 @@ const pageConfig: Record<string, { title: string; description: string }> = {
   'provisioning-shared-pbgd': { title: 'CSDL phổ biến, giáo dục pháp luật', description: 'Cung cấp dữ liệu CSDL phổ biến, giáo dục pháp luật và hoà giải cơ sở' },
   'provisioning-shared-dgts': { title: 'CSDL quản lý đấu giá tài sản', description: 'Cung cấp dữ liệu CSDL quản lý đấu giá tài sản' },
   'provisioning-shared-htqt': { title: 'CSDL Hợp tác quốc tế', description: 'Cung cấp dữ liệu CSDL Hợp tác quốc tế' },
-  
+
   'provisioning-internal-banan': { title: 'CSDL Thông tin Bản án', description: 'Cung cấp dữ liệu CSDL Thông tin Bản án' },
   'provisioning-internal-danhmuc': { title: 'Danh mục nội ngành', description: 'Cung cấp dữ liệu Danh mục' },
   'provisioning-internal-bhxh': { title: 'BHXH và Giảm nghèo', description: 'Cung cấp dữ liệu BHXH và Giảm nghèo' },
   'provisioning-internal-ncc': { title: 'Người có công', description: 'Cung cấp dữ liệu Người có công' },
   'provisioning-internal-treem': { title: 'Trẻ em', description: 'Cung cấp dữ liệu Trẻ em' },
-  
+
   'provisioning-open': { title: 'Dữ liệu mở', description: 'Danh mục dịch vụ cung cấp dữ liệu mở' },
   'provisioning-master': { title: 'Dữ liệu chủ', description: 'Danh mục dịch vụ cung cấp dữ liệu chủ' },
 
@@ -403,9 +403,9 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
   return (
     <div className="flex h-screen bg-slate-50">
       {/* Sidebar */}
-      <Sidebar 
-        currentPage={currentPage} 
-        onNavigate={setCurrentPage} 
+      <Sidebar
+        currentPage={currentPage}
+        onNavigate={setCurrentPage}
         isCollapsed={isCollapsed}
         onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
       />
@@ -430,15 +430,15 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'collection' && <DataCollectionPage />}
             {/* view-collected-data mapping removed - clicking it now only toggles dropdown */}
             {(currentPage === 'collection-setup' || currentPage.startsWith('collection-setup/')) && (
-              <CollectionSetupPage 
-                onNavigate={setCurrentPage} 
+              <CollectionSetupPage
+                onNavigate={setCurrentPage}
                 activeTab={currentPage === 'collection-setup/version' ? 'version' : 'service-setup'}
                 onTabChange={(tab) => setCurrentPage(`collection-setup/${tab === 'version' ? 'version' : 'service-setup'}`)}
               />
             )}
             {currentPage === 'collection-log' && <LogManagement />}
             {(currentPage === 'connection-management' || currentPage.startsWith('connection-management/')) && (
-              <ConnectionManagementPage 
+              <ConnectionManagementPage
                 activeTab={currentPage === 'connection-management/agents' ? 'agents' : 'source-systems'}
                 onTabChange={(tab) => setCurrentPage(`connection-management/${tab === 'agents' ? 'agents' : 'source-systems'}`)}
               />
@@ -513,9 +513,9 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'provisioning-monitoring' && <DataProvisionMonitoringPage />}
             {currentPage === 'provisioning-catalog-internal' && <DataProvisionServicesPage category="internal" title="Dữ liệu danh mục nội ngành" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu danh mục nội ngành" />}
             {currentPage === 'provisioning-catalog-shared' && <DataProvisionServicesPage category="shared" title="Dữ liệu dùng chung" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu dùng chung" />}
-            
+
             {currentPage === 'provisioning-shared-hotich' && <DataProvisionServicesPage category="shared" group="CSDL Hộ tịch điện tử" title="CSDL Hộ tịch điện tử" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu CSDL Hộ tịch điện tử" />}
-            {currentPage === 'provisioning-shared-quoctich' && <DataProvisionServicesPage category="shared" group="Hệ thống quản lý hồ sơ quốc tịch" title="Hệ thống quản lý hồ sơ quốc tịch" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu Hệ thống quản lý hồ sơ quốc tịch" />}
+            {currentPage === 'provisioning-shared-quoctich' && <DataProvisionServicesPage category="shared" group="Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch" title="Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch" />}
             {currentPage === 'provisioning-shared-tha' && <DataProvisionServicesPage category="shared" group="Cơ sở dữ liệu thi hành án dân sự" title="Cơ sở dữ liệu thi hành án dân sự" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu Cơ sở dữ liệu thi hành án dân sự" />}
             {currentPage === 'provisioning-shared-bpbd' && <DataProvisionServicesPage category="shared" group="Cơ sở dữ liệu về biện pháp bảo đảm" title="Cơ sở dữ liệu về biện pháp bảo đảm" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu Cơ sở dữ liệu về biện pháp bảo đảm" />}
             {currentPage === 'provisioning-shared-qgpl' && <DataProvisionServicesPage category="shared" group="CSDL quốc gia về pháp luật" title="CSDL quốc gia về pháp luật" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu CSDL quốc gia về pháp luật" />}

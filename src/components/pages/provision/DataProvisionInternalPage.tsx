@@ -67,7 +67,7 @@ const mockPackages: DataPackage[] = [
     code: 'BUSINESS_REG',
     name: 'Gói tin đăng ký kinh doanh',
     description: 'Cung cấp thông tin doanh nghiệp đăng ký mới',
-    targetSystem: 'Hệ thống Quản lý doanh nghiệp',
+    targetSystem: 'Hệ thống quản lý Bộ Tư Pháp doanh nghiệp',
     dataType: 'Thông tin doanh nghiệp',
     fields: [
       { id: 'F1', fieldName: 'Mã số DN', fieldType: 'String', required: true, description: 'Mã số doanh nghiệp' },
@@ -94,8 +94,8 @@ export function DataProvisionInternalPage() {
 
   const filteredPackages = packages.filter(pkg => {
     const matchesSearch = pkg.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         pkg.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         pkg.targetSystem.toLowerCase().includes(searchTerm.toLowerCase());
+      pkg.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      pkg.targetSystem.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'all' || pkg.status === filterStatus;
     return matchesSearch && matchesStatus;
   });

@@ -6,7 +6,7 @@
 - ✅ /components/collection/APIMethodsList.tsx - Thay thành "Thu thập trong nội bộ" và "Hệ thống trong nội bộ"
 - ✅ /components/collection/AddDataCollectionForm.tsx - Thay "Các cơ quan bên ngoài Bộ Tư pháp" → "Các cơ quan bên ngoài" và "Hệ thống trong Bộ Tư pháp" → "Hệ thống trong nội bộ"
 - ✅ /components/collection/EditDataCollectionForm.tsx - Thay "Thu thập từ các Hệ thống trong nội bộ Bộ Tư pháp" → "Thu thập từ các Hệ thống trong nội bộ"
-- ✅ /components/collection/NotificationManagement.tsx - Thay "Kho Dữ liệu Dùng Chung - Bộ Tư pháp" → "Kho Dữ liệu Dùng Chung"
+- ✅ /components/collection/NotificationManagement.tsx - Thay "Kho DLDC - Bộ Tư pháp" → "Kho DLDC"
 - ✅ /components/collection/ViewDataCollectionDetail.tsx - Thay "bên ngoài Bộ Tư pháp" → "bên ngoài" và "nội bộ Bộ Tư pháp" → "nội bộ"
 
 ### 2. Page files (10+ files)

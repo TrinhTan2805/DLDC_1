@@ -13,13 +13,13 @@ for (const line of lines) {
     if (line.toLowerCase().startsWith('hệ thống gửi')) continue;
 
     // Pattern matching
-    // "Kho dữ liệu dùng chung tiếp nhận dữ liệu " or "Kho dữ liệu dùng chung tiếp nhận dữ liệuiệu "
-    let match = line.match(/Kho dữ liệu dùng chung tiếp nhận dữ liệui?ệ?u?\s+(.*?)\s+từ hệ thống nguồn/i);
+    // "Kho DLDC tiếp nhận dữ liệu " or "Kho DLDC tiếp nhận dữ liệuiệu "
+    let match = line.match(/Kho DLDC tiếp nhận dữ liệui?ệ?u?\s+(.*?)\s+từ hệ thống nguồn/i);
     if (!match) {
         // Fallback for edge cases like missing some words
         match = line.match(/tiếp nhận dữ liệui?ệ?u?\s+(.*?)\s+từ/i);
     }
-    
+
     if (match && match[1]) {
         let name = match[1].trim();
         // Capitalize first letter to make it look nicer if needed, but keeping user's exactly is safer.
@@ -76,7 +76,7 @@ const startIndex = content.indexOf(startMarker);
 const endIndex = content.indexOf(endMarker);
 
 if (startIndex === -1 || endIndex === -1) {
-    console.error("Could not find markers.", {startIndex, endIndex});
+    console.error("Could not find markers.", { startIndex, endIndex });
     process.exit(1);
 }
 

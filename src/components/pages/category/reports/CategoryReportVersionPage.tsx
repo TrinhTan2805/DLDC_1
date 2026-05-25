@@ -44,7 +44,7 @@ export function CategoryReportVersionPage() {
               </button>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-3 w-full md:w-auto h-full pt-6 md:pt-0">
             <button className="px-5 py-2.5 border border-slate-300 text-slate-700 bg-white rounded-xl hover:bg-slate-50 transition-colors font-medium flex items-center gap-2">
               <Printer className="w-4 h-4" />
@@ -100,7 +100,7 @@ export function CategoryReportVersionPage() {
       {/* Report Preview - A4 Style Paper */}
       <div className="bg-slate-200/50 p-4 sm:p-8 rounded-2xl flex justify-center overflow-x-auto">
         <div className="bg-white w-[210mm] min-h-[297mm] shadow-xl p-[20mm] bg-[url('https://www.transparenttextures.com/patterns/cream-paper.png')] relative">
-          
+
           {/* Header - Quốc hiệu */}
           <div className="flex justify-between items-start mb-12">
             <div className="text-center w-1/2">
@@ -128,19 +128,19 @@ export function CategoryReportVersionPage() {
             <section>
               <h3 className="font-bold text-lg mb-3">1. Khái quát quy trình Nâng cấp phiên bản</h3>
               <p className="mb-2">
-                Danh mục <strong className="text-blue-700">{filterCategoryName}</strong> hiện đang được duy trì với lịch sử cập nhật minh bạch. Hệ thống quản lý mã nguồn (Data Repository) đã thực hiện ghi nhận {mockVersions.length} lần Release (phát hành) cấu trúc.
+                Danh mục <strong className="text-blue-700">{filterCategoryName}</strong> hiện đang được duy trì với lịch sử cập nhật minh bạch. Hệ thống quản lý Bộ Tư Pháp mã nguồn (Data Repository) đã thực hiện ghi nhận {mockVersions.length} lần Release (phát hành) cấu trúc.
               </p>
             </section>
 
             <section>
               <h3 className="font-bold text-lg mb-4 mt-6">2. Lịch sử Thay đổi (Changelog Timeline)</h3>
-              
+
               <div className="pl-4 mt-8 relative border-l-2 border-slate-300 ml-4 pb-4">
                 {mockVersions.map((v, i) => (
                   <div key={i} className="mb-8 relative pl-6">
                     {/* Timeline Dot */}
                     <div className="absolute w-5 h-5 rounded-full bg-white border-4 border-emerald-600 left-[-35px] top-1"></div>
-                    
+
                     <div className="bg-slate-50 p-4 border border-slate-200 rounded-lg shadow-sm">
                       <div className="flex justify-between items-start mb-2 border-b border-slate-200 pb-2">
                         <div>
@@ -176,7 +176,7 @@ export function CategoryReportVersionPage() {
           {/* Footer - Signatures */}
           <div className="flex justify-between items-start mt-20 text-center font-serif">
             <div className="w-1/2">
-               
+
             </div>
             <div className="w-1/2">
               <h4 className="font-bold">ĐẠI DIỆN HỘI ĐỒNG XÉT DUYỆT</h4>

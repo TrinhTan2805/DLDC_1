@@ -21,15 +21,15 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Kiểm tra thông tin đăng nhập theo Phương án B
     if (username === 'admin' && password === 'abcd') {
       setIsLoading(true);
-      
+
       try {
         // Sử dụng đăng nhập ẩn danh của Firebase để có session
         await signInAnonymously(auth);
-        
+
         // Ghi lại lịch sử truy cập vào Firestore để quản lý
         await addDoc(collection(db, 'access_logs'), {
           username: username,
@@ -37,7 +37,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           userAgent: navigator.userAgent,
           action: 'login_success'
         });
-        
+
         toast.success('Đăng nhập thành công');
         onLogin();
       } catch (error) {
@@ -76,7 +76,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                 />
               </div>
               <h1 className="text-2xl font-bold text-white mb-2">
-                Kho Dữ liệu Dùng Chung
+                Kho DLDC
               </h1>
               <p className="text-blue-100 text-sm">Bộ Tư pháp</p>
             </div>
@@ -146,8 +146,8 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               {/* Remember & Forgot */}
               <div className="flex items-center justify-between">
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     checked={rememberMe}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRememberMe(e.target.checked)}
                     className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500"
@@ -189,8 +189,8 @@ export function LoginPage({ onLogin }: LoginPageProps) {
         <div className="mt-6 text-center">
           <p className="text-sm text-slate-600">
             Cần hỗ trợ? Liên hệ{' '}
-            <a 
-              href="mailto:hotline@moj.gov.vn" 
+            <a
+              href="mailto:hotline@moj.gov.vn"
               className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
             >
               hotline@moj.gov.vn

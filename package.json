@@ -59,7 +59,7 @@
     "vite": "6.3.5"
   },
   "scripts": {
-    "dev": "vite --port 3002 --strictPort",
+    "dev": "vite --port 3000 --strictPort",
     "build": "vite build",
     "deploy:private": "npm run build && firebase hosting:channel:deploy private-preview"
   }

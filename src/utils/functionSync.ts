@@ -477,7 +477,7 @@ const getAvailablePermissions = (functionId: string) => {
 const getDefaultPermissions = (functionId: string) => {
   // Get available permissions first
   const available = getAvailablePermissions(functionId);
-  
+
   // Return enabled by default based on what's available
   return {
     view: available.view,

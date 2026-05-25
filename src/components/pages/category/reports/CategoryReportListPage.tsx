@@ -16,8 +16,8 @@ export function CategoryReportListPage() {
   const [filterAgency, setFilterAgency] = useState('all');
   const [dateRange, setDateRange] = useState('2024');
 
-  const filteredData = filterAgency === 'all' 
-    ? mockDataList 
+  const filteredData = filterAgency === 'all'
+    ? mockDataList
     : mockDataList.filter(d => d.agency === filterAgency);
 
   const totalCategories = filteredData.reduce((acc, curr) => acc + curr.total, 0);
@@ -49,7 +49,7 @@ export function CategoryReportListPage() {
                 <option value="Cục Công chứng">Cục Công chứng</option>
               </select>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">Thời gian tạo (Năm)</label>
               <select
@@ -71,7 +71,7 @@ export function CategoryReportListPage() {
               </button>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-3 w-full md:w-auto h-full pt-6 md:pt-0">
             <button className="px-5 py-2.5 border border-slate-300 text-slate-700 bg-white rounded-xl hover:bg-slate-50 transition-colors font-medium flex items-center gap-2">
               <Printer className="w-4 h-4" />
@@ -127,7 +127,7 @@ export function CategoryReportListPage() {
       {/* Report Preview - A4 Style Paper */}
       <div className="bg-slate-200/50 p-4 sm:p-8 rounded-2xl flex justify-center overflow-x-auto">
         <div className="bg-white w-[210mm] min-h-[297mm] shadow-xl p-[20mm] bg-[url('https://www.transparenttextures.com/patterns/cream-paper.png')] relative">
-          
+
           {/* Header - Quốc hiệu */}
           <div className="flex justify-between items-start mb-12">
             <div className="text-center w-1/2">
@@ -157,7 +157,7 @@ export function CategoryReportListPage() {
             <section>
               <h3 className="font-bold text-lg mb-3">1. Tổng quan tình hình thiết lập danh mục</h3>
               <p className="mb-2">
-                Tính đến thời điểm hiện tại, toàn hệ thống Kho dữ liệu dùng chung đã ghi nhận tổng cộng <strong className="text-lg">{totalCategories}</strong> danh mục dữ liệu được thiết lập và quản lý.
+                Tính đến thời điểm hiện tại, toàn hệ thống Kho DLDC đã ghi nhận tổng cộng <strong className="text-lg">{totalCategories}</strong> danh mục dữ liệu được thiết lập và quản lý.
                 Trong đó, có <strong>{totalRecent}</strong> danh mục được tạo mới hoặc cập nhật trong kỳ báo cáo hiển tại ({dateRange === 'all' ? 'Toàn thời gian' : `Năm ${dateRange}`}).
               </p>
             </section>

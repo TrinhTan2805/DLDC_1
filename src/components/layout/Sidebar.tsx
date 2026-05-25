@@ -764,17 +764,17 @@ export function Sidebar({
           {!isCollapsed && (
             <div className="whitespace-nowrap animate-in fade-in slide-in-from-left-2 duration-300 overflow-hidden">
               <div className="text-slate-900 text-base leading-5 font-bold truncate">
-                Kho Dữ liệu dùng chung
+                Kho DLDC
               </div>
               <div className="text-[10px] text-slate-500 leading-4 uppercase font-bold tracking-tight truncate">
-                Hệ thống quản lý
+                Hệ thống quản lý Bộ Tư Pháp
               </div>
             </div>
           )}
         </div>
-        
+
         {isCollapsed ? (
-          <button 
+          <button
             onClick={onToggleCollapse}
             className="absolute top-1/2 -translate-y-1/2 w-6 h-6 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-400 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50 transition-all z-50 shadow-sm"
             style={{ right: '-12px' }}
@@ -783,7 +783,7 @@ export function Sidebar({
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
         ) : (
-          <button 
+          <button
             onClick={onToggleCollapse}
             className="w-7 h-7 flex-shrink-0 bg-white border border-slate-200 rounded flex items-center justify-center text-slate-500 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50 transition-all shadow-sm ml-2"
             title="Thu gọn menu"
@@ -797,13 +797,13 @@ export function Sidebar({
       <div className={`px-4 py-3 border-b border-slate-100 ${isCollapsed ? 'flex justify-center' : ''}`}>
         <div className="relative group w-full">
           {isCollapsed ? (
-             <button 
-               onClick={onToggleCollapse}
-               className="w-full flex justify-center p-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-white transition-all"
-               title="Tìm kiếm menu"
-             >
-               <Search className="w-5 h-5" />
-             </button>
+            <button
+              onClick={onToggleCollapse}
+              className="w-full flex justify-center p-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-white transition-all"
+              title="Tìm kiếm menu"
+            >
+              <Search className="w-5 h-5" />
+            </button>
           ) : (
             <>
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />

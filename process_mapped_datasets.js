@@ -14,16 +14,16 @@ for (const line of lines) {
 
     const parts = line.split('\t');
     if (parts.length < 2) continue;
-    
+
     const dbNamePart = parts[0];
     const screenCode = parts[1].trim();
 
     // Pattern matching
-    let match = dbNamePart.match(/Kho dữ liệu dùng chung tiếp nhận dữ liệui?ệ?u?\s+(.*?)\s+từ hệ thống nguồn/i);
+    let match = dbNamePart.match(/Kho DLDC tiếp nhận dữ liệui?ệ?u?\s+(.*?)\s+từ hệ thống nguồn/i);
     if (!match) {
         match = dbNamePart.match(/tiếp nhận dữ liệui?ệ?u?\s+(.*?)\s+từ/i);
     }
-    
+
     if (match && match[1]) {
         let name = match[1].trim();
         if (!seen.has(name.toLowerCase())) {
@@ -79,7 +79,7 @@ const startIndex = content.indexOf(startMarker);
 const endIndex = content.indexOf(endMarker);
 
 if (startIndex === -1 || endIndex === -1) {
-    console.error("Could not find markers.", {startIndex, endIndex});
+    console.error("Could not find markers.", { startIndex, endIndex });
     process.exit(1);
 }
 

@@ -20,7 +20,7 @@ export function TargetDatabaseModal({ isOpen, onClose, onSave, editingData }: Ta
     schema: '',
     note: ''
   });
-  
+
   const [password, setPassword] = useState('');
 
   useEffect(() => {
@@ -96,7 +96,7 @@ export function TargetDatabaseModal({ isOpen, onClose, onSave, editingData }: Ta
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-slate-50/50"
-                  placeholder="Ví dụ: CSDL Kho dữ liệu dùng chung"
+                  placeholder="Ví dụ: CSDL Kho DLDC"
                 />
               </div>
 

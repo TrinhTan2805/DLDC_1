@@ -254,8 +254,8 @@ export function MasterDataScaleManagementPage() {
           <button title="Nút bấm"
             onClick={() => setActiveTab('setup')}
             className={`flex items-center gap-2 px-6 py-3 text-sm transition-colors whitespace-nowrap ${activeTab === 'setup'
-                ? 'bg-white text-slate-900 border-b-2 border-slate-900'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+              ? 'bg-white text-slate-900 border-b-2 border-slate-900'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               }`}
           >
             <Settings className="w-4 h-4" />
@@ -264,8 +264,8 @@ export function MasterDataScaleManagementPage() {
           <button title="Nút bấm"
             onClick={() => setActiveTab('attributes')}
             className={`flex items-center gap-2 px-6 py-3 text-sm transition-colors whitespace-nowrap ${activeTab === 'attributes'
-                ? 'bg-white text-slate-900 border-b-2 border-slate-900'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+              ? 'bg-white text-slate-900 border-b-2 border-slate-900'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               }`}
           >
             <Sliders className="w-4 h-4" />
@@ -274,8 +274,8 @@ export function MasterDataScaleManagementPage() {
           <button title="Nút bấm"
             onClick={() => setActiveTab('merge-rules')}
             className={`flex items-center gap-2 px-6 py-3 text-sm transition-colors whitespace-nowrap ${activeTab === 'merge-rules'
-                ? 'bg-white text-slate-900 border-b-2 border-slate-900'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+              ? 'bg-white text-slate-900 border-b-2 border-slate-900'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               }`}
           >
             <GitCompare className="w-4 h-4" />
@@ -284,8 +284,8 @@ export function MasterDataScaleManagementPage() {
           <button title="Nút bấm"
             onClick={() => setActiveTab('relationships')}
             className={`flex items-center gap-2 px-6 py-3 text-sm transition-colors whitespace-nowrap ${activeTab === 'relationships'
-                ? 'bg-white text-slate-900 border-b-2 border-slate-900'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+              ? 'bg-white text-slate-900 border-b-2 border-slate-900'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               }`}
           >
             <Network className="w-4 h-4" />
@@ -294,8 +294,8 @@ export function MasterDataScaleManagementPage() {
           <button title="Nút bấm"
             onClick={() => setActiveTab('identifier-rules')}
             className={`flex items-center gap-2 px-6 py-3 text-sm transition-colors whitespace-nowrap ${activeTab === 'identifier-rules'
-                ? 'bg-white text-slate-900 border-b-2 border-slate-900'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+              ? 'bg-white text-slate-900 border-b-2 border-slate-900'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               }`}
           >
             <Key className="w-4 h-4" />
@@ -304,8 +304,8 @@ export function MasterDataScaleManagementPage() {
           <button title="Nút bấm"
             onClick={() => setActiveTab('approval')}
             className={`flex items-center gap-2 px-6 py-3 text-sm transition-colors whitespace-nowrap ${activeTab === 'approval'
-                ? 'bg-white text-slate-900 border-b-2 border-slate-900'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+              ? 'bg-white text-slate-900 border-b-2 border-slate-900'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               }`}
           >
             <CheckSquare className="w-4 h-4" />
@@ -776,7 +776,7 @@ export function MasterDataScaleManagementPage() {
                                 <p>🔗 <strong>Tham chiếu:</strong> Dữ liệu được truy vấn trực tiếp từ nguồn khi cần, không lưu bản sao cục bộ.</p>
                               )}
                               {formData.updateStrategy === 'scheduled' && (
-                                <p>🕒 <strong>Cập nhật định kỳ:</strong> Dữ liệu được đồng bộ theo lịch trình cố định từ nguồn và lưu vào kho DLDC.</p>
+                                <p>🕒 <strong>Cập nhật định kỳ:</strong> Dữ liệu được đồng bộ theo lịch trình cố định từ nguồn và lưu vào Kho DLDC.</p>
                               )}
                               {formData.updateStrategy === 'realtime' && (
                                 <p>⚡ <strong>Thời gian thực:</strong> Dữ liệu được đồng bộ ngay lập tức khi có thay đổi từ hệ thống nguồn thông qua webhook hoặc event streaming.</p>

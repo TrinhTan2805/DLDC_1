@@ -216,7 +216,7 @@ export function DashboardHome() {
               Hình thành Kho dữ liệu Hợp nhất
             </h3>
             <p className="text-sm text-slate-700 leading-relaxed">
-              Thiết lập kho dữ liệu dùng chung của Bộ Tư pháp, đảm bảo khả năng kết nối, chia sẻ dữ liệu hiệu quả và an toàn trong nội bộ và với các cơ quan bên ngoài.
+              Thiết lập Kho DLDC của Bộ Tư pháp, đảm bảo khả năng kết nối, chia sẻ dữ liệu hiệu quả và an toàn trong nội bộ và với các cơ quan bên ngoài.
             </p>
           </div>
         </div>
