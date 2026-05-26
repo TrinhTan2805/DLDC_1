@@ -648,19 +648,6 @@ const menuItems: MenuItem[] = [
             id: "admin-groups",
             label: "Quản lý nhóm người dùng",
             icon: UsersRound,
-            subItems: [
-              { id: "admin-groups-1", label: "Bộ Tư Pháp", icon: Building2 },
-              { id: "admin-groups-2", label: "Cục Công nghệ thông tin", icon: Building2 },
-              { id: "admin-groups-3", label: "Cục Hành chính tư pháp", icon: Building2 },
-              { id: "admin-groups-4", label: "Cục Quản lý thi hành án dân sự", icon: Building2 },
-              { id: "admin-groups-5", label: "Cục Đăng ký GD bảo đảm & Bồi thường nhà nước", icon: Building2 },
-              { id: "admin-groups-6", label: "Cục Kiểm tra văn bản & Quản lý xử lý VP hành chính", icon: Building2 },
-              { id: "admin-groups-7", label: "Cục Pháp luật quốc tế và Giải quyết tranh chấp đầu tư quốc tế", icon: Building2 },
-              { id: "admin-groups-8", label: "Cục Phổ biến, giáo dục pháp luật và Trợ giúp pháp lý", icon: Building2 },
-              { id: "admin-groups-9", label: "Cục Bổ trợ tư pháp", icon: Building2 },
-              { id: "admin-groups-10", label: "Vụ Hợp tác quốc tế", icon: Building2 },
-              { id: "admin-groups-11", label: "Cục Kế hoạch - Tài chính", icon: Building2 }
-            ]
           },
           {
             id: "admin-functions",
@@ -954,9 +941,6 @@ export function Sidebar({
                             onClick={() => {
                               if (hasNestedItems) {
                                 toggleMenu(subItem.id);
-                                if (subItem.id === 'admin-groups') {
-                                  onNavigate(subItem.id);
-                                }
                               } else {
                                 onNavigate(subItem.id);
                               }
