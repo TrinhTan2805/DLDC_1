@@ -216,7 +216,7 @@ export function UserManagementPage() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <button className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center">
+            <button title="Tìm kiếm" aria-label="Tìm kiếm" className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center">
               <Search className="w-5 h-5" />
             </button>
             <button
@@ -229,13 +229,6 @@ export function UserManagementPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => handleOpenModal('add')}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium"
-            >
-              <Plus className="w-4 h-4" />
-              Thêm mới
-            </button>
             <button
               onClick={() => handleOpenModal('sync')}
               className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium"
@@ -261,6 +254,8 @@ export function UserManagementPage() {
             <div className="space-y-1.5 relative z-10">
               <label className="text-[13px] font-medium text-slate-700">Trạng thái</label>
               <select
+                title="Lọc theo trạng thái"
+                aria-label="Lọc theo trạng thái"
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
@@ -472,6 +467,8 @@ export function UserManagementPage() {
                 <div className="md:col-span-2">
                   <label className="block text-sm text-slate-700 mb-2">Đơn vị <span className="text-red-600">*</span></label>
                   <select
+                    title="Đơn vị"
+                    aria-label="Đơn vị"
                     value={formData.department}
                     onChange={(e) => setFormData({ ...formData, department: e.target.value })}
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -487,6 +484,8 @@ export function UserManagementPage() {
                 <div>
                   <label className="block text-sm text-slate-700 mb-2">Vai trò <span className="text-red-600">*</span></label>
                   <select
+                    title="Vai trò"
+                    aria-label="Vai trò"
                     value={formData.role}
                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -499,6 +498,8 @@ export function UserManagementPage() {
                 <div>
                   <label className="block text-sm text-slate-700 mb-2">Trạng thái</label>
                   <select
+                    title="Trạng thái"
+                    aria-label="Trạng thái"
                     value={formData.status}
                     onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"

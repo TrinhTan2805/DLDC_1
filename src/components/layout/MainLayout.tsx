@@ -559,7 +559,7 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'reconciliation' && <DataReconciliationPage />}
             {currentPage === 'admin' && <SystemAdminPage />}
             {currentPage === 'admin-users' && <UserManagementPage />}
-            {currentPage === 'admin-groups' && <GroupManagementPage />}
+            {(currentPage === 'admin-groups' || currentPage.startsWith('admin-groups-')) && <GroupManagementPage currentPage={currentPage} />}
             {currentPage === 'admin-password-rules' && <PasswordRuleConfigPage />}
             {currentPage === 'admin-functions' && <FunctionManagementPage />}
             {currentPage === 'admin-roles' && <RoleManagementPage />}
@@ -810,7 +810,7 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
 // Helper function to get breadcrumb path
 const getBreadcrumbPath = (pageId: string): string[] => {
   if (pageId === 'connection-management' || pageId.startsWith('connection-management/')) {
-    return ['Quản trị & vận hành', 'Quản lý kết nối', pageId === 'connection-management/agents' ? 'Trạm kết nối' : 'Hệ thống nguồn'];
+    return ['Quản trị & vận hành', 'Danh mục đơn vị cấp dl', 'Quản lý kết nối', pageId === 'connection-management/agents' ? 'Trạm kết nối' : 'Hệ thống nguồn'];
   }
   if (pageId === 'collection-setup' || pageId.startsWith('collection-setup/')) {
     return ['Quản lý thu thập', 'Thiết lập thu thập', pageId === 'collection-setup/version' ? 'Quản lý nhật ký' : 'Thiết lập dịch vụ'];
@@ -895,7 +895,6 @@ const getBreadcrumbPath = (pageId: string): string[] => {
 
     // Processing
     'processed-data': ['Xử lý dữ liệu', 'Dữ liệu đã xử lý'],
-    'target-database-management': ['Quản trị & vận hành', 'Quản lý CSDL đích'],
     'processing-internal-data': ['Xử lý dữ liệu', 'CSDL Trong ngành'],
     'processing-data-info-civil-registry': ['Xử lý dữ liệu', 'CSDL Trong ngành', 'CSDL Hộ tịch điện tử'],
     'processing-data-info-case-management': ['Xử lý dữ liệu', 'CSDL Trong ngành', 'HT quản lý hồ sơ QT'],
@@ -971,7 +970,8 @@ const getBreadcrumbPath = (pageId: string): string[] => {
     'provision-external-children-group': ['Điều phối dữ liệu', 'Dịch vụ cung cấp dữ liệu', 'CSDL Ngoài ngành', 'Trẻ em'],
 
     // Admin
-    'connection-management': ['Quản trị & vận hành', 'Quản lý kết nối'],
+    'connection-management': ['Quản trị & vận hành', 'Danh mục đơn vị cấp dữ liệu', 'Quản lý kết nối'],
+    'target-database-management': ['Quản trị & vận hành', 'Danh mục đơn vị cấp dữ liệu', 'Quản lý CSDL đích'],
     'admin-users': ['Quản trị & vận hành', 'Quản trị người dùng', 'Quản lý người dùng'],
     'admin-groups': ['Quản trị & vận hành', 'Quản trị người dùng', 'Quản lý nhóm người dùng'],
     'admin-functions': ['Quản trị & vận hành', 'Quản trị người dùng', 'Danh sách chức năng'],

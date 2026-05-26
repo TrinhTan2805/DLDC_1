@@ -7,6 +7,13 @@ interface VersionHistoryModalProps {
 
 const mockVersions = [
   {
+    id: 6,
+    version: 'v2.3.0',
+    date: '26/05/2026',
+    time: '09:00',
+    content: 'Nâng cấp phân hệ Quản lý vai trò và Nhóm người dùng: Đồng bộ hóa luồng phân quyền và phân cấp dữ liệu, áp dụng 3 mẫu vai trò chuẩn (Quản trị hệ thống, Quản trị nghiệp vụ, Người dùng cơ bản), cải tiến phương thức gán người dùng qua danh sách ID, bổ sung bộ lọc người dùng chưa được gán vai trò và hỗ trợ gán/xóa trực tiếp người dùng và nhóm người dùng.'
+  },
+  {
     id: 5,
     version: 'v2.2.0',
     date: '12/04/2026',

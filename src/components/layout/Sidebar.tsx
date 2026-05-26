@@ -83,6 +83,7 @@ import imgImageLogo from "figma:asset/009541fc5d689d29107b655d2b8ecd57f6d4b3ff.p
 
 import { VersionHistoryModal } from "../modals/VersionHistoryModal";
 import { reconciliationData } from "../../data/provisionReconciliationData";
+import { initialSourceSystems } from "../pages/collection/mockSourceSystems";
 
 interface SidebarProps {
   currentPage: string;
@@ -605,14 +606,22 @@ const menuItems: MenuItem[] = [
     color: "text-red-600",
     subItems: [
       {
-        id: "connection-management",
-        label: "Quản lý kết nối",
-        icon: Link2,
-      },
-      {
-        id: "target-database-management",
-        label: "Quản lý CSDL đích",
+        id: "data-management-category",
+        label: "Danh mục đơn vị quản lý dữ liệu",
         icon: Database,
+        isGroup: true,
+        subItems: [
+          {
+            id: "connection-management",
+            label: "Quản lý kết nối",
+            icon: Link2,
+          },
+          {
+            id: "target-database-management",
+            label: "Quản lý CSDL đích",
+            icon: Database,
+          }
+        ]
       },
       {
         id: "admin-user-management-group",
@@ -629,6 +638,19 @@ const menuItems: MenuItem[] = [
             id: "admin-groups",
             label: "Quản lý nhóm người dùng",
             icon: UsersRound,
+            subItems: [
+              { id: "admin-groups-1", label: "Bộ Tư Pháp", icon: Circle },
+              { id: "admin-groups-2", label: "Cục Công nghệ thông tin", icon: Circle },
+              { id: "admin-groups-3", label: "Cục Hành chính tư pháp", icon: Circle },
+              { id: "admin-groups-4", label: "Cục Quản lý thi hành án dân sự", icon: Circle },
+              { id: "admin-groups-5", label: "Cục Đăng ký GD bảo đảm & Bồi thường nhà nước", icon: Circle },
+              { id: "admin-groups-6", label: "Cục Kiểm tra văn bản & Quản lý xử lý VP hành chính", icon: Circle },
+              { id: "admin-groups-7", label: "Cục Pháp luật quốc tế và Giải quyết tranh chấp đầu tư quốc tế", icon: Circle },
+              { id: "admin-groups-8", label: "Cục Phổ biến, giáo dục pháp luật và Trợ giúp pháp lý", icon: Circle },
+              { id: "admin-groups-9", label: "Cục Bổ trợ tư pháp", icon: Circle },
+              { id: "admin-groups-10", label: "Vụ Hợp tác quốc tế", icon: Circle },
+              { id: "admin-groups-11", label: "Cục Kế hoạch - Tài chính", icon: Circle }
+            ]
           },
           {
             id: "admin-functions",
@@ -1094,7 +1116,7 @@ export function Sidebar({
               </span>
             )}
           </div>
-          {!isCollapsed && <div className="text-xs text-slate-900 font-bold">v2.2.0</div>}
+          {!isCollapsed && <div className="text-xs text-slate-900 font-bold">v2.3.0</div>}
         </button>
       </div>
 
