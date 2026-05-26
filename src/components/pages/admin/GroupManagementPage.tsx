@@ -706,9 +706,9 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
   return (
     <div className="flex flex-col lg:flex-row gap-6 items-start font-sans">
       {/* LEFT COLUMN: Danh mục đơn vị - Premium look like Image 2 */}
-      <div className="w-full lg:w-80 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col shrink-0 overflow-hidden self-stretch lg:h-[calc(100vh-140px)] lg:sticky lg:top-4">
+      <div className="w-full lg:w-80 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col shrink-0 overflow-hidden self-stretch lg:h-[calc(100vh-140px)] lg:sticky lg:top-4 p-4 space-y-4">
         {/* Header */}
-        <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
               <Building2 className="w-4 h-4 text-blue-600" />
@@ -728,21 +728,19 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
         </div>
 
         {/* Search */}
-        <div className="p-3 border-b border-slate-100 bg-white">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Tìm kiếm đơn vị..."
-              value={unitSearchTerm}
-              onChange={(e) => setUnitSearchTerm(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-            />
-          </div>
+        <div className="relative">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Tìm kiếm đơn vị..."
+            value={unitSearchTerm}
+            onChange={(e) => setUnitSearchTerm(e.target.value)}
+            className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+          />
         </div>
 
         {/* List of Units */}
-        <div className="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto space-y-1 pr-1 custom-scrollbar">
           {unitsList
             .filter((unit) =>
               unit.name.toLowerCase().includes(unitSearchTerm.toLowerCase())
