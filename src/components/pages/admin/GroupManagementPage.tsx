@@ -704,9 +704,9 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 items-start font-sans">
+    <div className="flex flex-row gap-6 items-start font-sans">
       {/* LEFT COLUMN: Danh mục đơn vị - Premium look like Image 2 */}
-      <div className="w-full lg:w-80 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col shrink-0 overflow-hidden self-stretch lg:h-[calc(100vh-140px)] lg:sticky lg:top-4 p-4 space-y-4">
+      <div className="w-80 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col shrink-0 overflow-hidden self-stretch h-[calc(100vh-140px)] sticky top-4 p-4 space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-slate-800">Danh mục đơn vị</h3>
@@ -786,7 +786,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
       </div>
 
       {/* RIGHT COLUMN: Nhóm người dùng - Main content */}
-      <div className="flex-1 space-y-6 w-full">
+      <div className="flex-1 space-y-6 min-w-0">
         {/* Title Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between border-b border-slate-200 pb-5">
           <div>
