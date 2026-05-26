@@ -754,8 +754,8 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                     <span className="truncate">{unit.name}</span>
                   </div>
 
-                  {/* Actions always visible */}
-                  <div className="flex items-center gap-1 transition-opacity shrink-0 ml-2 bg-gradient-to-l from-slate-50 via-slate-50 pl-2 pr-0.5 py-0.5 rounded-r-lg absolute right-2 top-1/2 -translate-y-1/2">
+                  {/* Actions always visible on the right */}
+                  <div className="flex items-center gap-1 shrink-0 ml-2">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
