@@ -38,6 +38,7 @@ import { CategorySetupPageNew } from '../pages/category/CategorySetupPageNew';
 import { OpenDataCategoryPage } from '../pages/OpenDataCategoryPage';
 import { OpenDataSetupPage } from '../pages/open-data/OpenDataSetupPage';
 import { OpenDataPublishedListPage } from '../pages/open-data/OpenDataPublishedListPage';
+import { OpenDataPublicPortal } from '../pages/open-data/OpenDataPublicPortal';
 import { OpenDataReportPage } from '../pages/open-data-report/OpenDataReportPage';
 import { OpenDataCategoryAPage } from '../pages/open-data-category/OpenDataCategoryAPage';
 import { OpenDataCategoryBPage } from '../pages/open-data-category/OpenDataCategoryBPage';
@@ -192,6 +193,7 @@ import { DataProvisionApiManagementPage } from '../pages/provisioning/DataProvis
 import { DataProvisionRequestPage } from '../pages/provisioning/DataProvisionRequestPage';
 import { DataProvisionMonitoringPage } from '../pages/provisioning/DataProvisionMonitoringPage';
 import { DataProvisionServicesPage } from '../pages/provisioning/DataProvisionServicesPage';
+import { DataProvisionDashboard } from '../pages/provisioning/DataProvisionDashboard';
 
 // Page configuration for titles and descriptions
 const pageConfig: Record<string, { title: string; description: string }> = {
@@ -206,6 +208,10 @@ const pageConfig: Record<string, { title: string; description: string }> = {
   dashboard: {
     title: 'Tổng quan hệ thống',
     description: 'Theo dõi tổng quan hoạt động và thống kê hệ thống kho dữ liệu DLDC'
+  },
+  'provision-dashboard': {
+    title: 'Tổng quan Cung cấp',
+    description: 'Trung tâm điều khiển và giám sát hoạt động cung cấp dữ liệu'
   },
   'provisioning-service-setup': {
     title: 'Thiết lập điều phối dữ liệu',
@@ -321,7 +327,11 @@ const pageConfig: Record<string, { title: string; description: string }> = {
   },
   'open-data-report': {
     title: 'Báo cáo thống kê dữ liệu mở',
-    description: 'Tìm ki��m, thống kê và phân tích dữ liệu mở'
+    description: 'Tìm kim, thống kê và phân tích dữ liệu mở'
+  },
+  'open-data-public-portal': {
+    title: 'Cổng dữ liệu mở',
+    description: 'Nền tảng chia sẻ dữ liệu công khai, minh bạch'
   },
   'master-data-reports': {
     title: 'Báo cáo tìm kiếm dữ liệu chủ',
@@ -491,6 +501,7 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'open-data-category-i' && <OpenDataCategoryIPage />}
             {currentPage === 'open-data-category-j' && <OpenDataCategoryJPage />}
             {currentPage === 'open-data-report' && <OpenDataReportPage onBack={() => setCurrentPage('open-data')} />}
+            {currentPage === 'open-data-public-portal' && <OpenDataPublicPortal />}
             {currentPage === 'open-data-category-setup' && <CategorySetupPageNew />}
             {currentPage === 'quality' && <QualityControlPage />}
             {currentPage === 'notifications' && <NotificationPage />}
@@ -512,6 +523,7 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'master-data-update-b' && <ProcessingNationalityPage />}
             {currentPage === 'master-data-update-c' && <ProcessingJudgmentPage />}
             {currentPage === 'master-data-reports' && <MasterDataReportsPage />}
+            {currentPage === 'provision-dashboard' && <DataProvisionDashboard />}
             {currentPage === 'provisioning-service-setup' && <DataProvisionServiceSetupPage />}
             {currentPage === 'provisioning-api-management' && <DataProvisionApiManagementPage />}
             {currentPage === 'provisioning-data-request' && <DataProvisionRequestPage />}

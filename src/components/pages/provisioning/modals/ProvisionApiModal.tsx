@@ -8,6 +8,8 @@ interface ProvisionApiModalProps {
 }
 
 export function ProvisionApiModal({ isOpen, onClose, apiData }: ProvisionApiModalProps) {
+  const [isNdxpEnabled, setIsNdxpEnabled] = React.useState(false);
+
   if (!isOpen) return null;
 
   return (
@@ -76,6 +78,40 @@ export function ProvisionApiModal({ isOpen, onClose, apiData }: ProvisionApiModa
                   rows={3}
                   placeholder="Mô tả chức năng của API..."
                 ></textarea>
+              </div>
+
+              {/* NDXP Integration Section */}
+              <div className="md:col-span-2 pt-4 border-t border-slate-200 mt-2">
+                <div className="flex items-center justify-between mb-4 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-800">Tích hợp Nền tảng chia sẻ dữ liệu quốc gia (NDXP)</h3>
+                    <p className="text-xs text-slate-500">Đăng ký API này lên hệ thống NDXP để chia sẻ dữ liệu với các bộ ngành khác.</p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" className="sr-only peer" checked={isNdxpEnabled} onChange={(e) => setIsNdxpEnabled(e.target.checked)} />
+                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                  </label>
+                </div>
+
+                {isNdxpEnabled && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-amber-50/50 p-4 rounded-xl border border-amber-100 animate-in fade-in duration-300">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Mã dịch vụ NDXP <span className="text-red-500">*</span></label>
+                      <input type="text" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20" placeholder="VD: BTP.01.01" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Giao thức kết nối</label>
+                      <select className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20">
+                        <option>REST</option>
+                        <option>SOAP</option>
+                      </select>
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Cơ quan chủ quản (Mã định danh)</label>
+                      <input type="text" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20" placeholder="VD: 000.00.00.H01 - Bộ Tư pháp" defaultValue="000.00.00.H01 - Bộ Tư pháp" />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
