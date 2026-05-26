@@ -7,6 +7,13 @@ interface VersionHistoryModalProps {
 
 const mockVersions = [
   {
+    id: 7,
+    version: 'v2.3.2',
+    date: '26/05/2026',
+    time: '11:40',
+    content: 'Cập nhật giao diện trang Quản lý nhóm người dùng: Loại bỏ menu con thừa trên Sidebar, điều chỉnh khối Danh mục đơn vị hiển thị song song bên trái, và cố định hiển thị nút thao tác (Sửa/Xóa) của danh sách đơn vị để nâng cao trải nghiệm người dùng.'
+  },
+  {
     id: 6,
     version: 'v2.3.0',
     date: '26/05/2026',

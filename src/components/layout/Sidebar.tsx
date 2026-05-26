@@ -1112,7 +1112,7 @@ export function Sidebar({
               </span>
             )}
           </div>
-          {!isCollapsed && <div className="text-xs text-slate-900 font-bold">v2.3.0</div>}
+          {!isCollapsed && <div className="text-xs text-slate-900 font-bold">v2.3.2</div>}
         </button>
       </div>
 
