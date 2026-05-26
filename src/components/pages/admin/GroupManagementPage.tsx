@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Search, Plus, Edit, Trash2, Users, Eye, UserPlus, Lock, Settings, ChevronRight, ChevronDown, X, Filter } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Plus, Edit, Trash2, Users, Eye, UserPlus, Lock, Settings, ChevronRight, ChevronDown, X, Filter, Building2 } from 'lucide-react';
 import { StatsCard } from '../../common/StatsCard';
 import { StatusTag } from '../../common/StatusTag';
 import { UsersRound } from 'lucide-react';
@@ -213,6 +213,23 @@ interface GroupManagementPageProps {
 
 export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
   const [groups, setGroups] = useState<Group[]>(groupsData);
+  const [unitsList, setUnitsList] = useState(units);
+  const [selectedUnitIdState, setSelectedUnitIdState] = useState<string>('');
+  const [unitSearchTerm, setUnitSearchTerm] = useState('');
+  const [unitModalType, setUnitModalType] = useState<'add' | 'edit' | 'delete' | null>(null);
+  const [selectedUnitToEdit, setSelectedUnitToEdit] = useState<{ id: string; name: string } | null>(null);
+  const [newUnitName, setNewUnitName] = useState('');
+
+  // Sync selectedUnitIdState with global currentPage from Sidebar
+  useEffect(() => {
+    const unitId = currentPage?.replace('admin-groups-', '') || '';
+    if (unitId && unitsList.some(u => u.id === unitId)) {
+      setSelectedUnitIdState(unitId);
+    } else if (!selectedUnitIdState && unitsList.length > 0) {
+      setSelectedUnitIdState(unitsList[0].id);
+    }
+  }, [currentPage]);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [modalType, setModalType] = useState<ModalType>(null);
@@ -244,8 +261,53 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
   const [memberDepartmentFilter, setMemberDepartmentFilter] = useState('');
   const [memberUnassignedOnly, setMemberUnassignedOnly] = useState(false);
 
-  const selectedUnitId = currentPage?.replace('admin-groups-', '') || '';
-  const currentUnit = units.find(u => u.id === selectedUnitId);
+  const currentUnit = unitsList.find(u => u.id === selectedUnitIdState);
+
+  const handleAddUnit = () => {
+    if (!newUnitName.trim()) {
+      alert('Vui lòng nhập tên đơn vị!');
+      return;
+    }
+    const newId = (unitsList.length > 0 ? Math.max(...unitsList.map(u => parseInt(u.id) || 0)) + 1 : 1).toString();
+    const newUnit = { id: newId, name: newUnitName.trim() };
+    setUnitsList([...unitsList, newUnit]);
+    setSelectedUnitIdState(newId);
+    setNewUnitName('');
+    setUnitModalType(null);
+    alert(`Đã thêm đơn vị "${newUnit.name}" thành công!`);
+  };
+
+  const handleEditUnit = () => {
+    if (!selectedUnitToEdit || !newUnitName.trim()) {
+      alert('Vui lòng nhập tên đơn vị!');
+      return;
+    }
+    const oldName = selectedUnitToEdit.name;
+    const newName = newUnitName.trim();
+    setUnitsList(unitsList.map(u => u.id === selectedUnitToEdit.id ? { ...u, name: newName } : u));
+    
+    // Also update department names in groups!
+    setGroups(groups.map(g => g.department === oldName ? { ...g, department: newName } : g));
+    
+    setSelectedUnitToEdit(null);
+    setNewUnitName('');
+    setUnitModalType(null);
+    alert(`Đã cập nhật đơn vị thành "${newName}"!`);
+  };
+
+  const handleDeleteUnit = (unitId: string) => {
+    const unitToDelete = unitsList.find(u => u.id === unitId);
+    if (!unitToDelete) return;
+    
+    if (confirm(`Bạn có chắc chắn muốn xóa đơn vị "${unitToDelete.name}"? Tất cả các nhóm thuộc đơn vị này sẽ bị ẩn.`)) {
+      setUnitsList(unitsList.filter(u => u.id !== unitId));
+      if (selectedUnitIdState === unitId) {
+        const remaining = unitsList.filter(u => u.id !== unitId);
+        setSelectedUnitIdState(remaining.length > 0 ? remaining[0].id : '');
+      }
+      alert(`Đã xóa đơn vị "${unitToDelete.name}" thành công!`);
+    }
+  };
 
   const filteredGroups = groups.filter(group => {
     const matchesUnit = currentUnit ? group.department === currentUnit.name : true;
@@ -642,58 +704,152 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Title Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between border-b border-slate-200 pb-5">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900">Quản lý nhóm người dùng</h2>
-          <p className="text-sm text-slate-500 mt-1">
-            Đơn vị quản lý: <span className="font-semibold text-blue-600">{currentUnit ? currentUnit.name : 'Tất cả đơn vị'}</span>
-          </p>
-        </div>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <StatsCard icon={UsersRound} iconColor="blue" title="Tổng nhóm" value="45" />
-        <StatsCard icon={UsersRound} iconColor="green" title="Đang hoạt động" value="42" />
-        <StatsCard icon={Users} iconColor="purple" title="Tổng thành viên" value="348" />
-        <StatsCard icon={Users} iconColor="orange" title="TB thành viên/nhóm" value="8" />
-      </div>
-
-      {/* Search and Actions */}
-      <div className="bg-white rounded-lg border border-slate-200 p-4">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Tìm kiếm theo tên nhóm, mã nhóm, đơn vị..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+    <div className="flex flex-col lg:flex-row gap-6 items-start font-sans">
+      {/* LEFT COLUMN: Danh mục đơn vị - Premium look like Image 2 */}
+      <div className="w-full lg:w-80 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col shrink-0 overflow-hidden self-stretch lg:h-[calc(100vh-140px)] lg:sticky lg:top-4">
+        {/* Header */}
+        <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+              <Building2 className="w-4 h-4 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-800">Danh mục đơn vị</h3>
+              <p className="text-[10px] text-slate-500">Quản lý các cấp đơn vị</p>
+            </div>
           </div>
-          <select
-            title="Lọc theo trạng thái"
-            aria-label="Lọc theo trạng thái"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive')}
-            className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">Tất cả trạng thái</option>
-            <option value="active">Hoạt động</option>
-            <option value="inactive">Ngừng hoạt động</option>
-          </select>
-          <button 
-            onClick={() => handleOpenModal('add')}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+          <button
+            onClick={() => setUnitModalType('add')}
+            className="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+            title="Thêm đơn vị mới"
           >
             <Plus className="w-4 h-4" />
-            Thêm nhóm mới
           </button>
         </div>
+
+        {/* Search */}
+        <div className="p-3 border-b border-slate-100 bg-white">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Tìm kiếm đơn vị..."
+              value={unitSearchTerm}
+              onChange={(e) => setUnitSearchTerm(e.target.value)}
+              className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+            />
+          </div>
+        </div>
+
+        {/* List of Units */}
+        <div className="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
+          {unitsList
+            .filter((unit) =>
+              unit.name.toLowerCase().includes(unitSearchTerm.toLowerCase())
+            )
+            .map((unit, index) => {
+              const isActive = selectedUnitIdState === unit.id;
+              return (
+                <div
+                  key={unit.id}
+                  className={`group flex items-center justify-between rounded-lg p-2.5 transition-all text-xs cursor-pointer relative ${
+                    isActive
+                      ? "bg-blue-50 text-blue-700 font-semibold border-l-4 border-blue-600 shadow-sm"
+                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  }`}
+                  onClick={() => setSelectedUnitIdState(unit.id)}
+                >
+                  <div className="flex items-center flex-1 min-w-0">
+                    <span className={`font-semibold shrink-0 mr-2 text-right w-5 ${isActive ? 'text-blue-700' : 'text-slate-400'}`}>
+                      {index + 1}.
+                    </span>
+                    <span className="truncate">{unit.name}</span>
+                  </div>
+
+                  {/* Actions on hover */}
+                  <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity shrink-0 ml-2 bg-gradient-to-l from-slate-50 via-slate-50 pl-2 pr-0.5 py-0.5 rounded-r-lg absolute right-2 top-1/2 -translate-y-1/2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedUnitToEdit(unit);
+                        setNewUnitName(unit.name);
+                        setUnitModalType('edit');
+                      }}
+                      className="p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded"
+                      title="Sửa tên đơn vị"
+                    >
+                      <Edit className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteUnit(unit.id);
+                      }}
+                      className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded"
+                      title="Xóa đơn vị"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+        </div>
       </div>
+
+      {/* RIGHT COLUMN: Nhóm người dùng - Main content */}
+      <div className="flex-1 space-y-6 w-full">
+        {/* Title Header */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between border-b border-slate-200 pb-5">
+          <div>
+            <h2 className="text-2xl font-bold text-slate-900">Quản lý nhóm người dùng</h2>
+            <p className="text-sm text-slate-500 mt-1">
+              Đơn vị quản lý: <span className="font-semibold text-blue-600">{currentUnit ? currentUnit.name : 'Tất cả đơn vị'}</span>
+            </p>
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <StatsCard icon={UsersRound} iconColor="blue" title="Tổng nhóm" value="45" />
+          <StatsCard icon={UsersRound} iconColor="green" title="Đang hoạt động" value="42" />
+          <StatsCard icon={Users} iconColor="purple" title="Tổng thành viên" value="348" />
+          <StatsCard icon={Users} iconColor="orange" title="TB thành viên/nhóm" value="8" />
+        </div>
+
+        {/* Search and Actions */}
+        <div className="bg-white rounded-lg border border-slate-200 p-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Tìm kiếm theo tên nhóm, mã nhóm, đơn vị..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <select
+              title="Lọc theo trạng thái"
+              aria-label="Lọc theo trạng thái"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive')}
+              className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">Tất cả trạng thái</option>
+              <option value="active">Hoạt động</option>
+              <option value="inactive">Ngừng hoạt động</option>
+            </select>
+            <button 
+              onClick={() => handleOpenModal('add')}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Thêm nhóm mới
+            </button>
+          </div>
+        </div>
 
       {/* Groups Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -779,6 +935,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
           </div>
         ))}
       </div>
+      </div>
 
       {/* Add/Edit Modal */}
       {(modalType === 'add' || modalType === 'edit') && (
@@ -843,7 +1000,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">-- Chọn đơn vị --</option>
-                    {units.map(unit => (
+                    {unitsList.map(unit => (
                       <option key={unit.id} value={unit.name}>{unit.name}</option>
                     ))}
                   </select>
@@ -1369,7 +1526,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                   className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full lg:w-auto"
                 >
                   <option value="">Tất cả đơn vị</option>
-                  {units.map(unit => (
+                  {unitsList.map(unit => (
                     <option key={unit.id} value={unit.name}>{unit.name}</option>
                   ))}
                 </select>
@@ -1493,6 +1650,58 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                 <button 
                   onClick={handleCloseModal}
                   className="px-6 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50"
+                >
+                  Hủy
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Unit Add / Edit Modals */}
+      {unitModalType && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[999] p-4 font-sans" onClick={() => setUnitModalType(null)}>
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+              <h3 className="text-slate-900 font-bold text-base">
+                {unitModalType === 'add' ? 'Thêm đơn vị mới' : 'Chỉnh sửa đơn vị'}
+              </h3>
+              <button title="Đóng" aria-label="Đóng" onClick={() => {
+                setUnitModalType(null);
+                setNewUnitName('');
+                setSelectedUnitToEdit(null);
+              }} className="text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-100 rounded-lg transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-2 uppercase tracking-wide">
+                  Tên đơn vị <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="Nhập tên đơn vị (ví dụ: Cục Bổ trợ tư pháp)..."
+                  value={newUnitName}
+                  onChange={(e) => setNewUnitName(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
+                />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={unitModalType === 'add' ? handleAddUnit : handleEditUnit}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                >
+                  Xác nhận
+                </button>
+                <button
+                  onClick={() => {
+                    setUnitModalType(null);
+                    setNewUnitName('');
+                    setSelectedUnitToEdit(null);
+                  }}
+                  className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 text-sm font-semibold rounded-lg hover:bg-slate-50 transition-colors"
                 >
                   Hủy
                 </button>
