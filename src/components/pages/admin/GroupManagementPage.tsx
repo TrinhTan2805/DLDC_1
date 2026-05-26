@@ -709,21 +709,13 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
       <div className="w-full lg:w-80 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col shrink-0 overflow-hidden self-stretch lg:h-[calc(100vh-140px)] lg:sticky lg:top-4 p-4 space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Building2 className="w-4 h-4 text-blue-600" />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-slate-800">Danh mục đơn vị</h3>
-              <p className="text-[10px] text-slate-500">Quản lý các cấp đơn vị</p>
-            </div>
-          </div>
+          <h3 className="text-sm font-bold text-slate-800">Danh mục dữ liệu</h3>
           <button
             onClick={() => setUnitModalType('add')}
-            className="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
-            title="Thêm đơn vị mới"
+            className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-[10px] font-semibold transition-colors flex items-center gap-1"
+            title="Thêm nhóm mới"
           >
-            <Plus className="w-4 h-4" />
+            + Thêm nhóm/mới
           </button>
         </div>
 
@@ -732,7 +724,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
           <input
             type="text"
-            placeholder="Tìm kiếm đơn vị..."
+            placeholder="Tìm kiếm dữ liệu..."
             value={unitSearchTerm}
             onChange={(e) => setUnitSearchTerm(e.target.value)}
             className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
@@ -757,10 +749,8 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                   }`}
                   onClick={() => setSelectedUnitIdState(unit.id)}
                 >
-                  <div className="flex items-center flex-1 min-w-0">
-                    <span className={`font-semibold shrink-0 mr-2 text-right w-5 ${isActive ? 'text-blue-700' : 'text-slate-400'}`}>
-                      {index + 1}.
-                    </span>
+                  <div className="flex items-center flex-1 min-w-0 gap-2">
+                    <Building2 className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-blue-600' : 'text-slate-400'}`} />
                     <span className="truncate">{unit.name}</span>
                   </div>
 
