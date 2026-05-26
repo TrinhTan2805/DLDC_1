@@ -471,6 +471,41 @@ export function FunctionManagementPage() {
             </select>
           </div>
 
+          {/* Conditional Cấu hình nâng cao (Page/Menu) */}
+          {(formData.type === 'page' || formData.type === 'menu') && (
+            <div className="grid grid-cols-2 gap-4 mt-2 p-4 bg-slate-50 rounded-lg border border-slate-200">
+              <div>
+                <label className="block text-sm text-slate-700 mb-2 font-medium">
+                  Lấy theo mẫu màn hình
+                </label>
+                <select
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
+                >
+                  <option value="">-- Chọn màn hình mẫu --</option>
+                  <option value="template-1">Mẫu Quản lý Danh mục chuẩn</option>
+                  <option value="template-2">Mẫu Báo cáo Thống kê</option>
+                  <option value="template-3">Mẫu Xử lý Nghiệp vụ</option>
+                </select>
+                <p className="text-xs text-slate-500 mt-1">Lấy cấu trúc từ màn hình tương tự cùng phân hệ</p>
+              </div>
+              <div>
+                <label className="block text-sm text-slate-700 mb-2 font-medium">
+                  Bảng dữ liệu (CSDL)
+                </label>
+                <select
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
+                >
+                  <option value="">-- Chọn bảng dữ liệu --</option>
+                  <option value="tbl_danh_muc_loai_van_ban">tbl_danh_muc_loai_van_ban</option>
+                  <option value="tbl_ho_so_nghiep_vu">tbl_ho_so_nghiep_vu</option>
+                  <option value="tbl_can_bo_nhan_vien">tbl_can_bo_nhan_vien</option>
+                  <option value="raw">-- Tự định nghĩa (Raw Data) --</option>
+                </select>
+                <p className="text-xs text-slate-500 mt-1">Nạp cấu trúc cột từ bảng dữ liệu có sẵn</p>
+              </div>
+            </div>
+          )}
+
           {/* Row 8: Toggles */}
           <div className="flex gap-8">
             <div className="flex items-center gap-3">
@@ -782,6 +817,33 @@ export function FunctionManagementPage() {
                   <option value="function">Function</option>
                 </select>
               </div>
+
+              {/* Conditional Cấu hình nâng cao (Page/Menu) */}
+              {(addFormData.type === 'page' || addFormData.type === 'menu') && (
+                <div className="grid grid-cols-2 gap-4 mt-2 p-4 bg-slate-50 rounded-lg border border-slate-200">
+                  <div>
+                    <label className="block text-sm text-slate-700 mb-2 font-medium">Lấy theo mẫu màn hình</label>
+                    <select className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white">
+                      <option value="">-- Chọn màn hình mẫu --</option>
+                      <option value="template-1">Mẫu Quản lý Danh mục chuẩn</option>
+                      <option value="template-2">Mẫu Báo cáo Thống kê</option>
+                      <option value="template-3">Mẫu Xử lý Nghiệp vụ</option>
+                    </select>
+                    <p className="text-xs text-slate-500 mt-1">Lấy cấu trúc từ màn hình tương tự cùng phân hệ</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-slate-700 mb-2 font-medium">Bảng dữ liệu (CSDL)</label>
+                    <select className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white">
+                      <option value="">-- Chọn bảng dữ liệu --</option>
+                      <option value="tbl_danh_muc_loai_van_ban">tbl_danh_muc_loai_van_ban</option>
+                      <option value="tbl_ho_so_nghiep_vu">tbl_ho_so_nghiep_vu</option>
+                      <option value="tbl_can_bo_nhan_vien">tbl_can_bo_nhan_vien</option>
+                      <option value="raw">-- Tự định nghĩa (Raw Data) --</option>
+                    </select>
+                    <p className="text-xs text-slate-500 mt-1">Nạp cấu trúc cột từ bảng dữ liệu có sẵn</p>
+                  </div>
+                </div>
+              )}
 
               <div className="flex gap-8">
                 <div className="flex items-center gap-3">
