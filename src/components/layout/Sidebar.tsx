@@ -649,17 +649,17 @@ const menuItems: MenuItem[] = [
             label: "Quản lý nhóm người dùng",
             icon: UsersRound,
             subItems: [
-              { id: "admin-groups-1", label: "Bộ Tư Pháp", icon: Circle },
-              { id: "admin-groups-2", label: "Cục Công nghệ thông tin", icon: Circle },
-              { id: "admin-groups-3", label: "Cục Hành chính tư pháp", icon: Circle },
-              { id: "admin-groups-4", label: "Cục Quản lý thi hành án dân sự", icon: Circle },
-              { id: "admin-groups-5", label: "Cục Đăng ký GD bảo đảm & Bồi thường nhà nước", icon: Circle },
-              { id: "admin-groups-6", label: "Cục Kiểm tra văn bản & Quản lý xử lý VP hành chính", icon: Circle },
-              { id: "admin-groups-7", label: "Cục Pháp luật quốc tế và Giải quyết tranh chấp đầu tư quốc tế", icon: Circle },
-              { id: "admin-groups-8", label: "Cục Phổ biến, giáo dục pháp luật và Trợ giúp pháp lý", icon: Circle },
-              { id: "admin-groups-9", label: "Cục Bổ trợ tư pháp", icon: Circle },
-              { id: "admin-groups-10", label: "Vụ Hợp tác quốc tế", icon: Circle },
-              { id: "admin-groups-11", label: "Cục Kế hoạch - Tài chính", icon: Circle }
+              { id: "admin-groups-1", label: "Bộ Tư Pháp", icon: Building2 },
+              { id: "admin-groups-2", label: "Cục Công nghệ thông tin", icon: Building2 },
+              { id: "admin-groups-3", label: "Cục Hành chính tư pháp", icon: Building2 },
+              { id: "admin-groups-4", label: "Cục Quản lý thi hành án dân sự", icon: Building2 },
+              { id: "admin-groups-5", label: "Cục Đăng ký GD bảo đảm & Bồi thường nhà nước", icon: Building2 },
+              { id: "admin-groups-6", label: "Cục Kiểm tra văn bản & Quản lý xử lý VP hành chính", icon: Building2 },
+              { id: "admin-groups-7", label: "Cục Pháp luật quốc tế và Giải quyết tranh chấp đầu tư quốc tế", icon: Building2 },
+              { id: "admin-groups-8", label: "Cục Phổ biến, giáo dục pháp luật và Trợ giúp pháp lý", icon: Building2 },
+              { id: "admin-groups-9", label: "Cục Bổ trợ tư pháp", icon: Building2 },
+              { id: "admin-groups-10", label: "Vụ Hợp tác quốc tế", icon: Building2 },
+              { id: "admin-groups-11", label: "Cục Kế hoạch - Tài chính", icon: Building2 }
             ]
           },
           {
@@ -1041,8 +1041,7 @@ export function Sidebar({
                                           <div className="ml-4 mt-0.5 space-y-0.5">
                                             {nestedItem.subItems?.map(
                                               (level4Item: any) => {
-                                                const Level4Icon =
-                                                  level4Item.icon;
+                                                const Level4Icon = level4Item.icon;
                                                 const isLevel4Active =
                                                   currentPage ===
                                                   level4Item.id;
@@ -1059,13 +1058,13 @@ export function Sidebar({
                                                     }
                                                     title={level4Item.label}
                                                     aria-label={level4Item.label}
-                                                    className={`w-full flex items-center gap-2 px-2 py-1 rounded-lg transition-all ${isLevel4Active
-                                                      ? "bg-blue-50 text-blue-700"
+                                                    className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg transition-all ${isLevel4Active
+                                                      ? "bg-blue-50 text-blue-700 font-medium"
                                                       : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                                                       }`}
                                                   >
-                                                    {Level4Icon && <Level4Icon className="w-2.5 h-2.5 flex-shrink-0" />}
-                                                    <span className="text-xs truncate">
+                                                    {Level4Icon && <Level4Icon className="w-3 h-3 flex-shrink-0" />}
+                                                    <span className="text-xs truncate flex-1 text-left">
                                                       {
                                                         level4Item.label
                                                       }
