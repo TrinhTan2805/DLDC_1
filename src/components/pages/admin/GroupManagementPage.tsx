@@ -709,13 +709,13 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
       <div className="w-full lg:w-80 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col shrink-0 overflow-hidden self-stretch lg:h-[calc(100vh-140px)] lg:sticky lg:top-4 p-4 space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-slate-800">Danh mục dữ liệu</h3>
+          <h3 className="text-sm font-bold text-slate-800">Danh mục đơn vị</h3>
           <button
             onClick={() => setUnitModalType('add')}
             className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-[10px] font-semibold transition-colors flex items-center gap-1"
             title="Thêm nhóm mới"
           >
-            + Thêm nhóm/mới
+            + Thêm đơn vị mới
           </button>
         </div>
 
@@ -724,7 +724,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
           <input
             type="text"
-            placeholder="Tìm kiếm dữ liệu..."
+            placeholder="Tìm kiếm đơn vị..."
             value={unitSearchTerm}
             onChange={(e) => setUnitSearchTerm(e.target.value)}
             className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"

@@ -954,6 +954,9 @@ export function Sidebar({
                             onClick={() => {
                               if (hasNestedItems) {
                                 toggleMenu(subItem.id);
+                                if (subItem.id === 'admin-groups') {
+                                  onNavigate(subItem.id);
+                                }
                               } else {
                                 onNavigate(subItem.id);
                               }
