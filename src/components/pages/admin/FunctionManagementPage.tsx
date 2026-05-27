@@ -27,6 +27,8 @@ interface FunctionDetail {
   i18nKey: string;
   type: string;
   active: boolean;
+  generateSimilarUI?: boolean;
+  dataSourceType?: string;
 }
 
 const flattenMenuStructure = (items: any[], parentId: string | null = null): LocalMenuItem[] => {
@@ -86,6 +88,8 @@ export function FunctionManagementPage() {
     i18nKey: '',
     type: 'page',
     active: true,
+    generateSimilarUI: false,
+    dataSourceType: 'database',
   });
 
   const [addFormData, setAddFormData] = useState<FunctionDetail>({
@@ -98,6 +102,8 @@ export function FunctionManagementPage() {
     i18nKey: '',
     type: 'page',
     active: true,
+    generateSimilarUI: false,
+    dataSourceType: 'database',
   });
 
   const toggleMenuExpansion = (menuId: string) => {
@@ -247,6 +253,8 @@ export function FunctionManagementPage() {
       i18nKey: '',
       type: '',
       active: true,
+      generateSimilarUI: false,
+      dataSourceType: 'database',
     });
     setPermissions(permissions.map(p => ({ ...p, enabled: false })));
   };
@@ -270,6 +278,8 @@ export function FunctionManagementPage() {
       i18nKey: '',
       type: 'page',
       active: true,
+      generateSimilarUI: false,
+      dataSourceType: 'database',
     });
   };
 
@@ -361,6 +371,8 @@ export function FunctionManagementPage() {
                 Chức năng cha
               </label>
               <select
+                aria-label="Chức năng cha"
+                title="Chức năng cha"
                 value={formData.parentId || ''}
                 onChange={(e) => setFormData({ ...formData, parentId: e.target.value || null })}
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
@@ -376,6 +388,8 @@ export function FunctionManagementPage() {
                 Số thứ tự
               </label>
               <input
+                aria-label="Số thứ tự"
+                title="Số thứ tự"
                 type="number"
                 value={formData.order}
                 onChange={(e) => setFormData({ ...formData, order: Number(e.target.value) })}
@@ -391,6 +405,8 @@ export function FunctionManagementPage() {
                 Tên chức năng <span className="text-red-600">*</span>
               </label>
               <input
+                aria-label="Tên chức năng"
+                title="Tên chức năng"
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -402,6 +418,8 @@ export function FunctionManagementPage() {
                 Mã chức năng
               </label>
               <input
+                aria-label="Mã chức năng"
+                title="Mã chức năng"
                 type="text"
                 value={formData.code}
                 onChange={(e) => setFormData({ ...formData, code: e.target.value })}
@@ -460,6 +478,8 @@ export function FunctionManagementPage() {
               Loại
             </label>
             <select
+              aria-label="Loại"
+              title="Loại"
               value={formData.type}
               onChange={(e) => setFormData({ ...formData, type: e.target.value })}
               className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
@@ -473,36 +493,78 @@ export function FunctionManagementPage() {
 
           {/* Conditional Cấu hình nâng cao (Page/Menu) */}
           {(formData.type === 'page' || formData.type === 'menu') && (
-            <div className="grid grid-cols-2 gap-4 mt-2 p-4 bg-slate-50 rounded-lg border border-slate-200">
-              <div>
-                <label className="block text-sm text-slate-700 mb-2 font-medium">
-                  Lấy theo mẫu màn hình
+            <div className="grid grid-cols-1 gap-4 mt-2 p-4 bg-slate-50 rounded-lg border border-slate-200">
+              <div className="flex items-center gap-2 mb-2">
+                <input
+                  type="checkbox"
+                  id="generateUI"
+                  checked={formData.generateSimilarUI || false}
+                  onChange={(e) => setFormData({ ...formData, generateSimilarUI: e.target.checked })}
+                  className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500 cursor-pointer"
+                />
+                <label htmlFor="generateUI" className="text-sm font-medium text-slate-900 cursor-pointer">
+                  Cho phép tự động tạo giao diện tương tự
                 </label>
-                <select
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
-                >
-                  <option value="">-- Chọn màn hình mẫu --</option>
-                  <option value="template-1">Mẫu Quản lý Danh mục chuẩn</option>
-                  <option value="template-2">Mẫu Báo cáo Thống kê</option>
-                  <option value="template-3">Mẫu Xử lý Nghiệp vụ</option>
-                </select>
-                <p className="text-xs text-slate-500 mt-1">Lấy cấu trúc từ màn hình tương tự cùng phân hệ</p>
               </div>
-              <div>
-                <label className="block text-sm text-slate-700 mb-2 font-medium">
-                  Bảng dữ liệu (CSDL)
-                </label>
-                <select
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
-                >
-                  <option value="">-- Chọn bảng dữ liệu --</option>
-                  <option value="tbl_danh_muc_loai_van_ban">tbl_danh_muc_loai_van_ban</option>
-                  <option value="tbl_ho_so_nghiep_vu">tbl_ho_so_nghiep_vu</option>
-                  <option value="tbl_can_bo_nhan_vien">tbl_can_bo_nhan_vien</option>
-                  <option value="raw">-- Tự định nghĩa (Raw Data) --</option>
-                </select>
-                <p className="text-xs text-slate-500 mt-1">Nạp cấu trúc cột từ bảng dữ liệu có sẵn</p>
-              </div>
+
+              {formData.generateSimilarUI && (
+                <div className="grid grid-cols-2 gap-4 pl-6 border-l-2 border-blue-200 ml-2">
+                  <div>
+                    <label className="block text-sm text-slate-700 mb-2 font-medium">
+                      Lấy theo mẫu màn hình
+                    </label>
+                    <select
+                      aria-label="Lấy theo mẫu màn hình"
+                      title="Lấy theo mẫu màn hình"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
+                    >
+                      <option value="">-- Chọn màn hình mẫu --</option>
+                      <option value="template-1">Mẫu Quản lý Danh mục chuẩn</option>
+                      <option value="template-2">Mẫu Báo cáo Thống kê</option>
+                      <option value="template-3">Mẫu Xử lý Nghiệp vụ</option>
+                    </select>
+                    <p className="text-xs text-slate-500 mt-1">Lấy cấu trúc từ màn hình tương tự cùng phân hệ</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-slate-700 mb-2 font-medium">
+                      Nguồn dữ liệu
+                    </label>
+                    <select
+                      aria-label="Nguồn dữ liệu"
+                      title="Nguồn dữ liệu"
+                      value={formData.dataSourceType || 'database'}
+                      onChange={(e) => setFormData({ ...formData, dataSourceType: e.target.value })}
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
+                    >
+                      <option value="database">Load dữ liệu từ CSDL đa thu thập</option>
+                      <option value="custom">Tự tạo trường dữ liệu</option>
+                    </select>
+                    <p className="text-xs text-slate-500 mt-1">
+                      {formData.dataSourceType === 'custom' 
+                        ? 'Tự định nghĩa các trường dữ liệu (Raw Data)' 
+                        : 'Nạp cấu trúc cột từ bảng dữ liệu có sẵn'}
+                    </p>
+                  </div>
+
+                  {formData.dataSourceType !== 'custom' && (
+                    <div className="col-span-2">
+                      <label className="block text-sm text-slate-700 mb-2 font-medium">
+                        Bảng dữ liệu (CSDL)
+                      </label>
+                      <select
+                        aria-label="Bảng dữ liệu"
+                        title="Bảng dữ liệu"
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
+                      >
+                        <option value="">-- Chọn bảng dữ liệu --</option>
+                        <option value="tbl_danh_muc_loai_van_ban">tbl_danh_muc_loai_van_ban</option>
+                        <option value="tbl_ho_so_nghiep_vu">tbl_ho_so_nghiep_vu</option>
+                        <option value="tbl_can_bo_nhan_vien">tbl_can_bo_nhan_vien</option>
+                      </select>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -513,6 +575,8 @@ export function FunctionManagementPage() {
                 Trạng thái
               </label>
               <button
+                aria-label="Chuyển đổi trạng thái hoạt động"
+                title="Chuyển đổi trạng thái hoạt động"
                 onClick={() => setFormData({ ...formData, active: !formData.active })}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                   formData.active ? 'bg-blue-600' : 'bg-slate-300'
@@ -574,6 +638,8 @@ export function FunctionManagementPage() {
                       <td className="px-4 py-3 text-sm text-slate-600">{perm.description}</td>
                       <td className="px-4 py-3 text-center">
                         <input
+                          aria-label="Kích hoạt quyền"
+                          title="Kích hoạt quyền"
                           type="checkbox"
                           checked={perm.enabled}
                           onChange={() => togglePermission(perm.id)}
@@ -725,6 +791,8 @@ export function FunctionManagementPage() {
                 <div>
                   <label className="block text-sm text-slate-700 mb-2">Chức năng cha</label>
                   <select
+                    aria-label="Chức năng cha"
+                    title="Chức năng cha"
                     value={addFormData.parentId || ''}
                     onChange={(e) => handleParentIdChange(e.target.value || null)}
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
@@ -738,6 +806,8 @@ export function FunctionManagementPage() {
                 <div>
                   <label className="block text-sm text-slate-700 mb-2">Số thứ tự</label>
                   <input
+                    aria-label="Số thứ tự"
+                    title="Số thứ tự"
                     type="number"
                     value={addFormData.order}
                     onChange={(e) => setAddFormData({ ...addFormData, order: Number(e.target.value) })}
@@ -754,6 +824,8 @@ export function FunctionManagementPage() {
                 <div>
                   <label className="block text-sm text-slate-700 mb-2">Tên chức năng <span className="text-red-600">*</span></label>
                   <input
+                    aria-label="Tên chức năng"
+                    title="Tên chức năng"
                     type="text"
                     value={addFormData.name}
                     onChange={(e) => setAddFormData({ ...addFormData, name: e.target.value })}
@@ -763,6 +835,8 @@ export function FunctionManagementPage() {
                 <div>
                   <label className="block text-sm text-slate-700 mb-2">Mã chức năng <span className="text-red-600">*</span></label>
                   <input
+                    aria-label="Mã chức năng"
+                    title="Mã chức năng"
                     type="text"
                     value={addFormData.code}
                     onChange={(e) => setAddFormData({ ...addFormData, code: e.target.value })}
@@ -807,6 +881,8 @@ export function FunctionManagementPage() {
               <div>
                 <label className="block text-sm text-slate-700 mb-2">Loại</label>
                 <select
+                  aria-label="Loại chức năng"
+                  title="Loại chức năng"
                   value={addFormData.type}
                   onChange={(e) => setAddFormData({ ...addFormData, type: e.target.value })}
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
@@ -823,7 +899,7 @@ export function FunctionManagementPage() {
                 <div className="grid grid-cols-2 gap-4 mt-2 p-4 bg-slate-50 rounded-lg border border-slate-200">
                   <div>
                     <label className="block text-sm text-slate-700 mb-2 font-medium">Lấy theo mẫu màn hình</label>
-                    <select className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white">
+                    <select aria-label="Mẫu màn hình" title="Mẫu màn hình" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white">
                       <option value="">-- Chọn màn hình mẫu --</option>
                       <option value="template-1">Mẫu Quản lý Danh mục chuẩn</option>
                       <option value="template-2">Mẫu Báo cáo Thống kê</option>
@@ -833,7 +909,7 @@ export function FunctionManagementPage() {
                   </div>
                   <div>
                     <label className="block text-sm text-slate-700 mb-2 font-medium">Bảng dữ liệu (CSDL)</label>
-                    <select className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white">
+                    <select aria-label="Bảng dữ liệu" title="Bảng dữ liệu" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white">
                       <option value="">-- Chọn bảng dữ liệu --</option>
                       <option value="tbl_danh_muc_loai_van_ban">tbl_danh_muc_loai_van_ban</option>
                       <option value="tbl_ho_so_nghiep_vu">tbl_ho_so_nghiep_vu</option>
@@ -849,6 +925,8 @@ export function FunctionManagementPage() {
                 <div className="flex items-center gap-3">
                   <label className="text-sm text-slate-700">Trạng thái</label>
                   <button
+                    aria-label="Chuyển đổi trạng thái hoạt động"
+                    title="Chuyển đổi trạng thái hoạt động"
                     onClick={() => setAddFormData({ ...addFormData, active: !addFormData.active })}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                       addFormData.active ? 'bg-blue-600' : 'bg-slate-300'

@@ -364,6 +364,8 @@ export function RoleManagementPage() {
             />
           </div>
           <select
+            aria-label="Lọc trạng thái"
+            title="Lọc trạng thái"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive')}
             className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -473,7 +475,7 @@ export function RoleManagementPage() {
               <h3 className="text-lg font-semibold text-slate-800">
                 {modalType === 'add' ? 'Tạo vai trò mới' : `Chỉnh sửa vai trò (Phiên bản ${selectedRole?.version})`}
               </h3>
-              <button onClick={handleCloseModal} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
+              <button aria-label="Đóng" title="Đóng" onClick={handleCloseModal} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
                 <Plus className="w-5 h-5 rotate-45" />
               </button>
             </div>
@@ -485,6 +487,8 @@ export function RoleManagementPage() {
                     Tên vai trò <span className="text-red-500">*</span>
                   </label>
                   <select
+                    aria-label="Tên vai trò"
+                    title="Tên vai trò"
                     value={formData.name}
                     onChange={(e) => {
                       const newName = e.target.value;
@@ -534,6 +538,8 @@ export function RoleManagementPage() {
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">Trạng thái hoạt động</label>
                   <select
+                    aria-label="Trạng thái hoạt động"
+                    title="Trạng thái hoạt động"
                     value={formData.status}
                     onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
@@ -614,7 +620,7 @@ export function RoleManagementPage() {
                 <h3 className="text-lg font-semibold text-slate-800">Gán vai trò cho người dùng/nhóm</h3>
                 <p className="text-sm text-slate-500">Vai trò gán: {selectedRole.name}</p>
               </div>
-              <button onClick={handleCloseModal} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
+              <button aria-label="Đóng" title="Đóng" onClick={handleCloseModal} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
                 <Plus className="w-5 h-5 rotate-45" />
               </button>
             </div>
@@ -762,7 +768,7 @@ export function RoleManagementPage() {
                 <h3 className="text-lg font-semibold text-slate-800">Lịch sử phiên bản</h3>
                 <p className="text-sm text-slate-500">Vai trò: {selectedRole.name}</p>
               </div>
-              <button onClick={handleCloseModal} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
+              <button aria-label="Đóng" title="Đóng" onClick={handleCloseModal} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
                 <Plus className="w-5 h-5 rotate-45" />
               </button>
             </div>
