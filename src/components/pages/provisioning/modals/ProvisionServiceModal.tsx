@@ -1,25 +1,36 @@
 import React, { useState } from 'react';
-import { X, Check, FileText, Plug, LayoutTemplate, ShieldCheck, Plus, Trash2, Code, Key, Copy, Eye, EyeOff, Database } from 'lucide-react';
+import { X, Check, FileText, Plug, LayoutTemplate, ShieldCheck, Plus, Trash2, Code, Key, Copy, Eye, EyeOff, Database, Send, Save, ArrowLeft, Pencil } from 'lucide-react';
 
 interface ProvisionServiceModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave?: (isPublic: boolean) => void;
+  onSaveDraft?: () => void;
+  onSubmitApproval?: () => void;
   service?: any;
 }
 
 type TabType = 'general' | 'protocol' | 'packet' | 'access';
 
-export function ProvisionServiceModal({ isOpen, onClose, onSave, service }: ProvisionServiceModalProps) {
+// Mock Database Schema for Civil Registry
+const mockSchema: Record<string, string[]> = {
+  'ho_tich_ca_nhan': ['id', 'ma_vinh_vien', 'ho_ten', 'ngay_sinh', 'gioi_tinh', 'so_dinh_danh'],
+  'giay_khai_sinh': ['id', 'so_giay_khai_sinh', 'ngay_dang_ky', 'noi_sinh', 'ho_ten_cha', 'ho_ten_me'],
+  'dia_chi_thuong_tru': ['id', 'user_id', 'id_ho_tich', 'tinh_thanh', 'quan_huyen', 'phuong_xa', 'chi_tiet'],
+  'thong_tin_cha_me': ['id', 'id_ho_tich', 'ho_ten_cha', 'cccd_cha', 'ho_ten_me', 'cccd_me']
+};
+const tableNames = Object.keys(mockSchema);
+
+export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, onSubmitApproval, service }: ProvisionServiceModalProps) {
   const [activeTab, setActiveTab] = useState<TabType>('general');
   const [accessScope, setAccessScope] = useState('all');
   
   // States for packet design (Tab 3)
   const [format, setFormat] = useState('json');
-  const [fields, setFields] = useState([
-    { id: 1, name: 'id', type: 'string', description: 'Mã định danh', isMasked: false, maskRule: '' },
-    { id: 2, name: 'thoi_gian', type: 'datetime', description: 'Thời gian cập nhật', isMasked: false, maskRule: '' },
-    { id: 3, name: 'so_dien_thoai', type: 'string', description: 'Số điện thoại', isMasked: true, maskRule: 'hide_middle_4' }
+  const [fields, setFields] = useState<any[]>([
+    { id: 1, name: 'id', type: 'string', description: 'Mã định danh', isMasked: false, maskRule: '', sourceTable: 'ho_tich_ca_nhan', sourceColumn: 'id' },
+    { id: 2, name: 'ho_ten', type: 'string', description: 'Họ và tên', isMasked: false, maskRule: '', sourceTable: 'ho_tich_ca_nhan', sourceColumn: 'ho_ten' },
+    { id: 3, name: 'so_dinh_danh', type: 'string', description: 'Số định danh cá nhân', isMasked: true, maskRule: 'hide_middle_4', sourceTable: 'ho_tich_ca_nhan', sourceColumn: 'so_dinh_danh' }
   ]);
   const [apiKey, setApiKey] = useState('');
   const [showKey, setShowKey] = useState(false);
@@ -27,6 +38,29 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, service }: Prov
   const [rateLimitValue, setRateLimitValue] = useState(100);
   const [hasJoin, setHasJoin] = useState(false);
   const [isPublic, setIsPublic] = useState(false);
+
+  // Dynamic table joins state
+  const [primaryTable, setPrimaryTable] = useState('ho_tich_ca_nhan');
+  const [joinedTables, setJoinedTables] = useState<any[]>([
+    { id: 1, name: 'dia_chi_thuong_tru', alias: 't2', type: 'LEFT JOIN', joinColA: 't2.id_ho_tich', joinOp: '=', joinColB: 'ho_tich_ca_nhan.id' }
+  ]);
+
+  const handleAddJoinTable = () => {
+    const nextId = joinedTables.length > 0 ? Math.max(...joinedTables.map(t => t.id)) + 1 : 1;
+    const nextAlias = `t${nextId + 1}`;
+    setJoinedTables([
+      ...joinedTables,
+      { id: nextId, name: '', alias: nextAlias, type: 'LEFT JOIN', joinColA: '', joinOp: '=', joinColB: '' }
+    ]);
+  };
+
+  const handleRemoveJoinTable = (id: number) => {
+    setJoinedTables(joinedTables.filter(t => t.id !== id));
+  };
+
+  const handleUpdateJoinTable = (id: number, key: string, value: string) => {
+    setJoinedTables(joinedTables.map(t => t.id === id ? { ...t, [key]: value } : t));
+  };
 
   if (!isOpen) return null;
 
@@ -39,9 +73,139 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, service }: Prov
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (onSave) onSave(isPublic);
-    alert(service ? 'Cập nhật dịch vụ thành công!' : 'Khởi tạo dịch vụ cung cấp thành công!');
+    if (onSubmitApproval) {
+      onSubmitApproval();
+    } else {
+      if (onSave) onSave(isPublic);
+      alert(service ? 'Cập nhật dịch vụ thành công!' : 'Khởi tạo dịch vụ cung cấp thành công!');
+    }
     onClose();
+  };
+
+  const handleSaveDraft = () => {
+    if (onSaveDraft) onSaveDraft();
+    onClose();
+  };
+
+
+  const handleAddDataField = () => {
+    const nextId = fields.length > 0 ? Math.max(...fields.map(f => f.id)) + 1 : 1;
+    setFields([
+      ...fields,
+      {
+        id: nextId,
+        name: '',
+        type: 'string',
+        description: '',
+        isMasked: false,
+        maskRule: '',
+        sourceTable: primaryTable,
+        sourceColumn: '',
+        isCalculated: false
+      }
+    ]);
+  };
+
+  const handleUpdateFieldProperty = (id: any, property: string, value: any) => {
+    setFields(fields.map(f => {
+      if (f.id === id) {
+        const updated = { ...f, [property]: value };
+        
+        // Auto-populate when sourceColumn changes
+        if (property === 'sourceColumn') {
+          updated.name = value; // Default API field name is the column name
+          
+          // Deduce type and description automatically
+          const tbl = updated.sourceTable || primaryTable;
+          const col = value;
+          updated.description = `Trường ${col} (từ bảng ${tbl})`;
+          
+          if (col.toLowerCase().includes('ngay') || col.toLowerCase().includes('thoi_gian') || col.toLowerCase().includes('date')) {
+            updated.type = 'datetime';
+          } else if (col === 'id' || col.toLowerCase().includes('so') || col.toLowerCase().includes('ma') || col.toLowerCase().includes('cccd')) {
+            updated.type = 'string';
+          } else {
+            updated.type = 'string';
+          }
+        }
+        
+        return updated;
+      }
+      return f;
+    }));
+  };
+
+  const handleDeleteField = (id: any) => {
+    setFields(fields.filter(f => f.id !== id));
+  };
+
+  const generateDynamicPreview = () => {
+    const dataObj: any = {};
+    
+    // Add fields dynamically based on state
+    fields.forEach(f => {
+      if (f.isCalculated) {
+        if (f.type === 'number') {
+          dataObj[f.name] = 42;
+        } else if (f.type === 'boolean') {
+          dataObj[f.name] = true;
+        } else if (f.type === 'datetime') {
+          dataObj[f.name] = "2026-05-28T13:45:00Z";
+        } else {
+          if (f.formula.includes('CONCAT')) {
+            dataObj[f.name] = "Nguyễn Văn A - USR-99812";
+          } else if (f.formula.includes('UPPER')) {
+            dataObj[f.name] = "NGUYỄN VĂN A";
+          } else {
+            dataObj[f.name] = `Computed: ${f.formula.substring(0, 20)}`;
+          }
+        }
+      } else {
+        const colName = f.sourceColumn || f.name || 'id';
+        if (colName === 'id') {
+          dataObj[f.name || 'id'] = "USR-99812";
+        } else if (colName === 'ho_ten') {
+          dataObj[f.name || 'ho_ten'] = "Nguyễn Văn A";
+        } else if (colName === 'ngay_sinh') {
+          dataObj[f.name || 'ngay_sinh'] = "1995-10-15";
+        } else if (colName === 'gioi_tinh') {
+          dataObj[f.name || 'gioi_tinh'] = 1;
+        } else if (colName === 'so_dinh_danh') {
+          dataObj[f.name || 'so_dinh_danh'] = f.isMasked ? "001••••123" : "001095000123";
+        } else if (colName === 'so_dien_thoai') {
+          dataObj[f.name || 'so_dien_thoai'] = f.isMasked ? "091••••285" : "0912345285";
+        } else if (colName === 'tinh_thanh') {
+          dataObj[f.name || 'tinh_thanh'] = "Thành phố Hà Nội";
+        } else if (colName === 'quan_huyen') {
+          dataObj[f.name || 'quan_huyen'] = "Quận Ba Đình";
+        } else if (colName === 'phuong_xa') {
+          dataObj[f.name || 'phuong_xa'] = "Phường Điện Biên";
+        } else if (colName === 'chi_tiet') {
+          dataObj[f.name || 'chi_tiet'] = "Số 10 Hùng Vương";
+        } else if (colName === 'so_giay_khai_sinh') {
+          dataObj[f.name || 'so_giay_khai_sinh'] = "KS-2026-9912";
+        } else if (colName === 'ho_ten_cha') {
+          dataObj[f.name || 'ho_ten_cha'] = "Nguyễn Văn B";
+        } else if (colName === 'ho_ten_me') {
+          dataObj[f.name || 'ho_ten_me'] = "Trần Thị C";
+        } else {
+          dataObj[f.name || colName] = f.type === 'number' ? 100 : `Dữ liệu trường [${colName}]`;
+        }
+      }
+    });
+
+    const fullResponse = {
+      status: "success",
+      data: {
+        ...dataObj,
+        metadata: {
+          source: "BTP_DLDC_CORE",
+          timestamp: new Date().toISOString()
+        }
+      }
+    };
+
+    return JSON.stringify(fullResponse, null, 2);
   };
 
   return (
@@ -116,7 +280,7 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, service }: Prov
                         defaultValue={service ? service.code : ''}
                       />
                     </div>
-                    <div className="md:col-span-2 flex items-center gap-12">
+                    <div className="md:col-span-2 flex items-center w-full">
                       <div className="flex-1">
                         <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Phân loại dữ liệu <span className="text-red-500">*</span></label>
                         <select aria-label="Loại dữ liệu" title="Loại dữ liệu" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 text-slate-900">
@@ -127,15 +291,15 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, service }: Prov
                           <option value="ly_lich">Dữ liệu Lý lịch tư pháp</option>
                         </select>
                       </div>
-                      <div className="flex items-center gap-3 pt-6 min-w-fit">
+                      <div className="flex items-center gap-3 pt-6 ml-8 shrink-0">
                         <input 
                           id="is-public-checkbox"
                           type="checkbox" 
                           checked={isPublic}
                           onChange={(e) => setIsPublic(e.target.checked)}
-                          className="w-6 h-6 rounded border-slate-300 text-amber-600 focus:ring-amber-500 cursor-pointer transition-all"
+                          className="w-5 h-5 rounded border-slate-300 text-amber-600 focus:ring-amber-500 cursor-pointer transition-all"
                         />
-                        <label htmlFor="is-public-checkbox" className="text-xs font-bold text-slate-500 uppercase tracking-wider cursor-pointer select-none">
+                        <label htmlFor="is-public-checkbox" className="text-xs font-bold text-slate-500 uppercase tracking-wider cursor-pointer select-none whitespace-nowrap">
                           API Công khai
                         </label>
                       </div>
@@ -237,171 +401,313 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, service }: Prov
                      </div>
                    </div>
 
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5 relative">
-                     {/* Primary Table */}
-                     <div className={`transition-all duration-300 ${hasJoin ? 'md:col-span-1' : 'md:col-span-2'}`}>
-                        <div className="p-4 bg-white rounded-xl border border-slate-200 hover:border-amber-500/50 transition-all group/table">
-                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center justify-between">
-                             <span>Bảng dữ liệu chính</span>
-                             <span className="text-[9px] bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded italic">Primary Table</span>
-                          </label>
-                          <select title="Chọn bảng chính" className="w-full bg-transparent border-none p-0 text-sm font-bold text-slate-800 outline-none cursor-pointer">
-                             <option value="ho_tich_ca_nhan">ho_tich_ca_nhan (Hộ tịch cá nhân)</option>
-                             <option value="giay_khai_sinh">giay_khai_sinh (Giấy khai sinh)</option>
-                          </select>
-                        </div>
-                     </div>
+                    <div className="grid grid-cols-1 gap-5">
+                      {/* Primary Table */}
+                      <div className="p-4 bg-white rounded-xl border border-slate-200 hover:border-amber-500/50 transition-all group/table">
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center justify-between">
+                           <span>Bảng dữ liệu chính</span>
+                           <span className="text-[9px] bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded italic">Primary Table</span>
+                        </label>
+                        <select 
+                          title="Chọn bảng chính" 
+                          className="w-full bg-transparent border-none p-0 text-sm font-bold text-slate-800 outline-none cursor-pointer"
+                          value={primaryTable}
+                          onChange={(e) => setPrimaryTable(e.target.value)}
+                        >
+                          <option value="ho_tich_ca_nhan">ho_tich_ca_nhan (Hộ tịch cá nhân)</option>
+                          <option value="giay_khai_sinh">giay_khai_sinh (Giấy khai sinh)</option>
+                        </select>
+                      </div>
 
-                     {/* Join Table (Conditional) */}
-                     {hasJoin && (
-                        <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                          <div className="p-4 bg-white rounded-xl border border-slate-200 hover:border-amber-500/50 transition-all group/table relative">
-                            <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center text-[10px] font-bold border-2 border-white z-10 shadow-md">
-                               +
-                            </div>
-                            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center justify-between">
-                               <span>Bảng liên kết bổ sung</span>
-                               <span className="text-[9px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded italic">Joined Table</span>
-                            </label>
-                            <select title="Chọn bảng phụ" className="w-full bg-transparent border-none p-0 text-sm font-bold text-slate-800 outline-none cursor-pointer">
-                               <option value="dia_chi_thuong_tru">dia_chi_thuong_tru (Địa chỉ thường trú)</option>
-                               <option value="thong_tin_cha_me">thong_tin_cha_me (Thông tin cha mẹ)</option>
-                            </select>
+                      {/* Joined Tables Builder */}
+                      {hasJoin && (
+                        <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
+                          <div className="flex items-center justify-between border-t border-slate-200/60 pt-4">
+                            <h5 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                              <Database className="w-3.5 h-3.5 text-amber-500" />
+                              Bảng liên kết bổ sung ({joinedTables.length})
+                            </h5>
+                            <button
+                              type="button"
+                              onClick={handleAddJoinTable}
+                              className="text-xs font-bold bg-amber-50 hover:bg-amber-105 text-amber-700 px-3 py-1.5 rounded-lg border border-amber-200 transition-all flex items-center shadow-sm cursor-pointer"
+                            >
+                              <Plus className="w-3.5 h-3.5 mr-1" /> Thêm bảng liên kết
+                            </button>
                           </div>
-                        </div>
-                     )}
-                   </div>
 
-                   {/* Join Condition - Compact Flowchart Style */}
-                   {hasJoin && (
-                     <div className="mt-4 p-4 bg-amber-50/40 rounded-xl border border-amber-100 border-dashed animate-in fade-in zoom-in-95 duration-300">
-                        <div className="flex flex-col md:flex-row items-center gap-3">
-                           <div className="flex-1 w-full">
-                              <select title="Trường PK" className="w-full bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-mono text-slate-600 outline-none focus:border-amber-500">
-                                 <option>ho_tich_ca_nhan.id</option>
-                                 <option>ho_tich_ca_nhan.ma_vinh_vien</option>
-                              </select>
-                           </div>
-                           <div className="text-amber-500 font-black text-xs px-2 py-1 bg-white rounded border border-amber-100 shadow-sm">=</div>
-                           <div className="flex-1 w-full">
-                              <select title="Trường FK" className="w-full bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-mono text-slate-600 outline-none focus:border-amber-500">
-                                 <option>dia_chi_thuong_tru.user_id</option>
-                                 <option>dia_chi_thuong_tru.id_ho_tich</option>
-                              </select>
-                           </div>
-                        </div>
-                     </div>
-                   )}
-                 </section>
-
-                 {/* Field Definition Table */}
-                 <section className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                  <div className="flex justify-between items-center p-5 border-b border-slate-100 bg-slate-50/30">
-                    <h4 className="font-bold text-slate-800 flex items-center gap-2">
-                      <LayoutTemplate className="w-5 h-5 text-amber-600" />
-                      Chọn trường dữ liệu chia sẻ (Field Selection)
-                    </h4>
-                    <button title="Thêm trường" aria-label="Thêm trường" className="text-xs font-bold bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 transition-all shadow-md">
-                      <Plus className="w-4 h-4 mr-2" /> Thêm trường tính toán
-                    </button>
-                  </div>
-                  
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm">
-                      <thead>
-                        <tr className="bg-slate-50 text-slate-400 border-b border-slate-100">
-                          <th className="px-4 py-3 font-bold uppercase text-[10px] text-center w-12">Chia sẻ</th>
-                          <th className="px-4 py-3 font-bold uppercase text-[10px] text-center w-12">PK</th>
-                          <th className="px-4 py-3 font-bold uppercase text-[10px]">Tên trường (API Field)</th>
-                          <th className="px-4 py-3 font-bold uppercase text-[10px]">Nguồn dữ liệu (Table)</th>
-                          <th className="px-4 py-3 font-bold uppercase text-[10px]">Kiểu dữ liệu</th>
-                          <th className="px-4 py-3 font-bold uppercase text-[10px] text-center">Che dấu</th>
-                          <th className="px-4 py-3 w-12"></th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-50">
-                        {fields.map(field => (
-                          <tr key={field.id} className="hover:bg-slate-50/50 group transition-colors">
-                            <td className="px-4 py-3 text-center">
-                              <input type="checkbox" title="Chọn trường" className="rounded text-amber-600 focus:ring-amber-500 w-4 h-4 cursor-pointer" defaultChecked />
-                            </td>
-                            <td className="px-4 py-3 text-center">
-                              <Key className={`w-4 h-4 mx-auto ${field.id === 1 ? 'text-amber-500' : 'text-slate-200 hover:text-slate-300 cursor-pointer'}`} />
-                            </td>
-                            <td className="px-4 py-3">
-                              <input title="Tên trường" aria-label="Tên trường" type="text" className="w-full bg-white border border-slate-100 px-2 py-1 rounded focus:border-amber-500 outline-none text-slate-800 font-medium" defaultValue={field.name} />
-                            </td>
-                            <td className="px-4 py-3">
-                              <select title="Nguồn" className="text-[10px] px-1 py-0.5 bg-slate-50 border border-slate-200 rounded text-slate-500 font-mono outline-none">
-                                <option>ho_tich_ca_nhan</option>
-                                <option>dia_chi_thuong_tru</option>
-                              </select>
-                            </td>
-                            <td className="px-4 py-3">
-                              <select title="Kiểu" className="text-[10px] font-bold text-slate-500 bg-transparent border-none outline-none uppercase">
-                                <option>string</option>
-                                <option>number</option>
-                                <option>datetime</option>
-                              </select>
-                            </td>
-                            <td className="px-4 py-3 text-center">
-                              <input type="checkbox" title="Masking" className="rounded text-amber-600 focus:ring-amber-500 w-4 h-4 cursor-pointer" defaultChecked={field.isMasked} />
-                            </td>
-                            <td className="px-4 py-3 text-right">
-                              <button title="Xóa" aria-label="Xóa" className="p-1 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all">
+                          {joinedTables.map((table, idx) => (
+                            <div key={table.id} className="p-4 bg-slate-50 border border-slate-200 rounded-xl relative space-y-4 hover:border-amber-500/30 transition-all">
+                              {/* Remove Join Table Button */}
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveJoinTable(table.id)}
+                                className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                                title="Xóa bảng liên kết"
+                              >
                                 <Trash2 className="w-4 h-4" />
                               </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                 </section>
 
-                 {/* ONLY THIS SECTION REMAINS DARK/PRO */}
-                 <section className="bg-slate-950 p-6 rounded-2xl border border-slate-800 shadow-2xl overflow-hidden relative group ring-1 ring-white/5">
-                    <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-all duration-700 rotate-12">
-                      <Code className="w-24 h-24 text-white" />
+                              {/* Card Header Info */}
+                              <div className="flex items-center gap-3">
+                                <span className="text-[10px] font-extrabold bg-amber-100 text-amber-700 border border-amber-200 px-2 py-0.5 rounded">
+                                  BẢNG LIÊN KẾT #{idx + 1}
+                                </span>
+                                <span className="text-[10px] font-mono font-bold text-slate-400">
+                                  Alias: {table.alias}
+                                </span>
+                              </div>
+
+                              {/* Dropdowns row */}
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Kiểu liên kết</label>
+                                  <select 
+                                    aria-label="Kiểu liên kết" 
+                                    className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700 focus:outline-none focus:border-amber-500"
+                                    value={table.type}
+                                    onChange={(e) => handleUpdateJoinTable(table.id, 'type', e.target.value)}
+                                  >
+                                    <option>INNER JOIN</option>
+                                    <option>LEFT JOIN</option>
+                                    <option>RIGHT JOIN</option>
+                                  </select>
+                                </div>
+                                <div>
+                                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Bảng dữ liệu bổ sung</label>
+                                  <select 
+                                    title="Chọn bảng phụ" 
+                                    className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700 focus:outline-none focus:border-amber-500 cursor-pointer"
+                                    value={table.name}
+                                    onChange={(e) => handleUpdateJoinTable(table.id, 'name', e.target.value)}
+                                  >
+                                    <option value="">-- Chọn bảng bổ sung --</option>
+                                    {tableNames.filter(name => name !== primaryTable).map(name => (
+                                      <option key={name} value={name}>{name}</option>
+                                    ))}
+                                  </select>
+                                </div>
+                              </div>
+
+                              {/* Join Condition Row */}
+                              {table.name && (
+                                <div className="p-3 bg-amber-50/40 rounded-lg border border-amber-100/50 border-dashed space-y-2 animate-in fade-in zoom-in-95 duration-205">
+                                  <div className="text-[9px] font-bold text-amber-700/80 uppercase tracking-tight">Điều kiện liên kết (Join Condition):</div>
+                                  <div className="flex flex-col md:flex-row items-center gap-2">
+                                    {/* Column of current table */}
+                                    <div className="flex-1 w-full">
+                                      <select 
+                                        title="Trường PK" 
+                                        className="w-full bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-mono text-slate-600 outline-none focus:border-amber-500 cursor-pointer"
+                                        value={table.joinColA}
+                                        onChange={(e) => handleUpdateJoinTable(table.id, 'joinColA', e.target.value)}
+                                      >
+                                        <option value="">-- Cột của {table.name} --</option>
+                                        {mockSchema[table.name]?.map(col => (
+                                          <option key={col} value={`${table.alias}.${col}`}>{table.alias}.{col}</option>
+                                        ))}
+                                      </select>
+                                    </div>
+                                    
+                                    {/* Op */}
+                                    <div className="text-amber-500 font-extrabold text-xs px-2 py-1 bg-white rounded border border-amber-100 shadow-sm">=</div>
+
+                                    {/* Target column from primary or previous tables */}
+                                    <div className="flex-1 w-full">
+                                      <select 
+                                        title="Trường FK" 
+                                        className="w-full bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-mono text-slate-600 outline-none focus:border-amber-500 cursor-pointer"
+                                        value={table.joinColB}
+                                        onChange={(e) => handleUpdateJoinTable(table.id, 'joinColB', e.target.value)}
+                                      >
+                                        <option value="">-- Nối với cột --</option>
+                                        {/* Primary table columns */}
+                                        <optgroup label={`Bảng chính: ${primaryTable}`}>
+                                          {mockSchema[primaryTable]?.map(col => (
+                                            <option key={`${primaryTable}.${col}`} value={`${primaryTable}.${col}`}>{primaryTable}.{col}</option>
+                                          ))}
+                                        </optgroup>
+                                        {/* Preceding joined tables columns */}
+                                        {joinedTables.slice(0, idx).map(prevTable => prevTable.name && (
+                                          <optgroup key={prevTable.id} label={`Bảng liên kết: ${prevTable.name} (${prevTable.alias})`}>
+                                            {mockSchema[prevTable.name]?.map(col => (
+                                              <option key={`${prevTable.alias}.${col}`} value={`${prevTable.alias}.${col}`}>{prevTable.alias}.{col}</option>
+                                            ))}
+                                          </optgroup>
+                                        ))}
+                                      </select>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                    
-                    <div className="flex items-center justify-between mb-6">
-                      <h4 className="font-bold text-slate-400 flex items-center text-[10px] uppercase tracking-[0.3em]">
-                        <div className="w-2 h-2 bg-emerald-500 rounded-full mr-3 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]"></div>
-                        Live API Response Preview
+                  </section>
+
+                  {/* Field Definition Table */}
+                  <section className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in duration-300">
+                    <div className="flex justify-between items-center p-5 border-b border-slate-100 bg-slate-50/30">
+                      <h4 className="font-bold text-slate-800 flex items-center gap-2">
+                        <LayoutTemplate className="w-5 h-5 text-amber-655" />
+                        Chọn trường dữ liệu chia sẻ (Field Selection)
                       </h4>
-                      <button title="Copy JSON" className="p-2 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-lg border border-white/10 backdrop-blur-md transition-all">
-                        <Copy className="w-4 h-4" />
+                      <button
+                        type="button"
+                        onClick={handleAddDataField}
+                        className="text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-700 px-4 py-2 rounded-lg border border-amber-200 hover:border-amber-300 transition-all flex items-center shadow-sm cursor-pointer"
+                        title="Thêm trường dữ liệu gốc"
+                      >
+                        <Plus className="w-4 h-4 mr-1.5" /> Thêm trường dữ liệu
                       </button>
                     </div>
                     
-                    <div className="relative">
-                      <pre className="font-mono text-sm leading-relaxed overflow-x-auto custom-scrollbar scrollbar-thin p-4 bg-slate-900/50 rounded-xl border border-white/5">
-                        <code className="text-slate-300">
-{`{
-  "`}<span className="text-amber-400">status</span>{`": "`} <span className="text-emerald-400">success</span> {`",
-  "`}<span className="text-amber-400">data</span>{`": {
-    "`}<span className="text-amber-400">id</span>{`": "`} <span className="text-emerald-400">USR-99812</span> {`",
-    "`}<span className="text-amber-400">ho_tich_ca_nhan</span>{`": {
-       "`}<span className="text-amber-400">ho_ten</span>{`": "`} <span className="text-emerald-400">Nguyễn Văn A</span> {`",
-       "`}<span className="text-amber-400">ngay_sinh</span>{`": "`} <span className="text-emerald-400">1990-01-01</span> {`"
-    },
-    "`}<span className="text-amber-400">dia_chi_thuong_tru</span>{`": {
-       "`}<span className="text-amber-400">tinh_thanh</span>{`": "`} <span className="text-emerald-400">Hà Nội</span> {`",
-       "`}<span className="text-amber-400">quan_huyen</span>{`": "`} <span className="text-emerald-400">Cầu Giấy</span> {`"
-    },
-    "`}<span className="text-amber-400">metadata</span>{`": {
-       "`}<span className="text-amber-400">source</span>{`": "`} <span className="text-emerald-400">BTP_DLDC_CORE</span> {`",
-       "`}<span className="text-amber-400">timestamp</span>{`": "`} <span className="text-emerald-400">2026-05-11T08:50:00Z</span> {`"
-    }
-  }
-}`}
-                        </code>
-                      </pre>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-sm">
+                        <thead>
+                          <tr className="bg-slate-50 text-slate-400 border-b border-slate-100">
+                            <th className="px-4 py-3 font-bold uppercase text-[10px] text-center w-12">Chia sẻ</th>
+                            <th className="px-4 py-3 font-bold uppercase text-[10px] text-center w-12">PK</th>
+                            <th className="px-4 py-3 font-bold uppercase text-[10px] w-[20%]">Nguồn dữ liệu (Table)</th>
+                            <th className="px-4 py-3 font-bold uppercase text-[10px] w-[22%]">Trường gốc (Column)</th>
+                            <th className="px-4 py-3 font-bold uppercase text-[10px] w-[22%]">Tên trường (API Field)</th>
+                            <th className="px-4 py-3 font-bold uppercase text-[10px] w-[14%]">Kiểu dữ liệu</th>
+                            <th className="px-4 py-3 font-bold uppercase text-[10px] text-center w-[10%]">Che dấu</th>
+                            <th className="px-4 py-3 w-16 text-right">Xóa</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-50">
+                          {fields.map(field => {
+                            return (
+                              <tr key={field.id} className="hover:bg-slate-50/50 group transition-colors">
+                                <td className="px-4 py-3 text-center">
+                                  <input type="checkbox" title="Chọn trường" className="rounded text-amber-600 focus:ring-amber-500 w-4 h-4 cursor-pointer" defaultChecked />
+                                </td>
+                                <td className="px-4 py-3 text-center">
+                                  <Key className={`w-4 h-4 mx-auto ${field.id === 1 ? 'text-amber-500' : 'text-slate-200 hover:text-slate-350 cursor-pointer'}`} />
+                                </td>
+                                
+                                {/* Nguồn dữ liệu (Table) */}
+                                <td className="px-4 py-3">
+                                  <select 
+                                    title="Chọn bảng" 
+                                    className="w-full bg-white border border-slate-200 px-2 py-1 rounded text-[11px] font-bold text-slate-700 outline-none cursor-pointer focus:border-amber-500 shadow-sm"
+                                    value={field.sourceTable || primaryTable}
+                                    onChange={(e) => handleUpdateFieldProperty(field.id, 'sourceTable', e.target.value)}
+                                  >
+                                    <option value={primaryTable}>{primaryTable} (Gốc)</option>
+                                    {hasJoin && joinedTables.map(t => t.name && (
+                                      <option key={t.id} value={t.name}>{t.name} (Liên kết)</option>
+                                    ))}
+                                  </select>
+                                </td>
+
+                                {/* Trường dữ liệu gốc (Column) */}
+                                <td className="px-4 py-3">
+                                  <select 
+                                    title="Chọn cột nguồn" 
+                                    className="w-full bg-white border border-slate-200 px-2 py-1 rounded text-[11px] font-mono text-slate-600 outline-none cursor-pointer focus:border-amber-500 shadow-sm"
+                                    value={field.sourceColumn || ''}
+                                    onChange={(e) => handleUpdateFieldProperty(field.id, 'sourceColumn', e.target.value)}
+                                  >
+                                    <option value="">-- Chọn trường gốc --</option>
+                                    {mockSchema[field.sourceTable || primaryTable]?.map(col => (
+                                      <option key={col} value={col}>{col}</option>
+                                    ))}
+                                  </select>
+                                </td>
+
+                                {/* Tên trường (API Field) */}
+                                <td className="px-4 py-3">
+                                  <input 
+                                    title="Tên trường API" 
+                                    aria-label="Tên trường API" 
+                                    type="text" 
+                                    className="w-full bg-white border border-slate-200 px-2 py-1 rounded focus:border-amber-500 outline-none text-xs text-slate-800 font-mono font-bold shadow-sm" 
+                                    value={field.name} 
+                                    onChange={(e) => handleUpdateFieldProperty(field.id, 'name', e.target.value)}
+                                    placeholder="Ví dụ: ho_ten"
+                                  />
+                                </td>
+
+                                {/* Kiểu dữ liệu */}
+                                <td className="px-4 py-3">
+                                  <select 
+                                    title="Kiểu" 
+                                    className="w-full bg-white border border-slate-200 px-2 py-1 rounded text-[10px] font-bold text-slate-500 outline-none uppercase cursor-pointer focus:border-amber-500 shadow-sm"
+                                    value={field.type}
+                                    onChange={(e) => handleUpdateFieldProperty(field.id, 'type', e.target.value)}
+                                  >
+                                    <option value="string">string</option>
+                                    <option value="number">number</option>
+                                    <option value="datetime">datetime</option>
+                                  </select>
+                                </td>
+
+                                {/* Che dấu */}
+                                <td className="px-4 py-3 text-center">
+                                  <input 
+                                    type="checkbox" 
+                                    title="Masking" 
+                                    className="rounded text-amber-600 focus:ring-amber-500 w-4 h-4 cursor-pointer" 
+                                    checked={field.isMasked || false} 
+                                    onChange={(e) => handleUpdateFieldProperty(field.id, 'isMasked', e.target.checked)}
+                                  />
+                                </td>
+
+                                {/* Thao tác */}
+                                <td className="px-4 py-3 text-right">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteField(field.id)}
+                                    className="p-1 text-slate-350 hover:text-red-500 opacity-60 group-hover:opacity-100 transition-all cursor-pointer"
+                                    title="Xóa trường"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
                     </div>
-                 </section>
-               </div>
-            )}
+                  </section>
+ 
+                  {/* ONLY THIS SECTION REMAINS DARK/PRO */}
+                  <section className="bg-slate-950 p-6 rounded-2xl border border-slate-800 shadow-2xl overflow-hidden relative group ring-1 ring-white/5">
+                     <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-all duration-700 rotate-12">
+                       <Code className="w-24 h-24 text-white" />
+                     </div>
+                     
+                     <div className="flex items-center justify-between mb-6">
+                       <h4 className="font-bold text-slate-400 flex items-center text-[10px] uppercase tracking-[0.3em]">
+                         <div className="w-2 h-2 bg-emerald-500 rounded-full mr-3 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]"></div>
+                         Live API Response Preview
+                       </h4>
+                       <button
+                         type="button"
+                         onClick={() => {
+                           navigator.clipboard.writeText(generateDynamicPreview());
+                           alert('Đã sao chép phản hồi mẫu JSON!');
+                         }}
+                         title="Copy JSON"
+                         className="p-2 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-lg border border-white/10 backdrop-blur-md transition-all"
+                       >
+                         <Copy className="w-4 h-4" />
+                       </button>
+                     </div>
+                     
+                     <div className="relative">
+                       <pre className="font-mono text-xs leading-relaxed overflow-x-auto custom-scrollbar scrollbar-thin p-4 bg-slate-900/50 rounded-xl border border-white/5 text-slate-300">
+                         <code>{generateDynamicPreview()}</code>
+                       </pre>
+                     </div>
+                  </section>
+                </div>
+             )}
 
             {/* TAB 4: Phân quyền truy cập */}
             {activeTab === 'access' && (
@@ -488,12 +794,32 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, service }: Prov
            </div>
            
            <div className="flex items-center gap-3">
+            <button title="Lưu tạm" aria-label="Lưu tạm"
+              onClick={handleSaveDraft}
+              className="px-6 py-2 text-slate-500 hover:text-amber-600 transition-colors font-bold text-xs uppercase tracking-widest flex items-center gap-2"
+            >
+              <Save className="w-4 h-4" />
+              Lưu tạm
+            </button>
             <button title="Hủy bỏ" aria-label="Hủy bỏ"
               onClick={onClose}
               className="px-6 py-2 text-slate-500 hover:text-slate-900 transition-colors font-bold text-xs uppercase tracking-widest"
             >
               Hủy bỏ
             </button>
+            {activeTab !== 'general' && (
+              <button 
+                title="Quay lại" aria-label="Quay lại"
+                onClick={() => {
+                  const currentIndex = tabs.findIndex(t => t.id === activeTab);
+                  if (currentIndex > 0) setActiveTab(tabs[currentIndex - 1].id);
+                }} 
+                className="px-6 py-2 text-slate-600 hover:text-slate-900 transition-colors font-bold text-xs uppercase tracking-widest flex items-center gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Quay lại
+              </button>
+            )}
             {activeTab !== 'access' ? (
               <button 
                 title="Tiếp tục" aria-label="Tiếp tục"
@@ -506,12 +832,12 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, service }: Prov
                 Tiếp tục
               </button>
             ) : (
-              <button title="Xác nhận" aria-label="Lưu & Gửi phê duyệt"
+              <button title="Trình duyệt" aria-label="Trình duyệt & Gửi phê duyệt"
                 onClick={handleSubmit}
-                className="px-8 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg flex items-center transition-all font-bold text-xs uppercase tracking-widest shadow-lg shadow-amber-200"
+                className="px-8 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center transition-all font-bold text-xs uppercase tracking-widest shadow-lg shadow-blue-200"
               >
-                <Check className="w-5 h-5 mr-2 stroke-[3px]" />
-                Deploy API
+                <Send className="w-5 h-5 mr-2" />
+                Trình duyệt
               </button>
             )}
            </div>
