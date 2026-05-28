@@ -13,231 +13,320 @@ import {
   MapPin,
   Activity,
   FileText,
+  Edit2,
+  Trash2,
+  Plus,
   CheckCircle2,
   AlertCircle
 } from 'lucide-react';
 import { StatsCard } from '../../common/StatsCard';
 import { StatusTag } from '../../common/StatusTag';
 
-interface AccessLogEntry {
+interface AccessLog {
   id: number;
+  sessionId: string;
   timestamp: string;
   user: string;
   userId: string;
   ip: string;
   action: string;
   module: string;
-  targetObject: string;
   status: 'success' | 'failed';
+  duration: string;
   userAgent: string;
   device: string;
   browser: string;
   location: string;
+}
+
+interface ActionDetail {
+  id: string;
+  time: string;
+  action: string;
+  module: string;
+  target: string;
+  status: 'success' | 'failed';
+  type: 'create' | 'update' | 'delete' | 'view' | 'export';
   description: string;
 }
 
-const mockAccessLogs: AccessLogEntry[] = [
-  {
-    id: 1,
-    timestamp: '28/05/2026 15:30:22',
-    user: 'Nguyễn Văn An',
-    userId: 'admin_an',
-    ip: '192.168.1.15',
-    module: 'Quản lý nhật ký',
-    action: 'Xem danh sách nhật ký truy cập',
-    targetObject: 'Nhật ký truy cập hệ thống',
-    status: 'success',
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+const accessLogs: AccessLog[] = [
+  { 
+    id: 1, 
+    sessionId: 'sess_1234567890abc',
+    timestamp: '09/12/2025 14:25:33', 
+    user: 'Nguyễn Văn An', 
+    userId: 'user_001',
+    ip: '192.168.1.100', 
+    action: 'Đăng nhập hệ thống', 
+    module: 'Authentication', 
+    status: 'success', 
+    duration: '0.5s', 
+    userAgent: 'Chrome/120.0.0.0',
     device: 'Windows 11',
-    browser: 'Chrome 124.0.0',
-    location: 'Hà Nội, Việt Nam',
-    description: 'Cán bộ xem danh sách nhật ký truy cập hệ thống. Hệ thống hiển thị danh sách nhật ký truy cập Phần mềm.'
+    browser: 'Chrome 120.0.0',
+    location: 'Hà Nội, Việt Nam'
   },
-  {
-    id: 2,
-    timestamp: '28/05/2026 15:28:45',
-    user: 'Nguyễn Văn An',
-    userId: 'admin_an',
-    ip: '192.168.1.15',
-    module: 'Quản lý nhật ký',
-    action: 'Tìm kiếm nhật ký truy cập',
-    targetObject: 'Nhật ký truy cập hệ thống',
-    status: 'success',
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-    device: 'Windows 11',
-    browser: 'Chrome 124.0.0',
-    location: 'Hà Nội, Việt Nam',
-    description: 'Cán bộ tìm kiếm nhật ký truy cập hệ thống. Hệ thống truy vấn dữ liệu và hiển thị kết quả lên màn hình.'
-  },
-  {
-    id: 3,
-    timestamp: '28/05/2026 15:26:10',
-    user: 'Nguyễn Văn An',
-    userId: 'admin_an',
-    ip: '192.168.1.15',
-    module: 'Quản lý nhật ký',
-    action: 'Kết xuất nhật ký truy cập',
-    targetObject: 'Nhật ký truy cập hệ thống',
-    status: 'success',
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-    device: 'Windows 11',
-    browser: 'Chrome 124.0.0',
-    location: 'Hà Nội, Việt Nam',
-    description: 'Cán bộ kết xuất nhật ký truy cập hệ thống. Hệ thống kết xuất về file máy tính cá nhân của cán bộ (AccessLogs_Export.xlsx).'
-  },
-  {
-    id: 4,
-    timestamp: '28/05/2026 15:15:33',
-    user: 'Trần Thị Bình',
-    userId: 'user_binh_02',
-    ip: '192.168.2.110',
-    module: 'Thu thập dữ liệu',
-    action: 'Truy vấn dữ liệu ngoài ngành',
-    targetObject: 'Danh mục Dữ liệu thuế vụ',
-    status: 'success',
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
-    device: 'MacOS 14',
-    browser: 'Safari 17.4',
-    location: 'Hồ Chí Minh, Việt Nam',
-    description: 'Truy vấn danh sách dữ liệu thu thập ngoài ngành phục vụ đối soát định kỳ.'
-  },
-  {
-    id: 5,
-    timestamp: '28/05/2026 15:10:05',
-    user: 'Lê Văn Cường',
-    userId: 'user_cuong_99',
-    ip: '10.0.4.82',
-    module: 'Quản lý người dùng',
-    action: 'Thêm mới người dùng',
-    targetObject: 'Tài khoản: pham_thi_dung',
-    status: 'success',
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0)',
+  { 
+    id: 2, 
+    sessionId: 'sess_2345678901bcd',
+    timestamp: '09/12/2025 14:24:12', 
+    user: 'Trần Thị Bình', 
+    userId: 'user_002',
+    ip: '192.168.1.101', 
+    action: 'Đăng nhập hệ thống', 
+    module: 'Authentication', 
+    status: 'success', 
+    duration: '1.2s', 
+    userAgent: 'Firefox/121.0',
     device: 'Windows 10',
-    browser: 'Firefox 125.0',
-    location: 'Đà Nẵng, Việt Nam',
-    description: 'Tạo mới tài khoản cán bộ xử lý dữ liệu và gán vào nhóm nghiệp vụ Thu thập.'
+    browser: 'Firefox 121.0',
+    location: 'Hà Nội, Việt Nam'
   },
-  {
-    id: 6,
-    timestamp: '28/05/2026 14:55:12',
-    user: 'Lê Văn Cường',
-    userId: 'user_cuong_99',
-    ip: '10.0.4.82',
-    module: 'Quản lý người dùng',
-    action: 'Cập nhật phân quyền nhóm',
-    targetObject: 'Nhóm: Kiểm tra dữ liệu',
-    status: 'failed',
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0)',
-    device: 'Windows 10',
-    browser: 'Firefox 125.0',
-    location: 'Đà Nẵng, Việt Nam',
-    description: 'Lỗi phân quyền: Người dùng không có quyền quản trị vai trò tối cao để cập nhật nhóm này.'
-  },
-  {
-    id: 7,
-    timestamp: '28/05/2026 14:48:30',
-    user: 'Phạm Thị Dung',
-    userId: 'user_dung_04',
-    ip: '192.168.1.55',
-    module: 'Quản lý danh mục',
-    action: 'Kết xuất danh mục Dân tộc',
-    targetObject: 'Danh mục dân tộc',
-    status: 'success',
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+  { 
+    id: 3, 
+    sessionId: 'sess_3456789012cde',
+    timestamp: '09/12/2025 14:22:45', 
+    user: 'Lê Văn Cường', 
+    userId: 'user_003',
+    ip: '192.168.1.102', 
+    action: 'Đăng nhập thất bại', 
+    module: 'Authentication', 
+    status: 'failed', 
+    duration: '2.1s', 
+    userAgent: 'Edge/120.0.0.0',
     device: 'Windows 11',
-    browser: 'Edge 124.0.0',
-    location: 'Hà Nội, Việt Nam',
-    description: 'Kết xuất danh mục dân tộc chuẩn hóa ra file Excel (DanhMucDanToc.xlsx).'
+    browser: 'Edge 120.0.0',
+    location: 'Hà Nội, Việt Nam'
   },
-  {
-    id: 8,
-    timestamp: '28/05/2026 14:32:18',
-    user: 'Hoàng Văn Em',
-    userId: 'user_em_guest',
-    ip: '172.16.85.3',
-    module: 'Dữ liệu mở',
-    action: 'Tải tài liệu hướng dẫn',
-    targetObject: 'File: HDSD_DataSharing.pdf',
-    status: 'success',
-    userAgent: 'Mozilla/5.0 (Linux; Android 10; K)',
-    device: 'Android Mobile',
-    browser: 'Chrome Mobile',
-    location: 'Hải Phòng, Việt Nam',
-    description: 'Tải tài liệu hướng dẫn khai thác và chia sẻ dữ liệu qua cổng API công cộng.'
-  },
-  {
-    id: 9,
-    timestamp: '28/05/2026 14:10:45',
-    user: 'Nguyễn Văn An',
-    userId: 'admin_an',
-    ip: '192.168.1.15',
-    module: 'Cấu hình hệ thống',
-    action: 'Cập nhật tham số bảo mật',
-    targetObject: 'Quy tắc đặt mật khẩu',
-    status: 'success',
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-    device: 'Windows 11',
-    browser: 'Chrome 124.0.0',
-    location: 'Hà Nội, Việt Nam',
-    description: 'Thay đổi độ dài mật khẩu tối thiểu từ 8 lên 10 ký tự và yêu cầu ký tự đặc biệt.'
-  },
-  {
-    id: 10,
-    timestamp: '28/05/2026 11:22:04',
-    user: 'Trần Thị Bình',
-    userId: 'user_binh_02',
-    ip: '192.168.2.110',
-    module: 'Đối soát dữ liệu',
-    action: 'Khởi chạy tiến trình đối soát',
-    targetObject: 'Phiên đối soát #842',
-    status: 'success',
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
+  { 
+    id: 4, 
+    sessionId: 'sess_4567890123def',
+    timestamp: '09/12/2025 14:20:18', 
+    user: 'Phạm Thị Dung', 
+    userId: 'user_004',
+    ip: '192.168.1.103', 
+    action: 'Đăng nhập hệ thống', 
+    module: 'Authentication', 
+    status: 'success', 
+    duration: '3.5s', 
+    userAgent: 'Chrome/120.0.0.0',
     device: 'MacOS 14',
-    browser: 'Safari 17.4',
-    location: 'Hồ Chí Minh, Việt Nam',
-    description: 'Khởi chạy thủ công tiến trình đối soát dữ liệu hộ tịch quốc gia tháng 05/2026.'
+    browser: 'Chrome 120.0.0',
+    location: 'Hồ Chí Minh, Việt Nam'
   },
-  {
-    id: 11,
-    timestamp: '28/05/2026 10:45:00',
-    user: 'Phạm Thị Dung',
-    userId: 'user_dung_04',
-    ip: '192.168.1.55',
-    module: 'Quản lý danh mục',
-    action: 'Xem chi tiết danh mục Giới tính',
-    targetObject: 'Danh mục giới tính',
-    status: 'success',
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-    device: 'Windows 11',
-    browser: 'Edge 124.0.0',
-    location: 'Hà Nội, Việt Nam',
-    description: 'Tra cứu mã chuẩn hóa và danh sách các giá trị thuộc danh mục giới tính.'
+  { 
+    id: 5, 
+    sessionId: 'sess_5678901234efg',
+    timestamp: '09/12/2025 14:18:55', 
+    user: 'Hoàng Văn Em', 
+    userId: 'user_005',
+    ip: '192.168.1.104', 
+    action: 'Đăng nhập hệ thống', 
+    module: 'Authentication', 
+    status: 'success', 
+    duration: '5.2s', 
+    userAgent: 'Safari/17.2',
+    device: 'MacOS 14',
+    browser: 'Safari 17.2',
+    location: 'Đà Nẵng, Việt Nam'
   },
-  {
-    id: 12,
-    timestamp: '28/05/2026 09:15:30',
-    user: 'Nguyễn Văn An',
-    userId: 'admin_an',
-    ip: '192.168.1.15',
-    module: 'Cấu hình hệ thống',
-    action: 'Sao lưu cơ sở dữ liệu',
-    targetObject: 'CSDL lõi - Phân hệ danh mục',
-    status: 'success',
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-    device: 'Windows 11',
-    browser: 'Chrome 124.0.0',
-    location: 'Hà Nội, Việt Nam',
-    description: 'Tạo bản sao lưu nóng cho phân hệ danh mục dữ liệu dùng chung trước khi bảo trì.'
-  }
 ];
 
-export function AccessLogPage() {
+// Mock action details for each session
+const getSessionActions = (sessionId: string): ActionDetail[] => {
+  const actionsBySession: Record<string, ActionDetail[]> = {
+    'sess_1234567890abc': [
+      {
+        id: '1',
+        time: '14:25:35',
+        action: 'Xem',
+        module: 'Dashboard',
+        target: 'Trang tổng quan',
+        status: 'success',
+        type: 'view',
+        description: 'Truy cập trang Dashboard tổng quan hệ thống'
+      },
+      {
+        id: '2',
+        time: '14:26:12',
+        action: 'Xem',
+        module: 'Quản lý người dùng',
+        target: 'Danh sách người dùng',
+        status: 'success',
+        type: 'view',
+        description: 'Xem danh sách người dùng trong hệ thống'
+      },
+      {
+        id: '3',
+        time: '14:27:45',
+        action: 'Cập nhật',
+        module: 'Quản lý người dùng',
+        target: 'User #125',
+        status: 'success',
+        type: 'update',
+        description: 'Cập nhật thông tin người dùng Trần Thị B'
+      },
+      {
+        id: '4',
+        time: '14:28:30',
+        action: 'Tạo mới',
+        module: 'Quản lý nhóm',
+        target: 'Group #15',
+        status: 'success',
+        type: 'create',
+        description: 'Tạo nhóm người dùng "Kiểm tra dữ liệu"'
+      },
+      {
+        id: '5',
+        time: '14:30:15',
+        action: 'Xuất',
+        module: 'Báo cáo',
+        target: 'Report_Users.xlsx',
+        status: 'success',
+        type: 'export',
+        description: 'Xuất báo cáo danh sách người dùng'
+      }
+    ],
+    'sess_2345678901bcd': [
+      {
+        id: '1',
+        time: '14:24:15',
+        action: 'Xem',
+        module: 'Dashboard',
+        target: 'Trang tổng quan',
+        status: 'success',
+        type: 'view',
+        description: 'Truy cập trang Dashboard'
+      },
+      {
+        id: '2',
+        time: '14:25:30',
+        action: 'Xem',
+        module: 'Thu thập dữ liệu',
+        target: 'Danh sách nguồn',
+        status: 'success',
+        type: 'view',
+        description: 'Xem danh sách nguồn dữ liệu'
+      },
+      {
+        id: '3',
+        time: '14:26:45',
+        action: 'Cập nhật',
+        module: 'Thu thập dữ liệu',
+        target: 'Source #8',
+        status: 'success',
+        type: 'update',
+        description: 'Cập nhật cấu hình nguồn dữ liệu đăng ký DN'
+      },
+      {
+        id: '4',
+        time: '14:28:20',
+        action: 'Xem',
+        module: 'Xử lý dữ liệu',
+        target: 'Log xử lý',
+        status: 'success',
+        type: 'view',
+        description: 'Kiểm tra log xử lý dữ liệu'
+      }
+    ],
+    'sess_3456789012cde': [
+      {
+        id: '1',
+        time: '14:22:45',
+        action: 'Đăng nhập',
+        module: 'Authentication',
+        target: 'Login',
+        status: 'failed',
+        type: 'view',
+        description: 'Đăng nhập thất bại - Sai mật khẩu'
+      }
+    ],
+    'sess_4567890123def': [
+      {
+        id: '1',
+        time: '14:20:20',
+        action: 'Xem',
+        module: 'Dashboard',
+        target: 'Trang tổng quan',
+        status: 'success',
+        type: 'view',
+        description: 'Truy cập Dashboard'
+      },
+      {
+        id: '2',
+        time: '14:21:35',
+        action: 'Xem',
+        module: 'Báo cáo',
+        target: 'Thống kê tháng',
+        status: 'success',
+        type: 'view',
+        description: 'Xem báo cáo thống kê tháng 11/2024'
+      },
+      {
+        id: '3',
+        time: '14:23:50',
+        action: 'Xuất',
+        module: 'Báo cáo',
+        target: 'Statistics_Nov2024.xlsx',
+        status: 'success',
+        type: 'export',
+        description: 'Xuất báo cáo thống kê dạng Excel'
+      }
+    ],
+    'sess_5678901234efg': [
+      {
+        id: '1',
+        time: '14:19:00',
+        action: 'Xem',
+        module: 'Dashboard',
+        target: 'Trang tổng quan',
+        status: 'success',
+        type: 'view',
+        description: 'Truy cập Dashboard'
+      },
+      {
+        id: '2',
+        time: '14:20:15',
+        action: 'Xem',
+        module: 'Quản lý danh mục',
+        target: 'Danh sách danh mục',
+        status: 'success',
+        type: 'view',
+        description: 'Xem danh sách danh mục dữ liệu'
+      },
+      {
+        id: '3',
+        time: '14:21:40',
+        action: 'Xóa',
+        module: 'Quản lý danh mục',
+        target: 'Category #12',
+        status: 'success',
+        type: 'delete',
+        description: 'Xóa danh mục không còn sử dụng'
+      },
+      {
+        id: '4',
+        time: '14:23:25',
+        action: 'Xuất',
+        module: 'Quản lý danh mục',
+        target: 'Categories_Export.xlsx',
+        status: 'success',
+        type: 'export',
+        description: 'Xuất danh sách danh mục'
+      }
+    ]
+  };
+
+  return actionsBySession[sessionId] || [];
+};
+
+export function LoginLogPage() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterModule, setFilterModule] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [selectedLog, setSelectedLog] = useState<AccessLogEntry | null>(null);
+  const [selectedLog, setSelectedLog] = useState<AccessLog | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   
@@ -257,14 +346,12 @@ export function AccessLogPage() {
     setCurrentPage(1);
   };
 
-  const filteredLogs = mockAccessLogs.filter(log => {
+  const filteredLogs = accessLogs.filter(log => {
     const matchesSearch = log.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          log.module.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          log.ip.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          log.targetObject.toLowerCase().includes(searchTerm.toLowerCase());
-                          
-    const matchesModule = filterModule === 'all' || log.module === filterModule;
+                         log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         log.module.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         log.ip.toLowerCase().includes(searchTerm.toLowerCase());
+                         
     const matchesStatus = filterStatus === 'all' || log.status === filterStatus;
     
     let matchesDate = true;
@@ -284,10 +371,10 @@ export function AccessLogPage() {
       }
     }
     
-    return matchesSearch && matchesModule && matchesStatus && matchesDate;
+    return matchesSearch && matchesStatus && matchesDate;
   });
 
-  const handleViewDetail = (log: AccessLogEntry) => {
+  const handleViewDetail = (log: AccessLog) => {
     setSelectedLog(log);
     setShowDetailModal(true);
   };
@@ -297,17 +384,46 @@ export function AccessLogPage() {
     setSelectedLog(null);
   };
 
-  // Get unique modules for filters
-  const modules = Array.from(new Set(mockAccessLogs.map(log => log.module)));
+  const getActionIcon = (type: ActionDetail['type']) => {
+    switch (type) {
+      case 'create':
+        return <Plus className="w-4 h-4" />;
+      case 'update':
+        return <Edit2 className="w-4 h-4" />;
+      case 'delete':
+        return <Trash2 className="w-4 h-4" />;
+      case 'view':
+        return <Eye className="w-4 h-4" />;
+      case 'export':
+        return <Download className="w-4 h-4" />;
+    }
+  };
+
+  const getActionColor = (type: ActionDetail['type']) => {
+    switch (type) {
+      case 'create':
+        return 'bg-green-100 text-green-700';
+      case 'update':
+        return 'bg-blue-100 text-blue-700';
+      case 'delete':
+        return 'bg-red-100 text-red-700';
+      case 'view':
+        return 'bg-purple-100 text-purple-700';
+      case 'export':
+        return 'bg-orange-100 text-orange-700';
+    }
+  };
+
+  const sessionActions = selectedLog ? getSessionActions(selectedLog.sessionId) : [];
 
   return (
     <div className="space-y-6" style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px' }}>
-      {/* Stats Cards */}
+      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <StatsCard icon={ScrollText} iconColor="blue" title="Tổng lượt truy cập (24h)" value="24,532" />
-        <StatsCard icon={CheckCircle2} iconColor="green" title="Tác vụ thành công" value="24,410" />
-        <StatsCard icon={AlertCircle} iconColor="red" title="Tác vụ thất bại" value="122" />
-        <StatsCard icon={Activity} iconColor="purple" title="Phân hệ đã truy cập" value="8" />
+        <StatsCard icon={ScrollText} iconColor="blue" title="Tổng truy cập (24h)" value="12,847" />
+        <StatsCard icon={ScrollText} iconColor="green" title="Thành công" value="12,654" />
+        <StatsCard icon={ScrollText} iconColor="red" title="Thất bại" value="193" />
+        <StatsCard icon={ScrollText} iconColor="purple" title="Người dùng hoạt động" value="847" />
       </div>
 
       {/* Filters and Actions */}
@@ -318,7 +434,7 @@ export function AccessLogPage() {
             <div className="relative flex-1">
               <input aria-label="Input field"
                 type="text"
-                placeholder="Tìm kiếm người dùng, hành động, phân hệ, đối tượng..."
+                placeholder="Tìm kiếm người dùng, hành động..."
                 className="w-full px-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                 value={searchTerm}
                 onChange={handleSearchChange}
@@ -338,7 +454,7 @@ export function AccessLogPage() {
 
           <div className="flex items-center gap-3">
             <button
-              onClick={() => alert('Đang kết xuất nhật ký truy cập ra file Excel...')}
+              onClick={() => alert('Đang kết xuất nhật ký đăng nhập ra file Excel...')}
               className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium"
             >
               <Download className="w-4 h-4" />
@@ -349,29 +465,12 @@ export function AccessLogPage() {
 
         {/* Row 2: Filters (Collapsible) */}
         {showFilters && (
-          <div className="bg-slate-50 p-5 rounded-lg border border-slate-200 grid grid-cols-4 gap-4 mt-4 animate-in slide-in-from-top-2 duration-200 shadow-sm relative">
+          <div className="bg-slate-50 p-5 rounded-lg border border-slate-200 grid grid-cols-3 gap-4 mt-4 animate-in slide-in-from-top-2 duration-200 shadow-sm relative">
             <div className="absolute -top-2 left-[50px] w-4 h-4 bg-slate-50 border-t border-l border-slate-200 transform rotate-45"></div>
 
             <div className="space-y-1.5 relative z-10">
-              <label className="text-[13px] font-medium text-slate-700">Phân hệ</label>
-              <select aria-label="Select module"
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
-                value={filterModule}
-                onChange={(e) => {
-                  setFilterModule(e.target.value);
-                  setCurrentPage(1);
-                }}
-              >
-                <option value="all">Tất cả phân hệ</option>
-                {modules.map(mod => (
-                  <option key={mod} value={mod}>{mod}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="space-y-1.5 relative z-10">
               <label className="text-[13px] font-medium text-slate-700">Trạng thái</label>
-              <select aria-label="Select status"
+              <select aria-label="Select box"
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                 value={filterStatus}
                 onChange={(e) => {
@@ -388,7 +487,7 @@ export function AccessLogPage() {
             <div className="space-y-1.5 relative z-10">
               <label className="text-[13px] font-medium text-slate-700">Thời gian từ</label>
               <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
-                <input aria-label="Start date"
+                <input aria-label="Input field"
                   type="date"
                   className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-slate-700 p-0"
                   value={startDate}
@@ -404,7 +503,7 @@ export function AccessLogPage() {
             <div className="space-y-1.5 relative z-10">
               <label className="text-[13px] font-medium text-slate-700">Thời gian đến</label>
               <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
-                <input aria-label="End date"
+                <input aria-label="Input field"
                   type="date"
                   className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-slate-700 p-0"
                   value={endDate}
@@ -428,9 +527,10 @@ export function AccessLogPage() {
               <tr>
                 <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-12 text-[13px]">STT</th>
                 <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Thời gian</th>
-                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Người thực hiện</th>
-                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Phân hệ</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Người dùng</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">IP</th>
                 <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Hành động</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Thiết bị</th>
                 <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái</th>
                 <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-24 text-[13px]">Thao tác</th>
               </tr>
@@ -447,12 +547,12 @@ export function AccessLogPage() {
                     <td className="px-4 py-3 text-center text-[13px]">
                       <div className="font-medium text-slate-950 leading-snug text-[13px]">{log.user}</div>
                     </td>
-                    <td className="px-4 py-3 text-center text-[13px]">
-                      <span className="px-2 py-1 bg-slate-100 rounded text-slate-700 font-medium text-[11px]">
-                        {log.module}
-                      </span>
-                    </td>
+                    <td className="px-4 py-3 text-center text-slate-600 font-mono text-[13px]">{log.ip}</td>
                     <td className="px-4 py-3 text-center text-slate-700 text-[13px]">{log.action}</td>
+                    <td className="px-4 py-3 text-center text-[13px]">
+                      <div className="font-medium text-slate-900 leading-snug text-[13px]">{log.device}</div>
+                      <div className="text-slate-500 mt-0.5 text-[11px]">{log.browser}</div>
+                    </td>
                     <td className="px-4 py-3 text-center">
                       <StatusTag 
                         label={log.status === 'success' ? 'Thành công' : 'Thất bại'} 
@@ -474,7 +574,7 @@ export function AccessLogPage() {
                 ))}
               {filteredLogs.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-slate-500 text-[13px]">
+                  <td colSpan={8} className="px-4 py-8 text-center text-slate-500 text-[13px]">
                     Không tìm thấy bản ghi nào phù hợp
                   </td>
                 </tr>
@@ -487,7 +587,7 @@ export function AccessLogPage() {
         <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white sm:px-6 collection-pagination text-[13px]">
           <div className="flex items-center gap-2">
             <span className="text-slate-600">Hiển thị</span>
-            <select aria-label="Select page size" 
+            <select aria-label="Select record count" 
               className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px]"
               title="Số bản ghi trên trang"
               value={itemsPerPage}
@@ -555,7 +655,7 @@ export function AccessLogPage() {
           onClick={closeDetailModal}
         >
           <div 
-            className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-white rounded-lg max-w-5xl w-full max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -565,9 +665,9 @@ export function AccessLogPage() {
                   <Activity className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
-                  <h3 className="text-slate-900">Chi tiết truy cập hệ thống</h3>
+                  <h3 className="text-slate-900">Chi tiết phiên đăng nhập</h3>
                   <p className="text-sm text-slate-600 mt-0.5">
-                    Log Entry ID: <span className="font-mono">LOG_{selectedLog.id.toString().padStart(6, '0')}</span>
+                    Session ID: <span className="font-mono">{selectedLog.sessionId}</span>
                   </p>
                 </div>
               </div>
@@ -579,89 +679,65 @@ export function AccessLogPage() {
               </button>
             </div>
 
-            {/* Info Cards */}
+            {/* Session Info */}
             <div className="p-6 border-b border-slate-200">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-slate-50 rounded-lg p-4">
                   <div className="flex items-center gap-2 text-slate-600 mb-2">
                     <User className="w-4 h-4" />
-                    <span className="text-xs">Người thực hiện</span>
+                    <span className="text-xs">Người dùng</span>
                   </div>
-                  <div className="text-sm text-slate-900 font-medium">{selectedLog.user}</div>
+                  <div className="text-sm text-slate-900">{selectedLog.user}</div>
                   <div className="text-xs text-slate-500 font-mono mt-1">{selectedLog.userId}</div>
                 </div>
 
                 <div className="bg-slate-50 rounded-lg p-4">
                   <div className="flex items-center gap-2 text-slate-600 mb-2">
                     <Clock className="w-4 h-4" />
-                    <span className="text-xs">Thời gian thực hiện</span>
+                    <span className="text-xs">Thời gian đăng nhập</span>
                   </div>
-                  <div className="text-sm text-slate-900 font-medium">{selectedLog.timestamp}</div>
+                  <div className="text-sm text-slate-900">{selectedLog.timestamp}</div>
                 </div>
 
                 <div className="bg-slate-50 rounded-lg p-4">
                   <div className="flex items-center gap-2 text-slate-600 mb-2">
                     <Monitor className="w-4 h-4" />
-                    <span className="text-xs">Thiết bị & Trình duyệt</span>
+                    <span className="text-xs">Thiết bị</span>
                   </div>
-                  <div className="text-sm text-slate-900 font-medium">{selectedLog.device}</div>
+                  <div className="text-sm text-slate-900">{selectedLog.device}</div>
                   <div className="text-xs text-slate-500 mt-1">{selectedLog.browser}</div>
                 </div>
 
                 <div className="bg-slate-50 rounded-lg p-4">
                   <div className="flex items-center gap-2 text-slate-600 mb-2">
                     <MapPin className="w-4 h-4" />
-                    <span className="text-xs">Vị trí thực hiện</span>
+                    <span className="text-xs">Vị trí</span>
                   </div>
-                  <div className="text-sm text-slate-900 font-medium">{selectedLog.location}</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Detailed Log Info */}
-            <div className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Phân hệ / Module</h4>
-                  <p className="text-sm text-slate-900 font-medium">{selectedLog.module}</p>
-                </div>
-                <div>
-                  <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Hành động tác vụ</h4>
-                  <p className="text-sm text-slate-900 font-medium">{selectedLog.action}</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Trạng thái tác vụ</h4>
-                  <div className="mt-1">
-                    <StatusTag 
-                      label={selectedLog.status === 'success' ? 'Thành công' : 'Thất bại'} 
-                      variant={selectedLog.status === 'success' ? 'green' : 'red'} 
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Mô tả chi tiết tác vụ</h4>
-                <div className="bg-slate-50 border border-slate-100 rounded-lg p-4 font-mono text-[12px] text-slate-700 whitespace-pre-wrap leading-relaxed">
-                  {selectedLog.description}
+                  <div className="text-sm text-slate-900">{selectedLog.location}</div>
+                  <div className="text-xs text-slate-500 font-mono mt-1">{selectedLog.ip}</div>
                 </div>
               </div>
             </div>
 
             {/* Footer */}
-            <div className="p-6 border-t border-slate-200 flex justify-between items-center bg-slate-50 rounded-b-lg">
-              <div className="flex items-center gap-2 text-xs text-slate-500 font-mono">
-                <span>UA: {selectedLog.userAgent}</span>
+            <div className="p-6 border-t border-slate-200">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2 text-sm text-slate-600">
+                  <Activity className="w-4 h-4" />
+                  <span>
+                    Tổng thời gian hoạt động:{' '}
+                    <strong className="text-slate-900">
+                      {sessionActions.length > 0 ? '8 phút 42 giây' : '0 giây'}
+                    </strong>
+                  </span>
+                </div>
+                <button
+                  onClick={closeDetailModal}
+                  className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors font-medium text-[13px]"
+                >
+                  Đóng
+                </button>
               </div>
-              <button
-                onClick={closeDetailModal}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-[13px] shadow-sm"
-              >
-                Đóng
-              </button>
             </div>
           </div>
         </div>

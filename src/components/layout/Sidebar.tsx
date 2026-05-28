@@ -673,11 +673,6 @@ const menuItems: MenuItem[] = [
             icon: Sliders,
           },
           {
-            id: "admin-password-rules",
-            label: "Thiết lập quy tắc đặt mật khẩu",
-            icon: Key,
-          },
-          {
             id: "admin-backup",
             label: "Sao lưu dự phòng",
             icon: DatabaseBackup,
@@ -690,6 +685,11 @@ const menuItems: MenuItem[] = [
         icon: ScrollText,
         isGroup: true,
         subItems: [
+          {
+            id: "admin-login-log",
+            label: "Nhật ký đăng nhập",
+            icon: ScrollText,
+          },
           {
             id: "admin-access-log",
             label: "Nhật ký truy cập",

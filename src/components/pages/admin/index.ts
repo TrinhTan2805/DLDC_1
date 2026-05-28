@@ -5,6 +5,7 @@ export { FunctionManagementPage } from './FunctionManagementPage';
 export { SystemConfigPage } from './SystemConfigPage';
 export { SecurityConfigPage } from './SecurityConfigPage';
 export { AccessLogPage } from './AccessLogPage';
+export { LoginLogPage } from './LoginLogPage';
 export { BackupPage } from './BackupPage';
 export { StatisticsPage } from './StatisticsPage';
 export { PasswordRuleConfigPage } from './PasswordRuleConfigPage';

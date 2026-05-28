@@ -5,33 +5,35 @@ import { StatusTag } from '../../common/StatusTag';
 import { UsersRound } from 'lucide-react';
 import { menuStructure, type MenuItem, type MenuFunction } from './menuStructure';
 
-// Filter menu structure to remove CSDL/Hệ thống nodes as per user request
+const isDatabaseOrSystemLeaf = (item: MenuItem): boolean => {
+  const id = item.id;
+  return (
+    id.startsWith('data-info-') ||
+    id.startsWith('external-') ||
+    id.startsWith('reconciliation-internal-') ||
+    id.startsWith('reconciliation-external-') ||
+    id.startsWith('processing-data-info-') ||
+    id.startsWith('processing-external-') ||
+    id.startsWith('provisioning-shared-') ||
+    id.startsWith('provisioning-internal-') ||
+    id === 'provisioning-open' ||
+    id === 'provisioning-master'
+  );
+};
+
+// Filter menu structure to remove CSDL/Hệ thống leaf nodes as per user request
 const filterMenuStructure = (items: MenuItem[]): MenuItem[] => {
   return items
     .map(item => {
-      // Remove database/system specific containers
-      if (
-        item.id === 'view-collected-data' ||
-        item.id === 'collection-reconciliation' ||
-        item.id === 'processing' ||
-        item.id === 'provisioning-service-catalog'
-      ) {
+      if (isDatabaseOrSystemLeaf(item)) {
         return null;
       }
-      
       if (item.children) {
-        const filteredChildren = filterMenuStructure(item.children);
-        if (filteredChildren.length === 0) {
-          if (!item.functions || item.functions.length === 0) {
-            return null;
-          }
-        }
         return {
           ...item,
-          children: filteredChildren
+          children: filterMenuStructure(item.children)
         };
       }
-      
       return item;
     })
     .filter((item): item is MenuItem => item !== null);
@@ -645,7 +647,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
       const isSelected = selectedMenuItems.includes(item.id);
       const hasChildren = item.children && item.children.length > 0;
       const hasFunctions = item.functions && item.functions.length > 0;
-      const canBeSelected = hasFunctions || !hasChildren;
+      const canBeSelected = hasFunctions;
 
       return (
         <div key={item.id}>

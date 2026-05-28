@@ -93,6 +93,7 @@ import { FunctionManagementPage } from '../pages/admin/FunctionManagementPage';
 import { RoleManagementPage } from '../pages/admin/RoleManagementPage';
 import { SecurityConfigPage } from '../pages/admin/SecurityConfigPage';
 import { AccessLogPage } from '../pages/admin/AccessLogPage';
+import { LoginLogPage } from '../pages/admin/LoginLogPage';
 import { ErrorLogPage } from '../pages/admin/ErrorLogPage';
 import { AccountManagementLogPage } from '../pages/admin/AccountManagementLogPage';
 import { ConfigChangeLogPage } from '../pages/admin/ConfigChangeLogPage';
@@ -572,11 +573,11 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'admin' && <SystemAdminPage />}
             {currentPage === 'admin-users' && <UserManagementPage />}
             {(currentPage === 'admin-groups' || currentPage.startsWith('admin-groups-')) && <GroupManagementPage currentPage={currentPage} />}
-            {currentPage === 'admin-password-rules' && <PasswordRuleConfigPage />}
             {currentPage === 'admin-functions' && <FunctionManagementPage />}
             {currentPage === 'admin-roles' && <RoleManagementPage />}
             {currentPage === 'admin-function-config' && <SystemAdminPage initialTab="function-config" />}
             {currentPage === 'admin-config' && <SecurityConfigPage />}
+            {currentPage === 'admin-login-log' && <LoginLogPage />}
             {currentPage === 'admin-access-log' && <AccessLogPage />}
             {currentPage === 'admin-error-log' && <ErrorLogPage />}
             {currentPage === 'admin-account-log' && <AccountManagementLogPage />}
@@ -988,8 +989,8 @@ const getBreadcrumbPath = (pageId: string): string[] => {
     'admin-groups': ['Quản trị & vận hành', 'Quản trị người dùng', 'Quản lý nhóm người dùng'],
     'admin-functions': ['Quản trị & vận hành', 'Quản trị người dùng', 'Danh sách chức năng'],
     'admin-config': ['Quản trị & vận hành', 'Cấu hình hệ thống', 'Thiết lập cấu hình hệ thống'],
-    'admin-password-rules': ['Quản trị & vận hành', 'Cấu hình hệ thống', 'Thiết lập quy tắc đặt mật khẩu'],
     'admin-backup': ['Quản trị & vận hành', 'Cấu hình hệ thống', 'Sao lưu dự phòng'],
+    'admin-login-log': ['Quản trị & vận hành', 'Quản lý nhật ký', 'Nhật ký đăng nhập'],
     'admin-access-log': ['Quản trị & vận hành', 'Quản lý nhật ký', 'Nhật ký truy cập'],
     'admin-error-log': ['Quản trị & vận hành', 'Quản lý nhật ký', 'Nhật ký các lỗi phát sinh'],
     'admin-account-log': ['Quản trị & vận hành', 'Quản lý nhật ký', 'Nhật ký quản lý tài khoản'],

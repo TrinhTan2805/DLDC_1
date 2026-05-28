@@ -10,6 +10,7 @@ import { ConnectionConfigSection } from './ConnectionConfigSection';
 import { DataDetailModal } from '../../DataDetailModal';
 import { ConfirmModal } from '../../common/ConfirmModal';
 import { BaseModal } from '../../common/BaseModal';
+import { Portal } from '../../common/Portal';
 import { StructureLoadingConfig } from './StructureLoadingConfig';
 import { initialSourceSystems } from './mockSourceSystems';
 import { StatusTag } from '../../common/StatusTag';
@@ -17,94 +18,143 @@ import { StatusTag } from '../../common/StatusTag';
 const ConnectionSuccessModal = ({ isOpen, onClose, onContinue }: { isOpen: boolean, onClose: () => void, onContinue: () => void }) => {
   if (!isOpen) return null;
   return (
-    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
-      <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-        <div className="bg-white rounded-xl shadow-xl w-full max-w-[450px] overflow-hidden flex flex-col relative">
-          <button onClick={onClose} aria-label="Đóng" className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 transition-colors z-10"><X className="w-4 h-4" /></button>
+    <Portal>
+      <div 
+        className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+        style={{ 
+          zIndex: 99999999,
+          backdropFilter: 'blur(4px)', 
+          WebkitBackdropFilter: 'blur(4px)',
+          fontFamily: 'Inter, system-ui, sans-serif'
+        }}
+        onClick={onClose}
+      >
+        <div 
+          className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col relative animate-in fade-in zoom-in-95 duration-200"
+          style={{ maxWidth: '450px' }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button onClick={onClose} aria-label="Đóng" className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 hover:bg-slate-50 p-1.5 rounded-lg transition-all z-10">
+            <X className="w-4 h-4"/>
+          </button>
           <div className="p-6 pb-4 flex flex-col items-center">
             <div className="w-12 h-12 bg-green-50 text-green-600 rounded-full flex items-center justify-center mb-3">
               <CheckCircle className="w-6 h-6" strokeWidth={2.5} />
             </div>
-            <h3 className="text-base font-bold text-slate-900 mb-1">Kết nối thành công</h3>
-            <p className="text-slate-500 text-base mb-4 text-center px-4 leading-relaxed">Kết nối thành công, vui lòng thực hiện Nạp cấu trúc.</p>
+            <h3 className="text-lg font-bold text-slate-900 mb-1">Kết nối thành công</h3>
+            <p className="text-slate-500 text-[13px] mb-4 text-center px-4 leading-relaxed font-medium">Kết nối thành công, vui lòng thực hiện Nạp cấu trúc.</p>
           </div>
-          <div className="px-5 py-3 flex justify-center gap-3 bg-slate-50 border-t border-slate-100">
-            <button onClick={onClose} className="px-6 py-2 bg-white border border-[#e2e8f0] text-[#020817] text-base rounded-[6px] transition-colors shadow-sm hover:bg-slate-50 font-medium">Đóng</button>
-            <button onClick={onContinue} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-base rounded-lg transition-colors shadow-sm font-medium">Tiếp tục</button>
+          <div className="px-5 py-3.5 flex justify-center gap-3 bg-slate-50 border-t border-slate-100 w-full">
+            <button onClick={onClose} className="px-6 py-2 bg-white border border-[#e2e8f0] text-[#020817] text-[13px] rounded-lg transition-all shadow-sm hover:bg-slate-50 active:scale-95 font-medium">Đóng</button>
+            <button onClick={onContinue} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-[13px] rounded-lg transition-all shadow-sm active:scale-95 font-medium">Tiếp tục</button>
           </div>
         </div>
       </div>
-    </div>
+    </Portal>
   );
 };
 
 const ConnectionErrorModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-[450px] overflow-hidden flex flex-col relative">
-        <button onClick={onClose} aria-label="Đóng" className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 transition-colors z-10"><X className="w-4 h-4" /></button>
-        <div className="p-6 pb-4 flex flex-col items-center">
-          <div className="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center mb-3">
-            <AlertCircle className="w-6 h-6" strokeWidth={2.5} />
-          </div>
-          <h3 className="text-base font-bold text-slate-900 mb-1">Kết nối thất bại</h3>
-          <p className="text-slate-500 text-base mb-4 text-center px-4 leading-relaxed">Không thể kết nối đến Hệ thống đích (Destination API).</p>
-
-          <div className="w-full text-left px-5">
-            <p className="text-base font-bold text-slate-500 uppercase tracking-tight mb-1.5">Lỗi trả về</p>
-            <div className="bg-red-50/50 text-red-600 px-3 py-2 rounded-lg text-[16px] mb-4 font-medium border border-red-100">
-              Error 401 Unauthorized: Invalid API Key.
+    <Portal>
+      <div 
+        className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+        style={{ 
+          zIndex: 99999999,
+          backdropFilter: 'blur(4px)', 
+          WebkitBackdropFilter: 'blur(4px)',
+          fontFamily: 'Inter, system-ui, sans-serif'
+        }}
+        onClick={onClose}
+      >
+        <div 
+          className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col relative animate-in fade-in zoom-in-95 duration-200"
+          style={{ maxWidth: '450px' }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button onClick={onClose} aria-label="Đóng" className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 hover:bg-slate-50 p-1.5 rounded-lg transition-all z-10">
+            <X className="w-4 h-4"/>
+          </button>
+          <div className="p-6 pb-4 flex flex-col items-center">
+            <div className="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center mb-3">
+              <AlertCircle className="w-6 h-6" strokeWidth={2.5} />
             </div>
+            <h3 className="text-[13px] font-bold text-slate-900 mb-1">Kết nối thất bại</h3>
+            <p className="text-slate-500 text-[13px] mb-4 text-center px-4 leading-relaxed font-medium">Không thể kết nối đến Hệ thống đích (Destination API).</p>
+            
+            <div className="w-full text-left px-5">
+              <p className="text-[13px] font-bold text-slate-500 uppercase tracking-tight mb-1.5">Lỗi trả về</p>
+              <div className="bg-red-50/50 text-red-600 px-3 py-2 rounded-lg text-[13px] mb-4 font-medium border border-red-100">
+                Error 401 Unauthorized: Invalid API Key.
+              </div>
 
-            <p className="text-base font-bold text-slate-800 mb-1.5 uppercase tracking-tight">Hướng dẫn khắc phục</p>
-            <ul className="text-[16px] text-slate-600 space-y-1.5 mb-2 ml-4 list-disc marker:text-slate-400">
-              <li>Kiểm tra lại giá trị <strong>API Key</strong> (tránh dư khoảng trắng).</li>
-              <li>Xác nhận API Key còn hạn hoặc chưa bị thu hồi.</li>
-              <li>Đảm bảo IP hệ thống đã được cấp phép (whitelist).</li>
-            </ul>
+              <p className="text-[13px] font-bold text-slate-800 mb-1.5 uppercase tracking-tight">Hướng dẫn khắc phục</p>
+              <ul className="text-[13px] text-slate-600 space-y-1.5 mb-2 ml-4 list-disc marker:text-slate-400">
+                <li>Kiểm tra lại giá trị <strong>API Key</strong> (tránh dư khoảng trắng).</li>
+                <li>Xác nhận API Key còn hạn hoặc chưa bị thu hồi.</li>
+                <li>Đảm bảo IP hệ thống đã được cấp phép (whitelist).</li>
+              </ul>
+            </div>
           </div>
-        </div>
-        <div className="px-5 py-3 flex justify-center bg-slate-50 border-t border-slate-100">
-          <button onClick={onClose} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-base rounded-lg transition-colors shadow-sm font-medium">Đã hiểu & Đóng</button>
+          <div className="px-5 py-3.5 flex justify-center bg-slate-50 border-t border-slate-100 w-full">
+            <button onClick={onClose} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-[13px] rounded-lg transition-all shadow-sm active:scale-95 font-medium">Đã hiểu & Đóng</button>
+          </div>
         </div>
       </div>
-    </div>
+    </Portal>
   );
 };
 
 const DataErrorModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-[450px] overflow-hidden flex flex-col relative">
-        <button onClick={onClose} aria-label="Đóng" className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 transition-colors z-10"><X className="w-4 h-4" /></button>
-        <div className="p-6 pb-4 flex flex-col items-center">
-          <div className="w-12 h-12 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center mb-3">
-            <FileX className="w-6 h-6" strokeWidth={2} />
-          </div>
-          <h3 className="text-base font-bold text-slate-900 mb-1">Không có dữ liệu</h3>
-          <p className="text-slate-500 text-[16px] mb-4 text-center px-4 leading-relaxed">Kết nối thành công, nhưng không nhận được dữ liệu trả về.</p>
-
-          <div className="w-full text-left px-5">
-            <p className="text-base font-bold text-slate-500 uppercase tracking-tight mb-1.5">Trạng thái kết nối</p>
-            <div className="bg-green-50/30 text-green-700 px-3 py-1.5 rounded-lg text-[16px] mb-4 flex items-center gap-1.5 border border-green-100">
-              <Check className="w-3 h-3" /> HTTP 200 OK (Thành công)
+    <Portal>
+      <div 
+        className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+        style={{ 
+          zIndex: 99999999,
+          backdropFilter: 'blur(4px)', 
+          WebkitBackdropFilter: 'blur(4px)',
+          fontFamily: 'Inter, system-ui, sans-serif'
+        }}
+        onClick={onClose}
+      >
+        <div 
+          className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col relative animate-in fade-in zoom-in-95 duration-200"
+          style={{ maxWidth: '450px' }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button onClick={onClose} aria-label="Đóng" className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 hover:bg-slate-50 p-1.5 rounded-lg transition-all z-10">
+            <X className="w-4 h-4"/>
+          </button>
+          <div className="p-6 pb-4 flex flex-col items-center">
+            <div className="w-12 h-12 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center mb-3">
+              <FileX className="w-6 h-6" strokeWidth={2} />
             </div>
+            <h3 className="text-[13px] font-bold text-slate-900 mb-1">Không có dữ liệu</h3>
+            <p className="text-slate-500 text-[13px] mb-4 text-center px-4 leading-relaxed font-medium">Kết nối thành công, nhưng không nhận được dữ liệu trả về.</p>
+            
+            <div className="w-full text-left px-5">
+              <p className="text-[13px] font-bold text-slate-500 uppercase tracking-tight mb-1.5">Trạng thái kết nối</p>
+              <div className="bg-green-50/30 text-green-700 px-3 py-1.5 rounded-lg text-[13px] mb-4 flex items-center gap-1.5 border border-green-100 w-fit">
+                <Check className="w-3 h-3"/> HTTP 200 OK (Thành công)
+              </div>
 
-            <p className="text-base font-bold text-slate-800 mb-1.5 uppercase tracking-tight">Hướng dẫn khắc phục</p>
-            <ul className="text-[16px] text-slate-600 space-y-1.5 mb-2 ml-4 list-disc marker:text-slate-400">
-              <li>Kiểm tra lại format của <strong>Request Sample</strong>.</li>
-              <li>Xác nhận thời điểm yêu cầu có dữ liệu trên nguồn.</li>
-              <li>Đảm bảo các tham số (Params) được truyền đúng.</li>
-            </ul>
+              <p className="text-[13px] font-bold text-slate-800 mb-1.5 uppercase tracking-tight">Hướng dẫn khắc phục</p>
+              <ul className="text-[13px] text-slate-600 space-y-1.5 mb-2 ml-4 list-disc marker:text-slate-400">
+                <li>Kiểm tra lại format của <strong>Request Sample</strong>.</li>
+                <li>Xác nhận thời điểm yêu cầu có dữ liệu trên nguồn.</li>
+                <li>Đảm bảo các tham số (Params) được truyền đúng.</li>
+              </ul>
+            </div>
           </div>
-        </div>
-        <div className="px-5 py-3 flex justify-center bg-slate-50 border-t border-slate-100">
-          <button onClick={onClose} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-base rounded-lg transition-colors shadow-sm font-medium">Đã hiểu & Đóng</button>
+          <div className="px-5 py-3.5 flex justify-center bg-slate-50 border-t border-slate-100 w-full">
+            <button onClick={onClose} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-[13px] rounded-lg transition-all shadow-sm active:scale-95 font-medium">Đã hiểu & Đóng</button>
+          </div>
         </div>
       </div>
-    </div>
+    </Portal>
   );
 };
 
