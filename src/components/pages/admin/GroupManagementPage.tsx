@@ -460,7 +460,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
   };
 
   const isUserAssignedToAnyGroup = (userId: number) => {
-    return groups.some(g => g.members && g.members.includes(userId));
+    return groups.some(g => g.members && g.members.some(m => m.id === userId));
   };
 
   const filteredAvailableUsers = availableUsers.filter(user => {
@@ -695,6 +695,47 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
               </span>
             </div>
           </div>
+          {/* Inline Actions for selected menus that have functions */}
+          {isSelected && hasFunctions && (
+            <div className={`ml-[${level * 12 + 40}px] my-2 pl-4 border-l-2 border-slate-200`} style={{ marginLeft: `${level * 12 + 40}px` }}>
+              {item.functions!.map(func => (
+                <div key={func.id} className="flex flex-wrap gap-x-6 gap-y-2 items-center bg-white p-3 rounded border border-slate-100 shadow-sm">
+                  <label className="flex items-center gap-1.5 text-sm text-blue-600 font-semibold cursor-pointer shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={isAllPermissionsSelectedForFunction(func.id, func.actions)}
+                      ref={(input) => {
+                        if (input) {
+                          input.indeterminate = isSomePermissionsSelectedForFunction(func.id, func.actions);
+                        }
+                      }}
+                      onChange={() => {
+                        if (isAllPermissionsSelectedForFunction(func.id, func.actions)) {
+                          deselectAllPermissionsForFunction(func.id);
+                        } else {
+                          selectAllPermissionsForFunction(func.id, func.actions);
+                        }
+                      }}
+                      className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                    />
+                    Chọn tất cả
+                  </label>
+                  <div className="h-4 w-px bg-slate-300 hidden sm:block"></div>
+                  {func.actions.map(action => (
+                    <label key={action} className="flex items-center gap-1.5 text-sm text-slate-700 cursor-pointer hover:text-blue-600">
+                      <input
+                        type="checkbox"
+                        checked={(selectedPermissions[func.id] || []).includes(action)}
+                        onChange={() => togglePermission(func.id, action)}
+                        className="w-3.5 h-3.5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                      />
+                      {action}
+                    </label>
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
           {hasChildren && isExpanded && (
             <div>
               {renderMenuTree(item.children!, level + 1)}
@@ -1066,16 +1107,11 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
               <div className="flex border-b border-slate-200 bg-slate-50 px-6 py-4 items-center gap-6">
                 <div className={`flex items-center gap-2 ${activeDetailTab === 'function' ? 'text-blue-600 font-semibold' : 'text-slate-500'}`}>
                   <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${activeDetailTab === 'function' ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-600'}`}>1</div>
-                  Phân quyền chức năng (Menu)
-                </div>
-                <div className="h-px w-8 bg-slate-300"></div>
-                <div className={`flex items-center gap-2 ${activeDetailTab === 'data' ? 'text-blue-600 font-semibold' : 'text-slate-500'}`}>
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${activeDetailTab === 'data' ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-600'}`}>2</div>
-                  Phân quyền quyền thao tác
+                  Phân quyền chức năng & thao tác
                 </div>
                 <div className="h-px w-8 bg-slate-300"></div>
                 <div className={`flex items-center gap-2 ${activeDetailTab === 'data-scope' ? 'text-blue-600 font-semibold' : 'text-slate-500'}`}>
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${activeDetailTab === 'data-scope' ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-600'}`}>3</div>
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${activeDetailTab === 'data-scope' ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-600'}`}>2</div>
                   Phạm vi dữ liệu
                 </div>
               </div>
@@ -1172,8 +1208,8 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
               {activeDetailTab === 'function' && (
                 <div className="h-full min-h-[500px] overflow-y-auto p-6 bg-white">
                   <div className="w-full border border-slate-200 rounded-lg p-6 bg-slate-50">
-                    <h4 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-200">Bước 1: Phân quyền menu</h4>
-                    <p className="text-sm text-slate-600 mb-6">Vui lòng chọn các menu mà nhóm người dùng này được phép truy cập.</p>
+                    <h4 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-200">Bước 1: Phân quyền chức năng & thao tác</h4>
+                    <p className="text-sm text-slate-600 mb-6">Vui lòng chọn các menu mà nhóm người dùng này được phép truy cập, sau đó chọn quyền thao tác tương ứng.</p>
                     
                     <div className="mb-4">
                       <label className="flex items-center gap-3 px-3 py-2.5 bg-white border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50">
@@ -1212,82 +1248,11 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                   </div>
                 </div>
               )}
-
-              {activeDetailTab === 'data' && (
-                <div className="h-full min-h-[500px] overflow-y-auto p-6 bg-white">
-                  <div className="w-full">
-                    <h4 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-200">
-                      Bước 2: Phân quyền quyền thao tác
-                      {selectedMenuItems.length > 0 && (
-                        <span className="ml-2 text-blue-600 font-normal text-sm">
-                          ({selectedMenuItems.length} menu đã chọn)
-                        </span>
-                      )}
-                    </h4>
-                    <p className="text-sm text-slate-600 mb-6">Thiết lập quyền thao tác (Xem, Thêm, Sửa, Xóa...) cho các menu đã chọn ở Bước 1.</p>
-                    
-                    {getSelectedMenuFunctions().length > 0 ? (
-                      <div className="space-y-4">
-                        {getSelectedMenuFunctions().map((func) => {
-                          return (
-                            <div key={func.id} className="border border-slate-200 rounded-lg p-4 mb-4">
-                              <div className="flex items-center justify-between mb-3">
-                                <div className="text-sm font-medium text-slate-900">{func.name}</div>
-                                <label className="flex items-center gap-2 text-xs text-blue-600 cursor-pointer hover:text-blue-700">
-                                  <input
-                                    type="checkbox"
-                                    checked={isAllPermissionsSelectedForFunction(func.id, func.actions)}
-                                    ref={(input) => {
-                                      if (input) {
-                                        input.indeterminate = isSomePermissionsSelectedForFunction(func.id, func.actions);
-                                      }
-                                    }}
-                                    onChange={() => {
-                                      if (isAllPermissionsSelectedForFunction(func.id, func.actions)) {
-                                        deselectAllPermissionsForFunction(func.id);
-                                      } else {
-                                        selectAllPermissionsForFunction(func.id, func.actions);
-                                      }
-                                    }}
-                                    className="w-3.5 h-3.5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                                  />
-                                  <span>Chọn tất cả</span>
-                                </label>
-                              </div>
-                              <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
-                                {func.actions.map((action) => (
-                                  <label
-                                    key={`${func.id}-${action}`}
-                                    className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded hover:bg-slate-50 cursor-pointer"
-                                  >
-                                    <input
-                                      type="checkbox"
-                                      checked={(selectedPermissions[func.id] || []).includes(action)}
-                                      onChange={() => togglePermission(func.id, action)}
-                                      className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                                    />
-                                    <span className="text-sm text-slate-700 whitespace-nowrap overflow-hidden text-ellipsis">{action}</span>
-                                  </label>
-                                ))}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      <div className="text-center py-12 text-slate-500 text-sm border border-slate-200 rounded-lg bg-slate-50">
-                        Vui lòng quay lại Bước 1 và chọn ít nhất một menu chức năng!
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
               {activeDetailTab === 'data-scope' && (
                 <div className="h-full min-h-[500px] overflow-y-auto p-6 bg-white">
                   <div className="w-full">
                     <h4 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-200">
-                      Bước 3: Phân quyền phạm vi dữ liệu
+                      Bước 2: Phân quyền phạm vi dữ liệu
                     </h4>
                     <p className="text-sm text-slate-600 mb-6">Thiết lập phạm vi dữ liệu (Bảng, Trường dữ liệu, Bản ghi) được phép truy cập.</p>
 
@@ -1305,18 +1270,18 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                                 <span className="font-medium text-slate-800 text-sm">Bảng: Thông tin khai sinh</span>
                               </label>
                               
-                              <select className="text-sm border border-slate-300 rounded px-2 py-1.5 focus:ring-2 focus:ring-blue-500 outline-none text-slate-700">
+                              <select aria-label="Điều kiện hiển thị" title="Điều kiện hiển thị" className="text-sm border border-slate-300 rounded px-2 py-1.5 focus:ring-2 focus:ring-blue-500 outline-none text-slate-700">
                                 <option value="">Điều kiện hiển thị</option>
                                 <option value="stt">STT</option>
                                 <option value="province">Tỉnh/Thành phố</option>
                                 <option value="dob">Ngày sinh</option>
                               </select>
                               
-                              <input type="text" className="text-sm border border-slate-300 rounded px-3 py-1.5 focus:ring-2 focus:ring-blue-500 outline-none w-40 text-slate-700" placeholder="Nhập giá trị" />
+                              <input type="text" aria-label="Giá trị điều kiện hiển thị" title="Giá trị điều kiện hiển thị" className="text-sm border border-slate-300 rounded px-3 py-1.5 focus:ring-2 focus:ring-blue-500 outline-none w-40 text-slate-700" placeholder="Nhập giá trị" />
                               
                               <div className="flex-1"></div>
                               
-                              <select className="text-sm border border-slate-300 rounded px-2 py-1.5 focus:ring-2 focus:ring-blue-500 outline-none text-slate-700">
+                              <select aria-label="Phạm vi dữ liệu" title="Phạm vi dữ liệu" className="text-sm border border-slate-300 rounded px-2 py-1.5 focus:ring-2 focus:ring-blue-500 outline-none text-slate-700">
                                 <option value="all">Xem toàn bộ bản ghi</option>
                                 <option value="org">Chỉ xem dữ liệu cơ quan mình</option>
                                 <option value="self">Chỉ xem dữ liệu do mình tạo</option>
@@ -1342,18 +1307,18 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                                 <span className="font-medium text-slate-800 text-sm">Bảng: Thông tin kết hôn</span>
                               </label>
                               
-                              <select className="text-sm border border-slate-300 rounded px-2 py-1.5 focus:ring-2 focus:ring-blue-500 outline-none text-slate-700">
+                              <select aria-label="Điều kiện hiển thị" title="Điều kiện hiển thị" className="text-sm border border-slate-300 rounded px-2 py-1.5 focus:ring-2 focus:ring-blue-500 outline-none text-slate-700">
                                 <option value="">Điều kiện hiển thị</option>
                                 <option value="stt">STT</option>
                                 <option value="province">Tỉnh/Thành phố</option>
                                 <option value="date">Ngày đăng ký</option>
                               </select>
                               
-                              <input type="text" className="text-sm border border-slate-300 rounded px-3 py-1.5 focus:ring-2 focus:ring-blue-500 outline-none w-40 text-slate-700" placeholder="Nhập giá trị" />
+                              <input type="text" aria-label="Giá trị điều kiện hiển thị" title="Giá trị điều kiện hiển thị" className="text-sm border border-slate-300 rounded px-3 py-1.5 focus:ring-2 focus:ring-blue-500 outline-none w-40 text-slate-700" placeholder="Nhập giá trị" />
                               
                               <div className="flex-1"></div>
                               
-                              <select className="text-sm border border-slate-300 rounded px-2 py-1.5 focus:ring-2 focus:ring-blue-500 outline-none text-slate-700">
+                              <select aria-label="Phạm vi dữ liệu" title="Phạm vi dữ liệu" className="text-sm border border-slate-300 rounded px-2 py-1.5 focus:ring-2 focus:ring-blue-500 outline-none text-slate-700">
                                 <option value="all">Xem toàn bộ bản ghi</option>
                                 <option value="org">Chỉ xem dữ liệu cơ quan mình</option>
                                 <option value="self">Chỉ xem dữ liệu do mình tạo</option>
@@ -1384,7 +1349,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                                 <input type="checkbox" className="w-4 h-4 text-blue-600 rounded" />
                                 <span className="font-medium text-slate-800 text-sm">Bảng: Hồ sơ xin thôi quốc tịch</span>
                               </label>
-                              <select disabled className="text-sm border border-slate-300 rounded px-2 py-1 bg-slate-100 text-slate-400">
+                              <select disabled aria-label="Phạm vi dữ liệu" title="Phạm vi dữ liệu" className="text-sm border border-slate-300 rounded px-2 py-1 bg-slate-100 text-slate-400">
                                 <option>Xem toàn bộ bản ghi</option>
                               </select>
                             </div>
@@ -1431,23 +1396,8 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                         alert('Vui lòng chọn ít nhất một menu chức năng!');
                         return;
                       }
-                      setActiveDetailTab('data');
+                      setActiveDetailTab('data-scope');
                     }}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                  >
-                    Tiếp tục
-                  </button>
-                </>
-              ) : activeDetailTab === 'data' ? (
-                <>
-                  <button 
-                    onClick={() => setActiveDetailTab('function')}
-                    className="px-6 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50"
-                  >
-                    Quay lại
-                  </button>
-                  <button 
-                    onClick={() => setActiveDetailTab('data-scope')}
                     className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                   >
                     Tiếp tục
@@ -1456,7 +1406,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
               ) : (
                 <>
                   <button 
-                    onClick={() => setActiveDetailTab('data')}
+                    onClick={() => setActiveDetailTab('function')}
                     className="px-6 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50"
                   >
                     Quay lại
