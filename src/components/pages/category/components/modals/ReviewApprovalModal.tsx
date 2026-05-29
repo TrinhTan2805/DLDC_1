@@ -7,12 +7,13 @@ interface ReviewApprovalModalProps {
   isOpen: boolean;
   onClose: () => void;
   requests: ApprovalRequest[];
+  entities?: any[]; // MasterDataEntity[]
   attributes?: MasterDataAttribute[];
   onApprove: (ids: string[], note: string, partialStatuses?: Record<string, Record<string, 'approved' | 'rejected'>>) => void;
   onReject: (ids: string[], note: string) => void;
 }
 
-export function ReviewApprovalModal({ isOpen, onClose, requests, attributes, onApprove, onReject }: ReviewApprovalModalProps) {
+export function ReviewApprovalModal({ isOpen, onClose, requests, entities, attributes, onApprove, onReject }: ReviewApprovalModalProps) {
   const [note, setNote] = useState('');
   const [lineStatuses, setLineStatuses] = useState<Record<string, Record<string, 'approved' | 'rejected'>>>({});
 
@@ -106,6 +107,39 @@ export function ReviewApprovalModal({ isOpen, onClose, requests, attributes, onA
                   </div>
                 )}
               </div>
+
+              {/* General Information Preview (Thông tin chung) */}
+              {(() => {
+                const entity = entities?.find(e => e.id === request.entityId);
+                if (!entity) return null;
+                return (
+                  <div className="mt-6 pt-6 border-t border-slate-100">
+                     <p className="text-[14px] font-bold text-slate-800 mb-4">Thông tin chung:</p>
+                     <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 grid grid-cols-2 gap-x-6 gap-y-4 text-[13px]">
+                        <div>
+                           <span className="text-slate-500 block mb-1">Phiên bản danh mục</span>
+                           <span className="text-slate-800 font-semibold bg-white border border-slate-200 px-2 py-0.5 rounded">v{entity.version || '1.0'}</span>
+                        </div>
+                        <div>
+                           <span className="text-slate-500 block mb-1">Phạm vi vĩ mô</span>
+                           <span className="text-slate-800 font-semibold">{entity.scope === 'national' ? 'Cấp quốc gia' : entity.scope === 'ministry' ? 'Cấp bộ' : entity.scope === 'provincial' ? 'Cấp tỉnh/thành' : 'Nội bộ'}</span>
+                        </div>
+                        <div>
+                           <span className="text-slate-500 block mb-1">Loại dữ liệu</span>
+                           <span className="text-slate-800 font-semibold">{entity.dataType === 'reference' ? 'Dữ liệu tham chiếu' : entity.dataType === 'standard' ? 'Dữ liệu chuẩn' : 'Dữ liệu giao dịch'}</span>
+                        </div>
+                        <div>
+                           <span className="text-slate-500 block mb-1">Cơ quan quản lý</span>
+                           <span className="text-slate-800 font-semibold">{entity.managingAgency}</span>
+                        </div>
+                        <div className="col-span-2">
+                           <span className="text-slate-500 block mb-1">Mô tả mục đích & vai trò</span>
+                           <span className="text-slate-800 font-medium">{entity.description}</span>
+                        </div>
+                     </div>
+                  </div>
+                );
+              })()}
 
               {/* Data Structure Preview */}
               {(request.type === 'structure' || request.type === 'category') && attributes && attributes.length > 0 && (

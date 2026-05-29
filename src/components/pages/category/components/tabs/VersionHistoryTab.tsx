@@ -12,9 +12,9 @@ export function VersionHistoryTab({
   onViewDetail
 }: VersionHistoryTabProps) {
   const historyData = [
-    { id: 3, version: '4.1', author: 'Nguyễn Văn A', category: 'Bộ dữ liệu chủ Công dân', date: '05/01/2026 09:30', content: 'Thêm trường "Địa chỉ email"', type: 'Cấu trúc', status: 'Success' },
-    { id: 2, version: '4.0', author: 'Trần Thị B', category: 'Bộ dữ liệu chủ Tổ chức', date: '28/12/2025 14:15', content: 'Cập nhật 120 doanh nghiệp mới', type: 'Dữ liệu', status: 'Success' },
-    { id: 1, version: '3.9', author: 'Lê Văn C', category: 'Bộ dữ liệu chủ Công dân', date: '15/12/2025 10:00', content: 'Khởi tạo cấu trúc ban đầu', type: 'Cấu trúc', status: 'Success' },
+    { id: 3, version: '4.1', author: 'Nguyễn Văn A', category: 'Dữ liệu Danh mục giới tính', date: '05/01/2026 09:30', content: 'Thêm trường "Giới tính khác"', type: 'Cấu trúc', status: 'Success' },
+    { id: 2, version: '4.0', author: 'Trần Thị B', category: 'Dữ liệu Danh mục và mã các dân tộc', date: '28/12/2025 14:15', content: 'Cập nhật 5 dân tộc mới', type: 'Dữ liệu', status: 'Success' },
+    { id: 1, version: '3.9', author: 'Lê Văn C', category: 'Dữ liệu Danh mục giới tính', date: '15/12/2025 10:00', content: 'Khởi tạo cấu trúc ban đầu', type: 'Cấu trúc', status: 'Success' },
   ];
 
   const [showFilter, setShowFilter] = useState(false);
@@ -101,8 +101,8 @@ export function VersionHistoryTab({
                  <label htmlFor="filter-category" className="block text-[13px] font-bold text-slate-700 mb-1.5">Danh mục</label>
                  <select id="filter-category" title="Chọn danh mục" className="w-full px-3 py-2 border border-slate-200 rounded-xl text-[14px] text-slate-700 bg-slate-50">
                    <option>Tất cả danh mục</option>
-                   <option>Bộ dữ liệu chủ Công dân</option>
-                   <option>Bộ dữ liệu chủ Tổ chức</option>
+                   <option>Dữ liệu Danh mục giới tính</option>
+                   <option>Dữ liệu Danh mục và mã các dân tộc</option>
                  </select>
                </div>
                <div className="grid grid-cols-2 gap-4">

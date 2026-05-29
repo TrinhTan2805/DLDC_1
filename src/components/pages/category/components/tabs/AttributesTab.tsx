@@ -23,6 +23,7 @@ interface AttributesTabProps {
   onSubmitAttribute?: (id: string) => void;
   onApproveAttribute?: (id: string) => void;
   onRejectAttribute?: (id: string) => void;
+  isViewOnly?: boolean;
 }
 
 export function AttributesTab({
@@ -45,6 +46,7 @@ export function AttributesTab({
   onSubmitAttribute = () => {},
   onApproveAttribute = () => {},
   onRejectAttribute = () => {},
+  isViewOnly = false,
 }: AttributesTabProps) {
   const currentEntityId = wizardMode ? wizardEntityId : selectedEntityId;
   const currentEntity = entities.find(e => e.id === currentEntityId);
@@ -135,21 +137,23 @@ export function AttributesTab({
           </span>
         </div>
         <div className="flex items-center gap-3">
-          {!wizardMode && onSaveAndSubmit && (
+          {!wizardMode && onSaveAndSubmit && !isViewOnly && (
             <button 
- onClick={onSaveAndSubmit} 
- className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors text-sm shadow-md shadow-emerald-100"
- >
+              onClick={onSaveAndSubmit} 
+              className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors text-sm shadow-md shadow-emerald-100"
+            >
               Lưu & trình duyệt
             </button>
           )}
-          <button
- onClick={onAddAttribute}
- className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors text-sm shadow-md shadow-blue-100"
- >
-            <Plus className="w-4 h-4" />
-            Thêm thuộc tính
-          </button>
+          {!isViewOnly && (
+            <button
+              onClick={onAddAttribute}
+              className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors text-sm shadow-md shadow-blue-100"
+            >
+              <Plus className="w-4 h-4" />
+              Thêm thuộc tính
+            </button>
+          )}
         </div>
       </div>
 
@@ -161,9 +165,10 @@ export function AttributesTab({
               <th className="w-12 px-4 py-3">
                 <input 
                   type="checkbox" 
+                  disabled={isViewOnly}
                   onChange={(e: any) => onSelectAll(e.target.checked)} 
                   checked={attributes.length > 0 && selectedAttributes.length === attributes.length} 
-                  className="rounded border-slate-300" 
+                  className={`rounded border-slate-300 ${isViewOnly ? 'cursor-not-allowed opacity-50' : ''}`} 
                   title="Chọn tất cả"
                 />
               </th>
@@ -172,7 +177,7 @@ export function AttributesTab({
               <th className="text-left px-4 py-3 text-[14px] font-medium text-slate-700">Kiểu dữ liệu</th>
               <th className="text-left px-4 py-3 text-[14px] font-medium text-slate-700">Ràng buộc</th>
               <th className="text-left px-4 py-3 text-[14px] font-medium text-slate-700">Trạng thái</th>
-              <th className="text-right px-4 py-3 text-[14px] font-medium text-slate-700">Thao tác</th>
+              {!isViewOnly && <th className="text-right px-4 py-3 text-[14px] font-medium text-slate-700">Thao tác</th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -184,9 +189,10 @@ export function AttributesTab({
                   <td className="px-4 py-3 text-center">
                     <input 
                       type="checkbox" 
+                      disabled={isViewOnly}
                       checked={selectedAttributes.includes(attr.id)} 
                       onChange={() => onSelectAttribute(attr.id)} 
-                      className="rounded border-slate-300" 
+                      className={`rounded border-slate-300 ${isViewOnly ? 'cursor-not-allowed opacity-50' : ''}`} 
                       title={`Chọn ${attr.fieldName}`}
                     />
                   </td>
@@ -209,31 +215,33 @@ export function AttributesTab({
                       {attr.status === 'approved' ? 'Đã duyệt' : attr.status === 'pending' ? 'Chở duyệt' : 'Bản nháp'}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex items-center justify-end gap-1.5 opacity-80 group-hover:opacity-100 transition-all">
-                      <ActionIconButton 
-                        action="submit" 
-                        onClick={() => onSubmitAttribute(attr.id)} 
-                        disabled={isLocked}
-                        title={attr.status === 'approved' ? "Đã duyệt" : (attr.status === 'pending' ? "Đang chờ duyệt" : "Trình duyệt")} 
-                      />
-                      
-                      <div className="w-px h-4 bg-slate-200 mx-1"></div>
-                      
-                      <ActionIconButton 
-                        action="edit" 
-                        onClick={() => onEditAttribute(attr)} 
-                        disabled={isLocked}
-                        title="Sửa" 
-                      />
-                      <ActionIconButton 
-                        action="delete" 
-                        onClick={() => onDeleteAttribute(attr.id)} 
-                        disabled={isLocked}
-                        title="Xóa" 
-                      />
-                    </div>
-                  </td>
+                  {!isViewOnly && (
+                    <td className="px-4 py-3 text-right">
+                      <div className="flex items-center justify-end gap-1.5 opacity-80 group-hover:opacity-100 transition-all">
+                        <ActionIconButton 
+                          action="submit" 
+                          onClick={() => onSubmitAttribute(attr.id)} 
+                          disabled={isLocked}
+                          title={attr.status === 'approved' ? "Đã duyệt" : (attr.status === 'pending' ? "Đang chờ duyệt" : "Trình duyệt")} 
+                        />
+                        
+                        <div className="w-px h-4 bg-slate-200 mx-1"></div>
+                        
+                        <ActionIconButton 
+                          action="edit" 
+                          onClick={() => onEditAttribute(attr)} 
+                          disabled={isLocked}
+                          title="Sửa" 
+                        />
+                        <ActionIconButton 
+                          action="delete" 
+                          onClick={() => onDeleteAttribute(attr.id)} 
+                          disabled={isLocked}
+                          title="Xóa" 
+                        />
+                      </div>
+                    </td>
+                  )}
                 </tr>
               );
             })}

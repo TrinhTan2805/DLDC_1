@@ -46,10 +46,7 @@ export function CategoryReportVersionPage() {
           </div>
 
           <div className="flex items-center gap-3 w-full md:w-auto h-full pt-6 md:pt-0">
-            <button className="px-5 py-2.5 border border-slate-300 text-slate-700 bg-white rounded-xl hover:bg-slate-50 transition-colors font-medium flex items-center gap-2">
-              <Printer className="w-4 h-4" />
-              In báo cáo
-            </button>
+
             <div className="relative">
               <button
                 type="button"
@@ -64,18 +61,12 @@ export function CategoryReportVersionPage() {
                 <div className="absolute right-0 mt-2 w-44 rounded-2xl border border-slate-200 bg-white shadow-xl z-20">
                   <button
                     type="button"
-                    onClick={() => handleExportFile('XLS')}
+                    onClick={() => handleExportFile('Excel')}
                     className="w-full text-left px-4 py-3 hover:bg-slate-50 text-sm text-slate-700"
                   >
-                    XLS
+                    Excel
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => handleExportFile('DOCX')}
-                    className="w-full text-left px-4 py-3 hover:bg-slate-50 text-sm text-slate-700"
-                  >
-                    DOCX
-                  </button>
+
                   <button
                     type="button"
                     onClick={() => handleExportFile('PDF')}
@@ -119,7 +110,7 @@ export function CategoryReportVersionPage() {
           {/* Title */}
           <div className="text-center mb-10">
             <h1 className="text-2xl font-bold uppercase mb-2">Biên bản Nhận dạng Hệ thống</h1>
-            <h2 className="text-lg font-bold uppercase">Lịch sử Lập phiên bản (Versioning) Danh mục</h2>
+            <h2 className="text-lg font-bold uppercase">Lịch sử Lập phiên bản Danh mục</h2>
             <p className="italic mt-2">Đối tượng truy xuất: <strong>{filterCategoryName}</strong></p>
           </div>
 
@@ -128,12 +119,12 @@ export function CategoryReportVersionPage() {
             <section>
               <h3 className="font-bold text-lg mb-3">1. Khái quát quy trình Nâng cấp phiên bản</h3>
               <p className="mb-2">
-                Danh mục <strong className="text-blue-700">{filterCategoryName}</strong> hiện đang được duy trì với lịch sử cập nhật minh bạch. Hệ thống quản lý Bộ Tư Pháp mã nguồn (Data Repository) đã thực hiện ghi nhận {mockVersions.length} lần Release (phát hành) cấu trúc.
+                Danh mục <strong className="text-blue-700">{filterCategoryName}</strong> hiện đang được duy trì với lịch sử cập nhật minh bạch. Hệ thống kho dữ liệu quản lý đã thực hiện ghi nhận {mockVersions.length} lần phát hành cấu trúc.
               </p>
             </section>
 
             <section>
-              <h3 className="font-bold text-lg mb-4 mt-6">2. Lịch sử Thay đổi (Changelog Timeline)</h3>
+              <h3 className="font-bold text-lg mb-4 mt-6">2. Lịch sử Thay đổi</h3>
 
               <div className="pl-4 mt-8 relative border-l-2 border-slate-300 ml-4 pb-4">
                 {mockVersions.map((v, i) => (
@@ -153,7 +144,7 @@ export function CategoryReportVersionPage() {
                         </div>
                         <div>
                           <span className={`${v.status === 'active' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'} px-2 py-1 rounded text-xs font-bold uppercase tracking-wider`}>
-                            {v.status === 'active' ? 'Current' : 'Archived'}
+                            {v.status === 'active' ? 'Hiện tại' : 'Lưu trữ'}
                           </span>
                         </div>
                       </div>
@@ -168,7 +159,7 @@ export function CategoryReportVersionPage() {
             <section>
               <h3 className="font-bold text-lg mb-3 mt-6">3. Cam kết Tích hợp</h3>
               <p>
-                Toàn bộ dữ liệu của phiên bản cũ (v1.0, v2.x) được cấu hình Fallback đảm bảo tính liên tục của các hệ thống cũ đang gọi API theo kiến trúc Legacy. Đảm bảo 100% không đứt gãy hệ thống.
+                Toàn bộ dữ liệu của phiên bản cũ (v1.0, v2.x) được cấu hình dự phòng đảm bảo tính liên tục của các hệ thống cũ đang gọi API theo kiến trúc cũ. Đảm bảo 100% không đứt gãy hệ thống.
               </p>
             </section>
           </div>

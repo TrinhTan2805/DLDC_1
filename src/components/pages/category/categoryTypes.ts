@@ -9,7 +9,7 @@ export type DataSourceType = 'dldc' | 'lgsp' | 'ndxp' | 'manual';
 export type UpdateStrategyType = 'reference' | 'scheduled' | 'realtime';
 export type SyncFrequencyType = 'daily' | 'weekly' | 'monthly' | 'event';
 export type FieldDataType = 'string' | 'number' | 'date' | 'datetime' | 'boolean' | 'text' | 'email' | 'phone' | 'url';
-export type ApprovalType = 'category' | 'structure' | 'version' | 'relationship';
+export type ApprovalType = 'category' | 'structure' | 'version' | 'relationship' | 'expire';
 export type ApprovalStatus = 'pending' | 'approved' | 'rejected' | 'partial';
 
 export interface ApprovalRequest {
@@ -104,4 +104,5 @@ export interface MasterDataEntity {
   updateStrategy?: UpdateStrategyType;
   syncFrequency?: SyncFrequencyType;
   customFields?: CustomField[];
+  version?: number;
 }

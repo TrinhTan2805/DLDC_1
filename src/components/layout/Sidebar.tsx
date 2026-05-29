@@ -332,11 +332,6 @@ const menuItems: MenuItem[] = [
         ],
       },
       {
-        id: "category-published-list",
-        label: "Công khai danh mục",
-        icon: FileText,
-      },
-      {
         id: "category-report-group",
         label: "Thống kê danh mục",
         icon: BarChart3,
