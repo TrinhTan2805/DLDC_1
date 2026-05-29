@@ -25,8 +25,7 @@ import {
   Edit,
   Trash2,
   Save,
-  AlertTriangle,
-  FileText
+  AlertTriangle
 } from 'lucide-react';
 import { StatsCard } from '../../common/StatsCard';
 import { StatusTag } from '../../common/StatusTag';
