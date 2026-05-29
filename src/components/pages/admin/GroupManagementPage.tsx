@@ -4,6 +4,7 @@ import { StatsCard } from '../../common/StatsCard';
 import { StatusTag } from '../../common/StatusTag';
 import { UsersRound } from 'lucide-react';
 import { menuStructure, type MenuItem, type MenuFunction } from './menuStructure';
+import { getRoles } from './RoleManagementPage';
 
 const isDatabaseOrSystemLeaf = (item: MenuItem): boolean => {
   const id = item.id;
@@ -245,6 +246,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
   const [selectedPermissions, setSelectedPermissions] = useState<{ [key: string]: string[] }>({});
   const [selectedDataPermissions, setSelectedDataPermissions] = useState<{ [sourceId: string]: { [tableId: string]: string[] } }>({});
   const [expandedDataSources, setExpandedDataSources] = useState<string[]>([]);
+  const [selectedDataScopeCategory, setSelectedDataScopeCategory] = useState<string>('');
   
   // State to hold actual saved permissions per group
   const [savedMenuItems, setSavedMenuItems] = useState<{ [groupId: number]: string[] }>({});
@@ -339,6 +341,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
       }
       if (type === 'detail') {
         setActiveDetailTab(tab);
+        setSelectedDataScopeCategory('');
         if (tab === 'function') {
           setSelectedMenuItems(savedMenuItems[group.id] || []);
           setSelectedPermissions(savedPermissions[group.id] || {});
@@ -463,14 +466,17 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
     return groups.some(g => g.members && g.members.some(m => m.id === userId));
   };
 
+  const currentGroupRole = modalType === 'add-members' && selectedGroup ? getRoles().find(r => r.name === selectedGroup.role) : null;
+  const validUserIds = currentGroupRole?.assignedUserIds || [];
+
   const filteredAvailableUsers = availableUsers.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(memberSearchTerm.toLowerCase()) || 
                           user.email.toLowerCase().includes(memberSearchTerm.toLowerCase()) ||
                           user.department.toLowerCase().includes(memberSearchTerm.toLowerCase());
     const matchesDept = memberDepartmentFilter ? user.department === memberDepartmentFilter : true;
-    const matchesUnassigned = memberUnassignedOnly ? !isUserAssignedToAnyGroup(user.id) : true;
+    const matchesRole = modalType === 'add-members' ? validUserIds.includes(user.id) : true;
     
-    return matchesSearch && matchesDept && matchesUnassigned;
+    return matchesSearch && matchesDept && matchesRole;
   });
 
   const selectAllUsers = () => {
@@ -1028,9 +1034,10 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                     aria-label="Đơn vị"
                     value={formData.department}
                     onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    disabled={true}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none bg-slate-100 text-slate-500 cursor-not-allowed"
                   >
-                    <option value="">-- Chọn đơn vị --</option>
+                    <option value="">{currentUnit ? '-- Chọn đơn vị --' : '-- Vui lòng chọn một đơn vị ở menu trái --'}</option>
                     {unitsList.map(unit => (
                       <option key={unit.id} value={unit.name}>{unit.name}</option>
                     ))}
@@ -1048,9 +1055,9 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">-- Chọn vai trò --</option>
-                    <option value="Quản trị hệ thống">Quản trị hệ thống</option>
-                    <option value="Quản trị nghiệp vụ">Quản trị nghiệp vụ</option>
-                    <option value="Người dùng cơ bản">Người dùng cơ bản</option>
+                    {getRoles().map(role => (
+                      <option key={role.id} value={role.name}>{role.name}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
@@ -1250,10 +1257,38 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
               )}
               {activeDetailTab === 'data-scope' && (
                 <div className="h-full min-h-[500px] overflow-y-auto p-6 bg-white">
-                  <div className="w-full">
+                  <div className="w-full mb-8">
                     <h4 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-200">
-                      Bước 2: Phân quyền phạm vi dữ liệu
+                      Chọn phạm vi dữ liệu
                     </h4>
+                    <select
+                      title="Chọn phạm vi dữ liệu"
+                      aria-label="Chọn phạm vi dữ liệu"
+                      value={selectedDataScopeCategory}
+                      onChange={(e) => setSelectedDataScopeCategory(e.target.value)}
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">-- Chọn phạm vi dữ liệu --</option>
+                      <option value="Dữ liệu thu thập">Dữ liệu thu thập</option>
+                      <option value="Dữ liệu tại CSDL đích (Dữ liệu đã xử lý)">Dữ liệu tại CSDL đích (Dữ liệu đã xử lý)</option>
+                      <option value="Dữ liệu chia sẻ">Dữ liệu chia sẻ</option>
+                      <option value="Dữ liệu mở">Dữ liệu mở</option>
+                      <option value="Dữ liệu danh mục">Dữ liệu danh mục</option>
+                      <option value="Dữ liệu chủ">Dữ liệu chủ</option>
+                    </select>
+                  </div>
+
+                  {!selectedDataScopeCategory ? (
+                    <div className="w-full mt-4">
+                      <div className="p-8 text-center text-slate-500 bg-slate-50 rounded-lg border border-slate-200 border-dashed">
+                        Vui lòng chọn phạm vi dữ liệu để phân quyền
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="w-full transition-opacity duration-300 opacity-100 animate-in fade-in">
+                      <h4 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-200">
+                        Bước 2: Phân quyền phạm vi dữ liệu
+                      </h4>
                     <p className="text-sm text-slate-600 mb-6">Thiết lập phạm vi dữ liệu (Bảng, Trường dữ liệu, Bản ghi) được phép truy cập.</p>
 
                     <div className="space-y-6">
@@ -1358,6 +1393,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                       </div>
                     </div>
                   </div>
+                  )}
                 </div>
               )}
             </div>
@@ -1458,89 +1494,75 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                     className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                <select 
-                  title="Lọc theo đơn vị"
-                  aria-label="Lọc theo đơn vị"
-                  value={memberDepartmentFilter}
-                  onChange={(e) => setMemberDepartmentFilter(e.target.value)}
-                  className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full lg:w-auto"
-                >
-                  <option value="">Tất cả đơn vị</option>
-                  {unitsList.map(unit => (
-                    <option key={unit.id} value={unit.name}>{unit.name}</option>
-                  ))}
-                </select>
-                <label className="flex items-center gap-2 cursor-pointer hover:text-blue-700 whitespace-nowrap">
-                  <input 
-                    type="checkbox" 
-                    title="Chưa được gán vào nhóm"
-                    aria-label="Chưa được gán vào nhóm"
-                    checked={memberUnassignedOnly}
-                    onChange={(e) => setMemberUnassignedOnly(e.target.checked)}
-                    className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                  />
-                  <span className="text-sm text-slate-700">Chưa được gán vào nhóm</span>
-                </label>
               </div>
               
-              {/* Select All Checkbox */}
-              <div className="mb-2">
-                <label className="flex items-center gap-3 px-4 py-3 bg-blue-50 border border-blue-200 rounded-lg cursor-pointer hover:bg-blue-100">
-                  <input
-                    type="checkbox"
-                    checked={isAllSelected}
-                    ref={(input) => {
-                      if (input) {
-                        input.indeterminate = isSomeSelected;
-                      }
-                    }}
-                    onChange={() => {
-                      if (isAllSelected) {
-                        deselectAllUsers();
-                      } else {
-                        selectAllUsers();
-                      }
-                    }}
-                    className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                  />
-                  <div className="flex-1">
-                    <div className="text-sm text-blue-900">
-                      {isAllSelected ? 'Bỏ chọn tất cả' : isSomeSelected ? `Chọn tất cả (đã chọn ${selectedUsers.length}/${filteredAvailableUsers.length})` : 'Chọn tất cả'}
-                    </div>
-                  </div>
-                </label>
-              </div>
-
-              <div className="border border-slate-200 rounded-lg overflow-hidden max-h-96 overflow-y-auto">
-                {filteredAvailableUsers.length === 0 ? (
-                  <div className="p-8 text-center text-slate-500 text-sm">
-                    Không tìm thấy người dùng phù hợp.
-                  </div>
-                ) : (
-                  filteredAvailableUsers.map((user) => (
-                    <label
-                      key={user.id}
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-b-0"
-                    >
+              {validUserIds.length === 0 ? (
+                <div className="p-8 text-center text-red-600 bg-red-50 border border-red-200 rounded-lg text-sm mt-4 mb-6">
+                  Vui lòng gán người dùng cho vai trò <span className="font-semibold">{selectedGroup.role}</span>
+                </div>
+              ) : (
+                <>
+                  {/* Select All Checkbox */}
+                  <div className="mb-2">
+                    <label className="flex items-center gap-3 px-4 py-3 bg-blue-50 border border-blue-200 rounded-lg cursor-pointer hover:bg-blue-100">
                       <input
                         type="checkbox"
-                        title={`Chọn ${user.name}`}
-                        aria-label={`Chọn ${user.name}`}
-                        checked={selectedUsers.includes(user.id)}
-                        onChange={() => toggleUser(user.id)}
-                        className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                        checked={isAllSelected}
+                        ref={(input) => {
+                          if (input) {
+                            input.indeterminate = isSomeSelected;
+                          }
+                        }}
+                        onChange={() => {
+                          if (isAllSelected) {
+                            deselectAllUsers();
+                          } else {
+                            selectAllUsers();
+                          }
+                        }}
+                        className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
                       />
                       <div className="flex-1">
-                        <div className="text-sm text-slate-900">{user.name}</div>
-                        <div className="text-xs text-slate-500">{user.email} • {user.department}</div>
+                        <div className="text-sm text-blue-900">
+                          {isAllSelected ? 'Bỏ chọn tất cả' : isSomeSelected ? `Chọn tất cả (đã chọn ${selectedUsers.length}/${filteredAvailableUsers.length})` : 'Chọn tất cả'}
+                        </div>
                       </div>
                     </label>
-                  ))
-                )}
-              </div>
+                  </div>
+
+                  <div className="border border-slate-200 rounded-lg overflow-hidden max-h-96 overflow-y-auto">
+                    {filteredAvailableUsers.length === 0 ? (
+                      <div className="p-8 text-center text-slate-500 text-sm">
+                        Không tìm thấy người dùng phù hợp.
+                      </div>
+                    ) : (
+                      filteredAvailableUsers.map((user) => (
+                        <label
+                          key={user.id}
+                          className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-b-0"
+                        >
+                          <input
+                            type="checkbox"
+                            title={`Chọn ${user.name}`}
+                            aria-label={`Chọn ${user.name}`}
+                            checked={selectedUsers.includes(user.id)}
+                            onChange={() => toggleUser(user.id)}
+                            className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                          />
+                          <div className="flex-1">
+                            <div className="text-sm text-slate-900">{user.name}</div>
+                            <div className="text-xs text-slate-500">{user.email} • {user.department}</div>
+                          </div>
+                        </label>
+                      ))
+                    )}
+                  </div>
+                </>
+              )}
               <div className="flex gap-3 mt-6">
                 <button 
                   onClick={handleSaveMembers}
+                  disabled={validUserIds.length === 0}
                   className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed"
                 >
                   Lưu {selectedUsers.length > 0 && `(${selectedUsers.length})`} thành viên

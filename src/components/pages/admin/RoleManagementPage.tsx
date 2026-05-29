@@ -1,7 +1,8 @@
-import { useState } from 'react';
-import { Search, Plus, Edit, Trash2, Shield, Eye, UserPlus, Lock, User, Users, CheckCircle, ArrowRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Plus, Edit, Trash2, Shield, Eye, UserPlus, Lock, User, Users, CheckCircle, ArrowRight, X } from 'lucide-react';
 import { StatsCard } from '../../common/StatsCard';
 import { StatusTag } from '../../common/StatusTag';
+import { menuStructure } from './menuStructure';
 
 interface RoleVersion {
   version: string;
@@ -13,6 +14,7 @@ interface RoleVersion {
 interface Role {
   id: number;
   name: string;
+  roleType: string;
   description: string;
   memberCount: number;
   groupCount: number;
@@ -27,10 +29,11 @@ interface Role {
   assignedGroupIds?: number[];
 }
 
-const mockRoles: Role[] = [
+export const mockRoles: Role[] = [
   {
     id: 1,
     name: 'Quản trị hệ thống',
+    roleType: 'Quản trị hệ thống Kho DLDC',
     description: 'Toàn quyền quản trị hệ thống DLDC',
     memberCount: 1,
     groupCount: 1,
@@ -54,6 +57,7 @@ const mockRoles: Role[] = [
   {
     id: 2,
     name: 'Quản trị nghiệp vụ',
+    roleType: 'Quản trị hệ thống nguồn',
     description: 'Quản lý các nghiệp vụ cốt lõi, danh mục và dữ liệu',
     memberCount: 2,
     groupCount: 2,
@@ -69,6 +73,7 @@ const mockRoles: Role[] = [
   {
     id: 3,
     name: 'Người dùng cơ bản',
+    roleType: 'Quản trị hệ thống nguồn',
     description: 'Vai trò mặc định cho cán bộ khai thác',
     memberCount: 1,
     groupCount: 2,
@@ -82,6 +87,11 @@ const mockRoles: Role[] = [
     assignedGroupIds: [4, 5]
   }
 ];
+
+export const getRoles = (): Role[] => {
+  const saved = localStorage.getItem('roles');
+  return saved ? JSON.parse(saved) : mockRoles;
+};
 
 const availableUsers = [
   { id: 1, name: 'Nguyễn Văn An', email: 'nguyenvanan@moj.gov.vn', department: 'Vụ Pháp luật Dân sự' },
@@ -116,10 +126,9 @@ const availableDataPermissions = [
   'Tải file'
 ];
 
-const roleTemplates = {
-  'Quản trị hệ thống': 'Bao gồm tất cả quyền xem, sửa, xóa các chức năng\nThiết lập kết nối cho tất cả CSDL\nThiết lập xử lý cho tất cả CSDL\nThiết lập chia sẻ cho tất cả CSDL\nThiết lập phân quyền quản trị cho các tài khoản quản trị viên',
-  'Quản trị nghiệp vụ': 'Xem dữ liệu theo hệ thống nguồn được phân quyền\nXem Dữ liệu được xử lý\nThiết lập dữ liệu chia sẻ',
-  'Người dùng cơ bản': 'Khai thác CSDL được phân quyền (không bao gồm quyền tải xuống)'
+const roleTypeTemplates = {
+  'Quản trị hệ thống Kho DLDC': 'Bao gồm tất cả quyền xem, sửa, xóa các chức năng\nThiết lập kết nối cho tất cả CSDL\nThiết lập xử lý cho tất cả CSDL\nThiết lập chia sẻ cho tất cả CSDL\nThiết lập phân quyền quản trị cho các tài khoản quản trị viên',
+  'Quản trị hệ thống nguồn': 'Xem dữ liệu theo hệ thống nguồn được phân quyền\nXem Dữ liệu được xử lý\nThiết lập dữ liệu chia sẻ'
 };
 
 type ModalType = 'add' | 'edit' | 'delete' | 'assign-users' | 'history' | null;
@@ -129,10 +138,15 @@ export function RoleManagementPage() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [modalType, setModalType] = useState<ModalType>(null);
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
-  const [roles, setRoles] = useState<Role[]>(mockRoles);
+  const [roles, setRoles] = useState<Role[]>(getRoles);
+  
+  useEffect(() => {
+    localStorage.setItem('roles', JSON.stringify(roles));
+  }, [roles]);
   
   const [formData, setFormData] = useState({
     name: '',
+    roleType: '',
     description: '',
     status: 'active' as 'active' | 'inactive',
     permissions: [] as string[],
@@ -170,6 +184,7 @@ export function RoleManagementPage() {
       if (type === 'edit') {
         setFormData({
           name: role.name,
+          roleType: role.roleType || '',
           description: role.description,
           status: role.status,
           permissions: role.permissions,
@@ -181,7 +196,7 @@ export function RoleManagementPage() {
       }
     } else {
       setSelectedRole(null);
-      setFormData({ name: '', description: '', status: 'active', permissions: [], dataPermissions: [] });
+      setFormData({ name: '', roleType: '', description: '', status: 'active', permissions: [], dataPermissions: [] });
     }
     
     if (type !== 'assign-users') {
@@ -198,6 +213,10 @@ export function RoleManagementPage() {
   const handleSaveRole = () => {
     if (!formData.name.trim()) {
       alert('Ràng buộc tính hợp lệ: Tên vai trò không được để trống!');
+      return;
+    }
+    if (!formData.roleType) {
+      alert('Ràng buộc tính hợp lệ: Loại vai trò không được để trống!');
       return;
     }
 
@@ -239,6 +258,7 @@ export function RoleManagementPage() {
           
           const changes = [];
           if (r.name !== formData.name) changes.push('Đổi tên');
+          if (r.roleType !== formData.roleType) changes.push('Đổi loại vai trò');
           if (r.description !== formData.description) changes.push('Sửa mô tả');
           if (r.status !== formData.status) changes.push('Đổi trạng thái');
           if (JSON.stringify(r.permissions) !== JSON.stringify(formData.permissions)) changes.push('Cập nhật quyền chức năng');
@@ -392,6 +412,9 @@ export function RoleManagementPage() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2.5 mb-2">
                     <h3 className="text-slate-900 font-bold">{role.name}</h3>
+                    <span className="px-2 py-0.5 text-[10px] font-medium bg-blue-50 text-blue-600 border border-blue-100 rounded-full flex-shrink-0">
+                      {role.roleType}
+                    </span>
                     <button 
                       onClick={() => handleOpenModal('history', role)}
                       className="px-2 py-0.5 text-[10px] font-semibold bg-slate-100 text-slate-600 rounded-full border border-slate-200 flex-shrink-0 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors cursor-pointer"
@@ -439,7 +462,7 @@ export function RoleManagementPage() {
                   <div className="text-slate-900 font-semibold">{role.permissions.length}</div>
                 </div>
                 <div>
-                  <div className="text-xs text-slate-500 mb-1">Quyền DL</div>
+                  <div className="text-xs text-slate-500 mb-1">Đơn vị</div>
                   <div className="text-slate-900 font-semibold">{(role.dataPermissions || []).length}</div>
                 </div>
                 <div>
@@ -469,14 +492,14 @@ export function RoleManagementPage() {
  
       {/* Add/Edit Modal */}
       {(modalType === 'add' || modalType === 'edit') && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
             <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
               <h3 className="text-lg font-semibold text-slate-800">
                 {modalType === 'add' ? 'Tạo vai trò mới' : `Chỉnh sửa vai trò (Phiên bản ${selectedRole?.version})`}
               </h3>
               <button aria-label="Đóng" title="Đóng" onClick={handleCloseModal} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
-                <Plus className="w-5 h-5 rotate-45" />
+                <X className="w-5 h-5" />
               </button>
             </div>
             
@@ -486,23 +509,31 @@ export function RoleManagementPage() {
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
                     Tên vai trò <span className="text-red-500">*</span>
                   </label>
-                  <select
+                  <input
+                    type="text"
                     aria-label="Tên vai trò"
                     title="Tên vai trò"
                     value={formData.name}
-                    onChange={(e) => {
-                      const newName = e.target.value;
-                      setFormData({ 
-                        ...formData, 
-                        name: newName
-                      });
-                    }}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
+                    placeholder="Nhập tên vai trò..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Loại vai trò <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    aria-label="Loại vai trò"
+                    title="Loại vai trò"
+                    value={formData.roleType}
+                    onChange={(e) => setFormData({ ...formData, roleType: e.target.value })}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer text-sm"
                   >
-                    <option value="" disabled>-- Chọn tên vai trò --</option>
-                    {Object.keys(roleTemplates).map(roleName => (
-                      <option key={roleName} value={roleName}>{roleName}</option>
-                    ))}
+                    <option value="" disabled>-- Chọn loại vai trò --</option>
+                    <option value="Quản trị hệ thống Kho DLDC">Quản trị hệ thống Kho DLDC</option>
+                    <option value="Quản trị hệ thống nguồn">Quản trị hệ thống nguồn</option>
                   </select>
                 </div>
                 
@@ -518,20 +549,56 @@ export function RoleManagementPage() {
                 </div>
  
                 <div>
-                  <label className="block text-sm font-semibold text-slate-800 mb-3">Phân phối danh sách quyền hạn</label>
+                  <label className="block text-sm font-semibold text-slate-800 mb-3">Phân phối danh sách quyền chức năng</label>
                   
-                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 min-h-[120px]">
-                    {formData.name && roleTemplates[formData.name as keyof typeof roleTemplates] ? (
-                      <ul className="list-disc list-outside ml-4 space-y-2 text-sm text-slate-700">
-                        {roleTemplates[formData.name as keyof typeof roleTemplates].split('\n').map((line, idx) => (
-                          <li key={idx} className="leading-relaxed">{line}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <div className="flex items-center justify-center h-full text-slate-400 text-sm italic py-8">
-                        Vui lòng chọn Tên vai trò ở trên để xem chi tiết danh sách quyền hạn.
-                      </div>
-                    )}
+                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 max-h-[250px] overflow-y-auto pr-2">
+                    {(() => {
+                      const removeVietnameseTones = (str: string) => {
+                        return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
+                      };
+
+                      const renderMenuTree = (items: any[], depth = 0) => {
+                        return items.map(item => {
+                          const isSelected = formData.permissions.includes(item.id);
+                          const toggleSelection = () => {
+                            if (isSelected) {
+                              setFormData(prev => ({...prev, permissions: prev.permissions.filter(p => p !== item.id)}));
+                            } else {
+                              setFormData(prev => ({...prev, permissions: [...prev.permissions, item.id]}));
+                            }
+                          };
+
+                          const nameNormalized = removeVietnameseTones(item.name || '').toLowerCase().trim();
+                          const shouldSkipChildren = nameNormalized === 'csdl trong nganh' || nameNormalized === 'csdl ngoai nganh';
+                          const hasChildren = item.children && item.children.length > 0 && !shouldSkipChildren && depth < 1;
+
+                          return (
+                            <div key={item.id} className={depth === 0 ? "mb-3 break-inside-avoid" : "mt-2"}>
+                              <label className="flex items-start gap-2 cursor-pointer">
+                                <input 
+                                  type="checkbox" 
+                                  className="w-4 h-4 mt-0.5 text-blue-600 rounded border-slate-300" 
+                                  checked={isSelected} 
+                                  onChange={toggleSelection} 
+                                />
+                                <span className={depth === 0 ? "text-sm font-semibold text-slate-800" : "text-sm font-medium text-slate-700"}>{item.name}</span>
+                              </label>
+                              {hasChildren && (
+                                <div className="ml-6 border-l border-slate-200 pl-4 mt-1">
+                                  {renderMenuTree(item.children, depth + 1)}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        });
+                      };
+                      
+                      return (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 items-start">
+                          {renderMenuTree(menuStructure)}
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
  
@@ -561,7 +628,7 @@ export function RoleManagementPage() {
               <button 
                 onClick={handleSaveRole}
                 className="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-sm transition-colors"
-                disabled={!formData.name}
+                disabled={!formData.name.trim() || !formData.roleType}
               >
                 {modalType === 'add' ? 'Lưu vai trò' : 'Ghi nhận chỉnh sửa'}
               </button>
@@ -572,7 +639,7 @@ export function RoleManagementPage() {
  
       {/* Delete Confirmation Modal */}
       {modalType === 'delete' && selectedRole && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full animate-in zoom-in-95 duration-200">
             <div className="p-6 text-center">
               <div className="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto mb-4">
@@ -613,7 +680,7 @@ export function RoleManagementPage() {
  
       {/* Assign Users/Groups Modal */}
       {modalType === 'assign-users' && selectedRole && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
             <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
               <div>
@@ -621,7 +688,7 @@ export function RoleManagementPage() {
                 <p className="text-sm text-slate-500">Vai trò gán: {selectedRole.name}</p>
               </div>
               <button aria-label="Đóng" title="Đóng" onClick={handleCloseModal} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
-                <Plus className="w-5 h-5 rotate-45" />
+                <X className="w-5 h-5" />
               </button>
             </div>
  
@@ -761,7 +828,7 @@ export function RoleManagementPage() {
 
       {/* History Modal */}
       {modalType === 'history' && selectedRole && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] flex flex-col animate-in zoom-in-95 duration-200">
             <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
               <div>
@@ -769,7 +836,7 @@ export function RoleManagementPage() {
                 <p className="text-sm text-slate-500">Vai trò: {selectedRole.name}</p>
               </div>
               <button aria-label="Đóng" title="Đóng" onClick={handleCloseModal} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
-                <Plus className="w-5 h-5 rotate-45" />
+                <X className="w-5 h-5" />
               </button>
             </div>
             
