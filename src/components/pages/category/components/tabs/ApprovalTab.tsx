@@ -48,7 +48,8 @@ export function ApprovalTab({
   const approvalTabs = [
     { key: 'category' as ApprovalType, label: 'Phê duyệt danh mục', icon: CheckSquare },
     { key: 'structure' as ApprovalType, label: 'Phê duyệt cấu trúc', icon: CheckSquare },
-    { key: 'version' as ApprovalType, label: 'Phê duyệt phiên bản', icon: Clock }
+    { key: 'version' as ApprovalType, label: 'Phê duyệt phiên bản', icon: Clock },
+    { key: 'expire' as ApprovalType, label: 'Phê duyệt hết hiệu lực', icon: Ban }
   ];
 
   const toggleHistory = (id: string) =>

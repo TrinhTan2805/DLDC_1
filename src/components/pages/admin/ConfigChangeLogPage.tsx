@@ -1,32 +1,5 @@
 import { useState } from 'react';
-import { 
-  Settings, 
-  Search, 
-  Download, 
-  Calendar, 
-  Filter, 
-  Eye, 
-  X,
-  Clock,
-  User,
-  CheckCircle2,
-  XCircle,
-  Shield,
-  Database,
-  Mail,
-  Lock,
-  Globe,
-  Bell,
-  Palette,
-  HardDrive,
-  FileText,
-  ArrowRight,
-  Plus,
-  Edit,
-  Trash2,
-  Save,
-  AlertTriangle
-} from 'lucide-react';
+import { Settings, Search, Download, Calendar, Filter, Eye, X, Clock, User, CheckCircle2, XCircle, Shield, Database, Mail, Lock, Globe, Bell, Palette, HardDrive, FileText, ArrowRight, Plus, Edit, Trash2, Save, AlertTriangle } from "lucide-react";
 import { StatsCard } from '../../common/StatsCard';
 import { StatusTag } from '../../common/StatusTag';
 import { LogRetentionConfigPage } from './LogRetentionConfigPage';

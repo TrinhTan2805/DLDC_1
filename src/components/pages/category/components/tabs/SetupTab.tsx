@@ -15,6 +15,7 @@ interface SetupTabProps {
   onAdd: () => void;
   onEdit: (entity: MasterDataEntity) => void;
   onDelete: (id: string) => void;
+  onView?: (entity: MasterDataEntity) => void;
   onSubmitApproval: (id: string, type: 'category' | 'structure') => void;
   onPublish: (entity: MasterDataEntity) => void;
   onUnpublish: (entity: MasterDataEntity) => void;
@@ -34,6 +35,7 @@ export function SetupTab({
   onAdd,
   onEdit,
   onDelete,
+  onView,
   onSubmitApproval,
   onPublish,
   onUnpublish,
@@ -126,8 +128,9 @@ export function SetupTab({
 
       {/* Entity Table */}
       <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-        <table className="w-full text-sm text-left">
-          <thead className="bg-[#f8fafc] text-black border-b border-slate-100">
+        <div className="max-h-[500px] overflow-y-auto custom-scrollbar">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-[#f8fafc] text-black border-b border-slate-100 sticky top-0 z-10">
             <tr>
               <th className="px-6 py-4 text-[14px] font-normal">Mã</th>
               <th className="px-6 py-4 text-[14px] font-normal">Tên dữ liệu chủ</th>
@@ -174,6 +177,13 @@ export function SetupTab({
                   )}
                   <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-1.5 opacity-80 group-hover:opacity-100 transition-all">
+                        {onView && (
+                          <ActionIconButton 
+                            action="view" 
+                            onClick={() => onView(entity)} 
+                            title="Xem chi tiết" 
+                          />
+                        )}
                         <ActionIconButton 
                           action="submit" 
                           onClick={() => onSubmitApproval(entity.id, 'category')} 
@@ -209,7 +219,8 @@ export function SetupTab({
               );
             })}
           </tbody>
-        </table>
+          </table>
+        </div>
       </div>
     </div>
   );
