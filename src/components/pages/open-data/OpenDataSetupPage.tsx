@@ -1387,18 +1387,20 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
   const getApprovalStatusBadge = (status?: string) => {
     if (!status) return null;
     const styles = {
+      draft: 'bg-slate-100 text-slate-700 border-slate-200',
       pending: 'bg-purple-100 text-purple-700 border-purple-200',
       approved: 'bg-green-100 text-green-700 border-green-200',
       rejected: 'bg-orange-100 text-orange-700 border-orange-200'
     };
     const labels = {
-      pending: 'Hàng tháng',
-      approved: 'Hoạt động',
-      rejected: 'Ngừng hoạt động'
+      draft: 'Bản nháp',
+      pending: 'Chờ phê duyệt',
+      approved: 'Đã phê duyệt',
+      rejected: 'Từ chối'
     };
     return (
       <span className={`px-2 py-1 text-xs border rounded-full ${styles[status as keyof typeof styles]}`}>
-        {labels[status as keyof typeof labels]}
+        {labels[status as keyof typeof labels] || status}
       </span>
     );
   };
@@ -1784,18 +1786,19 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                             <button onClick={() => handleDelete(category)} className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Xóa">
                               <Trash2 className="w-4 h-4" />
                             </button>
-                            {activeTab === 'management' && category.approvalStatus === 'pending' && (
-                              <>
-                                <button onClick={() => handleSubmitForApproval(category)} className="p-1.5 text-slate-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors" title="Trình duyệt">
-                                  <Send className="w-4 h-4" />
-                                </button>
-                                <button onClick={() => handleApprove(category)} className="p-1.5 text-slate-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Duyệt">
-                                  <Check className="w-4 h-4" />
-                                </button>
-                                <button onClick={() => handleReject(category)} className="p-1.5 text-slate-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors" title="Từ chối duyệt">
-                                  <Ban className="w-4 h-4" />
-                                </button>
-                              </>
+                            {activeTab === 'management' && (
+                              <button
+                                onClick={() => handleSubmitForApproval(category)}
+                                disabled={category.approvalStatus === 'draft' || category.status === 'draft'}
+                                className={`p-1.5 rounded-lg transition-colors ${
+                                  category.approvalStatus === 'draft' || category.status === 'draft'
+                                    ? 'text-slate-300 cursor-not-allowed bg-transparent'
+                                    : 'text-slate-500 hover:text-purple-600 hover:bg-purple-50'
+                                }`}
+                                title="Gửi duyệt"
+                              >
+                                <Send className="w-4 h-4" />
+                              </button>
                             )}
                           </div>
                         </td>
