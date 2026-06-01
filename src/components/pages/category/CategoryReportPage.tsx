@@ -108,7 +108,7 @@ export function CategoryReportPage() {
                   <input
                     type="text"
                     title="Từ khóa"
-                    placeholder="Tìm kiếm toàn văn (Nhập từ khóa mã dataset, tên dataset...)"
+                    placeholder="Tìm kiếm toàn văn (Nhập từ khóa mã danh mục, tên danh mục...)"
                     value={searchKeyword}
                     onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchKeyword(e.target.value)}
                     className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm"
@@ -259,17 +259,10 @@ export function CategoryReportPage() {
                     <div className="absolute right-0 top-full mt-2 w-40 rounded-2xl border border-slate-200 bg-white shadow-xl z-20">
                       <button
                         type="button"
-                        onClick={() => handleExportFile('XLS')}
+                        onClick={() => handleExportFile('Excel')}
                         className="w-full text-left px-4 py-3 hover:bg-slate-50 text-sm text-slate-700"
                       >
-                        XLS
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleExportFile('DOCX')}
-                        className="w-full text-left px-4 py-3 hover:bg-slate-50 text-sm text-slate-700"
-                      >
-                        DOCX
+                        Excel
                       </button>
                       <button
                         type="button"
@@ -297,8 +290,8 @@ export function CategoryReportPage() {
                 <table className="w-full">
                   <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600">Mã Dataset</th>
-                      <th className="px-4 py-3 text-left text-xs text-slate-600">Tên Dataset</th>
+                      <th className="px-4 py-3 text-left text-xs text-slate-600">Mã danh mục</th>
+                      <th className="px-4 py-3 text-left text-xs text-slate-600">Tên danh mục</th>
                       <th className="px-4 py-3 text-left text-xs text-slate-600">Chủ đề</th>
                       <th className="px-4 py-3 text-left text-xs text-slate-600">Phiên bản</th>
                       <th className="px-4 py-3 text-left text-xs text-slate-600">Hiệu lực</th>

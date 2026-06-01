@@ -1,17 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, CheckCircle, XCircle } from 'lucide-react';
 
 interface ProvisionServiceApprovalModalProps {
   isOpen: boolean;
   onClose: () => void;
   service?: any;
-  onApprove?: (service: any) => void;
+  onApprove?: (service: any, reason?: string) => void;
   onReject?: (service: any, reason: string) => void;
+  defaultStatus?: 'approve' | 'reject';
+  hideDecision?: boolean;
 }
 
-export function ProvisionServiceApprovalModal({ isOpen, onClose, service, onApprove, onReject }: ProvisionServiceApprovalModalProps) {
-  const [status, setStatus] = useState<'approve' | 'reject'>('approve');
+export function ProvisionServiceApprovalModal({ 
+  isOpen, 
+  onClose, 
+  service, 
+  onApprove, 
+  onReject,
+  defaultStatus = 'approve',
+  hideDecision = false
+}: ProvisionServiceApprovalModalProps) {
+  const [status, setStatus] = useState<'approve' | 'reject'>(defaultStatus);
   const [rejectReason, setRejectReason] = useState('');
+  const [approveReason, setApproveReason] = useState('');
+
+  useEffect(() => {
+    if (isOpen) {
+      setStatus(defaultStatus);
+      setRejectReason('');
+      setApproveReason('');
+    }
+  }, [isOpen, defaultStatus]);
 
   if (!isOpen) return null;
 
@@ -91,6 +110,18 @@ export function ProvisionServiceApprovalModal({ isOpen, onClose, service, onAppr
                   </p>
                 </div>
               )}
+
+              {/* Read Only Approval Reason */}
+              {(service?.status === 'approved' || service?.status === 'published') && service?.approveReason && (
+                <div className="bg-green-50/40 p-4 rounded-lg border border-green-100 space-y-1.5 animate-in fade-in duration-200">
+                  <h4 className="text-xs font-bold text-green-800 uppercase tracking-wider flex items-center gap-1.5">
+                    Ý kiến phê duyệt
+                  </h4>
+                  <p className="text-xs text-green-700 font-medium leading-relaxed">
+                    {service?.approveReason}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Right Column */}
@@ -113,31 +144,33 @@ export function ProvisionServiceApprovalModal({ isOpen, onClose, service, onAppr
               {/* Approval Decision inputs (Visible only if NOT read-only) */}
               {!isReadOnly && (
                 <div className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wider">Quyết định phê duyệt</label>
-                    <div className="flex space-x-3">
-                      <button
-                        onClick={() => setStatus('approve')}
-                        className={`flex-1 flex flex-col items-center p-3 border rounded-lg transition-colors cursor-pointer ${status === 'approve'
-                            ? 'border-green-500 bg-green-50/80 text-green-700'
-                            : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
-                          }`}
-                      >
-                        <CheckCircle className={`w-6 h-6 mb-1.5 ${status === 'approve' ? 'text-green-600' : 'text-slate-400'}`} />
-                        <span className="text-xs font-semibold">Đồng ý phê duyệt</span>
-                      </button>
-                      <button
-                        onClick={() => setStatus('reject')}
-                        className={`flex-1 flex flex-col items-center p-3 border rounded-lg transition-colors cursor-pointer ${status === 'reject'
-                            ? 'border-red-500 bg-red-50/80 text-red-700'
-                            : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
-                          }`}
-                      >
-                        <XCircle className={`w-6 h-6 mb-1.5 ${status === 'reject' ? 'text-red-600' : 'text-slate-400'}`} />
-                        <span className="text-xs font-semibold">Từ chối phê duyệt</span>
-                      </button>
+                  {!hideDecision && (
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wider">Quyết định phê duyệt</label>
+                      <div className="flex space-x-3">
+                        <button
+                          onClick={() => setStatus('approve')}
+                          className={`flex-1 flex flex-col items-center p-3 border rounded-lg transition-colors cursor-pointer ${status === 'approve'
+                              ? 'border-green-500 bg-green-50/80 text-green-700'
+                              : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
+                            }`}
+                        >
+                          <CheckCircle className={`w-6 h-6 mb-1.5 ${status === 'approve' ? 'text-green-600' : 'text-slate-400'}`} />
+                          <span className="text-xs font-semibold">Đồng ý phê duyệt</span>
+                        </button>
+                        <button
+                          onClick={() => setStatus('reject')}
+                          className={`flex-1 flex flex-col items-center p-3 border rounded-lg transition-colors cursor-pointer ${status === 'reject'
+                              ? 'border-red-500 bg-red-50/80 text-red-700'
+                              : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
+                            }`}
+                        >
+                          <XCircle className={`w-6 h-6 mb-1.5 ${status === 'reject' ? 'text-red-600' : 'text-slate-400'}`} />
+                          <span className="text-xs font-semibold">Từ chối phê duyệt</span>
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {status === 'reject' && (
                     <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
@@ -186,6 +219,21 @@ export function ProvisionServiceApprovalModal({ isOpen, onClose, service, onAppr
                       </div>
                     </div>
                   )}
+
+                  {status === 'approve' && (
+                    <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-600 mb-1">Mô tả lý do phê duyệt <span className="text-slate-400 font-normal">(Không bắt buộc)</span></label>
+                        <textarea
+                          className="w-full px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500"
+                          rows={3}
+                          placeholder="Nhập mô tả lý do phê duyệt (nếu có)..."
+                          value={approveReason}
+                          onChange={(e) => setApproveReason(e.target.value)}
+                        ></textarea>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -212,7 +260,7 @@ export function ProvisionServiceApprovalModal({ isOpen, onClose, service, onAppr
               <button aria-label="Xác nhận"
                 onClick={() => {
                   if (status === 'approve' && onApprove) {
-                    onApprove(service);
+                    onApprove(service, approveReason);
                   } else if (status === 'reject' && onReject) {
                     onReject(service, rejectReason);
                   }

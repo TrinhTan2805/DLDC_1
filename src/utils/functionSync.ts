@@ -189,6 +189,7 @@ export const menuStructure = [
       { id: 'admin-groups', code: 'ADMIN_GROUPS', name: 'Quản lý nhóm người dùng' },
       { id: 'admin-functions', code: 'ADMIN_FUNCTIONS', name: 'Danh sách chức năng' },
       { id: 'admin-config', code: 'ADMIN_CONFIG', name: 'Cấu hình hệ thống' },
+      { id: 'admin-login-log', code: 'ADMIN_LOGIN_LOG', name: 'Nhật ký đăng nhập' },
       { id: 'admin-access-log', code: 'ADMIN_ACCESS_LOG', name: 'Nhật ký truy cập' },
       { id: 'admin-backup', code: 'ADMIN_BACKUP', name: 'Sao lưu & Phục hồi' },
       { id: 'admin-statistics', code: 'ADMIN_STATS', name: 'Thống kê hệ thống' },

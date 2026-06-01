@@ -1,19 +1,20 @@
 import { useState } from 'react';
-import { Key, Shield, Clock, RotateCcw, Save, Database } from 'lucide-react';
+import { Shield, Clock, RotateCcw, Save, Database, UploadCloud, List, Wrench } from 'lucide-react';
 
 interface SecurityConfig {
-  // Cấu hình bảo mật mật khẩu
-  requireChangePasswordOnFirstLogin: boolean;
-  passwordValidityDays: number; // Thời gian mật khẩu hợp lệ (bắt buộc đổi sau X ngày)
-  passwordExpiryReminderDays: number; // Nhắc nhở trước X ngày
-  enableWorkingHoursRestriction: boolean; // Giới hạn thời gian làm việc
-  workingHoursStart: string; // Giờ bắt đầu (HH:mm)
-  workingHoursEnd: string; // Giờ kết thúc (HH:mm)
+  // Cấu hình tải lên
+  maxUploadSizeMB: number;
   
-  // Cấu hình bảo mật đăng nhập
+  // Cấu hình hiển thị
+  defaultRecordsPerPage: number;
+  
+  // Cấu hình bảo trì
+  maintenanceMode: boolean;
+
+  // Cấu hình giới hạn đăng nhập sai
   maxLoginAttempts: number;
   loginAttemptTimeWindowMinutes: number;
-  
+
   // Cấu hình phiên làm việc
   sessionTimeoutMinutes: number;
   
@@ -25,12 +26,9 @@ interface SecurityConfig {
 }
 
 const defaultConfig: SecurityConfig = {
-  requireChangePasswordOnFirstLogin: true,
-  passwordValidityDays: 90,
-  passwordExpiryReminderDays: 10,
-  enableWorkingHoursRestriction: true,
-  workingHoursStart: '09:00',
-  workingHoursEnd: '17:00',
+  maxUploadSizeMB: 10,
+  defaultRecordsPerPage: 10,
+  maintenanceMode: false,
   maxLoginAttempts: 5,
   loginAttemptTimeWindowMinutes: 15,
   sessionTimeoutMinutes: 30,
@@ -96,197 +94,136 @@ export function SecurityConfigPage() {
         </div>
       </div>
 
-      {/* Cấu hình bảo mật mật khẩu */}
+      {/* Cấu hình tải lên */}
       <div className="bg-white rounded-lg border border-slate-200 p-6">
         <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-200">
           <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
-            <Key className="w-5 h-5 text-blue-600" />
+            <UploadCloud className="w-5 h-5 text-blue-600" />
           </div>
-          <h2 className="text-slate-900">Cấu hình bảo mật mật khẩu</h2>
+          <h2 className="text-slate-900">Cấu hình giới hạn dung lượng tải lên</h2>
         </div>
 
         <div className="space-y-6">
-          {/* Yêu cầu đổi mật khẩu khi đăng nhập lần đầu */}
-          <div>
-            <div className="flex items-start justify-between mb-2">
-              <div className="flex-1">
-                <label className="text-sm text-slate-900 block mb-1">
-                  Yêu cầu đổi mật khẩu khi đăng nhập lần đầu
-                </label>
-                <p className="text-xs text-slate-500">
-                  Bắt buộc người dùng thay đổi mật khẩu mặc định ngay sau lần đăng nhập đầu tiên
-                </p>
-              </div>
-              <button
-                onClick={() => handleConfigChange('requireChangePasswordOnFirstLogin', !config.requireChangePasswordOnFirstLogin)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                  config.requireChangePasswordOnFirstLogin ? 'bg-blue-600' : 'bg-slate-300'
-                }`}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    config.requireChangePasswordOnFirstLogin ? 'translate-x-6' : 'translate-x-1'
-                  }`}
-                />
-              </button>
-            </div>
-          </div>
-
-          {/* Thời gian yêu cầu thay đổi mật khẩu */}
           <div>
             <div className="flex items-start justify-between mb-3">
               <div className="flex-1">
                 <label className="text-sm text-slate-900 block mb-1">
-                  Thời gian yêu cầu thay đổi mật khẩu (ngày)
+                  Giới hạn dung lượng tối đa cho mỗi tệp tin (MB)
                 </label>
                 <p className="text-xs text-slate-500">
-                  Số ngày tối đa trước khi yêu cầu người dùng đổi mật khẩu
+                  Quy định kích thước tệp tin lớn nhất được phép tải lên hệ thống
                 </p>
               </div>
               <div className="flex items-center gap-2 ml-4">
                 <input
                   type="number"
-                  value={config.passwordValidityDays}
-                  onChange={(e) => handleConfigChange('passwordValidityDays', parseInt(e.target.value) || 0)}
+                  value={config.maxUploadSizeMB}
+                  onChange={(e) => handleConfigChange('maxUploadSizeMB', parseInt(e.target.value) || 0)}
                   className="w-20 px-3 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
                   min="1"
-                  max="365"
+                  max="100"
                 />
-                <span className="text-sm text-slate-600">ngày</span>
-              </div>
-            </div>
-            <input
-              type="range"
-              min="30"
-              max="365"
-              step="1"
-              value={config.passwordValidityDays}
-              onChange={(e) => handleConfigChange('passwordValidityDays', parseInt(e.target.value))}
-              className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider-thumb-blue"
-            />
-            <div className="flex justify-between text-xs text-slate-500 mt-1">
-              <span>30 ngày</span>
-              <span>365 ngày</span>
-            </div>
-          </div>
-
-          {/* Nhắc nhở trước khi mật khẩu hết hạn */}
-          <div>
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex-1">
-                <label className="text-sm text-slate-900 block mb-1">
-                  Nhắc nhở trước khi mật khẩu hết hạn (ngày)
-                </label>
-                <p className="text-xs text-slate-500">
-                  Số ngày trước khi mật khẩu hết hạn để nhắc nhở người dùng
-                </p>
-              </div>
-              <div className="flex items-center gap-2 ml-4">
-                <input
-                  type="number"
-                  value={config.passwordExpiryReminderDays}
-                  onChange={(e) => handleConfigChange('passwordExpiryReminderDays', parseInt(e.target.value) || 0)}
-                  className="w-20 px-3 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
-                  min="1"
-                  max="30"
-                />
-                <span className="text-sm text-slate-600">ngày</span>
+                <span className="text-sm text-slate-600">MB</span>
               </div>
             </div>
             <input
               type="range"
               min="1"
-              max="30"
+              max="100"
               step="1"
-              value={config.passwordExpiryReminderDays}
-              onChange={(e) => handleConfigChange('passwordExpiryReminderDays', parseInt(e.target.value))}
+              value={config.maxUploadSizeMB}
+              onChange={(e) => handleConfigChange('maxUploadSizeMB', parseInt(e.target.value))}
               className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider-thumb-blue"
             />
             <div className="flex justify-between text-xs text-slate-500 mt-1">
-              <span>1 ngày</span>
-              <span>30 ngày</span>
+              <span>1 MB</span>
+              <span>100 MB</span>
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Giới hạn thời gian làm việc */}
-          <div>
-            <div className="flex items-start justify-between mb-2">
-              <div className="flex-1">
-                <label className="text-sm text-slate-900 block mb-1">
-                  Giới hạn thời gian làm việc
-                </label>
-                <p className="text-xs text-slate-500">
-                  Giới hạn truy cập hệ thống trong khoảng thời gian làm việc
-                </p>
-              </div>
-              <button
-                onClick={() => handleConfigChange('enableWorkingHoursRestriction', !config.enableWorkingHoursRestriction)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                  config.enableWorkingHoursRestriction ? 'bg-blue-600' : 'bg-slate-300'
-                }`}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    config.enableWorkingHoursRestriction ? 'translate-x-6' : 'translate-x-1'
-                  }`}
-                />
-              </button>
-            </div>
+      {/* Cấu hình hiển thị */}
+      <div className="bg-white rounded-lg border border-slate-200 p-6">
+        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-200">
+          <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
+            <List className="w-5 h-5 text-green-600" />
           </div>
+          <h2 className="text-slate-900">Cấu hình hiển thị danh sách</h2>
+        </div>
 
-          {/* Giờ bắt đầu làm việc */}
+        <div className="space-y-6">
           <div>
             <div className="flex items-start justify-between mb-3">
               <div className="flex-1">
                 <label className="text-sm text-slate-900 block mb-1">
-                  Giờ bắt đầu làm việc
+                  Số lượng bản ghi hiển thị mặc định trên mỗi trang
                 </label>
                 <p className="text-xs text-slate-500">
-                  Giờ bắt đầu truy cập hệ thống
+                  Số lượng dòng dữ liệu được hiển thị trên một trang bảng
                 </p>
               </div>
               <div className="flex items-center gap-2 ml-4">
-                <input
-                  type="time"
-                  value={config.workingHoursStart}
-                  onChange={(e) => handleConfigChange('workingHoursStart', e.target.value)}
-                  className="w-32 px-3 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Giờ kết thúc làm việc */}
-          <div>
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex-1">
-                <label className="text-sm text-slate-900 block mb-1">
-                  Giờ kết thúc làm việc
-                </label>
-                <p className="text-xs text-slate-500">
-                  Giờ kết thúc truy cập hệ thống
-                </p>
-              </div>
-              <div className="flex items-center gap-2 ml-4">
-                <input
-                  type="time"
-                  value={config.workingHoursEnd}
-                  onChange={(e) => handleConfigChange('workingHoursEnd', e.target.value)}
-                  className="w-32 px-3 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <select
+                  value={config.defaultRecordsPerPage}
+                  onChange={(e) => handleConfigChange('defaultRecordsPerPage', parseInt(e.target.value))}
+                  className="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                >
+                  <option value={10}>10 bản ghi/trang</option>
+                  <option value={20}>20 bản ghi/trang</option>
+                  <option value={50}>50 bản ghi/trang</option>
+                  <option value={100}>100 bản ghi/trang</option>
+                </select>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Cấu hình bảo mật đăng nhập */}
+      {/* Cấu hình chế độ bảo trì */}
       <div className="bg-white rounded-lg border border-slate-200 p-6">
         <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-200">
-          <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
-            <Shield className="w-5 h-5 text-green-600" />
+          <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
+            <Wrench className="w-5 h-5 text-purple-600" />
           </div>
-          <h2 className="text-slate-900">Cấu hình bảo mật đăng nhập</h2>
+          <h2 className="text-slate-900">Cấu hình chế độ bảo trị hệ thống</h2>
+        </div>
+
+        <div className="space-y-6">
+          <div>
+            <div className="flex items-start justify-between mb-2">
+              <div className="flex-1">
+                <label className="text-sm text-slate-900 block mb-1">
+                  Bật/Tắt chế độ bảo trì
+                </label>
+                <p className="text-xs text-slate-500">
+                  Khi bật, hệ thống sẽ tạm dừng hoạt động và hiển thị thông báo bảo trì cho người dùng
+                </p>
+              </div>
+              <button
+                onClick={() => handleConfigChange('maintenanceMode', !config.maintenanceMode)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                  config.maintenanceMode ? 'bg-blue-600' : 'bg-slate-300'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    config.maintenanceMode ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Cấu hình giới hạn đăng nhập sai */}
+      <div className="bg-white rounded-lg border border-slate-200 p-6">
+        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-200">
+          <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center">
+            <Shield className="w-5 h-5 text-red-600" />
+          </div>
+          <h2 className="text-slate-900">Cấu hình giới hạn đăng nhập sai</h2>
         </div>
 
         <div className="space-y-6">
@@ -336,7 +273,7 @@ export function SecurityConfigPage() {
                   Giới hạn số lần đăng nhập sai trong khoảng thời gian (phút)
                 </label>
                 <p className="text-xs text-slate-500">
-                  Khoảng thời gian các lần đăng nhập sai liên tiếp
+                  Khoảng thời gian các lần đăng nhập sai liên tiếp được tính cộng dồn
                 </p>
               </div>
               <div className="flex items-center gap-2 ml-4">

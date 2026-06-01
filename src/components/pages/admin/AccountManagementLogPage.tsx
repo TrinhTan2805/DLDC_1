@@ -19,7 +19,8 @@ import {
   Edit,
   Trash2,
   CheckCircle2,
-  XCircle
+  XCircle,
+  RefreshCw
 } from 'lucide-react';
 import { StatsCard } from '../../common/StatsCard';
 import { StatusTag } from '../../common/StatusTag';
@@ -27,7 +28,7 @@ import { StatusTag } from '../../common/StatusTag';
 interface AccountLog {
   id: number;
   timestamp: string;
-  action: 'create' | 'update' | 'delete' | 'lock' | 'unlock' | 'password_change' | 'password_reset' | 'role_change';
+  action: 'sync' | 'deactivate';
   targetUser: string;
   targetUserId: string;
   performedBy: string;
@@ -43,168 +44,171 @@ interface AccountLog {
 const accountLogs: AccountLog[] = [
   {
     id: 1,
-    timestamp: '22/12/2024 15:30:25',
-    action: 'create',
+    timestamp: '28/05/2026 15:30:25',
+    action: 'sync',
     targetUser: 'Nguyễn Thị Mai',
     targetUserId: 'nguyenthimai',
     performedBy: 'Admin Hệ thống',
     performedById: 'admin',
     ip: '192.168.1.100',
     status: 'success',
-    details: 'Tạo tài khoản mới với vai trò "Cán bộ xử lý dữ liệu"',
-    newValue: 'Role: Cán bộ xử lý dữ liệu, Email: ntmai@moj.gov.vn'
+    details: 'Đồng bộ thông tin tài khoản từ hệ thống SSO dùng chung',
+    newValue: 'Đồng bộ: Thành công, Trạng thái: Hoạt động'
   },
   {
     id: 2,
-    timestamp: '22/12/2024 15:15:42',
-    action: 'lock',
+    timestamp: '28/05/2026 15:15:42',
+    action: 'deactivate',
     targetUser: 'Trần Văn Hùng',
     targetUserId: 'tranvanhung',
     performedBy: 'Nguyễn Văn An',
     performedById: 'nguyenvanan',
     ip: '192.168.1.105',
     status: 'success',
-    details: 'Khóa tài khoản do vi phạm chính sách bảo mật',
-    reason: 'Đăng nhập sai mật khẩu quá 5 lần liên tiếp',
+    details: 'Ngừng hoạt động tài khoản do nhân sự chuyển công tác',
+    reason: 'Có quyết định thuyên chuyển công tác sang đơn vị khác',
     oldValue: 'Status: Active',
-    newValue: 'Status: Locked'
+    newValue: 'Status: Deactivated'
   },
   {
     id: 3,
-    timestamp: '22/12/2024 15:00:18',
-    action: 'password_reset',
+    timestamp: '28/05/2026 15:00:18',
+    action: 'sync',
     targetUser: 'Lê Thị Bình',
     targetUserId: 'lethibinh',
     performedBy: 'Admin Hệ thống',
     performedById: 'admin',
     ip: '192.168.1.100',
     status: 'success',
-    details: 'Đặt lại mật khẩu theo yêu cầu của người dùng',
-    reason: 'Người dùng quên mật khẩu'
+    details: 'Đồng bộ danh sách quyền và vai trò từ cơ sở dữ liệu nhân sự',
+    newValue: 'Quyền: Cập nhật vai trò Cán bộ xử lý'
   },
   {
     id: 4,
-    timestamp: '22/12/2024 14:45:55',
-    action: 'role_change',
+    timestamp: '28/05/2026 14:45:55',
+    action: 'deactivate',
     targetUser: 'Phạm Văn Cường',
     targetUserId: 'phamvancuong',
     performedBy: 'Nguyễn Văn An',
     performedById: 'nguyenvanan',
     ip: '192.168.1.105',
     status: 'success',
-    details: 'Thay đổi vai trò từ "Cán bộ" sang "Quản trị viên"',
-    oldValue: 'Role: Cán bộ',
-    newValue: 'Role: Quản trị viên'
+    details: 'Tạm ngưng hoạt động tài khoản không hoạt động trên 90 ngày',
+    reason: 'Không đăng nhập hệ thống quá 90 ngày',
+    oldValue: 'Status: Active',
+    newValue: 'Status: Deactivated'
   },
   {
     id: 5,
-    timestamp: '22/12/2024 14:30:33',
-    action: 'update',
+    timestamp: '28/05/2026 14:30:33',
+    action: 'sync',
     targetUser: 'Hoàng Thị Lan',
     targetUserId: 'hoangthilan',
     performedBy: 'Hoàng Thị Lan',
     performedById: 'hoangthilan',
     ip: '192.168.1.120',
     status: 'success',
-    details: 'Cập nhật thông tin cá nhân (email, số điện thoại)',
-    oldValue: 'Email: htlan@old.gov.vn, Phone: 0123456789',
-    newValue: 'Email: htlan@moj.gov.vn, Phone: 0987654321'
+    details: 'Yêu cầu đồng bộ lại thông tin cá nhân và chữ ký số',
+    oldValue: 'Signature: None',
+    newValue: 'Signature: Verified'
   },
   {
     id: 6,
-    timestamp: '22/12/2024 14:15:20',
-    action: 'unlock',
+    timestamp: '28/05/2026 14:15:20',
+    action: 'deactivate',
     targetUser: 'Đặng Văn Nam',
     targetUserId: 'dangvannam',
     performedBy: 'Admin Hệ thống',
     performedById: 'admin',
     ip: '192.168.1.100',
     status: 'success',
-    details: 'Mở khóa tài khoản sau khi xác minh danh tính',
-    reason: 'Đã xác minh danh tính qua điện thoại',
-    oldValue: 'Status: Locked',
-    newValue: 'Status: Active'
+    details: 'Ngừng hoạt động tài khoản theo văn bản yêu cầu của đơn vị quản lý',
+    reason: 'Nhân viên nghỉ hưu theo chế độ',
+    oldValue: 'Status: Active',
+    newValue: 'Status: Deactivated'
   },
   {
     id: 7,
-    timestamp: '22/12/2024 14:00:45',
-    action: 'password_change',
+    timestamp: '28/05/2026 14:00:45',
+    action: 'sync',
     targetUser: 'Vũ Thị Hoa',
     targetUserId: 'vuthihoa',
     performedBy: 'Vũ Thị Hoa',
     performedById: 'vuthihoa',
     ip: '192.168.1.115',
     status: 'success',
-    details: 'Người dùng đổi mật khẩu thành công',
-    reason: 'Đổi mật khẩu định kỳ'
+    details: 'Đồng bộ thông tin đăng ký định danh điện tử thành công',
+    newValue: 'eID: Verified'
   },
   {
     id: 8,
-    timestamp: '22/12/2024 13:45:12',
-    action: 'delete',
+    timestamp: '28/05/2026 13:45:12',
+    action: 'deactivate',
     targetUser: 'Nguyễn Văn Tuấn',
     targetUserId: 'nguyenvantuan',
     performedBy: 'Admin Hệ thống',
     performedById: 'admin',
     ip: '192.168.1.100',
     status: 'success',
-    details: 'Xóa tài khoản người dùng đã nghỉ việc',
-    reason: 'Nhân viên đã nghỉ việc từ ngày 01/12/2024',
-    oldValue: 'User: nguyenvantuan, Role: Cán bộ'
+    details: 'Ngừng hoạt động tài khoản do người dùng chấm dứt hợp đồng lao động',
+    reason: 'Hết hạn hợp đồng lao động',
+    oldValue: 'Status: Active',
+    newValue: 'Status: Deactivated'
   },
   {
     id: 9,
-    timestamp: '22/12/2024 13:30:28',
-    action: 'create',
+    timestamp: '28/05/2026 13:30:28',
+    action: 'sync',
     targetUser: 'Trần Thị Thu',
     targetUserId: 'tranthithu',
     performedBy: 'Nguyễn Văn An',
     performedById: 'nguyenvanan',
     ip: '192.168.1.105',
     status: 'failed',
-    details: 'Tạo tài khoản thất bại: Username đã tồn tại',
-    newValue: 'Username: tranthithu'
+    details: 'Đồng bộ thất bại: Không kết nối được tới phân hệ phân quyền tập trung',
+    newValue: 'Error: Connection Timeout'
   },
   {
     id: 10,
-    timestamp: '22/12/2024 13:15:55',
-    action: 'role_change',
+    timestamp: '28/05/2026 13:15:55',
+    action: 'deactivate',
     targetUser: 'Lê Văn Đức',
     targetUserId: 'levanduc',
     performedBy: 'Admin Hệ thống',
     performedById: 'admin',
     ip: '192.168.1.100',
     status: 'success',
-    details: 'Phân quyền bổ sung chức năng "Quản lý danh mục"',
-    oldValue: 'Permissions: [Xem dữ liệu, Xử lý dữ liệu]',
-    newValue: 'Permissions: [Xem dữ liệu, Xử lý dữ liệu, Quản lý danh mục]'
+    details: 'Ngừng hoạt động tài khoản do vi phạm kỷ luật sử dụng hệ thống',
+    reason: 'Truy cập tài nguyên trái phép nhiều lần',
+    oldValue: 'Status: Active',
+    newValue: 'Status: Deactivated'
   },
   {
     id: 11,
-    timestamp: '22/12/2024 13:00:40',
-    action: 'update',
+    timestamp: '28/05/2026 13:00:40',
+    action: 'sync',
     targetUser: 'Phạm Thị Hương',
     targetUserId: 'phamthihuong',
     performedBy: 'Admin Hệ thống',
     performedById: 'admin',
     ip: '192.168.1.100',
     status: 'success',
-    details: 'Cập nhật thông tin đơn vị công tác',
+    details: 'Đồng bộ cập nhật thông tin phòng ban mới phân bổ',
     oldValue: 'Department: Phòng Kế hoạch',
-    newValue: 'Department: Phòng Công nghệ thông tin'
+    newValue: 'Department: Phòng CNTT'
   },
   {
     id: 12,
-    timestamp: '22/12/2024 12:45:15',
-    action: 'lock',
+    timestamp: '28/05/2026 12:45:15',
+    action: 'deactivate',
     targetUser: 'Nguyễn Văn Minh',
     targetUserId: 'nguyenvanminh',
-    performedBy: 'Nguyễn Văn An',
-    performedById: 'nguyenvanan',
-    ip: '192.168.1.105',
+    performedBy: 'Admin Hệ thống',
+    performedById: 'admin',
+    ip: '192.168.1.100',
     status: 'failed',
-    details: 'Khóa tài khoản thất bại: Không đủ quyền hạn',
-    reason: 'Người thực hiện không có quyền khóa tài khoản quản trị viên'
+    details: 'Lỗi khi ngừng hoạt động tài khoản: Người dùng đang sở hữu các tiến trình điều phối dữ liệu chưa chuyển giao',
+    newValue: 'Status: Active'
   }
 ];
 
@@ -216,6 +220,23 @@ export function AccountManagementLogPage() {
   const [endDate, setEndDate] = useState('');
   const [selectedLog, setSelectedLog] = useState<AccountLog | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  const parseDate = (dateStr: string) => {
+    if (!dateStr) return null;
+    const [datePart] = dateStr.split(' ');
+    const [day, month, year] = datePart.split('/');
+    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
 
   const filteredLogs = accountLogs.filter(log => {
     const matchesSearch = log.targetUser.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -224,7 +245,24 @@ export function AccountManagementLogPage() {
                          log.details.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesAction = filterAction === 'all' || log.action === filterAction;
     const matchesStatus = filterStatus === 'all' || log.status === filterStatus;
-    return matchesSearch && matchesAction && matchesStatus;
+
+    let matchesDate = true;
+    if (startDate || endDate) {
+      const logDate = parseDate(log.timestamp);
+      if (logDate) {
+        if (startDate) {
+          const start = new Date(startDate);
+          start.setHours(0, 0, 0, 0);
+          if (logDate < start) matchesDate = false;
+        }
+        if (endDate) {
+          const end = new Date(endDate);
+          end.setHours(23, 59, 59, 999);
+          if (logDate > end) matchesDate = false;
+        }
+      }
+    }
+    return matchesSearch && matchesAction && matchesStatus && matchesDate;
   });
 
   const handleViewDetail = (log: AccountLog) => {
@@ -238,94 +276,57 @@ export function AccountManagementLogPage() {
   };
 
   const handleExportExcel = () => {
-    alert('Đang xuất file Excel...');
-    // Logic export Excel
+    alert('Đang kết xuất nhật ký quản lý tài khoản ra file Excel...');
   };
 
   const getActionIcon = (action: AccountLog['action']) => {
     switch (action) {
-      case 'create':
-        return <UserPlus className="w-4 h-4" />;
-      case 'update':
-        return <Edit className="w-4 h-4" />;
-      case 'delete':
-        return <Trash2 className="w-4 h-4" />;
-      case 'lock':
-        return <Lock className="w-4 h-4" />;
-      case 'unlock':
-        return <Unlock className="w-4 h-4" />;
-      case 'password_change':
-        return <Key className="w-4 h-4" />;
-      case 'password_reset':
-        return <Key className="w-4 h-4" />;
-      case 'role_change':
-        return <Shield className="w-4 h-4" />;
+      case 'sync':
+        return <RefreshCw className="w-4 h-4" />;
+      case 'deactivate':
+        return <UserX className="w-4 h-4" />;
     }
   };
 
   const getActionColor = (action: AccountLog['action']) => {
     switch (action) {
-      case 'create':
-        return 'bg-green-100 text-green-700 border-green-200';
-      case 'update':
+      case 'sync':
         return 'bg-blue-100 text-blue-700 border-blue-200';
-      case 'delete':
+      case 'deactivate':
         return 'bg-red-100 text-red-700 border-red-200';
-      case 'lock':
-        return 'bg-orange-100 text-orange-700 border-orange-200';
-      case 'unlock':
-        return 'bg-teal-100 text-teal-700 border-teal-200';
-      case 'password_change':
-        return 'bg-purple-100 text-purple-700 border-purple-200';
-      case 'password_reset':
-        return 'bg-purple-100 text-purple-700 border-purple-200';
-      case 'role_change':
-        return 'bg-cyan-100 text-cyan-700 border-cyan-200';
     }
   };
 
   const getActionLabel = (action: AccountLog['action']) => {
     switch (action) {
-      case 'create':
-        return 'Tạo tài khoản';
-      case 'update':
-        return 'Cập nhật';
-      case 'delete':
-        return 'Xóa tài khoản';
-      case 'lock':
-        return 'Khóa tài khoản';
-      case 'unlock':
-        return 'Mở khóa';
-      case 'password_change':
-        return 'Đổi mật khẩu';
-      case 'password_reset':
-        return 'Đặt lại mật khẩu';
-      case 'role_change':
-        return 'Thay đổi quyền';
+      case 'sync':
+        return 'Đồng bộ';
+      case 'deactivate':
+        return 'Ngừng hoạt động tài khoản';
     }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px' }}>
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <StatsCard 
-          icon={UserPlus} 
-          iconColor="green" 
-          title="Tài khoản mới (30 ngày)" 
-          value={accountLogs.filter(l => l.action === 'create' && l.status === 'success').length.toString()} 
-        />
-        <StatsCard 
-          icon={Lock} 
-          iconColor="orange" 
-          title="Tài khoản bị khóa" 
-          value={accountLogs.filter(l => l.action === 'lock' && l.status === 'success').length.toString()} 
-        />
-        <StatsCard 
-          icon={Shield} 
+          icon={RefreshCw} 
           iconColor="blue" 
-          title="Thay đổi quyền" 
-          value={accountLogs.filter(l => l.action === 'role_change').length.toString()} 
+          title="Đồng bộ thành công" 
+          value={accountLogs.filter(l => l.action === 'sync' && l.status === 'success').length.toString()} 
+        />
+        <StatsCard 
+          icon={UserX} 
+          iconColor="red" 
+          title="Ngừng hoạt động" 
+          value={accountLogs.filter(l => l.action === 'deactivate' && l.status === 'success').length.toString()} 
+        />
+        <StatsCard 
+          icon={UserCog} 
+          iconColor="green" 
+          title="Tổng số thao tác" 
+          value={accountLogs.length.toString()} 
         />
         <StatsCard 
           icon={XCircle} 
@@ -335,174 +336,272 @@ export function AccountManagementLogPage() {
         />
       </div>
 
-      {/* Filters */}
-      <div className="bg-white rounded-lg border border-slate-200 p-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          <div className="lg:col-span-2">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
+      {/* Filters and Actions */}
+      <div className="mb-6">
+        {/* Row 1: Search and Buttons */}
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex-1 flex items-center gap-3">
+            <div className="relative flex-1">
+              <input aria-label="Input field"
                 type="text"
                 placeholder="Tìm kiếm tài khoản, người thực hiện..."
+                className="w-full px-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onChange={handleSearchChange}
               />
             </div>
-          </div>
-          <div>
-            <select
-              value={filterAction}
-              onChange={(e) => setFilterAction(e.target.value)}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <button className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center">
+              <Search className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`p-2 rounded-lg transition-colors shadow-sm flex items-center justify-center border ${showFilters ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-[#e2e8f0] text-slate-600 hover:bg-slate-50'}`}
+              title="Bộ lọc"
             >
-              <option value="all">Tất cả thao tác</option>
-              <option value="create">Tạo tài khoản</option>
-              <option value="update">Cập nhật</option>
-              <option value="delete">Xóa tài khoản</option>
-              <option value="lock">Khóa tài khoản</option>
-              <option value="unlock">Mở khóa</option>
-              <option value="password_change">Đổi mật khẩu</option>
-              <option value="password_reset">Đặt lại mật khẩu</option>
-              <option value="role_change">Thay đổi quyền</option>
-            </select>
+              {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
+            </button>
           </div>
-          <div>
-            <div className="flex items-center gap-2 border border-slate-300 rounded-lg px-3 py-2">
-              <Calendar className="w-4 h-4 text-slate-400 flex-shrink-0" />
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="flex-1 outline-none text-sm"
-                placeholder="Từ ngày"
-              />
-              <span className="text-slate-400">-</span>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="flex-1 outline-none text-sm"
-                placeholder="Đến ngày"
-              />
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleExportExcel}
+              className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium"
+            >
+              <Download className="w-4 h-4" />
+              Kết xuất
+            </button>
+          </div>
+        </div>
+
+        {/* Row 2: Filters (Collapsible) */}
+        {showFilters && (
+          <div className="bg-slate-50 p-5 rounded-lg border border-slate-200 grid grid-cols-4 gap-4 mt-4 animate-in slide-in-from-top-2 duration-200 shadow-sm relative">
+            <div className="absolute -top-2 left-[50px] w-4 h-4 bg-slate-50 border-t border-l border-slate-200 transform rotate-45"></div>
+
+            <div className="space-y-1.5 relative z-10">
+              <label className="text-[13px] font-medium text-slate-700">Tác vụ</label>
+              <select aria-label="Select box"
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                value={filterAction}
+                onChange={(e) => {
+                  setFilterAction(e.target.value);
+                  setCurrentPage(1);
+                }}
+              >
+                <option value="all">Tất cả thao tác</option>
+                <option value="sync">Đồng bộ</option>
+                <option value="deactivate">Ngừng hoạt động tài khoản</option>
+              </select>
+            </div>
+
+            <div className="space-y-1.5 relative z-10">
+              <label className="text-[13px] font-medium text-slate-700">Trạng thái</label>
+              <select aria-label="Select box"
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                value={filterStatus}
+                onChange={(e) => {
+                  setFilterStatus(e.target.value);
+                  setCurrentPage(1);
+                }}
+              >
+                <option value="all">Tất cả trạng thái</option>
+                <option value="success">Thành công</option>
+                <option value="failed">Thất bại</option>
+              </select>
+            </div>
+
+            <div className="space-y-1.5 relative z-10">
+              <label className="text-[13px] font-medium text-slate-700">Thời gian từ</label>
+              <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
+                <input aria-label="Input field"
+                  type="date"
+                  className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-slate-700 p-0"
+                  value={startDate}
+                  onChange={(e) => {
+                    setStartDate(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                />
+                <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
+              </div>
+            </div>
+
+            <div className="space-y-1.5 relative z-10">
+              <label className="text-[13px] font-medium text-slate-700">Thời gian đến</label>
+              <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
+                <input aria-label="Input field"
+                  type="date"
+                  className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-slate-700 p-0"
+                  value={endDate}
+                  onChange={(e) => {
+                    setEndDate(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                />
+                <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
+              </div>
             </div>
           </div>
-          <div>
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">Tất cả trạng thái</option>
-              <option value="success">Thành công</option>
-              <option value="failed">Thất bại</option>
-            </select>
-          </div>
-        </div>
-        <div className="flex gap-3 mt-4">
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm flex items-center gap-2">
-            <Filter className="w-4 h-4" />
-            Lọc
-          </button>
-          <button 
-            onClick={handleExportExcel}
-            className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 text-sm flex items-center gap-2"
-          >
-            <Download className="w-4 h-4" />
-            Xuất Excel
-          </button>
-        </div>
+        )}
       </div>
 
       {/* Account Logs Table */}
-      <div className="bg-white rounded-lg border border-slate-200">
-        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-          <h3 className="text-slate-900">Nhật ký quản lý tài khoản ({filteredLogs.length} bản ghi)</h3>
-        </div>
+      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-slate-50">
+          <table className="w-full border-collapse collection-table text-[13px]">
+            <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-[1]">
               <tr>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Người thực hiện</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Thời gian</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Tác vụ</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Tài khoản</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Chi tiết</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">IP người thực hiện</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Trạng thái</th>
-                <th className="px-6 py-3 text-right text-xs text-slate-600 uppercase tracking-wider">Thao tác</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-12 text-[13px]">STT</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Người thực hiện</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Thời gian</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Tác vụ</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Tài khoản</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Chi tiết</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">IP người thực hiện</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-24 text-[13px]">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filteredLogs.map((log) => (
-                <tr key={log.id} className="hover:bg-slate-50">
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-slate-900">{log.performedBy}</div>
-                    <div className="text-xs text-slate-500">@{log.performedById}</div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-700 whitespace-nowrap">{log.timestamp}</td>
-                  <td className="px-6 py-4">
-                    <StatusTag 
-                      label={getActionLabel(log.action)} 
-                      variant={log.action === 'create' ? 'green' : log.action === 'update' ? 'blue' : log.action === 'delete' ? 'red' : log.action === 'lock' ? 'orange' : log.action === 'unlock' ? 'teal' : log.action === 'role_change' ? 'cyan' : 'purple'} 
-                      icon={getActionIcon(log.action)}
-                    />
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-slate-900">{log.targetUser}</div>
-                    <div className="text-xs text-slate-500">@{log.targetUserId}</div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-700 max-w-md truncate">
-                    {log.details}
-                  </td>
-                  <td className="px-6 py-4">
-                    <code className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-700">
-                      {log.ip}
-                    </code>
-                  </td>
-                  <td className="px-6 py-4">
-                    <StatusTag 
-                      label={log.status === 'success' ? 'Thành công' : 'Thất bại'} 
-                      variant={log.status === 'success' ? 'green' : 'red'} 
-                      icon={log.status === 'success' ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
-                    />
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-end">
-                      <button
-                        onClick={() => handleViewDetail(log)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="Xem chi tiết"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
-                    </div>
+              {filteredLogs
+                .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                .map((log, index) => (
+                  <tr key={log.id} className="hover:bg-slate-50 transition-all group border-b border-slate-100">
+                    <td className="px-4 py-3 text-center text-slate-500 font-medium text-[13px]">
+                      {(currentPage - 1) * itemsPerPage + index + 1}
+                    </td>
+                    <td className="px-4 py-3 text-center text-[13px]">
+                      <div className="font-medium text-slate-900 leading-snug">{log.performedBy}</div>
+                    </td>
+                    <td className="px-4 py-3 text-center text-slate-700 whitespace-nowrap text-[13px]">{log.timestamp}</td>
+                    <td className="px-4 py-3 text-center text-[13px]">
+                      <div className="inline-flex justify-center">
+                        <StatusTag 
+                          label={getActionLabel(log.action)} 
+                          variant={log.action === 'sync' ? 'blue' : 'red'} 
+                          icon={getActionIcon(log.action)}
+                        />
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-center text-[13px]">
+                      <div className="font-medium text-slate-900 leading-snug">{log.targetUser}</div>
+                    </td>
+                    <td className="px-4 py-3 text-center text-slate-700 max-w-xs truncate text-[13px]">
+                      {log.details}
+                    </td>
+                    <td className="px-4 py-3 text-center text-[13px]">
+                      <code className="text-[11px] bg-slate-100 px-2 py-1 rounded text-slate-700 font-mono">
+                        {log.ip}
+                      </code>
+                    </td>
+                    <td className="px-4 py-3 text-center text-[13px]">
+                      <div className="inline-flex justify-center">
+                        <StatusTag 
+                          label={log.status === 'success' ? 'Thành công' : 'Thất bại'} 
+                          variant={log.status === 'success' ? 'green' : 'red'} 
+                          icon={log.status === 'success' ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                        />
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex items-center justify-center">
+                        <button
+                          onClick={() => handleViewDetail(log)}
+                          className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
+                          title="Xem chi tiết"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              {filteredLogs.length === 0 && (
+                <tr>
+                  <td colSpan={9} className="px-4 py-8 text-center text-slate-500 text-[13px]">
+                    Không tìm thấy bản ghi nào phù hợp
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
         
         {/* Pagination */}
-        <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
-          <div className="text-sm text-slate-600">
-            Hiển thị 1-{filteredLogs.length} trong tổng số 2,548 bản ghi
+        <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white sm:px-6 collection-pagination text-[13px]">
+          <div className="flex items-center gap-2">
+            <span className="text-slate-600">Hiển thị</span>
+            <select aria-label="Select record count" 
+              className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px]"
+              title="Số bản ghi trên trang"
+              value={itemsPerPage}
+              onChange={(e) => {
+                setItemsPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+            <span className="text-slate-600">bản ghi/trang</span>
           </div>
-          <div className="flex gap-2">
-            <button className="px-3 py-1 border border-slate-300 rounded text-sm hover:bg-slate-50">Trước</button>
-            <button title="Hành động" aria-label="Hành động" className="px-3 py-1 bg-blue-600 text-white rounded text-sm">1</button>
-            <button title="Hành động" aria-label="Hành động" className="px-3 py-1 border border-slate-300 rounded text-sm hover:bg-slate-50">2</button>
-            <button title="Hành động" aria-label="Hành động" className="px-3 py-1 border border-slate-300 rounded text-sm hover:bg-slate-50">3</button>
-            <button className="px-3 py-1 border border-slate-300 rounded text-sm hover:bg-slate-50">Sau</button>
+          
+          <div className="flex items-center gap-4">
+            <span className="text-slate-600">
+              {filteredLogs.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, filteredLogs.length)} / {filteredLogs.length}
+            </span>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : currentPage)}
+                disabled={currentPage === 1}
+                className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
+              >
+                Trước
+              </button>
+              
+              {Array.from({ length: Math.ceil(filteredLogs.length / itemsPerPage) }, (_, i) => i + 1).map(page => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`px-3 py-1.5 border rounded-lg font-medium text-[13px] transition-colors ${
+                    currentPage === page
+                      ? 'bg-blue-600 border-blue-600 text-white'
+                      : 'border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+
+              <button
+                onClick={() => {
+                  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
+                  if (currentPage < totalPages) {
+                    setCurrentPage(currentPage + 1);
+                  }
+                }}
+                disabled={currentPage === Math.ceil(filteredLogs.length / itemsPerPage) || filteredLogs.length === 0}
+                className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
+              >
+                Sau
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Detail Modal */}
       {showDetailModal && selectedLog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={closeDetailModal}
+        >
+          <div 
+            className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-slate-200">
               <div className="flex items-center gap-3">

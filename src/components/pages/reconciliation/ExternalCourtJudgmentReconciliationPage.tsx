@@ -80,6 +80,8 @@ export function ExternalCourtJudgmentReconciliationPage() {
     <ReconciliationTemplate
       title="Đối soát tổng hợp dữ liệu về Thông tin Bản án, quyết định"
       records={mockRecords}
+      hideSetupTab={true}
+      hideLogTab={true}
     />
   );
 }

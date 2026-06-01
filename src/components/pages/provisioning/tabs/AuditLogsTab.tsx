@@ -1,6 +1,36 @@
 import React, { useState } from 'react';
 import { Search, Filter, Calendar, Download, Eye, AlertCircle, CheckCircle2, XCircle } from 'lucide-react';
 
+const formatDateTime = (dateStr: string) => {
+  if (!dateStr) return '';
+  if (/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}$/.test(dateStr)) return dateStr;
+  const spaceSplit = dateStr.split(' ');
+  if (spaceSplit.length === 2) {
+    const [dStr, tStr] = spaceSplit;
+    const dParts = dStr.split('-');
+    if (dParts.length === 3) {
+      return `${dParts[2]}/${dParts[1]}/${dParts[0]} ${tStr}`;
+    }
+  }
+  const parts = dateStr.split('-');
+  if (parts.length === 3 && !dateStr.includes('T') && !dateStr.includes(' ')) {
+    return `${parts[2]}/${parts[1]}/${parts[0]} 08:00:00`;
+  }
+  try {
+    const d = new Date(dateStr);
+    if (!isNaN(d.getTime())) {
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+      const h = String(d.getHours()).padStart(2, '0');
+      const m = String(d.getMinutes()).padStart(2, '0');
+      const s = String(d.getSeconds()).padStart(2, '0');
+      return `${day}/${month}/${year} ${h}:${m}:${s}`;
+    }
+  } catch (e) {}
+  return dateStr;
+};
+
 const mockLogs = [
   { id: 'LOG-001', timestamp: '2026-05-25 14:23:45', ip: '192.168.12.100', status: 200, method: 'GET', endpoint: '/api/v1/hotich/list', latency: '124ms', client: 'Sở Y tế tỉnh Bắc Ninh' },
   { id: 'LOG-002', timestamp: '2026-05-25 14:21:10', ip: '10.20.30.45', status: 403, method: 'GET', endpoint: '/api/v1/hotich/list', latency: '45ms', client: 'UBND Huyện Tiên Du' },
@@ -87,7 +117,7 @@ export function AuditLogsTab() {
                   <td className="px-6 py-4 text-slate-600">
                     <div className="flex items-center gap-1.5 text-xs font-mono">
                       <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                      {log.timestamp}
+                      {formatDateTime(log.timestamp)}
                     </div>
                   </td>
                   <td className="px-6 py-4 font-semibold text-slate-800">{log.client}</td>

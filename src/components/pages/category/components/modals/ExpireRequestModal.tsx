@@ -1,5 +1,6 @@
 import React, { ChangeEvent, useState } from 'react';
-import { Send, X, AlertTriangle, Info, CalendarClock } from 'lucide-react';
+import { Send, X, AlertTriangle, Info, CalendarClock, UserCheck } from 'lucide-react';
+import { approvers } from '../../categoryConstants';
 
 interface ExpireRequestModalProps {
   isOpen: boolean;
@@ -9,7 +10,7 @@ interface ExpireRequestModalProps {
     code: string;
     name: string;
   } | null;
-  onSubmit: (data: { expireDate: string; reason: string; note: string }) => void;
+  onSubmit: (data: { expireDate: string; reason: string; note: string; approver: string }) => void;
 }
 
 export function ExpireRequestModal({
@@ -21,7 +22,8 @@ export function ExpireRequestModal({
   const [formData, setFormData] = useState({
     expireDate: '',
     reason: '',
-    note: ''
+    note: '',
+    approver: ''
   });
 
   if (!isOpen || !entity) return null;
@@ -89,6 +91,24 @@ export function ExpireRequestModal({
              </div>
 
              <div>
+                <label className="block text-[13px] font-semibold text-slate-700 mb-1">Lãnh đạo phê duyệt <span className="text-red-500">*</span></label>
+                <div className="relative">
+                   <UserCheck className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                   <select 
+                      title="Lãnh đạo phê duyệt"
+                      value={formData.approver}
+                      onChange={(e: any) => setFormData({...formData, approver: e.target.value})}
+                      className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl bg-white text-[14px] focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none"
+                   >
+                      <option value="">-- Chọn lãnh đạo trình duyệt --</option>
+                      {approvers.map(a => (
+                        <option key={a.id} value={a.id}>{a.name} - {a.position} ({a.department})</option>
+                      ))}
+                   </select>
+                </div>
+             </div>
+
+             <div>
                 <label className="block text-[13px] font-semibold text-slate-700 mb-1">Ghi chú thêm</label>
                 <textarea 
                   title="Ghi chú thêm"
@@ -105,19 +125,19 @@ export function ExpireRequestModal({
         {/* Footer */}
         <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex gap-3 justify-end items-center">
           <button 
- onClick={onClose}
- className="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-all text-[14px]"
- >
+            onClick={onClose}
+            className="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-all text-[14px]"
+          >
             Hủy
           </button>
           <button 
- onClick={() => onSubmit(formData)}
- disabled={!formData.expireDate || !formData.reason}
- className="px-6 py-2.5 bg-orange-600 text-white rounded-xl flex items-center justify-center gap-2 hover:bg-orange-700 transition-all text-[14px] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-orange-200"
- >
- <Send className="w-4 h-4" />
- Trình duyệt hết hiệu lực
- </button>
+            onClick={() => onSubmit(formData)}
+            disabled={!formData.expireDate || !formData.reason || !formData.approver}
+            className="px-6 py-2.5 bg-orange-600 text-white rounded-xl flex items-center justify-center gap-2 hover:bg-orange-700 transition-all text-[14px] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-orange-200"
+          >
+            <Send className="w-4 h-4" />
+            Trình duyệt hết hiệu lực
+          </button>
         </div>
       </div>
     </div>

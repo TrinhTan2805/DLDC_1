@@ -556,10 +556,12 @@ export function DataDetailModal({
                     <button className="p-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 transition-all shadow-sm" title="Tải lại">
                       <RefreshCw className="w-5 h-5" />
                     </button>
-                    <button className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all flex items-center gap-2 text-sm font-semibold shadow-sm">
-                      <FileDown className="w-4 h-4" />
-                      Kết xuất
-                    </button>
+                    {!isInline && (
+                      <button className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all flex items-center gap-2 text-sm font-semibold shadow-sm">
+                        <FileDown className="w-4 h-4" />
+                        Kết xuất
+                      </button>
+                    )}
                   </div>
                 </div>
 

@@ -2,9 +2,41 @@ import React, { useMemo, useState } from 'react';
 import { FileText, Search, Share, Plus, Filter, Download, XCircle, UploadCloud, CheckCircle } from 'lucide-react';
 import { ProvisionDataRequestModal, CreateDataRequestPayload } from './modals/ProvisionDataRequestModal';
 import { ProvisionRequestApprovalModal } from './modals/ProvisionRequestApprovalModal';
+import { ProvisionRequestExportModal } from './modals/ProvisionRequestExportModal';
+import { ProvisionRequestHandoverModal } from './modals/ProvisionRequestHandoverModal';
 
-type ActiveTab = 'tiep_nhan' | 'tra_cuu' | 'tao_dich_vu' | 'cong_bo';
-type RequestStatus = 'CHO_XU_LY' | 'DA_PHE_DUYET' | 'TU_CHOI' | 'DA_XUAT';
+const formatDateTime = (dateStr: string) => {
+  if (!dateStr) return '';
+  if (/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}$/.test(dateStr)) return dateStr;
+  const spaceSplit = dateStr.split(' ');
+  if (spaceSplit.length === 2) {
+    const [dStr, tStr] = spaceSplit;
+    const dParts = dStr.split('-');
+    if (dParts.length === 3) {
+      return `${dParts[2]}/${dParts[1]}/${dParts[0]} ${tStr}`;
+    }
+  }
+  const parts = dateStr.split('-');
+  if (parts.length === 3 && !dateStr.includes('T') && !dateStr.includes(' ')) {
+    return `${parts[2]}/${parts[1]}/${parts[0]} 08:00:00`;
+  }
+  try {
+    const d = new Date(dateStr);
+    if (!isNaN(d.getTime())) {
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+      const h = String(d.getHours()).padStart(2, '0');
+      const m = String(d.getMinutes()).padStart(2, '0');
+      const s = String(d.getSeconds()).padStart(2, '0');
+      return `${day}/${month}/${year} ${h}:${m}:${s}`;
+    }
+  } catch (e) {}
+  return dateStr;
+};
+
+type ActiveTab = 'tiep_nhan' | 'tra_cuu' | 'tao_dich_vu' | 'ban_giao';
+type RequestStatus = 'CHO_XU_LY' | 'DA_PHE_DUYET' | 'TU_CHOI' | 'DA_XUAT' | 'DA_BAN_GIAO';
 
 type DataRequest = {
   id: string;
@@ -23,12 +55,15 @@ const statusLabel: Record<RequestStatus, string> = {
   DA_PHE_DUYET: 'Đã phê duyệt',
   TU_CHOI: 'Từ chối',
   DA_XUAT: 'Đã kết xuất',
+  DA_BAN_GIAO: 'Đã bàn giao',
 };
 
 export function DataProvisionRequestPage() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('tiep_nhan');
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [showHandoverModal, setShowHandoverModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<DataRequest | null>(null);
 
   const [query, setQuery] = useState('');
@@ -44,7 +79,7 @@ export function DataProvisionRequestPage() {
       org: 'Sở Nội vụ Lạng Sơn',
       dataType: 'Dữ liệu Hộ tịch điện tử',
       purpose: 'Thống kê tình hình biến động hộ tịch',
-      requestDate: '2026-04-29',
+      requestDate: '2026-04-29 08:00:00',
       format: 'excel',
       status: 'CHO_XU_LY',
     },
@@ -53,7 +88,7 @@ export function DataProvisionRequestPage() {
       org: 'Công an Lạng Sơn',
       dataType: 'Dữ liệu Thi hành án',
       purpose: 'Đồng bộ danh sách đối tượng theo dõi',
-      requestDate: '2026-03-15',
+      requestDate: '2026-03-15 08:00:00',
       format: 'csv',
       status: 'DA_XUAT',
     },
@@ -62,7 +97,7 @@ export function DataProvisionRequestPage() {
       org: 'Sở Tư pháp Lạng Sơn',
       dataType: 'Dữ liệu Lý lịch tư pháp',
       purpose: 'Tra cứu thông tin án tích',
-      requestDate: '2026-05-18',
+      requestDate: '2026-05-18 08:00:00',
       format: 'json',
       status: 'DA_PHE_DUYET',
     },
@@ -100,7 +135,7 @@ export function DataProvisionRequestPage() {
       org: payload.org,
       dataType: payload.dataType,
       purpose: payload.purpose || 'Bổ sung theo yêu cầu',
-      requestDate: new Date().toISOString().slice(0, 10),
+      requestDate: formatDateTime(new Date().toISOString()),
       fromDate: payload.fromDate,
       toDate: payload.toDate,
       format: payload.format,
@@ -110,8 +145,22 @@ export function DataProvisionRequestPage() {
     setActiveTab('tiep_nhan');
   };
 
-  const handleExport = (id: string) => {
+  const handleExportClick = (item: DataRequest) => {
+    setSelectedRequest(item);
+    setShowExportModal(true);
+  };
+
+  const handleConfirmExport = (id: string) => {
     setRequests((prev) => prev.map((item) => (item.id === id ? { ...item, status: 'DA_XUAT' } : item)));
+  };
+
+  const handleHandoverClick = (item: DataRequest) => {
+    setSelectedRequest(item);
+    setShowHandoverModal(true);
+  };
+
+  const handleConfirmHandover = (id: string, receivingUnit: string, file: File | null) => {
+    setRequests((prev) => prev.map((item) => (item.id === id ? { ...item, status: 'DA_BAN_GIAO' } : item)));
   };
 
   return (
@@ -136,8 +185,8 @@ export function DataProvisionRequestPage() {
             <button onClick={() => setActiveTab('tra_cuu')} className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center ${activeTab === 'tra_cuu' ? 'border-amber-500 text-amber-600' : 'border-transparent text-slate-500'}`}>
               <Search className="w-4 h-4 mr-2" />Tra cứu & Kết xuất
             </button>
-            <button onClick={() => setActiveTab('cong_bo')} className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center ${activeTab === 'cong_bo' ? 'border-amber-500 text-amber-600' : 'border-transparent text-slate-500'}`}>
-              <Share className="w-4 h-4 mr-2" />Công bố dịch vụ
+            <button onClick={() => setActiveTab('ban_giao')} className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center ${activeTab === 'ban_giao' ? 'border-amber-500 text-amber-600' : 'border-transparent text-slate-500'}`}>
+              <Share className="w-4 h-4 mr-2" />Bàn giao dữ liệu
             </button>
           </nav>
         </div>
@@ -161,6 +210,7 @@ export function DataProvisionRequestPage() {
                 <option value="DA_PHE_DUYET">Đã phê duyệt</option>
                 <option value="TU_CHOI">Từ chối</option>
                 <option value="DA_XUAT">Đã kết xuất</option>
+                <option value="DA_BAN_GIAO">Đã bàn giao</option>
               </select>
               <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm">
                 {dataTypeOptions.map((type) => <option key={type} value={type}>{type === 'ALL' ? 'Tất cả loại dữ liệu' : type}</option>)}
@@ -184,7 +234,7 @@ export function DataProvisionRequestPage() {
                     <td className="py-3 px-4 text-slate-600">{item.org}</td>
                     <td className="py-3 px-4 text-slate-600">{item.dataType}</td>
                     <td className="py-3 px-4 text-slate-600">{item.purpose}</td>
-                    <td className="py-3 px-4 text-slate-600">{item.requestDate}</td>
+                    <td className="py-3 px-4 text-slate-600">{formatDateTime(item.requestDate)}</td>
                     <td className="py-3 px-4"><span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700">{statusLabel[item.status]}</span></td>
                     <td className="py-3 px-4">
                       <div className="flex items-center justify-end gap-1.5 flex-nowrap">
@@ -192,11 +242,13 @@ export function DataProvisionRequestPage() {
                           <button title="Tiếp nhận" onClick={() => { setSelectedRequest(item); setShowApprovalModal(true); }} className="p-1.5 bg-amber-500 text-white rounded-md shadow-sm hover:bg-amber-600 transition-colors"><CheckCircle className="w-4 h-4" /></button>
                         )}
                         {(activeTab === 'tra_cuu' || item.status === 'DA_PHE_DUYET' || item.status === 'DA_XUAT') && (
-                          <button title="Xuất" onClick={() => handleExport(item.id)} className="p-1.5 bg-emerald-600 text-white rounded-md shadow-sm hover:bg-emerald-700 transition-colors"><Download className="w-4 h-4" /></button>
+                          <button title="Xuất" onClick={() => handleExportClick(item)} className="p-1.5 bg-emerald-600 text-white rounded-md shadow-sm hover:bg-emerald-700 transition-colors"><Download className="w-4 h-4" /></button>
                         )}
-                        {activeTab === 'cong_bo' && (
+                        {activeTab === 'ban_giao' && (
                           <>
-                            <button title="Công bố" className="p-1.5 bg-blue-600 text-white rounded-md shadow-sm hover:bg-blue-700 transition-colors"><UploadCloud className="w-4 h-4" /></button>
+                            {item.status !== 'DA_BAN_GIAO' && (
+                              <button title="Bàn giao" onClick={() => handleHandoverClick(item)} className="p-1.5 bg-blue-600 text-white rounded-md shadow-sm hover:bg-blue-700 transition-colors"><UploadCloud className="w-4 h-4" /></button>
+                            )}
                             <button title="Hủy" className="p-1.5 bg-red-600 text-white rounded-md shadow-sm hover:bg-red-700 transition-colors"><XCircle className="w-4 h-4" /></button>
                           </>
                         )}
@@ -212,6 +264,8 @@ export function DataProvisionRequestPage() {
 
       <ProvisionDataRequestModal isOpen={showRequestModal} onClose={() => setShowRequestModal(false)} onCreate={handleCreateRequest} />
       <ProvisionRequestApprovalModal isOpen={showApprovalModal} onClose={() => setShowApprovalModal(false)} requestData={selectedRequest} onApprove={handleApprove} onReject={(id) => handleReject(id)} />
+      <ProvisionRequestExportModal isOpen={showExportModal} onClose={() => setShowExportModal(false)} requestData={selectedRequest} onConfirmExport={handleConfirmExport} />
+      <ProvisionRequestHandoverModal isOpen={showHandoverModal} onClose={() => setShowHandoverModal(false)} requestData={selectedRequest} onConfirmHandover={handleConfirmHandover} />
     </div>
   );
 }

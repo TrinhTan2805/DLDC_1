@@ -5,9 +5,18 @@ interface ProvisionServicePublishModalProps {
   isOpen: boolean;
   onClose: () => void;
   service?: any;
+  onPublish?: (service: any, reason?: string) => void;
 }
 
-export function ProvisionServicePublishModal({ isOpen, onClose, service }: ProvisionServicePublishModalProps) {
+export function ProvisionServicePublishModal({ isOpen, onClose, service, onPublish }: ProvisionServicePublishModalProps) {
+  const [publishReason, setPublishReason] = React.useState('');
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setPublishReason('');
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
@@ -41,7 +50,7 @@ export function ProvisionServicePublishModal({ isOpen, onClose, service }: Provi
             <label className="block text-sm font-medium text-slate-700">Chọn nền tảng công khai</label>
             
             <label className="flex items-start p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer">
-              <input type="checkbox" className="mt-1 text-amber-600 focus:ring-amber-500 rounded" defaultChecked />
+              <input type="checkbox" className="mt-1 text-blue-600 focus:ring-blue-500 rounded" defaultChecked />
               <div className="ml-3">
                 <span className="block text-sm font-medium text-slate-800 flex items-center">
                   <Globe className="w-4 h-4 mr-2 text-slate-500" /> Cổng dữ liệu dùng chung Quốc gia
@@ -51,7 +60,7 @@ export function ProvisionServicePublishModal({ isOpen, onClose, service }: Provi
             </label>
 
             <label className="flex items-start p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer">
-              <input type="checkbox" className="mt-1 text-amber-600 focus:ring-amber-500 rounded" defaultChecked />
+              <input type="checkbox" className="mt-1 text-blue-600 focus:ring-blue-500 rounded" defaultChecked />
               <div className="ml-3">
                 <span className="block text-sm font-medium text-slate-800 flex items-center">
                   <Server className="w-4 h-4 mr-2 text-slate-500" /> Nền tảng chia sẻ dữ liệu nội bộ (LGSP)
@@ -59,6 +68,17 @@ export function ProvisionServicePublishModal({ isOpen, onClose, service }: Provi
                 <span className="block text-xs text-slate-500 mt-1">Cung cấp cho các cơ quan ban ngành trong tỉnh</span>
               </div>
             </label>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-slate-700">Mô tả lý do công khai <span className="text-slate-400 font-normal text-xs">(Không bắt buộc)</span></label>
+            <textarea
+              className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 hover:border-slate-300 transition-colors"
+              rows={3}
+              placeholder="Nhập mô tả lý do công khai dịch vụ dữ liệu..."
+              value={publishReason}
+              onChange={(e) => setPublishReason(e.target.value)}
+            ></textarea>
           </div>
         </div>
 
@@ -70,9 +90,11 @@ export function ProvisionServicePublishModal({ isOpen, onClose, service }: Provi
           >
             Hủy bỏ
           </button>
-          <button aria-label="Đóng"
-            onClick={onClose}
-            className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg flex items-center transition-colors font-medium"
+          <button aria-label="Xác nhận Công khai"
+            onClick={() => {
+              if (onPublish) onPublish(service, publishReason);
+            }}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center transition-colors font-medium"
           >
             <Check className="w-5 h-5 mr-2" />
             Xác nhận Công khai

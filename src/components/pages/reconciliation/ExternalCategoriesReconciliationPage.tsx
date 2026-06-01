@@ -121,6 +121,10 @@ export function ExternalCategoriesReconciliationPage() {
     <ReconciliationTemplate
       title="Đối soát tổng hợp các danh mục từ Bộ ngành ngoài (qua Trung tâm dữ liệu Quốc gia)"
       records={mockRecords}
+      hideSetupTab={true}
+      hideLogTab={true}
+      hideManualSync={true}
+      hideExportExcel={true}
     />
   );
 }

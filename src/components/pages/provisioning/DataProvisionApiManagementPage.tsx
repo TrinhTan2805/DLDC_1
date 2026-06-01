@@ -9,6 +9,36 @@ import { ProvisionReconciliationApiModal } from './modals/ProvisionReconciliatio
 import { ProvisionAccessControlModal } from './modals/ProvisionAccessControlModal';
 import { ApiVersionCompareModal } from './modals/ApiVersionCompareModal';
 
+const formatDateTime = (dateStr: string) => {
+  if (!dateStr) return '';
+  if (/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}$/.test(dateStr)) return dateStr;
+  const spaceSplit = dateStr.split(' ');
+  if (spaceSplit.length === 2) {
+    const [dStr, tStr] = spaceSplit;
+    const dParts = dStr.split('-');
+    if (dParts.length === 3) {
+      return `${dParts[2]}/${dParts[1]}/${dParts[0]} ${tStr}`;
+    }
+  }
+  const parts = dateStr.split('-');
+  if (parts.length === 3 && !dateStr.includes('T') && !dateStr.includes(' ')) {
+    return `${parts[2]}/${parts[1]}/${parts[0]} 08:00:00`;
+  }
+  try {
+    const d = new Date(dateStr);
+    if (!isNaN(d.getTime())) {
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+      const h = String(d.getHours()).padStart(2, '0');
+      const m = String(d.getMinutes()).padStart(2, '0');
+      const s = String(d.getSeconds()).padStart(2, '0');
+      return `${day}/${month}/${year} ${h}:${m}:${s}`;
+    }
+  } catch (e) {}
+  return dateStr;
+};
+
 export function DataProvisionApiManagementPage() {
   const [activeTab, setActiveTab] = useState<'api_cung_cap' | 'api_doi_soat' | 'phan_quyen' | 'phien_ban' | 'tai_lieu_api'>('api_cung_cap');
   const [searchTerm, setSearchTerm] = useState('');
@@ -72,9 +102,9 @@ export function DataProvisionApiManagementPage() {
   ]);
 
   const [versions, setVersions] = useState<any[]>([
-    { id: 'v1.2', apiName: 'Lấy danh sách Hộ tịch', createdBy: 'Admin Hệ thống', releaseDate: '2026-05-04', note: 'Cập nhật định dạng ngày sinh ISO 8601 và thêm trường quốc tịch', status: 'Kích hoạt' },
-    { id: 'v1.1', apiName: 'Lấy danh sách Hộ tịch', createdBy: 'Admin Hệ thống', releaseDate: '2026-03-10', note: 'Tối ưu hiệu năng truy vấn liên kết 3 bảng chính', status: 'Lưu trữ' },
-    { id: 'v1.0', apiName: 'Lấy danh sách Hộ tịch', createdBy: 'Hệ thống tự động', releaseDate: '2026-01-15', note: 'Bản phát hành đầu tiên công khai', status: 'Lưu trữ' }
+    { id: 'v1.2', apiName: 'Lấy danh sách Hộ tịch', createdBy: 'Admin Hệ thống', releaseDate: '2026-05-04 08:00:00', note: 'Cập nhật định dạng ngày sinh ISO 8601 và thêm trường quốc tịch', status: 'Kích hoạt' },
+    { id: 'v1.1', apiName: 'Lấy danh sách Hộ tịch', createdBy: 'Admin Hệ thống', releaseDate: '2026-03-10 10:30:00', note: 'Tối ưu hiệu năng truy vấn liên kết 3 bảng chính', status: 'Lưu trữ' },
+    { id: 'v1.0', apiName: 'Lấy danh sách Hộ tịch', createdBy: 'Hệ thống tự động', releaseDate: '2026-01-15 15:45:00', note: 'Bản phát hành đầu tiên công khai', status: 'Lưu trữ' }
   ]);
 
   // Handlers
@@ -167,8 +197,13 @@ export function DataProvisionApiManagementPage() {
         
         {activeTab === 'api_cung_cap' && (
           <button 
-            onClick={() => { setSelectedApi(null); setShowApiModal(true); }}
+            onClick={() => {
+              if (typeof (window as any).navigateToPage === 'function') {
+                (window as any).navigateToPage('provisioning-service-setup?action=create');
+              }
+            }}
             className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2.5 rounded-lg flex items-center shadow-md font-bold transition-all hover:scale-[1.02] active:scale-[0.98] text-sm"
+            title="Đến màn hình Thiết lập điều phối để tạo mới"
           >
             <Plus className="w-4 h-4 mr-2" />
             Tạo API Cung cấp mới
@@ -685,7 +720,7 @@ export function DataProvisionApiManagementPage() {
                         <td className="py-4 px-4 text-slate-600 text-xs">
                           <div className="flex items-center gap-1.5 whitespace-nowrap">
                             <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                            <span>{ver.releaseDate}</span>
+                            <span>{formatDateTime(ver.releaseDate)}</span>
                           </div>
                         </td>
                         <td className="py-4 px-4 text-slate-500 text-xs max-w-sm leading-relaxed whitespace-pre-wrap">{ver.note}</td>

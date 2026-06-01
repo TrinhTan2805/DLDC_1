@@ -73,10 +73,7 @@ export function CategoryReportListPage() {
           </div>
 
           <div className="flex items-center gap-3 w-full md:w-auto h-full pt-6 md:pt-0">
-            <button className="px-5 py-2.5 border border-slate-300 text-slate-700 bg-white rounded-xl hover:bg-slate-50 transition-colors font-medium flex items-center gap-2">
-              <Printer className="w-4 h-4" />
-              In báo cáo
-            </button>
+
             <div className="relative">
               <button
                 type="button"
@@ -91,18 +88,12 @@ export function CategoryReportListPage() {
                 <div className="absolute right-0 mt-2 w-44 rounded-2xl border border-slate-200 bg-white shadow-xl z-20">
                   <button
                     type="button"
-                    onClick={() => handleExportFile('XLS')}
+                    onClick={() => handleExportFile('Excel')}
                     className="w-full text-left px-4 py-3 hover:bg-slate-50 text-sm text-slate-700"
                   >
-                    XLS
+                    Excel
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => handleExportFile('DOCX')}
-                    className="w-full text-left px-4 py-3 hover:bg-slate-50 text-sm text-slate-700"
-                  >
-                    DOCX
-                  </button>
+
                   <button
                     type="button"
                     onClick={() => handleExportFile('PDF')}

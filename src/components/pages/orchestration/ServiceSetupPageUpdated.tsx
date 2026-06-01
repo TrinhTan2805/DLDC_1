@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Search, Server, Eye, Edit, Trash2, CheckCircle, XCircle, Settings as SettingsIcon, Database, Globe, X, Save, EyeOff, Eye as EyeIcon, FileCheck, FileText, Shield, GitBranch, Clock, AlertCircle, User, Lock, Share, Wifi, FolderOpen, Mail, MessageSquare, BarChart3, TrendingUp } from 'lucide-react';
+import { Plus, Search, Server, Eye, Edit, Trash2, CheckCircle, XCircle, Settings as SettingsIcon, Database, Globe, X, Save, EyeOff, Eye as EyeIcon, FileCheck, FileText, Shield, GitBranch, Clock, AlertCircle, User, Lock, Share, Wifi, FolderOpen, Mail, MessageSquare, BarChart3, TrendingUp } from "lucide-react";
 import { StatusTag } from '../../common/StatusTag';
 import { MonitoringPage } from './MonitoringPage';
 import { AddProvisionServiceModal } from './AddProvisionServiceModal';

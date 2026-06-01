@@ -180,6 +180,23 @@ export function ErrorLogPage() {
   const [endDate, setEndDate] = useState('');
   const [selectedLog, setSelectedLog] = useState<ErrorLog | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  const parseDate = (dateStr: string) => {
+    if (!dateStr) return null;
+    const [datePart] = dateStr.split(' ');
+    const [day, month, year] = datePart.split('/');
+    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
 
   const filteredLogs = errorLogs.filter(log => {
     const matchesSearch = log.errorMessage.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -187,7 +204,24 @@ export function ErrorLogPage() {
                          log.module.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesSeverity = filterSeverity === 'all' || log.severity === filterSeverity;
     const matchesModule = filterModule === 'all' || log.module === filterModule;
-    return matchesSearch && matchesSeverity && matchesModule;
+
+    let matchesDate = true;
+    if (startDate || endDate) {
+      const logDate = parseDate(log.timestamp);
+      if (logDate) {
+        if (startDate) {
+          const start = new Date(startDate);
+          start.setHours(0, 0, 0, 0);
+          if (logDate < start) matchesDate = false;
+        }
+        if (endDate) {
+          const end = new Date(endDate);
+          end.setHours(23, 59, 59, 999);
+          if (logDate > end) matchesDate = false;
+        }
+      }
+    }
+    return matchesSearch && matchesSeverity && matchesModule && matchesDate;
   });
 
   const handleViewDetail = (log: ErrorLog) => {
@@ -201,8 +235,7 @@ export function ErrorLogPage() {
   };
 
   const handleExportExcel = () => {
-    alert('Đang xuất file Excel...');
-    // Logic export Excel
+    alert('Đang kết xuất nhật ký lỗi ra file Excel...');
   };
 
   const getSeverityIcon = (severity: ErrorLog['severity']) => {
@@ -247,7 +280,7 @@ export function ErrorLogPage() {
   const uniqueModules = Array.from(new Set(errorLogs.map(log => log.module)));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px' }}>
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <StatsCard 
@@ -276,166 +309,272 @@ export function ErrorLogPage() {
         />
       </div>
 
-      {/* Filters */}
-      <div className="bg-white rounded-lg border border-slate-200 p-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          <div className="lg:col-span-2">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
+      {/* Filters and Actions */}
+      <div className="mb-6">
+        {/* Row 1: Search and Buttons */}
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex-1 flex items-center gap-3">
+            <div className="relative flex-1">
+              <input aria-label="Input field"
                 type="text"
                 placeholder="Tìm kiếm mã lỗi, thông báo, module..."
+                className="w-full px-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onChange={handleSearchChange}
               />
             </div>
-          </div>
-          <div>
-            <select
-              value={filterSeverity}
-              onChange={(e) => setFilterSeverity(e.target.value)}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <button className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center">
+              <Search className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`p-2 rounded-lg transition-colors shadow-sm flex items-center justify-center border ${showFilters ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-[#e2e8f0] text-slate-600 hover:bg-slate-50'}`}
+              title="Bộ lọc"
             >
-              <option value="all">Tất cả mức độ</option>
-              <option value="critical">Nghiêm trọng</option>
-              <option value="error">Lỗi</option>
-              <option value="warning">Cảnh báo</option>
-              <option value="info">Thông tin</option>
-            </select>
+              {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
+            </button>
           </div>
-          <div>
-            <select
-              value={filterModule}
-              onChange={(e) => setFilterModule(e.target.value)}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleExportExcel}
+              className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium"
             >
-              <option value="all">Tất cả module</option>
-              {uniqueModules.map(module => (
-                <option key={module} value={module}>{module}</option>
-              ))}
-            </select>
+              <Download className="w-4 h-4" />
+              Kết xuất
+            </button>
           </div>
-          <div>
-            <div className="flex items-center gap-2 border border-slate-300 rounded-lg px-3 py-2">
-              <Calendar className="w-4 h-4 text-slate-400 flex-shrink-0" />
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="flex-1 outline-none text-sm"
-                placeholder="Từ ngày"
-              />
-              <span className="text-slate-400">-</span>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="flex-1 outline-none text-sm"
-                placeholder="Đến ngày"
-              />
+        </div>
+
+        {/* Row 2: Filters (Collapsible) */}
+        {showFilters && (
+          <div className="bg-slate-50 p-5 rounded-lg border border-slate-200 grid grid-cols-4 gap-4 mt-4 animate-in slide-in-from-top-2 duration-200 shadow-sm relative">
+            <div className="absolute -top-2 left-[50px] w-4 h-4 bg-slate-50 border-t border-l border-slate-200 transform rotate-45"></div>
+
+            <div className="space-y-1.5 relative z-10">
+              <label className="text-[13px] font-medium text-slate-700">Mức độ</label>
+              <select aria-label="Select box"
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                value={filterSeverity}
+                onChange={(e) => {
+                  setFilterSeverity(e.target.value);
+                  setCurrentPage(1);
+                }}
+              >
+                <option value="all">Tất cả mức độ</option>
+                <option value="critical">Nghiêm trọng</option>
+                <option value="error">Lỗi</option>
+                <option value="warning">Cảnh báo</option>
+                <option value="info">Thông tin</option>
+              </select>
+            </div>
+
+            <div className="space-y-1.5 relative z-10">
+              <label className="text-[13px] font-medium text-slate-700">Phân hệ</label>
+              <select aria-label="Select box"
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                value={filterModule}
+                onChange={(e) => {
+                  setFilterModule(e.target.value);
+                  setCurrentPage(1);
+                }}
+              >
+                <option value="all">Tất cả module</option>
+                {uniqueModules.map(module => (
+                  <option key={module} value={module}>{module}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-1.5 relative z-10">
+              <label className="text-[13px] font-medium text-slate-700">Thời gian từ</label>
+              <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
+                <input aria-label="Input field"
+                  type="date"
+                  className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-slate-700 p-0"
+                  value={startDate}
+                  onChange={(e) => {
+                    setStartDate(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                />
+                <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
+              </div>
+            </div>
+
+            <div className="space-y-1.5 relative z-10">
+              <label className="text-[13px] font-medium text-slate-700">Thời gian đến</label>
+              <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
+                <input aria-label="Input field"
+                  type="date"
+                  className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-slate-700 p-0"
+                  value={endDate}
+                  onChange={(e) => {
+                    setEndDate(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                />
+                <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
+              </div>
             </div>
           </div>
-        </div>
-        <div className="flex gap-3 mt-4">
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm flex items-center gap-2">
-            <Filter className="w-4 h-4" />
-            Lọc
-          </button>
-          <button 
-            onClick={handleExportExcel}
-            className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 text-sm flex items-center gap-2"
-          >
-            <Download className="w-4 h-4" />
-            Xuất Excel
-          </button>
-        </div>
+        )}
       </div>
 
       {/* Error Logs Table */}
-      <div className="bg-white rounded-lg border border-slate-200">
-        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-          <h3 className="text-slate-900">Nhật ký lỗi ({filteredLogs.length} bản ghi)</h3>
-        </div>
+      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-slate-50">
+          <table className="w-full border-collapse collection-table text-[13px]">
+            <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-[1]">
               <tr>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Thời gian</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Mức độ</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Module</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Mã lỗi</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Thông báo lỗi</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Người dùng</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Trạng thái</th>
-                <th className="px-6 py-3 text-right text-xs text-slate-600 uppercase tracking-wider">Thao tác</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-12 text-[13px]">STT</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Thời gian</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Mức độ</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Phân hệ</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Mã lỗi</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Thông báo lỗi</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Người dùng</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-24 text-[13px]">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filteredLogs.map((log) => (
-                <tr key={log.id} className="hover:bg-slate-50">
-                  <td className="px-6 py-4 text-sm text-slate-700 whitespace-nowrap">{log.timestamp}</td>
-                  <td className="px-6 py-4">
-                    <StatusTag 
-                      label={getSeverityLabel(log.severity)} 
-                      variant={log.severity === 'critical' ? 'red' : log.severity === 'error' ? 'orange' : log.severity === 'warning' ? 'yellow' : 'blue'} 
-                      icon={getSeverityIcon(log.severity)}
-                    />
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-700">{log.module}</td>
-                  <td className="px-6 py-4">
-                    <code className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-700">
-                      {log.errorCode}
-                    </code>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-700 max-w-md truncate">
-                    {log.errorMessage}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-600">
-                    {log.user || <span className="text-slate-400 italic">System</span>}
-                  </td>
-                  <td className="px-6 py-4">
-                    <StatusTag 
-                      label={log.resolved ? 'Đã xử lý' : 'Chưa xử lý'} 
-                      variant={log.resolved ? 'green' : 'red'} 
-                    />
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-end">
-                      <button
-                        onClick={() => handleViewDetail(log)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="Xem chi tiết"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
-                    </div>
+              {filteredLogs
+                .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                .map((log, index) => (
+                  <tr key={log.id} className="hover:bg-slate-50 transition-all group border-b border-slate-100">
+                    <td className="px-4 py-3 text-center text-slate-500 font-medium text-[13px]">
+                      {(currentPage - 1) * itemsPerPage + index + 1}
+                    </td>
+                    <td className="px-4 py-3 text-center text-slate-700 whitespace-nowrap text-[13px]">{log.timestamp}</td>
+                    <td className="px-4 py-3 text-center text-[13px]">
+                      <div className="inline-flex justify-center">
+                        <StatusTag 
+                          label={getSeverityLabel(log.severity)} 
+                          variant={log.severity === 'critical' ? 'red' : log.severity === 'error' ? 'orange' : log.severity === 'warning' ? 'yellow' : 'blue'} 
+                          icon={getSeverityIcon(log.severity)}
+                        />
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-center text-slate-700 text-[13px]">{log.module}</td>
+                    <td className="px-4 py-3 text-center text-[13px]">
+                      <code className="text-[11px] bg-slate-100 px-2 py-1 rounded text-slate-700 font-mono">
+                        {log.errorCode}
+                      </code>
+                    </td>
+                    <td className="px-4 py-3 text-center text-slate-700 max-w-md truncate text-[13px]">
+                      {log.errorMessage}
+                    </td>
+                    <td className="px-4 py-3 text-center text-slate-600 text-[13px]">
+                      {log.user || <span className="text-slate-400 italic text-[12px]">System</span>}
+                    </td>
+                    <td className="px-4 py-3 text-center text-[13px]">
+                      <div className="inline-flex justify-center">
+                        <StatusTag 
+                          label={log.resolved ? 'Đã xử lý' : 'Chưa xử lý'} 
+                          variant={log.resolved ? 'green' : 'red'} 
+                        />
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex items-center justify-center">
+                        <button
+                          onClick={() => handleViewDetail(log)}
+                          className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
+                          title="Xem chi tiết"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              {filteredLogs.length === 0 && (
+                <tr>
+                  <td colSpan={9} className="px-4 py-8 text-center text-slate-500 text-[13px]">
+                    Không tìm thấy bản ghi nào phù hợp
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
-        
+
         {/* Pagination */}
-        <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
-          <div className="text-sm text-slate-600">
-            Hiển thị 1-{filteredLogs.length} trong tổng số 1,247 bản ghi
+        <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white sm:px-6 collection-pagination text-[13px]">
+          <div className="flex items-center gap-2">
+            <span className="text-slate-600">Hiển thị</span>
+            <select aria-label="Select record count" 
+              className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px]"
+              title="Số bản ghi trên trang"
+              value={itemsPerPage}
+              onChange={(e) => {
+                setItemsPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+            <span className="text-slate-600">bản ghi/trang</span>
           </div>
-          <div className="flex gap-2">
-            <button className="px-3 py-1 border border-slate-300 rounded text-sm hover:bg-slate-50">Trước</button>
-            <button title="Hành động" aria-label="Hành động" className="px-3 py-1 bg-blue-600 text-white rounded text-sm">1</button>
-            <button title="Hành động" aria-label="Hành động" className="px-3 py-1 border border-slate-300 rounded text-sm hover:bg-slate-50">2</button>
-            <button title="Hành động" aria-label="Hành động" className="px-3 py-1 border border-slate-300 rounded text-sm hover:bg-slate-50">3</button>
-            <button className="px-3 py-1 border border-slate-300 rounded text-sm hover:bg-slate-50">Sau</button>
+          
+          <div className="flex items-center gap-4">
+            <span className="text-slate-600">
+              {filteredLogs.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, filteredLogs.length)} / {filteredLogs.length}
+            </span>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : currentPage)}
+                disabled={currentPage === 1}
+                className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
+              >
+                Trước
+              </button>
+              
+              {Array.from({ length: Math.ceil(filteredLogs.length / itemsPerPage) }, (_, i) => i + 1).map(page => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`px-3 py-1.5 border rounded-lg font-medium text-[13px] transition-colors ${
+                    currentPage === page
+                      ? 'bg-blue-600 border-blue-600 text-white'
+                      : 'border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+
+              <button
+                onClick={() => {
+                  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
+                  if (currentPage < totalPages) {
+                    setCurrentPage(currentPage + 1);
+                  }
+                }}
+                disabled={currentPage === Math.ceil(filteredLogs.length / itemsPerPage) || filteredLogs.length === 0}
+                className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
+              >
+                Sau
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Detail Modal */}
       {showDetailModal && selectedLog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-5xl w-full max-h-[90vh] overflow-y-auto">
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={closeDetailModal}
+        >
+          <div 
+            className="bg-white rounded-lg max-w-5xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-slate-200">
               <div className="flex items-center gap-3">

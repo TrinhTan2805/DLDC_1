@@ -13,331 +13,281 @@ import {
   MapPin,
   Activity,
   FileText,
-  Edit2,
-  Trash2,
-  Plus,
   CheckCircle2,
   AlertCircle
 } from 'lucide-react';
 import { StatsCard } from '../../common/StatsCard';
 import { StatusTag } from '../../common/StatusTag';
 
-interface AccessLog {
+interface AccessLogEntry {
   id: number;
-  sessionId: string;
   timestamp: string;
   user: string;
   userId: string;
   ip: string;
   action: string;
   module: string;
+  targetObject: string;
   status: 'success' | 'failed';
-  duration: string;
   userAgent: string;
   device: string;
   browser: string;
   location: string;
-}
-
-interface ActionDetail {
-  id: string;
-  time: string;
-  action: string;
-  module: string;
-  target: string;
-  status: 'success' | 'failed';
-  type: 'create' | 'update' | 'delete' | 'view' | 'export';
   description: string;
 }
 
-const accessLogs: AccessLog[] = [
-  { 
-    id: 1, 
-    sessionId: 'sess_1234567890abc',
-    timestamp: '09/12/2025 14:25:33', 
-    user: 'Nguyễn Văn An', 
-    userId: 'user_001',
-    ip: '192.168.1.100', 
-    action: 'Đăng nhập hệ thống', 
-    module: 'Authentication', 
-    status: 'success', 
-    duration: '0.5s', 
-    userAgent: 'Chrome/120.0.0.0',
+const mockAccessLogs: AccessLogEntry[] = [
+  {
+    id: 1,
+    timestamp: '28/05/2026 15:30:22',
+    user: 'Nguyễn Văn An',
+    userId: 'admin_an',
+    ip: '192.168.1.15',
+    module: 'Quản lý nhật ký',
+    action: 'Xem danh sách nhật ký truy cập',
+    targetObject: 'Nhật ký truy cập hệ thống',
+    status: 'success',
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
     device: 'Windows 11',
-    browser: 'Chrome 120.0.0',
-    location: 'Hà Nội, Việt Nam'
+    browser: 'Chrome 124.0.0',
+    location: 'Hà Nội, Việt Nam',
+    description: 'Cán bộ xem danh sách nhật ký truy cập hệ thống. Hệ thống hiển thị danh sách nhật ký truy cập Phần mềm.'
   },
-  { 
-    id: 2, 
-    sessionId: 'sess_2345678901bcd',
-    timestamp: '09/12/2025 14:24:12', 
-    user: 'Trần Thị Bình', 
-    userId: 'user_002',
-    ip: '192.168.1.101', 
-    action: 'Đăng nhập hệ thống', 
-    module: 'Authentication', 
-    status: 'success', 
-    duration: '1.2s', 
-    userAgent: 'Firefox/121.0',
+  {
+    id: 2,
+    timestamp: '28/05/2026 15:28:45',
+    user: 'Nguyễn Văn An',
+    userId: 'admin_an',
+    ip: '192.168.1.15',
+    module: 'Quản lý nhật ký',
+    action: 'Tìm kiếm nhật ký truy cập',
+    targetObject: 'Nhật ký truy cập hệ thống',
+    status: 'success',
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+    device: 'Windows 11',
+    browser: 'Chrome 124.0.0',
+    location: 'Hà Nội, Việt Nam',
+    description: 'Cán bộ tìm kiếm nhật ký truy cập hệ thống. Hệ thống truy vấn dữ liệu và hiển thị kết quả lên màn hình.'
+  },
+  {
+    id: 3,
+    timestamp: '28/05/2026 15:26:10',
+    user: 'Nguyễn Văn An',
+    userId: 'admin_an',
+    ip: '192.168.1.15',
+    module: 'Quản lý nhật ký',
+    action: 'Kết xuất nhật ký truy cập',
+    targetObject: 'Nhật ký truy cập hệ thống',
+    status: 'success',
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+    device: 'Windows 11',
+    browser: 'Chrome 124.0.0',
+    location: 'Hà Nội, Việt Nam',
+    description: 'Cán bộ kết xuất nhật ký truy cập hệ thống. Hệ thống kết xuất về file máy tính cá nhân của cán bộ (AccessLogs_Export.xlsx).'
+  },
+  {
+    id: 4,
+    timestamp: '28/05/2026 15:15:33',
+    user: 'Trần Thị Bình',
+    userId: 'user_binh_02',
+    ip: '192.168.2.110',
+    module: 'Thu thập dữ liệu',
+    action: 'Truy vấn dữ liệu ngoài ngành',
+    targetObject: 'Danh mục Dữ liệu thuế vụ',
+    status: 'success',
+    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
+    device: 'MacOS 14',
+    browser: 'Safari 17.4',
+    location: 'Hồ Chí Minh, Việt Nam',
+    description: 'Truy vấn danh sách dữ liệu thu thập ngoài ngành phục vụ đối soát định kỳ.'
+  },
+  {
+    id: 5,
+    timestamp: '28/05/2026 15:10:05',
+    user: 'Lê Văn Cường',
+    userId: 'user_cuong_99',
+    ip: '10.0.4.82',
+    module: 'Quản lý người dùng',
+    action: 'Thêm mới người dùng',
+    targetObject: 'Tài khoản: pham_thi_dung',
+    status: 'success',
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0)',
     device: 'Windows 10',
-    browser: 'Firefox 121.0',
-    location: 'Hà Nội, Việt Nam'
+    browser: 'Firefox 125.0',
+    location: 'Đà Nẵng, Việt Nam',
+    description: 'Tạo mới tài khoản cán bộ xử lý dữ liệu và gán vào nhóm nghiệp vụ Thu thập.'
   },
-  { 
-    id: 3, 
-    sessionId: 'sess_3456789012cde',
-    timestamp: '09/12/2025 14:22:45', 
-    user: 'Lê Văn Cường', 
-    userId: 'user_003',
-    ip: '192.168.1.102', 
-    action: 'Đăng nhập thất bại', 
-    module: 'Authentication', 
-    status: 'failed', 
-    duration: '2.1s', 
-    userAgent: 'Edge/120.0.0.0',
+  {
+    id: 6,
+    timestamp: '28/05/2026 14:55:12',
+    user: 'Lê Văn Cường',
+    userId: 'user_cuong_99',
+    ip: '10.0.4.82',
+    module: 'Quản lý người dùng',
+    action: 'Cập nhật phân quyền nhóm',
+    targetObject: 'Nhóm: Kiểm tra dữ liệu',
+    status: 'failed',
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0)',
+    device: 'Windows 10',
+    browser: 'Firefox 125.0',
+    location: 'Đà Nẵng, Việt Nam',
+    description: 'Lỗi phân quyền: Người dùng không có quyền quản trị vai trò tối cao để cập nhật nhóm này.'
+  },
+  {
+    id: 7,
+    timestamp: '28/05/2026 14:48:30',
+    user: 'Phạm Thị Dung',
+    userId: 'user_dung_04',
+    ip: '192.168.1.55',
+    module: 'Quản lý danh mục',
+    action: 'Kết xuất danh mục Dân tộc',
+    targetObject: 'Danh mục dân tộc',
+    status: 'success',
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
     device: 'Windows 11',
-    browser: 'Edge 120.0.0',
-    location: 'Hà Nội, Việt Nam'
+    browser: 'Edge 124.0.0',
+    location: 'Hà Nội, Việt Nam',
+    description: 'Kết xuất danh mục dân tộc chuẩn hóa ra file Excel (DanhMucDanToc.xlsx).'
   },
-  { 
-    id: 4, 
-    sessionId: 'sess_4567890123def',
-    timestamp: '09/12/2025 14:20:18', 
-    user: 'Phạm Thị Dung', 
-    userId: 'user_004',
-    ip: '192.168.1.103', 
-    action: 'Đăng nhập hệ thống', 
-    module: 'Authentication', 
-    status: 'success', 
-    duration: '3.5s', 
-    userAgent: 'Chrome/120.0.0.0',
+  {
+    id: 8,
+    timestamp: '28/05/2026 14:32:18',
+    user: 'Hoàng Văn Em',
+    userId: 'user_em_guest',
+    ip: '172.16.85.3',
+    module: 'Dữ liệu mở',
+    action: 'Tải tài liệu hướng dẫn',
+    targetObject: 'File: HDSD_DataSharing.pdf',
+    status: 'success',
+    userAgent: 'Mozilla/5.0 (Linux; Android 10; K)',
+    device: 'Android Mobile',
+    browser: 'Chrome Mobile',
+    location: 'Hải Phòng, Việt Nam',
+    description: 'Tải tài liệu hướng dẫn khai thác và chia sẻ dữ liệu qua cổng API công cộng.'
+  },
+  {
+    id: 9,
+    timestamp: '28/05/2026 14:10:45',
+    user: 'Nguyễn Văn An',
+    userId: 'admin_an',
+    ip: '192.168.1.15',
+    module: 'Cấu hình hệ thống',
+    action: 'Cập nhật tham số bảo mật',
+    targetObject: 'Quy tắc đặt mật khẩu',
+    status: 'success',
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+    device: 'Windows 11',
+    browser: 'Chrome 124.0.0',
+    location: 'Hà Nội, Việt Nam',
+    description: 'Thay đổi độ dài mật khẩu tối thiểu từ 8 lên 10 ký tự và yêu cầu ký tự đặc biệt.'
+  },
+  {
+    id: 10,
+    timestamp: '28/05/2026 11:22:04',
+    user: 'Trần Thị Bình',
+    userId: 'user_binh_02',
+    ip: '192.168.2.110',
+    module: 'Đối soát dữ liệu',
+    action: 'Khởi chạy tiến trình đối soát',
+    targetObject: 'Phiên đối soát #842',
+    status: 'success',
+    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
     device: 'MacOS 14',
-    browser: 'Chrome 120.0.0',
-    location: 'Hồ Chí Minh, Việt Nam'
+    browser: 'Safari 17.4',
+    location: 'Hồ Chí Minh, Việt Nam',
+    description: 'Khởi chạy thủ công tiến trình đối soát dữ liệu hộ tịch quốc gia tháng 05/2026.'
   },
-  { 
-    id: 5, 
-    sessionId: 'sess_5678901234efg',
-    timestamp: '09/12/2025 14:18:55', 
-    user: 'Hoàng Văn Em', 
-    userId: 'user_005',
-    ip: '192.168.1.104', 
-    action: 'Đăng nhập hệ thống', 
-    module: 'Authentication', 
-    status: 'success', 
-    duration: '5.2s', 
-    userAgent: 'Safari/17.2',
-    device: 'MacOS 14',
-    browser: 'Safari 17.2',
-    location: 'Đà Nẵng, Việt Nam'
+  {
+    id: 11,
+    timestamp: '28/05/2026 10:45:00',
+    user: 'Phạm Thị Dung',
+    userId: 'user_dung_04',
+    ip: '192.168.1.55',
+    module: 'Quản lý danh mục',
+    action: 'Xem chi tiết danh mục Giới tính',
+    targetObject: 'Danh mục giới tính',
+    status: 'success',
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+    device: 'Windows 11',
+    browser: 'Edge 124.0.0',
+    location: 'Hà Nội, Việt Nam',
+    description: 'Tra cứu mã chuẩn hóa và danh sách các giá trị thuộc danh mục giới tính.'
   },
+  {
+    id: 12,
+    timestamp: '28/05/2026 09:15:30',
+    user: 'Nguyễn Văn An',
+    userId: 'admin_an',
+    ip: '192.168.1.15',
+    module: 'Cấu hình hệ thống',
+    action: 'Sao lưu cơ sở dữ liệu',
+    targetObject: 'CSDL lõi - Phân hệ danh mục',
+    status: 'success',
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+    device: 'Windows 11',
+    browser: 'Chrome 124.0.0',
+    location: 'Hà Nội, Việt Nam',
+    description: 'Tạo bản sao lưu nóng cho phân hệ danh mục dữ liệu dùng chung trước khi bảo trì.'
+  }
 ];
-
-// Mock action details for each session
-const getSessionActions = (sessionId: string): ActionDetail[] => {
-  const actionsBySession: Record<string, ActionDetail[]> = {
-    'sess_1234567890abc': [
-      {
-        id: '1',
-        time: '14:25:35',
-        action: 'Xem',
-        module: 'Dashboard',
-        target: 'Trang tổng quan',
-        status: 'success',
-        type: 'view',
-        description: 'Truy cập trang Dashboard tổng quan hệ thống'
-      },
-      {
-        id: '2',
-        time: '14:26:12',
-        action: 'Xem',
-        module: 'Quản lý người dùng',
-        target: 'Danh sách người dùng',
-        status: 'success',
-        type: 'view',
-        description: 'Xem danh sách người dùng trong hệ thống'
-      },
-      {
-        id: '3',
-        time: '14:27:45',
-        action: 'Cập nhật',
-        module: 'Quản lý người dùng',
-        target: 'User #125',
-        status: 'success',
-        type: 'update',
-        description: 'Cập nhật thông tin người dùng Trần Thị B'
-      },
-      {
-        id: '4',
-        time: '14:28:30',
-        action: 'Tạo mới',
-        module: 'Quản lý nhóm',
-        target: 'Group #15',
-        status: 'success',
-        type: 'create',
-        description: 'Tạo nhóm người dùng "Kiểm tra dữ liệu"'
-      },
-      {
-        id: '5',
-        time: '14:30:15',
-        action: 'Xuất',
-        module: 'Báo cáo',
-        target: 'Report_Users.xlsx',
-        status: 'success',
-        type: 'export',
-        description: 'Xuất báo cáo danh sách người dùng'
-      }
-    ],
-    'sess_2345678901bcd': [
-      {
-        id: '1',
-        time: '14:24:15',
-        action: 'Xem',
-        module: 'Dashboard',
-        target: 'Trang tổng quan',
-        status: 'success',
-        type: 'view',
-        description: 'Truy cập trang Dashboard'
-      },
-      {
-        id: '2',
-        time: '14:25:30',
-        action: 'Xem',
-        module: 'Thu thập dữ liệu',
-        target: 'Danh sách nguồn',
-        status: 'success',
-        type: 'view',
-        description: 'Xem danh sách nguồn dữ liệu'
-      },
-      {
-        id: '3',
-        time: '14:26:45',
-        action: 'Cập nhật',
-        module: 'Thu thập dữ liệu',
-        target: 'Source #8',
-        status: 'success',
-        type: 'update',
-        description: 'Cập nhật cấu hình nguồn dữ liệu đăng ký DN'
-      },
-      {
-        id: '4',
-        time: '14:28:20',
-        action: 'Xem',
-        module: 'Xử lý dữ liệu',
-        target: 'Log xử lý',
-        status: 'success',
-        type: 'view',
-        description: 'Kiểm tra log xử lý dữ liệu'
-      }
-    ],
-    'sess_3456789012cde': [
-      {
-        id: '1',
-        time: '14:22:45',
-        action: 'Đăng nhập',
-        module: 'Authentication',
-        target: 'Login',
-        status: 'failed',
-        type: 'view',
-        description: 'Đăng nhập thất bại - Sai mật khẩu'
-      }
-    ],
-    'sess_4567890123def': [
-      {
-        id: '1',
-        time: '14:20:20',
-        action: 'Xem',
-        module: 'Dashboard',
-        target: 'Trang tổng quan',
-        status: 'success',
-        type: 'view',
-        description: 'Truy cập Dashboard'
-      },
-      {
-        id: '2',
-        time: '14:21:35',
-        action: 'Xem',
-        module: 'Báo cáo',
-        target: 'Thống kê tháng',
-        status: 'success',
-        type: 'view',
-        description: 'Xem báo cáo thống kê tháng 11/2024'
-      },
-      {
-        id: '3',
-        time: '14:23:50',
-        action: 'Xuất',
-        module: 'Báo cáo',
-        target: 'Statistics_Nov2024.xlsx',
-        status: 'success',
-        type: 'export',
-        description: 'Xuất báo cáo thống kê dạng Excel'
-      }
-    ],
-    'sess_5678901234efg': [
-      {
-        id: '1',
-        time: '14:19:00',
-        action: 'Xem',
-        module: 'Dashboard',
-        target: 'Trang tổng quan',
-        status: 'success',
-        type: 'view',
-        description: 'Truy cập Dashboard'
-      },
-      {
-        id: '2',
-        time: '14:20:15',
-        action: 'Xem',
-        module: 'Quản lý danh mục',
-        target: 'Danh sách danh mục',
-        status: 'success',
-        type: 'view',
-        description: 'Xem danh sách danh mục dữ liệu'
-      },
-      {
-        id: '3',
-        time: '14:21:40',
-        action: 'Xóa',
-        module: 'Quản lý danh mục',
-        target: 'Category #12',
-        status: 'success',
-        type: 'delete',
-        description: 'Xóa danh mục không còn sử dụng'
-      },
-      {
-        id: '4',
-        time: '14:23:25',
-        action: 'Xuất',
-        module: 'Quản lý danh mục',
-        target: 'Categories_Export.xlsx',
-        status: 'success',
-        type: 'export',
-        description: 'Xuất danh sách danh mục'
-      }
-    ]
-  };
-
-  return actionsBySession[sessionId] || [];
-};
 
 export function AccessLogPage() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterModule, setFilterModule] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [selectedLog, setSelectedLog] = useState<AccessLog | null>(null);
+  const [selectedLog, setSelectedLog] = useState<AccessLogEntry | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  const filteredLogs = accessLogs.filter(log => {
+  const parseDate = (dateStr: string) => {
+    if (!dateStr) return null;
+    const [datePart] = dateStr.split(' ');
+    const [day, month, year] = datePart.split('/');
+    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const filteredLogs = mockAccessLogs.filter(log => {
     const matchesSearch = log.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         log.module.toLowerCase().includes(searchTerm.toLowerCase());
+                          log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          log.module.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          log.ip.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          log.targetObject.toLowerCase().includes(searchTerm.toLowerCase());
+                          
+    const matchesModule = filterModule === 'all' || log.module === filterModule;
     const matchesStatus = filterStatus === 'all' || log.status === filterStatus;
-    return matchesSearch && matchesStatus;
+    
+    let matchesDate = true;
+    if (startDate || endDate) {
+      const logDate = parseDate(log.timestamp);
+      if (logDate) {
+        if (startDate) {
+          const start = new Date(startDate);
+          start.setHours(0, 0, 0, 0);
+          if (logDate < start) matchesDate = false;
+        }
+        if (endDate) {
+          const end = new Date(endDate);
+          end.setHours(23, 59, 59, 999);
+          if (logDate > end) matchesDate = false;
+        }
+      }
+    }
+    
+    return matchesSearch && matchesModule && matchesStatus && matchesDate;
   });
 
-  const handleViewDetail = (log: AccessLog) => {
+  const handleViewDetail = (log: AccessLogEntry) => {
     setSelectedLog(log);
     setShowDetailModal(true);
   };
@@ -347,181 +297,267 @@ export function AccessLogPage() {
     setSelectedLog(null);
   };
 
-  const getActionIcon = (type: ActionDetail['type']) => {
-    switch (type) {
-      case 'create':
-        return <Plus className="w-4 h-4" />;
-      case 'update':
-        return <Edit2 className="w-4 h-4" />;
-      case 'delete':
-        return <Trash2 className="w-4 h-4" />;
-      case 'view':
-        return <Eye className="w-4 h-4" />;
-      case 'export':
-        return <Download className="w-4 h-4" />;
-    }
-  };
-
-  const getActionColor = (type: ActionDetail['type']) => {
-    switch (type) {
-      case 'create':
-        return 'bg-green-100 text-green-700';
-      case 'update':
-        return 'bg-blue-100 text-blue-700';
-      case 'delete':
-        return 'bg-red-100 text-red-700';
-      case 'view':
-        return 'bg-purple-100 text-purple-700';
-      case 'export':
-        return 'bg-orange-100 text-orange-700';
-    }
-  };
-
-  const sessionActions = selectedLog ? getSessionActions(selectedLog.sessionId) : [];
+  // Get unique modules for filters
+  const modules = Array.from(new Set(mockAccessLogs.map(log => log.module)));
 
   return (
-    <div className="space-y-6">
-      {/* Stats */}
+    <div className="space-y-6" style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px' }}>
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <StatsCard icon={ScrollText} iconColor="blue" title="Tổng truy cập (24h)" value="12,847" />
-        <StatsCard icon={ScrollText} iconColor="green" title="Thành công" value="12,654" />
-        <StatsCard icon={ScrollText} iconColor="red" title="Thất bại" value="193" />
-        <StatsCard icon={ScrollText} iconColor="purple" title="Người dùng hoạt động" value="847" />
+        <StatsCard icon={ScrollText} iconColor="blue" title="Tổng lượt truy cập (24h)" value="24,532" />
+        <StatsCard icon={CheckCircle2} iconColor="green" title="Tác vụ thành công" value="24,410" />
+        <StatsCard icon={AlertCircle} iconColor="red" title="Tác vụ thất bại" value="122" />
+        <StatsCard icon={Activity} iconColor="purple" title="Phân hệ đã truy cập" value="8" />
       </div>
 
-      {/* Filters */}
-      <div className="bg-white rounded-lg border border-slate-200 p-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="lg:col-span-2">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
+      {/* Filters and Actions */}
+      <div className="mb-6">
+        {/* Row 1: Search and Buttons */}
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex-1 flex items-center gap-3">
+            <div className="relative flex-1">
+              <input aria-label="Input field"
                 type="text"
-                placeholder="Tìm kiếm người dùng, hành động..."
+                placeholder="Tìm kiếm người dùng, hành động, phân hệ, đối tượng..."
+                className="w-full px-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onChange={handleSearchChange}
               />
             </div>
-          </div>
-          <div>
-            <div className="flex items-center gap-2 border border-slate-300 rounded-lg px-3 py-2">
-              <Calendar className="w-4 h-4 text-slate-400 flex-shrink-0" />
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="flex-1 outline-none text-sm"
-                placeholder="Từ ngày"
-              />
-              <span className="text-slate-400">-</span>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="flex-1 outline-none text-sm"
-                placeholder="Đến ngày"
-              />
-            </div>
-          </div>
-          <div>
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <button className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center">
+              <Search className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`p-2 rounded-lg transition-colors shadow-sm flex items-center justify-center border ${showFilters ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-[#e2e8f0] text-slate-600 hover:bg-slate-50'}`}
+              title="Bộ lọc"
             >
-              <option value="all">Tất cả trạng thái</option>
-              <option value="success">Thành công</option>
-              <option value="failed">Thất bại</option>
-            </select>
+              {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
+            </button>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => alert('Đang kết xuất nhật ký truy cập ra file Excel...')}
+              className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium"
+            >
+              <Download className="w-4 h-4" />
+              Kết xuất
+            </button>
           </div>
         </div>
-        <div className="flex gap-3 mt-4">
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm flex items-center gap-2">
-            <Filter className="w-4 h-4" />
-            Lọc
-          </button>
-          <button className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 text-sm flex items-center gap-2">
-            <Download className="w-4 h-4" />
-            Xuất Excel
-          </button>
-        </div>
+
+        {/* Row 2: Filters (Collapsible) */}
+        {showFilters && (
+          <div className="bg-slate-50 p-5 rounded-lg border border-slate-200 grid grid-cols-4 gap-4 mt-4 animate-in slide-in-from-top-2 duration-200 shadow-sm relative">
+            <div className="absolute -top-2 left-[50px] w-4 h-4 bg-slate-50 border-t border-l border-slate-200 transform rotate-45"></div>
+
+            <div className="space-y-1.5 relative z-10">
+              <label className="text-[13px] font-medium text-slate-700">Phân hệ</label>
+              <select aria-label="Select module"
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                value={filterModule}
+                onChange={(e) => {
+                  setFilterModule(e.target.value);
+                  setCurrentPage(1);
+                }}
+              >
+                <option value="all">Tất cả phân hệ</option>
+                {modules.map(mod => (
+                  <option key={mod} value={mod}>{mod}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-1.5 relative z-10">
+              <label className="text-[13px] font-medium text-slate-700">Trạng thái</label>
+              <select aria-label="Select status"
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                value={filterStatus}
+                onChange={(e) => {
+                  setFilterStatus(e.target.value);
+                  setCurrentPage(1);
+                }}
+              >
+                <option value="all">Tất cả trạng thái</option>
+                <option value="success">Thành công</option>
+                <option value="failed">Thất bại</option>
+              </select>
+            </div>
+
+            <div className="space-y-1.5 relative z-10">
+              <label className="text-[13px] font-medium text-slate-700">Thời gian từ</label>
+              <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
+                <input aria-label="Start date"
+                  type="date"
+                  className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-slate-700 p-0"
+                  value={startDate}
+                  onChange={(e) => {
+                    setStartDate(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                />
+                <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
+              </div>
+            </div>
+
+            <div className="space-y-1.5 relative z-10">
+              <label className="text-[13px] font-medium text-slate-700">Thời gian đến</label>
+              <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
+                <input aria-label="End date"
+                  type="date"
+                  className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-slate-700 p-0"
+                  value={endDate}
+                  onChange={(e) => {
+                    setEndDate(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                />
+                <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Logs Table */}
-      <div className="bg-white rounded-lg border border-slate-200">
-        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-          <h3 className="text-slate-900">Nhật ký truy cập ({filteredLogs.length} bản ghi)</h3>
-        </div>
+      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-slate-50">
+          <table className="w-full border-collapse collection-table text-[13px]">
+            <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-[1]">
               <tr>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Thời gian</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Người dùng</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">IP</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Hành động</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Thiết bị</th>
-                <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Trạng thái</th>
-                <th className="px-6 py-3 text-right text-xs text-slate-600 uppercase tracking-wider">Thao tác</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-12 text-[13px]">STT</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Thời gian</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Người thực hiện</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Phân hệ</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Hành động</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-24 text-[13px]">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filteredLogs.map((log) => (
-                <tr key={log.id} className="hover:bg-slate-50">
-                  <td className="px-6 py-4 text-sm text-slate-700">{log.timestamp}</td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-slate-900">{log.user}</div>
-                    <div className="text-xs text-slate-500 font-mono">{log.userId}</div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-600 font-mono">{log.ip}</td>
-                  <td className="px-6 py-4 text-sm text-slate-700">{log.action}</td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-slate-900">{log.device}</div>
-                    <div className="text-xs text-slate-500">{log.browser}</div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <StatusTag 
-                      label={log.status === 'success' ? 'Thành công' : 'Thất bại'} 
-                      variant={log.status === 'success' ? 'green' : 'red'} 
-                    />
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-end">
-                      <button
-                        onClick={() => handleViewDetail(log)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="Xem chi tiết"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
-                    </div>
+              {filteredLogs
+                .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                .map((log, index) => (
+                  <tr key={log.id} className="hover:bg-slate-50 transition-all group border-b border-slate-100">
+                    <td className="px-4 py-3 text-center text-slate-500 font-medium text-[13px]">
+                      {(currentPage - 1) * itemsPerPage + index + 1}
+                    </td>
+                    <td className="px-4 py-3 text-center text-slate-700 text-[13px]">{log.timestamp}</td>
+                    <td className="px-4 py-3 text-center text-[13px]">
+                      <div className="font-medium text-slate-950 leading-snug text-[13px]">{log.user}</div>
+                    </td>
+                    <td className="px-4 py-3 text-center text-[13px]">
+                      <span className="px-2 py-1 bg-slate-100 rounded text-slate-700 font-medium text-[11px]">
+                        {log.module}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-center text-slate-700 text-[13px]">{log.action}</td>
+                    <td className="px-4 py-3 text-center">
+                      <StatusTag 
+                        label={log.status === 'success' ? 'Thành công' : 'Thất bại'} 
+                        variant={log.status === 'success' ? 'green' : 'red'} 
+                      />
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex items-center justify-center">
+                        <button
+                          onClick={() => handleViewDetail(log)}
+                          className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
+                          title="Xem chi tiết"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              {filteredLogs.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="px-4 py-8 text-center text-slate-500 text-[13px]">
+                    Không tìm thấy bản ghi nào phù hợp
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
-        
+
         {/* Pagination */}
-        <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
-          <div className="text-sm text-slate-600">
-            Hiển thị 1-{filteredLogs.length} trong tổng số 12,847 bản ghi
+        <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white sm:px-6 collection-pagination text-[13px]">
+          <div className="flex items-center gap-2">
+            <span className="text-slate-600">Hiển thị</span>
+            <select aria-label="Select page size" 
+              className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px]"
+              title="Số bản ghi trên trang"
+              value={itemsPerPage}
+              onChange={(e) => {
+                setItemsPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+            <span className="text-slate-600">bản ghi/trang</span>
           </div>
-          <div className="flex gap-2">
-            <button className="px-3 py-1 border border-slate-300 rounded text-sm hover:bg-slate-50">Trước</button>
-            <button title="Hành động" aria-label="Hành động" className="px-3 py-1 bg-blue-600 text-white rounded text-sm">1</button>
-            <button title="Hành động" aria-label="Hành động" className="px-3 py-1 border border-slate-300 rounded text-sm hover:bg-slate-50">2</button>
-            <button title="Hành động" aria-label="Hành động" className="px-3 py-1 border border-slate-300 rounded text-sm hover:bg-slate-50">3</button>
-            <button className="px-3 py-1 border border-slate-300 rounded text-sm hover:bg-slate-50">Sau</button>
+          
+          <div className="flex items-center gap-4">
+            <span className="text-slate-600">
+              {filteredLogs.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, filteredLogs.length)} / {filteredLogs.length}
+            </span>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : currentPage)}
+                disabled={currentPage === 1}
+                className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
+              >
+                Trước
+              </button>
+              
+              {Array.from({ length: Math.ceil(filteredLogs.length / itemsPerPage) }, (_, i) => i + 1).map(page => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`px-3 py-1.5 border rounded-lg font-medium text-[13px] transition-colors ${
+                    currentPage === page
+                      ? 'bg-blue-600 border-blue-600 text-white'
+                      : 'border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+
+              <button
+                onClick={() => {
+                  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
+                  if (currentPage < totalPages) {
+                    setCurrentPage(currentPage + 1);
+                  }
+                }}
+                disabled={currentPage === Math.ceil(filteredLogs.length / itemsPerPage) || filteredLogs.length === 0}
+                className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
+              >
+                Sau
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Detail Modal */}
       {showDetailModal && selectedLog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-5xl w-full max-h-[90vh] overflow-y-auto">
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={closeDetailModal}
+        >
+          <div 
+            className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-slate-200">
               <div className="flex items-center gap-3">
@@ -529,9 +565,9 @@ export function AccessLogPage() {
                   <Activity className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
-                  <h3 className="text-slate-900">Chi tiết phiên truy cập</h3>
+                  <h3 className="text-slate-900">Chi tiết truy cập hệ thống</h3>
                   <p className="text-sm text-slate-600 mt-0.5">
-                    Session ID: <span className="font-mono">{selectedLog.sessionId}</span>
+                    Log Entry ID: <span className="font-mono">LOG_{selectedLog.id.toString().padStart(6, '0')}</span>
                   </p>
                 </div>
               </div>
@@ -543,124 +579,89 @@ export function AccessLogPage() {
               </button>
             </div>
 
-            {/* Session Info */}
+            {/* Info Cards */}
             <div className="p-6 border-b border-slate-200">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-slate-50 rounded-lg p-4">
                   <div className="flex items-center gap-2 text-slate-600 mb-2">
                     <User className="w-4 h-4" />
-                    <span className="text-xs">Người dùng</span>
+                    <span className="text-xs">Người thực hiện</span>
                   </div>
-                  <div className="text-sm text-slate-900">{selectedLog.user}</div>
+                  <div className="text-sm text-slate-900 font-medium">{selectedLog.user}</div>
                   <div className="text-xs text-slate-500 font-mono mt-1">{selectedLog.userId}</div>
                 </div>
 
                 <div className="bg-slate-50 rounded-lg p-4">
                   <div className="flex items-center gap-2 text-slate-600 mb-2">
                     <Clock className="w-4 h-4" />
-                    <span className="text-xs">Thời gian đăng nhập</span>
+                    <span className="text-xs">Thời gian thực hiện</span>
                   </div>
-                  <div className="text-sm text-slate-900">{selectedLog.timestamp}</div>
+                  <div className="text-sm text-slate-900 font-medium">{selectedLog.timestamp}</div>
                 </div>
 
                 <div className="bg-slate-50 rounded-lg p-4">
                   <div className="flex items-center gap-2 text-slate-600 mb-2">
                     <Monitor className="w-4 h-4" />
-                    <span className="text-xs">Thiết bị</span>
+                    <span className="text-xs">Thiết bị & Trình duyệt</span>
                   </div>
-                  <div className="text-sm text-slate-900">{selectedLog.device}</div>
+                  <div className="text-sm text-slate-900 font-medium">{selectedLog.device}</div>
                   <div className="text-xs text-slate-500 mt-1">{selectedLog.browser}</div>
                 </div>
 
                 <div className="bg-slate-50 rounded-lg p-4">
                   <div className="flex items-center gap-2 text-slate-600 mb-2">
                     <MapPin className="w-4 h-4" />
-                    <span className="text-xs">Vị trí</span>
+                    <span className="text-xs">Vị trí thực hiện</span>
                   </div>
-                  <div className="text-sm text-slate-900">{selectedLog.location}</div>
-                  <div className="text-xs text-slate-500 font-mono mt-1">{selectedLog.ip}</div>
+                  <div className="text-sm text-slate-900 font-medium">{selectedLog.location}</div>
                 </div>
               </div>
             </div>
 
-            {/* Actions Timeline */}
-            <div className="p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <FileText className="w-5 h-5 text-blue-600" />
-                <h4 className="text-slate-900">Lịch sử thao tác trong phiên</h4>
-                <StatusTag label={`${sessionActions.length} hành động`} variant="blue" />
+            {/* Detailed Log Info */}
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Phân hệ / Module</h4>
+                  <p className="text-sm text-slate-900 font-medium">{selectedLog.module}</p>
+                </div>
+                <div>
+                  <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Hành động tác vụ</h4>
+                  <p className="text-sm text-slate-900 font-medium">{selectedLog.action}</p>
+                </div>
               </div>
 
-              {sessionActions.length === 0 ? (
-                <div className="text-center py-8 text-slate-500">
-                  Không có thao tác nào trong phiên này
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Trạng thái tác vụ</h4>
+                  <div className="mt-1">
+                    <StatusTag 
+                      label={selectedLog.status === 'success' ? 'Thành công' : 'Thất bại'} 
+                      variant={selectedLog.status === 'success' ? 'green' : 'red'} 
+                    />
+                  </div>
                 </div>
-              ) : (
-                <div className="space-y-3">
-                  {sessionActions.map((action) => (
-                    <div
-                      key={action.id}
-                      className="bg-slate-50 rounded-lg p-4 hover:bg-slate-100 transition-colors"
-                    >
-                      <div className="flex items-start gap-4">
-                        {/* Icon */}
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${getActionColor(action.type)}`}>
-                          {getActionIcon(action.type)}
-                        </div>
+              </div>
 
-                        {/* Content */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-4 mb-2">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <StatusTag label={action.action} variant={action.type === 'create' ? 'green' : action.type === 'update' ? 'blue' : action.type === 'delete' ? 'red' : action.type === 'view' ? 'purple' : 'orange'} />
-                                <span className="text-sm text-slate-900">{action.module}</span>
-                                {action.status === 'success' ? (
-                                  <CheckCircle2 className="w-4 h-4 text-green-600" />
-                                ) : (
-                                  <AlertCircle className="w-4 h-4 text-red-600" />
-                                )}
-                              </div>
-                              <div className="text-sm text-slate-700">{action.description}</div>
-                            </div>
-                            <div className="flex items-center gap-2 text-xs text-slate-500">
-                              <Clock className="w-3 h-3" />
-                              {action.time}
-                            </div>
-                          </div>
-
-                          {/* Target */}
-                          <div className="text-xs text-slate-600 mt-2">
-                            <span className="text-slate-500">Đối tượng:</span>{' '}
-                            <span className="font-mono text-slate-900">{action.target}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+              <div>
+                <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Mô tả chi tiết tác vụ</h4>
+                <div className="bg-slate-50 border border-slate-100 rounded-lg p-4 font-mono text-[12px] text-slate-700 whitespace-pre-wrap leading-relaxed">
+                  {selectedLog.description}
                 </div>
-              )}
+              </div>
             </div>
 
             {/* Footer */}
-            <div className="p-6 border-t border-slate-200">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <Activity className="w-4 h-4" />
-                  <span>
-                    Tổng thời gian hoạt động:{' '}
-                    <strong className="text-slate-900">
-                      {sessionActions.length > 0 ? '8 phút 42 giây' : '0 giây'}
-                    </strong>
-                  </span>
-                </div>
-                <button
-                  onClick={closeDetailModal}
-                  className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
-                >
-                  Đóng
-                </button>
+            <div className="p-6 border-t border-slate-200 flex justify-between items-center bg-slate-50 rounded-b-lg">
+              <div className="flex items-center gap-2 text-xs text-slate-500 font-mono">
+                <span>UA: {selectedLog.userAgent}</span>
               </div>
+              <button
+                onClick={closeDetailModal}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-[13px] shadow-sm"
+              >
+                Đóng
+              </button>
             </div>
           </div>
         </div>

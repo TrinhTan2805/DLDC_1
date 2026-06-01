@@ -9,6 +9,7 @@ interface RelationshipsTabProps {
   entities: MasterDataEntity[];
   relationships: EntityRelationship[];
   setRelationships: (relationships: EntityRelationship[]) => void;
+  isViewOnly?: boolean;
 }
 
 const relationTypeLabels: Record<RelationshipType, string> = {
@@ -39,7 +40,8 @@ const BASE_MOCK_FIELDS = [
 export function RelationshipsTab({
   entities,
   relationships,
-  setRelationships
+  setRelationships,
+  isViewOnly = false
 }: RelationshipsTabProps) {
   const [showForm, setShowForm] = useState(false);
   const [editingRelationship, setEditingRelationship] = useState<EntityRelationship | null>(null);
@@ -276,13 +278,15 @@ export function RelationshipsTab({
             Định nghĩa liên kết (1-n, n-n) giữa các danh mục dữ liệu chủ
           </p>
         </div>
-        <button
- onClick={() => setShowForm(true)}
- className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md text-sm active:scale-95"
- >
- <Plus className="w-4 h-4" />
- Thêm quan hệ mới
- </button>
+        {!isViewOnly && (
+          <button
+            onClick={() => setShowForm(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md text-sm active:scale-95"
+          >
+            <Plus className="w-4 h-4" />
+            Thêm quan hệ mới
+          </button>
+        )}
       </div>
 
       {/* Relationships Table */}
@@ -296,7 +300,7 @@ export function RelationshipsTab({
                 <th className="text-left px-6 py-4 text-[14px] font-normal">Thực thể đích</th>
                 <th className="text-left px-6 py-4 text-[14px] font-normal">Điều kiện liên kết</th>
                 <th className="text-left px-6 py-4 text-[14px] font-normal">Cập nhật lúc</th>
-                <th className="text-right px-6 py-4 text-[14px] font-normal">Thao tác</th>
+                {!isViewOnly && <th className="text-right px-6 py-4 text-[14px] font-normal">Thao tác</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
@@ -366,40 +370,42 @@ export function RelationshipsTab({
                             <span className="text-slate-500">{relationship.updatedBy || relationship.createdBy}</span>
                          </div>
                       </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5 opacity-60 hover:opacity-100 transition-opacity">
-                          <button
-                            onClick={() => {
-                               setApprovalRequestData({
-                                  id: relationship.id,
-                                  code: relationship.relationshipType,
-                                  name: `${relationship.sourceEntityName} - ${relationship.targetEntityName}`,
-                                  type: 'attribute'
-                               });
-                               setApprovalRequestForm({ reviewer: '', note: '' });
-                               setShowApprovalModal(true);
-                            }}
-                            className="p-1.5 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                            title="Gửi phê duyệt"
-                          >
-                            <Send className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleEdit(relationship)}
-                            className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                            title="Chỉnh sửa"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(relationship.id)}
-                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                            title="Xóa"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
+                      {!isViewOnly && (
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex items-center justify-end gap-1.5 opacity-60 hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => {
+                                 setApprovalRequestData({
+                                    id: relationship.id,
+                                    code: relationship.relationshipType,
+                                    name: `${relationship.sourceEntityName} - ${relationship.targetEntityName}`,
+                                    type: 'attribute'
+                                 });
+                                 setApprovalRequestForm({ reviewer: '', note: '' });
+                                 setShowApprovalModal(true);
+                              }}
+                              className="p-1.5 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                              title="Gửi phê duyệt"
+                            >
+                              <Send className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleEdit(relationship)}
+                              className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                              title="Chỉnh sửa"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(relationship.id)}
+                              className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Xóa"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      )}
                     </tr>
                   );
                 })

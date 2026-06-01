@@ -7,6 +7,13 @@ interface VersionHistoryModalProps {
 
 const mockVersions = [
   {
+    id: 8,
+    version: 'v2.3.3',
+    date: '29/05/2026',
+    time: '17:30',
+    content: 'Bỏ nút Kết xuất tại các màn xem dữ liệu thu thập; Bỏ 2 tab Thiết lập dịch vụ, Nhật ký đối soát, bỏ 2 button Xuất báo cáo và Đồng bộ thủ công tại mục Đối soát dữ liệu thu thập; Đồng bộ giao diện Đối soát dữ liệu thu thập; Sửa logic Quản lý người dùng theo yêu cầu đã trao đổi, đồng bộ và rà soát màn hình Cấu hình hệ thống, Quản lý nhật ký; Sửa lại màn Xem biểu đồ thống kê; Bổ sung logic gán vai trò và nhóm người dùng tại Quản lý người dùng'
+  },
+  {
     id: 7,
     version: 'v2.3.2',
     date: '26/05/2026',

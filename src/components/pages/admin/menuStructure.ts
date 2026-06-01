@@ -2344,29 +2344,6 @@ export const menuStructure: MenuItem[] = [
             ],
           },
           {
-            id: "admin-password-rules",
-            name: "Thiết lập quy tắc đặt mật khẩu",
-            functions: [
-              {
-                id: "admin-password-rules-func",
-                name: "Thiết lập quy tắc đặt mật khẩu",
-                actions: [
-                  "Xem",
-                  "Thêm",
-                  "Sửa",
-                  "Xóa",
-                  "Xuất Excel",
-                  "Trình duyệt",
-                  "Duyệt",
-                  "Công bố",
-                  "Hủy công bố",
-                  "Công khai",
-                  "Hủy công khai",
-                ],
-              },
-            ],
-          },
-          {
             id: "admin-backup",
             name: "Sao lưu dự phòng",
             functions: [
@@ -2395,6 +2372,29 @@ export const menuStructure: MenuItem[] = [
         id: "admin-logs-group",
         name: "Quản lý nhật ký",
         children: [
+          {
+            id: "admin-login-log",
+            name: "Nhật ký đăng nhập",
+            functions: [
+              {
+                id: "admin-login-log-func",
+                name: "Nhật ký đăng nhập",
+                actions: [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel",
+                  "Trình duyệt",
+                  "Duyệt",
+                  "Công bố",
+                  "Hủy công bố",
+                  "Công khai",
+                  "Hủy công khai",
+                ],
+              },
+            ],
+          },
           {
             id: "admin-access-log",
             name: "Nhật ký truy cập",
