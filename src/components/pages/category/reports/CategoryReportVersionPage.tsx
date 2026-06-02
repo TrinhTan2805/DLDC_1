@@ -9,7 +9,7 @@ const mockVersions = [
 ];
 
 export function CategoryReportVersionPage() {
-  const [filterCategoryName, setFilterCategoryName] = useState('DM_HOTICH');
+  const [filterCategoryName, setFilterCategoryName] = useState('Danh mục Phòng Công chứng nhà nước');
   const [showExportMenu, setShowExportMenu] = useState(false);
 
   const handleExportFile = (format: string) => {
@@ -31,9 +31,9 @@ export function CategoryReportVersionPage() {
                 onChange={(e: ChangeEvent<HTMLSelectElement>) => setFilterCategoryName(e.target.value)}
                 className="w-full px-4 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500"
               >
-                <option value="DM_HOTICH">CSDL Hộ tịch điện tử Toàn quốc</option>
-                <option value="DM_DANGKY_DN">Danh mục tra cứu Mã ngành Đăng ký Doanh nghiệp</option>
-                <option value="DM_CONGCHUNG">Danh mục Phòng Công chứng nhà nước</option>
+                <option value="CSDL Hộ tịch điện tử Toàn quốc">CSDL Hộ tịch điện tử Toàn quốc</option>
+                <option value="Danh mục tra cứu Mã ngành Đăng ký Doanh nghiệp">Danh mục tra cứu Mã ngành Đăng ký Doanh nghiệp</option>
+                <option value="Danh mục Phòng Công chứng nhà nước">Danh mục Phòng Công chứng nhà nước</option>
               </select>
             </div>
 

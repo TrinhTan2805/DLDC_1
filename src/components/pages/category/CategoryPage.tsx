@@ -2778,6 +2778,7 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                 <h3 className="text-lg font-semibold text-slate-800">Tìm kiếm nâng cao</h3>
               </div>
               <button
+                title="Đóng"
                 onClick={() => setShowAdvancedSearch(false)}
                 className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded-lg transition-colors"
               >

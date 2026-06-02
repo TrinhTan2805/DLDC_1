@@ -64,6 +64,8 @@ interface Group {
   role?: string;
   functionPermissions?: { [functionId: string]: string[] };
   dataPermissions?: { [sourceId: string]: { [tableId: string]: string[] } };
+  groupAdmin?: string;
+  modules?: string[];
 }
 
 export interface DatabaseTable {
@@ -139,56 +141,111 @@ const generateGroupsAndUsers = () => {
   let userId = 1;
 
   units.forEach((unit, index) => {
-    // 3 user groups per unit as per requirement
-    groups.push({
-      id: groupId++,
-      name: `Nhóm người dùng theo nghiệp vụ`,
-      code: `NV-${unit.id}`,
-      description: `Thực hiện các nghiệp vụ chuyên môn tại ${unit.name}`,
-      department: unit.name,
-      memberCount: 5,
-      functionCount: 10,
-      createdDate: '01/01/2024',
-      status: 'active',
-      members: [],
-      functions: ['Thêm dữ liệu', 'Sửa dữ liệu', 'Xem dữ liệu'],
-      role: 'Người dùng cơ bản'
-    });
+    if (unit.name === 'Cục Hành chính tư pháp') {
+      const specialGroups = [
+        'Nhóm người dùng hồ sơ đăng ký khai sinh',
+        'Nhóm người dùng hồ sơ đăng ký kết hôn',
+        'Nhóm người dùng hồ sơ đăng ký khai tử',
+        'Nhóm người dùng hồ sơ cấp giấy XNTNHN',
+        'Nhóm người dùng hồ sơ đăng ký giám hộ',
+        'Nhóm người dùng hồ sơ nhận cha, mẹ, con',
+        'Nhóm người dùng hồ sơ thay đổi, cải chính hộ tịch',
+        'Nhóm người dùng hồ sơ xác định lại dân tộc',
+        'Nhóm người dùng hồ sơ khai sinh lưu động'
+      ];
+      specialGroups.forEach((groupName, i) => {
+        groups.push({
+          id: groupId++,
+          name: groupName,
+          code: `HCTP-${i+1}`,
+          description: `Thực hiện ${groupName.toLowerCase()}`,
+          department: unit.name,
+          memberCount: Math.floor(Math.random() * 10) + 1,
+          functionCount: 5,
+          createdDate: '01/01/2024',
+          status: 'active',
+          members: [],
+          functions: ['Xem dữ liệu', 'Sửa dữ liệu'],
+          role: 'Người dùng cơ bản'
+        });
+      });
+      // Thêm nhóm Quản trị dữ liệu
+      groups.push({
+        id: groupId++,
+        name: `Nhóm quản trị dữ liệu`,
+        code: `QT-${unit.id}`,
+        description: `Quản lý, cấu hình và bảo mật dữ liệu tại ${unit.name}`,
+        department: unit.name,
+        memberCount: 3,
+        functionCount: 20,
+        createdDate: '01/01/2024',
+        status: 'active',
+        members: [],
+        functions: ['Cấu hình hệ thống', 'Quản trị danh mục', 'Phân quyền'],
+        role: 'Quản trị hệ thống'
+      });
+    } else {
+      // 3 user groups per unit as per requirement
+      groups.push({
+        id: groupId++,
+        name: `Nhóm người dùng theo nghiệp vụ`,
+        code: `NV-${unit.id}`,
+        description: `Thực hiện các nghiệp vụ chuyên môn tại ${unit.name}`,
+        department: unit.name,
+        memberCount: 5,
+        functionCount: 10,
+        createdDate: '01/01/2024',
+        status: 'active',
+        members: [],
+        functions: ['Thêm dữ liệu', 'Sửa dữ liệu', 'Xem dữ liệu'],
+        role: 'Người dùng cơ bản'
+      });
 
-    groups.push({
-      id: groupId++,
-      name: `Nhóm lãnh đạo nghiệp vụ`,
-      code: `LD-${unit.id}`,
-      description: `Phê duyệt, chỉ đạo hoạt động nghiệp vụ tại ${unit.name}`,
-      department: unit.name,
-      memberCount: 2,
-      functionCount: 15,
-      createdDate: '01/01/2024',
-      status: 'active',
-      members: [],
-      functions: ['Phê duyệt', 'Xem báo cáo', 'Xem dữ liệu'],
-      role: 'Quản trị nghiệp vụ'
-    });
+      groups.push({
+        id: groupId++,
+        name: `Nhóm lãnh đạo nghiệp vụ`,
+        code: `LD-${unit.id}`,
+        description: `Phê duyệt, chỉ đạo hoạt động nghiệp vụ tại ${unit.name}`,
+        department: unit.name,
+        memberCount: 2,
+        functionCount: 15,
+        createdDate: '01/01/2024',
+        status: 'active',
+        members: [],
+        functions: ['Phê duyệt', 'Xem báo cáo', 'Xem dữ liệu'],
+        role: 'Quản trị nghiệp vụ'
+      });
 
-    groups.push({
-      id: groupId++,
-      name: `Nhóm quản trị dữ liệu`,
-      code: `QT-${unit.id}`,
-      description: `Quản lý, cấu hình và bảo mật dữ liệu tại ${unit.name}`,
-      department: unit.name,
-      memberCount: 3,
-      functionCount: 20,
-      createdDate: '01/01/2024',
-      status: 'active',
-      members: [],
-      functions: ['Cấu hình hệ thống', 'Quản trị danh mục', 'Phân quyền'],
-      role: 'Quản trị hệ thống'
-    });
+      groups.push({
+        id: groupId++,
+        name: `Nhóm quản trị dữ liệu`,
+        code: `QT-${unit.id}`,
+        description: `Quản lý, cấu hình và bảo mật dữ liệu tại ${unit.name}`,
+        department: unit.name,
+        memberCount: 3,
+        functionCount: 20,
+        createdDate: '01/01/2024',
+        status: 'active',
+        members: [],
+        functions: ['Cấu hình hệ thống', 'Quản trị danh mục', 'Phân quyền'],
+        role: 'Quản trị hệ thống'
+      });
+    }
 
     // 3 mock users per unit
-    users.push({ id: userId++, name: `Chuyên viên ${unit.id}`, email: `chuyenvien${unit.id}@moj.gov.vn`, department: unit.name });
-    users.push({ id: userId++, name: `Lãnh đạo ${unit.id}`, email: `lanhdao${unit.id}@moj.gov.vn`, department: unit.name });
-    users.push({ id: userId++, name: `Quản trị ${unit.id}`, email: `quantri${unit.id}@moj.gov.vn`, department: unit.name });
+    const unitUsers: any[] = [];
+    unitUsers.push({ id: userId++, name: `Chuyên viên ${unit.id}`, email: `chuyenvien${unit.id}@moj.gov.vn`, department: unit.name });
+    unitUsers.push({ id: userId++, name: `Lãnh đạo ${unit.id}`, email: `lanhdao${unit.id}@moj.gov.vn`, department: unit.name });
+    unitUsers.push({ id: userId++, name: `Quản trị ${unit.id}`, email: `quantri${unit.id}@moj.gov.vn`, department: unit.name });
+    users.push(...unitUsers);
+
+    // Assign users to the groups of this unit
+    groups.filter(g => g.department === unit.name).forEach(g => {
+      // randomly assign 1 to 3 users
+      const numUsers = Math.floor(Math.random() * 3) + 1;
+      g.members = unitUsers.slice(0, numUsers);
+      g.memberCount = g.members.length;
+    });
   });
 
   return { groups, users };
@@ -216,12 +273,27 @@ interface GroupManagementPageProps {
 
 export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
   const [groups, setGroups] = useState<Group[]>(groupsData);
-  const [unitsList, setUnitsList] = useState(units);
+
+  useEffect(() => {
+    setGroups(groupsData);
+  }, [groupsData]);
+
+  const [unitsList, setUnitsList] = useState<{id: string, name: string}[]>([]);
   const [selectedUnitIdState, setSelectedUnitIdState] = useState<string>('');
   const [unitSearchTerm, setUnitSearchTerm] = useState('');
-  const [unitModalType, setUnitModalType] = useState<'add' | 'edit' | 'delete' | null>(null);
-  const [selectedUnitToEdit, setSelectedUnitToEdit] = useState<{ id: string; name: string } | null>(null);
-  const [newUnitName, setNewUnitName] = useState('');
+
+  // Fetch units from roles on mount
+  useEffect(() => {
+    const roles = getRoles();
+    const unitNames = roles.map(r => r.selectedUnit).filter(Boolean) as string[];
+    const uniqueUnits = [...new Set(unitNames)];
+    const dynamicUnits = uniqueUnits.map((name, index) => ({ id: String(index + 1), name }));
+    
+    setUnitsList(dynamicUnits);
+    if (dynamicUnits.length > 0 && !selectedUnitIdState) {
+      setSelectedUnitIdState(dynamicUnits[0].id);
+    }
+  }, []);
 
   // Sync selectedUnitIdState with global currentPage from Sidebar
   useEffect(() => {
@@ -259,6 +331,8 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
     department: '',
     status: 'active' as 'active' | 'inactive',
     role: '',
+    groupAdmin: '',
+    modules: [] as string[],
   });
 
   const [memberSearchTerm, setMemberSearchTerm] = useState('');
@@ -267,51 +341,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
 
   const currentUnit = unitsList.find(u => u.id === selectedUnitIdState);
 
-  const handleAddUnit = () => {
-    if (!newUnitName.trim()) {
-      alert('Vui lòng nhập tên đơn vị!');
-      return;
-    }
-    const newId = (unitsList.length > 0 ? Math.max(...unitsList.map(u => parseInt(u.id) || 0)) + 1 : 1).toString();
-    const newUnit = { id: newId, name: newUnitName.trim() };
-    setUnitsList([...unitsList, newUnit]);
-    setSelectedUnitIdState(newId);
-    setNewUnitName('');
-    setUnitModalType(null);
-    alert(`Đã thêm đơn vị "${newUnit.name}" thành công!`);
-  };
 
-  const handleEditUnit = () => {
-    if (!selectedUnitToEdit || !newUnitName.trim()) {
-      alert('Vui lòng nhập tên đơn vị!');
-      return;
-    }
-    const oldName = selectedUnitToEdit.name;
-    const newName = newUnitName.trim();
-    setUnitsList(unitsList.map(u => u.id === selectedUnitToEdit.id ? { ...u, name: newName } : u));
-    
-    // Also update department names in groups!
-    setGroups(groups.map(g => g.department === oldName ? { ...g, department: newName } : g));
-    
-    setSelectedUnitToEdit(null);
-    setNewUnitName('');
-    setUnitModalType(null);
-    alert(`Đã cập nhật đơn vị thành "${newName}"!`);
-  };
-
-  const handleDeleteUnit = (unitId: string) => {
-    const unitToDelete = unitsList.find(u => u.id === unitId);
-    if (!unitToDelete) return;
-    
-    if (confirm(`Bạn có chắc chắn muốn xóa đơn vị "${unitToDelete.name}"? Tất cả các nhóm thuộc đơn vị này sẽ bị ẩn.`)) {
-      setUnitsList(unitsList.filter(u => u.id !== unitId));
-      if (selectedUnitIdState === unitId) {
-        const remaining = unitsList.filter(u => u.id !== unitId);
-        setSelectedUnitIdState(remaining.length > 0 ? remaining[0].id : '');
-      }
-      alert(`Đã xóa đơn vị "${unitToDelete.name}" thành công!`);
-    }
-  };
 
   const filteredGroups = groups.filter(group => {
     const matchesUnit = currentUnit ? group.department === currentUnit.name : true;
@@ -337,6 +367,8 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
           department: group.department,
           status: group.status,
           role: group.role || '',
+          groupAdmin: group.groupAdmin || '',
+          modules: group.modules || [],
         });
       }
       if (type === 'detail') {
@@ -363,6 +395,8 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
         department: currentUnit ? currentUnit.name : '',
         status: 'active',
         role: '',
+        groupAdmin: '',
+        modules: [],
       });
       setSelectedUsers([]);
     }
@@ -428,7 +462,9 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
         functionCount: 0,
         createdDate: new Date().toLocaleDateString('vi-VN'),
         members: [],
-        functions: []
+        functions: [],
+        groupAdmin: formData.groupAdmin,
+        modules: formData.modules
       };
       setGroups([...groups, newGroup]);
       alert('Thêm nhóm người dùng mới thành công!');
@@ -439,7 +475,9 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
         description: formData.description,
         department: formData.department,
         status: formData.status,
-        role: formData.role
+        role: formData.role,
+        groupAdmin: formData.groupAdmin,
+        modules: formData.modules
       } : g));
       alert('Cập nhật nhóm người dùng thành công!');
     }
@@ -474,9 +512,8 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                           user.email.toLowerCase().includes(memberSearchTerm.toLowerCase()) ||
                           user.department.toLowerCase().includes(memberSearchTerm.toLowerCase());
     const matchesDept = memberDepartmentFilter ? user.department === memberDepartmentFilter : true;
-    const matchesRole = modalType === 'add-members' ? validUserIds.includes(user.id) : true;
     
-    return matchesSearch && matchesDept && matchesRole;
+    return matchesSearch && matchesDept;
   });
 
   const selectAllUsers = () => {
@@ -531,6 +568,55 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
     }
   };
 
+  const getRolePermissionsForGroup = () => {
+    if (!selectedGroup) return [];
+    const roleName = selectedGroup.role;
+    const allRoles = getRoles();
+    const role = allRoles.find(r => r.name === roleName || r.roleType === roleName);
+    if (role) return role.permissions;
+    
+    // Fallback if role is not found but we know the name
+    if (roleName === 'Quản trị hệ thống' || roleName === 'Quản trị hệ thống nguồn') {
+      return ['Quản lý thu thập', 'Xử lý dữ liệu', 'Dữ liệu chủ', 'Quản lý dữ liệu mở', 'Xem tổng quan', 'Cung cấp số liệu', 'Quản lý vận hành'];
+    }
+    if (roleName === 'Quản trị nghiệp vụ') {
+       return ['Xem tổng quan', 'Quản lý thu thập', 'Xử lý dữ liệu'];
+    }
+    if (roleName === 'Người dùng cơ bản') {
+       return ['Xem tổng quan'];
+    }
+    return [];
+  };
+
+  const menuToPermissionMap: Record<string, string> = {
+    'Tổng quan': 'Xem tổng quan',
+    'Quản lý thu thập': 'Quản lý thu thập',
+    'Xử lý dữ liệu': 'Xử lý dữ liệu',
+    'Dữ liệu mở': 'Quản lý dữ liệu mở',
+    'Quản lý dữ liệu chủ': 'Dữ liệu chủ',
+    'Cung cấp dữ liệu': 'Cung cấp số liệu',
+    'Quản trị & vận hành': 'Quản lý vận hành'
+  };
+
+  const getAuthorizedMenuStructure = () => {
+    if (!selectedGroup) return filteredMenuStructure;
+    
+    const rolePermissions = getRolePermissionsForGroup();
+    if (rolePermissions && rolePermissions.length > 0) {
+      return filteredMenuStructure.filter(menuItem => {
+        const requiredPermission = menuToPermissionMap[menuItem.name];
+        if (requiredPermission) {
+          return rolePermissions.includes(requiredPermission);
+        }
+        return true; 
+      });
+    }
+    
+    return filteredMenuStructure;
+  };
+
+  const authorizedMenuStructure = getAuthorizedMenuStructure();
+
   const getAllSelectableMenuIds = (): string[] => {
     const selectableIds: string[] = [];
     
@@ -550,7 +636,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
       });
     };
     
-    traverse(filteredMenuStructure);
+    traverse(authorizedMenuStructure);
     return selectableIds;
   };
 
@@ -569,6 +655,24 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
 
   const isSomeMenuItemsSelected = () => {
     return selectedMenuItems.length > 0 && !isAllMenuItemsSelected();
+  };
+
+  const getMenuLabel = (id: string) => {
+    let label = '';
+    const traverse = (items: MenuItem[]) => {
+      for (const item of items) {
+        if (item.id === id) {
+          label = item.name;
+          return true;
+        }
+        if (item.children && traverse(item.children)) {
+          return true;
+        }
+      }
+      return false;
+    };
+    traverse(filteredMenuStructure);
+    return label;
   };
 
   const selectAllPermissionsForFunction = (functionId: string, actions: string[]) => {
@@ -759,13 +863,6 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
         {/* Header */}
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-slate-800">Danh mục đơn vị</h3>
-          <button
-            onClick={() => setUnitModalType('add')}
-            className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-[10px] font-semibold transition-colors flex items-center gap-1"
-            title="Thêm nhóm mới"
-          >
-            + Thêm đơn vị mới
-          </button>
         </div>
 
         {/* Search */}
@@ -801,32 +898,6 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                   <div className="flex items-center flex-1 min-w-0 gap-2">
                     <Building2 className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-blue-600' : 'text-slate-400'}`} />
                     <span className="truncate">{unit.name}</span>
-                  </div>
-
-                  {/* Actions always visible on the right */}
-                  <div className="flex items-center gap-1 shrink-0 ml-2">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedUnitToEdit(unit);
-                        setNewUnitName(unit.name);
-                        setUnitModalType('edit');
-                      }}
-                      className="p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded"
-                      title="Sửa tên đơn vị"
-                    >
-                      <Edit className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteUnit(unit.id);
-                      }}
-                      className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded"
-                      title="Xóa đơn vị"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
                   </div>
                 </div>
               );
@@ -1209,6 +1280,32 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                       </div>
                     )}
                   </div>
+
+                  {/* Functions */}
+                  <div className="mb-6 mt-6 pt-6 border-t border-slate-200">
+                    <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-200">
+                      <h4 className="text-slate-900">
+                        Danh sách chức năng được phân quyền ({savedMenuItems[selectedGroup.id]?.length || 0})
+                      </h4>
+                    </div>
+                    {(savedMenuItems[selectedGroup.id] && savedMenuItems[selectedGroup.id].length > 0) ? (
+                      <div className="flex flex-wrap gap-2">
+                        {savedMenuItems[selectedGroup.id].map((menuId, index) => {
+                          const label = getMenuLabel(menuId);
+                          if (!label) return null;
+                          return (
+                            <div key={index} className="px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-100 rounded-md text-sm font-medium">
+                              {label}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-slate-500 text-sm">
+                        Nhóm này chưa được phân quyền chức năng nào
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -1250,7 +1347,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                     </div>
 
                     <div className="space-y-1 bg-white border border-slate-200 rounded-lg p-4">
-                      {renderMenuTree(filteredMenuStructure)}
+                      {renderMenuTree(authorizedMenuStructure)}
                     </div>
                   </div>
                 </div>
@@ -1494,14 +1591,22 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                     className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
+                <div className="w-full lg:w-1/3">
+                  <select
+                    title="Chọn đơn vị"
+                    aria-label="Chọn đơn vị"
+                    value={memberDepartmentFilter}
+                    onChange={(e) => setMemberDepartmentFilter(e.target.value)}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Tất cả đơn vị</option>
+                    {unitsList.map(unit => (
+                      <option key={unit.id} value={unit.name}>{unit.name}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
               
-              {validUserIds.length === 0 ? (
-                <div className="p-8 text-center text-red-600 bg-red-50 border border-red-200 rounded-lg text-sm mt-4 mb-6">
-                  Vui lòng gán người dùng cho vai trò <span className="font-semibold">{selectedGroup.role}</span>
-                </div>
-              ) : (
-                <>
                   {/* Select All Checkbox */}
                   <div className="mb-2">
                     <label className="flex items-center gap-3 px-4 py-3 bg-blue-50 border border-blue-200 rounded-lg cursor-pointer hover:bg-blue-100">
@@ -1557,13 +1662,10 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                       ))
                     )}
                   </div>
-                </>
-              )}
               <div className="flex gap-3 mt-6">
                 <button 
                   onClick={handleSaveMembers}
-                  disabled={validUserIds.length === 0}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
                   Lưu {selectedUsers.length > 0 && `(${selectedUsers.length})`} thành viên
                 </button>
@@ -1621,57 +1723,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
         </div>
       )}
 
-      {/* Unit Add / Edit Modals */}
-      {unitModalType && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[999] p-4 font-sans" onClick={() => setUnitModalType(null)}>
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden" onClick={e => e.stopPropagation()}>
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
-              <h3 className="text-slate-900 font-bold text-base">
-                {unitModalType === 'add' ? 'Thêm đơn vị mới' : 'Chỉnh sửa đơn vị'}
-              </h3>
-              <button title="Đóng" aria-label="Đóng" onClick={() => {
-                setUnitModalType(null);
-                setNewUnitName('');
-                setSelectedUnitToEdit(null);
-              }} className="text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-100 rounded-lg transition-colors">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-2 uppercase tracking-wide">
-                  Tên đơn vị <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="Nhập tên đơn vị (ví dụ: Cục Bổ trợ tư pháp)..."
-                  value={newUnitName}
-                  onChange={(e) => setNewUnitName(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
-                />
-              </div>
-              <div className="flex gap-3 pt-2">
-                <button
-                  onClick={unitModalType === 'add' ? handleAddUnit : handleEditUnit}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
-                >
-                  Xác nhận
-                </button>
-                <button
-                  onClick={() => {
-                    setUnitModalType(null);
-                    setNewUnitName('');
-                    setSelectedUnitToEdit(null);
-                  }}
-                  className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 text-sm font-semibold rounded-lg hover:bg-slate-50 transition-colors"
-                >
-                  Hủy
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 }

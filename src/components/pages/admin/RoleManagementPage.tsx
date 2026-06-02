@@ -27,80 +27,65 @@ interface Role {
   history?: RoleVersion[];
   assignedUserIds?: number[];
   assignedGroupIds?: number[];
+  unitAdmin?: string;
+  selectedUnit?: string;
 }
 
-export const mockRoles: Role[] = [
-  {
-    id: 1,
-    name: 'Quản trị hệ thống',
-    roleType: 'Quản trị hệ thống Kho DLDC',
-    description: 'Toàn quyền quản trị hệ thống DLDC',
-    memberCount: 1,
-    groupCount: 1,
-    createdDate: '01/01/2024',
-    updatedDate: '01/01/2024',
-    status: 'active',
-    permissions: ['Xem tổng quan', 'Quản lý vận hành'],
-    dataPermissions: ['Thêm', 'Sửa', 'Xóa', 'Xem', 'Tra cứu', 'Tải file'],
-    version: 'v1.0',
-    history: [
-      {
-        version: 'v1.0',
-        updatedDate: '01/01/2024',
-        updatedBy: 'Nguyễn Văn An (Quản trị viên)',
-        changes: 'Khởi tạo vai trò ban đầu'
-      }
-    ],
-    assignedUserIds: [1],
-    assignedGroupIds: [1]
-  },
-  {
-    id: 2,
-    name: 'Quản trị nghiệp vụ',
-    roleType: 'Quản trị hệ thống nguồn',
-    description: 'Quản lý các nghiệp vụ cốt lõi, danh mục và dữ liệu',
-    memberCount: 2,
-    groupCount: 2,
-    createdDate: '15/01/2024',
-    updatedDate: '15/01/2024',
-    status: 'active',
-    permissions: ['Quản lý thu thập', 'Xử lý dữ liệu', 'Dữ liệu chủ', 'Quản lý dữ liệu mở'],
-    dataPermissions: ['Thêm', 'Sửa', 'Xem', 'Tra cứu', 'Tải file'],
-    version: 'v1.0',
-    assignedUserIds: [1, 2],
-    assignedGroupIds: [2, 3]
-  },
-  {
-    id: 3,
-    name: 'Người dùng cơ bản',
-    roleType: 'Quản trị hệ thống nguồn',
-    description: 'Vai trò mặc định cho cán bộ khai thác',
-    memberCount: 1,
-    groupCount: 2,
-    createdDate: '20/01/2024',
-    updatedDate: '20/01/2024',
-    status: 'active',
-    permissions: ['Xem tổng quan', 'Cung cấp số liệu'],
-    dataPermissions: ['Xem', 'Tra cứu', 'Tải file'],
-    version: 'v1.0',
-    assignedUserIds: [3],
-    assignedGroupIds: [4, 5]
-  }
+const mockUnits = [
+  'Bộ Tư pháp',
+  'Cục Công nghệ thông tin',
+  'Cục Hành chính tư pháp',
+  'Cục Quản lý thi hành án dân sự',
+  'Cục Đăng ký GD bảo đảm & Bồi thường nhà nước',
+  'Cục Kiểm tra văn bản & Quản lý xử lý VPHC',
+  'Cục Pháp luật quốc tế và Giải quyết tranh chấp...',
+  'Cục Phổ biến, giáo dục pháp luật',
+  'Cục Bổ trợ tư pháp',
+  'Vụ Hợp tác quốc tế',
+  'Cục Kế hoạch - Tài chính',
+  'Vụ Pháp luật Dân sự',
+  'Cục Đăng ký Quốc gia',
+  'Cục Công chứng'
 ];
+
+export const mockRoles: Role[] = mockUnits.map((unit, index) => ({
+  id: index + 1,
+  name: `Quản trị ${unit}`,
+  roleType: 'Quản trị hệ thống nguồn',
+  description: `Toàn quyền quản trị và khai thác dữ liệu cho ${unit}`,
+  memberCount: Math.floor(Math.random() * 5) + 1,
+  groupCount: Math.floor(Math.random() * 3) + 1,
+  createdDate: '15/01/2024',
+  updatedDate: '15/01/2024',
+  status: 'active',
+  permissions: ['Quản lý thu thập', 'Xử lý dữ liệu', 'Dữ liệu chủ', 'Quản lý dữ liệu mở'],
+  dataPermissions: ['Thêm', 'Sửa', 'Xem', 'Tra cứu', 'Tải file'],
+  version: 'v1.0',
+  assignedUserIds: [1, 2],
+  assignedGroupIds: [1, 2],
+  selectedUnit: unit
+}));
 
 export const getRoles = (): Role[] => {
   const saved = localStorage.getItem('roles');
-  return saved ? JSON.parse(saved) : mockRoles;
+  if (saved) {
+    const parsed = JSON.parse(saved);
+    if (parsed.length <= 3) return mockRoles;
+    return parsed;
+  }
+  return mockRoles;
 };
 
 const availableUsers = [
   { id: 1, name: 'Nguyễn Văn An', email: 'nguyenvanan@moj.gov.vn', department: 'Vụ Pháp luật Dân sự' },
   { id: 2, name: 'Trần Thị Bình', email: 'tranthibinh@moj.gov.vn', department: 'Cục Đăng ký Quốc gia' },
-  { id: 3, name: 'Lê Văn Cường', email: 'levancuong@moj.gov.vn', department: 'Cục Công chứng' }
+  { id: 3, name: 'Lê Văn Cường', email: 'levancuong@moj.gov.vn', department: 'Cục Công chứng' },
+  { id: 4, name: 'Phạm Thị D', email: 'ptd@moj.gov.vn', department: 'Bộ Tư pháp' },
+  { id: 5, name: 'Hoàng Văn E', email: 'hve@moj.gov.vn', department: 'Cục Công nghệ thông tin' }
 ];
 
 const availableGroups = [
-  { id: 1, name: 'Ban Lãnh đạo Bộ', code: 'LDB-BTP', department: 'Bộ Tư Pháp', memberCount: 5 },
+  { id: 1, name: 'Ban Lãnh đạo Bộ', code: 'LDB-BTP', department: 'Bộ Tư pháp', memberCount: 5 },
   { id: 2, name: 'Quản trị hạ tầng & An ninh thông tin', code: 'QTHT-CNTT', department: 'Cục Công nghệ thông tin', memberCount: 8 },
   { id: 3, name: 'Nghiệp vụ Hộ tịch điện tử', code: 'NVHT-HCTP', department: 'Cục Hành chính tư pháp', memberCount: 15 },
   { id: 4, name: 'Nghiệp vụ Quốc tịch', code: 'NVQT-HCTP', department: 'Cục Hành chính tư pháp', memberCount: 10 },
@@ -128,7 +113,8 @@ const availableDataPermissions = [
 
 const roleTypeTemplates = {
   'Quản trị hệ thống Kho DLDC': 'Bao gồm tất cả quyền xem, sửa, xóa các chức năng\nThiết lập kết nối cho tất cả CSDL\nThiết lập xử lý cho tất cả CSDL\nThiết lập chia sẻ cho tất cả CSDL\nThiết lập phân quyền quản trị cho các tài khoản quản trị viên',
-  'Quản trị hệ thống nguồn': 'Xem dữ liệu theo hệ thống nguồn được phân quyền\nXem Dữ liệu được xử lý\nThiết lập dữ liệu chia sẻ'
+  'Quản trị hệ thống nguồn': 'Xem dữ liệu theo hệ thống nguồn được phân quyền\nXem Dữ liệu được xử lý\nThiết lập dữ liệu chia sẻ',
+  'Người dùng cơ bản': 'Xem tổng quan hệ thống\nXem dữ liệu theo hệ thống nguồn được phân quyền\nTra cứu thông tin dữ liệu\nKhông có quyền quản trị hệ thống'
 };
 
 type ModalType = 'add' | 'edit' | 'delete' | 'assign-users' | 'history' | null;
@@ -150,7 +136,9 @@ export function RoleManagementPage() {
     description: '',
     status: 'active' as 'active' | 'inactive',
     permissions: [] as string[],
-    dataPermissions: [] as string[]
+    dataPermissions: [] as string[],
+    unitAdmin: '',
+    selectedUnit: ''
   });
   
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
@@ -159,6 +147,8 @@ export function RoleManagementPage() {
   const [groupSearchTerm, setGroupSearchTerm] = useState('');
   const [userSearchTerm, setUserSearchTerm] = useState('');
   const [showUnassignedOnly, setShowUnassignedOnly] = useState(false);
+  const [userDropdownSearch, setUserDropdownSearch] = useState('');
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   const [assignmentSuccess, setAssignmentSuccess] = useState<{
     roleName: string;
@@ -188,7 +178,9 @@ export function RoleManagementPage() {
           description: role.description,
           status: role.status,
           permissions: role.permissions,
-          dataPermissions: role.dataPermissions || []
+          dataPermissions: role.dataPermissions || [],
+          unitAdmin: role.unitAdmin || '',
+          selectedUnit: role.selectedUnit || ''
         });
       } else if (type === 'assign-users') {
         setSelectedUsers(role.assignedUserIds || []);
@@ -196,7 +188,9 @@ export function RoleManagementPage() {
       }
     } else {
       setSelectedRole(null);
-      setFormData({ name: '', roleType: '', description: '', status: 'active', permissions: [], dataPermissions: [] });
+      setFormData({ name: '', roleType: '', description: '', status: 'active', permissions: [], dataPermissions: [], unitAdmin: '', selectedUnit: '' });
+      setUserDropdownOpen(false);
+      setUserDropdownSearch('');
     }
     
     if (type !== 'assign-users') {
@@ -477,15 +471,7 @@ export function RoleManagementPage() {
               </div>
             </div>
  
-            <div className="px-6 py-3 bg-slate-50 border-t border-slate-200 flex gap-2">
-              <button 
-                onClick={() => handleOpenModal('assign-users', role)}
-                className="flex-1 px-3 py-1.5 text-sm bg-white border border-slate-300 text-slate-700 rounded hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-all flex items-center justify-center gap-1.5"
-              >
-                <UserPlus className="w-3.5 h-3.5" />
-                Gán vai trò
-              </button>
-            </div>
+
           </div>
         ))}
       </div>
@@ -534,29 +520,92 @@ export function RoleManagementPage() {
                     <option value="" disabled>-- Chọn loại vai trò --</option>
                     <option value="Quản trị hệ thống Kho DLDC">Quản trị hệ thống Kho DLDC</option>
                     <option value="Quản trị hệ thống nguồn">Quản trị hệ thống nguồn</option>
+                    <option value="Người dùng cơ bản">Người dùng cơ bản</option>
                   </select>
                 </div>
                 
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Mô tả</label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    rows={5}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm leading-relaxed"
-                    placeholder="Mô tả quyền hạn của vai trò này"
-                  />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-800 mb-1.5">Chọn đơn vị</label>
+                    <select
+                      title="Chọn đơn vị"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
+                      value={formData.selectedUnit}
+                      onChange={(e) => {
+                        setFormData({ ...formData, selectedUnit: e.target.value, unitAdmin: '' });
+                        setUserDropdownSearch('');
+                      }}
+                    >
+                      <option value="">-- Chọn đơn vị --</option>
+                      {mockUnits.map(unit => (
+                        <option key={unit} value={unit}>{unit}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="relative">
+                    <label className="block text-sm font-semibold text-slate-800 mb-1.5">Thêm người dùng vào nhóm</label>
+                    <div 
+                      className={`w-full px-4 py-2 border border-slate-300 rounded-lg bg-white flex items-center justify-between cursor-pointer ${!formData.selectedUnit ? 'opacity-60 cursor-not-allowed bg-slate-50' : 'hover:border-blue-400'}`}
+                      onClick={() => formData.selectedUnit && setUserDropdownOpen(!userDropdownOpen)}
+                    >
+                      <span className="text-sm truncate text-slate-700">
+                        {!formData.selectedUnit 
+                          ? '-- Vui lòng chọn đơn vị trước --' 
+                          : formData.unitAdmin 
+                            ? availableUsers.find(u => u.id.toString() === formData.unitAdmin)?.name 
+                            : '-- Chọn người dùng --'}
+                      </span>
+                      <svg className={`w-4 h-4 text-slate-500 transition-transform ${userDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+
+                    {userDropdownOpen && formData.selectedUnit && (
+                      <div className="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden">
+                        <div className="p-2 border-b border-slate-100">
+                          <div className="relative">
+                            <Search className="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5" />
+                            <input
+                              type="text"
+                              autoFocus
+                              className="w-full pl-8 pr-3 py-1.5 text-sm border border-slate-200 rounded focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                              placeholder="Tìm kiếm theo tên..."
+                              value={userDropdownSearch}
+                              onChange={(e) => setUserDropdownSearch(e.target.value)}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          </div>
+                        </div>
+                        <div className="max-h-48 overflow-y-auto">
+                          {availableUsers
+                            .filter(u => u.department === formData.selectedUnit)
+                            .filter(u => u.name.toLowerCase().includes(userDropdownSearch.toLowerCase()))
+                            .map(u => (
+                              <div
+                                key={u.id}
+                                className={`px-4 py-2.5 text-sm cursor-pointer hover:bg-blue-50 ${formData.unitAdmin === u.id.toString() ? 'bg-blue-50 text-blue-600 font-medium' : 'text-slate-700'}`}
+                                onClick={() => {
+                                  setFormData({ ...formData, unitAdmin: u.id.toString() });
+                                  setUserDropdownOpen(false);
+                                  setUserDropdownSearch('');
+                                }}
+                              >
+                                {u.name}
+                              </div>
+                            ))}
+                          {availableUsers.filter(u => u.department === formData.selectedUnit && u.name.toLowerCase().includes(userDropdownSearch.toLowerCase())).length === 0 && (
+                            <div className="px-4 py-3 text-sm text-slate-500 text-center italic">Không tìm thấy người dùng</div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
  
                 <div>
-                  <label className="block text-sm font-semibold text-slate-800 mb-3">Phân phối danh sách quyền chức năng</label>
+                  <label className="block text-sm font-semibold text-slate-800 mb-3">Phân quyền module chức năng</label>
                   
-                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 max-h-[250px] overflow-y-auto pr-2">
+                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 max-h-[300px] overflow-y-auto pr-2">
                     {(() => {
-                      const removeVietnameseTones = (str: string) => {
-                        return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
-                      };
-
                       const renderMenuTree = (items: any[], depth = 0) => {
                         return items.map(item => {
                           const isSelected = formData.permissions.includes(item.id);
@@ -568,9 +617,7 @@ export function RoleManagementPage() {
                             }
                           };
 
-                          const nameNormalized = removeVietnameseTones(item.name || '').toLowerCase().trim();
-                          const shouldSkipChildren = nameNormalized === 'csdl trong nganh' || nameNormalized === 'csdl ngoai nganh';
-                          const hasChildren = item.children && item.children.length > 0 && !shouldSkipChildren && depth < 1;
+                          const hasChildren = item.children && item.children.length > 0 && depth < 1;
 
                           return (
                             <div key={item.id} className={depth === 0 ? "mb-3 break-inside-avoid" : "mt-2"}>
@@ -601,20 +648,8 @@ export function RoleManagementPage() {
                     })()}
                   </div>
                 </div>
- 
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Trạng thái hoạt động</label>
-                  <select
-                    aria-label="Trạng thái hoạt động"
-                    title="Trạng thái hoạt động"
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
-                  >
-                    <option value="active">Hoạt động</option>
-                    <option value="inactive">Không hoạt động</option>
-                  </select>
-                </div>
+
+
               </div>
             </div>
             
