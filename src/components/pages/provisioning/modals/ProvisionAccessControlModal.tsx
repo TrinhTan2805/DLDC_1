@@ -1,5 +1,5 @@
-import React from 'react';
-import { X, Check, Shield } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Check, Shield, Key, Copy, RefreshCw } from 'lucide-react';
 
 interface ProvisionAccessControlModalProps {
   isOpen: boolean;
@@ -9,6 +9,29 @@ interface ProvisionAccessControlModalProps {
 }
 
 export function ProvisionAccessControlModal({ isOpen, onClose, apiName, onSave }: ProvisionAccessControlModalProps) {
+  const [selectedOrg, setSelectedOrg] = useState('Công an tỉnh Bắc Ninh');
+  const [authToken, setAuthToken] = useState('');
+  const [isCopied, setIsCopied] = useState(false);
+
+  const generateToken = (org: string) => {
+    const prefix = org.includes('Công an') ? 'BCA' : org.includes('Y tế') ? 'SYT' : 'ORG';
+    const randomStr = Math.random().toString(36).substring(2, 10).toUpperCase();
+    return `Bearer ${prefix}_${randomStr}_${Date.now().toString().slice(-6)}`;
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      setAuthToken(generateToken(selectedOrg));
+      setIsCopied(false);
+    }
+  }, [isOpen, selectedOrg]);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(authToken);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
+
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -24,7 +47,8 @@ export function ProvisionAccessControlModal({ isOpen, onClose, apiName, onSave }
     if (onSave) {
       onSave({
         id: Math.random().toString(36).substr(2, 9),
-        organization: form.organization.value,
+        organization: selectedOrg,
+        authorization: authToken,
         scopes: scopes.join(', '),
         ipWhitelist: form.ipWhitelist.value || 'Tất cả IP',
         validFrom: form.validFrom.value,
@@ -79,6 +103,8 @@ export function ProvisionAccessControlModal({ isOpen, onClose, apiName, onSave }
                 </label>
                 <select
                   name="organization"
+                  value={selectedOrg}
+                  onChange={(e) => setSelectedOrg(e.target.value)}
                   required
                   className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm font-medium"
                 >
@@ -90,6 +116,46 @@ export function ProvisionAccessControlModal({ isOpen, onClose, apiName, onSave }
                   <option value="UBND Huyện Tiên Du">UBND Huyện Tiên Du</option>
                   <option value="UBND Thành phố Bắc Ninh">UBND Thành phố Bắc Ninh</option>
                 </select>
+              </div>
+
+              {/* Authorization Token */}
+              <div className="md:col-span-2">
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  Authorization Token (riêng cho đơn vị) <span className="text-red-500">*</span>
+                </label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Key className="h-4 w-4 text-slate-400" />
+                    </div>
+                    <input
+                      name="authorization"
+                      type="text"
+                      readOnly
+                      value={authToken}
+                      className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-mono text-slate-600 focus:outline-none"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCopy}
+                    className="px-3 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-600 transition-colors flex items-center justify-center bg-white"
+                    title="Sao chép Token"
+                  >
+                    {isCopied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAuthToken(generateToken(selectedOrg))}
+                    className="px-3 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-600 transition-colors flex items-center justify-center bg-white"
+                    title="Tạo mới Token"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                  </button>
+                </div>
+                <p className="text-xs text-slate-500 mt-1.5">
+                  * Token truy cập API được khởi tạo tự động cho <span className="font-semibold text-amber-700">{selectedOrg}</span>
+                </p>
               </div>
 
               {/* Access Scope Checkboxes */}

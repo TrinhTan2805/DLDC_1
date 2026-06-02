@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { 
   Activity, BarChart3, Download, Network, Share2, Server, Database, 
-  AlertCircle, ChevronRight, X, Clock, HelpCircle, CheckCircle2, ArrowRightLeft 
+  AlertCircle, ChevronRight, X, Clock, HelpCircle, CheckCircle2, ArrowRightLeft,
+  ChevronDown, Search, Check
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { ProvisionExportReportModal } from './modals/ProvisionExportReportModal';
@@ -84,12 +85,33 @@ const apiMockStats: Record<string, {
   }
 };
 
+const apiList = [
+  { id: 'Lấy danh sách Hộ tịch', name: 'Lấy danh sách Hộ tịch', database: 'CSDL Hộ tịch điện tử' },
+  { id: 'Đồng bộ dữ liệu THADS', name: 'Đồng bộ dữ liệu THADS', database: 'Cơ sở dữ liệu THADS' },
+  { id: 'Đọc thông tin Biện pháp bảo đảm', name: 'Đọc thông tin Biện pháp bảo đảm', database: 'CSDL Biện pháp bảo đảm' }
+];
+
+const databases = Array.from(new Set(apiList.map(api => api.database)));
+
 export function DataProvisionMonitoringPage() {
   const [activeTab, setActiveTab] = useState<'luong_du_lieu' | 'bao_cao' | 'nhat_ky'>('luong_du_lieu');
   const [showExportModal, setShowExportModal] = useState(false);
   
   // API monitoring select state
+  const [selectedDatabase, setSelectedDatabase] = useState<string>('');
   const [selectedApi, setSelectedApi] = useState<string>('Lấy danh sách Hộ tịch');
+  
+  const filteredApis = selectedDatabase ? apiList.filter(api => api.database === selectedDatabase) : apiList;
+
+  // Auto-select first API when database changes
+  React.useEffect(() => {
+    if (selectedDatabase) {
+      const isApiInDb = filteredApis.find(a => a.id === selectedApi);
+      if (!isApiInDb && filteredApis.length > 0) {
+        setSelectedApi(filteredApis[0].id);
+      }
+    }
+  }, [selectedDatabase, filteredApis, selectedApi]);
   
   // Log Detail modal state
   const [selectedLog, setSelectedLog] = useState<any>(null);
@@ -107,18 +129,38 @@ export function DataProvisionMonitoringPage() {
         </div>
         <div className="flex items-center gap-3 w-full md:w-auto">
           
-          {/* API Selector Dropdown */}
-          <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-3 py-2 shadow-sm shrink-0">
-            <span className="text-xs font-bold text-slate-400 uppercase">Giám sát API:</span>
-            <select
-              value={selectedApi}
-              onChange={(e) => setSelectedApi(e.target.value)}
-              className="text-xs font-extrabold text-slate-700 bg-transparent focus:outline-none cursor-pointer"
-            >
-              <option value="Lấy danh sách Hộ tịch">Lấy danh sách Hộ tịch</option>
-              <option value="Đồng bộ dữ liệu THADS">Đồng bộ dữ liệu THADS</option>
-              <option value="Đọc thông tin Biện pháp bảo đảm">Đọc thông tin Biện pháp bảo đảm</option>
-            </select>
+          {/* Cascading API Selectors */}
+          <div className="flex flex-col sm:flex-row items-center gap-0 bg-white border border-slate-200 rounded-lg p-1 shadow-sm shrink-0">
+            
+            {/* Database Selector */}
+            <div className="flex items-center px-3 py-1.5 hover:bg-slate-50 rounded-md transition-colors border-b sm:border-b-0 sm:border-r border-slate-100">
+              <Database className="w-3.5 h-3.5 text-slate-400 mr-2 shrink-0" />
+              <select
+                value={selectedDatabase}
+                onChange={(e) => setSelectedDatabase(e.target.value)}
+                className="text-xs font-bold text-slate-600 bg-transparent focus:outline-none cursor-pointer max-w-[150px] truncate"
+              >
+                <option value="">Tất cả CSDL</option>
+                {databases.map(db => (
+                  <option key={db} value={db}>{db}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* API Selector */}
+            <div className="flex items-center px-3 py-1.5 hover:bg-slate-50 rounded-md transition-colors">
+              <span className="text-[10px] font-bold text-slate-400 uppercase mr-2 shrink-0">API:</span>
+              <select
+                value={selectedApi}
+                onChange={(e) => setSelectedApi(e.target.value)}
+                className="text-xs font-extrabold text-amber-700 bg-transparent focus:outline-none cursor-pointer max-w-[200px] truncate"
+              >
+                {filteredApis.map(api => (
+                  <option key={api.id} value={api.id}>{api.name}</option>
+                ))}
+              </select>
+            </div>
+
           </div>
 
           <button 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   Server, GitCompare, Shield, History, Search, Filter, Plus, 
-  Trash2, Edit3, Key, Clock, Calendar, CheckCircle2, XCircle, AlertTriangle, FileJson
+  Trash2, Edit3, Key, Clock, Calendar, CheckCircle2, XCircle, AlertTriangle, FileJson, Power
 } from 'lucide-react';
 import { ApiDocumentationTab } from './tabs/ApiDocumentationTab';
 import { ProvisionApiModal } from './modals/ProvisionApiModal';
@@ -71,6 +71,7 @@ export function DataProvisionApiManagementPage() {
   const [selectedApiForAccess, setSelectedApiForAccess] = useState<string>('Lấy danh sách Hộ tịch');
   
   const [showCompareModal, setShowCompareModal] = useState(false);
+  const [compareVersions, setCompareVersions] = useState({ verA: 'v1.2', verB: 'v1.1' });
 
   // Success message toast
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -133,17 +134,25 @@ export function DataProvisionApiManagementPage() {
     triggerToast(`Cấp quyền truy cập API cho ${data.organization} thành công!`);
   };
 
-  const handleDeleteApi = (id: string) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa API cung cấp dữ liệu này khỏi hệ thống?')) {
-      setApis(apis.filter(item => item.id !== id));
-      triggerToast('Xóa API cung cấp dữ liệu thành công!');
+  const handleToggleApiStatus = (id: string, currentStatus: string) => {
+    const isTạmNgưng = currentStatus === 'Tạm ngưng';
+    const actionName = isTạmNgưng ? 'kích hoạt lại' : 'tạm ngưng';
+    const newStatus = isTạmNgưng ? 'Hoạt động' : 'Tạm ngưng';
+    
+    if (window.confirm(`Bạn có chắc chắn muốn ${actionName} API cung cấp dữ liệu này?`)) {
+      setApis(apis.map(item => item.id === id ? { ...item, status: newStatus } : item));
+      triggerToast(`Đã ${actionName} API thành công!`);
     }
   };
 
-  const handleDeleteRecon = (id: string) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa API đối soát dữ liệu này?')) {
-      setRecons(recons.filter(item => item.id !== id));
-      triggerToast('Xóa API đối soát thành công!');
+  const handleToggleReconStatus = (id: string, currentStatus: string) => {
+    const isInactive = currentStatus === 'inactive';
+    const actionName = isInactive ? 'kích hoạt lại' : 'tạm ngưng';
+    const newStatus = isInactive ? 'active' : 'inactive';
+
+    if (window.confirm(`Bạn có chắc chắn muốn ${actionName} tiến trình đối soát dữ liệu này?`)) {
+      setRecons(recons.map(item => item.id === id ? { ...item, status: newStatus } : item));
+      triggerToast(`Đã ${actionName} tiến trình đối soát thành công!`);
     }
   };
 
@@ -152,6 +161,24 @@ export function DataProvisionApiManagementPage() {
       setPermissions(permissions.filter(item => item.id !== id));
       triggerToast('Thu hồi quyền truy cập thành công!');
     }
+  };
+
+  const handleViewDiff = (index: number) => {
+    let verA, verB;
+    if (index === 0) {
+      if (versions.length > 1) {
+        verA = versions[0].id;
+        verB = versions[1].id;
+      } else {
+        verA = versions[0].id;
+        verB = versions[0].id;
+      }
+    } else {
+      verA = versions[index - 1].id;
+      verB = versions[index].id;
+    }
+    setCompareVersions({ verA, verB });
+    setShowCompareModal(true);
   };
 
   const filteredApis = apis.filter(api => {
@@ -488,11 +515,15 @@ export function DataProvisionApiManagementPage() {
                             <Edit3 className="w-4 h-4" />
                           </button>
                           <button 
-                            onClick={() => handleDeleteApi(api.id)}
-                            className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors"
-                            title="Xóa API"
+                            onClick={() => handleToggleApiStatus(api.id, api.status)}
+                            className={`p-1.5 rounded transition-colors ${
+                              api.status === 'Hoạt động' 
+                                ? 'text-orange-500 hover:text-orange-600 hover:bg-orange-50' 
+                                : 'text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50'
+                            }`}
+                            title={api.status === 'Hoạt động' ? "Tạm ngưng API" : "Kích hoạt API"}
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Power className="w-4 h-4" />
                           </button>
                         </div>
                       </td>
@@ -549,11 +580,15 @@ export function DataProvisionApiManagementPage() {
                             <Edit3 className="w-4 h-4" />
                           </button>
                           <button 
-                            onClick={() => handleDeleteRecon(recon.id)}
-                            className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors"
-                            title="Xóa tiến trình đối soát"
+                            onClick={() => handleToggleReconStatus(recon.id, recon.status)}
+                            className={`p-1.5 rounded transition-colors ${
+                              recon.status === 'active' 
+                                ? 'text-orange-500 hover:text-orange-600 hover:bg-orange-50' 
+                                : 'text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50'
+                            }`}
+                            title={recon.status === 'active' ? "Tạm ngưng tiến trình đối soát" : "Kích hoạt tiến trình đối soát"}
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Power className="w-4 h-4" />
                           </button>
                         </div>
                       </td>
@@ -686,11 +721,11 @@ export function DataProvisionApiManagementPage() {
                   </div>
                 </div>
                 <button
-                  onClick={() => setShowCompareModal(true)}
+                  onClick={() => handleViewDiff(0)}
                   className="px-5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <GitCompare className="w-4 h-4" />
-                  So sánh v1.2 & v1.1
+                  So sánh {compareVersions.verA} & {compareVersions.verB}
                 </button>
               </div>
 
@@ -708,7 +743,7 @@ export function DataProvisionApiManagementPage() {
                     </tr>
                   </thead>
                   <tbody className="text-sm divide-y divide-slate-100">
-                    {versions.map(ver => (
+                    {versions.map((ver, index) => (
                       <tr key={ver.id} className="hover:bg-slate-50/50 transition-colors">
                         <td className="py-4 px-4 font-semibold text-slate-800 whitespace-nowrap">{ver.apiName}</td>
                         <td className="py-4 px-4">
@@ -733,7 +768,7 @@ export function DataProvisionApiManagementPage() {
                         </td>
                         <td className="py-4 px-4 text-center">
                           <button
-                            onClick={() => setShowCompareModal(true)}
+                            onClick={() => handleViewDiff(index)}
                             className="px-3 py-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 hover:text-slate-900 rounded font-bold text-xs transition-colors whitespace-nowrap"
                           >
                             Xem Diff
@@ -785,8 +820,8 @@ export function DataProvisionApiManagementPage() {
         isOpen={showCompareModal}
         onClose={() => setShowCompareModal(false)}
         apiName="Lấy danh sách Hộ tịch"
-        verA="v1.2"
-        verB="v1.1"
+        verA={compareVersions.verA}
+        verB={compareVersions.verB}
       />
 
     </div>

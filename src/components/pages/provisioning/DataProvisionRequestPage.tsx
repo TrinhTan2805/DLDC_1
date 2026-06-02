@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { FileText, Search, Share, Plus, Filter, Download, XCircle, UploadCloud, CheckCircle } from 'lucide-react';
+import { FileText, Search, Share, Plus, Filter, Download, XCircle, UploadCloud, CheckCircle, Send, Settings, Eye } from 'lucide-react';
 import { ProvisionDataRequestModal, CreateDataRequestPayload } from './modals/ProvisionDataRequestModal';
 import { ProvisionRequestApprovalModal } from './modals/ProvisionRequestApprovalModal';
 import { ProvisionRequestExportModal } from './modals/ProvisionRequestExportModal';
@@ -238,16 +238,24 @@ export function DataProvisionRequestPage() {
                     <td className="py-3 px-4"><span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700">{statusLabel[item.status]}</span></td>
                     <td className="py-3 px-4">
                       <div className="flex items-center justify-end gap-1.5 flex-nowrap">
-                        {activeTab === 'tiep_nhan' && item.status === 'CHO_XU_LY' && (
+                        {(activeTab === 'tiep_nhan' || activeTab === 'tra_cuu') && item.status === 'CHO_XU_LY' && (
                           <button title="Tiếp nhận" onClick={() => { setSelectedRequest(item); setShowApprovalModal(true); }} className="p-1.5 bg-amber-500 text-white rounded-md shadow-sm hover:bg-amber-600 transition-colors"><CheckCircle className="w-4 h-4" /></button>
                         )}
                         {(activeTab === 'tra_cuu' || item.status === 'DA_PHE_DUYET' || item.status === 'DA_XUAT') && (
-                          <button title="Xuất" onClick={() => handleExportClick(item)} className="p-1.5 bg-emerald-600 text-white rounded-md shadow-sm hover:bg-emerald-700 transition-colors"><Download className="w-4 h-4" /></button>
+                          <button 
+                            title={activeTab === 'tiep_nhan' ? "Xem chi tiết" : "Thiết lập kết xuất"} 
+                            onClick={() => handleExportClick(item)} 
+                            className={activeTab === 'tiep_nhan' 
+                              ? "p-1.5 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors" 
+                              : "p-1.5 bg-emerald-600 text-white rounded-md shadow-sm hover:bg-emerald-700 transition-colors"}
+                          >
+                            {activeTab === 'tiep_nhan' ? <Eye className="w-5 h-5" /> : <Settings className="w-4 h-4" />}
+                          </button>
                         )}
                         {activeTab === 'ban_giao' && (
                           <>
                             {item.status !== 'DA_BAN_GIAO' && (
-                              <button title="Bàn giao" onClick={() => handleHandoverClick(item)} className="p-1.5 bg-blue-600 text-white rounded-md shadow-sm hover:bg-blue-700 transition-colors"><UploadCloud className="w-4 h-4" /></button>
+                              <button title="Bàn giao" onClick={() => handleHandoverClick(item)} className="p-1.5 bg-indigo-600 text-white rounded-md shadow-sm hover:bg-indigo-700 transition-colors"><Send className="w-4 h-4" /></button>
                             )}
                             <button title="Hủy" className="p-1.5 bg-red-600 text-white rounded-md shadow-sm hover:bg-red-700 transition-colors"><XCircle className="w-4 h-4" /></button>
                           </>
