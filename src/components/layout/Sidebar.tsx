@@ -315,6 +315,11 @@ const menuItems: MenuItem[] = [
     color: "text-indigo-600",
     subItems: [
       {
+        id: "category-dashboard",
+        label: "Tổng quan danh mục",
+        icon: LayoutDashboard,
+      },
+      {
         id: "category-setup",
         label: "Thiết lập danh mục",
         icon: Settings,

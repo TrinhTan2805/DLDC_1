@@ -70,6 +70,7 @@ import { MasterDataAPage as MasterDataUpdateAPage } from '../pages/master-data/M
 import MasterDataReportsPage from '../pages/master-data/MasterDataReportsPage';
 import { DataCoordinationPage } from '../pages/DataCoordinationPage';
 import { ProvisionReconciliationPage } from '../pages/provisioning/DataReconciliationPage';
+import { CategoryDashboardPage } from '../pages/category/CategoryDashboardPage';
 import { ServiceSetupPage } from '../pages/orchestration/ServiceSetupPageUpdated';
 import { APIManagementPage } from '../pages/orchestration/APIManagementPage';
 import { DataReconciliationAPIPage } from '../pages/orchestration/DataReconciliationAPIPage';
@@ -274,6 +275,10 @@ const pageConfig: Record<string, { title: string; description: string }> = {
     title: 'Dashboard - Quản lý thu thập',
     description: 'Theo dõi tổng quan hoạt động thu thập dữ liệu'
   },
+  'category-dashboard': {
+    title: 'Tổng quan Quản lý Danh mục',
+    description: 'Giám sát số liệu và hoạt động quản trị danh mục dùng chung'
+  },
   'category-setup': {
     title: 'Thiết lập danh mục',
     description: 'Thiết lập và quản lý danh mục dữ liệu'
@@ -469,6 +474,7 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'target-database-management' && <TargetDatabaseManagementPage />}
             {currentPage.startsWith('target-database-detail-') && <TargetDatabaseDetailPage databaseId={currentPage.replace('target-database-detail-', '')} />}
             {currentPage === 'category' && <CategoryManagementPage />}
+            {currentPage === 'category-dashboard' && <CategoryDashboardPage />}
             {currentPage === 'category-setup' && <CategorySetupPage userRole={userRole} />}
             {currentPage === 'category-a' && <CategoryAPage />}
             {currentPage === 'category-b' && <CategoryBPage />}
