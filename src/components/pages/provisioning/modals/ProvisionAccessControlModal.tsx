@@ -50,7 +50,7 @@ export function ProvisionAccessControlModal({ isOpen, onClose, apiName, onSave }
         organization: selectedOrg,
         authorization: authToken,
         scopes: scopes.join(', '),
-        ipWhitelist: form.ipWhitelist.value || 'Tất cả IP',
+        ipWhitelist: 'Tất cả IP',
         validFrom: form.validFrom.value,
         validTo: form.validTo.value,
         status: 'Hợp lệ'
@@ -179,18 +179,7 @@ export function ProvisionAccessControlModal({ isOpen, onClose, apiName, onSave }
                 </div>
               </div>
 
-              {/* IP Whitelist */}
-              <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-slate-700 mb-1">
-                  Danh sách IP được phép kết nối (IP Whitelist)
-                </label>
-                <input
-                  name="ipWhitelist"
-                  type="text"
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm font-mono"
-                  placeholder="Ví dụ: 192.168.10.25, 203.162.4.52 (để trống nếu cho phép tất cả)"
-                />
-              </div>
+
 
               {/* Start Date */}
               <div>

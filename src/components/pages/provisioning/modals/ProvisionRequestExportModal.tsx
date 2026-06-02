@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Search, FileDown, CheckCircle, Table as TableIcon, Filter, AlertCircle, RefreshCw, Layers, Database, LayoutTemplate, Key, Trash2, Plus } from 'lucide-react';
+import { X, Search, FileDown, CheckCircle, Table as TableIcon, Filter, AlertCircle, RefreshCw, Layers, Database, LayoutTemplate, Key, Trash2, Plus, Copy } from 'lucide-react';
 
 // Mock Database Schema for Civil Registry
 const mockSchema: Record<string, string[]> = {
@@ -21,6 +21,10 @@ export function ProvisionRequestExportModal({ isOpen, onClose, requestData, onCo
   const [activeStep, setActiveStep] = useState<1 | 2>(1);
   const [isGenerating, setIsGenerating] = useState(false);
   const [exportFormat, setExportFormat] = useState(requestData?.format || 'excel');
+
+  // States for query builder
+  const [dateColumn, setDateColumn] = useState('');
+  const [conditions, setConditions] = useState<any[]>([]);
 
   // States for packet design
   const [fields, setFields] = useState<any[]>([
@@ -190,21 +194,149 @@ export function ProvisionRequestExportModal({ isOpen, onClose, requestData, onCo
                     Thiết lập điều kiện truy xuất
                   </h3>
                   
-                  <div className="grid grid-cols-2 gap-6 bg-slate-50 p-6 rounded-xl border border-slate-200">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-50 p-6 rounded-xl border border-slate-200">
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Thời gian dữ liệu từ</label>
-                      <input type="date" className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 text-sm text-slate-700" defaultValue={requestData.fromDate || ''} />
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Cột thời gian</label>
+                      <select 
+                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 text-sm font-medium text-slate-700"
+                        value={dateColumn}
+                        onChange={(e) => setDateColumn(e.target.value)}
+                      >
+                        <option value="">-- Chọn mốc thời gian --</option>
+                        <optgroup label={`Bảng chính: ${primaryTable}`}>
+                          {mockSchema[primaryTable]?.map(col => (
+                            <option key={`${primaryTable}.${col}`} value={`${primaryTable}.${col}`}>{primaryTable}.{col}</option>
+                          ))}
+                        </optgroup>
+                        {hasJoin && joinedTables.map(t => t.name && (
+                          <optgroup key={t.id} label={`Liên kết: ${t.alias}`}>
+                            {mockSchema[t.name]?.map(col => (
+                               <option key={`${t.alias}.${col}`} value={`${t.alias}.${col}`}>{t.alias}.{col}</option>
+                            ))}
+                          </optgroup>
+                        ))}
+                      </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Đến ngày</label>
-                      <input type="date" className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 text-sm text-slate-700" defaultValue={requestData.toDate || ''} />
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Từ ngày</label>
+                      <input type="date" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 text-sm text-slate-700" defaultValue={requestData.fromDate || ''} />
                     </div>
-                    <div className="col-span-2">
-                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Truy vấn bổ sung (Tùy chọn)</label>
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                        <input type="text" placeholder="Nhập từ khóa hoặc câu lệnh SQL WHERE (nếu có quyền)..." className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 text-sm text-slate-700" />
-                      </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Đến ngày</label>
+                      <input type="date" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 text-sm text-slate-700" defaultValue={requestData.toDate || ''} />
+                    </div>
+                  </div>
+
+                  {/* Visual Query Builder */}
+                  <div className="mt-6 border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                    <div className="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center justify-between">
+                      <h4 className="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-2">
+                        <Filter className="w-4 h-4 text-blue-500" />
+                        Điều kiện lọc bổ sung
+                      </h4>
+                      <button
+                        type="button"
+                        onClick={() => setConditions([...conditions, { id: Date.now(), logicalOp: 'AND', column: '', operator: '=', value: '' }])}
+                        className="text-[10px] font-bold bg-white hover:bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-blue-200 transition-colors flex items-center gap-1 shadow-sm cursor-pointer uppercase tracking-wider"
+                      >
+                        <Plus className="w-3.5 h-3.5" /> Thêm điều kiện
+                      </button>
+                    </div>
+                    
+                    <div className="p-4 bg-white space-y-3">
+                      {conditions.length === 0 ? (
+                        <div className="text-center py-6 text-sm text-slate-400 italic bg-slate-50/50 rounded-lg border border-slate-100 border-dashed">
+                          Chưa có điều kiện lọc bổ sung nào. Nhấn "Thêm điều kiện" để thiết lập.
+                        </div>
+                      ) : (
+                        conditions.map((cond, idx) => (
+                          <div key={cond.id} className="flex flex-col md:flex-row items-center gap-3 p-3 bg-slate-50 border border-slate-100 rounded-lg group animate-in fade-in zoom-in-95 duration-200">
+                            {idx === 0 ? (
+                              <div className="text-xs font-mono font-bold text-slate-400 bg-white px-3 py-1.5 rounded-lg border border-slate-200 w-20 text-center">
+                                WHERE
+                              </div>
+                            ) : (
+                              <select
+                                className="text-xs font-mono font-bold text-blue-600 bg-blue-50 px-2 py-1.5 rounded-lg border border-blue-200 outline-none focus:border-blue-500 cursor-pointer w-20 text-center"
+                                value={cond.logicalOp || 'AND'}
+                                onChange={(e) => {
+                                  const newConds = [...conditions];
+                                  newConds[idx].logicalOp = e.target.value;
+                                  setConditions(newConds);
+                                }}
+                              >
+                                <option value="AND">AND</option>
+                                <option value="OR">OR</option>
+                              </select>
+                            )}
+                            <div className="flex-1 w-full flex items-center gap-3">
+                              <select 
+                                className="flex-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-blue-500 font-mono"
+                                value={cond.column}
+                                onChange={(e) => {
+                                  const newConds = [...conditions];
+                                  newConds[idx].column = e.target.value;
+                                  setConditions(newConds);
+                                }}
+                              >
+                                <option value="">-- Chọn trường --</option>
+                                <optgroup label={`Bảng chính: ${primaryTable}`}>
+                                  {mockSchema[primaryTable]?.map(col => (
+                                    <option key={`${primaryTable}.${col}`} value={`${primaryTable}.${col}`}>{primaryTable}.{col}</option>
+                                  ))}
+                                </optgroup>
+                                {hasJoin && joinedTables.map(t => t.name && (
+                                  <optgroup key={t.id} label={`Liên kết: ${t.alias}`}>
+                                    {mockSchema[t.name]?.map(col => (
+                                       <option key={`${t.alias}.${col}`} value={`${t.alias}.${col}`}>{t.alias}.{col}</option>
+                                    ))}
+                                  </optgroup>
+                                ))}
+                              </select>
+                              
+                              <select 
+                                className="w-32 px-3 py-1.5 bg-blue-50 border border-blue-100 rounded-lg text-sm font-bold text-blue-700 outline-none focus:border-blue-500 text-center"
+                                value={cond.operator}
+                                onChange={(e) => {
+                                  const newConds = [...conditions];
+                                  newConds[idx].operator = e.target.value;
+                                  setConditions(newConds);
+                                }}
+                              >
+                                <option value="=">Bằng (=)</option>
+                                <option value=">">Lớn hơn (&gt;)</option>
+                                <option value="<">Nhỏ hơn (&lt;)</option>
+                                <option value="LIKE">Chứa (LIKE)</option>
+                                <option value="IN">Trong (IN)</option>
+                                <option value="IS NULL">Rỗng (IS NULL)</option>
+                                <option value="!=">Khác (!=)</option>
+                              </select>
+                              
+                              <input 
+                                type="text" 
+                                placeholder="Giá trị lọc..." 
+                                className="flex-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-blue-500 disabled:bg-slate-100 disabled:text-slate-400"
+                                value={cond.value}
+                                onChange={(e) => {
+                                  const newConds = [...conditions];
+                                  newConds[idx].value = e.target.value;
+                                  setConditions(newConds);
+                                }}
+                                disabled={cond.operator === 'IS NULL'}
+                              />
+                              
+                              <button
+                                type="button"
+                                onClick={() => setConditions(conditions.filter(c => c.id !== cond.id))}
+                                className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                                title="Xóa điều kiện"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </div>
                 </section>
@@ -476,6 +608,56 @@ export function ProvisionRequestExportModal({ isOpen, onClose, requestData, onCo
                           ))}
                         </tbody>
                       </table>
+                    </div>
+                  </section>
+
+                  {/* Live JSON Preview */}
+                  <section className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in duration-300 relative mt-6">
+                    <div className="flex justify-between items-center p-4 border-b border-slate-100">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                        <h4 className="font-bold text-slate-500 text-sm tracking-wide">Live API Response Preview</h4>
+                      </div>
+                      <button className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg border border-slate-200 transition-colors shadow-sm">
+                        <Copy className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <div className="p-5 overflow-x-auto">
+                      <pre className="text-sm font-mono leading-loose text-slate-400/90">
+                        <code className="text-slate-400">{`{`}</code>{'\n'}
+                        <code className="text-slate-400">  "status": "success",</code>{'\n'}
+                        <code className="text-slate-400">  "data": {`{`}</code>{'\n'}
+                        {fields.filter(f => f.name).map((f) => (
+                          <React.Fragment key={f.id}>
+                            <code className="text-slate-400">    "{f.name}": </code>
+                            {f.type === 'number' ? (
+                              <code className="text-slate-400/80">12345</code>
+                            ) : f.type === 'datetime' ? (
+                              <code className="text-slate-400/80">"2026-10-15T08:30:00Z"</code>
+                            ) : (
+                              <code className="text-slate-400/80">"{f.isMasked ? '001••••123' : `sample_${f.sourceColumn || f.name}`}"</code>
+                            )}
+                            <code className="text-slate-400">,</code>{'\n'}
+                          </React.Fragment>
+                        ))}
+                        <code className="text-slate-400">    "metadata": {`{`}</code>{'\n'}
+                        <code className="text-slate-400">      "source": "BTP_DLDC_CORE",</code>{'\n'}
+                        {(() => {
+                           const filtersString = conditions.filter(c => c.column).map((c, i) => {
+                             const prefix = i === 0 ? '' : ` ${c.logicalOp || 'AND'} `;
+                             return `${prefix}${c.column} ${c.operator} ${c.operator === 'IS NULL' ? '' : `'${c.value}'`}`;
+                           }).join('').trim();
+                           return filtersString ? (
+                             <>
+                               <code className="text-slate-400">      "query_filters": "{filtersString}",</code>{'\n'}
+                             </>
+                           ) : null;
+                        })()}
+                        <code className="text-slate-400">      "timestamp": "2026-06-02T16:21:10.607Z"</code>{'\n'}
+                        <code className="text-slate-400">    {`}`}</code>{'\n'}
+                        <code className="text-slate-400">  {`}`}</code>{'\n'}
+                        <code className="text-slate-400">{`}`}</code>
+                      </pre>
                     </div>
                   </section>
               </div>

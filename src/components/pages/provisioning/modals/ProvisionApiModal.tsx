@@ -268,25 +268,7 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
                       </label>
                     </div>
 
-                    {isNdxpEnabled && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-amber-50/50 p-4 rounded-xl border border-amber-100 animate-in fade-in duration-300">
-                        <div>
-                          <label className="block text-xs font-bold text-slate-700 mb-1">Mã dịch vụ NDXP <span className="text-red-500">*</span></label>
-                          <input type="text" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20" placeholder="VD: BTP.01.01" />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-bold text-slate-700 mb-1">Giao thức kết nối</label>
-                          <select className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20">
-                            <option>REST</option>
-                            <option>SOAP</option>
-                          </select>
-                        </div>
-                        <div className="md:col-span-2">
-                          <label className="block text-xs font-bold text-slate-700 mb-1">Cơ quan chủ quản (Mã định danh)</label>
-                          <input type="text" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20" placeholder="VD: 000.00.00.H01 - Bộ Tư pháp" defaultValue="000.00.00.H01 - Bộ Tư pháp" />
-                        </div>
-                      </div>
-                    )}
+
                   </div>
                 </div>
               </div>

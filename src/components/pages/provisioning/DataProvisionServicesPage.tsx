@@ -49,6 +49,18 @@ export function DataProvisionServicesPage({ category, group, title, description 
       sampleJson: `{\n  "status": "success",\n  "data": {\n    "id": "USR-99812",\n    "ho_ten": "Nguyễn Văn A",\n    "ngay_sinh": "1995-10-15",\n    "so_dinh_danh": "001••••123"\n  }\n}`
     },
     {
+      id: 'api-3',
+      name: 'Lấy danh sách Hộ tịch (Tỉnh Quảng Ninh)',
+      endpoint: '/api/v1/hotich/quangninh',
+      method: 'GET',
+      requestCount: '2,150',
+      fieldCount: 15,
+      provisionTime: 'Real-time',
+      unit: 'UBND Tỉnh Quảng Ninh',
+      status: 'active',
+      sampleJson: `{\n  "status": "success",\n  "data": {\n    "id": "USR-99813",\n    "ho_ten": "Trần Văn B",\n    "ngay_sinh": "1990-05-20",\n    "so_dinh_danh": "001••••456"\n  }\n}`
+    },
+    {
       id: 'api-2',
       name: 'Tra cứu thông tin Đăng ký kết hôn (Bộ Công An)',
       endpoint: '/api/v2/kethon/bca',

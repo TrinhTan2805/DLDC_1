@@ -4,11 +4,11 @@ import { X, Share2, Globe, Server, Check } from 'lucide-react';
 interface ProvisionServicePublishModalProps {
   isOpen: boolean;
   onClose: () => void;
-  service?: any;
-  onPublish?: (service: any, reason?: string) => void;
+  requestData?: any;
+  onConfirmPublish?: (id: string, platforms: string[], reason: string) => void;
 }
 
-export function ProvisionServicePublishModal({ isOpen, onClose, service, onPublish }: ProvisionServicePublishModalProps) {
+export function ProvisionServicePublishModal({ isOpen, onClose, requestData, onConfirmPublish }: ProvisionServicePublishModalProps) {
   const [publishReason, setPublishReason] = React.useState('');
 
   React.useEffect(() => {
@@ -40,7 +40,7 @@ export function ProvisionServicePublishModal({ isOpen, onClose, service, onPubli
             <div>
               <h3 className="font-semibold text-blue-800 mb-1">Xác nhận công khai dịch vụ</h3>
               <p className="text-sm text-blue-700">
-                Dịch vụ <strong>{service?.name || 'DV_Hộ tịch điện tử'}</strong> đã được phê duyệt hợp lệ. 
+                Dịch vụ <strong>{requestData?.dataType || 'DV_Hộ tịch điện tử'}</strong> đã được phê duyệt hợp lệ. 
                 Bạn chuẩn bị đồng bộ và công khai dịch vụ này lên các nền tảng chia sẻ dữ liệu.
               </p>
             </div>
@@ -92,7 +92,11 @@ export function ProvisionServicePublishModal({ isOpen, onClose, service, onPubli
           </button>
           <button aria-label="Xác nhận Công khai"
             onClick={() => {
-              if (onPublish) onPublish(service, publishReason);
+              if (onConfirmPublish && requestData) {
+                // In a real app we'd read the checkboxes state, for now mock it
+                onConfirmPublish(requestData.id, ['national', 'lgsp'], publishReason);
+              }
+              onClose();
             }}
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center transition-colors font-medium"
           >

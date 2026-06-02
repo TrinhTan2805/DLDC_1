@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { 
-  Server, GitCompare, Shield, History, Search, Filter, Plus, 
+import {
+  Server, GitCompare, Shield, History, Search, Filter, Plus,
   Trash2, Edit3, Key, Clock, Calendar, CheckCircle2, XCircle, AlertTriangle, FileJson, Power
 } from 'lucide-react';
 import { ApiDocumentationTab } from './tabs/ApiDocumentationTab';
@@ -35,14 +35,14 @@ const formatDateTime = (dateStr: string) => {
       const s = String(d.getSeconds()).padStart(2, '0');
       return `${day}/${month}/${year} ${h}:${m}:${s}`;
     }
-  } catch (e) {}
+  } catch (e) { }
   return dateStr;
 };
 
 export function DataProvisionApiManagementPage() {
   const [activeTab, setActiveTab] = useState<'api_cung_cap' | 'api_doi_soat' | 'phan_quyen' | 'phien_ban' | 'tai_lieu_api'>('api_cung_cap');
   const [searchTerm, setSearchTerm] = useState('');
-  
+
   // Advanced Filter state
   const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
   const [filterMethod, setFilterMethod] = useState<string>('All');
@@ -63,13 +63,13 @@ export function DataProvisionApiManagementPage() {
   // Modals state
   const [showApiModal, setShowApiModal] = useState(false);
   const [selectedApi, setSelectedApi] = useState<any>(null);
-  
+
   const [showReconModal, setShowReconModal] = useState(false);
   const [selectedRecon, setSelectedRecon] = useState<any>(null);
-  
+
   const [showAccessModal, setShowAccessModal] = useState(false);
   const [selectedApiForAccess, setSelectedApiForAccess] = useState<string>('Lấy danh sách Hộ tịch');
-  
+
   const [showCompareModal, setShowCompareModal] = useState(false);
   const [compareVersions, setCompareVersions] = useState({ verA: 'v1.2', verB: 'v1.1' });
 
@@ -138,7 +138,7 @@ export function DataProvisionApiManagementPage() {
     const isTạmNgưng = currentStatus === 'Tạm ngưng';
     const actionName = isTạmNgưng ? 'kích hoạt lại' : 'tạm ngưng';
     const newStatus = isTạmNgưng ? 'Hoạt động' : 'Tạm ngưng';
-    
+
     if (window.confirm(`Bạn có chắc chắn muốn ${actionName} API cung cấp dữ liệu này?`)) {
       setApis(apis.map(item => item.id === id ? { ...item, status: newStatus } : item));
       triggerToast(`Đã ${actionName} API thành công!`);
@@ -164,26 +164,20 @@ export function DataProvisionApiManagementPage() {
   };
 
   const handleViewDiff = (index: number) => {
-    let verA, verB;
-    if (index === 0) {
-      if (versions.length > 1) {
-        verA = versions[0].id;
-        verB = versions[1].id;
-      } else {
-        verA = versions[0].id;
-        verB = versions[0].id;
-      }
+    const verA = versions[index].id;
+    let verB;
+    if (index < versions.length - 1) {
+      verB = versions[index + 1].id;
     } else {
-      verA = versions[index - 1].id;
-      verB = versions[index].id;
+      verB = 'Khởi tạo';
     }
     setCompareVersions({ verA, verB });
     setShowCompareModal(true);
   };
 
   const filteredApis = apis.filter(api => {
-    const matchesSearch = api.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          api.endpoint.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = api.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      api.endpoint.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesMethod = filterMethod === 'All' || api.method === filterMethod;
     const matchesStatus = filterStatus === 'All' || api.status === filterStatus;
     const matchesVersion = filterVersion === 'All' || api.version === filterVersion;
@@ -192,21 +186,21 @@ export function DataProvisionApiManagementPage() {
 
   const filteredRecons = recons.filter(recon => {
     const matchesSearch = recon.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          recon.targetSystem.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === 'All' || 
-                          (filterStatus === 'Hoạt động' && recon.status === 'active') ||
-                          (filterStatus === 'Tạm ngưng' && recon.status === 'inactive');
-    const matchesSchedule = filterReconSchedule === 'All' || 
-                            (filterReconSchedule === 'Hàng ngày' && recon.schedule.includes('Hàng ngày')) ||
-                            (filterReconSchedule === 'Hàng tuần' && recon.schedule.includes('Hàng tuần')) ||
-                            (filterReconSchedule === 'Theo yêu cầu' && recon.schedule.includes('Theo yêu cầu'));
+      recon.targetSystem.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = filterStatus === 'All' ||
+      (filterStatus === 'Hoạt động' && recon.status === 'active') ||
+      (filterStatus === 'Tạm ngưng' && recon.status === 'inactive');
+    const matchesSchedule = filterReconSchedule === 'All' ||
+      (filterReconSchedule === 'Hàng ngày' && recon.schedule.includes('Hàng ngày')) ||
+      (filterReconSchedule === 'Hàng tuần' && recon.schedule.includes('Hàng tuần')) ||
+      (filterReconSchedule === 'Theo yêu cầu' && recon.schedule.includes('Theo yêu cầu'));
     const matchesApi = filterReconApi === 'All' || recon.linkedApi === filterReconApi;
     return matchesSearch && matchesStatus && matchesSchedule && matchesApi;
   });
 
   return (
     <div className="space-y-6">
-      
+
       {/* Toast Notification Alert */}
       {toastMessage && (
         <div className="fixed top-4 right-4 z-50 flex items-center gap-2 bg-emerald-600 text-white px-5 py-3 rounded-lg shadow-xl border border-emerald-500 animate-in fade-in slide-in-from-top-4 duration-300 font-semibold text-sm">
@@ -221,9 +215,9 @@ export function DataProvisionApiManagementPage() {
           <h2 className="text-2xl font-bold text-slate-800">Quản lý API Cung cấp & Đối soát</h2>
           <p className="text-slate-500 mt-1">Danh mục API cung cấp, API đối soát, phân quyền bảo mật và lịch sử phiên bản</p>
         </div>
-        
+
         {activeTab === 'api_cung_cap' && (
-          <button 
+          <button
             onClick={() => {
               if (typeof (window as any).navigateToPage === 'function') {
                 (window as any).navigateToPage('provisioning-service-setup?action=create');
@@ -238,7 +232,7 @@ export function DataProvisionApiManagementPage() {
         )}
 
         {activeTab === 'api_doi_soat' && (
-          <button 
+          <button
             onClick={() => { setSelectedRecon(null); setShowReconModal(true); }}
             className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2.5 rounded-lg flex items-center shadow-md font-bold transition-all hover:scale-[1.02] active:scale-[0.98] text-sm"
           >
@@ -248,7 +242,7 @@ export function DataProvisionApiManagementPage() {
         )}
 
         {activeTab === 'phan_quyen' && (
-          <button 
+          <button
             onClick={() => { setShowAccessModal(true); }}
             className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg flex items-center shadow-md font-bold transition-all hover:scale-[1.02] active:scale-[0.98] text-sm"
           >
@@ -262,15 +256,14 @@ export function DataProvisionApiManagementPage() {
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="border-b border-slate-200 bg-slate-50/50">
           <nav className="flex space-x-6 px-6" aria-label="Tabs">
-            
+
             {/* Tab: API Cung cấp */}
             <button
               onClick={() => { setActiveTab('api_cung_cap'); setSearchTerm(''); }}
-              className={`whitespace-nowrap py-4 px-1 border-b-2 font-bold text-sm flex items-center transition-colors ${
-                activeTab === 'api_cung_cap'
-                  ? 'border-amber-500 text-amber-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-              }`}
+              className={`whitespace-nowrap py-4 px-1 border-b-2 font-bold text-sm flex items-center transition-colors ${activeTab === 'api_cung_cap'
+                ? 'border-amber-500 text-amber-600'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                }`}
             >
               <Server className="w-4 h-4 mr-2" />
               API Cung cấp dữ liệu ({apis.length})
@@ -279,11 +272,10 @@ export function DataProvisionApiManagementPage() {
             {/* Tab: API Đối soát */}
             <button
               onClick={() => { setActiveTab('api_doi_soat'); setSearchTerm(''); }}
-              className={`whitespace-nowrap py-4 px-1 border-b-2 font-bold text-sm flex items-center transition-colors ${
-                activeTab === 'api_doi_soat'
-                  ? 'border-purple-500 text-purple-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-              }`}
+              className={`whitespace-nowrap py-4 px-1 border-b-2 font-bold text-sm flex items-center transition-colors ${activeTab === 'api_doi_soat'
+                ? 'border-purple-500 text-purple-600'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                }`}
             >
               <GitCompare className="w-4 h-4 mr-2" />
               API Đối soát dữ liệu ({recons.length})
@@ -292,11 +284,10 @@ export function DataProvisionApiManagementPage() {
             {/* Tab: Phân quyền truy cập */}
             <button
               onClick={() => { setActiveTab('phan_quyen'); setSearchTerm(''); }}
-              className={`whitespace-nowrap py-4 px-1 border-b-2 font-bold text-sm flex items-center transition-colors ${
-                activeTab === 'phan_quyen'
-                  ? 'border-emerald-500 text-emerald-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-              }`}
+              className={`whitespace-nowrap py-4 px-1 border-b-2 font-bold text-sm flex items-center transition-colors ${activeTab === 'phan_quyen'
+                ? 'border-emerald-500 text-emerald-600'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                }`}
             >
               <Shield className="w-4 h-4 mr-2" />
               Phân quyền truy cập ({permissions.length})
@@ -305,11 +296,10 @@ export function DataProvisionApiManagementPage() {
             {/* Tab: Quản lý phiên bản */}
             <button
               onClick={() => { setActiveTab('phien_ban'); setSearchTerm(''); }}
-              className={`whitespace-nowrap py-4 px-1 border-b-2 font-bold text-sm flex items-center transition-colors ${
-                activeTab === 'phien_ban'
-                  ? 'border-sky-500 text-sky-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-              }`}
+              className={`whitespace-nowrap py-4 px-1 border-b-2 font-bold text-sm flex items-center transition-colors ${activeTab === 'phien_ban'
+                ? 'border-sky-500 text-sky-600'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                }`}
             >
               <History className="w-4 h-4 mr-2" />
               Quản lý phiên bản ({versions.length})
@@ -318,11 +308,10 @@ export function DataProvisionApiManagementPage() {
             {/* Tab: Tài liệu API */}
             <button
               onClick={() => { setActiveTab('tai_lieu_api'); setSearchTerm(''); }}
-              className={`whitespace-nowrap py-4 px-1 border-b-2 font-bold text-sm flex items-center transition-colors ${
-                activeTab === 'tai_lieu_api'
-                  ? 'border-indigo-500 text-indigo-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-              }`}
+              className={`whitespace-nowrap py-4 px-1 border-b-2 font-bold text-sm flex items-center transition-colors ${activeTab === 'tai_lieu_api'
+                ? 'border-indigo-500 text-indigo-600'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                }`}
             >
               <FileJson className="w-4 h-4 mr-2" />
               Tài liệu API (Swagger)
@@ -332,7 +321,7 @@ export function DataProvisionApiManagementPage() {
 
         {/* Tab contents */}
         <div className="p-6">
-          
+
           {/* General Search Panel for lists with Advanced Filter */}
           {activeTab !== 'phan_quyen' && activeTab !== 'phien_ban' && activeTab !== 'tai_lieu_api' && (
             <div className="space-y-4 mb-6">
@@ -347,13 +336,12 @@ export function DataProvisionApiManagementPage() {
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
-                <button 
+                <button
                   onClick={() => setShowAdvancedFilter(!showAdvancedFilter)}
-                  className={`flex items-center px-4 py-2 border rounded-lg transition-colors text-sm font-semibold ${
-                    showAdvancedFilter 
-                      ? 'bg-amber-50 border-amber-300 text-amber-700' 
-                      : 'border-slate-200 text-slate-600 hover:bg-slate-50'
-                  }`}
+                  className={`flex items-center px-4 py-2 border rounded-lg transition-colors text-sm font-semibold ${showAdvancedFilter
+                    ? 'bg-amber-50 border-amber-300 text-amber-700'
+                    : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                    }`}
                 >
                   <Filter className="w-4 h-4 mr-2" />
                   Bộ lọc nâng cao
@@ -363,7 +351,7 @@ export function DataProvisionApiManagementPage() {
               {/* Advanced Filter Criteria Dropdowns */}
               {showAdvancedFilter && (
                 <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl grid grid-cols-1 md:grid-cols-3 gap-4 animate-in slide-in-from-top-2 duration-200 shadow-inner">
-                  
+
                   {/* FOR TAB 1: API CUNG CẤP DỮ LIỆU */}
                   {activeTab === 'api_cung_cap' && (
                     <>
@@ -489,38 +477,35 @@ export function DataProvisionApiManagementPage() {
                       <td className="py-3.5 px-4 font-semibold text-slate-800">{api.name}</td>
                       <td className="py-3.5 px-4 font-mono text-xs text-slate-600">{api.endpoint}</td>
                       <td className="py-3.5 px-4">
-                        <span className={`font-mono text-xs px-2.5 py-1 rounded font-bold ${
-                          api.method === 'GET' ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                        }`}>
+                        <span className={`font-mono text-xs px-2.5 py-1 rounded font-bold ${api.method === 'GET' ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          }`}>
                           {api.method}
                         </span>
                       </td>
                       <td className="py-3.5 px-4 text-slate-700 font-mono text-xs font-semibold">{api.version}</td>
                       <td className="py-3.5 px-4 text-slate-500 text-xs max-w-[200px] truncate" title={api.desc}>{api.desc}</td>
                       <td className="py-3.5 px-4">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                          api.status === 'Hoạt động' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-800'
-                        }`}>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${api.status === 'Hoạt động' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-800'
+                          }`}>
                           <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${api.status === 'Hoạt động' ? 'bg-green-500 animate-pulse' : 'bg-slate-400'}`}></span>
                           {api.status}
                         </span>
                       </td>
                       <td className="py-3.5 px-4">
                         <div className="flex items-center justify-center gap-2">
-                          <button 
+                          <button
                             onClick={() => { setSelectedApi(api); setShowApiModal(true); }}
                             className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded transition-colors"
                             title="Sửa thông tin API"
                           >
                             <Edit3 className="w-4 h-4" />
                           </button>
-                          <button 
+                          <button
                             onClick={() => handleToggleApiStatus(api.id, api.status)}
-                            className={`p-1.5 rounded transition-colors ${
-                              api.status === 'Hoạt động' 
-                                ? 'text-orange-500 hover:text-orange-600 hover:bg-orange-50' 
-                                : 'text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50'
-                            }`}
+                            className={`p-1.5 rounded transition-colors ${api.status === 'Hoạt động'
+                              ? 'text-orange-500 hover:text-orange-600 hover:bg-orange-50'
+                              : 'text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50'
+                              }`}
                             title={api.status === 'Hoạt động' ? "Tạm ngưng API" : "Kích hoạt API"}
                           >
                             <Power className="w-4 h-4" />
@@ -563,29 +548,27 @@ export function DataProvisionApiManagementPage() {
                       </td>
                       <td className="py-3.5 px-4 font-semibold text-xs text-indigo-600 whitespace-nowrap">{recon.linkedApi}</td>
                       <td className="py-3.5 px-4">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold whitespace-nowrap ${
-                          recon.status === 'active' ? 'bg-purple-100 text-purple-800' : 'bg-slate-100 text-slate-800'
-                        }`}>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold whitespace-nowrap ${recon.status === 'active' ? 'bg-purple-100 text-purple-800' : 'bg-slate-100 text-slate-800'
+                          }`}>
                           <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${recon.status === 'active' ? 'bg-purple-500 animate-pulse' : 'bg-slate-400'}`}></span>
                           {recon.status === 'active' ? 'Hoạt động' : 'Tạm ngưng'}
                         </span>
                       </td>
                       <td className="py-3.5 px-4">
                         <div className="flex items-center justify-center gap-2">
-                          <button 
+                          <button
                             onClick={() => { setSelectedRecon(recon); setShowReconModal(true); }}
                             className="p-1.5 text-slate-500 hover:text-purple-600 hover:bg-purple-50 rounded transition-colors"
                             title="Sửa thông tin đối soát"
                           >
                             <Edit3 className="w-4 h-4" />
                           </button>
-                          <button 
+                          <button
                             onClick={() => handleToggleReconStatus(recon.id, recon.status)}
-                            className={`p-1.5 rounded transition-colors ${
-                              recon.status === 'active' 
-                                ? 'text-orange-500 hover:text-orange-600 hover:bg-orange-50' 
-                                : 'text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50'
-                            }`}
+                            className={`p-1.5 rounded transition-colors ${recon.status === 'active'
+                              ? 'text-orange-500 hover:text-orange-600 hover:bg-orange-50'
+                              : 'text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50'
+                              }`}
                             title={recon.status === 'active' ? "Tạm ngưng tiến trình đối soát" : "Kích hoạt tiến trình đối soát"}
                           >
                             <Power className="w-4 h-4" />
@@ -602,7 +585,7 @@ export function DataProvisionApiManagementPage() {
           {/* TAB 3: PHÂN QUYỀN TRUY CẬP (Dual-pane View - Wide Layout) */}
           {activeTab === 'phan_quyen' && (
             <div className="grid grid-cols-12 gap-6">
-              
+
               {/* Left pane: API List (Col span 3) */}
               <div className="col-span-12 lg:col-span-3 border border-slate-200 rounded-xl overflow-hidden divide-y divide-slate-100 bg-white shadow-sm">
                 <div className="bg-slate-50 p-4 border-b border-slate-200">
@@ -613,11 +596,10 @@ export function DataProvisionApiManagementPage() {
                     <button
                       key={api.id}
                       onClick={() => setSelectedApiForAccess(api.name)}
-                      className={`w-full text-left p-3 rounded-lg text-xs font-bold transition-all flex items-center justify-between ${
-                        selectedApiForAccess === api.name 
-                          ? 'bg-emerald-50 text-emerald-800 border-l-4 border-emerald-600 shadow-sm'
-                          : 'text-slate-600 hover:bg-slate-50'
-                      }`}
+                      className={`w-full text-left p-3 rounded-lg text-xs font-bold transition-all flex items-center justify-between ${selectedApiForAccess === api.name
+                        ? 'bg-emerald-50 text-emerald-800 border-l-4 border-emerald-600 shadow-sm'
+                        : 'text-slate-600 hover:bg-slate-50'
+                        }`}
                     >
                       <span className="truncate mr-2">{api.name}</span>
                       <span className="font-mono text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded shrink-0">{api.version}</span>
@@ -672,15 +654,14 @@ export function DataProvisionApiManagementPage() {
                               </div>
                             </td>
                             <td className="py-4 px-6 whitespace-nowrap">
-                              <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold whitespace-nowrap ${
-                                perm.status === 'Hợp lệ' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'
-                              }`}>
+                              <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold whitespace-nowrap ${perm.status === 'Hợp lệ' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'
+                                }`}>
                                 <CheckCircle2 className={`w-3.5 h-3.5 ${perm.status === 'Hợp lệ' ? 'text-emerald-500' : 'text-red-500'} shrink-0`} />
                                 {perm.status}
                               </span>
                             </td>
                             <td className="py-4 px-6 text-center whitespace-nowrap">
-                              <button 
+                              <button
                                 onClick={() => handleDeletePermission(perm.id)}
                                 className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
                                 title="Thu hồi quyền truy cập"
@@ -708,7 +689,7 @@ export function DataProvisionApiManagementPage() {
           {/* TAB 4: QUẢN LÝ PHIÊN BẢN API */}
           {activeTab === 'phien_ban' && (
             <div className="space-y-6">
-              
+
               {/* Alert header with comparison helper action */}
               <div className="p-4 bg-sky-50 border border-sky-200/50 rounded-xl flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
@@ -720,13 +701,7 @@ export function DataProvisionApiManagementPage() {
                     <p className="text-xs text-slate-500 mt-0.5">Theo dõi lịch sử nâng cấp cấu trúc, đổi kiểu trường và so sánh sự khác biệt (diff) giữa các bản</p>
                   </div>
                 </div>
-                <button
-                  onClick={() => handleViewDiff(0)}
-                  className="px-5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  <GitCompare className="w-4 h-4" />
-                  So sánh {compareVersions.verA} & {compareVersions.verB}
-                </button>
+
               </div>
 
               <div className="border border-slate-200 rounded-xl overflow-x-auto bg-white shadow-sm">
@@ -739,7 +714,7 @@ export function DataProvisionApiManagementPage() {
                       <th className="py-3 px-4 font-bold">Ngày phát hành</th>
                       <th className="py-3 px-4 font-bold">Ghi chú thay đổi</th>
                       <th className="py-3 px-4 font-bold">Trạng thái</th>
-                      <th className="py-3 px-4 font-bold text-center">So sánh diff</th>
+                      <th className="py-3 px-4 font-bold text-center">So sánh phiên bản</th>
                     </tr>
                   </thead>
                   <tbody className="text-sm divide-y divide-slate-100">
@@ -760,9 +735,8 @@ export function DataProvisionApiManagementPage() {
                         </td>
                         <td className="py-4 px-4 text-slate-500 text-xs max-w-sm leading-relaxed whitespace-pre-wrap">{ver.note}</td>
                         <td className="py-4 px-4">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold whitespace-nowrap ${
-                            ver.status === 'Kích hoạt' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-800'
-                          }`}>
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold whitespace-nowrap ${ver.status === 'Kích hoạt' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-800'
+                            }`}>
                             {ver.status}
                           </span>
                         </td>
@@ -771,7 +745,7 @@ export function DataProvisionApiManagementPage() {
                             onClick={() => handleViewDiff(index)}
                             className="px-3 py-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 hover:text-slate-900 rounded font-bold text-xs transition-colors whitespace-nowrap"
                           >
-                            Xem Diff
+                            Xem chi tiết
                           </button>
                         </td>
                       </tr>
@@ -792,9 +766,9 @@ export function DataProvisionApiManagementPage() {
       </div>
 
       {/* API Provision Modal */}
-      <ProvisionApiModal 
-        isOpen={showApiModal} 
-        onClose={() => setShowApiModal(false)} 
+      <ProvisionApiModal
+        isOpen={showApiModal}
+        onClose={() => setShowApiModal(false)}
         apiData={selectedApi}
         onSave={handleSaveApi}
       />

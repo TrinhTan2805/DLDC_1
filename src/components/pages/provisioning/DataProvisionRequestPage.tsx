@@ -1,9 +1,13 @@
 import React, { useMemo, useState } from 'react';
-import { FileText, Search, Share, Plus, Filter, Download, XCircle, UploadCloud, CheckCircle, Send, Settings, Eye } from 'lucide-react';
+import { FileText, Search, Share, Plus, Filter, Download, XCircle, UploadCloud, CheckCircle, Send, Settings, Eye, Edit, Globe } from 'lucide-react';
 import { ProvisionDataRequestModal, CreateDataRequestPayload } from './modals/ProvisionDataRequestModal';
 import { ProvisionRequestApprovalModal } from './modals/ProvisionRequestApprovalModal';
 import { ProvisionRequestExportModal } from './modals/ProvisionRequestExportModal';
 import { ProvisionRequestHandoverModal } from './modals/ProvisionRequestHandoverModal';
+import { ProvisionServicePublishModal } from './modals/ProvisionServicePublishModal';
+import { ProvisionServiceUnpublishModal } from './modals/ProvisionServiceUnpublishModal';
+import { ProvisionHandoverDetailModal } from './modals/ProvisionHandoverDetailModal';
+import { ProvisionPublishDetailModal } from './modals/ProvisionPublishDetailModal';
 
 const formatDateTime = (dateStr: string) => {
   if (!dateStr) return '';
@@ -36,11 +40,13 @@ const formatDateTime = (dateStr: string) => {
 };
 
 type ActiveTab = 'tiep_nhan' | 'tra_cuu' | 'tao_dich_vu' | 'ban_giao';
-type RequestStatus = 'CHO_XU_LY' | 'DA_PHE_DUYET' | 'TU_CHOI' | 'DA_XUAT' | 'DA_BAN_GIAO';
+type RequestStatus = 'CHO_XU_LY' | 'DA_PHE_DUYET' | 'TU_CHOI' | 'DA_XUAT' | 'DA_BAN_GIAO' | 'DA_CONG_KHAI' | 'HUY_CONG_KHAI';
 
 type DataRequest = {
   id: string;
   org: string;
+  requestContent?: string;
+  attachment?: File | null;
   dataType: string;
   purpose: string;
   requestDate: string;
@@ -48,6 +54,8 @@ type DataRequest = {
   toDate?: string;
   format: 'excel' | 'csv' | 'json' | 'xml';
   status: RequestStatus;
+  handoverDetails?: any;
+  publishDetails?: any;
 };
 
 const statusLabel: Record<RequestStatus, string> = {
@@ -56,6 +64,8 @@ const statusLabel: Record<RequestStatus, string> = {
   TU_CHOI: 'Từ chối',
   DA_XUAT: 'Đã kết xuất',
   DA_BAN_GIAO: 'Đã bàn giao',
+  DA_CONG_KHAI: 'Đã công khai',
+  HUY_CONG_KHAI: 'Đã hủy công khai',
 };
 
 export function DataProvisionRequestPage() {
@@ -64,6 +74,8 @@ export function DataProvisionRequestPage() {
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [showHandoverModal, setShowHandoverModal] = useState(false);
+  const [showPublishModal, setShowPublishModal] = useState(false);
+  const [showUnpublishModal, setShowUnpublishModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<DataRequest | null>(null);
 
   const [query, setQuery] = useState('');
@@ -130,19 +142,26 @@ export function DataProvisionRequestPage() {
   };
 
   const handleCreateRequest = (payload: CreateDataRequestPayload) => {
-    const newItem: DataRequest = {
-      id: `YC-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`,
-      org: payload.org,
-      dataType: payload.dataType,
-      purpose: payload.purpose || 'Bổ sung theo yêu cầu',
-      requestDate: formatDateTime(new Date().toISOString()),
-      fromDate: payload.fromDate,
-      toDate: payload.toDate,
-      format: payload.format,
-      status: 'CHO_XU_LY',
-    };
-    setRequests((prev) => [newItem, ...prev]);
+    if (selectedRequest) {
+      setRequests((prev) => prev.map((item) => (item.id === selectedRequest.id ? { ...item, org: payload.org, requestContent: payload.requestContent, attachment: payload.attachment, dataType: payload.dataType, purpose: payload.purpose || 'Bổ sung theo yêu cầu', fromDate: payload.fromDate, toDate: payload.toDate, format: payload.format } : item)));
+    } else {
+      const newItem: DataRequest = {
+        id: `YC-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`,
+        org: payload.org,
+        requestContent: payload.requestContent,
+        attachment: payload.attachment,
+        dataType: payload.dataType,
+        purpose: payload.purpose || 'Bổ sung theo yêu cầu',
+        requestDate: formatDateTime(new Date().toISOString()),
+        fromDate: payload.fromDate,
+        toDate: payload.toDate,
+        format: payload.format,
+        status: 'CHO_XU_LY',
+      };
+      setRequests((prev) => [newItem, ...prev]);
+    }
     setActiveTab('tiep_nhan');
+    setSelectedRequest(null);
   };
 
   const handleExportClick = (item: DataRequest) => {
@@ -154,13 +173,53 @@ export function DataProvisionRequestPage() {
     setRequests((prev) => prev.map((item) => (item.id === id ? { ...item, status: 'DA_XUAT' } : item)));
   };
 
+  const [showHandoverDetailModal, setShowHandoverDetailModal] = useState(false);
+  const [showPublishDetailModal, setShowPublishDetailModal] = useState(false);
+
   const handleHandoverClick = (item: DataRequest) => {
     setSelectedRequest(item);
     setShowHandoverModal(true);
   };
 
   const handleConfirmHandover = (id: string, receivingUnit: string, file: File | null) => {
-    setRequests((prev) => prev.map((item) => (item.id === id ? { ...item, status: 'DA_BAN_GIAO' } : item)));
+    setRequests((prev) => prev.map((item) => (item.id === id ? { ...item, status: 'DA_BAN_GIAO', handoverDetails: { receivingUnit, file, date: new Date().toISOString() } } : item)));
+  };
+
+  const handlePublishClick = (item: DataRequest) => {
+    setSelectedRequest(item);
+    setShowPublishModal(true);
+  };
+
+  const handleConfirmPublish = (id: string, platforms: string[], reason: string) => {
+    setRequests((prev) => prev.map((item) => (item.id === id ? { ...item, status: 'DA_CONG_KHAI', publishDetails: { platforms, reason, publishDate: new Date().toISOString() } } : item)));
+  };
+
+  const handleUnpublishClick = (item: DataRequest) => {
+    setSelectedRequest(item);
+    setShowUnpublishModal(true);
+  };
+
+  const handleConfirmUnpublish = (id: string, unpublishReason: string) => {
+    setRequests((prev) => prev.map((item) => {
+      if (item.id === id) {
+        return {
+          ...item,
+          status: 'HUY_CONG_KHAI',
+          publishDetails: { ...item.publishDetails, unpublishReason, unpublishDate: new Date().toISOString() }
+        };
+      }
+      return item;
+    }));
+  };
+
+  const handleViewHandoverDetail = (item: DataRequest) => {
+    setSelectedRequest(item);
+    setShowHandoverDetailModal(true);
+  };
+
+  const handleViewPublishDetail = (item: DataRequest) => {
+    setSelectedRequest(item);
+    setShowPublishDetailModal(true);
   };
 
   return (
@@ -211,6 +270,8 @@ export function DataProvisionRequestPage() {
                 <option value="TU_CHOI">Từ chối</option>
                 <option value="DA_XUAT">Đã kết xuất</option>
                 <option value="DA_BAN_GIAO">Đã bàn giao</option>
+                <option value="DA_CONG_KHAI">Đã công khai</option>
+                <option value="HUY_CONG_KHAI">Đã hủy công khai</option>
               </select>
               <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm">
                 {dataTypeOptions.map((type) => <option key={type} value={type}>{type === 'ALL' ? 'Tất cả loại dữ liệu' : type}</option>)}
@@ -238,7 +299,19 @@ export function DataProvisionRequestPage() {
                     <td className="py-3 px-4"><span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700">{statusLabel[item.status]}</span></td>
                     <td className="py-3 px-4">
                       <div className="flex items-center justify-end gap-1.5 flex-nowrap">
-                        {(activeTab === 'tiep_nhan' || activeTab === 'tra_cuu') && item.status === 'CHO_XU_LY' && (
+                        {activeTab === 'tiep_nhan' && item.status === 'CHO_XU_LY' && (
+                          <>
+                            <button title="Chỉnh sửa" onClick={() => { setSelectedRequest(item); setShowRequestModal(true); }} className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"><Edit className="w-5 h-5" /></button>
+                            <button title="Xem chi tiết" onClick={() => handleExportClick(item)} className="p-1.5 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors"><Eye className="w-5 h-5" /></button>
+                          </>
+                        )}
+                        {activeTab === 'tiep_nhan' && item.status === 'DA_BAN_GIAO' && (
+                          <button title="Xem chi tiết Bàn giao" onClick={() => handleViewHandoverDetail(item)} className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"><Eye className="w-5 h-5" /></button>
+                        )}
+                        {activeTab === 'tiep_nhan' && (item.status === 'DA_CONG_KHAI' || item.status === 'HUY_CONG_KHAI') && (
+                          <button title="Xem chi tiết Công khai" onClick={() => handleViewPublishDetail(item)} className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"><Eye className="w-5 h-5" /></button>
+                        )}
+                        {activeTab === 'tra_cuu' && item.status === 'CHO_XU_LY' && (
                           <button title="Tiếp nhận" onClick={() => { setSelectedRequest(item); setShowApprovalModal(true); }} className="p-1.5 bg-amber-500 text-white rounded-md shadow-sm hover:bg-amber-600 transition-colors"><CheckCircle className="w-4 h-4" /></button>
                         )}
                         {(activeTab === 'tra_cuu' || item.status === 'DA_PHE_DUYET' || item.status === 'DA_XUAT') && (
@@ -254,10 +327,21 @@ export function DataProvisionRequestPage() {
                         )}
                         {activeTab === 'ban_giao' && (
                           <>
-                            {item.status !== 'DA_BAN_GIAO' && (
-                              <button title="Bàn giao" onClick={() => handleHandoverClick(item)} className="p-1.5 bg-indigo-600 text-white rounded-md shadow-sm hover:bg-indigo-700 transition-colors"><Send className="w-4 h-4" /></button>
+                            {item.status === 'DA_XUAT' && (
+                              <>
+                                <button title="Bàn giao" onClick={() => handleHandoverClick(item)} className="p-1.5 bg-indigo-600 text-white rounded-md shadow-sm hover:bg-indigo-700 transition-colors"><Send className="w-4 h-4" /></button>
+                                <button title="Công khai" onClick={() => handlePublishClick(item)} className="p-1.5 bg-blue-600 text-white rounded-md shadow-sm hover:bg-blue-700 transition-colors"><Globe className="w-4 h-4" /></button>
+                              </>
                             )}
-                            <button title="Hủy" className="p-1.5 bg-red-600 text-white rounded-md shadow-sm hover:bg-red-700 transition-colors"><XCircle className="w-4 h-4" /></button>
+                            {item.status === 'DA_BAN_GIAO' && (
+                              <button title="Xem chi tiết Bàn giao" onClick={() => handleViewHandoverDetail(item)} className="p-1.5 text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-md transition-colors"><Eye className="w-5 h-5" /></button>
+                            )}
+                            {(item.status === 'DA_CONG_KHAI' || item.status === 'HUY_CONG_KHAI') && (
+                              <button title="Xem chi tiết Công khai" onClick={() => handleViewPublishDetail(item)} className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors"><Eye className="w-5 h-5" /></button>
+                            )}
+                            {item.status === 'DA_CONG_KHAI' && (
+                              <button title="Hủy công khai" onClick={() => handleUnpublishClick(item)} className="p-1.5 bg-red-600 text-white rounded-md shadow-sm hover:bg-red-700 transition-colors"><XCircle className="w-4 h-4" /></button>
+                            )}
                           </>
                         )}
                       </div>
@@ -270,10 +354,14 @@ export function DataProvisionRequestPage() {
         </div>
       </div>
 
-      <ProvisionDataRequestModal isOpen={showRequestModal} onClose={() => setShowRequestModal(false)} onCreate={handleCreateRequest} />
+      <ProvisionDataRequestModal isOpen={showRequestModal} onClose={() => { setShowRequestModal(false); setSelectedRequest(null); }} onCreate={handleCreateRequest} requestData={selectedRequest} />
       <ProvisionRequestApprovalModal isOpen={showApprovalModal} onClose={() => setShowApprovalModal(false)} requestData={selectedRequest} onApprove={handleApprove} onReject={(id) => handleReject(id)} />
       <ProvisionRequestExportModal isOpen={showExportModal} onClose={() => setShowExportModal(false)} requestData={selectedRequest} onConfirmExport={handleConfirmExport} />
       <ProvisionRequestHandoverModal isOpen={showHandoverModal} onClose={() => setShowHandoverModal(false)} requestData={selectedRequest} onConfirmHandover={handleConfirmHandover} />
+      <ProvisionServicePublishModal isOpen={showPublishModal} onClose={() => setShowPublishModal(false)} requestData={selectedRequest} onConfirmPublish={handleConfirmPublish} />
+      <ProvisionServiceUnpublishModal isOpen={showUnpublishModal} onClose={() => setShowUnpublishModal(false)} requestData={selectedRequest} onConfirmUnpublish={handleConfirmUnpublish} />
+      <ProvisionHandoverDetailModal isOpen={showHandoverDetailModal} onClose={() => setShowHandoverDetailModal(false)} requestData={selectedRequest} />
+      <ProvisionPublishDetailModal isOpen={showPublishDetailModal} onClose={() => setShowPublishDetailModal(false)} requestData={selectedRequest} />
     </div>
   );
 }

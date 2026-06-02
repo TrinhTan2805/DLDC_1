@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Upload, FileText } from 'lucide-react';
+import { X, Upload, FileText, Download } from 'lucide-react';
 
 interface ProvisionRequestHandoverModalProps {
   isOpen: boolean;
@@ -35,9 +35,22 @@ export function ProvisionRequestHandoverModal({ isOpen, onClose, requestData, on
 
         <div className="p-6 space-y-6">
           <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
-            <h3 className="font-bold text-slate-800 mb-2">Mã YC: {requestData?.id}</h3>
+            <h3 className="font-bold text-slate-800 mb-2">Thông tin yêu cầu</h3>
+            <p className="text-sm text-slate-600 mb-1"><span className="font-semibold text-slate-700">Mã YC:</span> {requestData?.id}</p>
             <p className="text-sm text-slate-600 mb-1"><span className="font-semibold text-slate-700">Cơ quan yêu cầu:</span> {requestData?.org}</p>
             <p className="text-sm text-slate-600 mb-1"><span className="font-semibold text-slate-700">Loại dữ liệu:</span> {requestData?.dataType}</p>
+            <div className="mt-3 pt-3 border-t border-slate-200">
+              <p className="text-sm font-semibold text-slate-700 mb-2">File dữ liệu đã kết xuất:</p>
+              <div className="flex items-center justify-between bg-white border border-slate-200 p-2.5 rounded-lg shadow-sm">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-emerald-600" />
+                  <span className="text-sm font-medium text-slate-700">data_export_{requestData?.id?.toLowerCase() || 'file'}.{requestData?.format || 'csv'}</span>
+                </div>
+                <button type="button" className="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded flex items-center font-medium transition-colors border border-emerald-200 cursor-pointer">
+                  <Download className="w-3.5 h-3.5 mr-1" /> Tải về
+                </button>
+              </div>
+            </div>
           </div>
 
           <div>
