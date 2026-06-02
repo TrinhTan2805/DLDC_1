@@ -467,7 +467,7 @@ const menuItems: MenuItem[] = [
       },
       {
         id: "provisioning-service-catalog",
-        label: "Danh mục dịch vụ cung cấp",
+        label: "Dịch vụ chia sẻ",
         icon: Database,
         isGroup: true,
         subItems: [

@@ -1730,7 +1730,7 @@ export const menuStructure: MenuItem[] = [
       },
       {
         id: "provisioning-service-catalog",
-        name: "Danh mục dịch vụ cung cấp",
+        name: "Dịch vụ chia sẻ",
         children: [
           {
             id: "provisioning-shared",

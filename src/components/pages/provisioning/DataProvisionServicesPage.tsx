@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Database, Server, Code, Clock, ShieldCheck, Activity } from 'lucide-react';
+import { Search, Server, Clock, ShieldCheck, Activity, Code, Database } from 'lucide-react';
 import { provisionServicesData, ProvisionService } from '../../../data/provisionServicesData';
+import { ServiceDataTable } from './components/ServiceDataTable';
 
 interface DataProvisionServicesPageProps {
   category: 'internal' | 'shared' | 'open' | 'master';
@@ -114,88 +115,94 @@ export function DataProvisionServicesPage({ category, group, title, description 
             <div className="flex-1 overflow-y-auto p-6 bg-slate-50/50">
               <div className="max-w-4xl mx-auto space-y-6">
                 
-                <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">
-                  Danh sách API đang lấy dữ liệu từ "{selectedService.name}"
-                </h3>
+                {/* Dynamic Data Table for any service */}
+                <ServiceDataTable service={selectedService} />
+                
+                {/* ALWAYS show API list below */}
+                <>
+                  <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">
+                    Danh sách API đang lấy dữ liệu từ "{selectedService.name}"
+                  </h3>
 
-                {mockConsumerApis.map(api => (
-                  <div key={api.id} className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:border-blue-300 transition-colors">
-                    <div 
-                      className="p-5 cursor-pointer flex items-center justify-between"
-                      onClick={() => setSelectedApi(selectedApi?.id === api.id ? null : api)}
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
-                          <Server className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-slate-800 text-base">{api.name}</h4>
-                          <div className="flex items-center gap-3 mt-1.5">
-                            <span className="font-mono text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-bold border border-slate-200">
-                              {api.method}
-                            </span>
-                            <span className="font-mono text-xs text-slate-500">{api.endpoint}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100 inline-block mb-1">
-                          Đang hoạt động
-                        </div>
-                        <div className="text-xs text-slate-400 font-medium">Click để xem chi tiết</div>
-                      </div>
-                    </div>
-
-                    {selectedApi?.id === api.id && (
-                      <div className="border-t border-slate-100 bg-slate-50/50 p-6 animate-in slide-in-from-top-2 duration-200">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                          <div className="space-y-4">
-                            <div>
-                              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Đơn vị sử dụng</div>
-                              <div className="font-semibold text-slate-800 text-sm flex items-center gap-2">
-                                <ShieldCheck className="w-4 h-4 text-blue-500" />
-                                {api.unit}
-                              </div>
+                  {mockConsumerApis.map(api => (
+                      <div key={api.id} className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:border-blue-300 transition-colors mb-6">
+                        <div 
+                          className="p-5 cursor-pointer flex items-center justify-between"
+                          onClick={() => setSelectedApi(selectedApi?.id === api.id ? null : api)}
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
+                              <Server className="w-6 h-6" />
                             </div>
                             <div>
-                              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Thời gian cung cấp</div>
-                              <div className="font-semibold text-slate-800 text-sm flex items-center gap-2">
-                                <Clock className="w-4 h-4 text-amber-500" />
-                                {api.provisionTime}
+                              <h4 className="font-bold text-slate-800 text-base">{api.name}</h4>
+                              <div className="flex items-center gap-3 mt-1.5">
+                                <span className="font-mono text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-bold border border-slate-200">
+                                  {api.method}
+                                </span>
+                                <span className="font-mono text-xs text-slate-500">{api.endpoint}</span>
                               </div>
                             </div>
                           </div>
-                          <div className="space-y-4">
-                            <div>
-                              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Số lượng trường dữ liệu (Fields)</div>
-                              <div className="font-semibold text-slate-800 text-sm flex items-center gap-2">
-                                <Database className="w-4 h-4 text-emerald-500" />
-                                {api.fieldCount} trường
-                              </div>
+                          <div className="text-right">
+                            <div className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100 inline-block mb-1">
+                              Đang hoạt động
                             </div>
-                            <div>
-                              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Lưu lượng truy cập (Requests)</div>
-                              <div className="font-semibold text-slate-800 text-sm flex items-center gap-2">
-                                <Activity className="w-4 h-4 text-purple-500" />
-                                {api.requestCount} / tháng
-                              </div>
-                            </div>
+                            <div className="text-xs text-slate-400 font-medium">Click để xem chi tiết</div>
                           </div>
                         </div>
 
-                        <div className="rounded-xl border border-slate-800 overflow-hidden bg-slate-950 shadow-inner">
-                          <div className="bg-slate-900 px-4 py-2 border-b border-slate-800 flex items-center gap-2">
-                            <Code className="w-4 h-4 text-emerald-400" />
-                            <span className="text-xs font-mono font-bold text-emerald-400">JSON Payload (Sample)</span>
+                        {selectedApi?.id === api.id && (
+                          <div className="border-t border-slate-100 bg-slate-50/50 p-6 animate-in slide-in-from-top-2 duration-200">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                              <div className="space-y-4">
+                                <div>
+                                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Đơn vị sử dụng</div>
+                                  <div className="font-semibold text-slate-800 text-sm flex items-center gap-2">
+                                    <ShieldCheck className="w-4 h-4 text-blue-500" />
+                                    {api.unit}
+                                  </div>
+                                </div>
+                                <div>
+                                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Thời gian cung cấp</div>
+                                  <div className="font-semibold text-slate-800 text-sm flex items-center gap-2">
+                                    <Clock className="w-4 h-4 text-amber-500" />
+                                    {api.provisionTime}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="space-y-4">
+                                <div>
+                                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Số lượng trường dữ liệu (Fields)</div>
+                                  <div className="font-semibold text-slate-800 text-sm flex items-center gap-2">
+                                    <Database className="w-4 h-4 text-emerald-500" />
+                                    {api.fieldCount} trường
+                                  </div>
+                                </div>
+                                <div>
+                                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Lưu lượng truy cập (Requests)</div>
+                                  <div className="font-semibold text-slate-800 text-sm flex items-center gap-2">
+                                    <Activity className="w-4 h-4 text-purple-500" />
+                                    {api.requestCount} / tháng
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="rounded-xl border border-slate-800 overflow-hidden bg-slate-950 shadow-inner">
+                              <div className="bg-slate-900 px-4 py-2 border-b border-slate-800 flex items-center gap-2">
+                                <Code className="w-4 h-4 text-emerald-400" />
+                                <span className="text-xs font-mono font-bold text-emerald-400">JSON Payload (Sample)</span>
+                              </div>
+                              <pre className="p-4 text-xs font-mono text-slate-300 overflow-x-auto">
+                                <code>{api.sampleJson}</code>
+                              </pre>
+                            </div>
                           </div>
-                          <pre className="p-4 text-xs font-mono text-slate-300 overflow-x-auto">
-                            <code>{api.sampleJson}</code>
-                          </pre>
-                        </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                ))}
+                    ))}
+                  </>
               </div>
             </div>
           </>
