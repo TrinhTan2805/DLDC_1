@@ -5,16 +5,18 @@ interface ProvisionRequestHandoverModalProps {
   isOpen: boolean;
   onClose: () => void;
   requestData?: any;
-  onConfirmHandover: (id: string, receivingUnit: string, file: File | null) => void;
+  onConfirmHandover: (id: string, receivingUnit: string, file: File | null, receiverName?: string) => void;
 }
 
 export function ProvisionRequestHandoverModal({ isOpen, onClose, requestData, onConfirmHandover }: ProvisionRequestHandoverModalProps) {
   const [receivingUnit, setReceivingUnit] = useState('');
+  const [receiverName, setReceiverName] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   useEffect(() => {
     if (isOpen && requestData) {
       setReceivingUnit(requestData.org || '');
+      setReceiverName('');
       setSelectedFile(null);
     }
   }, [isOpen, requestData]);
@@ -46,6 +48,17 @@ export function ProvisionRequestHandoverModal({ isOpen, onClose, requestData, on
               onChange={(e) => setReceivingUnit(e.target.value)}
               className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500" 
               placeholder="Nhập tên đơn vị nhận bàn giao" 
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Tên người nhận bàn giao</label>
+            <input 
+              type="text" 
+              value={receiverName}
+              onChange={(e) => setReceiverName(e.target.value)}
+              className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500" 
+              placeholder="Nhập tên người nhận bàn giao (không bắt buộc)" 
             />
           </div>
 
@@ -84,7 +97,7 @@ export function ProvisionRequestHandoverModal({ isOpen, onClose, requestData, on
             disabled={!receivingUnit || !selectedFile}
             onClick={() => {
               if (requestData?.id) {
-                onConfirmHandover(requestData.id, receivingUnit, selectedFile);
+                onConfirmHandover(requestData.id, receivingUnit, selectedFile, receiverName);
               }
               onClose();
             }}
