@@ -32,6 +32,29 @@ export function SourceSystemModal({ isOpen, onClose, onSave, editingData }: Sour
     note: ''
   });
 
+  const [mojUnits, setMojUnits] = useState<any[]>([]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('moj_units');
+    if (saved) {
+      try {
+        setMojUnits(JSON.parse(saved));
+      } catch (e) {
+        // Fallback
+      }
+    } else {
+      const initialUnits = [
+        { id: '1', code: 'BTP', name: 'Bộ Tư pháp', type: 'internal' },
+        { id: '2', code: 'CNTT', name: 'Cục Công nghệ thông tin', type: 'internal' },
+        { id: '3', code: 'HCTP', name: 'Cục Hành chính tư pháp', type: 'internal' },
+        { id: '4', code: 'THADS', name: 'Cục Quản lý thi hành án dân sự', type: 'internal' },
+        { id: '5', code: 'GDPL', name: 'Cục Phổ biến, giáo dục pháp luật', type: 'internal' },
+        { id: '6', code: 'BTTP', name: 'Cục Bổ trợ tư pháp', type: 'internal' },
+      ];
+      setMojUnits(initialUnits);
+    }
+  }, [isOpen]);
+
   useEffect(() => {
     if (editingData) {
       setFormData(editingData);
@@ -50,6 +73,27 @@ export function SourceSystemModal({ isOpen, onClose, onSave, editingData }: Sour
   }, [editingData, isOpen]);
 
   if (!isOpen) return null;
+
+  const hasEditingUnit = editingData && mojUnits.some(u => u.name === editingData.unitName);
+  const dropdownOptions = [...mojUnits];
+  if (editingData && editingData.unitName && !hasEditingUnit) {
+    dropdownOptions.push({
+      id: 'editing-temp',
+      code: 'TEMP',
+      name: editingData.unitName,
+      type: editingData.sourceType === 'Ngoài ngành' ? 'external' : 'internal'
+    });
+  }
+
+  const handleUnitChange = (unitName: string) => {
+    const selectedUnit = dropdownOptions.find(u => u.name === unitName);
+    const sourceType = (selectedUnit?.type === 'external') ? 'Ngoài ngành' : 'Trong ngành';
+    setFormData(prev => ({
+      ...prev,
+      unitName,
+      sourceType
+    }));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,28 +140,18 @@ export function SourceSystemModal({ isOpen, onClose, onSave, editingData }: Sour
                 <label className="block text-base font-medium text-slate-700 mb-1">
                   Tên đơn vị <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
+                <select
                   required
                   value={formData.unitName}
-                  onChange={(e) => setFormData({ ...formData, unitName: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Nhập tên đơn vị"
-                />
-              </div>
-
-              <div className="col-span-2 sm:col-span-1">
-                <label className="block text-base font-medium text-slate-700 mb-1">
-                  Loại nguồn
-                </label>
-                <select
-                  value={formData.sourceType}
-                  onChange={(e) => setFormData({ ...formData, sourceType: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) => handleUnitChange(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-base"
                 >
-                  <option value="">Chọn loại nguồn</option>
-                  <option value="Trong ngành">Trong ngành</option>
-                  <option value="Ngoài ngành">Ngoài ngành</option>
+                  <option value="">Chọn đơn vị</option>
+                  {dropdownOptions.map(unit => (
+                    <option key={unit.id} value={unit.name}>
+                      {unit.name} ({unit.code})
+                    </option>
+                  ))}
                 </select>
               </div>
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Plus, Edit, Trash2, Shield, Eye, UserPlus, Lock, User, Users, CheckCircle, ArrowRight, X } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, Shield, Eye, UserPlus, Lock, User, Users, CheckCircle, ArrowRight, X, ChevronRight, ChevronDown } from 'lucide-react';
 import { StatsCard } from '../../common/StatsCard';
 import { StatusTag } from '../../common/StatusTag';
 import { menuStructure } from './menuStructure';
@@ -149,6 +149,48 @@ export function RoleManagementPage() {
   const [showUnassignedOnly, setShowUnassignedOnly] = useState(false);
   const [userDropdownSearch, setUserDropdownSearch] = useState('');
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [expandedNodes, setExpandedNodes] = useState<string[]>([]);
+
+  const getParentNodeIds = (items: any[]): string[] => {
+    let ids: string[] = [];
+    items.forEach(item => {
+      const shouldHideChildren = 
+        item.id === 'view-data-internal' || 
+        item.id === 'view-data-external' ||
+        item.id === 'processing-internal' ||
+        item.id === 'processing-external' ||
+        item.id === 'reconciliation-external-ministry' ||
+        item.id === 'reconciliation-internal-ministry' ||
+        item.id === 'provisioning-shared' ||
+        item.id === 'provisioning-internal';
+      if (item.children && item.children.length > 0 && !shouldHideChildren) {
+        ids.push(item.id);
+        ids = ids.concat(getParentNodeIds(item.children));
+      }
+    });
+    return ids;
+  };
+
+  const getAllDescendants = (item: any): string[] => {
+    let ids: string[] = [];
+    const shouldHideChildren = 
+      item.id === 'view-data-internal' || 
+      item.id === 'view-data-external' ||
+      item.id === 'processing-internal' ||
+      item.id === 'processing-external' ||
+      item.id === 'reconciliation-external-ministry' ||
+      item.id === 'reconciliation-internal-ministry' ||
+      item.id === 'provisioning-shared' ||
+      item.id === 'provisioning-internal';
+
+    if (item.children && item.children.length > 0 && !shouldHideChildren) {
+      item.children.forEach((child: any) => {
+        ids.push(child.id);
+        ids = ids.concat(getAllDescendants(child));
+      });
+    }
+    return ids;
+  };
 
   const [assignmentSuccess, setAssignmentSuccess] = useState<{
     roleName: string;
@@ -193,6 +235,8 @@ export function RoleManagementPage() {
       setUserDropdownSearch('');
     }
     
+    setExpandedNodes([]);
+    
     if (type !== 'assign-users') {
       setSelectedUsers([]);
       setSelectedGroups([]);
@@ -202,15 +246,12 @@ export function RoleManagementPage() {
   const handleCloseModal = () => {
     setModalType(null);
     setSelectedRole(null);
+    setExpandedNodes([]);
   };
 
   const handleSaveRole = () => {
     if (!formData.name.trim()) {
       alert('Ràng buộc tính hợp lệ: Tên vai trò không được để trống!');
-      return;
-    }
-    if (!formData.roleType) {
-      alert('Ràng buộc tính hợp lệ: Loại vai trò không được để trống!');
       return;
     }
 
@@ -229,6 +270,7 @@ export function RoleManagementPage() {
       const newRole: Role = {
         id: roles.length > 0 ? Math.max(...roles.map(r => r.id)) + 1 : 1,
         ...formData,
+        roleType: formData.roleType || 'Người dùng cơ bản',
         memberCount: 0,
         groupCount: 0,
         createdDate: today,
@@ -506,23 +548,7 @@ export function RoleManagementPage() {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Loại vai trò <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    aria-label="Loại vai trò"
-                    title="Loại vai trò"
-                    value={formData.roleType}
-                    onChange={(e) => setFormData({ ...formData, roleType: e.target.value })}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer text-sm"
-                  >
-                    <option value="" disabled>-- Chọn loại vai trò --</option>
-                    <option value="Quản trị hệ thống Kho DLDC">Quản trị hệ thống Kho DLDC</option>
-                    <option value="Quản trị hệ thống nguồn">Quản trị hệ thống nguồn</option>
-                    <option value="Người dùng cơ bản">Người dùng cơ bản</option>
-                  </select>
-                </div>
+
                 
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -544,58 +570,90 @@ export function RoleManagementPage() {
                     </select>
                   </div>
                   <div className="relative">
-                    <label className="block text-sm font-semibold text-slate-800 mb-1.5">Thêm người dùng vào nhóm</label>
-                    <div 
-                      className={`w-full px-4 py-2 border border-slate-300 rounded-lg bg-white flex items-center justify-between cursor-pointer ${!formData.selectedUnit ? 'opacity-60 cursor-not-allowed bg-slate-50' : 'hover:border-blue-400'}`}
-                      onClick={() => formData.selectedUnit && setUserDropdownOpen(!userDropdownOpen)}
-                    >
-                      <span className="text-sm truncate text-slate-700">
-                        {!formData.selectedUnit 
-                          ? '-- Vui lòng chọn đơn vị trước --' 
-                          : formData.unitAdmin 
-                            ? availableUsers.find(u => u.id.toString() === formData.unitAdmin)?.name 
-                            : '-- Chọn người dùng --'}
-                      </span>
-                      <svg className={`w-4 h-4 text-slate-500 transition-transform ${userDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                    <label className="block text-sm font-semibold text-slate-800 mb-1.5">Chọn Quản lý đơn vị</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm pr-10"
+                        placeholder="Tìm và chọn quản lý đơn vị..."
+                        value={
+                          userDropdownOpen
+                            ? userDropdownSearch
+                            : formData.unitAdmin
+                              ? availableUsers.find(u => u.id.toString() === formData.unitAdmin)?.name || ''
+                              : ''
+                        }
+                        onChange={(e) => {
+                          setUserDropdownSearch(e.target.value);
+                          setUserDropdownOpen(true);
+                        }}
+                        onFocus={() => {
+                          setUserDropdownOpen(true);
+                          if (!formData.unitAdmin) {
+                            setUserDropdownSearch('');
+                          } else {
+                            const currentName = availableUsers.find(u => u.id.toString() === formData.unitAdmin)?.name || '';
+                            setUserDropdownSearch(currentName);
+                          }
+                        }}
+                      />
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                        {formData.unitAdmin && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setFormData({ ...formData, unitAdmin: '' });
+                              setUserDropdownSearch('');
+                            }}
+                            className="p-0.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100"
+                            title="Xóa lựa chọn"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                        <svg
+                          onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                          className={`w-4 h-4 text-slate-500 transition-transform cursor-pointer ${userDropdownOpen ? 'rotate-180' : ''}`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                      </div>
                     </div>
 
-                    {userDropdownOpen && formData.selectedUnit && (
-                      <div className="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden">
-                        <div className="p-2 border-b border-slate-100">
-                          <div className="relative">
-                            <Search className="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5" />
-                            <input
-                              type="text"
-                              autoFocus
-                              className="w-full pl-8 pr-3 py-1.5 text-sm border border-slate-200 rounded focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                              placeholder="Tìm kiếm theo tên..."
-                              value={userDropdownSearch}
-                              onChange={(e) => setUserDropdownSearch(e.target.value)}
-                              onClick={(e) => e.stopPropagation()}
-                            />
-                          </div>
-                        </div>
-                        <div className="max-h-48 overflow-y-auto">
-                          {availableUsers
-                            .filter(u => u.department === formData.selectedUnit)
-                            .filter(u => u.name.toLowerCase().includes(userDropdownSearch.toLowerCase()))
-                            .map(u => (
-                              <div
-                                key={u.id}
-                                className={`px-4 py-2.5 text-sm cursor-pointer hover:bg-blue-50 ${formData.unitAdmin === u.id.toString() ? 'bg-blue-50 text-blue-600 font-medium' : 'text-slate-700'}`}
-                                onClick={() => {
-                                  setFormData({ ...formData, unitAdmin: u.id.toString() });
-                                  setUserDropdownOpen(false);
-                                  setUserDropdownSearch('');
-                                }}
-                              >
-                                {u.name}
-                              </div>
-                            ))}
-                          {availableUsers.filter(u => u.department === formData.selectedUnit && u.name.toLowerCase().includes(userDropdownSearch.toLowerCase())).length === 0 && (
-                            <div className="px-4 py-3 text-sm text-slate-500 text-center italic">Không tìm thấy người dùng</div>
-                          )}
-                        </div>
+                    {userDropdownOpen && (
+                      <div className="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                        {availableUsers
+                          .filter(u => !formData.selectedUnit || u.department === formData.selectedUnit)
+                          .filter(u => 
+                            u.name.toLowerCase().includes(userDropdownSearch.toLowerCase()) || 
+                            u.email.toLowerCase().includes(userDropdownSearch.toLowerCase())
+                          )
+                          .map(u => (
+                            <div
+                              key={u.id}
+                              className={`px-4 py-2.5 text-sm cursor-pointer hover:bg-blue-50 flex flex-col ${formData.unitAdmin === u.id.toString() ? 'bg-blue-50 text-blue-600 font-medium' : 'text-slate-700'}`}
+                              onClick={() => {
+                                setFormData({ ...formData, unitAdmin: u.id.toString(), selectedUnit: u.department });
+                                setUserDropdownOpen(false);
+                                setUserDropdownSearch(u.name);
+                              }}
+                            >
+                              <span className="font-medium text-slate-900">{u.name}</span>
+                              <span className="text-[10px] text-slate-400">{u.email} • {u.department}</span>
+                            </div>
+                          ))}
+                        {availableUsers
+                          .filter(u => !formData.selectedUnit || u.department === formData.selectedUnit)
+                          .filter(u => 
+                            u.name.toLowerCase().includes(userDropdownSearch.toLowerCase()) || 
+                            u.email.toLowerCase().includes(userDropdownSearch.toLowerCase())
+                          ).length === 0 && (
+                          <div className="px-4 py-3 text-sm text-slate-500 text-center italic">Không tìm thấy người dùng</div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -610,27 +668,78 @@ export function RoleManagementPage() {
                         return items.map(item => {
                           const isSelected = formData.permissions.includes(item.id);
                           const toggleSelection = () => {
+                            const descendantIds = getAllDescendants(item);
                             if (isSelected) {
-                              setFormData(prev => ({...prev, permissions: prev.permissions.filter(p => p !== item.id)}));
+                              setFormData(prev => ({
+                                ...prev,
+                                permissions: prev.permissions.filter(p => p !== item.id && !descendantIds.includes(p))
+                              }));
                             } else {
-                              setFormData(prev => ({...prev, permissions: [...prev.permissions, item.id]}));
+                              const toAdd = [item.id, ...descendantIds];
+                              setFormData(prev => {
+                                const newPermissions = [...prev.permissions];
+                                toAdd.forEach(id => {
+                                  if (!newPermissions.includes(id)) {
+                                    newPermissions.push(id);
+                                  }
+                                });
+                                return { ...prev, permissions: newPermissions };
+                              });
                             }
                           };
 
-                          const hasChildren = item.children && item.children.length > 0 && depth < 1;
+                          const shouldHideChildren = 
+                            item.id === 'view-data-internal' || 
+                            item.id === 'view-data-external' ||
+                            item.id === 'processing-internal' ||
+                            item.id === 'processing-external' ||
+                            item.id === 'reconciliation-external-ministry' ||
+                            item.id === 'reconciliation-internal-ministry' ||
+                            item.id === 'provisioning-shared' ||
+                            item.id === 'provisioning-internal';
+
+                          const hasChildren = item.children && item.children.length > 0 && !shouldHideChildren;
+                          const isExpanded = expandedNodes.includes(item.id);
+                          const toggleExpand = (e: React.MouseEvent) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setExpandedNodes(prev => 
+                              prev.includes(item.id) 
+                                ? prev.filter(id => id !== item.id) 
+                                : [...prev, item.id]
+                            );
+                          };
 
                           return (
                             <div key={item.id} className={depth === 0 ? "mb-3 break-inside-avoid" : "mt-2"}>
-                              <label className="flex items-start gap-2 cursor-pointer">
-                                <input 
-                                  type="checkbox" 
-                                  className="w-4 h-4 mt-0.5 text-blue-600 rounded border-slate-300" 
-                                  checked={isSelected} 
-                                  onChange={toggleSelection} 
-                                />
-                                <span className={depth === 0 ? "text-sm font-semibold text-slate-800" : "text-sm font-medium text-slate-700"}>{item.name}</span>
-                              </label>
-                              {hasChildren && (
+                              <div className="flex items-center gap-1">
+                                {hasChildren ? (
+                                  <button 
+                                    type="button"
+                                    onClick={toggleExpand}
+                                    className="p-1 hover:bg-slate-200 rounded text-slate-500 shrink-0 flex items-center justify-center"
+                                    title={isExpanded ? "Thu gọn" : "Mở rộng"}
+                                  >
+                                    {isExpanded ? (
+                                      <ChevronDown className="w-3.5 h-3.5" />
+                                    ) : (
+                                      <ChevronRight className="w-3.5 h-3.5" />
+                                    )}
+                                  </button>
+                                ) : (
+                                  <div className="w-5.5 shrink-0" />
+                                )}
+                                <label className="flex items-start gap-2 cursor-pointer py-1">
+                                  <input 
+                                    type="checkbox" 
+                                    className="w-4 h-4 mt-0.5 text-blue-600 rounded border-slate-300 cursor-pointer" 
+                                    checked={isSelected} 
+                                    onChange={toggleSelection} 
+                                  />
+                                  <span className={depth === 0 ? "text-sm font-semibold text-slate-800" : "text-sm font-medium text-slate-700"}>{item.name}</span>
+                                </label>
+                              </div>
+                              {hasChildren && isExpanded && (
                                 <div className="ml-6 border-l border-slate-200 pl-4 mt-1">
                                   {renderMenuTree(item.children, depth + 1)}
                                 </div>
@@ -649,6 +758,22 @@ export function RoleManagementPage() {
                   </div>
                 </div>
 
+                <div>
+                  <label className="block text-sm font-semibold text-slate-800 mb-1.5">
+                    Trạng thái
+                  </label>
+                  <select
+                    aria-label="Trạng thái"
+                    title="Trạng thái"
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value as 'active' | 'inactive' })}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer text-sm bg-white"
+                  >
+                    <option value="active">Hoạt động</option>
+                    <option value="inactive">Không hoạt động</option>
+                  </select>
+                </div>
+
 
               </div>
             </div>
@@ -663,7 +788,7 @@ export function RoleManagementPage() {
               <button 
                 onClick={handleSaveRole}
                 className="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-sm transition-colors"
-                disabled={!formData.name.trim() || !formData.roleType}
+                disabled={!formData.name.trim()}
               >
                 {modalType === 'add' ? 'Lưu vai trò' : 'Ghi nhận chỉnh sửa'}
               </button>

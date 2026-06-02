@@ -16,10 +16,10 @@ interface OpenDataCategory {
   dataField: string;
   updateFrequency: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
   dataFormat: string[];
-  status: 'active' | 'inactive' | 'pending' | 'approved' | 'rejected';
+  status: 'active' | 'inactive' | 'pending' | 'approved' | 'rejected' | 'draft';
   createdDate: string;
   updatedDate: string;
-  approvalStatus?: 'pending' | 'approved' | 'rejected';
+  approvalStatus?: 'draft' | 'pending' | 'approved' | 'rejected';
   customFields?: DataField[];
   version?: string;
 }
@@ -79,6 +79,20 @@ const mockCategories: OpenDataCategory[] = [
     approvalStatus: 'rejected',
     createdDate: '20/03/2024',
     updatedDate: '05/12/2024',
+    version: '1.0'
+  },
+  {
+    id: '4',
+    code: 'ODC004',
+    name: 'Danh mục dữ liệu D (Bản nháp)',
+    description: 'Dữ liệu thống kê thử nghiệm chưa gửi duyệt',
+    dataField: 'Bộ Tư Pháp',
+    updateFrequency: 'monthly',
+    dataFormat: ['JSON'],
+    status: 'draft',
+    approvalStatus: 'draft',
+    createdDate: '02/06/2026',
+    updatedDate: '02/06/2026',
     version: '1.0'
   },
 ];
@@ -527,6 +541,11 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
   const [toDate, setToDate] = useState('');
   const [changeTypeFilter, setChangeTypeFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [unitFilter, setUnitFilter] = useState('');
+  const [frequencyFilter, setFrequencyFilter] = useState('');
+  const [formatFilter, setFormatFilter] = useState('');
+  const [managementFromDate, setManagementFromDate] = useState('');
+  const [managementToDate, setManagementToDate] = useState('');
 
   const getLicenseName = (licenseId: string) => {
     const license = licenseEntries.find(l => l.id === licenseId);
@@ -778,7 +797,10 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
   const filteredCategories = currentData.filter(cat => {
     const matchSearch = cat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                        cat.code.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchSearch;
+    const matchStatus = !statusFilter || cat.approvalStatus === statusFilter;
+    const matchUnit = !unitFilter || cat.dataField === unitFilter;
+    const matchFrequency = !frequencyFilter || cat.updateFrequency === frequencyFilter;
+    return matchSearch && matchStatus && matchUnit && matchFrequency;
   });
 
   // Filter for approval tab with status filter
@@ -902,20 +924,21 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
               >
                 <Search className="w-5 h-5" />
               </button>
-            </div>
-            
-            <div className="flex items-center gap-2 w-full md:w-auto">
               <button
                 type="button"
                 onClick={() => setShowFilters(!showFilters)}
-                className={`w-10 h-10 border rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                  showFilters ? 'bg-blue-50 border-blue-300 text-blue-600' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-all ${
+                  showFilters
+                    ? 'bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 shadow-sm'
+                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
                 }`}
-                title="Bộ lọc nâng cao"
+                title={showFilters ? "Đóng bộ lọc" : "Bộ lọc nâng cao"}
               >
-                <Filter className="w-4 h-4" />
+                {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-4 h-4" />}
               </button>
-
+            </div>
+            
+            <div className="flex items-center gap-2 w-full md:w-auto">
               {showAddButton && (
                 <button
                   type="button"
@@ -971,11 +994,47 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                       <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="w-full pl-3 pr-8 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-sm bg-white outline-none focus:ring-2 focus:ring-blue-100 transition-all appearance-none cursor-pointer"
+                        className="w-full pl-3 pr-8 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-sm bg-white outline-none focus:ring-2 focus:ring-blue-100 transition-all appearance-none cursor-pointer text-slate-700"
                       >
                         <option value="">Tất cả trạng thái</option>
-                        <option value="active">Hoạt động</option>
-                        <option value="inactive">Không hoạt động</option>
+                        <option value="draft">Bản nháp</option>
+                        <option value="pending">Chờ duyệt</option>
+                        <option value="approved">Đã phê duyệt</option>
+                        <option value="rejected">Từ chối</option>
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Đơn vị chủ trì</label>
+                    <div className="relative">
+                      <select
+                        value={unitFilter}
+                        onChange={(e) => setUnitFilter(e.target.value)}
+                        className="w-full pl-3 pr-8 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-sm bg-white outline-none focus:ring-2 focus:ring-blue-100 transition-all appearance-none cursor-pointer text-slate-700"
+                      >
+                        <option value="">Tất cả đơn vị</option>
+                        {units.map((unit) => (
+                          <option key={unit.id} value={unit.name}>
+                            {unit.name}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Tần suất cập nhật</label>
+                    <div className="relative">
+                      <select
+                        value={frequencyFilter}
+                        onChange={(e) => setFrequencyFilter(e.target.value)}
+                        className="w-full pl-3 pr-8 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-sm bg-white outline-none focus:ring-2 focus:ring-blue-100 transition-all appearance-none cursor-pointer text-slate-700"
+                      >
+                        <option value="">Tất cả tần suất</option>
+                        <option value="monthly">Hàng tháng</option>
+                        <option value="quarterly">Hàng quý</option>
+                        <option value="yearly">Hàng năm</option>
                       </select>
                       <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                     </div>
@@ -1258,8 +1317,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
       id: String(currentData.length + 1),
       ...formData,
       version: '1.0',
-      status: 'pending',
-      approvalStatus: 'pending',
+      status: 'draft',
+      approvalStatus: 'draft',
       createdDate: new Date().toLocaleDateString('vi-VN'),
       updatedDate: new Date().toLocaleDateString('vi-VN')
     };
@@ -1274,6 +1333,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
           ? { 
               ...c, 
               ...formData, 
+              status: 'draft',
+              approvalStatus: 'draft',
               version: incrementVersion(c.version), 
               updatedDate: new Date().toLocaleDateString('vi-VN') 
             }
@@ -1285,6 +1346,44 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
   };
 
   const handleSendApproval = () => {
+    if (showAddModal) {
+      const newCategory: OpenDataCategory = {
+        id: String(currentData.length + 1),
+        ...formData,
+        version: '1.0',
+        status: 'pending',
+        approvalStatus: 'pending',
+        createdDate: new Date().toLocaleDateString('vi-VN'),
+        updatedDate: new Date().toLocaleDateString('vi-VN')
+      };
+      setCurrentData([...currentData, newCategory]);
+    } else if (showEditModal && selectedCategory) {
+      setCurrentData(currentData.map(c =>
+        c.id === selectedCategory.id
+          ? { 
+              ...c, 
+              ...formData, 
+              status: 'pending',
+              approvalStatus: 'pending',
+              version: incrementVersion(c.version), 
+              updatedDate: new Date().toLocaleDateString('vi-VN') 
+            }
+          : c
+      ));
+      setSelectedCategory(null);
+    } else if (showViewModal && selectedCategory) {
+      setCurrentData(currentData.map(c =>
+        c.id === selectedCategory.id
+          ? { 
+              ...c, 
+              status: 'pending',
+              approvalStatus: 'pending',
+              updatedDate: new Date().toLocaleDateString('vi-VN') 
+            }
+          : c
+      ));
+      setSelectedCategory(null);
+    }
     setShowAddModal(false);
     setShowEditModal(false);
     setShowViewModal(false);
@@ -1394,7 +1493,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
     };
     const labels = {
       draft: 'Bản nháp',
-      pending: 'Chờ phê duyệt',
+      pending: 'Chờ duyệt',
       approved: 'Đã phê duyệt',
       rejected: 'Từ chối'
     };
@@ -1719,13 +1818,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                         <td className="px-4 py-3 text-left text-slate-600 font-medium text-[13px]">{category.dataField}</td>
                         <td className="px-4 py-3 text-center text-[13px]">{getStatusBadge(category.updateFrequency)}</td>
                         <td className="px-4 py-3 text-center">
-                          {category.approvalStatus === 'approved' ? (
-                            <span className="px-2.5 py-1 bg-green-50 text-green-700 rounded-full text-xs font-semibold border border-green-100">Đã phê duyệt</span>
-                          ) : category.approvalStatus === 'pending' ? (
-                            <span className="px-2.5 py-1 bg-orange-50 text-orange-700 rounded-full text-xs font-semibold border border-orange-100">Chờ phê duyệt</span>
-                          ) : (
-                            <span className="px-2.5 py-1 bg-red-50 text-red-700 rounded-full text-xs font-semibold border border-red-100">Từ chối</span>
-                          )}
+                          {getApprovalStatusBadge(category.approvalStatus)}
                         </td>
                         <td className="px-4 py-3 text-center">
                           <div className="flex items-center justify-center gap-1">
@@ -1789,9 +1882,9 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                             {activeTab === 'management' && (
                               <button
                                 onClick={() => handleSubmitForApproval(category)}
-                                disabled={category.approvalStatus === 'draft' || category.status === 'draft'}
+                                disabled={category.approvalStatus === 'approved' || category.approvalStatus === 'pending'}
                                 className={`p-1.5 rounded-lg transition-colors ${
-                                  category.approvalStatus === 'draft' || category.status === 'draft'
+                                  category.approvalStatus === 'approved' || category.approvalStatus === 'pending'
                                     ? 'text-slate-300 cursor-not-allowed bg-transparent'
                                     : 'text-slate-500 hover:text-purple-600 hover:bg-purple-50'
                                 }`}

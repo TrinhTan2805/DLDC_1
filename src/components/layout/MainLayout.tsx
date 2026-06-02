@@ -16,6 +16,7 @@ import { ProcessedDataPage } from '../pages/processing/ProcessedDataPage';
 import { CategoryManagementPage } from '../pages/CategoryManagementPage';
 import { ScreenFlowDiagram } from '../pages/ScreenFlowDiagram';
 import CategorySetupPage from '../pages/category/CategorySetupPage';
+import { CategoryMojUnitsPage } from '../pages/category/CategoryMojUnitsPage';
 import { CategoryAPage } from '../pages/category/CategoryAPage';
 import { CategoryBPage } from '../pages/category/CategoryBPage';
 import { CategoryCPage } from '../pages/category/CategoryCPage';
@@ -319,6 +320,10 @@ const pageConfig: Record<string, { title: string; description: string }> = {
     title: 'Danh mục dữ liệu mở A',
     description: 'Quản lý chi tiết danh mục dữ liệu mở A'
   },
+  'category-moj-units': {
+    title: 'Danh mục đơn vị thuộc Bộ Tư Pháp',
+    description: 'Biên tập và quản lý danh mục mã các đơn vị trực thuộc Bộ Tư Pháp'
+  },
   'category-a': {
     title: 'Biên tập danh mục A',
     description: 'Quản lý chi tiết Biên tập danh mục A'
@@ -476,6 +481,7 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'category' && <CategoryManagementPage />}
             {currentPage === 'category-dashboard' && <CategoryDashboardPage />}
             {currentPage === 'category-setup' && <CategorySetupPage userRole={userRole} />}
+            {currentPage === 'category-moj-units' && <CategoryMojUnitsPage />}
             {currentPage === 'category-a' && <CategoryAPage />}
             {currentPage === 'category-b' && <CategoryBPage />}
             {currentPage === 'category-c' && <CategoryCPage />}
@@ -938,6 +944,7 @@ const getBreadcrumbPath = (pageId: string): string[] => {
     // Category
     'category-setup': ['Quản lý danh mục', 'Thiết lập danh mục'],
     'category-list': ['Quản lý danh mục', 'Biên tập danh mục'],
+    'category-moj-units': ['Quản lý danh mục', 'Biên tập danh mục', 'Danh mục đơn vị thuộc BTP'],
     'category-a': ['Quản lý danh mục', 'Biên tập danh mục', 'Biên tập danh mục A'],
     'category-published-list': ['Quản lý danh mục', 'Công khai danh mục'],
     'category-report-group': ['Quản lý danh mục', 'Thống kê danh mục'],

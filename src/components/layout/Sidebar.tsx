@@ -330,6 +330,11 @@ const menuItems: MenuItem[] = [
         icon: List,
         subItems: [
           {
+            id: "category-moj-units",
+            label: "Danh mục đơn vị thuộc BTP",
+            icon: FolderOpen,
+          },
+          {
             id: "category-a",
             label: "Biên tập danh mục A",
             icon: FolderOpen,

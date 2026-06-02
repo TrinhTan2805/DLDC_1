@@ -1277,6 +1277,22 @@ export const menuStructure: MenuItem[] = [
         name: "Danh sách danh mục",
         children: [
           {
+            id: "category-moj-units",
+            name: "Danh mục đơn vị thuộc Bộ Tư Pháp",
+            functions: [
+              {
+                id: "category-moj-units-func",
+                name: "Danh mục đơn vị thuộc Bộ Tư Pháp",
+                actions: [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                ],
+              },
+            ],
+          },
+          {
             id: "category-a",
             name: "Biên tập danh mục A",
             functions: [

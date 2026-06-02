@@ -7,6 +7,20 @@ interface VersionHistoryModalProps {
 
 const mockVersions = [
   {
+    id: 10,
+    version: 'v2.4.1',
+    date: '02/06/2026',
+    time: '17:50',
+    content: 'Cập nhật cây phân quyền chức năng: Loại bỏ mục con của Đối soát dữ liệu và Dịch vụ chia sẻ; thêm nút đóng/mở (dropdown) mặc định thu gọn; hỗ trợ chọn/bỏ chọn hàng loạt chức năng con. Thay thế trường Loại vai trò bằng dropdown Trạng thái (Hoạt động/Không hoạt động) và chuyển xuống dưới cây phân quyền.'
+  },
+  {
+    id: 9,
+    version: 'v2.4.0',
+    date: '02/06/2026',
+    time: '16:55',
+    content: 'Nâng cấp giao diện Quản lý danh mục Dữ liệu mở: Tích hợp thiết kế bộ lọc nâng cao 3 trường (Trạng thái, Đơn vị, Tần suất) và nút chuyển đổi linh hoạt. Đồng bộ hóa quy trình 4 trạng thái (Bản nháp, Chờ duyệt, Đã phê duyệt, Từ chối). Cập nhật code mới từ Git: Cải tiến phân hệ Quản lý vai trò, Nhóm người dùng, bổ sung Category Dashboard mới và tối ưu hóa hệ thống Sidebar/MainLayout.'
+  },
+  {
     id: 8,
     version: 'v2.3.3',
     date: '29/05/2026',

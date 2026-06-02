@@ -75,12 +75,12 @@ const flattenMenuStructure = (items: any[], parentId: string | null = null): Loc
     const isDatabaseOrSystemLeaf = 
       id.startsWith('data-info-') ||
       id.startsWith('external-') ||
-      id.startsWith('reconciliation-internal-') ||
-      id.startsWith('reconciliation-external-') ||
+      (id.startsWith('reconciliation-internal-') && id !== 'reconciliation-internal-ministry') ||
+      (id.startsWith('reconciliation-external-') && id !== 'reconciliation-external-ministry') ||
       id.startsWith('processing-data-info-') ||
       id.startsWith('processing-external-') ||
-      id.startsWith('provisioning-shared-') ||
-      id.startsWith('provisioning-internal-') ||
+      (id.startsWith('provisioning-shared-') && id !== 'provisioning-shared') ||
+      (id.startsWith('provisioning-internal-') && id !== 'provisioning-internal') ||
       id === 'provisioning-open' ||
       id === 'provisioning-master';
 
