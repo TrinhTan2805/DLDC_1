@@ -320,6 +320,86 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
   const [expandedDataSources, setExpandedDataSources] = useState<string[]>([]);
   const [selectedDataScopeCategory, setSelectedDataScopeCategory] = useState<string>('');
   
+  // State for data scope field security methods
+  const [fieldSecurityChecked, setFieldSecurityChecked] = useState<{ [key: string]: boolean }>(() => {
+    const saved = localStorage.getItem('field_security_checked');
+    return saved ? JSON.parse(saved) : {};
+  });
+  
+  const [fieldSecurityMethods, setFieldSecurityMethods] = useState<{ [key: string]: string }>(() => {
+    const saved = localStorage.getItem('field_security_methods');
+    return saved ? JSON.parse(saved) : {};
+  });
+
+  const getActiveAlgorithms = () => {
+    const defaultAlgs = [
+      { id: 'partial', name: 'Làm mờ một phần (***-***-1234)' },
+      { id: 'redacted', name: 'Che khuất hoàn toàn ([REDACTED])' },
+      { id: 'hashed', name: 'Băm dữ liệu (Hashed)' },
+      { id: 'nullify', name: 'Trả về Null/Rỗng' }
+    ];
+    const saved = localStorage.getItem('security_config');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.blurringAlgorithms) {
+          const filtered = defaultAlgs.filter(alg => parsed.blurringAlgorithms[alg.id] !== false);
+          return filtered.length > 0 ? filtered : defaultAlgs;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return defaultAlgs;
+  };
+
+  const isFieldChecked = (tableId: string, fieldName: string) => {
+    if (!selectedGroup) return false;
+    const key = `${selectedGroup.id}-${tableId}-${fieldName}`;
+    if (fieldSecurityChecked[key] !== undefined) {
+      return fieldSecurityChecked[key];
+    }
+    return false;
+  };
+
+  const handleFieldCheckChange = (tableId: string, fieldName: string, checked: boolean) => {
+    if (!selectedGroup) return;
+    const key = `${selectedGroup.id}-${tableId}-${fieldName}`;
+    setFieldSecurityChecked(prev => ({
+      ...prev,
+      [key]: checked
+    }));
+    
+    if (checked) {
+      const activeAlgs = getActiveAlgorithms();
+      if (activeAlgs.length > 0 && !fieldSecurityMethods[key]) {
+        setFieldSecurityMethods(prev => ({
+          ...prev,
+          [key]: activeAlgs[0].id
+        }));
+      }
+    }
+  };
+
+  const getFieldMethod = (tableId: string, fieldName: string) => {
+    if (!selectedGroup) return '';
+    const key = `${selectedGroup.id}-${tableId}-${fieldName}`;
+    if (fieldSecurityMethods[key]) {
+      return fieldSecurityMethods[key];
+    }
+    const activeAlgs = getActiveAlgorithms();
+    return activeAlgs.length > 0 ? activeAlgs[0].id : '';
+  };
+
+  const handleFieldMethodChange = (tableId: string, fieldName: string, method: string) => {
+    if (!selectedGroup) return;
+    const key = `${selectedGroup.id}-${tableId}-${fieldName}`;
+    setFieldSecurityMethods(prev => ({
+      ...prev,
+      [key]: method
+    }));
+  };
+
   // State to hold actual saved permissions per group
   const [savedMenuItems, setSavedMenuItems] = useState<{ [groupId: number]: string[] }>({});
   const [savedPermissions, setSavedPermissions] = useState<{ [groupId: number]: { [key: string]: string[] } }>({});
@@ -1421,13 +1501,41 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                             </div>
                             
                             <div className="mt-2">
-                              <div className="text-xs text-slate-500 mb-2">Trường dữ liệu được phép thao tác:</div>
-                              <div className="flex flex-wrap gap-4">
-                                <label className="flex items-center gap-1.5"><input type="checkbox" defaultChecked className="w-3.5 h-3.5 text-blue-600 rounded" /><span className="text-sm text-slate-700">Mã định danh</span></label>
-                                <label className="flex items-center gap-1.5"><input type="checkbox" defaultChecked className="w-3.5 h-3.5 text-blue-600 rounded" /><span className="text-sm text-slate-700">Họ tên</span></label>
-                                <label className="flex items-center gap-1.5"><input type="checkbox" defaultChecked className="w-3.5 h-3.5 text-blue-600 rounded" /><span className="text-sm text-slate-700">Ngày sinh</span></label>
-                                <label className="flex items-center gap-1.5"><input type="checkbox" className="w-3.5 h-3.5 text-blue-600 rounded" /><span className="text-sm text-slate-700">Giới tính</span></label>
-                                <label className="flex items-center gap-1.5"><input type="checkbox" className="w-3.5 h-3.5 text-blue-600 rounded" /><span className="text-sm text-slate-700">Dân tộc</span></label>
+                              <div className="text-xs text-slate-500 mb-2">Trường dữ liệu yêu cầu bảo mật:</div>
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                {[
+                                  'Mã định danh',
+                                  'Họ tên',
+                                  'Ngày sinh',
+                                  'Giới tính',
+                                  'Dân tộc'
+                                ].map((field) => {
+                                  const checked = isFieldChecked('khaisinh', field);
+                                  return (
+                                    <div key={field} className="flex flex-col gap-1.5 p-2 border border-slate-200 rounded bg-white">
+                                      <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                          type="checkbox"
+                                          checked={checked}
+                                          onChange={(e) => handleFieldCheckChange('khaisinh', field, e.target.checked)}
+                                          className="w-3.5 h-3.5 text-blue-600 rounded focus:ring-blue-500 cursor-pointer"
+                                        />
+                                        <span className="text-sm text-slate-700 font-medium">{field}</span>
+                                      </label>
+                                      {checked && (
+                                        <select
+                                          value={getFieldMethod('khaisinh', field)}
+                                          onChange={(e) => handleFieldMethodChange('khaisinh', field, e.target.value)}
+                                          className="text-xs border border-slate-300 rounded px-2 py-1.5 bg-white focus:ring-2 focus:ring-blue-500 outline-none text-slate-600 w-full"
+                                        >
+                                          {getActiveAlgorithms().map(alg => (
+                                            <option key={alg.id} value={alg.id}>{alg.name}</option>
+                                          ))}
+                                        </select>
+                                      )}
+                                    </div>
+                                  );
+                                })}
                               </div>
                             </div>
                           </div>
@@ -1458,11 +1566,39 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                             </div>
                             
                             <div className="mt-2">
-                              <div className="text-xs text-slate-500 mb-2">Trường dữ liệu được phép thao tác:</div>
-                              <div className="flex flex-wrap gap-4">
-                                <label className="flex items-center gap-1.5"><input type="checkbox" defaultChecked className="w-3.5 h-3.5 text-blue-600 rounded" /><span className="text-sm text-slate-700">Mã định danh vợ/chồng</span></label>
-                                <label className="flex items-center gap-1.5"><input type="checkbox" defaultChecked className="w-3.5 h-3.5 text-blue-600 rounded" /><span className="text-sm text-slate-700">Ngày đăng ký</span></label>
-                                <label className="flex items-center gap-1.5"><input type="checkbox" defaultChecked className="w-3.5 h-3.5 text-blue-600 rounded" /><span className="text-sm text-slate-700">Nơi đăng ký</span></label>
+                              <div className="text-xs text-slate-500 mb-2">Trường dữ liệu yêu cầu bảo mật:</div>
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                {[
+                                  'Mã định danh vợ/chồng',
+                                  'Ngày đăng ký',
+                                  'Nơi đăng ký'
+                                ].map((field) => {
+                                  const checked = isFieldChecked('kethon', field);
+                                  return (
+                                    <div key={field} className="flex flex-col gap-1.5 p-2 border border-slate-200 rounded bg-white">
+                                      <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                          type="checkbox"
+                                          checked={checked}
+                                          onChange={(e) => handleFieldCheckChange('kethon', field, e.target.checked)}
+                                          className="w-3.5 h-3.5 text-blue-600 rounded focus:ring-blue-500 cursor-pointer"
+                                        />
+                                        <span className="text-sm text-slate-700 font-medium">{field}</span>
+                                      </label>
+                                      {checked && (
+                                        <select
+                                          value={getFieldMethod('kethon', field)}
+                                          onChange={(e) => handleFieldMethodChange('kethon', field, e.target.value)}
+                                          className="text-xs border border-slate-300 rounded px-2 py-1.5 bg-white focus:ring-2 focus:ring-blue-500 outline-none text-slate-600 w-full"
+                                        >
+                                          {getActiveAlgorithms().map(alg => (
+                                            <option key={alg.id} value={alg.id}>{alg.name}</option>
+                                          ))}
+                                        </select>
+                                      )}
+                                    </div>
+                                  );
+                                })}
                               </div>
                             </div>
                           </div>
@@ -1549,6 +1685,8 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                       if (selectedGroup) {
                         setSavedMenuItems({ ...savedMenuItems, [selectedGroup.id]: selectedMenuItems });
                         setSavedPermissions({ ...savedPermissions, [selectedGroup.id]: selectedPermissions });
+                        localStorage.setItem('field_security_checked', JSON.stringify(fieldSecurityChecked));
+                        localStorage.setItem('field_security_methods', JSON.stringify(fieldSecurityMethods));
                       }
                       alert('Đã lưu cấu hình phân quyền thành công!');
                       handleCloseModal();

@@ -7,6 +7,20 @@ interface VersionHistoryModalProps {
 
 const mockVersions = [
   {
+    id: 12,
+    version: 'v2.4.3',
+    date: '05/06/2026',
+    time: '18:14',
+    content: 'Tái cấu trúc và nâng cấp thiết kế UI/UX module Dữ liệu mở (Công bố dữ liệu, Thiết lập danh mục); Đồng nhất thanh tìm kiếm và bộ lọc đa tab. Gỡ bỏ tab Phiên bản. Bổ sung mô tả và tối ưu hiển thị chi tiết các modal Hộ tịch; Cập nhật cấu trúc menu Sidebar và tài liệu dự án.'
+  },
+  {
+    id: 11,
+    version: 'v2.4.2',
+    date: '03/06/2026',
+    time: '08:57',
+    content: 'Phân rã logic bàn giao (file) và công khai (API); Bổ sung tính năng hiển thị chi tiết ở tab Tiếp nhận và bàn giao; Thêm modal ProvisionHandoverDetailModal và ProvisionPublishDetailModal; Nâng cấp Modal Bàn giao hiển thị File kết xuất đính kèm để tải về.'
+  },
+  {
     id: 10,
     version: 'v2.4.1',
     date: '02/06/2026',

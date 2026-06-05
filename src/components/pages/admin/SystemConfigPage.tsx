@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Sliders, Save, RotateCcw, Key, Clock, ShieldAlert, LogOut, Database, AlertCircle } from 'lucide-react';
+import { Sliders, Save, RotateCcw, Key, Clock, ShieldAlert, LogOut, Database, AlertCircle, EyeOff } from 'lucide-react';
 
 interface SystemConfig {
   forcePasswordChangeOnFirstLogin: boolean;
@@ -10,6 +10,12 @@ interface SystemConfig {
   backupSchedule: 'daily' | 'weekly' | 'monthly';
   backupRetentionDays: number;
   backupTime: string;
+  blurringAlgorithms: {
+    partial: boolean;
+    redacted: boolean;
+    hashed: boolean;
+    nullify: boolean;
+  };
 }
 
 const defaultConfig: SystemConfig = {
@@ -20,7 +26,13 @@ const defaultConfig: SystemConfig = {
   sessionTimeoutMinutes: 30,
   backupSchedule: 'daily',
   backupRetentionDays: 30,
-  backupTime: '02:00'
+  backupTime: '02:00',
+  blurringAlgorithms: {
+    partial: true,
+    redacted: true,
+    hashed: true,
+    nullify: true
+  }
 };
 
 export function SystemConfigPage() {
@@ -33,6 +45,17 @@ export function SystemConfigPage() {
     value: SystemConfig[K]
   ) => {
     setConfig(prev => ({ ...prev, [key]: value }));
+    setHasChanges(true);
+  };
+
+  const handleAlgorithmToggle = (key: keyof SystemConfig['blurringAlgorithms']) => {
+    setConfig(prev => ({
+      ...prev,
+      blurringAlgorithms: {
+        ...prev.blurringAlgorithms,
+        [key]: !prev.blurringAlgorithms[key]
+      }
+    }));
     setHasChanges(true);
   };
 
@@ -378,6 +401,120 @@ export function SystemConfigPage() {
         </div>
       </div>
 
+      {/* Blurring Algorithms Configuration */}
+      <div className="bg-white rounded-lg border border-slate-200">
+        <div className="p-6 border-b border-slate-200">
+          <div className="flex items-center gap-3">
+            <EyeOff className="w-5 h-5 text-blue-600" />
+            <h3 className="text-slate-900">Cấu hình thuật toán tự động làm mờ dữ liệu</h3>
+          </div>
+        </div>
+        <div className="p-6 space-y-6">
+          <p className="text-xs text-slate-600">
+            Chọn Kích hoạt (Active) hoặc Vô hiệu hóa (Inactive) các thuật toán tự động làm mờ dữ liệu. 
+            Các thuật toán được kích hoạt sẽ khả dụng để lựa chọn khi thiết lập phân quyền khai thác dữ liệu.
+          </p>
+
+          <div className="divide-y divide-slate-100">
+            {/* Algorithm 1: Partial Blurring */}
+            <div className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
+              <div className="flex-1">
+                <div className="text-sm font-semibold text-slate-900">Làm mờ một phần (***-***-1234)</div>
+                <div className="text-xs text-slate-600 mt-1">
+                  Ẩn một phần thông tin nhạy cảm của dữ liệu, giữ lại các ký tự cuối (Ví dụ: số CCCD, số điện thoại)
+                </div>
+              </div>
+              <div className="flex items-center gap-3 ml-4">
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${config.blurringAlgorithms.partial ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                  {config.blurringAlgorithms.partial ? 'Active' : 'Inactive'}
+                </span>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={config.blurringAlgorithms.partial}
+                    onChange={() => handleAlgorithmToggle('partial')}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+            </div>
+
+            {/* Algorithm 2: Full Redacted */}
+            <div className="flex items-center justify-between py-4 last:pb-0">
+              <div className="flex-1">
+                <div className="text-sm font-semibold text-slate-900">Che khuất hoàn toàn ([REDACTED])</div>
+                <div className="text-xs text-slate-600 mt-1">
+                  Thay thế toàn bộ giá trị dữ liệu bằng nhãn [REDACTED] để bảo mật tuyệt đối thông tin
+                </div>
+              </div>
+              <div className="flex items-center gap-3 ml-4">
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${config.blurringAlgorithms.redacted ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                  {config.blurringAlgorithms.redacted ? 'Active' : 'Inactive'}
+                </span>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={config.blurringAlgorithms.redacted}
+                    onChange={() => handleAlgorithmToggle('redacted')}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+            </div>
+
+            {/* Algorithm 3: Hashed */}
+            <div className="flex items-center justify-between py-4 last:pb-0">
+              <div className="flex-1">
+                <div className="text-sm font-semibold text-slate-900">Băm dữ liệu (Hashed)</div>
+                <div className="text-xs text-slate-600 mt-1">
+                  Mã hóa một chiều giá trị dữ liệu bằng thuật toán băm bảo mật (ví dụ SHA-256)
+                </div>
+              </div>
+              <div className="flex items-center gap-3 ml-4">
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${config.blurringAlgorithms.hashed ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                  {config.blurringAlgorithms.hashed ? 'Active' : 'Inactive'}
+                </span>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={config.blurringAlgorithms.hashed}
+                    onChange={() => handleAlgorithmToggle('hashed')}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+            </div>
+
+            {/* Algorithm 4: Nullify */}
+            <div className="flex items-center justify-between py-4 last:pb-0">
+              <div className="flex-1">
+                <div className="text-sm font-semibold text-slate-900">Trả về Null/Rỗng</div>
+                <div className="text-xs text-slate-600 mt-1">
+                  Xóa bỏ hoàn toàn giá trị dữ liệu nhạy cảm và trả về giá trị null hoặc chuỗi rỗng
+                </div>
+              </div>
+              <div className="flex items-center gap-3 ml-4">
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${config.blurringAlgorithms.nullify ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                  {config.blurringAlgorithms.nullify ? 'Active' : 'Inactive'}
+                </span>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={config.blurringAlgorithms.nullify}
+                    onChange={() => handleAlgorithmToggle('nullify')}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Warning Notice */}
       <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
         <div className="flex items-start gap-3">
@@ -436,6 +573,17 @@ export function SystemConfigPage() {
           <div className="flex justify-between py-2 border-b border-slate-100">
             <span className="text-slate-600">Lưu trữ sao lưu:</span>
             <span className="text-slate-900">{config.backupRetentionDays} ngày</span>
+          </div>
+          <div className="flex justify-between py-2 border-b border-slate-100 md:col-span-2">
+            <span className="text-slate-600">Thuật toán làm mờ kích hoạt:</span>
+            <span className="text-slate-900 font-medium">
+              {[
+                config.blurringAlgorithms.partial && 'Làm mờ một phần',
+                config.blurringAlgorithms.redacted && 'Che khuất hoàn toàn',
+                config.blurringAlgorithms.hashed && 'Băm dữ liệu',
+                config.blurringAlgorithms.nullify && 'Trả về Null/Rỗng'
+              ].filter(Boolean).join(', ') || 'Không có thuật toán nào'}
+            </span>
           </div>
         </div>
       </div>

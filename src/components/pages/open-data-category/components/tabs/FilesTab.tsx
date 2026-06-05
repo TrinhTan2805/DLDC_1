@@ -1,0 +1,98 @@
+import React, { useState } from 'react';
+import { OpenDataCategoryFilters, OpenDataCategoryFilterPanel } from '../OpenDataCategoryFilters';
+import { OpenDataCategoryActions } from '../OpenDataCategoryActions';
+import { OpenDataCategoryGrid } from './OpenDataCategoryGrid';
+import { OpenDataCategoryPagination } from './OpenDataCategoryPagination';
+import { CategoryItem } from '../../OpenDataCategoryPage';
+
+interface FilesTabProps {
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+  statusFilter: string;
+  setStatusFilter: (status: string) => void;
+  filteredData: CategoryItem[];
+  paginatedData: CategoryItem[];
+  totalItems: number;
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+  pageSize: number;
+  setPageSize: (size: number) => void;
+  onViewDetail: (item: CategoryItem) => void;
+  onEdit: (item: CategoryItem) => void;
+  onDelete: (item: CategoryItem) => void;
+  activeTab: string;
+  onAddClick?: () => void;
+  onImportClick?: () => void;
+  onExportClick?: () => void;
+}
+
+export function FilesTab({
+  searchTerm,
+  setSearchTerm,
+  statusFilter,
+  setStatusFilter,
+  filteredData,
+  paginatedData,
+  currentPage,
+  setCurrentPage,
+  pageSize,
+  setPageSize,
+  onViewDetail,
+  onEdit,
+  onDelete,
+  activeTab,
+  onAddClick,
+  onImportClick,
+  onExportClick
+}: FilesTabProps) {
+  const [showFilters, setShowFilters] = useState(false);
+
+  return (
+    <div className="space-y-6">
+      {/* Top Filter and Actions Row */}
+      <div className="flex items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm sticky top-0 z-10">
+        <OpenDataCategoryFilters
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          showFilters={showFilters}
+          setShowFilters={setShowFilters}
+        />
+        <OpenDataCategoryActions
+          onAddClick={onAddClick}
+          onImportClick={onImportClick}
+          onExportClick={onExportClick}
+        />
+      </div>
+
+      {/* Advanced Filter Collapsible Panel */}
+      {showFilters && (
+        <OpenDataCategoryFilterPanel
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+        />
+      )}
+
+      {/* Data Grid Table and Pagination card container */}
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+        <OpenDataCategoryGrid
+          paginatedData={paginatedData}
+          currentPage={currentPage}
+          pageSize={pageSize}
+          onViewDetail={onViewDetail}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          activeTab={activeTab}
+        />
+        <OpenDataCategoryPagination
+          total={filteredData.length}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          pageSize={pageSize}
+          setPageSize={setPageSize}
+        />
+      </div>
+    </div>
+  );
+}

@@ -317,8 +317,16 @@ const pageConfig: Record<string, { title: string; description: string }> = {
     description: 'Quản lý và theo dõi các danh mục dữ liệu mở được công khai'
   },
   'open-data-category-a': {
-    title: 'Danh mục dữ liệu mở A',
-    description: 'Quản lý chi tiết danh mục dữ liệu mở A'
+    title: 'Danh sách tổ chức thực hiện trợ giúp pháp lý',
+    description: 'Chi tiết danh sách tổ chức thực hiện trợ giúp pháp lý'
+  },
+  'open-data-category-b': {
+    title: 'Danh sách người thực hiện trợ giúp pháp lý',
+    description: 'Chi tiết danh sách người thực hiện trợ giúp pháp lý'
+  },
+  'open-data-category-c': {
+    title: 'Danh sách Luật sư Việt Nam',
+    description: 'Chi tiết danh sách Luật sư Việt Nam'
   },
   'category-moj-units': {
     title: 'Danh mục đơn vị thuộc Bộ Tư Pháp',
@@ -957,7 +965,9 @@ const getBreadcrumbPath = (pageId: string): string[] => {
     // Open Data
     'open-data-setup': ['Dữ liệu mở', 'Quản lý danh mục'],
     'open-data-category-list': ['Dữ liệu mở', 'Biên tập danh mục'],
-    'open-data-category-a': ['Dữ liệu mở', 'Biên tập danh mục', 'Biên tập danh mục A'],
+    'open-data-category-a': ['Dữ liệu mở', 'Biên tập danh mục', 'Danh sách tổ chức thực hiện trợ giúp pháp lý'],
+    'open-data-category-b': ['Dữ liệu mở', 'Biên tập danh mục', 'Danh sách người thực hiện trợ giúp pháp lý'],
+    'open-data-category-c': ['Dữ liệu mở', 'Biên tập danh mục', 'Danh sách Luật sư Việt Nam'],
     'open-data-published-list': ['Dữ liệu mở', 'Công bố dữ liệu mở'],
     'open-data-report': ['Dữ liệu mở', 'Thống kê dữ liệu mở'],
 

@@ -1,5 +1,5 @@
 import { OpenDataCategoryPage } from './OpenDataCategoryPage';
 
 export function OpenDataCategoryCPage() {
-  return <OpenDataCategoryPage categoryName="Danh mục C" categoryId="open-data-category-c" />;
+  return <OpenDataCategoryPage categoryName="Danh sách Luật sư Việt Nam" categoryId="open-data-category-c" />;
 }

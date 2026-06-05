@@ -22,6 +22,9 @@ interface OpenDataCategory {
   approvalStatus?: 'draft' | 'pending' | 'approved' | 'rejected';
   customFields?: DataField[];
   version?: string;
+  approvalNote?: string;
+  rejectReason?: string;
+  parentId?: string;
 }
 
 const incrementVersion = (v?: string): string => {
@@ -42,56 +45,57 @@ const mockCategories: OpenDataCategory[] = [
   {
     id: '1',
     code: 'ODC001',
-    name: 'Danh mục dữ liệu A',
-    description: 'Dữ liệu thống kê về Bộ Tư Pháp',
-    dataField: 'Bộ Tư Pháp',
-    updateFrequency: 'monthly',
+    name: 'Danh sách tổ chức thực hiện trợ giúp pháp lý',
+    description: 'Dữ liệu tổ chức thực hiện trợ giúp pháp lý bao gồm thông tin của các Trung tâm Trợ giúp pháp lý nhà nước, các tổ chức ký hợp đồng thực hiện trợ giúp pháp lý, các tổ chức đăng ký tham gia trợ giúp pháp lý...',
+    dataField: 'Cục Phổ biến, giáo dục pháp luật và Trợ giúp pháp lý',
+    updateFrequency: 'daily',
     dataFormat: ['JSON', 'CSV', 'XML'],
     status: 'approved',
     approvalStatus: 'approved',
-    createdDate: '01/01/2024',
+    createdDate: '01/01/2019',
     updatedDate: '10/12/2024',
-    version: '1.0'
+    version: '1.0',
+    approvalNote: 'Đồng ý phê duyệt danh sách tổ chức trợ giúp pháp lý.'
   },
   {
     id: '2',
     code: 'ODC002',
-    name: 'Danh mục dữ liệu B',
-    description: 'Dữ liệu thống kê về Cục Công nghệ thông tin',
-    dataField: 'Cục Công nghệ thông tin',
-    updateFrequency: 'quarterly',
+    name: 'Danh sách người thực hiện trợ giúp pháp lý',
+    description: 'Dữ liệu cung cấp danh sách người thực hiện trợ giúp pháp lý giúp người được trợ giúp pháp lý có thể tham khảo và thực hiện quyền thay đổi...',
+    dataField: 'Cục Phổ biến, giáo dục pháp luật và Trợ giúp pháp lý',
+    updateFrequency: 'daily',
     dataFormat: ['JSON', 'Excel'],
-    status: 'pending',
-    approvalStatus: 'pending',
-    createdDate: '15/02/2024',
+    status: 'approved',
+    approvalStatus: 'approved',
+    createdDate: '01/01/2019',
     updatedDate: '08/12/2024',
     version: '1.0'
   },
   {
     id: '3',
     code: 'ODC003',
-    name: 'Danh mục dữ liệu C',
-    description: 'Dữ liệu thống kê về Cục Hành chính tư pháp',
-    dataField: 'Cục Hành chính tư pháp',
-    updateFrequency: 'yearly',
+    name: 'Danh sách Luật sư Việt Nam',
+    description: 'Dữ liệu bao gồm thông tin về: Họ và tên, ngày sinh, giới tính, quốc tịch, số Chứng chỉ hành nghề luật sư, số Thẻ luật sư...',
+    dataField: 'Cục Bổ trợ tư pháp',
+    updateFrequency: 'daily',
     dataFormat: ['JSON', 'CSV'],
-    status: 'rejected',
-    approvalStatus: 'rejected',
-    createdDate: '20/03/2024',
+    status: 'approved',
+    approvalStatus: 'approved',
+    createdDate: '01/01/2027',
     updatedDate: '05/12/2024',
     version: '1.0'
   },
   {
     id: '4',
     code: 'ODC004',
-    name: 'Danh mục dữ liệu D (Bản nháp)',
-    description: 'Dữ liệu thống kê thử nghiệm chưa gửi duyệt',
-    dataField: 'Bộ Tư Pháp',
-    updateFrequency: 'monthly',
+    name: 'Danh sách Tổ chức hành nghề Luật sư Việt Nam',
+    description: 'Dữ liệu bao gồm thông tin về: Tên tổ chức, số Giấy đăng ký hoạt động, địa chỉ trụ sở, người đại diện theo pháp luật, trạng thái hoạt động',
+    dataField: 'Cục Bổ trợ tư pháp',
+    updateFrequency: 'daily',
     dataFormat: ['JSON'],
     status: 'draft',
     approvalStatus: 'draft',
-    createdDate: '02/06/2026',
+    createdDate: '01/01/2027',
     updatedDate: '02/06/2026',
     version: '1.0'
   },
@@ -158,10 +162,10 @@ const mockApprovalList: OpenDataCategory[] = [
   {
     id: 'ap1',
     code: 'ODC005',
-    name: 'Danh mục văn bản pháp luật',
-    description: 'Chờ phê duyệt - Người trình: Nguyễn Văn A',
-    dataField: 'Cục Kiểm tra văn bản & Quản lý xử lý VP hành chính',
-    updateFrequency: 'monthly',
+    name: 'Danh sách công chứng viên Việt Nam',
+    description: 'Chờ phê duyệt - Người trình: Cục Bổ trợ tư pháp. Dữ liệu bao gồm thông tin về: Họ và tên công chứng viên, tổ chức công chứng viên đang hành nghề...',
+    dataField: 'Cục Bổ trợ tư pháp',
+    updateFrequency: 'daily',
     dataFormat: ['JSON', 'XML'],
     status: 'pending',
     approvalStatus: 'pending',
@@ -171,10 +175,10 @@ const mockApprovalList: OpenDataCategory[] = [
   {
     id: 'ap2',
     code: 'ODC006',
-    name: 'Danh mục đăng ký kinh doanh',
-    description: 'Chờ phê duyệt - Người trình: Trần Thị B',
-    dataField: 'Bộ Tư Pháp',
-    updateFrequency: 'quarterly',
+    name: 'Danh sách tổ chức hành nghề công chứng',
+    description: 'Chờ phê duyệt - Người trình: Cục Bổ trợ tư pháp. Dữ liệu bao gồm thông tin về: Tỉnh/thành phố, tên tổ chức hành nghề công chứng, họ và tên trưởng đơn vị...',
+    dataField: 'Cục Bổ trợ tư pháp',
+    updateFrequency: 'daily',
     dataFormat: ['JSON', 'CSV'],
     status: 'pending',
     approvalStatus: 'pending',
@@ -183,11 +187,11 @@ const mockApprovalList: OpenDataCategory[] = [
   },
   {
     id: 'ap3',
-    code: 'ODCM05',
-    name: 'Quy tắc cập nhật công chứng',
-    description: 'Chờ phê duyệt - Người trình: Lê Văn C',
+    code: 'ODC007',
+    name: 'Danh sách đấu giá viên',
+    description: 'Chờ phê duyệt - Người trình: Cục Bổ trợ tư pháp. Dữ liệu bao gồm thông tin về: Họ và tên đấu giá viên, ngày sinh, tên tổ chức đấu giá đang hành nghề...',
     dataField: 'Cục Bổ trợ tư pháp',
-    updateFrequency: 'monthly',
+    updateFrequency: 'daily',
     dataFormat: ['JSON'],
     status: 'pending',
     approvalStatus: 'pending',
@@ -196,43 +200,32 @@ const mockApprovalList: OpenDataCategory[] = [
   },
   {
     id: 'ap4',
-    code: 'ODC007',
-    name: 'Danh mục hộ tịch',
-    description: 'Đã phê duyệt - Người phê duyệt: Lê Văn C',
-    dataField: 'Cục Hành chính tư pháp',
-    updateFrequency: 'monthly',
+    code: 'ODC008',
+    name: 'Dữ liệu thống kê ngành Tư pháp',
+    description: 'Đã phê duyệt - Người phê duyệt: Cục Kế hoạch – Tài chính. Dữ liệu bao gồm số liệu thống kê trong các lĩnh vực thực hiện chế độ báo cáo thống kê...',
+    dataField: 'Cục Kế hoạch – Tài chính',
+    updateFrequency: 'yearly',
     dataFormat: ['JSON', 'CSV'],
     status: 'approved',
     approvalStatus: 'approved',
-    createdDate: '20/12/2024',
-    updatedDate: '23/12/2024'
+    createdDate: '01/01/2015',
+    updatedDate: '23/12/2024',
+    approvalNote: 'Đồng ý phê duyệt dữ liệu thống kê ngành Tư pháp, số liệu đầy đủ.'
   },
   {
     id: 'ap5',
-    code: 'ODC008',
-    name: 'Danh mục trợ giúp pháp lý',
-    description: 'Đã phê duyệt - Người phê duyệt: Trần Thị B',
-    dataField: 'Cục Phổ biến, giáo dục pháp luật và Trợ giúp pháp lý',
-    updateFrequency: 'quarterly',
+    code: 'ODC009',
+    name: 'Tài sản thi hành án',
+    description: 'Đã phê duyệt. Thông tin về hiện trạng, tình trạng pháp lý của tài sản thi hành án dân sự...',
+    dataField: 'Cục Quản lý THADS',
+    updateFrequency: 'monthly',
     dataFormat: ['JSON'],
     status: 'approved',
     approvalStatus: 'approved',
-    createdDate: '18/12/2024',
-    updatedDate: '22/12/2024'
-  },
-  {
-    id: 'ap6',
-    code: 'ODC009',
-    name: 'Danh mục luật sư',
-    description: 'Từ chối - Lý do: Thiếu thông tin cấu trúc dữ liệu',
-    dataField: 'Cục Bổ trợ tư pháp',
-    updateFrequency: 'yearly',
-    dataFormat: ['JSON', 'XML'],
-    status: 'rejected',
-    approvalStatus: 'rejected',
-    createdDate: '15/12/2024',
-    updatedDate: '19/12/2024'
-  },
+    createdDate: '20/12/2024',
+    updatedDate: '22/12/2024',
+    approvalNote: 'Đồng ý phê duyệt tài sản thi hành án.'
+  }
 ];
 
 // Mock data for History tab
@@ -354,67 +347,67 @@ const mockHistory: HistoryRecord[] = [
 const mockCategoryList: OpenDataCategory[] = [
   {
     id: 'cat1',
-    code: 'CAT001',
-    name: 'Văn bản pháp luật',
-    description: 'Danh mục văn bản quy phạm pháp luật',
-    dataField: 'Tư pháp',
-    updateFrequency: 'monthly',
-    dataFormat: ['JSON', 'XML'],
+    code: 'ODC001',
+    name: 'Danh sách tổ chức thực hiện trợ giúp pháp lý',
+    description: 'Dữ liệu tổ chức thực hiện trợ giúp pháp lý bao gồm thông tin của các Trung tâm Trợ giúp pháp lý nhà nước...',
+    dataField: 'Cục Phổ biến, giáo dục pháp luật và Trợ giúp pháp lý',
+    updateFrequency: 'daily',
+    dataFormat: ['JSON', 'CSV'],
     status: 'approved',
     approvalStatus: 'approved',
-    createdDate: '01/01/2024',
+    createdDate: '01/01/2019',
     updatedDate: '30/12/2024'
   },
   {
     id: 'cat2',
-    code: 'CAT002',
-    name: 'Hộ tịch',
-    description: 'Danh mục dữ liệu hộ tịch',
-    dataField: 'Hộ tịch',
-    updateFrequency: 'monthly',
+    code: 'ODC002',
+    name: 'Danh sách người thực hiện trợ giúp pháp lý',
+    description: 'Dữ liệu cung cấp danh sách người thực hiện trợ giúp pháp lý giúp người được trợ giúp pháp lý có thể tham khảo...',
+    dataField: 'Cục Phổ biến, giáo dục pháp luật và Trợ giúp pháp lý',
+    updateFrequency: 'daily',
     dataFormat: ['JSON', 'CSV'],
     status: 'approved',
     approvalStatus: 'approved',
-    createdDate: '01/01/2024',
+    createdDate: '01/01/2019',
     updatedDate: '29/12/2024'
   },
   {
     id: 'cat3',
-    code: 'CAT003',
-    name: 'Công chứng',
-    description: 'Danh mục dữ liệu công chứng',
-    dataField: 'Công chứng',
-    updateFrequency: 'quarterly',
+    code: 'ODC003',
+    name: 'Danh sách Luật sư Việt Nam',
+    description: 'Dữ liệu bao gồm thông tin về: Họ và tên, ngày sinh, giới tính, quốc tịch, số Chứng chỉ hành nghề luật sư...',
+    dataField: 'Cục Bổ trợ tư pháp',
+    updateFrequency: 'daily',
     dataFormat: ['JSON'],
     status: 'approved',
     approvalStatus: 'approved',
-    createdDate: '01/01/2024',
+    createdDate: '01/01/2027',
     updatedDate: '28/12/2024'
   },
   {
     id: 'cat4',
-    code: 'CAT004',
-    name: 'Đăng ký kinh doanh',
-    description: 'Danh mục dữ liệu đăng ký kinh doanh',
-    dataField: 'Đăng ký kinh doanh',
-    updateFrequency: 'monthly',
-    dataFormat: ['JSON', 'CSV', 'XML'],
+    code: 'ODC004',
+    name: 'Danh sách Tổ chức hành nghề Luật sư Việt Nam',
+    description: 'Dữ liệu bao gồm thông tin về: Tên tổ chức, số Giấy đăng ký hoạt động, địa chỉ trụ sở, người đại diện theo pháp luật...',
+    dataField: 'Cục Bổ trợ tư pháp',
+    updateFrequency: 'daily',
+    dataFormat: ['JSON', 'CSV'],
     status: 'approved',
     approvalStatus: 'approved',
-    createdDate: '01/01/2024',
+    createdDate: '01/01/2027',
     updatedDate: '27/12/2024'
   },
   {
     id: 'cat5',
-    code: 'CAT005',
-    name: 'Trợ giúp pháp lý',
-    description: 'Danh mục dữ liệu TGPL',
-    dataField: 'TGPL',
-    updateFrequency: 'yearly',
+    code: 'ODC005',
+    name: 'Danh sách công chứng viên Việt Nam',
+    description: 'Dữ liệu bao gồm thông tin về: Họ và tên công chứng viên, tổ chức công chứng viên đang hành nghề...',
+    dataField: 'Cục Bổ trợ tư pháp',
+    updateFrequency: 'daily',
     dataFormat: ['JSON'],
     status: 'approved',
     approvalStatus: 'approved',
-    createdDate: '01/01/2024',
+    createdDate: '01/01/2027',
     updatedDate: '26/12/2024'
   },
 ];
@@ -741,7 +734,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
     status: 'active' as const,
     selectedTable: '',
     selectedFields: [] as string[],
-    version: '1.0'
+    version: '1.0',
+    parentId: ''
   });
 
   // Custom fields state
@@ -807,8 +801,10 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
   const filteredApprovalList = approvalList.filter(cat => {
     const matchSearch = cat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                        cat.code.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchStatus = approvalFilterTab === 'all' || cat.approvalStatus === approvalFilterTab;
-    return matchSearch && matchStatus;
+    const matchStatus = !statusFilter || cat.approvalStatus === statusFilter;
+    const matchUnit = !unitFilter || cat.dataField === unitFilter;
+    const matchFrequency = !frequencyFilter || cat.updateFrequency === frequencyFilter;
+    return matchSearch && matchStatus && matchUnit && matchFrequency;
   });
 
   // Get approval stats
@@ -849,6 +845,9 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
 
   useEffect(() => {
     setCurrentPageNum(1);
+    setStatusFilter('');
+    setUnitFilter('');
+    setFrequencyFilter('');
   }, [activeTab]);
 
   const paginatedLicenses = filteredLicenseEntries.slice((currentPageNum - 1) * pageSize, currentPageNum * pageSize);
@@ -907,34 +906,36 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
 
     return (
       <div className="space-y-3 mb-6">
-        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
+        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
           <div className="flex flex-col md:flex-row items-center gap-3">
             <div className="flex-1 w-full flex items-center gap-2">
-              <input
-                type="text"
-                placeholder={placeholder}
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-                className="flex-1 px-4 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-100 transition-all placeholder:text-slate-400"
-              />
+              <div className="flex-1 relative">
+                <input
+                  type="text"
+                  placeholder={placeholder}
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-400 bg-white hover:bg-slate-50/50 font-medium shadow-sm"
+                />
+              </div>
               <button
                 type="button"
-                className="w-10 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center justify-center shrink-0 transition-colors shadow-sm"
+                className="w-10 h-10 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shrink-0 transition-all cursor-pointer active:scale-95 shadow-sm"
                 title="Tìm kiếm"
               >
-                <Search className="w-5 h-5" />
+                <Search className="w-4 h-4" />
               </button>
               <button
                 type="button"
                 onClick={() => setShowFilters(!showFilters)}
-                className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-all ${
+                className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all border cursor-pointer active:scale-95 ${
                   showFilters
-                    ? 'bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 shadow-sm'
-                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                    ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-sm'
+                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                 }`}
                 title={showFilters ? "Đóng bộ lọc" : "Bộ lọc nâng cao"}
               >
-                {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-4 h-4" />}
+                {showFilters ? <X className="w-4.5 h-4.5" /> : <Filter className="w-4 h-4" />}
               </button>
             </div>
             
@@ -943,18 +944,18 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                 <button
                   type="button"
                   onClick={onAddClick}
-                  className="flex-1 md:flex-none px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium flex items-center justify-center gap-1.5 transition-colors shadow-sm whitespace-nowrap"
+                  className="flex-1 md:flex-none px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[14px] font-medium flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   {addLabel}
                 </button>
               )}
 
-              {activeTab !== 'license' && activeTab !== 'history' && (
+              {activeTab !== 'history' && (
                 <button
                   type="button"
                   onClick={() => alert('Xuất file báo cáo thành công!')}
-                  className="flex-1 md:flex-none px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium flex items-center justify-center gap-2 hover:bg-slate-50 transition-colors shadow-sm whitespace-nowrap"
+                  className="flex-1 md:flex-none px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-[14px] font-medium flex items-center justify-center gap-2 hover:bg-slate-50 transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
                 >
                   <Download className="w-4 h-4 text-slate-500" />
                   Kết xuất
@@ -965,7 +966,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
 
           {/* Advanced Collapsible Filter Panel */}
           {showFilters && (
-            <div className="mt-4 pt-4 border-t border-slate-100">
+            <div className="relative mt-3 p-4 bg-white border border-slate-200 rounded-xl shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] before:content-[''] before:absolute before:-top-[7px] before:right-[208px] md:before:right-[auto] md:before:left-[calc(100%-100px)] lg:before:left-[calc(100%-242px)] before:w-3 before:h-3 before:bg-white before:rotate-45 before:border-l before:border-t before:border-slate-200">
               {activeTab === 'license' && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
@@ -974,7 +975,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                       <select
                         value={licenseStatusFilter}
                         onChange={(e) => setLicenseStatusFilter(e.target.value)}
-                        className="w-full pl-3 pr-8 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-sm bg-white outline-none focus:ring-2 focus:ring-blue-100 transition-all appearance-none cursor-pointer"
+                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
                       >
                         <option value="all">Tất cả trạng thái</option>
                         <option value="active">Còn hiệu lực</option>
@@ -994,7 +995,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                       <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="w-full pl-3 pr-8 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-sm bg-white outline-none focus:ring-2 focus:ring-blue-100 transition-all appearance-none cursor-pointer text-slate-700"
+                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
                       >
                         <option value="">Tất cả trạng thái</option>
                         <option value="draft">Bản nháp</option>
@@ -1011,7 +1012,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                       <select
                         value={unitFilter}
                         onChange={(e) => setUnitFilter(e.target.value)}
-                        className="w-full pl-3 pr-8 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-sm bg-white outline-none focus:ring-2 focus:ring-blue-100 transition-all appearance-none cursor-pointer text-slate-700"
+                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
                       >
                         <option value="">Tất cả đơn vị</option>
                         {units.map((unit) => (
@@ -1029,7 +1030,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                       <select
                         value={frequencyFilter}
                         onChange={(e) => setFrequencyFilter(e.target.value)}
-                        className="w-full pl-3 pr-8 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-sm bg-white outline-none focus:ring-2 focus:ring-blue-100 transition-all appearance-none cursor-pointer text-slate-700"
+                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
                       >
                         <option value="">Tất cả tần suất</option>
                         <option value="monthly">Hàng tháng</option>
@@ -1043,27 +1044,56 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
               )}
 
               {activeTab === 'approval' && (
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Trạng thái phê duyệt</label>
-                  <div className="flex gap-2">
-                    {(['all', 'pending', 'approved', 'rejected'] as const).map((status) => {
-                      const labels = { all: 'Tất cả', pending: 'Chờ phê duyệt', approved: 'Đã phê duyệt', rejected: 'Từ chối' };
-                      const count = status === 'all' ? approvalList.length : approvalList.filter(item => item.approvalStatus === status).length;
-                      return (
-                        <button
-                          key={status}
-                          type="button"
-                          onClick={() => setApprovalFilterTab(status)}
-                          className={`px-4 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-                            approvalFilterTab === status
-                              ? 'bg-blue-50 border-blue-200 text-blue-700'
-                              : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                          }`}
-                        >
-                          {labels[status]} ({count})
-                        </button>
-                      );
-                    })}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Trạng thái phê duyệt</label>
+                    <div className="relative">
+                      <select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+                      >
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="pending">Chờ duyệt</option>
+                        <option value="approved">Đã phê duyệt</option>
+                        <option value="rejected">Từ chối</option>
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Đơn vị chủ trì</label>
+                    <div className="relative">
+                      <select
+                        value={unitFilter}
+                        onChange={(e) => setUnitFilter(e.target.value)}
+                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+                      >
+                        <option value="">Tất cả đơn vị</option>
+                        {units.map((unit) => (
+                          <option key={unit.id} value={unit.name}>
+                            {unit.name}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Tần suất cập nhật</label>
+                    <div className="relative">
+                      <select
+                        value={frequencyFilter}
+                        onChange={(e) => setFrequencyFilter(e.target.value)}
+                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+                      >
+                        <option value="">Tất cả tần suất</option>
+                        <option value="monthly">Hàng tháng</option>
+                        <option value="quarterly">Hàng quý</option>
+                        <option value="yearly">Hàng năm</option>
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                    </div>
                   </div>
                 </div>
               )}
@@ -1076,7 +1106,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                       <select
                         value={metadataFrequencyFilter}
                         onChange={(e) => setMetadataFrequencyFilter(e.target.value)}
-                        className="w-full pl-3 pr-8 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-sm bg-white outline-none focus:ring-2 focus:ring-blue-100 transition-all appearance-none cursor-pointer"
+                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
                       >
                         <option value="all">Tất cả tần suất</option>
                         <option value="daily">Hàng ngày</option>
@@ -1094,7 +1124,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                       <select
                         value={metadataFieldFilter}
                         onChange={(e) => setMetadataFieldFilter(e.target.value)}
-                        className="w-full pl-3 pr-8 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-sm bg-white outline-none focus:ring-2 focus:ring-blue-100 transition-all appearance-none cursor-pointer"
+                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
                       >
                         <option value="all">Tất cả lĩnh vực</option>
                         {allFields.map((field, idx) => (
@@ -1115,7 +1145,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                       type="date"
                       value={fromDate}
                       onChange={(e) => setFromDate(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-sm outline-none"
+                      className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-xl text-sm outline-none font-medium text-slate-700"
                     />
                   </div>
                   <div>
@@ -1124,7 +1154,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                       type="date"
                       value={toDate}
                       onChange={(e) => setToDate(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-sm outline-none"
+                      className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-xl text-sm outline-none font-medium text-slate-700"
                     />
                   </div>
                   <div>
@@ -1133,7 +1163,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                       <select
                         value={changeTypeFilter}
                         onChange={(e) => setChangeTypeFilter(e.target.value)}
-                        className="w-full pl-3 pr-8 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-sm bg-white outline-none focus:ring-2 focus:ring-blue-100 transition-all appearance-none cursor-pointer"
+                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
                       >
                         <option value="">Tất cả</option>
                         <option value="create_category">Tạo danh mục</option>
@@ -1152,7 +1182,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                       <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="w-full pl-3 pr-8 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-sm bg-white outline-none focus:ring-2 focus:ring-blue-100 transition-all appearance-none cursor-pointer"
+                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
                       >
                         <option value="">Tất cả</option>
                         <option value="applied">Đã áp dụng</option>
@@ -1168,6 +1198,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
         </div>
       </div>
     );
+
   };
 
   const renderPagination = (totalItemsCount: number) => {
@@ -1177,7 +1208,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
     const endItem = Math.min(currentPageNum * pageSize, totalItemsCount);
 
     return (
-      <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white sm:px-6 collection-pagination text-[13px]">
+      <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-white text-[13px] font-medium">
         {/* Left Side: Page Size Selector */}
         <div className="flex items-center gap-2">
           <span className="text-slate-600">Hiển thị</span>
@@ -1188,7 +1219,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
               setPageSize(Number(e.target.value));
               setCurrentPageNum(1);
             }}
-            className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px] cursor-pointer"
+            className="px-2 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 bg-white text-[13px] cursor-pointer"
             title="Số bản ghi trên trang"
           >
             <option value={10}>10</option>
@@ -1208,7 +1239,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
             <button
               onClick={() => setCurrentPageNum(Math.max(1, currentPageNum - 1))}
               disabled={currentPageNum === 1}
-              className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
+              className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
             >
               Trước
             </button>
@@ -1216,10 +1247,10 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
               <button
                 key={page}
                 onClick={() => setCurrentPageNum(page)}
-                className={`px-3 py-1.5 border rounded-lg font-medium text-[13px] transition-colors ${
+                className={`px-3 py-1.5 border rounded-xl font-medium text-[13px] transition-colors cursor-pointer ${
                   currentPageNum === page
                     ? 'bg-blue-600 border-blue-600 text-white'
-                    : 'border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
+                    : 'border-slate-200 text-slate-600 hover:bg-slate-50'
                 }`}
               >
                 {page}
@@ -1228,7 +1259,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
             <button
               onClick={() => setCurrentPageNum(Math.min(totalPages, currentPageNum + 1))}
               disabled={currentPageNum === totalPages}
-              className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
+              className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
             >
               Sau
             </button>
@@ -1270,7 +1301,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
       status: 'active',
       selectedTable: '',
       selectedFields: [],
-      version: '1.0'
+      version: '1.0',
+      parentId: ''
     });
     setCustomFields([]);
     setAttachedFiles([]);
@@ -1294,7 +1326,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
       status: category.status as 'active' | 'inactive',
       selectedTable: '',
       selectedFields: [],
-      version: category.version || '1.0'
+      version: category.version || '1.0',
+      parentId: category.parentId || ''
     });
     setShowEditModal(true);
   };
@@ -1426,12 +1459,19 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
     if (selectedCategory) {
       setCurrentData(currentData.map(c =>
         c.id === selectedCategory.id
-          ? { ...c, status: approvalAction, approvalStatus: approvalAction }
+          ? { 
+              ...c, 
+              status: approvalAction, 
+              approvalStatus: approvalAction,
+              approvalNote: approvalAction === 'approved' ? approvalNote : c.approvalNote,
+              rejectReason: approvalAction === 'rejected' ? rejectReason : c.rejectReason
+            }
           : c
       ));
       setShowApprovalModal(false);
       setSelectedCategory(null);
       setRejectReason('');
+      setApprovalNote('');
     }
   };
 
@@ -1462,6 +1502,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
       pending: 'bg-purple-100 text-purple-700 border-purple-200',
       approved: 'bg-green-100 text-green-700 border-green-200',
       rejected: 'bg-orange-100 text-orange-700 border-orange-200',
+      daily: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+      weekly: 'bg-indigo-100 text-indigo-700 border-indigo-200',
       monthly: 'bg-purple-100 text-purple-700 border-purple-200',
       quarterly: 'bg-blue-100 text-blue-700 border-blue-200',
       yearly: 'bg-amber-100 text-amber-700 border-amber-200'
@@ -1472,6 +1514,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
       pending: 'Hàng tháng',
       approved: 'Hoạt động',
       rejected: 'Ngừng hoạt động',
+      daily: 'Hàng ngày',
+      weekly: 'Hàng tuần',
       monthly: 'Hàng tháng',
       quarterly: 'Hàng quý',
       yearly: 'Hàng năm'
@@ -1511,9 +1555,9 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
         <div className="flex px-6 gap-2">
           <button
             onClick={() => setActiveTab('license')}
-            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
+            className={`flex items-center gap-2 px-6 py-4 text-[14px] font-medium transition-all border-b-2 cursor-pointer ${
               activeTab === 'license'
-                ? 'border-blue-600 text-blue-600'
+                ? 'border-blue-600 text-blue-600 bg-blue-50/50'
                 : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
             }`}
           >
@@ -1522,9 +1566,9 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
           </button>
           <button
             onClick={() => setActiveTab('management')}
-            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
+            className={`flex items-center gap-2 px-6 py-4 text-[14px] font-medium transition-all border-b-2 cursor-pointer ${
               activeTab === 'management'
-                ? 'border-blue-600 text-blue-600'
+                ? 'border-blue-600 text-blue-600 bg-blue-50/50'
                 : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
             }`}
           >
@@ -1533,9 +1577,9 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
           </button>
           <button
             onClick={() => setActiveTab('approval')}
-            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
+            className={`flex items-center gap-2 px-6 py-4 text-[14px] font-medium transition-all border-b-2 cursor-pointer ${
               activeTab === 'approval'
-                ? 'border-blue-600 text-blue-600'
+                ? 'border-blue-600 text-blue-600 bg-blue-50/50'
                 : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
             }`}
           >
@@ -1544,9 +1588,9 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
           </button>
           <button
             onClick={() => setActiveTab('metadata')}
-            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
+            className={`flex items-center gap-2 px-6 py-4 text-[14px] font-medium transition-all border-b-2 cursor-pointer ${
               activeTab === 'metadata'
-                ? 'border-blue-600 text-blue-600'
+                ? 'border-blue-600 text-blue-600 bg-blue-50/50'
                 : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
             }`}
           >
@@ -1555,9 +1599,9 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
           </button>
           <button
             onClick={() => setActiveTab('history')}
-            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
+            className={`flex items-center gap-2 px-6 py-4 text-[14px] font-medium transition-all border-b-2 cursor-pointer ${
               activeTab === 'history'
-                ? 'border-blue-600 text-blue-600'
+                ? 'border-blue-600 text-blue-600 bg-blue-50/50'
                 : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
             }`}
           >
@@ -1572,59 +1616,59 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
         {renderFilterRow()}
 
 
-        <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
+        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse collection-table text-[13px]">
-              <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-[1]">
+            <table className="w-full text-left">
+              <thead className="bg-[#f8fafc] text-slate-700 border-b border-slate-100">
                 <tr>
-                  <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-12 text-[13px]">STT</th>
+                  <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap w-16 text-[14px]">STT</th>
                   {activeTab === 'history' ? (
                     <>
-                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px] w-24">Phiên bản</th>
-                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px] w-40">Ngày thay đổi</th>
-                      <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Người thay đổi</th>
-                      <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Danh mục</th>
-                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Loại thay đổi</th>
-                      <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Nội dung thay đổi</th>
-                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái</th>
-                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px] w-28">Thao tác</th>
+                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[14px] w-24">Phiên bản</th>
+                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[14px] w-40">Ngày thay đổi</th>
+                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Người thay đổi</th>
+                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Danh mục</th>
+                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[14px]">Loại thay đổi</th>
+                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Nội dung thay đổi</th>
+                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[14px]">Trạng thái</th>
+                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[14px] w-28">Thao tác</th>
                     </>
                   ) : activeTab === 'metadata' ? (
                     <>
-                      <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Tập dữ liệu</th>
-                      <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Mô tả</th>
-                      <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Giấy phép</th>
-                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Định dạng</th>
-                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Tần suất</th>
-                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái</th>
-                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px] w-32">Thao tác</th>
+                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Tập dữ liệu</th>
+                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Danh mục</th>
+                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Mô tả</th>
+                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Giấy phép</th>
+                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[14px]">Định dạng</th>
+                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[14px]">Tần suất</th>
+                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[14px]">Trạng thái</th>
+                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[14px] w-32">Thao tác</th>
                     </>
                   ) : activeTab === 'license' ? (
                     <>
-                      <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Tên giấy phép</th>
-                      <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Tên viết tắt</th>
-                      <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Mô tả</th>
-                      <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Điều kiện sử dụng</th>
-                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái</th>
-                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px] w-32">Thao tác</th>
+                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Tên giấy phép</th>
+                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Tên viết tắt</th>
+                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Mô tả</th>
+                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Điều kiện sử dụng</th>
+                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[14px]">Trạng thái</th>
+                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[14px] w-32">Thao tác</th>
                     </>
                   ) : activeTab === 'approval' ? (
                     <>
-                      <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Mã danh mục</th>
-                      <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Tên danh mục</th>
-                      <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Đơn vị chủ trì cung cấp</th>
-                      <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Tần suất gửi</th>
-                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái phê duyệt</th>
-                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px] w-32">Thao tác</th>
+                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Mã danh mục</th>
+                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Tên danh mục</th>
+                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Đơn vị chủ trì cung cấp</th>
+                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Tần suất gửi</th>
+                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[14px]">Trạng thái phê duyệt</th>
+                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[14px] w-32">Thao tác</th>
                     </>
                   ) : (
                     <>
-                      <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Mã danh mục</th>
-                      <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Tên danh mục</th>
-                      <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Đơn vị chủ trì cung cấp</th>
-                      <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Tần suất cập nhật</th>
-                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái</th>
-                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px] w-48">Thao tác</th>
+                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Mã danh mục</th>
+                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Tên danh mục</th>
+                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Đơn vị chủ trì cung cấp</th>
+                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[14px]">Trạng thái</th>
+                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[14px] w-48">Thao tác</th>
                     </>
                   )}
                 </tr>
@@ -1725,6 +1769,14 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                           </div>
                         </td>
                         <td className="px-4 py-3 text-left text-[13px]">
+                          <span className="text-slate-700 font-medium">
+                            {item.categoryCodes.map(code => {
+                              const cat = categories.find(c => c.code === code) || categoryList.find(c => c.code === code);
+                              return cat ? cat.name : 'Chưa xác định';
+                            }).join(', ')}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-left text-[13px]">
                           <div className="font-semibold text-slate-900 leading-snug">{item.description}</div>
                           <div className="text-xs text-slate-500 mt-1 flex flex-wrap gap-1 font-normal">
                             Từ khóa: {item.keywords.split(',').map((k, i) => k.trim() && <span key={i} className="px-1.5 py-0.5 bg-slate-100 rounded text-[10px]">{k.trim()}</span>)}
@@ -1754,47 +1806,53 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                       </tr>
                     ))
                   ) : (
-                    <tr><td colSpan={8} className="px-4 py-8 text-center text-sm text-slate-500">Không tìm thấy dữ liệu</td></tr>
+                    <tr><td colSpan={9} className="px-4 py-8 text-center text-sm text-slate-500">Không tìm thấy dữ liệu</td></tr>
                   )
                 ) : activeTab === 'license' ? (
                   paginatedLicenses.length > 0 ? (
                     paginatedLicenses.map((item, index) => (
-                      <tr key={item.id} className="hover:bg-slate-50 transition-all group border-b border-slate-100">
-                        <td className="px-4 py-3 text-center text-slate-500 font-medium text-[13px]">{(currentPageNum - 1) * pageSize + index + 1}</td>
-                        <td className="px-4 py-3 text-left text-[13px]">
+                      <tr key={item.id} className="hover:bg-slate-50/50 transition-all font-medium">
+                        <td className="px-6 py-4 text-center text-slate-500 text-[14px]">{(currentPageNum - 1) * pageSize + index + 1}</td>
+                        <td className="px-6 py-4 text-left text-[14px]">
                           <div>
-                            <span className="font-medium text-slate-950 leading-snug">{item.name}</span>
-                            <a href={item.referenceUrl} target="_blank" rel="noreferrer" className="text-xs text-blue-600 hover:underline flex items-center gap-1 mt-1 font-normal w-max">
+                            <span className="font-semibold text-slate-900 leading-snug">{item.name}</span>
+                            <a href={item.referenceUrl} target="_blank" rel="noreferrer" className="text-xs text-blue-600 hover:underline flex items-center gap-1 mt-1 font-normal w-max cursor-pointer">
                               <Globe className="w-3 h-3" /> Nguồn tham chiếu
                             </a>
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-left text-[13px]">
+                        <td className="px-6 py-4 text-left text-[14px]">
                           {item.shortName && (
-                            <span className="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-semibold border border-slate-200">
+                            <span className="px-2 py-0.5 bg-slate-100 text-slate-600 border border-slate-200 rounded text-[11px] font-semibold">
                               {item.shortName}
                             </span>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-left text-slate-600 text-[13px]">{item.description}</td>
-                        <td className="px-4 py-3 text-left text-slate-500 max-w-xs truncate text-[13px]" title={item.terms}>{item.terms}</td>
-                        <td className="px-4 py-3 text-center">
-                          <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${item.status === 'active' ? 'bg-green-50 text-green-700 border-green-100' : 'bg-slate-100 text-slate-700 border-slate-200'}`}>
-                            {item.status === 'active' ? 'Còn hiệu lực' : 'Hết hiệu lực'}
-                          </span>
+                        <td className="px-6 py-4 text-left text-slate-700 text-[14px]">{item.description}</td>
+                        <td className="px-6 py-4 text-left text-slate-600 max-w-xs truncate text-[14px]" title={item.terms}>{item.terms}</td>
+                        <td className="px-6 py-4 text-center">
+                          {item.status === 'active' ? (
+                            <span className="px-2.5 py-1 text-xs bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-full font-medium">
+                              Còn hiệu lực
+                            </span>
+                          ) : (
+                            <span className="px-2.5 py-1 text-xs bg-slate-100 text-slate-600 border border-slate-200 rounded-full font-medium">
+                              Hết hiệu lực
+                            </span>
+                          )}
                         </td>
-                        <td className="px-4 py-3 text-center">
+                        <td className="px-6 py-4 text-center">
                           <div className="flex items-center justify-center gap-1">
                             <button
                               onClick={() => viewLicenseModal(item)}
-                              className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                              className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors cursor-pointer"
                               title="Xem chi tiết"
                             >
                               <Eye className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => openLicenseModal(item)}
-                              className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                              className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded transition-colors cursor-pointer"
                               title="Chỉnh sửa"
                             >
                               <Edit className="w-4 h-4" />
@@ -1804,7 +1862,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                       </tr>
                     ))
                   ) : (
-                    <tr><td colSpan={7} className="px-4 py-8 text-center text-sm text-slate-500">Không tìm thấy dữ liệu</td></tr>
+                    <tr><td colSpan={7} className="px-6 py-8 text-center text-[14px] text-slate-500">Không tìm thấy dữ liệu</td></tr>
                   )
                 ) : activeTab === 'approval' ? (
                   paginatedApproval.length > 0 ? (
@@ -1825,16 +1883,30 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                             <button onClick={() => handleView(category)} className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Xem chi tiết">
                               <Eye className="w-4 h-4" />
                             </button>
-                            {category.approvalStatus === 'pending' && (
-                              <>
-                                <button onClick={() => handleApprove(category)} className="p-1.5 text-slate-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Phê duyệt">
-                                  <Check className="w-4 h-4" />
-                                </button>
-                                <button onClick={() => handleReject(category)} className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Từ chối">
-                                  <Ban className="w-4 h-4" />
-                                </button>
-                              </>
-                            )}
+                            <button 
+                              onClick={() => handleApprove(category)} 
+                              disabled={category.approvalStatus === 'approved' || category.approvalStatus === 'rejected'}
+                              className={`p-1.5 rounded-lg transition-colors ${
+                                category.approvalStatus === 'approved' || category.approvalStatus === 'rejected'
+                                  ? 'text-slate-300 cursor-not-allowed bg-transparent'
+                                  : 'text-slate-500 hover:text-green-600 hover:bg-green-50'
+                              }`}
+                              title="Phê duyệt"
+                            >
+                              <Check className="w-4 h-4" />
+                            </button>
+                            <button 
+                              onClick={() => handleReject(category)} 
+                              disabled={category.approvalStatus === 'approved' || category.approvalStatus === 'rejected'}
+                              className={`p-1.5 rounded-lg transition-colors ${
+                                category.approvalStatus === 'approved' || category.approvalStatus === 'rejected'
+                                  ? 'text-slate-300 cursor-not-allowed bg-transparent'
+                                  : 'text-slate-500 hover:text-red-600 hover:bg-red-50'
+                              }`}
+                              title="Từ chối"
+                            >
+                              <Ban className="w-4 h-4" />
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -1856,17 +1928,14 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                               <div className="font-semibold text-blue-600 hover:text-blue-700 hover:underline cursor-pointer">
                                 {category.name}
                               </div>
-                              <div className="text-xs text-slate-500 mt-0.5 leading-snug">{category.description}</div>
                             </button>
                           ) : (
                             <div>
                               <div className="font-semibold text-slate-950 leading-snug">{category.name}</div>
-                              <div className="text-xs text-slate-500 mt-0.5 leading-snug">{category.description}</div>
                             </div>
                           )}
                         </td>
                         <td className="px-4 py-3 text-left text-slate-600 font-medium text-[13px]">{category.dataField}</td>
-                        <td className="px-4 py-3 text-center text-[13px]">{getStatusBadge(category.updateFrequency)}</td>
                         <td className="px-4 py-3 text-center text-[13px]">{getApprovalStatusBadge(category.approvalStatus)}</td>
                         <td className="px-4 py-3 text-center">
                           <div className="flex items-center justify-center gap-1">
@@ -1882,9 +1951,15 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                             {activeTab === 'management' && (
                               <button
                                 onClick={() => handleSubmitForApproval(category)}
-                                disabled={category.approvalStatus === 'approved' || category.approvalStatus === 'pending'}
+                                disabled={
+                                  category.approvalStatus === 'approved' ||
+                                  category.approvalStatus === 'pending' ||
+                                  category.approvalStatus === 'rejected'
+                                }
                                 className={`p-1.5 rounded-lg transition-colors ${
-                                  category.approvalStatus === 'approved' || category.approvalStatus === 'pending'
+                                  category.approvalStatus === 'approved' ||
+                                  category.approvalStatus === 'pending' ||
+                                  category.approvalStatus === 'rejected'
                                     ? 'text-slate-300 cursor-not-allowed bg-transparent'
                                     : 'text-slate-500 hover:text-purple-600 hover:bg-purple-50'
                                 }`}
@@ -1898,7 +1973,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                       </tr>
                     ))
                   ) : (
-                    <tr><td colSpan={7} className="px-4 py-8 text-center text-sm text-slate-500">Không tìm thấy dữ liệu</td></tr>
+                    <tr><td colSpan={6} className="px-4 py-8 text-center text-sm text-slate-500">Không tìm thấy dữ liệu</td></tr>
                   )
                 )}
               </tbody>
@@ -1932,38 +2007,33 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
             <div className="p-6 space-y-4">
               <div>
                 <label className="block text-sm text-slate-700 mb-2">Danh mục *</label>
-                <div className="border border-slate-300 rounded-lg p-4 bg-slate-50 max-h-72 overflow-y-auto">
-                  {Object.entries(categoryList.reduce<Record<string, OpenDataCategory[]>>((groups, cat) => {
+                <select
+                  value={metadataFormData.categoryCodes[0] || ''}
+                  onChange={(e) => {
+                    setMetadataFormData({ ...metadataFormData, categoryCodes: e.target.value ? [e.target.value] : [] });
+                  }}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 bg-white"
+                  aria-label="Chọn danh mục"
+                  title="Chọn danh mục"
+                >
+                  <option value="">-- Chọn danh mục --</option>
+                  {Object.entries(categories.filter(cat => cat.status === 'approved' || cat.approvalStatus === 'approved').reduce<Record<string, OpenDataCategory[]>>((groups, cat) => {
                     if (!groups[cat.dataField]) {
                       groups[cat.dataField] = [];
                     }
                     groups[cat.dataField].push(cat);
                     return groups;
                   }, {})).map(([system, items]) => (
-                    <div key={system} className="mb-4">
-                      <div className="text-sm font-semibold text-slate-900 mb-2">{system}</div>
-                      <div className="space-y-2 pl-4">
-                        {items.map((cat) => (
-                          <label key={cat.id} className="flex items-center gap-2 text-sm text-slate-700">
-                            <input
-                              type="checkbox"
-                              checked={metadataFormData.categoryCodes.includes(cat.code)}
-                              onChange={(e) => {
-                                const selectedCodes = metadataFormData.categoryCodes.includes(cat.code)
-                                  ? metadataFormData.categoryCodes.filter(code => code !== cat.code)
-                                  : [...metadataFormData.categoryCodes, cat.code];
-                                setMetadataFormData({ ...metadataFormData, categoryCodes: selectedCodes });
-                              }}
-                              className="h-4 w-4 text-emerald-600 border-slate-300 rounded"
-                            />
-                            <span>{cat.code} - {cat.name}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
+                    <optgroup key={system} label={system}>
+                      {items.map((cat) => (
+                        <option key={cat.id} value={cat.code}>
+                          {cat.code} - {cat.name}
+                        </option>
+                      ))}
+                    </optgroup>
                   ))}
-                </div>
-                <p className="text-xs text-slate-500 mt-2">Chọn một hoặc nhiều danh mục cho Metadata này.</p>
+                </select>
+                <p className="text-xs text-slate-500 mt-2">Chọn một danh mục cho Metadata này.</p>
               </div>
               <div>
                 <label className="block text-sm text-slate-700 mb-2">Mô tả *</label>
@@ -2083,10 +2153,10 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
           <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4">
             <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-slate-900">
+                <h3 className="text-[15px] font-semibold text-slate-900">
                   {isLicenseViewOnly ? 'Xem chi tiết giấy phép' : selectedLicense ? 'Chỉnh sửa giấy phép' : 'Thêm mới giấy phép'}
                 </h3>
-                <p className="text-sm text-slate-500 mt-1">
+                <p className="text-[13px] text-slate-500 mt-1">
                   Quản lý giấy phép chuẩn, điều kiện sử dụng và liên kết tham chiếu.
                 </p>
               </div>
@@ -2097,18 +2167,18 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-slate-700 mb-2">Tên giấy phép *</label>
+                  <label className="block text-[13px] text-slate-700 mb-2">Tên giấy phép *</label>
                   <input
                     type="text"
                     value={licenseFormData.name}
                     onChange={(e) => setLicenseFormData({ ...licenseFormData, name: e.target.value })}
                     disabled={isLicenseViewOnly}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 disabled:bg-slate-50 disabled:text-slate-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-emerald-500 disabled:bg-slate-50 disabled:text-slate-500"
                     placeholder="Nhập tên giấy phép"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-slate-700 mb-2">Tên viết tắt *</label>
+                  <label className="block text-[13px] text-slate-700 mb-2">Tên viết tắt *</label>
                   <input
                     type="text"
                     value={licenseFormData.shortName}
@@ -2117,7 +2187,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                       if (licenseError) setLicenseError('');
                     }}
                     disabled={isLicenseViewOnly || licenseFormData.id !== '0'}
-                    className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none disabled:bg-slate-50 disabled:text-slate-500 ${
+                    className={`w-full px-3 py-2 border rounded-lg text-[13px] focus:ring-2 focus:ring-emerald-500 outline-none disabled:bg-slate-50 disabled:text-slate-500 ${
                       licenseError ? 'border-red-500 focus:ring-red-500' : 'border-slate-300'
                     }`}
                     placeholder="Nhập tên viết tắt"
@@ -2128,45 +2198,45 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                 </div>
               </div>
               <div>
-                <label className="block text-sm text-slate-700 mb-2">Mô tả *</label>
+                <label className="block text-[13px] text-slate-700 mb-2">Mô tả *</label>
                 <textarea
                   value={licenseFormData.description}
                   onChange={(e) => setLicenseFormData({ ...licenseFormData, description: e.target.value })}
                   disabled={isLicenseViewOnly}
                   rows={4}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 disabled:bg-slate-50 disabled:text-slate-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-emerald-500 disabled:bg-slate-50 disabled:text-slate-500"
                   placeholder="Mô tả ngắn về giấy phép"
                 />
               </div>
               <div>
-                <label className="block text-sm text-slate-700 mb-2">Điều kiện sử dụng *</label>
+                <label className="block text-[13px] text-slate-700 mb-2">Điều kiện sử dụng *</label>
                 <textarea
                   value={licenseFormData.terms}
                   onChange={(e) => setLicenseFormData({ ...licenseFormData, terms: e.target.value })}
                   disabled={isLicenseViewOnly}
                   rows={4}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 disabled:bg-slate-50 disabled:text-slate-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-emerald-500 disabled:bg-slate-50 disabled:text-slate-500"
                   placeholder="Mô tả điều kiện sử dụng"
                 />
               </div>
               <div>
-                <label className="block text-sm text-slate-700 mb-2">Liên kết tham chiếu *</label>
+                <label className="block text-[13px] text-slate-700 mb-2">Liên kết tham chiếu *</label>
                 <input
                   type="text"
                   value={licenseFormData.referenceUrl}
                   onChange={(e) => setLicenseFormData({ ...licenseFormData, referenceUrl: e.target.value })}
                   disabled={isLicenseViewOnly}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 disabled:bg-slate-50 disabled:text-slate-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-emerald-500 disabled:bg-slate-50 disabled:text-slate-500"
                   placeholder="https://example.com/license/cc0"
                 />
               </div>
               <div>
-                <label className="block text-sm text-slate-700 mb-2">Trạng thái</label>
+                <label className="block text-[13px] text-slate-700 mb-2">Trạng thái</label>
                 <select
                   value={licenseFormData.status}
                   onChange={(e) => setLicenseFormData({ ...licenseFormData, status: e.target.value as LicenseItem['status'] })}
                   disabled={isLicenseViewOnly}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 disabled:bg-slate-50 disabled:text-slate-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-emerald-500 disabled:bg-slate-50 disabled:text-slate-500"
                   aria-label="Trạng thái"
                   title="Trạng thái"
                 >
@@ -2180,13 +2250,13 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                 <>
                   <button
                     onClick={() => setIsLicenseViewOnly(false)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-[13px] font-medium"
                   >
                     Chỉnh sửa
                   </button>
                   <button
                     onClick={() => setShowLicenseModal(false)}
-                    className="px-4 py-2 text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                    className="px-4 py-2 text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors text-[13px] font-medium"
                   >
                     Đóng
                   </button>
@@ -2195,13 +2265,13 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                 <>
                   <button
                     onClick={() => setShowLicenseModal(false)}
-                    className="px-4 py-2 text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50"
+                    className="px-4 py-2 text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 text-[13px] font-medium"
                   >
                     Hủy
                   </button>
                   <button
                     onClick={saveLicense}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-[13px] font-medium"
                   >
                     Lưu giấy phép
                   </button>
@@ -2217,7 +2287,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4">
             <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-              <h3 className="text-lg text-slate-900">
+              <h3 className="text-[15px] font-semibold text-slate-900">
                 {activeTab === 'management' ? 'Thêm danh mục mới' : 'Thêm quy tắc cập nhật mới'}
               </h3>
               <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600" aria-label="Đóng" title="Đóng">
@@ -2250,53 +2320,53 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
               */}
               
               <div>
-                <label className="block text-sm text-slate-700 mb-2">Mã danh mục *</label>
+                <label className="block text-[13px] text-slate-700 mb-2">Mã danh mục *</label>
                 <input
                   type="text"
                   value={formData.code}
                   onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-emerald-500"
                   placeholder={activeTab === 'management' ? 'Nhập mã danh mục (vd: ODC001)' : 'Nhập mã quy tắc (vd: ODCM01)'}
                 />
               </div>
               <div>
-                <label className="block text-sm text-slate-700 mb-2">Tên danh mục *</label>
+                <label className="block text-[13px] text-slate-700 mb-2">Tên danh mục *</label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-emerald-500"
                   placeholder="Nhập tên danh mục"
                 />
               </div>
               {activeTab === 'management' && (
                 <div>
-                  <label className="block text-sm text-slate-700 mb-2">Phiên bản</label>
+                  <label className="block text-[13px] text-slate-700 mb-2">Phiên bản</label>
                   <input
                     type="text"
                     value={formData.version}
                     readOnly
                     disabled
-                    className="w-full px-3 py-2 border border-slate-200 bg-slate-50 text-slate-500 rounded-lg text-sm outline-none cursor-not-allowed"
+                    className="w-full px-3 py-2 border border-slate-200 bg-slate-50 text-slate-500 rounded-lg text-[13px] outline-none cursor-not-allowed"
                   />
                 </div>
               )}
               <div>
-                <label className="block text-sm text-slate-700 mb-2">Mô tả</label>
+                <label className="block text-[13px] text-slate-700 mb-2">Mô tả</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-emerald-500"
                   rows={3}
                   placeholder="Nhập mô tả"
                 />
               </div>
               <div>
-                <label className="block text-sm text-slate-700 mb-2">Đơn vị chủ trì cung cấp *</label>
+                <label className="block text-[13px] text-slate-700 mb-2">Đơn vị chủ trì cung cấp *</label>
                 <select
                   value={formData.dataField}
                   onChange={(e) => setFormData({ ...formData, dataField: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 bg-white"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-emerald-500 bg-white"
                   aria-label="Đơn vị chủ trì cung cấp"
                   title="Đơn vị chủ trì cung cấp"
                 >
@@ -2308,18 +2378,22 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   ))}
                 </select>
               </div>
+
               <div>
-                <label className="block text-sm text-slate-700 mb-2">Tần suất cập nhật *</label>
+                <label className="block text-[13px] text-slate-700 mb-2">Danh mục cha</label>
                 <select
-                  value={formData.updateFrequency}
-                  onChange={(e) => setFormData({ ...formData, updateFrequency: e.target.value as any })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
-                  aria-label="Tần suất cập nhật"
-                  title="Tần suất cập nhật"
+                  value={formData.parentId}
+                  onChange={(e) => setFormData({ ...formData, parentId: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-emerald-500 bg-white"
+                  aria-label="Danh mục cha"
+                  title="Danh mục cha"
                 >
-                  <option value="monthly">Hàng tháng</option>
-                  <option value="quarterly">Hàng quý</option>
-                  <option value="yearly">Hàng năm</option>
+                  <option value="">-- Không có danh mục cha --</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.code} - {cat.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -2327,13 +2401,13 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
             <div className="sticky bottom-0 bg-slate-50 border-t border-slate-200 px-6 py-4 flex items-center justify-end gap-3">
               <button
                 onClick={() => setShowAddModal(false)}
-                className="px-4 py-2 text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50"
+                className="px-4 py-2 text-[13px] font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50"
               >
                 Hủy
               </button>
               <button
                 onClick={handleSaveAdd}
-                className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+                className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-[13px] font-medium"
               >
                 <Save className="w-4 h-4 inline mr-2" />
                 Lưu
@@ -2341,7 +2415,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
               {activeTab === 'management' && (
                 <button
                   onClick={handleSendApproval}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-[13px] font-medium"
                 >
                   <Send className="w-4 h-4 inline mr-2" />
                   Gửi phê duyệt
@@ -2357,7 +2431,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4">
             <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-              <h3 className="text-lg text-slate-900">Chi tiết danh mục</h3>
+              <h3 className="text-[15px] font-semibold text-slate-900">Chi tiết danh mục</h3>
               <button onClick={() => setShowViewModal(false)} className="text-slate-400 hover:text-slate-600" aria-label="Đóng" title="Đóng">
                 <X className="w-5 h-5" />
               </button>
@@ -2365,48 +2439,75 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-slate-600 mb-1">Mã danh mục</label>
-                  <div className="text-sm text-slate-900">{selectedCategory.code}</div>
+                  <label className="block text-[13px] text-slate-600 mb-1">Mã danh mục</label>
+                  <div className="text-[13px] text-slate-900">{selectedCategory.code}</div>
                 </div>
                 <div>
-                  <label className="block text-sm text-slate-600 mb-1">Tên danh mục</label>
-                  <div className="text-sm text-slate-900">{selectedCategory.name}</div>
+                  <label className="block text-[13px] text-slate-600 mb-1">Tên danh mục</label>
+                  <div className="text-[13px] text-slate-900">{selectedCategory.name}</div>
                 </div>
                 {activeTab === 'management' && (
                   <div>
-                    <label className="block text-sm text-slate-600 mb-1">Phiên bản</label>
-                    <div className="text-sm text-slate-900">{selectedCategory.version || '1.0'}</div>
+                    <label className="block text-[13px] text-slate-600 mb-1">Phiên bản</label>
+                    <div className="text-[13px] text-slate-900">{selectedCategory.version || '1.0'}</div>
                   </div>
                 )}
                 <div className="col-span-2">
-                  <label className="block text-sm text-slate-600 mb-1">Mô tả</label>
-                  <div className="text-sm text-slate-900">{selectedCategory.description}</div>
+                  <label className="block text-[13px] text-slate-600 mb-1">Mô tả</label>
+                  <div className="text-[13px] text-slate-900">{selectedCategory.description}</div>
                 </div>
                 <div>
-                  <label className="block text-sm text-slate-600 mb-1">Đơn vị chủ trì cung cấp</label>
-                  <div className="text-sm text-slate-900">{selectedCategory.dataField}</div>
+                  <label className="block text-[13px] text-slate-600 mb-1">Đơn vị chủ trì cung cấp</label>
+                  <div className="text-[13px] text-slate-900">{selectedCategory.dataField}</div>
                 </div>
+
                 <div>
-                  <label className="block text-sm text-slate-600 mb-1">Tần suất cập nhật</label>
-                  <div>{getStatusBadge(selectedCategory.updateFrequency)}</div>
-                </div>
-                <div>
-                  <label className="block text-sm text-slate-600 mb-1">Trạng thái phê duyệt</label>
+                  <label className="block text-[13px] text-slate-600 mb-1">Trạng thái phê duyệt</label>
                   <div>{getApprovalStatusBadge(selectedCategory.approvalStatus)}</div>
                 </div>
+                <div>
+                  <label className="block text-[13px] text-slate-600 mb-1">Danh mục cha</label>
+                  <div className="text-[13px] text-slate-900 font-medium">
+                    {selectedCategory.parentId 
+                      ? (() => {
+                          const parent = categories.find(c => c.id === selectedCategory.parentId);
+                          return parent ? `${parent.code} - ${parent.name}` : 'Không xác định';
+                        })()
+                      : 'Không có'}
+                  </div>
+                </div>
+                {selectedCategory.approvalStatus === 'approved' && (
+                  <div className="col-span-2 bg-green-50 border border-green-200 rounded-lg p-3">
+                    <label className="block text-[13px] font-semibold text-green-800 mb-1">Ý kiến người phê duyệt</label>
+                    <div className="text-[13px] text-green-900 italic">
+                      {selectedCategory.approvalNote || 'Đồng ý phê duyệt danh mục.'}
+                    </div>
+                  </div>
+                )}
+                {selectedCategory.approvalStatus === 'rejected' && (
+                  <div className="col-span-2 bg-red-50 border border-red-200 rounded-lg p-3">
+                    <label className="block text-[13px] font-semibold text-red-800 mb-1">Lý do từ chối</label>
+                    <div className="text-[13px] text-red-900 italic">
+                      {selectedCategory.rejectReason || 'Không có lý do từ chối cụ thể.'}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
             <div className="sticky bottom-0 bg-slate-50 border-t border-slate-200 px-6 py-4 flex items-center justify-end gap-3">
               <button
                 onClick={() => setShowViewModal(false)}
-                className="px-4 py-2 text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50"
+                className="px-4 py-2 text-[13px] font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50"
               >
                 Đóng
               </button>
-              {activeTab === 'management' && (
+              {activeTab === 'management' && 
+               selectedCategory.approvalStatus !== 'approved' && 
+               selectedCategory.approvalStatus !== 'rejected' && 
+               selectedCategory.approvalStatus !== 'pending' && (
                 <button
                   onClick={handleSendApproval}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-[13px] font-medium"
                 >
                   <Send className="w-4 h-4 inline mr-2" />
                   Gửi phê duyệt
@@ -2422,63 +2523,63 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4">
             <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-              <h3 className="text-lg text-slate-900">Chỉnh sửa danh mục</h3>
+              <h3 className="text-[15px] font-semibold text-slate-900">Chỉnh sửa danh mục</h3>
               <button onClick={() => setShowEditModal(false)} className="text-slate-400 hover:text-slate-600" aria-label="Đóng" title="Đóng">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm text-slate-700 mb-2">Mã danh mục *</label>
+                <label className="block text-[13px] text-slate-700 mb-2">Mã danh mục *</label>
                 <input
                   type="text"
                   value={formData.code}
                   onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-emerald-500"
                   aria-label="Mã danh mục"
                   title="Mã danh mục"
                 />
               </div>
               <div>
-                <label className="block text-sm text-slate-700 mb-2">Tên danh mục *</label>
+                <label className="block text-[13px] text-slate-700 mb-2">Tên danh mục *</label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-emerald-500"
                   aria-label="Tên danh mục"
                   title="Tên danh mục"
                 />
               </div>
               {activeTab === 'management' && (
                 <div>
-                  <label className="block text-sm text-slate-700 mb-2">Phiên bản</label>
+                  <label className="block text-[13px] text-slate-700 mb-2">Phiên bản</label>
                   <input
                     type="text"
                     value={formData.version}
                     readOnly
                     disabled
-                    className="w-full px-3 py-2 border border-slate-200 bg-slate-50 text-slate-500 rounded-lg text-sm outline-none cursor-not-allowed"
+                    className="w-full px-3 py-2 border border-slate-200 bg-slate-50 text-slate-500 rounded-lg text-[13px] outline-none cursor-not-allowed"
                   />
                 </div>
               )}
               <div>
-                <label className="block text-sm text-slate-700 mb-2">Mô tả</label>
+                <label className="block text-[13px] text-slate-700 mb-2">Mô tả</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-emerald-500"
                   rows={3}
                   aria-label="Mô tả"
                   title="Mô tả"
                 />
               </div>
               <div>
-                <label className="block text-sm text-slate-700 mb-2">Đơn vị chủ trì cung cấp *</label>
+                <label className="block text-[13px] text-slate-700 mb-2">Đơn vị chủ trì cung cấp *</label>
                 <select
                   value={formData.dataField}
                   onChange={(e) => setFormData({ ...formData, dataField: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 bg-white"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-emerald-500 bg-white"
                   aria-label="Đơn vị chủ trì cung cấp"
                   title="Đơn vị chủ trì cung cấp"
                 >
@@ -2490,31 +2591,37 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   ))}
                 </select>
               </div>
+
               <div>
-                <label className="block text-sm text-slate-700 mb-2">Tần suất cập nhật *</label>
+                <label className="block text-[13px] text-slate-700 mb-2">Danh mục cha</label>
                 <select
-                  value={formData.updateFrequency}
-                  onChange={(e) => setFormData({ ...formData, updateFrequency: e.target.value as any })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
-                  aria-label="Tần suất cập nhật"
-                  title="Tần suất cập nhật"
+                  value={formData.parentId}
+                  onChange={(e) => setFormData({ ...formData, parentId: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-emerald-500 bg-white"
+                  aria-label="Danh mục cha"
+                  title="Danh mục cha"
                 >
-                  <option value="monthly">Hàng tháng</option>
-                  <option value="quarterly">Hàng quý</option>
-                  <option value="yearly">Hàng năm</option>
+                  <option value="">-- Không có danh mục cha --</option>
+                  {categories
+                    .filter(cat => !selectedCategory || cat.id !== selectedCategory.id)
+                    .map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.code} - {cat.name}
+                      </option>
+                    ))}
                 </select>
               </div>
             </div>
             <div className="sticky bottom-0 bg-slate-50 border-t border-slate-200 px-6 py-4 flex items-center justify-end gap-3">
               <button
                 onClick={() => setShowEditModal(false)}
-                className="px-4 py-2 text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50"
+                className="px-4 py-2 text-[13px] font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50"
               >
                 Hủy
               </button>
               <button
                 onClick={handleSaveEdit}
-                className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+                className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-[13px] font-medium"
               >
                 <Save className="w-4 h-4 inline mr-2" />
                 Lưu
@@ -2522,7 +2629,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
               {activeTab === 'management' && (
                 <button
                   onClick={handleSendApproval}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-[13px] font-medium"
                 >
                   <Send className="w-4 h-4 inline mr-2" />
                   Gửi phê duyệt
@@ -2534,30 +2641,55 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
       )}
 
       {/* Delete Modal */}
-      {showDeleteModal && selectedCategory && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg w-full max-w-md m-4 p-6">
-            <h3 className="text-lg text-slate-900 mb-4">Xác nhận xóa</h3>
-            <p className="text-sm text-slate-600 mb-6">
-              Bạn có chắc chắn muốn xóa danh mục <strong>{selectedCategory.name}</strong>?
-            </p>
-            <div className="flex items-center justify-end gap-3">
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                className="px-4 py-2 text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={confirmDelete}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-              >
-                Xóa
-              </button>
+      {showDeleteModal && selectedCategory && (() => {
+        const isCategoryUsed = metadataEntries.some(m => m.categoryCodes.includes(selectedCategory.code));
+        return (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg w-full max-w-md m-4 p-6">
+              {isCategoryUsed ? (
+                <>
+                  <div className="flex items-center gap-3 text-red-600 mb-4">
+                    <AlertCircle className="w-6 h-6 shrink-0" />
+                    <h3 className="text-[15px] font-bold text-slate-900">Không thể xóa danh mục</h3>
+                  </div>
+                  <p className="text-[13px] text-slate-600 mb-6 leading-relaxed">
+                    Không thể xóa danh mục đã được sử dụng. Vui lòng xóa dữ liệu/metadata của danh mục để thực hiện tiếp tác vụ.
+                  </p>
+                  <div className="flex items-center justify-end">
+                    <button
+                      onClick={() => setShowDeleteModal(false)}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-[13px] font-medium transition-colors"
+                    >
+                      Đóng
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-[15px] font-semibold text-slate-900 mb-4">Xác nhận xóa</h3>
+                  <p className="text-[13px] text-slate-600 mb-6">
+                    Bạn có chắc chắn muốn xóa danh mục <strong>{selectedCategory.name}</strong>?
+                  </p>
+                  <div className="flex items-center justify-end gap-3">
+                    <button
+                      onClick={() => setShowDeleteModal(false)}
+                      className="px-4 py-2 text-[13px] font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50"
+                    >
+                      Hủy
+                    </button>
+                    <button
+                      onClick={confirmDelete}
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-[13px] font-medium"
+                    >
+                      Xóa
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Approval Modal */}
       {showApprovalModal && selectedCategory && approvalAction === 'approved' && (
@@ -2660,34 +2792,34 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                 <div className="flex items-start gap-3">
                   <XCircle className="w-5 h-5 text-red-600 mt-0.5" />
                   <div>
-                    <div className="text-sm font-medium text-red-900 mb-1">Thông tin danh mục</div>
-                    <div className="text-sm text-red-800"><strong>{selectedCategory.name}</strong></div>
-                    <div className="text-xs text-red-700 mt-1">Mã: {selectedCategory.code}</div>
-                    <div className="text-xs text-red-700 mt-1">Lĩnh vực: {selectedCategory.dataField}</div>
+                    <div className="text-[13px] font-medium text-red-900 mb-1">Thông tin danh mục</div>
+                    <div className="text-[13px] text-red-800"><strong>{selectedCategory.name}</strong></div>
+                    <div className="text-[13px] text-red-700 mt-1">Mã: {selectedCategory.code}</div>
+                    <div className="text-[13px] text-red-700 mt-1">Lĩnh vực: {selectedCategory.dataField}</div>
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-[13px] font-medium text-slate-700 mb-2">
                   Lý do từ chối <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   value={rejectReason}
                   onChange={(e) => setRejectReason(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-red-500 focus:border-red-500"
                   rows={5}
                   placeholder="Nhập lý do từ chối phê duyệt...&#10;Ví dụ: Danh mục chưa đầy đủ thông tin về cấu trúc dữ liệu. Đề nghị bổ sung các trường dữ liệu bắt buộc theo quy định."
                 />
                 {rejectReason.trim() === '' && (
-                  <p className="text-xs text-red-600 mt-1">Vui lòng nhập lý do từ chối</p>
+                  <p className="text-[13px] text-red-600 mt-1">Vui lòng nhập lý do từ chối</p>
                 )}
               </div>
 
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
                 <div className="flex items-start gap-2">
                   <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5" />
-                  <div className="text-xs text-amber-800">
+                  <div className="text-[13px] text-amber-800">
                     Sau khi từ chối, danh mục sẽ được trả lại cho đơn vị để chỉnh sửa và trình lại.
                   </div>
                 </div>
@@ -2700,14 +2832,14 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   setShowApprovalModal(false);
                   setRejectReason('');
                 }}
-                className="px-4 py-2 text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50"
+                className="px-4 py-2 text-[13px] font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50"
               >
                 Hủy
               </button>
               <button
                 onClick={confirmApprovalAction}
                 disabled={!rejectReason.trim()}
-                className="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-[13px] font-medium"
               >
                 <Ban className="w-4 h-4" />
                 Từ chối
@@ -2722,18 +2854,18 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg w-full max-w-lg m-4">
             <div className="border-b border-slate-200 px-6 py-4">
-              <h3 className="text-lg text-slate-900">Trình duyệt danh mục</h3>
+              <h3 className="text-[15px] font-semibold text-slate-900">Trình duyệt danh mục</h3>
             </div>
             
             <div className="p-6 space-y-4">
               <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
-                <div className="text-sm text-slate-600">Danh mục</div>
-                <div className="text-sm text-slate-900 mt-1"><strong>{selectedCategory.name}</strong></div>
-                <div className="text-xs text-slate-500 mt-1">Mã: {selectedCategory.code}</div>
+                <div className="text-[13px] text-slate-600">Danh mục</div>
+                <div className="text-[13px] text-slate-900 mt-1"><strong>{selectedCategory.name}</strong></div>
+                <div className="text-[13px] text-slate-500 mt-1">Mã: {selectedCategory.code}</div>
               </div>
 
               <div>
-                <label className="block text-sm text-slate-700 mb-2">
+                <label className="block text-[13px] text-slate-700 mb-2">
                   Người phê duyệt <span className="text-red-500">*</span>
                 </label>
                 <select

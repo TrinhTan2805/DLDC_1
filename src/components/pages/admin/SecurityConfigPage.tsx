@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Shield, Clock, RotateCcw, Save, Database, UploadCloud, List, Wrench } from 'lucide-react';
+import { Shield, Clock, RotateCcw, Save, Database, UploadCloud, List, Wrench, EyeOff } from 'lucide-react';
 
 interface SecurityConfig {
   // Cấu hình tải lên
@@ -23,6 +23,14 @@ interface SecurityConfig {
   backupFrequencyHours: number;
   backupRetentionDays: number;
   backupLocation: string;
+
+  // Cấu hình thuật toán làm mờ dữ liệu
+  blurringAlgorithms: {
+    partial: boolean;
+    redacted: boolean;
+    hashed: boolean;
+    nullify: boolean;
+  };
 }
 
 const defaultConfig: SecurityConfig = {
@@ -36,20 +44,56 @@ const defaultConfig: SecurityConfig = {
   backupFrequencyHours: 24,
   backupRetentionDays: 30,
   backupLocation: 'S3 Bucket',
+  blurringAlgorithms: {
+    partial: true,
+    redacted: true,
+    hashed: true,
+    nullify: true,
+  },
 };
 
 export function SecurityConfigPage() {
-  const [config, setConfig] = useState<SecurityConfig>(defaultConfig);
+  const [config, setConfig] = useState<SecurityConfig>(() => {
+    const saved = localStorage.getItem('security_config');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return {
+          ...defaultConfig,
+          ...parsed,
+          blurringAlgorithms: {
+            ...defaultConfig.blurringAlgorithms,
+            ...(parsed.blurringAlgorithms || {})
+          }
+        };
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return defaultConfig;
+  });
   const [hasChanges, setHasChanges] = useState(false);
 
-  const handleConfigChange = (key: keyof SecurityConfig, value: number | boolean | string) => {
+  const handleConfigChange = (key: keyof SecurityConfig, value: any) => {
     setConfig({ ...config, [key]: value });
+    setHasChanges(true);
+  };
+
+  const handleAlgorithmToggle = (key: keyof SecurityConfig['blurringAlgorithms']) => {
+    setConfig(prev => ({
+      ...prev,
+      blurringAlgorithms: {
+        ...prev.blurringAlgorithms,
+        [key]: !prev.blurringAlgorithms[key]
+      }
+    }));
     setHasChanges(true);
   };
 
   const handleResetToDefault = () => {
     if (confirm('Bạn có chắc chắn muốn đặt lại về cấu hình mặc định?')) {
       setConfig(defaultConfig);
+      localStorage.setItem('security_config', JSON.stringify(defaultConfig));
       setHasChanges(true);
     }
   };
@@ -57,6 +101,7 @@ export function SecurityConfigPage() {
   const handleSaveConfig = () => {
     // Lưu cấu hình
     console.log('Saving config:', config);
+    localStorage.setItem('security_config', JSON.stringify(config));
     alert('Đã lưu cấu hình thành công!');
     setHasChanges(false);
   };
@@ -485,6 +530,141 @@ export function SecurityConfigPage() {
                   onChange={(e) => handleConfigChange('backupLocation', e.target.value)}
                   className="w-40 px-3 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
                 />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Cấu hình thuật toán tự động làm mờ dữ liệu */}
+      <div className="bg-white rounded-lg border border-slate-200 p-6">
+        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-200">
+          <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+            <EyeOff className="w-5 h-5 text-blue-600" />
+          </div>
+          <h2 className="text-slate-900">Cấu hình thuật toán tự động làm mờ dữ liệu</h2>
+        </div>
+
+        <div className="space-y-6">
+          <p className="text-xs text-slate-500">
+            Chọn Kích hoạt (Active) hoặc Vô hiệu hóa (Inactive) các thuật toán tự động làm mờ dữ liệu. 
+            Các thuật toán được kích hoạt sẽ khả dụng khi người dùng thiết lập phân quyền khai thác dữ liệu.
+          </p>
+
+          <div className="divide-y divide-slate-100">
+            {/* Algorithm 1: Partial Blurring */}
+            <div className="flex items-center justify-between py-4 first:pt-0">
+              <div className="flex-1">
+                <label className="text-sm font-semibold text-slate-900 block mb-1">
+                  Làm mờ một phần (***-***-1234)
+                </label>
+                <p className="text-xs text-slate-500">
+                  Ẩn một phần thông tin nhạy cảm của dữ liệu, giữ lại các ký tự cuối (Ví dụ: số CCCD, số điện thoại)
+                </p>
+              </div>
+              <div className="flex items-center gap-3 ml-4">
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${config.blurringAlgorithms.partial ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                  {config.blurringAlgorithms.partial ? 'Active' : 'Inactive'}
+                </span>
+                <button
+                  onClick={() => handleAlgorithmToggle('partial')}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                    config.blurringAlgorithms.partial ? 'bg-blue-600' : 'bg-slate-300'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      config.blurringAlgorithms.partial ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+
+            {/* Algorithm 2: Full Redacted */}
+            <div className="flex items-center justify-between py-4">
+              <div className="flex-1">
+                <label className="text-sm font-semibold text-slate-900 block mb-1">
+                  Che khuất hoàn toàn ([REDACTED])
+                </label>
+                <p className="text-xs text-slate-500">
+                  Thay thế toàn bộ giá trị dữ liệu bằng nhãn [REDACTED] để bảo mật tuyệt đối thông tin
+                </p>
+              </div>
+              <div className="flex items-center gap-3 ml-4">
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${config.blurringAlgorithms.redacted ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                  {config.blurringAlgorithms.redacted ? 'Active' : 'Inactive'}
+                </span>
+                <button
+                  onClick={() => handleAlgorithmToggle('redacted')}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                    config.blurringAlgorithms.redacted ? 'bg-blue-600' : 'bg-slate-300'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      config.blurringAlgorithms.redacted ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+
+            {/* Algorithm 3: Hashed */}
+            <div className="flex items-center justify-between py-4">
+              <div className="flex-1">
+                <label className="text-sm font-semibold text-slate-900 block mb-1">
+                  Băm dữ liệu (Hashed)
+                </label>
+                <p className="text-xs text-slate-500">
+                  Mã hóa một chiều giá trị dữ liệu bằng thuật toán băm bảo mật (ví dụ SHA-256)
+                </p>
+              </div>
+              <div className="flex items-center gap-3 ml-4">
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${config.blurringAlgorithms.hashed ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                  {config.blurringAlgorithms.hashed ? 'Active' : 'Inactive'}
+                </span>
+                <button
+                  onClick={() => handleAlgorithmToggle('hashed')}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                    config.blurringAlgorithms.hashed ? 'bg-blue-600' : 'bg-slate-300'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      config.blurringAlgorithms.hashed ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+
+            {/* Algorithm 4: Nullify */}
+            <div className="flex items-center justify-between py-4 last:pb-0">
+              <div className="flex-1">
+                <label className="text-sm font-semibold text-slate-900 block mb-1">
+                  Trả về Null/Rỗng
+                </label>
+                <p className="text-xs text-slate-500">
+                  Xóa bỏ hoàn toàn giá trị dữ liệu nhạy cảm và trả về giá trị null hoặc chuỗi rỗng
+                </p>
+              </div>
+              <div className="flex items-center gap-3 ml-4">
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${config.blurringAlgorithms.nullify ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                  {config.blurringAlgorithms.nullify ? 'Active' : 'Inactive'}
+                </span>
+                <button
+                  onClick={() => handleAlgorithmToggle('nullify')}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                    config.blurringAlgorithms.nullify ? 'bg-blue-600' : 'bg-slate-300'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      config.blurringAlgorithms.nullify ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
               </div>
             </div>
           </div>

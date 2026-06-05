@@ -393,7 +393,17 @@ const menuItems: MenuItem[] = [
         subItems: [
           {
             id: "open-data-category-a",
-            label: "Biên tập danh mục A",
+            label: "Danh sách tổ chức thực hiện trợ giúp pháp lý",
+            icon: FolderOpen,
+          },
+          {
+            id: "open-data-category-b",
+            label: "Danh sách người thực hiện trợ giúp pháp lý",
+            icon: FolderOpen,
+          },
+          {
+            id: "open-data-category-c",
+            label: "Danh sách Luật sư Việt Nam",
             icon: FolderOpen,
           },
         ],
@@ -407,11 +417,6 @@ const menuItems: MenuItem[] = [
         id: "open-data-report",
         label: "Thống kê dữ liệu mở",
         icon: BarChart3,
-      },
-      {
-        id: "open-data-public-portal",
-        label: "Cổng dữ liệu mở (Portal)",
-        icon: Globe,
       },
     ],
   },

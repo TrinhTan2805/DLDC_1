@@ -1496,11 +1496,57 @@ export const menuStructure: MenuItem[] = [
         children: [
           {
             id: "open-data-category-a",
-            name: "Biên tập danh mục A",
+            name: "Danh sách tổ chức thực hiện trợ giúp pháp lý",
             functions: [
               {
                 id: "open-data-category-a-func",
-                name: "Biên tập danh mục A",
+                name: "Danh sách tổ chức thực hiện trợ giúp pháp lý",
+                actions: [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel",
+                  "Trình duyệt",
+                  "Duyệt",
+                  "Công bố",
+                  "Hủy công bố",
+                  "Công khai",
+                  "Hủy công khai",
+                ],
+              },
+            ],
+          },
+          {
+            id: "open-data-category-b",
+            name: "Danh sách người thực hiện trợ giúp pháp lý",
+            functions: [
+              {
+                id: "open-data-category-b-func",
+                name: "Danh sách người thực hiện trợ giúp pháp lý",
+                actions: [
+                  "Xem",
+                  "Thêm",
+                  "Sửa",
+                  "Xóa",
+                  "Xuất Excel",
+                  "Trình duyệt",
+                  "Duyệt",
+                  "Công bố",
+                  "Hủy công bố",
+                  "Công khai",
+                  "Hủy công khai",
+                ],
+              },
+            ],
+          },
+          {
+            id: "open-data-category-c",
+            name: "Danh sách Luật sư Việt Nam",
+            functions: [
+              {
+                id: "open-data-category-c-func",
+                name: "Danh sách Luật sư Việt Nam",
                 actions: [
                   "Xem",
                   "Thêm",
