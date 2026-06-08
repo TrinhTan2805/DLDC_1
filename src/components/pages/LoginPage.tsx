@@ -180,7 +180,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           {/* Footer */}
           <div className="bg-slate-50 px-8 py-4 text-center border-t border-slate-100">
             <p className="text-xs text-slate-600">
-              © 2025 Bộ Tư pháp - Phiên bản 2.4.2
+              © 2025 Bộ Tư pháp - Phiên bản 2.4.4
             </p>
           </div>
         </div>
