@@ -102,8 +102,8 @@ export function SourceSystemModal({ isOpen, onClose, onSave, editingData }: Sour
   };
 
   return (
-    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px' }}>
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 font-sans backdrop-blur-sm">
         <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white z-10 rounded-t-lg">
@@ -123,7 +123,7 @@ export function SourceSystemModal({ isOpen, onClose, onSave, editingData }: Sour
           <form id="source-system-form" onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2 sm:col-span-1">
-                <label className="block text-base font-medium text-slate-700 mb-1">
+                <label className="block text-[13px] font-medium text-slate-700 mb-1">
                   Tên hệ thống <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -131,20 +131,20 @@ export function SourceSystemModal({ isOpen, onClose, onSave, editingData }: Sour
                   required
                   value={formData.systemName}
                   onChange={(e) => setFormData({ ...formData, systemName: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Nhập tên hệ thống"
                 />
               </div>
 
-              <div className="col-span-2 sm:col-span-1">
-                <label className="block text-base font-medium text-slate-700 mb-1">
+               <div className="col-span-2 sm:col-span-1">
+                <label className="block text-[13px] font-medium text-slate-700 mb-1">
                   Tên đơn vị <span className="text-red-500">*</span>
                 </label>
                 <select
                   required
                   value={formData.unitName}
                   onChange={(e) => handleUnitChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-base"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px]"
                 >
                   <option value="">Chọn đơn vị</option>
                   {dropdownOptions.map(unit => (
@@ -156,66 +156,82 @@ export function SourceSystemModal({ isOpen, onClose, onSave, editingData }: Sour
               </div>
 
               <div className="col-span-2 sm:col-span-1">
-                <label className="block text-base font-medium text-slate-700 mb-1">
+                <label className="block text-[13px] font-medium text-slate-700 mb-1">
+                  Loại nguồn <span className="text-red-500">*</span>
+                </label>
+                <select
+                  required
+                  value={formData.sourceType}
+                  onChange={(e) => setFormData({ ...formData, sourceType: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px]"
+                >
+                  <option value="">Chọn loại nguồn</option>
+                  <option value="Trong ngành">Trong ngành</option>
+                  <option value="Ngoài ngành">Ngoài ngành</option>
+                </select>
+              </div>
+
+              <div className="col-span-2 sm:col-span-1">
+                <label className="block text-[13px] font-medium text-slate-700 mb-1">
                   Đầu mối liên hệ
                 </label>
                 <input
                   type="text"
                   value={formData.contactPerson}
                   onChange={(e) => setFormData({ ...formData, contactPerson: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Tên người đầu mối"
                 />
               </div>
 
               <div className="col-span-2">
-                <label className="block text-base font-medium text-slate-700 mb-1">
+                <label className="block text-[13px] font-medium text-slate-700 mb-1">
                   Địa chỉ
                 </label>
                 <input
                   type="text"
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Nhập địa chỉ"
                 />
               </div>
 
               <div className="col-span-2 sm:col-span-1">
-                <label className="block text-base font-medium text-slate-700 mb-1">
+                <label className="block text-[13px] font-medium text-slate-700 mb-1">
                   Số điện thoại
                 </label>
                 <input
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Nhập số điện thoại"
                 />
               </div>
 
               <div className="col-span-2 sm:col-span-1">
-                <label className="block text-base font-medium text-slate-700 mb-1">
+                <label className="block text-[13px] font-medium text-slate-700 mb-1">
                   Email
                 </label>
                 <input
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Nhập email"
                 />
               </div>
 
               <div className="col-span-2">
-                <label className="block text-base font-medium text-slate-700 mb-1">
+                <label className="block text-[13px] font-medium text-slate-700 mb-1">
                   Ghi chú
                 </label>
                 <textarea
                   value={formData.note}
                   onChange={(e) => setFormData({ ...formData, note: e.target.value })}
                   rows={3}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Nhập ghi chú"
                 />
               </div>
@@ -228,14 +244,14 @@ export function SourceSystemModal({ isOpen, onClose, onSave, editingData }: Sour
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-base font-medium text-[#020817] bg-white border border-[#e2e8f0] rounded-lg hover:bg-slate-50 transition-colors shadow-sm"
+            className="px-4 py-2 text-[13px] font-medium text-[#020817] bg-white border border-[#e2e8f0] rounded-lg hover:bg-slate-50 transition-colors shadow-sm"
           >
             Hủy
           </button>
           <button
             type="submit"
             form="source-system-form"
-            className="px-4 py-2 text-base font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm"
+            className="px-4 py-2 text-[13px] font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm"
           >
             <Save className="w-4 h-4" />
             Lưu

@@ -331,7 +331,7 @@ const menuItems: MenuItem[] = [
         subItems: [
           {
             id: "category-moj-units",
-            label: "Danh mục đơn vị thuộc BTP",
+            label: "Đơn vị thuộc BTP",
             icon: FolderOpen,
           },
           {
@@ -855,7 +855,9 @@ export function Sidebar({
                     {item.subItems?.map((subItem: SubMenuItem) => {
                       const SubIcon = subItem.icon;
                       const isSubActive =
-                        currentPage === subItem.id || currentPage.startsWith(subItem.id + '/');
+                        currentPage === subItem.id || 
+                        currentPage.startsWith(subItem.id + '/') ||
+                        (subItem.id === 'admin-config-log' && currentPage === 'admin-log-retention');
                       const isSubExpanded = expandedMenus.has(
                         subItem.id,
                       );

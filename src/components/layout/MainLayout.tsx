@@ -411,6 +411,8 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
     };
   }, [navigate]);
 
+
+
   const handleUserMenuClick = (action: 'profile' | 'change-password' | 'change-background' | 'access-history' | 'action-history' | 'logout') => {
     switch (action) {
       case 'profile':
@@ -952,7 +954,7 @@ const getBreadcrumbPath = (pageId: string): string[] => {
     // Category
     'category-setup': ['Quản lý danh mục', 'Thiết lập danh mục'],
     'category-list': ['Quản lý danh mục', 'Biên tập danh mục'],
-    'category-moj-units': ['Quản lý danh mục', 'Biên tập danh mục', 'Danh mục đơn vị thuộc BTP'],
+    'category-moj-units': ['Quản lý danh mục', 'Danh sách danh mục', 'Đơn vị thuộc BTP'],
     'category-a': ['Quản lý danh mục', 'Biên tập danh mục', 'Biên tập danh mục A'],
     'category-published-list': ['Quản lý danh mục', 'Công khai danh mục'],
     'category-report-group': ['Quản lý danh mục', 'Thống kê danh mục'],
@@ -1018,6 +1020,7 @@ const getBreadcrumbPath = (pageId: string): string[] => {
     'admin-error-log': ['Quản trị & vận hành', 'Quản lý nhật ký', 'Nhật ký các lỗi phát sinh'],
     'admin-account-log': ['Quản trị & vận hành', 'Quản lý nhật ký', 'Nhật ký quản lý tài khoản'],
     'admin-config-log': ['Quản trị & vận hành', 'Quản lý nhật ký', 'Nhật ký thay đổi cấu hình'],
+    'admin-log-retention': ['Quản trị & vận hành', 'Quản lý nhật ký', 'Quản lý thời gian lưu trữ nhật ký'],
     'admin-statistics': ['Quản trị & vận hành', 'Thống kê & báo cáo', 'Xem biểu đồ thống kê'],
 
     // Notifications

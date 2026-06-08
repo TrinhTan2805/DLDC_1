@@ -237,7 +237,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
   if (!data) return <div className="p-8 text-center text-slate-500">Không tìm thấy cơ sở dữ liệu</div>;
 
   return (
-    <div className="bg-[#f8f9fa] min-h-full p-6 flex flex-col" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+    <div className="bg-[#f8f9fa] min-h-full p-6 flex flex-col" style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px' }}>
       <div className="mb-6 flex items-center">
         <button 
           onClick={handleBack}
@@ -245,7 +245,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-2xl font-bold text-slate-800">Chi tiết cơ sở dữ liệu đích</h1>
+        <h1 className="text-[16px] font-bold text-slate-800">Chi tiết cơ sở dữ liệu đích</h1>
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm w-full flex flex-col flex-1 border border-slate-200 overflow-hidden">
@@ -257,7 +257,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
             </div>
             <div>
               <div className="flex items-center gap-2 mb-0.5">
-                <h2 className="text-2xl font-bold text-slate-800">{data.name}</h2>
+                <h2 className="text-[16px] font-bold text-slate-800">{data.name}</h2>
               </div>
               <p className="text-sm text-slate-500 font-medium flex items-center gap-1.5">
                 <Link2 className="w-4 h-4" /> {data.type} • {data.host}:{data.port}
@@ -272,42 +272,42 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
           <div className="w-1/3 border-r border-slate-100 flex flex-col bg-slate-50/30 overflow-y-auto">
             {/* Connection Info */}
             <div className="p-6">
-              <h3 className="text-base font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+              <h3 className="text-[13px] font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
                 <Info className="w-3.5 h-3.5" /> Thông tin kết nối
               </h3>
               <div className="space-y-3">
                 <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                  <span className="text-base text-slate-500">Schema/Database</span>
-                  <span className="text-base font-semibold text-slate-800">{data.schema}</span>
+                  <span className="text-[13px] text-slate-500">Schema/Database</span>
+                  <span className="text-[13px] font-semibold text-slate-800">{data.schema}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                  <span className="text-base text-slate-500">Username</span>
-                  <span className="text-base font-semibold text-slate-800 flex items-center gap-1.5">
+                  <span className="text-[13px] text-slate-500">Username</span>
+                  <span className="text-[13px] font-semibold text-slate-800 flex items-center gap-1.5">
                     <ShieldCheck className="w-3.5 h-3.5 text-blue-500" /> {data.username}
                   </span>
                 </div>
                 <div className="flex justify-between items-center py-2">
-                  <span className="text-base text-slate-500">Ngày tạo</span>
-                  <span className="text-base font-semibold text-slate-800 flex items-center gap-1.5">
+                  <span className="text-[13px] text-slate-500">Ngày tạo</span>
+                  <span className="text-[13px] font-semibold text-slate-800 flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5 text-slate-400" /> 20/05/2026
                   </span>
                 </div>
               </div>
               
               <div className="mt-4 p-3 bg-blue-50/50 rounded-xl border border-blue-100">
-                <p className="text-base text-blue-700 italic">"{data.note || 'Không có ghi chú'}"</p>
+                <p className="text-[13px] text-blue-700 italic">"{data.note || 'Không có ghi chú'}"</p>
               </div>
             </div>
 
             {/* Table List Header */}
             <div className="px-6 py-4 border-t border-slate-100">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-base font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 m-0">
+                <h3 className="text-[13px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 m-0">
                   <Table className="w-3.5 h-3.5" /> Danh sách bảng ({filteredTables.length})
                 </h3>
                 <button 
                   onClick={handleStartAddTable}
-                  className="px-2 py-1 text-base font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 flex items-center gap-1 transition-colors"
+                  className="px-2 py-1 text-[13px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 flex items-center gap-1 transition-colors"
                   title="Thêm bảng mới"
                 >
                   <Plus className="w-3 h-3" /> Thêm bảng
@@ -320,7 +320,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                   placeholder="Tìm kiếm bảng..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                  className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                 />
               </div>
             </div>
@@ -341,7 +341,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                     <div className="flex items-center gap-3 overflow-hidden">
                       <Table className={`w-4 h-4 flex-shrink-0 ${selectedTable === table.name ? 'text-white' : 'text-slate-400 group-hover:text-blue-500'}`} />
                       <div className="text-left overflow-hidden">
-                        <p className={`text-base font-bold truncate ${selectedTable === table.name ? 'text-white' : 'text-slate-800'}`}>
+                        <p className={`text-[13px] font-bold truncate ${selectedTable === table.name ? 'text-white' : 'text-slate-800'}`}>
                           {table.name}
                         </p>
                         <p className={`text-[10px] truncate ${selectedTable === table.name ? 'text-blue-100' : 'text-slate-400'}`}>
@@ -376,7 +376,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                               value={newTableName} 
                               onChange={(e) => setNewTableName(e.target.value)}
                               placeholder="Tên bảng (VD: PERSON_INFO)"
-                              className="w-full text-lg font-bold text-slate-800 border-b-2 border-blue-500 focus:outline-none bg-transparent px-1 py-1"
+                              className="w-full text-[13px] font-bold text-slate-800 border-b-2 border-blue-500 focus:outline-none bg-transparent px-1 py-1"
                               autoFocus
                             />
                           </div>
@@ -386,7 +386,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                               value={newTableDesc} 
                               onChange={(e) => setNewTableDesc(e.target.value)}
                               placeholder="Nhập mô tả cho bảng"
-                              className="w-full text-base text-slate-600 border-b border-transparent focus:border-blue-500 hover:border-slate-200 focus:outline-none bg-transparent px-1 py-1 transition-colors"
+                              className="w-full text-[13px] text-slate-600 border-b border-transparent focus:border-blue-500 hover:border-slate-200 focus:outline-none bg-transparent px-1 py-1 transition-colors"
                             />
                           </div>
                         </div>
@@ -394,19 +394,19 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                       <div className="flex items-center gap-2 shrink-0">
                         <button 
                           onClick={handleAddColumn}
-                          className="px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded text-base font-medium hover:bg-emerald-100 flex items-center gap-1.5"
+                          className="px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded text-[13px] font-medium hover:bg-emerald-100 flex items-center gap-1.5"
                         >
                           <Plus className="w-4 h-4" /> Thêm cột
                         </button>
                         <button 
                           onClick={handleCancelAddTable}
-                          className="px-3 py-1.5 bg-slate-100 text-slate-600 rounded text-base font-medium hover:bg-slate-200"
+                          className="px-3 py-1.5 bg-slate-100 text-slate-600 rounded text-[13px] font-medium hover:bg-slate-200"
                         >
                           Đóng
                         </button>
                         <button 
                           onClick={handleSaveAddTable}
-                          className="px-3 py-1.5 bg-blue-600 text-white rounded text-base font-medium hover:bg-blue-700 flex items-center gap-1.5"
+                          className="px-3 py-1.5 bg-blue-600 text-white rounded text-[13px] font-medium hover:bg-blue-700 flex items-center gap-1.5"
                         >
                           <Save className="w-4 h-4" /> Lưu bảng
                         </button>
@@ -426,7 +426,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                                 value={newTableName} 
                                 onChange={(e) => setNewTableName(e.target.value)}
                                 onKeyDown={(e) => { if (e.key === 'Enter') handleSaveRename(); if (e.key === 'Escape') setIsRenamingTable(false); }}
-                                className="text-lg font-bold text-slate-800 border-b-2 border-blue-500 focus:outline-none bg-transparent px-1"
+                                className="text-[13px] font-bold text-slate-800 border-b-2 border-blue-500 focus:outline-none bg-transparent px-1"
                                 autoFocus
                               />
                               <button onClick={handleSaveRename} className="p-1 text-blue-600 hover:bg-blue-50 rounded" title="Lưu tên">
@@ -439,7 +439,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                           ) : (
                             <h3 className="text-lg font-bold text-slate-800">Cấu trúc bảng: {selectedTable}</h3>
                           )}
-                          <p className="text-base text-slate-500">Danh sách các trường thông tin trong bảng dữ liệu</p>
+                          <p className="text-[13px] text-slate-500">Danh sách các trường thông tin trong bảng dữ liệu</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -447,19 +447,19 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                           <>
                             <button 
                               onClick={handleAddColumn}
-                              className="px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded text-base font-medium hover:bg-emerald-100 flex items-center gap-1.5"
+                              className="px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded text-[13px] font-medium hover:bg-emerald-100 flex items-center gap-1.5"
                             >
                               <Plus className="w-4 h-4" /> Thêm cột
                             </button>
                             <button 
                               onClick={handleCancelEdit}
-                              className="px-3 py-1.5 bg-slate-100 text-slate-600 rounded text-base font-medium hover:bg-slate-200"
+                              className="px-3 py-1.5 bg-slate-100 text-slate-600 rounded text-[13px] font-medium hover:bg-slate-200"
                             >
                               Đóng
                             </button>
                             <button 
                               onClick={handleSaveEdit}
-                              className="px-3 py-1.5 bg-blue-600 text-white rounded text-base font-medium hover:bg-blue-700 flex items-center gap-1.5"
+                              className="px-3 py-1.5 bg-blue-600 text-white rounded text-[13px] font-medium hover:bg-blue-700 flex items-center gap-1.5"
                             >
                               <Save className="w-4 h-4" /> Lưu
                             </button>
@@ -495,13 +495,13 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                   <div className="bg-slate-50/50 border-b border-slate-200 px-6 flex items-center gap-6">
                     <button 
                       onClick={() => { setViewMode('structure'); setCurrentPage(1); }}
-                      className={`text-base font-bold py-3 border-b-2 transition-colors ${viewMode === 'structure' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+                      className={`text-[13px] font-bold py-3 border-b-2 transition-colors ${viewMode === 'structure' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
                     >
                       Cấu trúc bảng
                     </button>
                     <button 
                       onClick={() => { setViewMode('data'); setCurrentPage(1); }}
-                      className={`text-base font-bold py-3 border-b-2 transition-colors ${viewMode === 'data' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+                      className={`text-[13px] font-bold py-3 border-b-2 transition-colors ${viewMode === 'data' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
                     >
                       Dữ liệu bảng
                     </button>
@@ -514,16 +514,16 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                       <table className="w-full text-left border-collapse">
                       <thead className="bg-slate-50 border-b border-slate-200">
                         <tr>
-                          <th className="py-3 px-4 text-base font-bold text-slate-500 uppercase tracking-wider w-12 text-center">#</th>
-                          <th className="py-3 px-4 text-base font-bold text-slate-500 uppercase tracking-wider min-w-[150px]">Name</th>
-                          <th className="py-3 px-4 text-base font-bold text-slate-500 uppercase tracking-wider w-40">Type</th>
-                          <th className="py-3 px-4 text-base font-bold text-slate-500 uppercase tracking-wider w-24">Length</th>
-                          <th className="py-3 px-4 text-base font-bold text-slate-500 uppercase tracking-wider w-28">Decimals</th>
-                          <th className="py-3 px-4 text-base font-bold text-slate-500 uppercase tracking-wider text-center w-24">Not null</th>
-                          <th className="py-3 px-4 text-base font-bold text-slate-500 uppercase tracking-wider text-center w-16">Key</th>
-                          <th className="py-3 px-4 text-base font-bold text-slate-500 uppercase tracking-wider">Comment</th>
+                          <th className="py-3 px-4 text-[13px] font-bold text-slate-500 uppercase tracking-wider w-12 text-center">#</th>
+                          <th className="py-3 px-4 text-[13px] font-bold text-slate-500 uppercase tracking-wider min-w-[150px]">Name</th>
+                          <th className="py-3 px-4 text-[13px] font-bold text-slate-500 uppercase tracking-wider w-40">Type</th>
+                          <th className="py-3 px-4 text-[13px] font-bold text-slate-500 uppercase tracking-wider w-24">Length</th>
+                          <th className="py-3 px-4 text-[13px] font-bold text-slate-500 uppercase tracking-wider w-28">Decimals</th>
+                          <th className="py-3 px-4 text-[13px] font-bold text-slate-500 uppercase tracking-wider text-center w-24">Not null</th>
+                          <th className="py-3 px-4 text-[13px] font-bold text-slate-500 uppercase tracking-wider text-center w-16">Key</th>
+                          <th className="py-3 px-4 text-[13px] font-bold text-slate-500 uppercase tracking-wider">Comment</th>
                           {isEditingTable && (
-                            <th className="py-3 px-4 text-base font-bold text-slate-500 uppercase tracking-wider text-center w-16">Xóa</th>
+                            <th className="py-3 px-4 text-[13px] font-bold text-slate-500 uppercase tracking-wider text-center w-16">Xóa</th>
                           )}
                         </tr>
                       </thead>
@@ -532,15 +532,15 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                           const idx = startIndex + relativeIdx;
                           return (
                           <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
-                            <td className="py-3 px-4 text-base text-slate-500 text-center">{idx + 1}</td>
-                            <td className="py-3 px-4 text-base font-bold text-slate-800">
+                            <td className="py-3 px-4 text-[13px] text-slate-500 text-center">{idx + 1}</td>
+                            <td className="py-3 px-4 text-[13px] font-bold text-slate-800">
                               {isEditingTable ? (
-                                <input type="text" value={col.name} onChange={(e) => updateColumn(idx, 'name', e.target.value)} className="w-full px-2 py-1 border border-slate-200 rounded text-base focus:border-blue-500 focus:outline-none font-normal" placeholder="Tên cột" />
+                                <input type="text" value={col.name} onChange={(e) => updateColumn(idx, 'name', e.target.value)} className="w-full px-2 py-1 border border-slate-200 rounded text-[13px] focus:border-blue-500 focus:outline-none font-normal" placeholder="Tên cột" />
                               ) : col.name}
                             </td>
                             <td className="py-3 px-4">
                               {isEditingTable ? (
-                                <select value={col.type} onChange={(e) => updateColumn(idx, 'type', e.target.value)} className="w-full px-2 py-1 border border-slate-200 rounded text-base focus:border-blue-500 focus:outline-none bg-white">
+                                <select value={col.type} onChange={(e) => updateColumn(idx, 'type', e.target.value)} className="w-full px-2 py-1 border border-slate-200 rounded text-[13px] focus:border-blue-500 focus:outline-none bg-white">
                                   <option value="int">int</option>
                                   <option value="varchar">varchar</option>
                                   <option value="nvarchar(max)">nvarchar(max)</option>
@@ -550,19 +550,19 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                                   <option value="NUMBER">NUMBER</option>
                                 </select>
                               ) : (
-                                <span className="px-2 py-1 bg-slate-100 text-slate-600 rounded-md text-base font-bold uppercase border border-slate-200">
+                                <span className="px-2 py-1 bg-slate-100 text-slate-600 rounded-md text-[13px] font-bold uppercase border border-slate-200">
                                   {col.type}
                                 </span>
                               )}
                             </td>
-                            <td className="py-3 px-4 text-base text-slate-500">
+                            <td className="py-3 px-4 text-[13px] text-slate-500">
                               {isEditingTable ? (
-                                <input type="text" value={col.length || ''} onChange={(e) => updateColumn(idx, 'length', e.target.value)} className="w-full px-2 py-1 border border-slate-200 rounded text-base focus:border-blue-500 focus:outline-none" />
+                                <input type="text" value={col.length || ''} onChange={(e) => updateColumn(idx, 'length', e.target.value)} className="w-full px-2 py-1 border border-slate-200 rounded text-[13px] focus:border-blue-500 focus:outline-none" />
                               ) : (col.length || '')}
                             </td>
-                            <td className="py-3 px-4 text-base text-slate-500">
+                            <td className="py-3 px-4 text-[13px] text-slate-500">
                               {isEditingTable ? (
-                                <input type="text" value={col.decimals || ''} onChange={(e) => updateColumn(idx, 'decimals', e.target.value)} className="w-full px-2 py-1 border border-slate-200 rounded text-base focus:border-blue-500 focus:outline-none" />
+                                <input type="text" value={col.decimals || ''} onChange={(e) => updateColumn(idx, 'decimals', e.target.value)} className="w-full px-2 py-1 border border-slate-200 rounded text-[13px] focus:border-blue-500 focus:outline-none" />
                               ) : (col.decimals || '')}
                             </td>
                             <td className="py-3 px-4 text-center">
@@ -581,9 +581,9 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                                 col.isKey && <Key className="w-4 h-4 text-amber-500 mx-auto" />
                               )}
                             </td>
-                            <td className="py-3 px-4 text-base text-slate-600">
+                            <td className="py-3 px-4 text-[13px] text-slate-600">
                               {isEditingTable ? (
-                                <input type="text" value={col.description || ''} onChange={(e) => updateColumn(idx, 'description', e.target.value)} className="w-full px-2 py-1 border border-slate-200 rounded text-base focus:border-blue-500 focus:outline-none" />
+                                <input type="text" value={col.description || ''} onChange={(e) => updateColumn(idx, 'description', e.target.value)} className="w-full px-2 py-1 border border-slate-200 rounded text-[13px] focus:border-blue-500 focus:outline-none" />
                               ) : col.description}
                             </td>
                             {isEditingTable && (
@@ -602,21 +602,21 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                   <div className="flex flex-col">
                     <div className="flex items-center justify-between bg-slate-50 p-2 border border-slate-200 rounded-lg mb-4">
                       <div className="flex items-center gap-2">
-                        <button onClick={() => { setShowFilter(!showFilter); setShowSort(false); }} className={`flex items-center gap-1.5 px-3 py-1.5 text-base font-medium border rounded transition-colors ${showFilter ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'}`}>
+                        <button onClick={() => { setShowFilter(!showFilter); setShowSort(false); }} className={`flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium border rounded transition-colors ${showFilter ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'}`}>
                           <Filter className="w-3.5 h-3.5" /> Lọc
                         </button>
-                        <button onClick={() => { setShowSort(!showSort); setShowFilter(false); }} className={`flex items-center gap-1.5 px-3 py-1.5 text-base font-medium border rounded transition-colors ${showSort ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'}`}>
+                        <button onClick={() => { setShowSort(!showSort); setShowFilter(false); }} className={`flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium border rounded transition-colors ${showSort ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'}`}>
                           <ArrowUpDown className="w-3.5 h-3.5" /> Sắp xếp
                         </button>
                         <button 
                           onClick={() => setShowExportModal(true)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 text-base font-medium bg-white text-slate-700 border border-slate-200 rounded hover:bg-slate-50 transition-colors"
+                          className="flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium bg-white text-slate-700 border border-slate-200 rounded hover:bg-slate-50 transition-colors"
                         >
                           <FileSpreadsheet className="w-3.5 h-3.5" /> Xuất excel
                         </button>
                         <button 
                           onClick={() => setShowColumnToggle(!showColumnToggle)}
-                          className={`flex items-center gap-1.5 px-3 py-1.5 text-base font-medium border rounded transition-colors ${showColumnToggle ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'}`}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium border rounded transition-colors ${showColumnToggle ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'}`}
                         >
                           <Columns className="w-3.5 h-3.5" /> Ẩn/Hiện cột
                         </button>
@@ -624,11 +624,11 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                       <div className="flex items-center gap-2">
                         <button 
                           onClick={() => setShowClearDataConfirmModal(true)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 text-base font-medium bg-white text-red-600 border border-red-200 rounded hover:bg-red-50 transition-colors"
+                          className="flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium bg-white text-red-600 border border-red-200 rounded hover:bg-red-50 transition-colors"
                         >
                           <Trash2 className="w-3.5 h-3.5" /> Xóa dữ liệu
                         </button>
-                        <button className="flex items-center gap-1.5 px-3 py-1.5 text-base font-medium bg-white text-slate-700 border border-slate-200 rounded hover:bg-slate-50 transition-colors">
+                        <button className="flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium bg-white text-slate-700 border border-slate-200 rounded hover:bg-slate-50 transition-colors">
                           <RefreshCw className="w-3.5 h-3.5" /> Tải lại
                         </button>
                       </div>
@@ -649,7 +649,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                                         (newF[i] as FilterCondition).logic = e.target.value as 'AND' | 'OR';
                                         setFilters(newF);
                                       }}
-                                      className="px-3 py-1.5 border border-slate-300 rounded text-base w-24 focus:outline-none focus:border-blue-500 bg-white"
+                                      className="px-3 py-1.5 border border-slate-300 rounded text-[13px] w-24 focus:outline-none focus:border-blue-500 bg-white"
                                     >
                                       <option value="AND">AND</option>
                                       <option value="OR">OR</option>
@@ -662,7 +662,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                                       (newF[i] as FilterCondition).field = e.target.value;
                                       setFilters(newF);
                                     }}
-                                    className={`px-3 py-1.5 border border-slate-300 rounded text-base focus:outline-none focus:border-blue-500 bg-white ${i === 0 ? 'flex-1 max-w-xs' : 'flex-1 max-w-[216px]'}`}
+                                    className={`px-3 py-1.5 border border-slate-300 rounded text-[13px] focus:outline-none focus:border-blue-500 bg-white ${i === 0 ? 'flex-1 max-w-xs' : 'flex-1 max-w-[216px]'}`}
                                   >
                                     {dataItems.length > 0 ? Object.keys(dataItems[0]).map(k => <option key={k} value={k}>{k}</option>) : <option value="">- Chọn trường -</option>}
                                   </select>
@@ -673,7 +673,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                                       (newF[i] as FilterCondition).operator = e.target.value;
                                       setFilters(newF);
                                     }}
-                                    className="px-3 py-1.5 border border-slate-300 rounded text-base w-40 focus:outline-none focus:border-blue-500 bg-white"
+                                    className="px-3 py-1.5 border border-slate-300 rounded text-[13px] w-40 focus:outline-none focus:border-blue-500 bg-white"
                                   >
                                     <option value="=">Bằng (=)</option>
                                     <option value="!=">Khác (!=)</option>
@@ -691,7 +691,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                                         setFilters(newF);
                                       }}
                                       placeholder="<?>"
-                                      className="w-full px-3 py-1.5 border border-slate-300 rounded text-base focus:outline-none focus:border-blue-500"
+                                      className="w-full px-3 py-1.5 border border-slate-300 rounded text-[13px] focus:outline-none focus:border-blue-500"
                                     />
                                   </div>
                                   <button 
@@ -723,7 +723,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                                           (newF[i] as FilterGroup).logic = e.target.value as 'AND' | 'OR';
                                           setFilters(newF);
                                         }}
-                                        className="px-3 py-1.5 border border-slate-300 rounded text-base w-24 focus:outline-none focus:border-blue-500 bg-white"
+                                        className="px-3 py-1.5 border border-slate-300 rounded text-[13px] w-24 focus:outline-none focus:border-blue-500 bg-white"
                                       >
                                         <option value="AND">AND</option>
                                         <option value="OR">OR</option>
@@ -739,7 +739,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                                           });
                                           setFilters(newF);
                                         }}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-200 text-blue-600 rounded text-base font-medium hover:bg-blue-50 bg-white transition-colors"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-200 text-blue-600 rounded text-[13px] font-medium hover:bg-blue-50 bg-white transition-colors"
                                       >
                                         <Plus className="w-3.5 h-3.5" /> Thêm điều kiện
                                       </button>
@@ -769,7 +769,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                                             (newF[i] as FilterGroup).conditions[j].field = e.target.value;
                                             setFilters(newF);
                                           }}
-                                          className="flex-1 max-w-[216px] px-3 py-1.5 border border-slate-300 rounded text-base focus:outline-none focus:border-blue-500 bg-white"
+                                          className="flex-1 max-w-[216px] px-3 py-1.5 border border-slate-300 rounded text-[13px] focus:outline-none focus:border-blue-500 bg-white"
                                         >
                                           {dataItems.length > 0 ? Object.keys(dataItems[0]).map(k => <option key={k} value={k}>{k}</option>) : <option value="">- Chọn trường -</option>}
                                         </select>
@@ -780,7 +780,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                                             (newF[i] as FilterGroup).conditions[j].operator = e.target.value;
                                             setFilters(newF);
                                           }}
-                                          className="px-3 py-1.5 border border-slate-300 rounded text-base w-40 focus:outline-none focus:border-blue-500 bg-white"
+                                          className="px-3 py-1.5 border border-slate-300 rounded text-[13px] w-40 focus:outline-none focus:border-blue-500 bg-white"
                                         >
                                           <option value="=">Bằng (=)</option>
                                           <option value="!=">Khác (!=)</option>
@@ -798,7 +798,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                                               setFilters(newF);
                                             }}
                                             placeholder="<?>"
-                                            className="w-full px-3 py-1.5 border border-slate-300 rounded text-base focus:outline-none focus:border-blue-500"
+                                            className="w-full px-3 py-1.5 border border-slate-300 rounded text-[13px] focus:outline-none focus:border-blue-500"
                                           />
                                         </div>
                                         <button 
@@ -824,7 +824,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                               onClick={() => {
                                 setFilters([...filters, { id: Date.now().toString(), type: 'condition', field: dataItems.length > 0 ? Object.keys(dataItems[0])[0] : '', operator: '=', value: '', logic: 'AND' }]);
                               }}
-                              className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-600 text-blue-600 rounded text-base font-medium hover:bg-blue-50 transition-colors"
+                              className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-600 text-blue-600 rounded text-[13px] font-medium hover:bg-blue-50 transition-colors"
                             >
                               <Plus className="w-4 h-4" /> Điều kiện
                             </button>
@@ -842,21 +842,21 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                                   }
                                 ]);
                               }}
-                              className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-600 text-blue-600 rounded text-base font-medium hover:bg-blue-50 transition-colors"
+                              className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-600 text-blue-600 rounded text-[13px] font-medium hover:bg-blue-50 transition-colors"
                             >
                               <Layers className="w-4 h-4" /> Gom Nhóm
                             </button>
                           </div>
 
                           <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-200">
-                            <button className="flex items-center gap-1.5 px-4 py-1.5 bg-blue-600 text-white rounded text-base font-medium hover:bg-blue-700 transition-colors">
+                            <button className="flex items-center gap-1.5 px-4 py-1.5 bg-blue-600 text-white rounded text-[13px] font-medium hover:bg-blue-700 transition-colors">
                               <Check className="w-4 h-4" /> Áp dụng
                             </button>
                             <button 
                               onClick={() => {
                                 setFilters([{ id: Date.now().toString(), type: 'condition', field: dataItems.length > 0 ? Object.keys(dataItems[0])[0] : '', operator: '=', value: '', logic: 'AND' }]);
                               }}
-                              className="flex items-center gap-1.5 px-4 py-1.5 bg-white text-slate-700 border border-slate-300 rounded text-base font-medium hover:bg-slate-50 transition-colors"
+                              className="flex items-center gap-1.5 px-4 py-1.5 bg-white text-slate-700 border border-slate-300 rounded text-[13px] font-medium hover:bg-slate-50 transition-colors"
                             >
                               <X className="w-4 h-4" /> Xóa bộ lọc
                             </button>
@@ -877,7 +877,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                                   newS[i].field = e.target.value;
                                   setSorts(newS);
                                 }}
-                                className="flex-1 px-3 py-1.5 border border-slate-300 rounded text-base focus:outline-none focus:border-blue-500 bg-white"
+                                className="flex-1 px-3 py-1.5 border border-slate-300 rounded text-[13px] focus:outline-none focus:border-blue-500 bg-white"
                               >
                                 {dataItems.length > 0 ? Object.keys(dataItems[0]).map(k => <option key={k} value={k}>{k}</option>) : <option value="">- Chọn trường -</option>}
                               </select>
@@ -887,7 +887,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                                   newS[i].order = newS[i].order === 'ASC' ? 'DESC' : 'ASC';
                                   setSorts(newS);
                                 }}
-                                className="flex-1 flex items-center justify-center gap-2 px-3 py-1.5 border border-slate-300 bg-slate-100 text-slate-700 rounded text-base font-medium hover:bg-slate-200 transition-colors"
+                                className="flex-1 flex items-center justify-center gap-2 px-3 py-1.5 border border-slate-300 bg-slate-100 text-slate-700 rounded text-[13px] font-medium hover:bg-slate-200 transition-colors"
                               >
                                 {s.order === 'ASC' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />}
                                 {s.order}
@@ -913,21 +913,21 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                               onClick={() => {
                                 setSorts([...sorts, { id: Date.now().toString(), field: dataItems.length > 0 ? Object.keys(dataItems[0])[0] : '', order: 'DESC' }]);
                               }}
-                              className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-600 text-blue-600 rounded text-base font-medium hover:bg-blue-50 transition-colors"
+                              className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-600 text-blue-600 rounded text-[13px] font-medium hover:bg-blue-50 transition-colors"
                             >
                               <Plus className="w-4 h-4" /> Điều kiện
                             </button>
                           </div>
 
                           <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-200">
-                            <button className="flex items-center gap-1.5 px-4 py-1.5 bg-blue-600 text-white rounded text-base font-medium hover:bg-blue-700 transition-colors">
+                            <button className="flex items-center gap-1.5 px-4 py-1.5 bg-blue-600 text-white rounded text-[13px] font-medium hover:bg-blue-700 transition-colors">
                               <Check className="w-4 h-4" /> Áp dụng
                             </button>
                             <button 
                               onClick={() => {
                                 setSorts([{ id: Date.now().toString(), field: dataItems.length > 0 ? Object.keys(dataItems[0])[0] : '', order: 'DESC' }]);
                               }}
-                              className="flex items-center gap-1.5 px-4 py-1.5 bg-white text-slate-700 border border-slate-300 rounded text-base font-medium hover:bg-slate-50 transition-colors"
+                              className="flex items-center gap-1.5 px-4 py-1.5 bg-white text-slate-700 border border-slate-300 rounded text-[13px] font-medium hover:bg-slate-50 transition-colors"
                             >
                               <X className="w-4 h-4" /> Xóa sắp xếp
                             </button>
@@ -949,7 +949,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                                  onChange={() => toggleColumn(col)}
                                  className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
                                />
-                               <span className="text-base font-medium text-slate-700 truncate" title={col}>{col}</span>
+                               <span className="text-[13px] font-medium text-slate-700 truncate" title={col}>{col}</span>
                              </label>
                            );
                         })}
@@ -964,12 +964,12 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                               Object.keys(dataItems[0])
                                 .filter(key => !(hiddenColumns[selectedTable || ''] || []).includes(key))
                                 .map(key => (
-                                  <th key={key} className="py-3 px-4 text-base font-bold text-slate-500 uppercase tracking-wider">
+                                  <th key={key} className="py-3 px-4 text-[13px] font-bold text-slate-500 uppercase tracking-wider">
                                     {key}
                                   </th>
                               ))
                             ) : (
-                               <th className="py-3 px-4 text-base font-bold text-slate-500 uppercase tracking-wider text-center">Dữ liệu</th>
+                               <th className="py-3 px-4 text-[13px] font-bold text-slate-500 uppercase tracking-wider text-center">Dữ liệu</th>
                             )}
                           </tr>
                         </thead>
@@ -980,7 +980,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                                 {Object.entries(row)
                                   .filter(([colKey]) => !(hiddenColumns[selectedTable || ''] || []).includes(colKey))
                                   .map(([colKey, val], colIdx) => (
-                                    <td key={colIdx} className="py-3 px-4 text-base text-slate-800">
+                                    <td key={colIdx} className="py-3 px-4 text-[13px] text-slate-800">
                                       {val as any}
                                     </td>
                                 ))}
@@ -988,7 +988,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                             ))
                           ) : (
                             <tr>
-                              <td colSpan={100} className="py-12 text-center text-slate-500 text-base">
+                              <td colSpan={100} className="py-12 text-center text-slate-500 text-[13px]">
                                 <div className="flex flex-col items-center justify-center">
                                   <Search className="w-8 h-8 text-slate-300 mb-2" />
                                   <p>Bảng chưa có dữ liệu</p>
@@ -1005,7 +1005,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
 
                   {/* Pagination */}
                   {totalItems > 0 && (
-                    <div className="mt-4 flex items-center justify-between text-base max-w-full flex-wrap gap-3">
+                    <div className="mt-4 flex items-center justify-between text-[13px] max-w-full flex-wrap gap-3">
                       <div className="flex items-center gap-2">
                         <span className="text-slate-500">Hiển thị</span>
                         <div className="relative">
@@ -1079,7 +1079,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                   <Table className="w-10 h-10 text-slate-200" />
                 </div>
                 <h4 className="text-xl font-bold text-slate-800 mb-2">Chưa chọn bảng dữ liệu</h4>
-                <p className="max-w-xs text-base text-slate-500">
+                <p className="max-w-xs text-[13px] text-slate-500">
                   Vui lòng chọn một bảng từ danh sách bên trái để xem chi tiết cấu trúc các cột dữ liệu.
                 </p>
               </div>
@@ -1098,7 +1098,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                 <Trash2 className="w-6 h-6 text-red-600" />
               </div>
               <h3 className="text-xl font-bold text-slate-800 text-center mb-2">Xác nhận xóa bảng</h3>
-              <p className="text-slate-600 text-center text-base mb-6">
+              <p className="text-slate-600 text-center text-[13px] mb-6">
                 Bạn có chắc chắn muốn xóa bảng <span className="font-bold text-slate-800">"{selectedTable}"</span>? Toàn bộ dữ liệu của bảng cũng sẽ bị xóa vĩnh viễn. Thao tác này không thể hoàn tác.
               </p>
               
@@ -1126,7 +1126,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-[2px] animate-in fade-in duration-200">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between px-5 py-3 bg-blue-600 text-white">
-              <h3 className="text-base font-bold">Xuất dữ liệu</h3>
+              <h3 className="text-[13px] font-bold">Xuất dữ liệu</h3>
               <button 
                 onClick={() => setShowExportModal(false)}
                 className="text-white/80 hover:text-white transition-colors p-1 rounded hover:bg-white/10"
@@ -1138,11 +1138,11 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
             <div className="p-5">
               <div className="bg-blue-50/80 border border-blue-100 rounded-lg p-2.5 mb-5 flex items-center gap-2">
                 <Info className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                <span className="text-base font-medium text-blue-900 truncate">Tên bảng: <span className="font-bold">{selectedTable}</span></span>
+                <span className="text-[13px] font-medium text-blue-900 truncate">Tên bảng: <span className="font-bold">{selectedTable}</span></span>
               </div>
               
               <div className="mb-5">
-                <h4 className="text-base font-semibold text-slate-800 mb-2.5">Tùy chọn xuất dữ liệu</h4>
+                <h4 className="text-[13px] font-semibold text-slate-800 mb-2.5">Tùy chọn xuất dữ liệu</h4>
                 
                 <div className="space-y-3">
                   <label className="flex items-start gap-2.5 cursor-pointer group">
@@ -1157,7 +1157,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                       />
                     </div>
                     <div>
-                      <div className="text-base font-semibold text-slate-700 group-hover:text-blue-600 transition-colors">Xuất dữ liệu đã lọc</div>
+                      <div className="text-[13px] font-semibold text-slate-700 group-hover:text-blue-600 transition-colors">Xuất dữ liệu đã lọc</div>
                       <div className="text-[11px] text-slate-500 mt-0.5">Xuất dữ liệu theo điều kiện lọc & sắp xếp hiện tại</div>
                     </div>
                   </label>
@@ -1174,7 +1174,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                       />
                     </div>
                     <div>
-                      <div className="text-base font-semibold text-slate-700 group-hover:text-blue-600 transition-colors">Xuất tất cả dữ liệu</div>
+                      <div className="text-[13px] font-semibold text-slate-700 group-hover:text-blue-600 transition-colors">Xuất tất cả dữ liệu</div>
                       <div className="text-[11px] text-slate-500 mt-0.5">Bỏ qua bộ lọc, xuất toàn bộ collection</div>
                     </div>
                   </label>
@@ -1182,13 +1182,13 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
               </div>
               
               <div className="mb-5">
-                <h4 className="text-base font-semibold text-slate-800 mb-2">Giới hạn số dòng <span className="text-slate-400 font-normal">(tùy chọn)</span></h4>
+                <h4 className="text-[13px] font-semibold text-slate-800 mb-2">Giới hạn số dòng <span className="text-slate-400 font-normal">(tùy chọn)</span></h4>
                 <input 
                   type="number"
                   value={exportLimit}
                   onChange={(e) => setExportLimit(e.target.value)}
                   placeholder="Để trống để xuất tất cả"
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 />
                 <p className="text-[11px] text-amber-600 mt-1.5">Khuyến nghị: Tối đa 10,000 dòng để tránh timeout</p>
               </div>
@@ -1214,7 +1214,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
             <div className="flex justify-end items-center gap-2 px-5 py-3 border-t border-slate-100 bg-slate-50">
               <button 
                 onClick={() => setShowExportModal(false)}
-                className="px-3 py-1.5 text-base font-medium text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 hover:text-slate-800 transition-colors"
+                className="px-3 py-1.5 text-[13px] font-medium text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 hover:text-slate-800 transition-colors"
               >
                 Hủy
               </button>
@@ -1223,7 +1223,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                   setShowExportModal(false);
                   // Implement actual export logic here
                 }}
-                className="flex items-center gap-1.5 px-4 py-1.5 text-base font-semibold text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition-colors shadow-sm"
+                className="flex items-center gap-1.5 px-4 py-1.5 text-[13px] font-semibold text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition-colors shadow-sm"
               >
                 <Download className="w-3.5 h-3.5" /> Thực hiện
               </button>
@@ -1241,7 +1241,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                 <Trash2 className="w-6 h-6 text-red-600" />
               </div>
               <h3 className="text-xl font-bold text-slate-800 text-center mb-2">Xác nhận xóa dữ liệu</h3>
-              <p className="text-slate-600 text-center text-base mb-6">
+              <p className="text-slate-600 text-center text-[13px] mb-6">
                 Bạn có chắc chắn muốn xóa toàn bộ dữ liệu của bảng <span className="font-bold text-slate-800">"{selectedTable}"</span>? Thao tác này không thể hoàn tác.
               </p>
               

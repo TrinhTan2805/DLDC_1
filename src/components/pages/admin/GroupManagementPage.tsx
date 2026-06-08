@@ -320,6 +320,8 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
   const [expandedDataSources, setExpandedDataSources] = useState<string[]>([]);
   const [selectedDataScopeCategory, setSelectedDataScopeCategory] = useState<string>('');
   
+
+  
   // State for data scope field security methods
   const [fieldSecurityChecked, setFieldSecurityChecked] = useState<{ [key: string]: boolean }>(() => {
     const saved = localStorage.getItem('field_security_checked');
@@ -330,6 +332,9 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
     const saved = localStorage.getItem('field_security_methods');
     return saved ? JSON.parse(saved) : {};
   });
+
+  const [addedBlankRows, setAddedBlankRows] = useState<{ [tableId: string]: number }>({});
+  const [securityTableEnabled, setSecurityTableEnabled] = useState<{ [tableId: string]: boolean }>({});
 
   const getActiveAlgorithms = () => {
     const defaultAlgs = [
@@ -400,6 +405,199 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
     }));
   };
 
+  const renderFieldSecurityTable = (tableId: string, allFields: string[]) => {
+    const checkedFields = allFields.filter(f => isFieldChecked(tableId, f));
+    const blankCount = addedBlankRows[tableId] || 0;
+    const activeAlgorithms = getActiveAlgorithms();
+
+    const handleAddRow = () => {
+      const uncheckedFieldsCount = allFields.filter(f => !isFieldChecked(tableId, f)).length;
+      if (blankCount >= uncheckedFieldsCount) {
+        alert('Tất cả các trường dữ liệu đều đã được cấu hình bảo mật.');
+        return;
+      }
+      setAddedBlankRows(prev => ({
+        ...prev,
+        [tableId]: (prev[tableId] || 0) + 1
+      }));
+    };
+
+    const handleRemoveBlankRow = () => {
+      setAddedBlankRows(prev => ({
+        ...prev,
+        [tableId]: Math.max(0, (prev[tableId] || 0) - 1)
+      }));
+    };
+
+    const handleSelectField = (field: string) => {
+      handleFieldCheckChange(tableId, field, true);
+      setAddedBlankRows(prev => ({
+        ...prev,
+        [tableId]: Math.max(0, (prev[tableId] || 0) - 1)
+      }));
+    };
+
+    const handleRemoveField = (field: string) => {
+      handleFieldCheckChange(tableId, field, false);
+    };
+
+    const handleFieldChange = (oldField: string, newField: string) => {
+      const currentMethod = getFieldMethod(tableId, oldField);
+      handleFieldCheckChange(tableId, oldField, false);
+      handleFieldCheckChange(tableId, newField, true);
+      handleFieldMethodChange(tableId, newField, currentMethod);
+    };
+
+    const isEnabled = securityTableEnabled[tableId] !== undefined ? securityTableEnabled[tableId] : checkedFields.length > 0;
+
+    const handleToggleEnabled = (checked: boolean) => {
+      setSecurityTableEnabled(prev => ({
+        ...prev,
+        [tableId]: checked
+      }));
+      if (!checked) {
+        allFields.forEach(f => {
+          handleFieldCheckChange(tableId, f, false);
+        });
+        setAddedBlankRows(prev => ({
+          ...prev,
+          [tableId]: 0
+        }));
+      }
+    };
+
+    return (
+      <div className="mt-4 space-y-3">
+        <label className="flex items-center gap-2 cursor-pointer font-bold text-[13px] text-slate-700 select-none">
+          <input
+            type="checkbox"
+            checked={isEnabled}
+            onChange={(e) => handleToggleEnabled(e.target.checked)}
+            className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 cursor-pointer"
+          />
+          <span>Cấu hình dữ liệu bảo mật</span>
+        </label>
+
+        {isEnabled && (
+          <div className="border border-slate-200 rounded-lg overflow-hidden bg-white animate-in fade-in duration-200">
+            <table className="w-full text-left border-collapse text-[13px]">
+              <thead className="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th className="py-2.5 px-4 font-semibold text-slate-700 w-12 text-center">STT</th>
+                  <th className="py-2.5 px-4 font-semibold text-slate-700 min-w-[200px]">Chọn trường bảo mật</th>
+                  <th className="py-2.5 px-4 font-semibold text-slate-700 min-w-[250px]">Chọn cấu hình bảo mật</th>
+                  <th className="py-2.5 px-4 font-semibold text-slate-700 w-20 text-center">
+                    <button
+                      type="button"
+                      onClick={handleAddRow}
+                      className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                      title="Thêm trường bảo mật"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {checkedFields.length === 0 && blankCount === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="py-6 text-center text-slate-400 text-[13px]">
+                      Chưa cấu hình bảo mật trường nào. Bấm nút <span className="font-bold text-blue-600">+</span> ở cột thao tác để thêm.
+                    </td>
+                  </tr>
+                ) : (
+                  <>
+                    {checkedFields.map((field, index) => {
+                      const availableFields = allFields.filter(f => !isFieldChecked(tableId, f) || f === field);
+                      return (
+                        <tr key={`checked-${field}`} className="hover:bg-slate-50/50">
+                          <td className="py-2 px-4 text-center text-slate-500">{index + 1}</td>
+                          <td className="py-2 px-4">
+                            <select
+                              value={field}
+                              onChange={(e) => handleFieldChange(field, e.target.value)}
+                              className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white text-[13px]"
+                            >
+                              {availableFields.map(f => (
+                                <option key={f} value={f}>{f}</option>
+                              ))}
+                            </select>
+                          </td>
+                          <td className="py-2 px-4">
+                            <select
+                              value={getFieldMethod(tableId, field)}
+                              onChange={(e) => handleFieldMethodChange(tableId, field, e.target.value)}
+                              className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white text-[13px]"
+                            >
+                              {activeAlgorithms.map(alg => (
+                                <option key={alg.id} value={alg.id}>{alg.name}</option>
+                              ))}
+                            </select>
+                          </td>
+                          <td className="py-2 px-4 text-center">
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveField(field)}
+                              className="p-1 text-red-500 hover:bg-red-50 rounded transition-colors"
+                              title="Xóa"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {Array.from({ length: blankCount }).map((_, bIdx) => {
+                      const availableFields = allFields.filter(f => !isFieldChecked(tableId, f));
+                      return (
+                        <tr key={`blank-${bIdx}`} className="hover:bg-slate-50/50 bg-blue-50/10">
+                          <td className="py-2 px-4 text-center text-slate-400">
+                            {checkedFields.length + bIdx + 1}
+                          </td>
+                          <td className="py-2 px-4">
+                            <select
+                              value=""
+                              onChange={(e) => handleSelectField(e.target.value)}
+                              className="w-full px-2.5 py-1.5 border border-blue-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white text-[13px] text-slate-500 font-medium"
+                            >
+                              <option value="">-- Chọn trường bảo mật --</option>
+                              {availableFields.map(f => (
+                                <option key={f} value={f}>{f}</option>
+                              ))}
+                            </select>
+                          </td>
+                          <td className="py-2 px-4">
+                            <select
+                              disabled
+                              value=""
+                              className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-slate-50 text-slate-400 text-[13px]"
+                            >
+                              <option value="">Chọn cấu hình bảo mật</option>
+                            </select>
+                          </td>
+                          <td className="py-2 px-4 text-center">
+                            <button
+                              type="button"
+                              onClick={handleRemoveBlankRow}
+                              className="p-1 text-slate-400 hover:bg-slate-100 rounded transition-colors"
+                              title="Hủy"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   // State to hold actual saved permissions per group
   const [savedMenuItems, setSavedMenuItems] = useState<{ [groupId: number]: string[] }>({});
   const [savedPermissions, setSavedPermissions] = useState<{ [groupId: number]: { [key: string]: string[] } }>({});
@@ -434,6 +632,8 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
     
     return matchesUnit && matchesSearch && matchesStatus;
   });
+
+
 
   const handleOpenModal = (type: ModalType, group?: Group, tab: DetailTabType = 'info') => {
     setModalType(type);
@@ -1491,53 +1691,10 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                               
                               <input type="text" aria-label="Giá trị điều kiện hiển thị" title="Giá trị điều kiện hiển thị" className="text-sm border border-slate-300 rounded px-3 py-1.5 focus:ring-2 focus:ring-blue-500 outline-none w-40 text-slate-700" placeholder="Nhập giá trị" />
                               
-                              <div className="flex-1"></div>
-                              
-                              <select aria-label="Phạm vi dữ liệu" title="Phạm vi dữ liệu" className="text-sm border border-slate-300 rounded px-2 py-1.5 focus:ring-2 focus:ring-blue-500 outline-none text-slate-700">
-                                <option value="all">Xem toàn bộ bản ghi</option>
-                                <option value="org">Chỉ xem dữ liệu cơ quan mình</option>
-                                <option value="self">Chỉ xem dữ liệu do mình tạo</option>
-                              </select>
+
                             </div>
                             
-                            <div className="mt-2">
-                              <div className="text-xs text-slate-500 mb-2">Trường dữ liệu yêu cầu bảo mật:</div>
-                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                {[
-                                  'Mã định danh',
-                                  'Họ tên',
-                                  'Ngày sinh',
-                                  'Giới tính',
-                                  'Dân tộc'
-                                ].map((field) => {
-                                  const checked = isFieldChecked('khaisinh', field);
-                                  return (
-                                    <div key={field} className="flex flex-col gap-1.5 p-2 border border-slate-200 rounded bg-white">
-                                      <label className="flex items-center gap-2 cursor-pointer">
-                                        <input
-                                          type="checkbox"
-                                          checked={checked}
-                                          onChange={(e) => handleFieldCheckChange('khaisinh', field, e.target.checked)}
-                                          className="w-3.5 h-3.5 text-blue-600 rounded focus:ring-blue-500 cursor-pointer"
-                                        />
-                                        <span className="text-sm text-slate-700 font-medium">{field}</span>
-                                      </label>
-                                      {checked && (
-                                        <select
-                                          value={getFieldMethod('khaisinh', field)}
-                                          onChange={(e) => handleFieldMethodChange('khaisinh', field, e.target.value)}
-                                          className="text-xs border border-slate-300 rounded px-2 py-1.5 bg-white focus:ring-2 focus:ring-blue-500 outline-none text-slate-600 w-full"
-                                        >
-                                          {getActiveAlgorithms().map(alg => (
-                                            <option key={alg.id} value={alg.id}>{alg.name}</option>
-                                          ))}
-                                        </select>
-                                      )}
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
+                            {renderFieldSecurityTable('khaisinh', ['Mã định danh', 'Họ tên', 'Ngày sinh', 'Giới tính', 'Dân tộc'])}
                           </div>
 
                           <div className="space-y-3 border border-slate-100 rounded p-3">
@@ -1556,51 +1713,10 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                               
                               <input type="text" aria-label="Giá trị điều kiện hiển thị" title="Giá trị điều kiện hiển thị" className="text-sm border border-slate-300 rounded px-3 py-1.5 focus:ring-2 focus:ring-blue-500 outline-none w-40 text-slate-700" placeholder="Nhập giá trị" />
                               
-                              <div className="flex-1"></div>
-                              
-                              <select aria-label="Phạm vi dữ liệu" title="Phạm vi dữ liệu" className="text-sm border border-slate-300 rounded px-2 py-1.5 focus:ring-2 focus:ring-blue-500 outline-none text-slate-700">
-                                <option value="all">Xem toàn bộ bản ghi</option>
-                                <option value="org">Chỉ xem dữ liệu cơ quan mình</option>
-                                <option value="self">Chỉ xem dữ liệu do mình tạo</option>
-                              </select>
+
                             </div>
                             
-                            <div className="mt-2">
-                              <div className="text-xs text-slate-500 mb-2">Trường dữ liệu yêu cầu bảo mật:</div>
-                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                {[
-                                  'Mã định danh vợ/chồng',
-                                  'Ngày đăng ký',
-                                  'Nơi đăng ký'
-                                ].map((field) => {
-                                  const checked = isFieldChecked('kethon', field);
-                                  return (
-                                    <div key={field} className="flex flex-col gap-1.5 p-2 border border-slate-200 rounded bg-white">
-                                      <label className="flex items-center gap-2 cursor-pointer">
-                                        <input
-                                          type="checkbox"
-                                          checked={checked}
-                                          onChange={(e) => handleFieldCheckChange('kethon', field, e.target.checked)}
-                                          className="w-3.5 h-3.5 text-blue-600 rounded focus:ring-blue-500 cursor-pointer"
-                                        />
-                                        <span className="text-sm text-slate-700 font-medium">{field}</span>
-                                      </label>
-                                      {checked && (
-                                        <select
-                                          value={getFieldMethod('kethon', field)}
-                                          onChange={(e) => handleFieldMethodChange('kethon', field, e.target.value)}
-                                          className="text-xs border border-slate-300 rounded px-2 py-1.5 bg-white focus:ring-2 focus:ring-blue-500 outline-none text-slate-600 w-full"
-                                        >
-                                          {getActiveAlgorithms().map(alg => (
-                                            <option key={alg.id} value={alg.id}>{alg.name}</option>
-                                          ))}
-                                        </select>
-                                      )}
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
+                            {renderFieldSecurityTable('kethon', ['Mã định danh vợ/chồng', 'Ngày đăng ký', 'Nơi đăng ký'])}
                           </div>
                         </div>
                       </div>
@@ -1617,9 +1733,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                                 <input type="checkbox" className="w-4 h-4 text-blue-600 rounded" />
                                 <span className="font-medium text-slate-800 text-sm">Bảng: Hồ sơ xin thôi quốc tịch</span>
                               </label>
-                              <select disabled aria-label="Phạm vi dữ liệu" title="Phạm vi dữ liệu" className="text-sm border border-slate-300 rounded px-2 py-1 bg-slate-100 text-slate-400">
-                                <option>Xem toàn bộ bản ghi</option>
-                              </select>
+
                             </div>
                           </div>
                         </div>

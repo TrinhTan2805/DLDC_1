@@ -220,7 +220,7 @@ export function TargetDatabaseManagementPage() {
                             item.status === 'active' ? 'translate-x-5' : 'translate-x-1'
                           }`} />
                         </button>
-                        <span className="text-[12px] font-bold text-slate-500 uppercase tracking-tighter">
+                        <span className="text-[13px] font-bold text-slate-500 uppercase tracking-tighter">
                           {item.status === 'active' ? 'Kích hoạt' : 'Tạm dừng'}
                         </span>
                       </div>

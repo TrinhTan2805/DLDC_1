@@ -400,11 +400,10 @@ export function RoleManagementPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <StatsCard icon={Shield} iconColor="blue" title="Tổng số vai trò" value={roles.length.toString()} />
         <StatsCard icon={Shield} iconColor="green" title="Vai trò hoạt động" value={roles.filter(r => r.status === 'active').length.toString()} />
         <StatsCard icon={User} iconColor="purple" title="Số người dùng được gán vai trò" value={roles.reduce((acc, r) => acc + r.memberCount, 0).toString()} />
-        <StatsCard icon={Users} iconColor="orange" title="Số nhóm người dùng được gán vai trò" value={roles.reduce((acc, r) => acc + (r.groupCount || 0), 0).toString()} />
       </div>
 
       <div className="bg-white rounded-lg border border-slate-200 p-4">
@@ -484,7 +483,7 @@ export function RoleManagementPage() {
                 </div>
               </div>
  
-              <div className="grid grid-cols-5 gap-2 pt-4 border-t border-slate-100">
+              <div className="grid grid-cols-4 gap-2 pt-4 border-t border-slate-100">
                 <div>
                   <div className="text-xs text-slate-500 mb-1">Người dùng</div>
                   <div className="text-slate-900 font-semibold">{role.memberCount}</div>
@@ -496,10 +495,6 @@ export function RoleManagementPage() {
                 <div>
                   <div className="text-xs text-slate-500 mb-1">Quyền CN</div>
                   <div className="text-slate-900 font-semibold">{role.permissions.length}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-slate-500 mb-1">Đơn vị</div>
-                  <div className="text-slate-900 font-semibold">{(role.dataPermissions || []).length}</div>
                 </div>
                 <div>
                   <div className="text-xs text-slate-500 mb-1">Trạng thái</div>

@@ -246,16 +246,7 @@ export function BackupPage() {
         <StatsCard icon={HardDrive} iconColor="purple" title="Dung lượng" value={`${totalSize} GB`} />
       </div>
 
-      {/* Backup Schedule Info */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 shadow-sm">
-        <div className="flex items-start gap-3">
-          <Calendar className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-          <div className="text-[13px] text-blue-800 font-medium">
-            <strong>Lịch sao lưu tự động:</strong> Hàng ngày lúc 02:00 AM | 
-            <strong className="ml-3">Lưu trữ:</strong> 30 ngày
-          </div>
-        </div>
-      </div>
+
 
       {/* Backup List Table */}
       <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">

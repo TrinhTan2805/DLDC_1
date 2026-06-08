@@ -14,7 +14,8 @@ import {
   UserCog,
   Settings,
   CheckCircle2,
-  XCircle
+  XCircle,
+  FileText
 } from 'lucide-react';
 import { StatsCard } from '../../common/StatsCard';
 
@@ -249,6 +250,27 @@ export function LogRetentionConfigPage() {
 
   return (
     <div className="space-y-6" style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px' }}>
+      <div className="bg-white rounded-lg border border-slate-200">
+        <div className="flex border-b border-slate-200">
+          <button
+            onClick={() => {
+              if (typeof (window as any).navigateToPage === 'function') {
+                (window as any).navigateToPage('admin-config-log');
+              }
+            }}
+            className="flex items-center gap-2 px-6 py-3 border-b-2 transition-colors border-transparent text-slate-600 hover:text-slate-900"
+          >
+            <FileText className="w-4 h-4" />
+            <span className="text-sm font-medium">Nhật ký thay đổi cấu hình</span>
+          </button>
+          <button
+            className="flex items-center gap-2 px-6 py-3 border-b-2 transition-colors border-blue-600 text-blue-600"
+          >
+            <Clock className="w-4 h-4" />
+            <span className="text-sm font-medium">Quản lý thời gian lưu trữ nhật ký</span>
+          </button>
+        </div>
+      </div>
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <StatsCard 
