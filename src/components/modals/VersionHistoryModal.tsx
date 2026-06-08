@@ -7,6 +7,13 @@ interface VersionHistoryModalProps {
 
 const mockVersions = [
   {
+    id: 13,
+    version: 'v2.4.4',
+    date: '08/06/2026',
+    time: '13:30',
+    content: 'Cấu hình lại giao diện Tạo mới/Cập nhật API cung cấp dưới dạng màn cuộn đơn trang; bổ sung các trường nhập liệu thông tin liên hệ và cơ chế autofill động. Đồng bộ bảng danh sách API cung cấp: Tách/gộp cột Mã & Tên API thành một cột xếp tầng, loại bỏ cột Đơn vị sử dụng, thu gọn cột đặc tả tài liệu PDF thành Icon đặc tả.'
+  },
+  {
     id: 12,
     version: 'v2.4.3',
     date: '05/06/2026',

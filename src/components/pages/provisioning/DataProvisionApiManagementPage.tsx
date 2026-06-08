@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   Server, GitCompare, Shield, History, Search, Filter, Plus,
-  Trash2, Edit3, Key, Clock, Calendar, CheckCircle2, XCircle, AlertTriangle, FileJson, Power
+  Trash2, Edit3, Key, Clock, Calendar, CheckCircle2, XCircle, AlertTriangle, FileJson, Power, FileText
 } from 'lucide-react';
 import { ApiDocumentationTab } from './tabs/ApiDocumentationTab';
 import { ProvisionApiModal } from './modals/ProvisionApiModal';
@@ -82,10 +82,10 @@ export function DataProvisionApiManagementPage() {
 
   // Mock datasets with full CRUD state
   const [apis, setApis] = useState<any[]>([
-    { id: '1', name: 'Lấy danh sách Hộ tịch', endpoint: '/api/v1/hotich/list', method: 'GET', version: 'v1.2', status: 'Hoạt động', desc: 'Dịch vụ khai thác thông tin hộ tịch của công dân' },
-    { id: '2', name: 'Đồng bộ dữ liệu THADS', endpoint: '/api/v1/thads/sync', method: 'POST', version: 'v2.0', status: 'Hoạt động', desc: 'Đồng bộ kết quả thi hành án dân sự tỉnh Bắc Ninh' },
-    { id: '3', name: 'Đọc thông tin Biện pháp bảo đảm', endpoint: '/api/v1/bpbd/get', method: 'GET', version: 'v1.0', status: 'Hoạt động', desc: 'Đọc thông tin giao dịch bảo đảm' },
-    { id: '4', name: 'Tra cứu Cơ sở dữ liệu Pháp luật', endpoint: '/api/v1/phapluat/search', method: 'GET', version: 'v1.1', status: 'Tạm ngưng', desc: 'Tra cứu văn bản pháp luật hiện hành' }
+    { id: '1', code: 'SVC-HOTICH-001', name: 'API cung cấp dữ liệu Hộ tịch điện tử', endpoint: '/api/v1/hotich/search', method: 'GET', version: 'v1.2', status: 'Hoạt động', desc: 'Dịch vụ khai thác thông tin hộ tịch của công dân', dataType: 'Hộ tịch điện tử', consumerUnit: 'Bộ Kế hoạch và Đầu tư', receiverPoint: 'Nguyễn Văn A - 0987654321', time: '2026-05-24 08:00:00' },
+    { id: '2', code: 'SVC-THADS-002', name: 'API đồng bộ dữ liệu thi hành án dân sự', endpoint: '/api/v1/thads/sync', method: 'POST', version: 'v2.0', status: 'Hoạt động', desc: 'Đồng bộ kết quả thi hành án dân sự tỉnh Bắc Ninh', dataType: 'Thi hành án dân sự', consumerUnit: 'Sở Tài chính tỉnh Bắc Ninh', receiverPoint: 'Trần Thị B - 0912345678', time: '2026-05-25 09:30:00' },
+    { id: '3', code: 'SVC-BPBD-003', name: 'API đọc thông tin Biện pháp bảo đảm', endpoint: '/api/v1/bpbd/get', method: 'GET', version: 'v1.0', status: 'Hoạt động', desc: 'Đọc thông tin giao dịch bảo đảm', dataType: 'Biện pháp bảo đảm', consumerUnit: 'Sở Tư pháp tỉnh Bắc Ninh', receiverPoint: 'Phạm Văn C - 0901234567', time: '2026-05-25 14:15:00' },
+    { id: '4', code: 'SVC-PHAPLUAT-004', name: 'API tra cứu Cơ sở dữ liệu Pháp luật', endpoint: '/api/v1/phapluat/search', method: 'GET', version: 'v1.1', status: 'Tạm ngưng', desc: 'Tra cứu văn bản pháp luật hiện hành', dataType: 'Văn bản pháp luật', consumerUnit: 'UBND Huyện Tiên Du', receiverPoint: 'Lê Văn D - 0988888888', time: '2026-05-23 16:45:00' }
   ]);
 
   const [recons, setRecons] = useState<any[]>([
@@ -177,7 +177,8 @@ export function DataProvisionApiManagementPage() {
 
   const filteredApis = apis.filter(api => {
     const matchesSearch = api.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      api.endpoint.toLowerCase().includes(searchTerm.toLowerCase());
+      api.endpoint.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (api.code && api.code.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesMethod = filterMethod === 'All' || api.method === filterMethod;
     const matchesStatus = filterStatus === 'All' || api.status === filterStatus;
     const matchesVersion = filterVersion === 'All' || api.version === filterVersion;
@@ -219,12 +220,11 @@ export function DataProvisionApiManagementPage() {
         {activeTab === 'api_cung_cap' && (
           <button
             onClick={() => {
-              if (typeof (window as any).navigateToPage === 'function') {
-                (window as any).navigateToPage('provisioning-service-setup?action=create');
-              }
+              setSelectedApi(null);
+              setShowApiModal(true);
             }}
             className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2.5 rounded-lg flex items-center shadow-md font-bold transition-all hover:scale-[1.02] active:scale-[0.98] text-sm"
-            title="Đến màn hình Thiết lập điều phối để tạo mới"
+            title="Tạo mới API Cung cấp dữ liệu"
           >
             <Plus className="w-4 h-4 mr-2" />
             Tạo API Cung cấp mới
@@ -462,11 +462,11 @@ export function DataProvisionApiManagementPage() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50 text-slate-500 text-xs border-b border-slate-200 uppercase tracking-wider">
-                    <th className="py-3 px-4 font-bold">Tên API</th>
-                    <th className="py-3 px-4 font-bold">Endpoint (URL)</th>
-                    <th className="py-3 px-4 font-bold">Phương thức</th>
-                    <th className="py-3 px-4 font-bold">Phiên bản</th>
-                    <th className="py-3 px-4 font-bold">Mô tả</th>
+                    <th className="py-3 px-4 font-bold">Mã / Tên API</th>
+                    <th className="py-3 px-4 font-bold">Loại dữ liệu chia sẻ</th>
+                    <th className="py-3 px-4 font-bold">Đầu mối tiếp nhận</th>
+                    <th className="py-3 px-4 font-bold">Thời gian</th>
+                    <th className="py-3 px-4 font-bold">Tài liệu</th>
                     <th className="py-3 px-4 font-bold">Trạng thái</th>
                     <th className="py-3 px-4 font-bold text-center">Thao tác</th>
                   </tr>
@@ -474,16 +474,22 @@ export function DataProvisionApiManagementPage() {
                 <tbody className="text-sm divide-y divide-slate-100">
                   {filteredApis.map(api => (
                     <tr key={api.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="py-3.5 px-4 font-semibold text-slate-800">{api.name}</td>
-                      <td className="py-3.5 px-4 font-mono text-xs text-slate-600">{api.endpoint}</td>
                       <td className="py-3.5 px-4">
-                        <span className={`font-mono text-xs px-2.5 py-1 rounded font-bold ${api.method === 'GET' ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                          }`}>
-                          {api.method}
-                        </span>
+                        <div className="font-bold text-slate-800">{api.name}</div>
+                        <div className="text-xs text-slate-500 font-mono mt-1">{api.code || 'SVC-HOTICH-001'}</div>
                       </td>
-                      <td className="py-3.5 px-4 text-slate-700 font-mono text-xs font-semibold">{api.version}</td>
-                      <td className="py-3.5 px-4 text-slate-500 text-xs max-w-[200px] truncate" title={api.desc}>{api.desc}</td>
+                      <td className="py-3.5 px-4 text-slate-700 font-semibold">{api.dataType || 'Hộ tịch điện tử'}</td>
+                      <td className="py-3.5 px-4 text-slate-600 text-xs">{api.receiverPoint || 'Nguyễn Văn A - 0987654321'}</td>
+                      <td className="py-3.5 px-4 text-slate-500 font-mono text-xs">{formatDateTime(api.time || '2026-05-24 08:00:00')}</td>
+                      <td className="py-3.5 px-4">
+                        <button
+                          onClick={() => window.open(`/preview-api-docs?apiId=${api.code || 'SVC-HOTICH-001'}&apiUrl=https://api.dldc.gov.vn${api.endpoint}&consumerUnit=${encodeURIComponent(api.consumerUnit || 'Bộ Kế hoạch và Đầu tư')}`, '_blank')}
+                          className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors cursor-pointer inline-flex items-center justify-center border border-red-200 bg-red-50/50"
+                          title="Xem Tài liệu Đặc tả kỹ thuật API (PDF)"
+                        >
+                          <FileText className="w-4 h-4" />
+                        </button>
+                      </td>
                       <td className="py-3.5 px-4">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${api.status === 'Hoạt động' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-800'
                           }`}>
@@ -495,14 +501,14 @@ export function DataProvisionApiManagementPage() {
                         <div className="flex items-center justify-center gap-2">
                           <button
                             onClick={() => { setSelectedApi(api); setShowApiModal(true); }}
-                            className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded transition-colors"
+                            className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded transition-colors cursor-pointer"
                             title="Sửa thông tin API"
                           >
                             <Edit3 className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleToggleApiStatus(api.id, api.status)}
-                            className={`p-1.5 rounded transition-colors ${api.status === 'Hoạt động'
+                            className={`p-1.5 rounded transition-colors cursor-pointer ${api.status === 'Hoạt động'
                               ? 'text-orange-500 hover:text-orange-600 hover:bg-orange-50'
                               : 'text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50'
                               }`}

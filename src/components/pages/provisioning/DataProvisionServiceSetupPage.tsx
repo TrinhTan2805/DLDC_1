@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Settings, CheckCircle, XCircle, Share2, Search, Filter, Plus, FileText, Activity, Eye, Pencil, RefreshCw, ChevronDown, Ban } from 'lucide-react';
+import { Settings, CheckCircle, XCircle, Share2, Search, Filter, Plus, FileText, Activity, Eye, Pencil, RefreshCw, ChevronDown, Ban, Database, Clock } from 'lucide-react';
 import { ProvisionServiceModal } from './modals/ProvisionServiceModal';
 import { ProvisionServiceApprovalModal } from './modals/ProvisionServiceApprovalModal';
 import { ProvisionServicePublishModal } from './modals/ProvisionServicePublishModal';
 import { SubmitApprovalModal } from './modals/SubmitApprovalModal';
 import { ProvisionServicePublicDetailsModal } from './modals/ProvisionServicePublicDetailsModal';
+import { ProvisionApiDetailModal } from './modals/ProvisionApiDetailModal';
 
 const formatDateTime = (dateStr: string) => {
   if (!dateStr) return '';
@@ -45,6 +46,7 @@ export function DataProvisionServiceSetupPage() {
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [showSubmitApprovalModal, setShowSubmitApprovalModal] = useState(false);
   const [showPublicDetailsModal, setShowPublicDetailsModal] = useState(false);
+  const [showApiDetailModal, setShowApiDetailModal] = useState(false);
   const [selectedService, setSelectedService] = useState<any>(null);
   const [approvalModalMode, setApprovalModalMode] = useState<'approve' | 'reject'>('approve');
 
@@ -70,8 +72,10 @@ export function DataProvisionServiceSetupPage() {
 
   // Dynamic services list (including standard fields from UI mockups)
   const [services, setServices] = useState([
-    { id: '1', name: 'DV_Hộ tịch điện tử', code: 'DV_001', type: 'Dữ liệu Hộ tịch điện tử', freq: 'Thời gian thực', protocol: 'REST API', status: 'pending', date: '2026-05-11 08:00:00', publishDate: '' },
-    { id: '2', name: 'DV_Thi hành án dân sự', code: 'DV_002', type: 'Dữ liệu Thi hành án dân sự', freq: 'Hàng ngày', protocol: 'SOAP', status: 'published', date: '2026-05-10 09:00:00', publishDate: '11/05/2026 08:00:00' }
+    { id: '1', name: 'API cung cấp dữ liệu Hộ tịch điện tử', code: 'SVC-HOTICH-001', type: 'Dữ liệu Hộ tịch', freq: 'Thời gian thực', protocol: 'REST API (JSON)', status: 'published', date: '2026-05-24 08:00:00', publishDate: '25/05/2026 09:00:00', creator: 'Hệ thống BTP' },
+    { id: '2', name: 'API đối soát dữ liệu đăng ký kết hôn', code: 'SVC-KETHON-002', type: 'Dữ liệu kết hôn', freq: 'Hàng ngày', protocol: 'REST API (JSON)', status: 'pending', date: '2026-05-25 09:30:00', publishDate: '', creator: 'Nguyễn Văn A' },
+    { id: '3', name: 'API cung cấp thông tin khai sinh', code: 'SVC-KHAISINH-003', type: 'Dữ liệu khai sinh', freq: 'Thời gian thực', protocol: 'REST API (JSON)', status: 'draft', date: '2026-05-25 14:15:00', publishDate: '', creator: 'Trần Thị B' },
+    { id: '4', name: 'API đối soát dữ liệu khai tử', code: 'SVC-KHAITU-004', type: 'Dữ liệu khai tử', freq: 'Hàng tuần', protocol: 'SOAP (XML)', status: 'rejected', date: '2026-05-23 16:45:00', publishDate: '', creator: 'Lê Văn C' }
   ]);
 
   const filteredServices = services.filter(item => {
@@ -282,6 +286,55 @@ export function DataProvisionServiceSetupPage() {
             </div>
           ) : (
             <>
+              {/* Stat Cards - From Image 1 */}
+              {activeTab === 'setup' && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8 animate-in fade-in duration-300">
+                  <div className="bg-gradient-to-br from-blue-50/50 to-white border border-blue-100 rounded-xl p-5 shadow-sm flex items-center justify-between group hover:shadow-md hover:border-blue-200 transition-all">
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-black text-blue-600 uppercase tracking-wider">Tổng số API</p>
+                      <h4 className="text-3xl font-black text-slate-800">{services.length}</h4>
+                      <p className="text-[10px] text-slate-500 font-semibold font-semibold">Đang cấu hình chia sẻ</p>
+                    </div>
+                    <div className="p-3 bg-blue-100/50 text-blue-600 rounded-xl group-hover:scale-110 transition-transform">
+                      <Database className="w-6 h-6" />
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-emerald-50/50 to-white border border-emerald-100 rounded-xl p-5 shadow-sm flex items-center justify-between group hover:shadow-md hover:border-emerald-200 transition-all">
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-black text-emerald-600 uppercase tracking-wider">Đang hoạt động</p>
+                      <h4 className="text-3xl font-black text-slate-800">{services.filter(s => s.status === 'published').length}</h4>
+                      <p className="text-[10px] text-slate-500 font-semibold font-semibold">Đã xuất bản & kết nối</p>
+                    </div>
+                    <div className="p-3 bg-emerald-100/50 text-emerald-600 rounded-xl group-hover:scale-110 transition-transform">
+                      <CheckCircle className="w-6 h-6" />
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-amber-50/50 to-white border border-amber-100 rounded-xl p-5 shadow-sm flex items-center justify-between group hover:shadow-md hover:border-amber-200 transition-all">
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-black text-amber-600 uppercase tracking-wider">Chờ phê duyệt</p>
+                      <h4 className="text-3xl font-black text-slate-800">{services.filter(s => s.status === 'pending').length}</h4>
+                      <p className="text-[10px] text-slate-500 font-semibold font-semibold">Đang chờ hội đồng duyệt</p>
+                    </div>
+                    <div className="p-3 bg-amber-100/50 text-amber-600 rounded-xl group-hover:scale-110 transition-transform">
+                      <Clock className="w-6 h-6" />
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-red-50/50 to-white border border-red-100 rounded-xl p-5 shadow-sm flex items-center justify-between group hover:shadow-md hover:border-red-200 transition-all">
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-black text-red-600 uppercase tracking-wider">Đã từ chối</p>
+                      <h4 className="text-3xl font-black text-slate-800">{services.filter(s => s.status === 'rejected').length}</h4>
+                      <p className="text-[10px] text-slate-500 font-semibold font-semibold">Cần cập nhật cấu hình</p>
+                    </div>
+                    <div className="p-3 bg-red-100/50 text-red-600 rounded-xl group-hover:scale-110 transition-transform">
+                      <XCircle className="w-6 h-6" />
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="flex flex-col md:flex-row gap-4 mb-6">
                 <div className="flex-1 relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -318,16 +371,15 @@ export function DataProvisionServiceSetupPage() {
                         onChange={(e) => setFilterDataType(e.target.value)}
                         className="w-full bg-white border border-slate-200 rounded-lg pl-3 pr-8 py-2 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 appearance-none cursor-pointer"
                       >
-                        <option value="all">-- Chọn phân loại --</option>
-                        <option value="Dữ liệu Hộ tịch điện tử">Dữ liệu Hộ tịch điện tử</option>
-                        <option value="Dữ liệu Hồ sơ quốc tịch">Dữ liệu Hồ sơ quốc tịch</option>
-                        <option value="Dữ liệu Thi hành án dân sự">Dữ liệu Thi hành án dân sự</option>
-                        <option value="Dữ liệu Lý lịch tư pháp">Dữ liệu Lý lịch tư pháp</option>
+                        <option value="all">Tất cả phân loại</option>
+                        <option value="Dữ liệu Hộ tịch">Dữ liệu Hộ tịch</option>
+                        <option value="Dữ liệu khai sinh">Dữ liệu khai sinh</option>
+                        <option value="Dữ liệu kết hôn">Dữ liệu kết hôn</option>
+                        <option value="Dữ liệu khai tử">Dữ liệu khai tử</option>
                       </select>
-                      <ChevronDown className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                      <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 pointer-events-none" />
                     </div>
                   </div>
-
                   <div>
                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Tần suất</label>
                     <div className="relative">
@@ -340,12 +392,10 @@ export function DataProvisionServiceSetupPage() {
                         <option value="Thời gian thực">Thời gian thực</option>
                         <option value="Hàng ngày">Hàng ngày</option>
                         <option value="Hàng tuần">Hàng tuần</option>
-                        <option value="Hàng tháng">Hàng tháng</option>
                       </select>
-                      <ChevronDown className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                      <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 pointer-events-none" />
                     </div>
                   </div>
-
                   <div>
                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Giao thức</label>
                     <div className="relative">
@@ -355,43 +405,28 @@ export function DataProvisionServiceSetupPage() {
                         className="w-full bg-white border border-slate-200 rounded-lg pl-3 pr-8 py-2 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 appearance-none cursor-pointer"
                       >
                         <option value="all">Tất cả giao thức</option>
-                        <option value="REST API">REST API</option>
-                        <option value="SOAP">SOAP</option>
+                        <option value="REST API (JSON)">REST API (JSON)</option>
+                        <option value="SOAP (XML)">SOAP (XML)</option>
                       </select>
-                      <ChevronDown className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                      <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 pointer-events-none" />
                     </div>
                   </div>
-
                   <div>
                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Trạng thái</label>
-                    <div className="flex gap-2">
-                      <div className="flex-1 relative">
-                        <select
-                          value={filterStatus}
-                          onChange={(e) => setFilterStatus(e.target.value)}
-                          className="w-full bg-white border border-slate-200 rounded-lg pl-3 pr-8 py-2 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 appearance-none cursor-pointer"
-                        >
-                          <option value="all">Tất cả trạng thái</option>
-                          <option value="draft">Bản nháp</option>
-                          <option value="pending">Chờ phê duyệt</option>
-                          <option value="published">Đã công khai</option>
-                        </select>
-                        <ChevronDown className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                      </div>
-
-                      <button
-                        onClick={() => {
-                          setFilterDataType('all');
-                          setFilterFreq('all');
-                          setFilterProtocol('all');
-                          setFilterStatus('all');
-                          setSearchTerm('');
-                        }}
-                        title="Xóa bộ lọc"
-                        className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 rounded-lg transition-colors border border-slate-200 flex items-center justify-center"
+                    <div className="relative">
+                      <select
+                        value={filterStatus}
+                        onChange={(e) => setFilterStatus(e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-lg pl-3 pr-8 py-2 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 appearance-none cursor-pointer"
                       >
-                        <RefreshCw className="w-3.5 h-3.5" />
-                      </button>
+                        <option value="all">Tất cả trạng thái</option>
+                        <option value="published">Đang hoạt động</option>
+                        <option value="pending">Chờ phê duyệt</option>
+                        <option value="draft">Bản nháp</option>
+                        <option value="approved">Đã duyệt</option>
+                        <option value="rejected">Từ chối</option>
+                      </select>
+                      <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 pointer-events-none" />
                     </div>
                   </div>
                 </div>
@@ -400,20 +435,20 @@ export function DataProvisionServiceSetupPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-slate-50 text-slate-500 text-sm border-b border-slate-200">
-                      <th className="py-3 px-4 font-medium">Tên dịch vụ</th>
-                      <th className="py-3 px-4 font-medium">Phân loại dữ liệu</th>
-                      <th className="py-3 px-4 font-medium">Tần suất</th>
-                      <th className="py-3 px-4 font-medium">Giao thức</th>
-                      <th className="py-3 px-4 font-medium">Trạng thái</th>
-                      <th className="py-3 px-4 font-medium">Ngày tạo</th>
+                    <tr className="bg-slate-50 text-slate-500 text-xs border-b border-slate-200 uppercase font-bold tracking-wider">
+                      <th className="py-3 px-4 font-bold">Mã / Tên API</th>
+                      <th className="py-3 px-4 font-bold">Loại dữ liệu chia sẻ</th>
+                      <th className="py-3 px-4 font-bold">Tần suất đối soát</th>
+                      <th className="py-3 px-4 font-bold">Giao thức / Định dạng</th>
+                      <th className="py-3 px-4 font-bold">Trạng thái</th>
+                      <th className="py-3 px-4 font-bold">Người tạo / Ngày tạo</th>
                       {activeTab === 'publish' && (
-                        <th className="py-3 px-4 font-medium">Ngày công khai</th>
+                        <th className="py-3 px-4 font-bold">Ngày công khai</th>
                       )}
-                      <th className="py-3 px-4 font-medium text-right">Thao tác</th>
+                      <th className="py-3 px-4 font-bold text-right">Thao tác</th>
                     </tr>
                   </thead>
-                  <tbody className="text-sm">
+                  <tbody className="text-sm font-medium text-slate-700">
                     {filteredServices.length === 0 ? (
                       <tr>
                         <td colSpan={activeTab === 'publish' ? 8 : 7} className="py-8 text-center text-slate-500 font-medium">
@@ -423,29 +458,33 @@ export function DataProvisionServiceSetupPage() {
                     ) : (
                       filteredServices.map((item) => (
                         <tr key={item.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
-                          <td className="py-3 px-4 font-medium text-slate-800">{item.name}</td>
-                          <td className="py-3 px-4 text-slate-600">{item.type}</td>
-                          <td className="py-3 px-4 text-slate-600">{item.freq}</td>
-                          <td className="py-3 px-4 text-slate-600">{item.protocol}</td>
                           <td className="py-3 px-4">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${item.status === 'published'
-                              ? 'bg-green-100 text-green-800'
+                            <div className="font-bold text-slate-800 text-sm leading-snug">{item.name}</div>
+                            <div className="text-xs font-mono text-slate-500 mt-1">{item.code}</div>
+                          </td>
+                          <td className="py-3 px-4 text-slate-600 font-semibold">{item.type}</td>
+                          <td className="py-3 px-4 text-slate-600 font-semibold">{item.freq}</td>
+                          <td className="py-3 px-4 font-mono text-slate-600 text-xs font-semibold">{item.protocol}</td>
+                          <td className="py-3 px-4">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${item.status === 'published'
+                              ? 'bg-green-50 text-green-700 border border-green-200'
                               : item.status === 'pending'
-                                ? 'bg-blue-100 text-blue-800'
+                                ? 'bg-blue-50 text-blue-700 border border-blue-200'
                                 : item.status === 'draft'
-                                  ? 'bg-slate-100 text-slate-600'
+                                  ? 'bg-slate-50 text-slate-500 border border-slate-200'
                                   : item.status === 'approved'
-                                    ? 'bg-emerald-100 text-emerald-800'
-                                    : 'bg-red-100 text-red-800'
+                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                    : 'bg-red-50 text-red-700 border border-red-200'
                               }`}>
-                              {item.status === 'published' ? 'Đã công khai' : item.status === 'pending' ? 'Chờ phê duyệt' : item.status === 'approved' ? 'Đã duyệt' : item.status === 'draft' ? 'Bản nháp' : 'Từ chối'}
+                              {item.status === 'published' ? 'Đang hoạt động' : item.status === 'pending' ? 'Chờ phê duyệt' : item.status === 'approved' ? 'Đã duyệt' : item.status === 'draft' ? 'Bản nháp' : 'Từ chối'}
                             </span>
                           </td>
-                          <td className="py-3 px-4 text-slate-600 text-sm font-mono whitespace-nowrap">
-                            {formatDateTime(item.date || new Date().toISOString())}
+                          <td className="py-3 px-4 text-slate-600 text-xs font-medium whitespace-nowrap">
+                            <div className="font-bold text-slate-700">{item.creator || 'Hệ thống BTP'}</div>
+                            <div className="text-slate-400 font-mono mt-0.5">{formatDateTime(item.date || new Date().toISOString())}</div>
                           </td>
                           {activeTab === 'publish' && (
-                            <td className="py-3 px-4 text-slate-600 text-sm font-mono whitespace-nowrap">
+                            <td className="py-3 px-4 text-slate-600 text-sm font-mono whitespace-nowrap font-semibold">
                               {item.publishDate ? item.publishDate : <span className="text-slate-300">—</span>}
                             </td>
                           )}
@@ -468,7 +507,7 @@ export function DataProvisionServiceSetupPage() {
                                   <button
                                     onClick={() => {
                                       setSelectedService(item);
-                                      setShowPublicDetailsModal(true);
+                                      setShowApiDetailModal(true);
                                     }}
                                     className="px-3 py-1.5 text-xs font-bold text-slate-500 hover:text-slate-900 border border-slate-200 rounded-lg hover:bg-slate-50 transition-all uppercase tracking-widest flex items-center gap-1.5 cursor-pointer"
                                     title="Chi tiết API"
@@ -483,7 +522,7 @@ export function DataProvisionServiceSetupPage() {
                                 <button
                                   onClick={() => {
                                     setSelectedService(item);
-                                    setShowServiceModal(true);
+                                    setShowApiDetailModal(true);
                                   }}
                                   className="text-slate-400 hover:text-blue-600 p-1.5 hover:bg-slate-100 rounded-lg transition-all inline-flex items-center justify-center group"
                                   title="Xem chi tiết"
@@ -616,6 +655,20 @@ export function DataProvisionServiceSetupPage() {
         isOpen={showPublicDetailsModal}
         onClose={() => setShowPublicDetailsModal(false)}
         service={selectedService}
+      />
+
+      <ProvisionApiDetailModal
+        isOpen={showApiDetailModal}
+        onClose={() => setShowApiDetailModal(false)}
+        service={selectedService}
+        onApprove={(serviceToApprove) => {
+          setServices(services.map(s => s.id === serviceToApprove.id ? { ...s, status: 'approved' } : s));
+          alert(`Đã phê duyệt dịch vụ: ${serviceToApprove.name}`);
+        }}
+        onReject={(serviceToReject) => {
+          setServices(services.map(s => s.id === serviceToReject.id ? { ...s, status: 'rejected' } : s));
+          alert(`Đã từ chối dịch vụ: ${serviceToReject.name}`);
+        }}
       />
     </div>
   );
