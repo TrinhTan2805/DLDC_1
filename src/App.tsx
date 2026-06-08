@@ -3,6 +3,7 @@ import { MainLayout } from './components/layout/MainLayout';
 import { LoginPage } from './components/pages/LoginPage';
 import { auth } from './lib/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { PreviewApiDocsPage } from './components/pages/provisioning/PreviewApiDocsPage';
 
 // Main App Component
 export default function App() {
@@ -29,6 +30,11 @@ export default function App() {
       console.error('Logout error:', error);
     }
   };
+
+  // Nếu truy cập trang xem tài liệu đặc tả, hiển thị luôn không cần layout/auth
+  if (window.location.pathname === '/preview-api-docs') {
+    return <PreviewApiDocsPage />;
+  }
 
   // Hiển thị loading trong khi kiểm tra auth
   if (isLoggedIn === null) {
