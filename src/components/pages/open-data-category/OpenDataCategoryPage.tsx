@@ -629,27 +629,25 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                   <input type="text" aria-label="Từ khóa metadata" title="Từ khóa metadata" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 outline-none shadow-sm" defaultValue="luật, mở, thống kê" />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Giấy phép *</label>
-                    <select aria-label="Giấy phép metadata" title="Giấy phép metadata" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 outline-none shadow-sm bg-white">
-                      <option>Giấy phép dữ liệu mở công cộng</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Định dạng</label>
-                    <div className="flex flex-wrap gap-3 p-3 bg-slate-50 border border-slate-200 rounded-lg">
-                      {['CSV', 'JSON', 'XML', 'Excel', 'PDF'].map((fmt) => (
-                        <label key={fmt} className="flex items-center gap-1.5 text-xs text-slate-700 font-semibold cursor-pointer">
-                          <input
-                            type="checkbox"
-                            defaultChecked={fmt === 'CSV'}
-                            className="rounded border-slate-300 w-4 h-4 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
-                          />
-                          {fmt}
-                        </label>
-                      ))}
-                    </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Giấy phép *</label>
+                  <select aria-label="Giấy phép metadata" title="Giấy phép metadata" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 outline-none shadow-sm bg-white">
+                    <option>Giấy phép dữ liệu mở công cộng</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Định dạng</label>
+                  <div className="flex flex-wrap gap-3 p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                    {['CSV', 'JSON', 'XML', 'Excel', 'PDF'].map((fmt) => (
+                      <label key={fmt} className="flex items-center gap-1.5 text-xs text-slate-700 font-semibold cursor-pointer">
+                        <input
+                          type="checkbox"
+                          defaultChecked={fmt === 'CSV'}
+                          className="rounded border-slate-300 w-4 h-4 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                        />
+                        {fmt}
+                      </label>
+                    ))}
                   </div>
                 </div>
 
