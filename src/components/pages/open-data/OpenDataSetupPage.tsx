@@ -2073,19 +2073,39 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm text-slate-700 mb-2">Định dạng</label>
-                  <select
-                    value={metadataFormData.format}
-                    onChange={(e) => setMetadataFormData({ ...metadataFormData, format: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
-                    aria-label="Chọn định dạng"
-                    title="Chọn định dạng"
-                  >
-                    <option value="CSV">CSV</option>
-                    <option value="JSON">JSON</option>
-                    <option value="XML">XML</option>
-                    <option value="Excel">Excel</option>
-                  </select>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Định dạng</label>
+                  <div className="flex flex-wrap gap-3 p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                    {['CSV', 'JSON', 'XML', 'Excel', 'PDF'].map((fmt) => {
+                      const isChecked = metadataFormData.format
+                        ? metadataFormData.format.split(', ').map(f => f.trim()).includes(fmt)
+                        : false;
+                      return (
+                        <label key={fmt} className="flex items-center gap-1.5 text-xs text-slate-700 font-semibold cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={(e) => {
+                              const currentFormats = metadataFormData.format
+                                ? metadataFormData.format.split(', ').map(f => f.trim()).filter(Boolean)
+                                : [];
+                              let nextFormats;
+                              if (e.target.checked) {
+                                nextFormats = [...currentFormats, fmt];
+                              } else {
+                                nextFormats = currentFormats.filter(f => f !== fmt);
+                              }
+                              setMetadataFormData({
+                                ...metadataFormData,
+                                format: nextFormats.join(', ')
+                              });
+                            }}
+                            className="rounded border-slate-300 w-4 h-4 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                          />
+                          {fmt}
+                        </label>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
               <div>
