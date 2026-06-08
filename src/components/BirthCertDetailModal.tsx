@@ -156,7 +156,11 @@ export function BirthCertDetailModal({
         {isInline && (
           <div className="flex flex-col mb-4">
             <h2 className="text-xl font-bold text-slate-900">{title}</h2>
-            <p className="text-sm text-slate-500 mt-1">Tích hợp: Hồ sơ khai sinh. Thuộc đơn vị: Cục Hành chính tư pháp.</p>
+            <p className="text-sm text-slate-500 mt-1">
+              Tích hợp: Hồ sơ khai sinh.
+              <br />
+              Thuộc đơn vị: Cục Hành chính tư pháp.
+            </p>
           </div>
         )}
         
@@ -166,7 +170,11 @@ export function BirthCertDetailModal({
             <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0 bg-white sticky top-0 z-20 rounded-t-lg">
               <div>
                 <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
-                <p className="text-sm text-slate-500 mt-1">Tích hợp: Hồ sơ khai sinh. Thuộc đơn vị: Cục Hành chính tư pháp.</p>
+                <p className="text-sm text-slate-500 mt-1">
+                  Tích hợp: Hồ sơ khai sinh.
+                  <br />
+                  Thuộc đơn vị: Cục Hành chính tư pháp.
+                </p>
               </div>
               <button
                 onClick={onClose}

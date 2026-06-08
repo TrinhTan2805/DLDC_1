@@ -138,7 +138,11 @@ export function TerminationGuardianshipMonitoringModal({
           <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0 bg-white sticky top-0 z-20">
             <div>
               <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
-              <p className="text-sm text-slate-500 mt-1">Tích hợp: {title}. Thuộc đơn vị: Cục Hành chính tư pháp.</p>
+              <p className="text-sm text-slate-500 mt-1">
+                Tích hợp: {title}.
+                <br />
+                Thuộc đơn vị: Cục Hành chính tư pháp.
+              </p>
             </div>
             {!isInline && (
               <button

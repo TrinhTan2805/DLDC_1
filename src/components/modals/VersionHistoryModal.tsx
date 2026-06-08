@@ -7,6 +7,13 @@ interface VersionHistoryModalProps {
 
 const mockVersions = [
   {
+    id: 15,
+    version: 'v2.4.6',
+    date: '08/06/2026',
+    time: '14:20',
+    content: 'Tinh chỉnh giao diện Xem dữ liệu thu thập: Điều chỉnh mô tả dưới header tại các bảng dữ liệu hộ tịch sang định dạng xuống dòng (Tích hợp: [Tên loại dữ liệu] / Xuống dòng / Thuộc đơn vị: Cục Hành chính tư pháp.) để tối ưu hóa hiển thị và tăng tính nhất quán.'
+  },
+  {
     id: 14,
     version: 'v2.4.5',
     date: '08/06/2026',

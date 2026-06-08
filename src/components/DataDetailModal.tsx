@@ -500,7 +500,7 @@ export function DataDetailModal({
           <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0">
             <div>
               <h2 className="text-lg font-bold text-slate-900">{title}</h2>
-              {description && <p className="text-sm text-slate-500 mt-1">{description}</p>}
+              {description && <p className="text-sm text-slate-500 mt-1 whitespace-pre-line">{description}</p>}
             </div>
             {!isInline && (
               <button
