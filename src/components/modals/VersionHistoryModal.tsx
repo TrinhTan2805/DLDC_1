@@ -7,6 +7,13 @@ interface VersionHistoryModalProps {
 
 const mockVersions = [
   {
+    id: 14,
+    version: 'v2.4.5',
+    date: '08/06/2026',
+    time: '14:07',
+    content: 'Cập nhật từ Git: Đồng bộ thiết kế phân hệ Cung cấp dữ liệu (Dịch vụ chia sẻ, Cung cấp số liệu), tái cấu trúc API modal dạng cuộn đơn trang có autofill thông tin liên hệ, gộp cột Mã & Tên API dạng xếp tầng, thu gọn tài liệu PDF. Cải tiến cục bộ hệ thống: Thiết kế bảng cấu hình động dữ liệu bảo mật (cột STT, Trường, Cấu hình thuật toán, nút thêm/xóa dòng) ẩn/hiện theo checkbox; chuyển trang Đơn vị thuộc BTP về Sidebar; chuẩn hóa cỡ chữ 13px (cho bảng grid, ô nhập liệu) và áp dụng quy tắc modal 5.4 (hiệu ứng backdrop-blur-sm) cho các hộp thoại xác nhận xóa của Đơn vị, Agent và Hệ thống nguồn; tinh giản thẻ thống kê và cột Đơn vị tại phân hệ Quản lý vai trò; ẩn hộp lịch tự động tại mục Sao lưu dự phòng.'
+  },
+  {
     id: 13,
     version: 'v2.4.4',
     date: '08/06/2026',
