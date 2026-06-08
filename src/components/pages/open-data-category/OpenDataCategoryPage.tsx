@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Plus, Edit2, Trash2, Download, Upload, Filter, FileText, Info, Edit, CheckCircle, XCircle, Eye, Clock, FileCheck, Shield, History as HistoryIcon, File, ExternalLink, CheckSquare, ChevronDown, RotateCcw, ArrowLeft, PlusCircle, PauseCircle, PlayCircle } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Download, Upload, Filter, FileText, Info, Edit, CheckCircle, XCircle, Eye, Clock, FileCheck, Shield, History as HistoryIcon, File, ExternalLink, CheckSquare, ChevronDown, RotateCcw, ArrowLeft, PlusCircle, PauseCircle, PlayCircle, X } from 'lucide-react';
 
 import { OpenDataCategoryTabBar } from './components/OpenDataCategoryTabBar';
 import { FilesTab } from './components/tabs/FilesTab';
@@ -67,6 +67,7 @@ interface MetadataItem {
   id: number;
   datasetCode: string;
   datasetName: string;
+  fileName: string;
   description: string;
   keywords: string;
   licenseId: number;
@@ -188,6 +189,7 @@ const sampleMetadata: MetadataItem[] = [
     id: 1,
     datasetCode: 'ODC001',
     datasetName: 'Danh mục dữ liệu A',
+    fileName: 'danh_sach_to_chuc_tgpl.xlsx',
     description: 'Dữ liệu thống kê về lĩnh vực A',
     keywords: 'văn bản, pháp luật, mở',
     licenseId: 1,
@@ -203,6 +205,7 @@ const sampleMetadata: MetadataItem[] = [
     id: 2,
     datasetCode: 'ODC002',
     datasetName: 'Danh mục dữ liệu B',
+    fileName: 'danh_sach_nguoi_tgpl.json',
     description: 'Dữ liệu thống kê về lĩnh vực B',
     keywords: 'đăng ký, doanh nghiệp',
     licenseId: 2,
@@ -218,6 +221,7 @@ const sampleMetadata: MetadataItem[] = [
     id: 3,
     datasetCode: 'ODC003',
     datasetName: 'Danh mục dữ liệu C',
+    fileName: 'danh_sach_luat_su.xlsx',
     description: 'Dữ liệu thống kê về lĩnh vực C',
     keywords: 'đăng ký, doanh nghiệp',
     licenseId: 2,
@@ -273,6 +277,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
   const [selectedVersionToRestore, setSelectedVersionToRestore] = useState<VersionHistoryItem | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [tempRequiredFields, setTempRequiredFields] = useState<string[]>(['MaHS', 'HoTen', 'NgaySinh']);
 
   // Danh sách người phê duyệt
   const approvers = [
@@ -468,15 +473,15 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
         {/* Headers */}
         <div className="bg-white border-b border-slate-200 pt-4 px-6">
           <div className="flex gap-8">
-            <button onClick={() => setSubmitActiveTab('category')} className={`pb-3 text-sm font-medium transition-colors border-b-2 flex items-center gap-2 ${submitActiveTab === 'category' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-600 hover:text-slate-900'}`}>
+            <button onClick={() => setSubmitActiveTab('category')} className={`pb-3 text-sm font-medium transition-colors border-b-2 flex items-center gap-2 ${submitActiveTab === 'category' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-600 hover:text-slate-900'}`}>
                <FileText className="w-4 h-4" />
                Thông tin danh mục
             </button>
-            <button onClick={() => setSubmitActiveTab('metadata')} className={`pb-3 text-sm font-medium transition-colors border-b-2 flex items-center gap-2 ${submitActiveTab === 'metadata' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-600 hover:text-slate-900'}`}>
+            <button onClick={() => setSubmitActiveTab('metadata')} className={`pb-3 text-sm font-medium transition-colors border-b-2 flex items-center gap-2 ${submitActiveTab === 'metadata' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-600 hover:text-slate-900'}`}>
                <File className="w-4 h-4" />
                Thông tin Metadata
             </button>
-            <button onClick={() => setSubmitActiveTab('license')} className={`pb-3 text-sm font-medium transition-colors border-b-2 flex items-center gap-2 ${submitActiveTab === 'license' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-600 hover:text-slate-900'}`}>
+            <button onClick={() => setSubmitActiveTab('license')} className={`pb-3 text-sm font-medium transition-colors border-b-2 flex items-center gap-2 ${submitActiveTab === 'license' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-600 hover:text-slate-900'}`}>
                <Shield className="w-4 h-4" />
                Thông tin giấy phép
             </button>
@@ -487,14 +492,14 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
         <div className="flex-1 overflow-auto p-6 bg-slate-50">
           {submitActiveTab === 'category' && (
             <div className="bg-white rounded-lg border border-slate-200 shadow-sm max-w-6xl mx-auto">
-              <div className="p-4 border-b border-slate-200 border-l-4 border-l-emerald-500">
+              <div className="p-4 border-b border-slate-200 border-l-4 border-l-blue-600">
                 <h2 className="text-lg font-medium text-slate-800">{isApproving ? "Danh sách danh mục đang chờ phê duyệt" : "Danh sách danh mục cần phê duyệt"}</h2>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
-                      <th className="px-4 py-3 text-left"><input type="checkbox" aria-label="Chọn tất cả" title="Chọn tất cả" checked={true} readOnly className="w-4 h-4 text-emerald-600 rounded" /></th>
+                      <th className="px-4 py-3 text-left"><input type="checkbox" aria-label="Chọn tất cả" title="Chọn tất cả" checked={true} readOnly className="w-4 h-4 text-blue-600 rounded" /></th>
                       <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">STT</th>
                       <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Mã</th>
                       <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase">Tên</th>
@@ -508,7 +513,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                   <tbody className="divide-y divide-slate-100">
                     {submitItems.map((item, index) => (
                       <tr key={item.id} className="hover:bg-slate-50">
-                        <td className="px-4 py-3"><input type="checkbox" aria-label={`Chọn mục ${item.name}`} title={`Chọn mục ${item.name}`} checked={true} readOnly className="w-4 h-4 text-emerald-600 rounded" /></td>
+                        <td className="px-4 py-3"><input type="checkbox" aria-label={`Chọn mục ${item.name}`} title={`Chọn mục ${item.name}`} checked={true} readOnly className="w-4 h-4 text-blue-600 rounded" /></td>
                         <td className="px-4 py-3 text-sm">{index + 1}</td>
                         <td className="px-4 py-3"><code className="px-2 py-0.5 bg-slate-100 text-emerald-700 rounded text-xs">{item.code}</code></td>
                         <td className="px-4 py-3 text-sm text-slate-900">{item.name}</td>
@@ -539,7 +544,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">Người nhận trình duyệt (Người phê duyệt) <span className="text-red-500">*</span></label>
                       <select 
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white shadow-sm"
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-400 focus:outline-none bg-white shadow-sm"
                         value={selectedApprover}
                         onChange={(e) => setSelectedApprover(e.target.value)}
                         aria-label="Chọn người phê duyệt"
@@ -553,7 +558,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">Nội dung trình duyệt</label>
                       <textarea 
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white shadow-sm"
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-400 focus:outline-none bg-white shadow-sm"
                         rows={3}
                         placeholder="Nhập ghi chú hoặc nội dung cần trình bày..."
                         value={submitApprovalNote}
@@ -574,7 +579,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">Nội dung phê duyệt / Lý do từ chối</label>
                       <textarea 
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-400 focus:outline-none bg-white shadow-sm"
                         rows={3}
                         placeholder="Nhập ghi chú phê duyệt hoặc lý do từ chối nếu có..."
                         value={approvalNote}
@@ -604,14 +609,14 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                     <div>
                       <div className="text-sm font-semibold mb-1 text-slate-800">Tư pháp</div>
                       <label className="flex items-center gap-2 text-sm text-slate-600 ml-2">
-                        <input type="checkbox" aria-label="Danh mục tư pháp" title="Danh mục tư pháp" checked={true} readOnly className="rounded border-slate-300 w-4 h-4 cursor-pointer" />
+                        <input type="checkbox" aria-label="Danh mục tư pháp" title="Danh mục tư pháp" checked={true} readOnly className="rounded border-slate-300 w-4 h-4 text-blue-600 cursor-pointer" />
                         CAT001 - Văn bản pháp luật
                       </label>
                     </div>
                     <div>
                       <div className="text-sm font-semibold mb-1 text-slate-800">Hộ tịch</div>
                       <label className="flex items-center gap-2 text-sm text-slate-600 ml-2">
-                        <input type="checkbox" aria-label="Danh mục hộ tịch" title="Danh mục hộ tịch" readOnly className="rounded border-slate-300 w-4 h-4 cursor-pointer" />
+                        <input type="checkbox" aria-label="Danh mục hộ tịch" title="Danh mục hộ tịch" readOnly className="rounded border-slate-300 w-4 h-4 text-blue-600 cursor-pointer" />
                         CAT002 - Hộ tịch
                       </label>
                     </div>
@@ -620,18 +625,23 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                 </div>
 
                 <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Tên tệp dữ liệu *</label>
+                  <input type="text" aria-label="Tên tệp dữ liệu" title="Tên tệp dữ liệu" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-400 outline-none shadow-sm bg-white" defaultValue={`${categoryName}.xlsx`} />
+                </div>
+
+                <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Mô tả *</label>
-                  <textarea rows={3} aria-label="Mô tả metadata" title="Mô tả metadata" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 outline-none shadow-sm" defaultValue={`Metadata cho dữ liệu mở ${categoryName}`}></textarea>
+                  <textarea rows={3} aria-label="Mô tả metadata" title="Mô tả metadata" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-400 outline-none shadow-sm" defaultValue={`Metadata cho dữ liệu mở ${categoryName}`}></textarea>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Từ khóa</label>
-                  <input type="text" aria-label="Từ khóa metadata" title="Từ khóa metadata" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 outline-none shadow-sm" defaultValue="luật, mở, thống kê" />
+                  <input type="text" aria-label="Từ khóa metadata" title="Từ khóa metadata" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-400 outline-none shadow-sm" defaultValue="luật, mở, thống kê" />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Giấy phép *</label>
-                  <select aria-label="Giấy phép metadata" title="Giấy phép metadata" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 outline-none shadow-sm bg-white">
+                  <select aria-label="Giấy phép metadata" title="Giấy phép metadata" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-400 outline-none shadow-sm bg-white">
                     <option>Giấy phép dữ liệu mở công cộng</option>
                   </select>
                 </div>
@@ -643,7 +653,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                         <input
                           type="checkbox"
                           defaultChecked={fmt === 'CSV'}
-                          className="rounded border-slate-300 w-4 h-4 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                          className="rounded border-slate-300 w-4 h-4 text-blue-600 focus:ring-2 focus:ring-slate-200 focus:border-slate-400 focus:outline-none cursor-pointer"
                         />
                         {fmt}
                       </label>
@@ -653,14 +663,85 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Nguồn dữ liệu *</label>
-                    <input type="text" aria-label="Nguồn dữ liệu" title="Nguồn dữ liệu" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 outline-none shadow-sm" defaultValue="API nội bộ" />
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Nguồn dữ liệu</label>
+                    <input type="text" aria-label="Nguồn dữ liệu" title="Nguồn dữ liệu" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-400 outline-none shadow-sm" defaultValue="API nội bộ" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">Tần suất cập nhật</label>
-                    <select aria-label="Tần suất cập nhật" title="Tần suất cập nhật" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-white shadow-sm">
+                    <select aria-label="Tần suất cập nhật" title="Tần suất cập nhật" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-400 outline-none bg-white shadow-sm">
                       <option>Hàng tháng</option>
                     </select>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Cấu hình trường bắt buộc trong file dữ liệu tải lên
+                  </label>
+                  <div className="space-y-3 p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        id="new-required-field-category-input"
+                        placeholder="Nhập tên trường bắt buộc (ví dụ: MaHS, HoTen...)"
+                        className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-slate-200 focus:border-slate-400 focus:outline-none bg-white"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            const input = e.currentTarget;
+                            const val = input.value.trim();
+                            if (val) {
+                              if (!tempRequiredFields.includes(val)) {
+                                setTempRequiredFields([...tempRequiredFields, val]);
+                              }
+                              input.value = '';
+                            }
+                          }
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const input = document.getElementById('new-required-field-category-input') as HTMLInputElement;
+                          const val = input?.value.trim();
+                          if (val) {
+                            if (!tempRequiredFields.includes(val)) {
+                              setTempRequiredFields([...tempRequiredFields, val]);
+                            }
+                            input.value = '';
+                          }
+                        }}
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition-colors flex items-center gap-1.5"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Thêm
+                      </button>
+                    </div>
+
+                    {/* List of current required fields */}
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {tempRequiredFields.length > 0 ? (
+                        tempRequiredFields.map((field) => (
+                          <span
+                            key={field}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-red-50 text-red-700 rounded-lg text-xs font-semibold border border-red-100"
+                          >
+                            {field}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setTempRequiredFields(tempRequiredFields.filter((f) => f !== field));
+                              }}
+                              className="p-0.5 hover:bg-red-100 rounded text-red-500 transition-colors"
+                              title="Xóa trường"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-xs text-slate-500 italic">Chưa cấu hình trường bắt buộc nào</span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -676,23 +757,23 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
               <div className="p-6 space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Tên giấy phép *</label>
-                  <input type="text" aria-label="Tên giấy phép" title="Tên giấy phép" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 outline-none shadow-sm" defaultValue="Giấy phép dữ liệu mở công cộng" />
+                  <input type="text" aria-label="Tên giấy phép" title="Tên giấy phép" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-400 focus:outline-none shadow-sm" defaultValue="Giấy phép dữ liệu mở công cộng" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Mô tả *</label>
-                  <textarea rows={3} aria-label="Mô tả giấy phép" title="Mô tả giấy phép" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 outline-none shadow-sm" defaultValue="Cho phép sử dụng và phân phối dữ liệu mở."></textarea>
+                  <textarea rows={3} aria-label="Mô tả giấy phép" title="Mô tả giấy phép" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-400 focus:outline-none shadow-sm" defaultValue="Cho phép sử dụng và phân phối dữ liệu mở."></textarea>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Điều kiện sử dụng *</label>
-                  <textarea rows={3} aria-label="Điều kiện sử dụng" title="Điều kiện sử dụng" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 outline-none shadow-sm" defaultValue="Ghi nguồn là bắt buộc."></textarea>
+                  <textarea rows={3} aria-label="Điều kiện sử dụng" title="Điều kiện sử dụng" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-400 focus:outline-none shadow-sm" defaultValue="Ghi nguồn là bắt buộc."></textarea>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Liên kết tham chiếu *</label>
-                  <input type="text" aria-label="Liên kết tham chiếu" title="Liên kết tham chiếu" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 outline-none shadow-sm" defaultValue="https://example.com/license/cc0" />
+                  <input type="text" aria-label="Liên kết tham chiếu" title="Liên kết tham chiếu" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-400 focus:outline-none shadow-sm" defaultValue="https://example.com/license/cc0" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Trạng thái</label>
-                  <select aria-label="Trạng thái giấy phép" title="Trạng thái giấy phép" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-white shadow-sm">
+                  <select aria-label="Trạng thái giấy phép" title="Trạng thái giấy phép" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-400 focus:outline-none bg-white shadow-sm">
                     <option>Còn hiệu lực</option>
                   </select>
                 </div>
