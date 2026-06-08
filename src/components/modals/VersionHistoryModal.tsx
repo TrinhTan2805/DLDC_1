@@ -7,18 +7,30 @@ interface VersionHistoryModalProps {
 
 const mockVersions = [
   {
-    id: 15,
-    version: 'v2.4.6',
-    date: '08/06/2026',
-    time: '14:20',
-    content: 'Tinh chỉnh giao diện Xem dữ liệu thu thập: Điều chỉnh mô tả dưới header tại các bảng dữ liệu hộ tịch sang định dạng xuống dòng (Tích hợp: [Tên loại dữ liệu] / Xuống dòng / Thuộc đơn vị: Cục Hành chính tư pháp.) để tối ưu hóa hiển thị và tăng tính nhất quán.'
-  },
-  {
     id: 14,
     version: 'v2.4.5',
     date: '08/06/2026',
-    time: '14:07',
-    content: 'Cập nhật từ Git: Đồng bộ thiết kế phân hệ Cung cấp dữ liệu (Dịch vụ chia sẻ, Cung cấp số liệu), tái cấu trúc API modal dạng cuộn đơn trang có autofill thông tin liên hệ, gộp cột Mã & Tên API dạng xếp tầng, thu gọn tài liệu PDF. Cải tiến cục bộ hệ thống: Thiết kế bảng cấu hình động dữ liệu bảo mật (cột STT, Trường, Cấu hình thuật toán, nút thêm/xóa dòng) ẩn/hiện theo checkbox; chuyển trang Đơn vị thuộc BTP về Sidebar; chuẩn hóa cỡ chữ 13px (cho bảng grid, ô nhập liệu) và áp dụng quy tắc modal 5.4 (hiệu ứng backdrop-blur-sm) cho các hộp thoại xác nhận xóa của Đơn vị, Agent và Hệ thống nguồn; tinh giản thẻ thống kê và cột Đơn vị tại phân hệ Quản lý vai trò; ẩn hộp lịch tự động tại mục Sao lưu dự phòng.'
+    time: '14:20',
+    content: `1. Phân hệ Cơ sở dữ liệu Hộ tịch (Xem dữ liệu thu thập):
+- Màn hình chính (Xem dữ liệu thu thập): Cập nhật cấu trúc hiển thị mô tả động dưới tiêu đề danh sách, cho phép nhận diện và tự động xuống dòng khi gặp ký tự xuống dòng (\\n).
+- Các hộp thoại chi tiết dữ liệu hộ tịch (Khai sinh, Kết hôn, Khai tử, Nuôi con nuôi, Thay đổi/cải chính hộ tịch, Đăng ký giám hộ, Đăng ký giám sát giám hộ, Chấm dứt giám hộ, Chấm dứt giám sát giám hộ, Nhận cha mẹ con, Xác nhận tình trạng hôn nhân): Điều chỉnh mô tả dưới header sang định dạng xuống dòng (Tích hợp: [Tên loại dữ liệu]. \\n Thuộc đơn vị: Cục Hành chính tư pháp.).
+
+2. Phân hệ Cung cấp dữ liệu:
+- Màn hình Dịch vụ chia sẻ & Cung cấp số liệu: Đồng bộ hóa toàn diện ngôn ngữ thiết kế giao diện theo quy chuẩn mới.
+- Màn hình Danh sách API cung cấp: Gộp cột Mã & Tên API thành một cột hiển thị xếp tầng; thu gọn cột hiển thị tài liệu PDF thành biểu tượng đặc tả.
+- Hộp thoại Tạo mới / Cập nhật API cung cấp: Tái cấu trúc giao diện thành màn hình cuộn đơn trang; bổ sung các trường thông tin liên hệ và tự động điền thông tin.
+
+3. Quản lý nhóm người dùng > Phân quyền phạm vi dữ liệu:
+- Màn hình Cấu hình bảo mật phạm vi dữ liệu: Thiết kế bảng cấu hình động dữ liệu bảo mật (STT, Trường dữ liệu, Cấu hình thuật toán, nút thêm/xóa dòng) ẩn/hiện linh hoạt dựa theo checkbox bảo mật dữ liệu.
+
+4. Phân hệ Quản trị hệ thống & Danh mục:
+- Thanh điều hướng Sidebar (Menu hệ thống): Chuyển trang quản lý Đơn vị thuộc BTP về Sidebar.
+- Màn hình Quản lý vai trò: Tinh giản thẻ thống kê tổng quan; loại bỏ cột Đơn vị trong bảng danh sách vai trò.
+- Màn hình Sao lưu dự phòng: Ẩn/gỡ bỏ nút thiết lập lịch sao lưu tự động.
+- Hộp thoại xác nhận xóa (Đơn vị, Agent kết nối, Hệ thống nguồn): Áp dụng quy tắc modal 5.4 mới, bổ sung hiệu ứng làm mờ nền backdrop-blur-sm.
+
+5. Giao diện chung toàn hệ thống:
+- Tất cả các bảng lưới dữ liệu (Grid) và ô nhập liệu (Input): Chuẩn hóa kích thước font chữ hiển thị về cỡ 13px.`
   },
   {
     id: 13,
@@ -162,7 +174,7 @@ export function VersionHistoryModal({ isOpen, onClose }: VersionHistoryModalProp
                 <div className="space-y-2">
                   <div className="flex items-start gap-2">
                     <FileText className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
-                    <p className="text-sm text-slate-700 leading-relaxed">{item.content}</p>
+                    <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{item.content}</p>
                   </div>
 
                   <div className="flex items-center gap-6 mt-3 pt-3 border-t border-slate-100/50">
