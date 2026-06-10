@@ -9,7 +9,7 @@ interface PublishedData {
   publisher: string;
   creator: string;
   createdDate: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'approved' | 'rejected' | 'draft';
   approver: string;
   description: string;
   format: string[];
@@ -196,6 +196,10 @@ interface ScheduleItem {
   nextRun: string;
   createdBy: string;
   createdDate: string;
+  weeklyDays?: string[];
+  monthlyDay?: number;
+  quarterlyMonth?: number;
+  quarterlyDay?: number;
 }
 
 interface CategoryOption {
@@ -452,7 +456,11 @@ export function OpenDataPublishedListPage() {
     publishFormat: 'api' as 'api' | 'file',
     targetAudience: '',
     contactInfo: '',
-    dataSource: ''
+    dataSource: '',
+    weeklyDays: [] as string[],
+    monthlyDay: 1,
+    quarterlyDay: 1,
+    quarterlyMonth: 1
   });
   const [isEditingSchedule, setIsEditingSchedule] = useState(false);
 
