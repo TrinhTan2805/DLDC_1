@@ -236,7 +236,7 @@
 
 ---
 
-## 8. PHÂN HỆ DỮ LIỆU CHỦNG (MASTER DATA)
+## 8. PHÂN HỆ DỮ LIỆU CHỦ (MASTER DATA)
 
 ### Trang chính
 - `[ ]` Quản lý Master Data tổng (`master-data/MasterDataManagementPage.tsx`)
