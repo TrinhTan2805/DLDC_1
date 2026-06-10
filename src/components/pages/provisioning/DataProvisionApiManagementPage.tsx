@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Server, GitCompare, Shield, History, Search, Filter, Plus,
   Trash2, Edit3, Key, Clock, Calendar, CheckCircle2, XCircle, AlertTriangle, FileJson, Power, FileText
@@ -80,13 +80,19 @@ export function DataProvisionApiManagementPage() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  // Mock datasets with full CRUD state
-  const [apis, setApis] = useState<any[]>([
-    { id: '1', code: 'SVC-HOTICH-001', name: 'API cung cấp dữ liệu Hộ tịch điện tử', endpoint: '/api/v1/hotich/search', method: 'GET', version: 'v1.2', status: 'Hoạt động', desc: 'Dịch vụ khai thác thông tin hộ tịch của công dân', dataType: 'Hộ tịch điện tử', consumerUnit: 'Bộ Kế hoạch và Đầu tư', receiverPoint: 'Nguyễn Văn A - 0987654321', time: '2026-05-24 08:00:00' },
-    { id: '2', code: 'SVC-THADS-002', name: 'API đồng bộ dữ liệu thi hành án dân sự', endpoint: '/api/v1/thads/sync', method: 'POST', version: 'v2.0', status: 'Hoạt động', desc: 'Đồng bộ kết quả thi hành án dân sự tỉnh Bắc Ninh', dataType: 'Thi hành án dân sự', consumerUnit: 'Sở Tài chính tỉnh Bắc Ninh', receiverPoint: 'Trần Thị B - 0912345678', time: '2026-05-25 09:30:00' },
-    { id: '3', code: 'SVC-BPBD-003', name: 'API đọc thông tin Biện pháp bảo đảm', endpoint: '/api/v1/bpbd/get', method: 'GET', version: 'v1.0', status: 'Hoạt động', desc: 'Đọc thông tin giao dịch bảo đảm', dataType: 'Biện pháp bảo đảm', consumerUnit: 'Sở Tư pháp tỉnh Bắc Ninh', receiverPoint: 'Phạm Văn C - 0901234567', time: '2026-05-25 14:15:00' },
-    { id: '4', code: 'SVC-PHAPLUAT-004', name: 'API tra cứu Cơ sở dữ liệu Pháp luật', endpoint: '/api/v1/phapluat/search', method: 'GET', version: 'v1.1', status: 'Tạm ngưng', desc: 'Tra cứu văn bản pháp luật hiện hành', dataType: 'Văn bản pháp luật', consumerUnit: 'UBND Huyện Tiên Du', receiverPoint: 'Lê Văn D - 0988888888', time: '2026-05-23 16:45:00' }
-  ]);
+  const [apis, setApis] = useState<any[]>(() => {
+    const saved = localStorage.getItem('provision_apis');
+    return saved ? JSON.parse(saved) : [
+      { id: '1', code: 'SVC-HOTICH-001', name: 'API cung cấp dữ liệu Hộ tịch điện tử', endpoint: '/api/v1/hotich/search', method: 'GET', version: 'v1.2', status: 'Hoạt động', desc: 'Dịch vụ khai thác thông tin hộ tịch của công dân', dataType: 'Hộ tịch điện tử', consumerUnit: 'Bộ Kế hoạch và Đầu tư', receiverPoint: 'Nguyễn Văn A - 0987654321', time: '2026-05-24 08:00:00' },
+      { id: '2', code: 'SVC-THADS-002', name: 'API đồng bộ dữ liệu thi hành án dân sự', endpoint: '/api/v1/thads/sync', method: 'POST', version: 'v2.0', status: 'Hoạt động', desc: 'Đồng bộ kết quả thi hành án dân sự tỉnh Bắc Ninh', dataType: 'Thi hành án dân sự', consumerUnit: 'Sở Tài chính tỉnh Bắc Ninh', receiverPoint: 'Trần Thị B - 0912345678', time: '2026-05-25 09:30:00' },
+      { id: '3', code: 'SVC-BPBD-003', name: 'API đọc thông tin Biện pháp bảo đảm', endpoint: '/api/v1/bpbd/get', method: 'GET', version: 'v1.0', status: 'Hoạt động', desc: 'Đọc thông tin giao dịch bảo đảm', dataType: 'Biện pháp bảo đảm', consumerUnit: 'Sở Tư pháp tỉnh Bắc Ninh', receiverPoint: 'Phạm Văn C - 0901234567', time: '2026-05-25 14:15:00' },
+      { id: '4', code: 'SVC-PHAPLUAT-004', name: 'API tra cứu Cơ sở dữ liệu Pháp luật', endpoint: '/api/v1/phapluat/search', method: 'GET', version: 'v1.1', status: 'Tạm ngưng', desc: 'Tra cứu văn bản pháp luật hiện hành', dataType: 'Văn bản pháp luật', consumerUnit: 'UBND Huyện Tiên Du', receiverPoint: 'Lê Văn D - 0988888888', time: '2026-05-23 16:45:00' }
+    ];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('provision_apis', JSON.stringify(apis));
+  }, [apis]);
 
   const [recons, setRecons] = useState<any[]>([
     { id: '662', name: 'Đối soát tổng hợp danh mục dữ liệu dùng chung', targetSystem: 'Hệ thống đích (Các Bộ/Ngành)', schedule: 'Định kỳ (Hàng ngày) / Theo yêu cầu', linkedApi: 'Lấy danh sách Hộ tịch', status: 'active' },

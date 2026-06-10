@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, FileText, Calendar, User, Download, Eye, Filter, ChevronDown, Globe, CheckCircle, AlertCircle, RefreshCw, XCircle, Send, Upload, X, FileSpreadsheet, Info, Plus, Clock, Database, Trash2, Edit, PlusCircle, PauseCircle, PlayCircle, Edit2, Shield, Menu } from 'lucide-react';
+import { Search, FileText, Calendar, User, Download, Eye, Filter, ChevronDown, Globe, CheckCircle, AlertCircle, RefreshCw, XCircle, Send, Upload, X, FileSpreadsheet, Info, Plus, Clock, Database, Trash2, Edit, PlusCircle, PauseCircle, PlayCircle, Edit2, Shield, Menu, Save, AlertTriangle } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 interface PublishedData {
@@ -128,6 +128,24 @@ const mockPublishedData: PublishedData[] = [
       ['Nguyễn Văn B', '12/12/1970', 'THE-0001-LS']
     ]
   },
+  {
+    id: '6',
+    fileName: 'API Danh sách Luật sư Việt Nam',
+    category: 'Danh sách Luật sư Việt Nam',
+    publisher: 'Bộ Tư pháp',
+    creator: 'Hệ thống (User)',
+    createdDate: '10/05/2026',
+    status: 'approved',
+    approver: 'Lãnh đạo Cục CNTT',
+    description: 'API Danh sách Luật sư Việt Nam cập nhật trực tuyến.',
+    format: ['API'],
+    keywords: 'luật sư, api',
+    license: 'Giấy phép dữ liệu mở công cộng',
+    fileSize: '-',
+    dataSource: 'API: GET - https://api.moj.gov.vn/luatsu',
+    previewHeaders: [],
+    previewRows: []
+  }
 ];
 
 const APPROVED_CATEGORIES = [
@@ -249,7 +267,7 @@ const sampleCategoryData: CategoryItem[] = [
 const mockSchedules: ScheduleItem[] = [
   {
     id: 1,
-    datasetCode: 'ODCAT001',
+    datasetCode: 'ODC001',
     datasetName: 'Danh sách tổ chức thực hiện trợ giúp pháp lý',
     categoryName: 'Biên tập danh mục A',
     frequency: 'daily',
@@ -263,7 +281,7 @@ const mockSchedules: ScheduleItem[] = [
   },
   {
     id: 2,
-    datasetCode: 'ODCAT002',
+    datasetCode: 'ODC002',
     datasetName: 'Danh sách người thực hiện trợ giúp pháp lý',
     categoryName: 'Danh mục B',
     frequency: 'weekly',
@@ -273,7 +291,8 @@ const mockSchedules: ScheduleItem[] = [
     lastRun: '01/06/2026 02:00',
     nextRun: '08/06/2026 02:00',
     createdBy: 'Trần Thị B',
-    createdDate: '20/01/2026'
+    createdDate: '20/01/2026',
+    weeklyDays: ['Thứ 2', 'Thứ 4']
   }
 ];
 
@@ -343,6 +362,15 @@ const validateHeaders = (categoryCode: string, headers: string[]) => {
 export function OpenDataPublishedListPage() {
   const [activeTab, setActiveTab] = useState<'requests' | 'approval' | 'schedule'>('requests');
   const [dataList, setDataList] = useState<PublishedData[]>(mockPublishedData);
+
+  const getDatasetFormat = (datasetId: string) => {
+    if (!datasetId) return null;
+    const category = APPROVED_CATEGORIES.find(c => c.code === datasetId);
+    if (!category) return null;
+    const matchedData = dataList.find(item => item.category === category.name && item.status === 'approved');
+    if (!matchedData) return null;
+    return matchedData.format.includes('API') ? 'API' : 'file';
+  };
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -367,6 +395,29 @@ export function OpenDataPublishedListPage() {
   const [requestPublisher, setRequestPublisher] = useState('Bộ Tư pháp');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
+  const [uploadType, setUploadType] = useState<'file' | 'api'>('file');
+  const [apiType, setApiType] = useState<'internal' | 'external'>('internal');
+  const [selectedInternalApiId, setSelectedInternalApiId] = useState('');
+  const [apiMethod, setApiMethod] = useState<'GET' | 'POST' | 'PUT' | 'DELETE'>('GET');
+  const [apiUrl, setApiUrl] = useState('');
+  const [apiParams, setApiParams] = useState('');
+  const [apiHeaders, setApiHeaders] = useState('');
+  const [apiBody, setApiBody] = useState('');
+  const [apiTitle, setApiTitle] = useState('');
+  const [apiDesc, setApiDesc] = useState('');
+  const [internalApis, setInternalApis] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (showRequestModal) {
+      const savedApis = localStorage.getItem('provision_apis');
+      if (savedApis) {
+        setInternalApis(JSON.parse(savedApis));
+      } else {
+        setInternalApis([]);
+      }
+    }
+  }, [showRequestModal]);
+
   // Validation & Parse States
   const [isValidating, setIsValidating] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -378,7 +429,11 @@ export function OpenDataPublishedListPage() {
   // Approval Tab States
   const [selectedApprovalItem, setSelectedApprovalItem] = useState<PublishedData | null>(null);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [showApproveConfirmModal, setShowApproveConfirmModal] = useState(false);
+  const [showRejectConfirmModal, setShowRejectConfirmModal] = useState(false);
+  const [approveOpinion, setApproveOpinion] = useState('');
   const [rejectReason, setRejectReason] = useState('');
+  const [rejectReasonError, setRejectReasonError] = useState(false);
   const [showRejectForm, setShowRejectForm] = useState(false);
 
 
@@ -437,12 +492,13 @@ export function OpenDataPublishedListPage() {
 
   const filteredApprovalRequests = dataList.filter(item => {
     if (!item) return false;
-    if (item.status !== 'pending') return false;
+    if (item.status === 'draft') return false;
     const nameToSearch = (item.fileName || '').toLowerCase();
     const matchSearch = nameToSearch.includes(searchTerm.toLowerCase());
+    const matchStatus = selectedStatus === 'all' || item.status === selectedStatus;
     const matchCategory = selectedCategory === 'all' || item.category === selectedCategory;
     const matchPublisher = selectedPublisher === 'all' || item.publisher === selectedPublisher;
-    return matchSearch && matchCategory && matchPublisher;
+    return matchSearch && matchStatus && matchCategory && matchPublisher;
   });
 
   const totalApprovalItemsCount = filteredApprovalRequests.length;
@@ -467,16 +523,18 @@ export function OpenDataPublishedListPage() {
     const styles = {
       approved: 'bg-green-50 text-green-600 border-green-200',
       pending: 'bg-purple-50 text-purple-600 border-purple-200',
-      rejected: 'bg-orange-50 text-orange-600 border-orange-200',
+      rejected: 'bg-red-50 text-red-600 border-red-200',
+      draft: 'bg-slate-50 text-slate-600 border-slate-200'
     };
     const labels = {
-      approved: 'Đã phê duyệt',
-      pending: 'Chờ phê duyệt',
+      approved: 'Đã công bố',
+      pending: 'Chờ công bố',
       rejected: 'Từ chối',
+      draft: 'Bản nháp'
     };
     return (
       <span className={`inline-block px-2.5 py-1 text-xs border rounded-full font-medium text-center leading-tight whitespace-nowrap ${styles[status as keyof typeof styles] || styles.pending}`}>
-        {labels[status as keyof typeof labels] || 'Chờ phê duyệt'}
+        {labels[status as keyof typeof labels] || 'Chờ công bố'}
       </span>
     );
   };
@@ -491,10 +549,24 @@ export function OpenDataPublishedListPage() {
   };
 
   const runValidation = (file: File, categoryCode: string, isForNewVersion: boolean = false) => {
+    const extension = file.name.split('.').pop()?.toLowerCase() || '';
+    const isSpreadsheet = ['xlsx', 'xls', 'csv'].includes(extension);
+
     setIsValidating(true);
     setValidationError(null);
     setValidationSuccess(false);
     setValidationDetails(null);
+
+    if (!isSpreadsheet) {
+      setTimeout(() => {
+        setValidationSuccess(true);
+        setValidationError(null);
+        setUploadedPreviewHeaders([]);
+        setUploadedPreviewRows([]);
+        setIsValidating(false);
+      }, 500);
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -506,7 +578,7 @@ export function OpenDataPublishedListPage() {
         
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
         if (jsonData.length === 0 || !jsonData[0] || jsonData[0].length === 0) {
-          setValidationError("Tệp Excel trống hoặc không đọc được dữ liệu dòng đầu tiên.");
+          setValidationError("Tệp trống hoặc không đọc được dữ liệu dòng đầu tiên.");
           setIsValidating(false);
           return;
         }
@@ -526,8 +598,8 @@ export function OpenDataPublishedListPage() {
           setValidationError(`Tệp thiếu các cột bắt buộc: ${validation.missing.join(', ')}`);
         }
       } catch (error) {
-        console.error("Lỗi đọc file Excel:", error);
-        setValidationError("Đã xảy ra lỗi khi đọc tệp Excel. Vui lòng kiểm tra lại tệp.");
+        console.error("Lỗi đọc file:", error);
+        setValidationError("Đã xảy ra lỗi khi đọc tệp. Vui lòng kiểm tra lại tệp.");
       } finally {
         setIsValidating(false);
       }
@@ -542,9 +614,19 @@ export function OpenDataPublishedListPage() {
   };
 
   const processFile = (file: File) => {
-    const extension = file.name.split('.').pop()?.toLowerCase();
-    if (extension !== 'xlsx' && extension !== 'xls') {
-      setValidationError("Định dạng tệp không hợp lệ. Chỉ chấp nhận tệp Excel (.xlsx, .xls)");
+    const MAX_SIZE = 100 * 1024 * 1024; // 100MB
+    if (file.size >= MAX_SIZE) {
+      setValidationError("Kích thước tệp quá lớn. Chỉ chấp nhận tệp dưới 100MB.");
+      setUploadedFile(null);
+      setValidationSuccess(false);
+      setValidationDetails(null);
+      return;
+    }
+
+    const extension = file.name.split('.').pop()?.toLowerCase() || '';
+    const allowedExtensions = ['csv', 'xml', 'xlsx', 'docx', 'doc', 'pdf', 'edxml', 'xls'];
+    if (!allowedExtensions.includes(extension)) {
+      setValidationError("Định dạng tệp không được hỗ trợ. Chỉ chấp nhận các định dạng: CSV, XML, XLSX, DOCX, DOC, PDF, EDXML.");
       setUploadedFile(null);
       setValidationSuccess(false);
       setValidationDetails(null);
@@ -560,60 +642,173 @@ export function OpenDataPublishedListPage() {
     }
   };
 
-  const handleRequestSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validationSuccess || !uploadedFile) {
-      alert("Vui lòng tải lên và validate tệp Excel hợp lệ trước khi gửi!");
-      return;
+  const createNewRecord = (status: 'pending' | 'draft'): PublishedData => {
+    const currentCategoryObj = APPROVED_CATEGORIES.find(c => c.code === requestCategory);
+    let fileName = '';
+    let fileSize = '-';
+    let dataSource = '';
+    let previewHeaders: string[] = [];
+    let previewRows: any[][] = [];
+
+    if (uploadType === 'file') {
+      fileName = requestFileName || (uploadedFile ? uploadedFile.name : '');
+      fileSize = uploadedFile ? `${(uploadedFile.size / 1024).toFixed(1)} KB` : '-';
+      dataSource = WAREHOUSE_DATABASES.find(db => db.id === (requestCategory === 'ODC001' ? 'db_tgpl_org' : requestCategory === 'ODC002' ? 'db_tgpl_user' : 'db_luatsu'))?.name || 'Cơ sở dữ liệu kho';
+      previewHeaders = uploadedPreviewHeaders;
+      previewRows = uploadedPreviewRows;
+    } else {
+      if (apiType === 'internal') {
+        const selectedApi = internalApis.find(api => api.id === selectedInternalApiId);
+        fileName = selectedApi ? selectedApi.name : 'API Cung cấp dữ liệu';
+        dataSource = selectedApi ? `API: ${selectedApi.method} - ${selectedApi.endpoint}` : 'API cung cấp dữ liệu';
+      } else {
+        fileName = apiTitle || 'API Cơ quan nhà nước';
+        dataSource = `API: ${apiMethod} - ${apiUrl}`;
+      }
     }
 
-    const currentCategoryObj = APPROVED_CATEGORIES.find(c => c.code === requestCategory);
-    
-    const newRecord: PublishedData = {
+    return {
       id: Date.now().toString(),
-      fileName: requestFileName || uploadedFile.name,
+      fileName: fileName,
       category: currentCategoryObj ? currentCategoryObj.name : 'Danh mục dữ liệu mở',
       publisher: requestPublisher || 'Bộ Tư pháp',
       creator: 'Hệ thống (User)',
       createdDate: new Date().toLocaleDateString('vi-VN'),
-      status: 'pending',
+      status: status,
       approver: 'Chưa phê duyệt',
-      description: requestDescription || 'Yêu cầu công bố dữ liệu mở tải lên từ Excel',
-      format: ['Excel'],
-      keywords: requestKeywords || 'excel, dữ liệu mở',
+      description: uploadType === 'file' 
+        ? (requestDescription || 'Yêu cầu công bố dữ liệu mở tải lên từ tệp')
+        : (apiDesc || requestDescription || 'Yêu cầu công bố dữ liệu mở lấy từ API'),
+      format: uploadType === 'file' 
+        ? [(uploadedFile?.name.split('.').pop()?.toUpperCase() || 'EXCEL')] 
+        : ['API'],
+      keywords: requestKeywords || (uploadType === 'file' ? 'dữ liệu mở, file' : 'dữ liệu mở, api'),
       license: requestLicense || 'Giấy phép dữ liệu mở công cộng',
-      fileSize: `${(uploadedFile.size / 1024).toFixed(1)} KB`,
-      dataSource: WAREHOUSE_DATABASES.find(db => db.id === (requestCategory === 'ODC001' ? 'db_tgpl_org' : requestCategory === 'ODC002' ? 'db_tgpl_user' : 'db_luatsu'))?.name || 'Cơ sở dữ liệu kho',
-      previewHeaders: uploadedPreviewHeaders,
-      previewRows: uploadedPreviewRows
+      fileSize: fileSize,
+      dataSource: dataSource,
+      previewHeaders: previewHeaders,
+      previewRows: previewRows
     };
+  };
 
+  const handleRequestSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (uploadType === 'file') {
+      if (!validationSuccess || !uploadedFile) {
+        alert("Vui lòng tải lên tệp hợp lệ trước khi gửi!");
+        return;
+      }
+    } else {
+      if (apiType === 'internal') {
+        if (!selectedInternalApiId) {
+          alert("Vui lòng chọn API từ danh mục cung cấp dữ liệu!");
+          return;
+        }
+      } else {
+        if (!apiUrl || !apiTitle || !apiDesc) {
+          alert("Vui lòng điền đầy đủ các thông tin API bắt buộc!");
+          return;
+        }
+      }
+    }
+
+    const newRecord = createNewRecord('pending');
     setDataList([newRecord, ...dataList]);
     setShowRequestModal(false);
-    setSuccessPopupMessage('Yêu cầu công bố đã được ghi nhận');
+    setSuccessPopupMessage('Yêu cầu công bố đã được gửi đi phê duyệt');
     setShowSuccessPopup(true);
+    setTimeout(() => setShowSuccessPopup(false), 3000);
+    resetRequestForm();
+  };
+
+  const handleSaveDraft = () => {
+    if (uploadType === 'file') {
+      if (!uploadedFile) {
+        alert("Vui lòng chọn tệp trước khi lưu nháp!");
+        return;
+      }
+    } else {
+      if (apiType === 'internal') {
+        if (!selectedInternalApiId) {
+          alert("Vui lòng chọn API trước khi lưu nháp!");
+          return;
+        }
+      } else {
+        if (!apiUrl || !apiTitle) {
+          alert("Vui lòng điền ít nhất URL và Tiêu đề API để lưu nháp!");
+          return;
+        }
+      }
+    }
+
+    const newRecord = createNewRecord('draft');
+    setDataList([newRecord, ...dataList]);
+    setShowRequestModal(false);
+    setSuccessPopupMessage('Yêu cầu công bố đã được lưu nháp');
+    setShowSuccessPopup(true);
+    setTimeout(() => setShowSuccessPopup(false), 3000);
+    resetRequestForm();
+  };
+
+  const resetRequestForm = () => {
+    setRequestFileName('');
+    setRequestDescription('');
+    setRequestCategory('');
+    setRequestKeywords('');
+    setRequestLicense('Giấy phép dữ liệu mở công cộng');
+    setRequestPublisher('Bộ Tư pháp');
+    setUploadedFile(null);
+    setValidationError(null);
+    setValidationSuccess(false);
+    setValidationDetails(null);
+    
+    setUploadType('file');
+    setApiType('internal');
+    setSelectedInternalApiId('');
+    setApiMethod('GET');
+    setApiUrl('');
+    setApiParams('');
+    setApiHeaders('');
+    setApiBody('');
+    setApiTitle('');
+    setApiDesc('');
   };
 
   // Approval actions
-  const handleApprove = (item: PublishedData) => {
-    setDataList(dataList.map(d => d.id === item.id ? { ...d, status: 'approved', approver: 'Lãnh đạo Nghiệp vụ' } : d));
+  const handleApprove = (item: PublishedData, opinion?: string) => {
+    setDataList(dataList.map(d => d.id === item.id ? { 
+      ...d, 
+      status: 'approved', 
+      approver: 'Lãnh đạo Nghiệp vụ', 
+      description: opinion ? `${d.description}\n[Ý kiến phê duyệt: ${opinion}]` : d.description 
+    } : d));
     setShowApprovalModal(false);
+    setShowApproveConfirmModal(false);
+    setApproveOpinion('');
     setSuccessPopupMessage('Đã phê duyệt yêu cầu công bố thành công!');
     setShowSuccessPopup(true);
+    setTimeout(() => setShowSuccessPopup(false), 3000);
   };
 
-  const handleReject = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleReject = () => {
     if (!selectedApprovalItem) return;
     if (!rejectReason.trim()) {
-      alert("Vui lòng nhập lý do từ chối!");
+      setRejectReasonError(true);
       return;
     }
-    setDataList(dataList.map(d => d.id === selectedApprovalItem.id ? { ...d, status: 'rejected', approver: 'Lãnh đạo Nghiệp vụ', description: `${d.description}\n[Từ chối do: ${rejectReason}]` } : d));
+    setDataList(dataList.map(d => d.id === selectedApprovalItem.id ? { 
+      ...d, 
+      status: 'rejected', 
+      approver: 'Lãnh đạo Nghiệp vụ', 
+      description: `${d.description}\n[Từ chối do: ${rejectReason}]` 
+    } : d));
     setShowApprovalModal(false);
-    setShowRejectForm(false);
+    setShowRejectConfirmModal(false);
+    setRejectReason('');
+    setRejectReasonError(false);
     setSuccessPopupMessage('Yêu cầu đã bị từ chối công bố.');
     setShowSuccessPopup(true);
+    setTimeout(() => setShowSuccessPopup(false), 3000);
   };
 
 
@@ -765,31 +960,13 @@ export function OpenDataPublishedListPage() {
                   <button
                     type="button"
                     onClick={() => {
-                      setRequestFileName('');
-                      setRequestDescription('');
-                      setRequestCategory('');
-                      setRequestKeywords('');
-                      setRequestLicense('Giấy phép dữ liệu mở công cộng');
-                      setRequestPublisher('Bộ Tư pháp');
-                      setUploadedFile(null);
-                      setValidationError(null);
-                      setValidationSuccess(false);
-                      setValidationDetails(null);
+                      resetRequestForm();
                       setShowRequestModal(true);
                     }}
                     className="flex-1 md:flex-none px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[14px] font-medium flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
                   >
                     <Plus className="w-4 h-4" />
                     Gửi yêu cầu công bố
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => alert('Xuất báo cáo danh sách yêu cầu công bố thành công!')}
-                    className="flex-1 md:flex-none px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-[14px] font-medium flex items-center justify-center gap-2 hover:bg-slate-50 transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
-                  >
-                    <Download className="w-4 h-4 text-slate-500" />
-                    Kết xuất
                   </button>
                 </div>
               </div>
@@ -807,8 +984,9 @@ export function OpenDataPublishedListPage() {
                           className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
                         >
                           <option value="all">Tất cả trạng thái</option>
-                          <option value="pending">Chờ phê duyệt</option>
-                          <option value="approved">Đã phê duyệt</option>
+                          <option value="draft">Bản nháp</option>
+                          <option value="pending">Chờ công bố</option>
+                          <option value="approved">Đã công bố</option>
                           <option value="rejected">Từ chối</option>
                         </select>
                         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
@@ -888,10 +1066,9 @@ export function OpenDataPublishedListPage() {
                               <FileSpreadsheet className="w-4 h-4 text-emerald-600 shrink-0" />
                               {item.fileName || 'Không có tên tệp'}
                             </div>
-                            <div className="text-xs text-slate-450 mt-0.5 max-w-md truncate">{item.description}</div>
                           </td>
                           <td className="px-4 py-3 text-left text-slate-700 font-medium text-[13px]">{item.category}</td>
-                          <td className="px-4 py-3 text-left text-slate-600 text-[13px]">{item.publisher}</td>
+                          <td className="px-4 py-3 text-left text-slate-650 text-[13px]">{item.publisher}</td>
                           <td className="px-4 py-3 text-left text-slate-600 font-medium text-[13px]">{item.creator}</td>
                           <td className="px-4 py-3 text-left text-slate-600 text-[13px]">{item.createdDate}</td>
                           <td className="px-4 py-3 text-left text-slate-600 text-[13px]">{item.approver}</td>
@@ -904,13 +1081,6 @@ export function OpenDataPublishedListPage() {
                                 title="Xem chi tiết"
                               >
                                 <Eye className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => handleDownload(item.fileName)}
-                                className="p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
-                                title="Tải xuống tệp Excel"
-                              >
-                                <Download className="w-4 h-4" />
                               </button>
                             </div>
                           </td>
@@ -957,14 +1127,6 @@ export function OpenDataPublishedListPage() {
                 </div>
                 
                 <div className="flex items-center gap-2 w-full md:w-auto">
-                  <button
-                    type="button"
-                    onClick={() => alert('Xuất báo cáo danh sách yêu cầu chờ duyệt thành công!')}
-                    className="flex-1 md:flex-none px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-[14px] font-medium flex items-center justify-center gap-2 hover:bg-slate-50 transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
-                  >
-                    <Download className="w-4 h-4 text-slate-500" />
-                    Kết xuất
-                  </button>
                 </div>
               </div>
 
@@ -972,6 +1134,22 @@ export function OpenDataPublishedListPage() {
               {showFilters && (
                 <div className="mt-4 pt-4 border-t border-slate-100">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Trạng thái yêu cầu</label>
+                      <div className="relative">
+                        <select
+                          value={selectedStatus}
+                          onChange={(e) => setSelectedStatus(e.target.value)}
+                          className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+                        >
+                          <option value="all">Tất cả trạng thái</option>
+                          <option value="pending">Chờ công bố</option>
+                          <option value="approved">Đã công bố</option>
+                          <option value="rejected">Từ chối</option>
+                        </select>
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                      </div>
+                    </div>
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Danh mục mở</label>
                       <div className="relative">
@@ -1016,9 +1194,10 @@ export function OpenDataPublishedListPage() {
                     <tr>
                       <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap w-16 text-[14px]">STT</th>
                       <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Tên tập dữ liệu</th>
-                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Người gửi</th>
-                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Mã yêu cầu</th>
-                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Giấy phép</th>
+                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Danh mục</th>
+                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Cơ quan công bố</th>
+                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Người tạo</th>
+                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Ngày tạo</th>
                       <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[14px] w-32">Trạng thái</th>
                       <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[14px] w-28">Thao tác</th>
                     </tr>
@@ -1026,8 +1205,8 @@ export function OpenDataPublishedListPage() {
                   <tbody className="divide-y divide-slate-100 bg-white">
                     {paginatedApprovalRequests.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="px-6 py-8 text-center text-slate-500 text-[14px]">
-                          Không có yêu cầu công bố nào đang chờ phê duyệt.
+                        <td colSpan={8} className="px-6 py-8 text-center text-slate-500 text-[14px]">
+                          Không có yêu cầu công bố nào được tìm thấy.
                         </td>
                       </tr>
                     ) : (
@@ -1050,13 +1229,10 @@ export function OpenDataPublishedListPage() {
                               </span>
                             </div>
                           </td>
+                          <td className="px-4 py-3 text-slate-700 font-medium text-[13px]">{item.category}</td>
+                          <td className="px-4 py-3 text-slate-500 text-[13px]">{item.publisher}</td>
                           <td className="px-4 py-3 text-slate-700 font-medium text-[13px]">{item.creator}</td>
-                          <td className="px-4 py-3 text-left text-[13px]">
-                            <code className="px-2 py-0.5 bg-slate-50 border border-slate-200 rounded text-xs font-mono font-medium text-slate-700">
-                              {item.id}
-                            </code>
-                          </td>
-                          <td className="px-4 py-3 text-slate-700 text-[13px]">{item.license}</td>
+                          <td className="px-4 py-3 text-slate-550 text-[13px]">{item.createdDate}</td>
                           <td className="px-4 py-3 text-center text-[13px]">{getStatusBadge(item.status)}</td>
                           <td className="px-4 py-3 text-center">
                             <button
@@ -1126,7 +1302,11 @@ export function OpenDataPublishedListPage() {
                         publishFormat: 'api',
                         targetAudience: '',
                         contactInfo: '',
-                        dataSource: ''
+                        dataSource: '',
+                        weeklyDays: [],
+                        monthlyDay: 1,
+                        quarterlyDay: 1,
+                        quarterlyMonth: 1
                       });
                       setIsEditingSchedule(false);
                       setSelectedSchedule(null);
@@ -1136,15 +1316,6 @@ export function OpenDataPublishedListPage() {
                   >
                     <Plus className="w-4 h-4" />
                     Thêm lịch mới
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => alert('Xuất báo cáo danh sách lịch công bố tự động thành công!')}
-                    className="flex-1 lg:flex-none px-4 h-10 bg-white border border-slate-200 text-slate-700 rounded-lg text-[13px] font-semibold flex items-center justify-center gap-2 hover:bg-slate-50 transition-colors shadow-sm whitespace-nowrap cursor-pointer"
-                  >
-                    <Download className="w-4 h-4 text-slate-500" />
-                    Kết xuất
                   </button>
                 </div>
               </div>
@@ -1233,7 +1404,11 @@ export function OpenDataPublishedListPage() {
                                     endDate: schedule.endDate || '',
                                     publishFormat: schedule.publishFormat || 'api',
                                     targetAudience: schedule.targetAudience || '',
-                                    contactInfo: schedule.contactInfo || ''
+                                    contactInfo: schedule.contactInfo || '',
+                                    weeklyDays: schedule.weeklyDays || [],
+                                    monthlyDay: schedule.monthlyDay || 1,
+                                    quarterlyDay: schedule.quarterlyDay || 1,
+                                    quarterlyMonth: schedule.quarterlyMonth || 1
                                   });
                                   setShowScheduleModal(true);
                                 }}
@@ -1247,8 +1422,25 @@ export function OpenDataPublishedListPage() {
                               {schedule.datasetCode}
                             </code>
                           </td>
-                          <td className="px-4 py-3.5 text-slate-700 font-medium">
-                            {schedule.frequency === 'daily' ? 'Hàng ngày' : schedule.frequency === 'weekly' ? 'Hàng tuần' : schedule.frequency === 'monthly' ? 'Hàng tháng' : 'Hàng quý'}
+                          <td className="px-4 py-3 text-[13px]">
+                            <div className="font-semibold text-slate-800">
+                              {schedule.frequency === 'daily' ? 'Hàng ngày' : schedule.frequency === 'weekly' ? 'Hàng tuần' : schedule.frequency === 'monthly' ? 'Hàng tháng' : 'Hàng quý'}
+                            </div>
+                            {schedule.frequency === 'weekly' && schedule.weeklyDays && schedule.weeklyDays.length > 0 && (
+                              <div className="text-[11px] text-slate-500 mt-0.5">
+                                {schedule.weeklyDays.join(', ')}
+                              </div>
+                            )}
+                            {schedule.frequency === 'monthly' && schedule.monthlyDay && (
+                              <div className="text-[11px] text-slate-500 mt-0.5">
+                                Ngày {schedule.monthlyDay} hàng tháng
+                              </div>
+                            )}
+                            {schedule.frequency === 'quarterly' && schedule.quarterlyMonth && schedule.quarterlyDay && (
+                              <div className="text-[11px] text-slate-500 mt-0.5">
+                                Tháng thứ {schedule.quarterlyMonth}, ngày {schedule.quarterlyDay}
+                              </div>
+                            )}
                           </td>
                           <td className="px-4 py-3.5 text-slate-700 font-medium">{schedule.startTime}</td>
                           <td className="px-4 py-3.5 text-slate-500">{schedule.lastRun || 'Chưa chạy'}</td>
@@ -1273,7 +1465,11 @@ export function OpenDataPublishedListPage() {
                                     endDate: schedule.endDate || '',
                                     publishFormat: schedule.publishFormat || 'api',
                                     targetAudience: schedule.targetAudience || '',
-                                    contactInfo: schedule.contactInfo || ''
+                                    contactInfo: schedule.contactInfo || '',
+                                    weeklyDays: schedule.weeklyDays || [],
+                                    monthlyDay: schedule.monthlyDay || 1,
+                                    quarterlyDay: schedule.quarterlyDay || 1,
+                                    quarterlyMonth: schedule.quarterlyMonth || 1
                                   });
                                   setShowScheduleModal(true);
                                 }}
@@ -1422,12 +1618,12 @@ export function OpenDataPublishedListPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="col-span-1 md:col-span-2">
                   <label className="block font-semibold text-slate-700 mb-1">
-                    Tên tệp dữ liệu <span className="text-red-500">*</span>
+                    Tên tập dữ liệu <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="Nhập tên tệp dữ liệu (ví dụ: Danh sách tổ chức TGPL Quý 2/2026)"
+                    placeholder="Nhập tên tập dữ liệu (ví dụ: Danh sách tổ chức TGPL Quý 2/2026)"
                     value={requestFileName}
                     onChange={(e) => setRequestFileName(e.target.value)}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -1448,7 +1644,7 @@ export function OpenDataPublishedListPage() {
                         if (newCat) {
                           runValidation(uploadedFile, newCat, false);
                         } else {
-                          setValidationError("Vui lòng chọn Danh mục dữ liệu mở để kiểm tra cấu trúc metadata của tệp.");
+                          setValidationError('Vui lòng chọn Danh mục dữ liệu mở để kiểm tra cấu trúc metadata của tệp.');
                           setValidationSuccess(false);
                           setValidationDetails(null);
                         }
@@ -1458,17 +1654,13 @@ export function OpenDataPublishedListPage() {
                   >
                     <option value="">-- Chọn danh mục dữ liệu mở --</option>
                     {APPROVED_CATEGORIES.map(cat => (
-                      <option key={cat.code} value={cat.code}>
-                        {cat.name}
-                      </option>
+                      <option key={cat.code} value={cat.code}>{cat.name}</option>
                     ))}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Giấy phép
-                  </label>
+                  <label className="block font-semibold text-slate-700 mb-1">Giấy phép</label>
                   <select
                     value={requestLicense}
                     onChange={(e) => setRequestLicense(e.target.value)}
@@ -1480,9 +1672,7 @@ export function OpenDataPublishedListPage() {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Từ khóa
-                  </label>
+                  <label className="block font-semibold text-slate-700 mb-1">Từ khóa</label>
                   <input
                     type="text"
                     placeholder="Ngăn cách bằng dấu phẩy, vd: luat, tgpl, tro giup"
@@ -1493,9 +1683,7 @@ export function OpenDataPublishedListPage() {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Cơ quan công bố
-                  </label>
+                  <label className="block font-semibold text-slate-700 mb-1">Cơ quan công bố</label>
                   <input
                     type="text"
                     placeholder="Nhập tên cơ quan"
@@ -1506,134 +1694,222 @@ export function OpenDataPublishedListPage() {
                 </div>
 
                 <div className="col-span-1 md:col-span-2">
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Thông tin mô tả
-                  </label>
+                  <label className="block font-semibold text-slate-700 mb-1">Thông tin mô tả</label>
                   <textarea
-                    rows={3}
-                    placeholder="Mô tả nội dung tệp dữ liệu công bố..."
+                    rows={2}
+                    placeholder="Mô tả nội dung tập dữ liệu công bố..."
                     value={requestDescription}
                     onChange={(e) => setRequestDescription(e.target.value)}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
-                <div className="col-span-1 md:col-span-2 bg-slate-50 border border-slate-200 rounded-lg p-3">
-                  <div className="flex items-start gap-2">
-                    <Info className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
-                    <div>
-                      <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-1">
-                        Cấu trúc Metadata yêu cầu
-                      </h4>
-                      {requestCategory ? (
-                        <>
-                          <p className="text-xs text-slate-600 mb-2">
-                            Tệp dữ liệu tải lên bắt buộc phải chứa các cột tiêu đề ở dòng đầu tiên sau đây:
-                          </p>
-                          <div className="flex flex-wrap gap-1.5">
-                            {APPROVED_CATEGORIES.find(c => c.code === requestCategory)?.expectedHeaders.map((hdr, idx) => (
-                              <span key={idx} className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-100 rounded text-xs font-medium">
-                                {hdr}
-                              </span>
-                            ))}
-                          </div>
-                        </>
-                      ) : (
-                        <p className="text-xs text-slate-500 italic">
-                          Vui lòng chọn danh mục dữ liệu mở để xem cấu trúc metadata yêu cầu.
-                        </p>
-                      )}
-                    </div>
+                {/* Upload Type Selector */}
+                <div className="col-span-1 md:col-span-2">
+                  <label className="block font-semibold text-slate-700 mb-2">
+                    Dạng tải dữ liệu <span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => { setUploadType('file'); setValidationError(null); setValidationSuccess(false); }}
+                      className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg border text-sm font-semibold transition-all cursor-pointer ${
+                        uploadType === 'file'
+                          ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                          : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'
+                      }`}
+                    >
+                      <Upload className="w-4 h-4" />
+                      Tải lên tệp
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setUploadType('api'); setValidationError(null); setValidationSuccess(false); }}
+                      className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg border text-sm font-semibold transition-all cursor-pointer ${
+                        uploadType === 'api'
+                          ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                          : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'
+                      }`}
+                    >
+                      <Globe className="w-4 h-4" />
+                      Lấy từ API
+                    </button>
                   </div>
                 </div>
 
-                <div className="col-span-1 md:col-span-2">
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Tải lên tệp dữ liệu (Định dạng Excel) <span className="text-red-500">*</span>
-                  </label>
-                  
-                  {!uploadedFile ? (
-                    <div
-                      onDragOver={(e) => e.preventDefault()}
-                      onDrop={(e) => {
-                        e.preventDefault();
-                        const file = e.dataTransfer.files?.[0];
-                        if (file) processFile(file, false);
-                      }}
-                      className="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-xl p-6 text-center cursor-pointer transition-all hover:bg-slate-50/50"
-                      onClick={() => document.getElementById('excel-file-upload')?.click()}
-                    >
-                      <input
-                        id="excel-file-upload"
-                        type="file"
-                        accept=".xlsx, .xls"
-                        onChange={(e) => handleFileChange(e, false)}
-                        className="hidden"
-                      />
-                      <Upload className="w-10 h-10 text-slate-400 mx-auto mb-3" />
-                      <p className="text-sm font-medium text-slate-700 mb-1">
-                        Kéo thả tệp Excel vào đây hoặc click để chọn tệp
-                      </p>
-                      <p className="text-xs text-slate-500">
-                        Chỉ hỗ trợ tệp định dạng .xlsx, .xls
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="border border-slate-200 rounded-xl p-4 bg-slate-50 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
-                          <FileSpreadsheet className="w-6 h-6" />
-                        </div>
+                {/* FILE UPLOAD SECTION */}
+                {uploadType === 'file' && (
+                  <>
+                    <div className="col-span-1 md:col-span-2 bg-slate-50 border border-slate-200 rounded-lg p-3">
+                      <div className="flex items-start gap-2">
+                        <Info className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
                         <div>
-                          <div className="text-sm font-semibold text-slate-900 truncate max-w-md">
-                            {uploadedFile.name}
-                          </div>
-                          <div className="text-xs text-slate-500">
-                            {(uploadedFile.size / 1024).toFixed(1)} KB
-                          </div>
+                          <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-1">Cấu trúc Metadata yêu cầu</h4>
+                          {requestCategory ? (
+                            <>
+                              <p className="text-xs text-slate-600 mb-2">Tệp dữ liệu tải lên bắt buộc phải chứa các cột tiêu đề ở dòng đầu tiên:</p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {APPROVED_CATEGORIES.find(c => c.code === requestCategory)?.expectedHeaders.map((hdr, idx) => (
+                                  <span key={idx} className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-100 rounded text-xs font-medium">{hdr}</span>
+                                ))}
+                              </div>
+                            </>
+                          ) : (
+                            <p className="text-xs text-slate-500 italic">Vui lòng chọn danh mục dữ liệu mở để xem cấu trúc metadata yêu cầu.</p>
+                          )}
                         </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setUploadedFile(null);
-                          setValidationError(null);
-                          setValidationSuccess(false);
-                          setValidationDetails(null);
-                        }}
-                        className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        <X className="w-5 h-5" />
-                      </button>
                     </div>
-                  )}
-                </div>
 
-                {(isValidating || validationError || validationSuccess) && (
-                  <div className="col-span-1 md:col-span-2">
-                    {isValidating && (
-                      <div className="flex items-center gap-2 text-sm text-slate-600">
-                        <RefreshCw className="w-4 h-4 animate-spin text-blue-600" />
-                        Đang đọc và đối chiếu metadata file...
+                    <div className="col-span-1 md:col-span-2">
+                      <label className="block font-semibold text-slate-700 mb-1">
+                        Tải lên tệp dữ liệu <span className="text-red-500">*</span>
+                      </label>
+                      {!uploadedFile ? (
+                        <div
+                          onDragOver={(e) => e.preventDefault()}
+                          onDrop={(e) => { e.preventDefault(); const file = e.dataTransfer.files?.[0]; if (file) processFile(file); }}
+                          className="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-xl p-6 text-center cursor-pointer transition-all hover:bg-slate-50/50"
+                          onClick={() => document.getElementById('data-file-upload')?.click()}
+                        >
+                          <input
+                            id="data-file-upload"
+                            type="file"
+                            accept=".xlsx,.xls,.csv,.xml,.docx,.doc,.pdf,.edxml"
+                            onChange={handleFileChange}
+                            className="hidden"
+                          />
+                          <Upload className="w-10 h-10 text-slate-400 mx-auto mb-3" />
+                          <p className="text-sm font-medium text-slate-700 mb-1">Kéo thả tệp vào đây hoặc click để chọn tệp</p>
+                          <p className="text-xs text-slate-500">Hỗ trợ: .xlsx, .xls, .csv, .xml, .docx, .doc, .pdf, .edxml — Tối đa 100MB</p>
+                        </div>
+                      ) : (
+                        <div className="border border-slate-200 rounded-xl p-4 bg-slate-50 flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-blue-100 text-blue-600 rounded-lg"><FileSpreadsheet className="w-6 h-6" /></div>
+                            <div>
+                              <div className="text-sm font-semibold text-slate-900 truncate max-w-md">{uploadedFile.name}</div>
+                              <div className="text-xs text-slate-500">{(uploadedFile.size / 1024).toFixed(1)} KB</div>
+                            </div>
+                          </div>
+                          <button type="button" onClick={() => { setUploadedFile(null); setValidationError(null); setValidationSuccess(false); setValidationDetails(null); }} className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {(isValidating || validationError || validationSuccess) && (
+                      <div className="col-span-1 md:col-span-2">
+                        {isValidating && (
+                          <div className="flex items-center gap-2 text-sm text-slate-600">
+                            <RefreshCw className="w-4 h-4 animate-spin text-blue-600" />
+                            Đang đọc và đối chiếu metadata file...
+                          </div>
+                        )}
+                        {!isValidating && validationError && (
+                          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-start gap-2">
+                            <AlertCircle className="w-5 h-5 mt-0.5 shrink-0" />
+                            <div><span className="font-semibold">Lỗi cấu trúc metadata: </span>{validationError}</div>
+                          </div>
+                        )}
+                        {!isValidating && validationSuccess && (
+                          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
+                            <CheckCircle className="w-5 h-5 shrink-0" />
+                            <div><span className="font-semibold">Kiểm tra hợp lệ: </span>Tệp dữ liệu khớp với cấu trúc metadata của danh mục đã chọn!</div>
+                          </div>
+                        )}
                       </div>
                     )}
-                    
-                    {!isValidating && validationError && (
-                      <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-start gap-2">
-                        <AlertCircle className="w-5 h-5 mt-0.5 shrink-0" />
-                        <div>
-                          <span className="font-semibold">Lỗi cấu trúc metadata: </span>
-                          {validationError}
-                        </div>
+                  </>
+                )}
+
+                {/* API SECTION */}
+                {uploadType === 'api' && (
+                  <div className="col-span-1 md:col-span-2 space-y-4">
+                    <div>
+                      <label className="block font-semibold text-slate-700 mb-2">Loại API</label>
+                      <div className="flex gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setApiType('internal')}
+                          className={`flex-1 py-2.5 rounded-lg border text-sm font-semibold transition-all cursor-pointer ${
+                            apiType === 'internal' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'
+                          }`}
+                        >
+                          API Nội bộ (từ mục Cung cấp dữ liệu)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setApiType('external')}
+                          className={`flex-1 py-2.5 rounded-lg border text-sm font-semibold transition-all cursor-pointer ${
+                            apiType === 'external' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'
+                          }`}
+                        >
+                          API Cơ quan nhà nước (bên ngoài)
+                        </button>
+                      </div>
+                    </div>
+
+                    {apiType === 'internal' && (
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">
+                          Chọn API từ danh mục cung cấp dữ liệu <span className="text-red-500">*</span>
+                        </label>
+                        {internalApis.length > 0 ? (
+                          <select
+                            value={selectedInternalApiId}
+                            onChange={(e) => setSelectedInternalApiId(e.target.value)}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                          >
+                            <option value="">-- Chọn API --</option>
+                            {internalApis.map((api: any) => (
+                              <option key={api.id} value={api.id}>[{api.method}] {api.name} — {api.endpoint}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          <div className="border border-amber-200 bg-amber-50 rounded-lg px-4 py-3 text-sm text-amber-800 flex items-center gap-2">
+                            <AlertTriangle className="w-4 h-4 shrink-0" />
+                            Chưa có API nào được cấu hình trong mục Cung cấp dữ liệu. Vui lòng tạo API trước.
+                          </div>
+                        )}
                       </div>
                     )}
 
-                    {!isValidating && validationSuccess && (
-                      <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
-                        <CheckCircle className="w-5 h-5 shrink-0" />
+                    {apiType === 'external' && (
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block font-semibold text-slate-700 mb-1">Tiêu đề API <span className="text-red-500">*</span></label>
+                            <input type="text" placeholder="Ví dụ: API Danh sách Luật sư VN" value={apiTitle} onChange={(e) => setApiTitle(e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                          </div>
+                          <div>
+                            <label className="block font-semibold text-slate-700 mb-1">Phương thức</label>
+                            <select value={apiMethod} onChange={(e) => setApiMethod(e.target.value as any)} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                              <option value="GET">GET</option>
+                              <option value="POST">POST</option>
+                              <option value="PUT">PUT</option>
+                              <option value="DELETE">DELETE</option>
+                            </select>
+                          </div>
+                        </div>
                         <div>
-                          <span className="font-semibold">Kiểm tra hợp lệ: </span>
-                          File Excel khớp hoàn toàn với cấu trúc metadata của danh mục đã chọn!
+                          <label className="block font-semibold text-slate-700 mb-1">URL API <span className="text-red-500">*</span></label>
+                          <input type="text" placeholder="https://api.example.gov.vn/v1/data" value={apiUrl} onChange={(e) => setApiUrl(e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono" />
+                        </div>
+                        <div>
+                          <label className="block font-semibold text-slate-700 mb-1">Mô tả API <span className="text-red-500">*</span></label>
+                          <textarea rows={2} placeholder="Mô tả về API và dữ liệu trả về..." value={apiDesc} onChange={(e) => setApiDesc(e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block font-semibold text-slate-700 mb-1">Tham số (Query Params)</label>
+                            <input type="text" placeholder="page=1&limit=100" value={apiParams} onChange={(e) => setApiParams(e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono" />
+                          </div>
+                          <div>
+                            <label className="block font-semibold text-slate-700 mb-1">Headers</label>
+                            <input type="text" placeholder='{"Authorization": "Bearer token"}' value={apiHeaders} onChange={(e) => setApiHeaders(e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono" />
+                          </div>
                         </div>
                       </div>
                     )}
@@ -1641,7 +1917,7 @@ export function OpenDataPublishedListPage() {
                 )}
               </div>
 
-              <div className="border-t border-slate-200 pt-4 flex items-center justify-end gap-3 bg-white">
+              <div className="border-t border-slate-200 pt-4 flex items-center justify-between gap-3 bg-white">
                 <button
                   type="button"
                   onClick={() => setShowRequestModal(false)}
@@ -1649,14 +1925,28 @@ export function OpenDataPublishedListPage() {
                 >
                   Hủy
                 </button>
-                <button
-                  type="submit"
-                  disabled={!validationSuccess}
-                  className={`px-4 py-2 text-white rounded-lg font-semibold text-sm flex items-center gap-2 shadow-sm transition-all ${validationSuccess ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer animate-pulse-slow' : 'bg-slate-300 cursor-not-allowed text-slate-500'}`}
-                >
-                  <Send className="w-4 h-4" />
-                  Gửi yêu cầu
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleSaveDraft}
+                    className="px-4 py-2 border border-slate-300 text-slate-600 hover:bg-slate-50 rounded-lg font-semibold text-sm flex items-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <Save className="w-4 h-4" />
+                    Lưu nháp
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={uploadType === 'file' && !validationSuccess}
+                    className={`px-4 py-2 text-white rounded-lg font-semibold text-sm flex items-center gap-2 shadow-sm transition-all ${
+                      uploadType === 'api' || validationSuccess
+                        ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
+                        : 'bg-slate-300 cursor-not-allowed text-slate-500'
+                    }`}
+                  >
+                    <Send className="w-4 h-4" />
+                    Gửi yêu cầu
+                  </button>
+                </div>
               </div>
             </form>
           </div>
@@ -1801,6 +2091,11 @@ export function OpenDataPublishedListPage() {
                 e.preventDefault();
                 const matchedDataset = APPROVED_CATEGORIES.find(c => c.code === scheduleFormData.datasetId);
                 
+                if (scheduleFormData.frequency === 'weekly' && (!scheduleFormData.weeklyDays || scheduleFormData.weeklyDays.length === 0)) {
+                  alert('Vui lòng chọn ít nhất một thứ trong tuần!');
+                  return;
+                }
+
                 if (isEditingSchedule && selectedSchedule) {
                   setSchedules(schedules.map(s => s.id === selectedSchedule.id ? {
                     ...s,
@@ -1812,6 +2107,10 @@ export function OpenDataPublishedListPage() {
                     publishFormat: scheduleFormData.publishFormat,
                     targetAudience: scheduleFormData.targetAudience,
                     contactInfo: scheduleFormData.contactInfo,
+                    weeklyDays: scheduleFormData.weeklyDays,
+                    monthlyDay: scheduleFormData.monthlyDay,
+                    quarterlyDay: scheduleFormData.quarterlyDay,
+                    quarterlyMonth: scheduleFormData.quarterlyMonth,
                     nextRun: `06/06/2026 ${scheduleFormData.startTime}`
                   } : s));
                   alert('Đã cập nhật lịch công bố tự động thành công!');
@@ -1835,7 +2134,11 @@ export function OpenDataPublishedListPage() {
                     status: 'active',
                     nextRun: `06/06/2026 ${scheduleFormData.startTime}`,
                     createdBy: 'User',
-                    createdDate: new Date().toLocaleDateString('vi-VN')
+                    createdDate: new Date().toLocaleDateString('vi-VN'),
+                    weeklyDays: scheduleFormData.weeklyDays,
+                    monthlyDay: scheduleFormData.monthlyDay,
+                    quarterlyDay: scheduleFormData.quarterlyDay,
+                    quarterlyMonth: scheduleFormData.quarterlyMonth
                   };
                   setSchedules([newSchedule, ...schedules]);
                   alert('Đã thêm lịch công bố tự động thành công!');
@@ -1851,13 +2154,20 @@ export function OpenDataPublishedListPage() {
                     disabled={isEditingSchedule}
                     value={scheduleFormData.datasetId}
                     onChange={(e) => setScheduleFormData({ ...scheduleFormData, datasetId: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white disabled:bg-slate-50 disabled:text-slate-500"
+                    className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white disabled:bg-slate-50 disabled:text-slate-500 ${
+                      getDatasetFormat(scheduleFormData.datasetId) === 'file' ? 'border-red-500 focus:ring-red-500' : 'border-slate-300'
+                    }`}
                   >
                     <option value="">-- Chọn tập dữ liệu mở --</option>
                     {APPROVED_CATEGORIES.map(c => (
                       <option key={c.code} value={c.code}>{c.name}</option>
                     ))}
                   </select>
+                  {getDatasetFormat(scheduleFormData.datasetId) === 'file' && (
+                    <div className="text-red-600 font-semibold text-xs mt-1">
+                      Tệp dữ liệu không thể tự động cập nhật từ dữ liệu nguồn
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -1885,6 +2195,85 @@ export function OpenDataPublishedListPage() {
                   />
                 </div>
 
+                {scheduleFormData.frequency === 'weekly' && (
+                  <div className="col-span-2 space-y-1.5">
+                    <label className="block font-semibold text-slate-700">Các thứ trong tuần *</label>
+                    <div className="flex flex-wrap gap-2">
+                      {['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'].map((day) => {
+                        const isSelected = scheduleFormData.weeklyDays?.includes(day);
+                        return (
+                          <button
+                            key={day}
+                            type="button"
+                            onClick={() => {
+                              const currentDays = scheduleFormData.weeklyDays || [];
+                              const newWeeklyDays = isSelected
+                                ? currentDays.filter(d => d !== day)
+                                : [...currentDays, day];
+                              setScheduleFormData({ ...scheduleFormData, weeklyDays: newWeeklyDays });
+                            }}
+                            className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all ${
+                              isSelected
+                                ? 'bg-blue-600 border-blue-600 text-white shadow-sm font-medium'
+                                : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400'
+                            }`}
+                          >
+                            {day}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {scheduleFormData.frequency === 'monthly' && (
+                  <div className="col-span-2">
+                    <label className="block font-semibold text-slate-700 mb-1">Ngày trong tháng *</label>
+                    <select
+                      value={scheduleFormData.monthlyDay || 1}
+                      onChange={(e) => setScheduleFormData({ ...scheduleFormData, monthlyDay: parseInt(e.target.value) })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    >
+                      {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
+                        <option key={day} value={day}>
+                          Ngày {day}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {scheduleFormData.frequency === 'quarterly' && (
+                  <>
+                    <div>
+                      <label className="block font-semibold text-slate-700 mb-1">Tháng thứ mấy trong quý *</label>
+                      <select
+                        value={scheduleFormData.quarterlyMonth || 1}
+                        onChange={(e) => setScheduleFormData({ ...scheduleFormData, quarterlyMonth: parseInt(e.target.value) })}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                      >
+                        <option value={1}>Tháng thứ nhất</option>
+                        <option value={2}>Tháng thứ hai</option>
+                        <option value={3}>Tháng thứ ba</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block font-semibold text-slate-700 mb-1">Ngày trong quý (1-30) *</label>
+                      <select
+                        value={scheduleFormData.quarterlyDay || 1}
+                        onChange={(e) => setScheduleFormData({ ...scheduleFormData, quarterlyDay: parseInt(e.target.value) })}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                      >
+                        {Array.from({ length: 30 }, (_, i) => i + 1).map((day) => (
+                          <option key={day} value={day}>
+                            Ngày {day}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </>
+                )}
+
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">Ngày bắt đầu</label>
                   <input
@@ -1905,19 +2294,7 @@ export function OpenDataPublishedListPage() {
                   />
                 </div>
 
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Hình thức công bố *</label>
-                  <select
-                    value={scheduleFormData.publishFormat}
-                    onChange={(e) => setScheduleFormData({ ...scheduleFormData, publishFormat: e.target.value as any })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                  >
-                    <option value="file">Xuất file Excel</option>
-                    <option value="api">Đồng bộ qua API dịch vụ</option>
-                  </select>
-                </div>
-
-                <div>
+                <div className="col-span-2">
                   <label className="block font-semibold text-slate-700 mb-1">Nguồn cơ sở dữ liệu hệ thống *</label>
                   <input
                     type="text"
@@ -1951,7 +2328,12 @@ export function OpenDataPublishedListPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold text-sm cursor-pointer"
+                  disabled={getDatasetFormat(scheduleFormData.datasetId) === 'file'}
+                  className={`px-4 py-2 text-white rounded-lg font-semibold text-sm transition-all ${
+                    getDatasetFormat(scheduleFormData.datasetId) === 'file'
+                      ? 'bg-slate-300 cursor-not-allowed text-slate-500'
+                      : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
+                  }`}
                 >
                   Xác nhận
                 </button>

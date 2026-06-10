@@ -499,10 +499,19 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
   const [categoryList, setCategoryList] = useState<OpenDataCategory[]>(mockCategoryList);
   const [searchTerm, setSearchTerm] = useState('');
   const [approvalFilterTab, setApprovalFilterTab] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
-  const [metadataEntries, setMetadataEntries] = useState<MetadataItem[]>(sampleMetadata);
+  const [metadataEntries, setMetadataEntries] = useState<MetadataItem[]>(() => {
+    const saved = localStorage.getItem('open_data_metadata');
+    return saved ? JSON.parse(saved) : sampleMetadata;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('open_data_metadata', JSON.stringify(metadataEntries));
+  }, [metadataEntries]);
+
   const [licenseEntries, setLicenseEntries] = useState<LicenseItem[]>(sampleLicenses);
   const [selectedMetadata, setSelectedMetadata] = useState<MetadataItem | null>(null);
   const [showMetadataModal, setShowMetadataModal] = useState(false);
+  const [showViewMetadataModal, setShowViewMetadataModal] = useState(false);
   const [metadataFormData, setMetadataFormData] = useState<MetadataItem>({
     id: '0',
     categoryCodes: [],
@@ -510,8 +519,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
     description: '',
     keywords: '',
     licenseId: sampleLicenses[0]?.id || 'l1',
-    format: 'CSV',
-    source: '',
+    format: 'CSV, JSON, XML, Excel, PDF',
+    source: 'Tải tệp, API',
     frequency: 'monthly',
     status: 'active'
   });
@@ -552,6 +561,11 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
     return license ? license.name : 'Không xác định';
   };
 
+  const handleViewMetadata = (item: MetadataItem) => {
+    setSelectedMetadata(item);
+    setShowViewMetadataModal(true);
+  };
+
   const openMetadataModal = (item?: MetadataItem) => {
     if (item) {
       setSelectedMetadata(item);
@@ -569,8 +583,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
         description: '',
         keywords: '',
         licenseId: sampleLicenses[0]?.id || 'l1',
-        format: 'CSV',
-        source: '',
+        format: 'CSV, JSON, XML, Excel, PDF',
+        source: 'Tải tệp, API',
         frequency: 'monthly',
         status: 'active',
         requiredFields: []
@@ -580,7 +594,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
   };
 
   const saveMetadata = () => {
-    if (metadataFormData.categoryCodes.length === 0 || !metadataFormData.description || !metadataFormData.fileName) {
+    if (metadataFormData.categoryCodes.length === 0 || !metadataFormData.fileName) {
       return;
     }
     if (metadataFormData.id === '0') {
@@ -961,17 +975,6 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                 >
                   <Plus className="w-4 h-4" />
                   {addLabel}
-                </button>
-              )}
-
-              {activeTab !== 'history' && (
-                <button
-                  type="button"
-                  onClick={() => alert('Xuất file báo cáo thành công!')}
-                  className="flex-1 md:flex-none px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-[14px] font-medium flex items-center justify-center gap-2 hover:bg-slate-50 transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
-                >
-                  <Download className="w-4 h-4 text-slate-500" />
-                  Kết xuất
                 </button>
               )}
             </div>
@@ -1650,9 +1653,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                     <>
                       <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Tên tệp dữ liệu</th>
                       <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Danh mục</th>
-                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Mô tả</th>
                       <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Từ khóa</th>
-                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Cấu hình dữ liệu</th>
                       <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[14px]">Giấy phép</th>
                       <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[14px]">Định dạng</th>
                       <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[14px]">Tần suất</th>
@@ -1788,23 +1789,9 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                           </span>
                         </td>
                         <td className="px-4 py-3 text-left text-[13px]">
-                          <div className="font-semibold text-slate-900 leading-snug">{item.description}</div>
-                        </td>
-                        <td className="px-4 py-3 text-left text-[13px]">
                           <div className="flex flex-wrap gap-1 font-normal">
                             {item.keywords ? item.keywords.split(',').map((k, i) => k.trim() && <span key={i} className="px-1.5 py-0.5 bg-slate-100 rounded text-[10px]">{k.trim()}</span>) : <span className="text-slate-400 italic text-[11px]">Không có</span>}
                           </div>
-                        </td>
-                        <td className="px-4 py-3 text-left text-[13px]">
-                          {item.requiredFields && item.requiredFields.length > 0 ? (
-                            <div className="flex flex-wrap gap-1 items-center font-normal">
-                              {item.requiredFields.map((f, i) => (
-                                <span key={i} className="px-1.5 py-0.5 bg-red-50 text-red-700 rounded text-[10px] border border-red-100 font-semibold">{f}</span>
-                              ))}
-                            </div>
-                          ) : (
-                            <span className="text-slate-400 italic text-[11px]">Không cấu hình</span>
-                          )}
                         </td>
                         <td className="px-4 py-3 text-left text-[13px]">
                           <span className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-semibold border border-blue-100">{getLicenseName(item.licenseId)}</span>
@@ -1822,7 +1809,10 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                         </td>
                         <td className="px-4 py-3 text-center">
                           <div className="flex items-center justify-center gap-1">
-                            <button onClick={() => openMetadataModal(item)} className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Chỉnh sửa">
+                            <button onClick={() => handleViewMetadata(item)} className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer" title="Xem chi tiết">
+                              <Eye className="w-4 h-4" />
+                            </button>
+                            <button onClick={() => openMetadataModal(item)} className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer" title="Chỉnh sửa">
                               <Edit className="w-4 h-4" />
                             </button>
                           </div>
@@ -1830,7 +1820,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                       </tr>
                     ))
                   ) : (
-                    <tr><td colSpan={11} className="px-4 py-8 text-center text-sm text-slate-500">Không tìm thấy dữ liệu</td></tr>
+                    <tr><td colSpan={9} className="px-4 py-8 text-center text-sm text-slate-500">Không tìm thấy dữ liệu</td></tr>
                   )
                 ) : activeTab === 'license' ? (
                   paginatedLicenses.length > 0 ? (
@@ -2011,6 +2001,153 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
         </div>
       </div>
 
+      {/* View Metadata Detail Modal */}
+      {showViewMetadataModal && selectedMetadata && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4 shadow-xl border border-slate-100">
+            <div className="sticky top-0 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between z-10">
+              <div>
+                <h3 className="text-[16px] font-bold text-slate-900">Chi tiết Metadata</h3>
+                <p className="text-xs text-slate-500 mt-0.5 font-normal">Thông tin chi tiết cấu hình metadata của tập dữ liệu mở</p>
+              </div>
+              <button 
+                onClick={() => setShowViewMetadataModal(false)} 
+                className="text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer" 
+                aria-label="Đóng" 
+                title="Đóng"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-6">
+              {/* Basic info section using grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8 text-[13px] font-normal text-slate-900">
+                <div>
+                  <span className="block font-semibold text-slate-500 mb-1 text-[13px]">Tên tệp dữ liệu</span>
+                  <div className="font-mono font-medium text-[13px]">
+                    {selectedMetadata.fileName || 'Chưa cấu hình'}
+                  </div>
+                </div>
+
+                <div>
+                  <span className="block font-semibold text-slate-500 mb-1 text-[13px]">Trạng thái</span>
+                  <div className="flex items-center">
+                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
+                      selectedMetadata.status === 'active' 
+                        ? 'bg-green-50 text-green-700 border-green-200' 
+                        : 'bg-slate-100 text-slate-600 border-slate-200'
+                    }`}>
+                      {selectedMetadata.status === 'active' ? 'Hoạt động' : 'Ngừng hoạt động'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="col-span-1 md:col-span-2">
+                  <span className="block font-semibold text-slate-500 mb-1 text-[13px]">Thuộc danh mục</span>
+                  <div className="font-medium text-[13px]">
+                    {selectedMetadata.categoryCodes.map(code => {
+                      const cat = categories.find(c => c.code === code) || categoryList.find(c => c.code === code);
+                      return cat ? `${cat.code} - ${cat.name}` : code;
+                    }).join(', ')}
+                  </div>
+                </div>
+
+                <div className="col-span-1 md:col-span-2">
+                  <span className="block font-semibold text-slate-500 mb-1 text-[13px]">Mô tả</span>
+                  <div className="text-slate-700 whitespace-pre-wrap leading-relaxed text-[13px]">
+                    {selectedMetadata.description || <span className="text-slate-400 italic">Không có mô tả</span>}
+                  </div>
+                </div>
+
+                <div>
+                  <span className="block font-semibold text-slate-500 mb-1 text-[13px]">Giấy phép</span>
+                  <div className="font-semibold text-slate-900 text-[13px]">
+                    {getLicenseName(selectedMetadata.licenseId)}
+                  </div>
+                </div>
+
+                <div>
+                  <span className="block font-semibold text-slate-500 mb-1 text-[13px]">Nguồn dữ liệu</span>
+                  <div className="font-medium text-[13px]">
+                    {selectedMetadata.source || <span className="text-slate-400 italic">Chưa xác định</span>}
+                  </div>
+                </div>
+
+                <div>
+                  <span className="block font-semibold text-slate-500 mb-1 text-[13px]">Định dạng hỗ trợ</span>
+                  <div className="flex flex-wrap gap-1.5 items-center">
+                    {selectedMetadata.format ? (
+                      selectedMetadata.format.split(',').map((fmt, idx) => (
+                        <span key={idx} className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-100 rounded text-xs font-semibold">
+                          {fmt.trim()}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-slate-400 italic text-xs">Chưa chọn</span>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <span className="block font-semibold text-slate-500 mb-1 text-[13px]">Tần suất cập nhật</span>
+                  <div className="flex items-center">
+                    <span className="px-2.5 py-0.5 bg-purple-50 text-purple-700 border border-purple-200 rounded-full text-xs font-semibold">
+                      {selectedMetadata.frequency === 'daily' 
+                        ? 'Hàng ngày' 
+                        : selectedMetadata.frequency === 'weekly' 
+                          ? 'Hàng tuần' 
+                          : selectedMetadata.frequency === 'monthly' 
+                            ? 'Hàng tháng' 
+                            : 'Hàng quý'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="col-span-1 md:col-span-2">
+                  <span className="block font-semibold text-slate-500 mb-1 text-[13px]">Từ khóa</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {selectedMetadata.keywords ? (
+                      selectedMetadata.keywords.split(',').map((k, i) => k.trim() && (
+                        <span key={i} className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-xs font-medium border border-slate-200">
+                          {k.trim()}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-slate-400 italic text-xs">Không có từ khóa</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="col-span-1 md:col-span-2">
+                  <span className="block font-semibold text-slate-500 mb-1 text-[13px]">Cấu hình trường bắt buộc (File dữ liệu)</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {selectedMetadata.requiredFields && selectedMetadata.requiredFields.length > 0 ? (
+                      selectedMetadata.requiredFields.map((f, i) => (
+                        <span key={i} className="px-2 py-0.5 bg-red-50 text-red-700 border border-red-100 rounded text-xs font-semibold">
+                          {f}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-slate-400 italic text-xs">Chưa cấu hình trường bắt buộc nào</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="sticky bottom-0 bg-slate-50 border-t border-slate-100 px-6 py-4 flex items-center justify-end">
+              <button
+                onClick={() => setShowViewMetadataModal(false)}
+                className="px-5 py-2.5 text-[13px] font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer active:scale-95"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Metadata Modal */}
       {showMetadataModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -2028,15 +2165,15 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-4 text-[13px]">
               <div>
-                <label className="block text-sm text-slate-700 mb-2">Danh mục *</label>
+                <label className="block text-[13px] text-slate-700 mb-2">Danh mục <span className="text-red-500">*</span></label>
                 <select
                   value={metadataFormData.categoryCodes[0] || ''}
                   onChange={(e) => {
                     setMetadataFormData({ ...metadataFormData, categoryCodes: e.target.value ? [e.target.value] : [] });
                   }}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-slate-200 focus:border-slate-400 focus:outline-none bg-white"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-slate-200 focus:border-slate-400 focus:outline-none bg-white"
                   aria-label="Chọn danh mục"
                   title="Chọn danh mục"
                 >
@@ -2057,44 +2194,44 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                     </optgroup>
                   ))}
                 </select>
-                <p className="text-xs text-slate-500 mt-2">Chọn một danh mục cho Metadata này.</p>
+                <p className="text-[13px] text-slate-500 mt-2">Chọn một danh mục cho Metadata này.</p>
               </div>
               <div>
-                <label className="block text-sm text-slate-700 mb-2">Tên tệp dữ liệu *</label>
+                <label className="block text-[13px] text-slate-700 mb-2">Tên tệp dữ liệu <span className="text-red-500">*</span></label>
                 <input
                   type="text"
                   value={metadataFormData.fileName || ''}
                   onChange={(e) => setMetadataFormData({ ...metadataFormData, fileName: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-slate-200 focus:border-slate-400 focus:outline-none"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-slate-200 focus:border-slate-400 focus:outline-none"
                   placeholder="Nhập tên tệp dữ liệu (ví dụ: danh_sach_luat_su.xlsx)"
                 />
               </div>
               <div>
-                <label className="block text-sm text-slate-700 mb-2">Mô tả *</label>
+                <label className="block text-[13px] text-slate-700 mb-2">Mô tả</label>
                 <textarea
                   value={metadataFormData.description}
                   onChange={(e) => setMetadataFormData({ ...metadataFormData, description: e.target.value })}
                   rows={4}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-slate-200 focus:border-slate-400 focus:outline-none"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-slate-200 focus:border-slate-400 focus:outline-none"
                   placeholder="Mô tả metadata cho danh mục"
                 />
               </div>
               <div>
-                <label className="block text-sm text-slate-700 mb-2">Từ khóa</label>
+                <label className="block text-[13px] text-slate-700 mb-2">Từ khóa</label>
                 <input
                   type="text"
                   value={metadataFormData.keywords}
                   onChange={(e) => setMetadataFormData({ ...metadataFormData, keywords: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-slate-200 focus:border-slate-400 focus:outline-none"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-slate-200 focus:border-slate-400 focus:outline-none"
                   placeholder="Ví dụ: luật, dữ liệu mở"
                 />
               </div>
               <div>
-                <label className="block text-sm text-slate-700 mb-2">Giấy phép *</label>
+                <label className="block text-[13px] text-slate-700 mb-2">Giấy phép</label>
                 <select
                   value={metadataFormData.licenseId}
                   onChange={(e) => setMetadataFormData({ ...metadataFormData, licenseId: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-slate-200 focus:border-slate-400 focus:outline-none bg-white"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-slate-200 focus:border-slate-400 focus:outline-none bg-white"
                   aria-label="Chọn giấy phép"
                   title="Chọn giấy phép"
                 >
@@ -2106,14 +2243,14 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Định dạng</label>
+                <label className="block text-[13px] font-medium text-slate-700 mb-2">Định dạng</label>
                 <div className="flex flex-wrap gap-3 p-3 bg-slate-50 border border-slate-200 rounded-lg">
                   {['CSV', 'JSON', 'XML', 'Excel', 'PDF'].map((fmt) => {
                     const isChecked = metadataFormData.format
                       ? metadataFormData.format.split(', ').map(f => f.trim()).includes(fmt)
                       : false;
                     return (
-                      <label key={fmt} className="flex items-center gap-1.5 text-xs text-slate-700 font-semibold cursor-pointer">
+                      <label key={fmt} className="flex items-center gap-1.5 text-[13px] text-slate-700 font-semibold cursor-pointer">
                         <input
                           type="checkbox"
                           checked={isChecked}
@@ -2141,22 +2278,45 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                 </div>
               </div>
               <div>
-                <label className="block text-sm text-slate-700 mb-2">Nguồn dữ liệu</label>
-                <input
-                  type="text"
-                  value={metadataFormData.source}
-                  onChange={(e) => setMetadataFormData({ ...metadataFormData, source: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-slate-200 focus:border-slate-400 focus:outline-none"
-                  placeholder="Nhập nguồn dữ liệu"
-                />
+                <label className="block text-[13px] text-slate-700 mb-2">Nguồn dữ liệu</label>
+                <div className="flex gap-4 p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                  {['Tải tệp', 'API'].map((src) => {
+                    const selectedSources = metadataFormData.source
+                      ? metadataFormData.source.split(', ').map(s => s.trim()).filter(Boolean)
+                      : [];
+                    const isChecked = selectedSources.includes(src);
+                    return (
+                      <label key={src} className="flex items-center gap-1.5 text-[13px] text-slate-700 font-semibold cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={(e) => {
+                            let nextSources;
+                            if (e.target.checked) {
+                              nextSources = [...selectedSources, src];
+                            } else {
+                              nextSources = selectedSources.filter(s => s !== src);
+                            }
+                            setMetadataFormData({
+                              ...metadataFormData,
+                              source: nextSources.join(', ')
+                            });
+                          }}
+                          className="rounded border-slate-300 w-4 h-4 text-blue-600 focus:ring-2 focus:ring-slate-200 focus:border-slate-400 focus:outline-none cursor-pointer"
+                        />
+                        {src}
+                      </label>
+                    );
+                  })}
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-slate-700 mb-2">Tần suất cập nhật</label>
+                  <label className="block text-[13px] text-slate-700 mb-2">Tần suất cập nhật</label>
                   <select
                     value={metadataFormData.frequency}
                     onChange={(e) => setMetadataFormData({ ...metadataFormData, frequency: e.target.value as MetadataItem['frequency'] })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-slate-200 focus:border-slate-400 focus:outline-none"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-slate-200 focus:border-slate-400 focus:outline-none"
                     aria-label="Tần suất cập nhật"
                     title="Tần suất cập nhật"
                   >
@@ -2167,11 +2327,11 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm text-slate-700 mb-2">Trạng thái</label>
+                  <label className="block text-[13px] text-slate-700 mb-2">Trạng thái</label>
                   <select
                     value={metadataFormData.status}
                     onChange={(e) => setMetadataFormData({ ...metadataFormData, status: e.target.value as MetadataItem['status'] })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-slate-200 focus:border-slate-400 focus:outline-none"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-slate-200 focus:border-slate-400 focus:outline-none"
                     aria-label="Trạng thái"
                     title="Trạng thái"
                   >
@@ -2181,7 +2341,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                <label className="block text-[13px] font-semibold text-slate-700 mb-2">
                   Cấu hình trường bắt buộc trong file dữ liệu tải lên
                 </label>
                 <div className="space-y-3 p-4 bg-slate-50 border border-slate-200 rounded-lg">
@@ -2190,7 +2350,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                       type="text"
                       id="new-required-field-input"
                       placeholder="Nhập tên trường bắt buộc (ví dụ: MaHS, HoTen...)"
-                      className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-slate-200 focus:border-slate-400 focus:outline-none bg-white"
+                      className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-slate-200 focus:border-slate-400 focus:outline-none bg-white"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
@@ -2225,7 +2385,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                           input.value = '';
                         }
                       }}
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition-colors flex items-center gap-1.5"
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[13px] font-semibold transition-colors flex items-center gap-1.5"
                     >
                       <Plus className="w-4 h-4" />
                       Thêm
@@ -2266,13 +2426,13 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
             <div className="sticky bottom-0 bg-slate-50 border-t border-slate-200 px-6 py-4 flex items-center justify-end gap-3">
               <button
                 onClick={() => setShowMetadataModal(false)}
-                className="px-4 py-2 text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50"
+                className="px-4 py-2 text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 text-[13px] font-medium"
               >
                 Hủy
               </button>
               <button
                 onClick={saveMetadata}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-[13px] font-medium"
               >
                 Lưu Metadata
               </button>
