@@ -72,8 +72,8 @@ const apiInfoMap: Record<string, { title: string; provider: string; consumer: st
   'SVC-PHAPLUAT-004': {
     title: 'API tra cứu Cơ sở dữ liệu Pháp luật',
     provider: 'Bộ Tư pháp',
-    consumer: 'UBND Huyện Tiên Du',
-    targetSystem: 'Cổng thông tin pháp luật Huyện Tiên Du',
+    consumer: 'Sở Thông tin và Truyền thông tỉnh Bắc Ninh',
+    targetSystem: 'Hệ thống Quản lý Văn bản và Điều hành',
     responseData: `{
   "status": "200",
   "message": "Thành công",
@@ -127,9 +127,9 @@ export function PreviewApiDocsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-700 p-4 md:p-8 flex flex-col items-center select-text font-serif">
+    <div className="min-h-screen bg-slate-100 p-4 md:p-8 flex flex-col items-center select-text font-sans">
       {/* Control Toolbar */}
-      <div className="w-full max-w-[820px] bg-slate-900 text-white rounded-lg shadow-lg p-4 mb-6 flex justify-between items-center font-sans no-print">
+      <div className="w-full max-w-[820px] bg-slate-900 text-white rounded-lg shadow-lg p-4 mb-6 flex justify-between items-center no-print">
         <button
           onClick={() => window.close()}
           className="flex items-center gap-2 hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors text-slate-300 hover:text-white text-xs font-semibold"
@@ -156,99 +156,87 @@ export function PreviewApiDocsPage() {
       </div>
 
       {/* Styled A4 Technical Spec Paper */}
-      <div className="w-full max-w-[820px] min-h-[1130px] bg-white p-12 md:p-[60px] shadow-2xl border border-slate-300 text-slate-900 rounded-sm print-doc">
+      <div className="w-full max-w-[820px] min-h-[1130px] bg-white p-12 md:p-[60px] shadow-lg border border-slate-200 text-slate-900 rounded-sm print-doc">
         
-        {/* National Emblem & Title Block */}
-        <div className="grid grid-cols-12 gap-4 border-b border-slate-900 pb-6 mb-8 text-center font-sans font-bold text-xs uppercase tracking-tight">
-          <div className="col-span-5 text-left">
-            <div className="text-[10px] text-slate-600">Cơ quan chủ quản DLDC</div>
-            <div className="text-[11px] text-slate-900 mt-1">CỔNG DỮ LIỆU SỐ QUỐC GIA</div>
-          </div>
-          <div className="col-span-7 text-right font-bold text-slate-900">
-            <div>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
-            <div className="text-[10px] tracking-wide mt-1">Độc lập - Tự do - Hạnh phúc</div>
-            <div className="mt-1 font-normal lowercase italic text-slate-600 text-[10px]">-------------------</div>
-          </div>
+        {/* National Emblem & Title Block (Centered) */}
+        <div className="text-center font-sans">
+          <div className="font-bold text-[13px] uppercase tracking-wider text-black">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
+          <div className="text-[12px] font-semibold text-black mt-1">Độc lập - Tự do - Hạnh phúc</div>
         </div>
 
         {/* Spec Title */}
-        <div className="text-center my-10 font-sans">
-          <h1 className="text-xl md:text-2xl font-black text-slate-950 uppercase tracking-wide leading-tight">
+        <div className="text-center my-8">
+          <h1 className="text-xl md:text-2xl font-bold text-blue-800 uppercase tracking-wide leading-tight">
             TÀI LIỆU ĐẶC TẢ KỸ THUẬT API
           </h1>
-          <h2 className="text-lg font-bold text-slate-900 mt-2 uppercase">
+          <h2 className="text-lg font-bold text-black mt-2 uppercase">
             {info.title}
           </h2>
-          <p className="text-sm italic text-slate-600 mt-3">
+          <p className="text-sm italic text-slate-500 mt-2">
             (Tài liệu phục vụ tích hợp hệ thống)
           </p>
         </div>
 
         {/* Section I: Introduction */}
-        <div className="mt-12 space-y-4">
-          <h3 className="text-base font-bold text-slate-950 font-sans uppercase border-l-4 border-slate-900 pl-3">
+        <div className="mt-8 space-y-3 text-[14px]">
+          <h3 className="text-base font-bold text-slate-900">
             I. Giới thiệu chung
           </h3>
-          <p className="text-sm text-slate-800 leading-relaxed text-justify indent-8">
-            Tài liệu này cung cấp các đặc tả kỹ thuật chi tiết về việc kết nối và tích hợp dữ liệu thông qua nền tảng API chia sẻ của Cơ quan chủ quản nhằm mục đích đồng bộ thông tin và vận hành kho cơ sở dữ liệu dùng chung.
+          <p className="text-slate-700 leading-relaxed text-justify">
+            Tài liệu này cung cấp các đặc tả kỹ thuật chi tiết về việc kết nối và tích hợp dữ liệu thông qua nền tảng API chia sẻ của Cơ quan chủ quản.
           </p>
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 font-sans text-xs space-y-2.5">
-            <div className="flex">
-              <span className="font-bold text-slate-700 w-48 shrink-0">• Đơn vị cung cấp dữ liệu:</span>
-              <span className="text-slate-900">{info.provider}</span>
-            </div>
-            <div className="flex">
-              <span className="font-bold text-slate-700 w-48 shrink-0">• Đơn vị khai thác (dự kiến):</span>
-              <span className="text-slate-900 font-semibold">{info.consumer}</span>
-            </div>
-            <div className="flex">
-              <span className="font-bold text-slate-700 w-48 shrink-0">• Hệ thống đích tích hợp:</span>
-              <span className="text-slate-900">{info.targetSystem}</span>
-            </div>
-          </div>
+          <ul className="space-y-1.5 pl-1 text-slate-700">
+            <li>
+              <span className="font-bold">• Đơn vị cung cấp dữ liệu:</span> {info.provider}
+            </li>
+            <li>
+              <span className="font-bold">• Đơn vị khai thác (dự kiến):</span> {info.consumer}
+            </li>
+            <li>
+              <span className="font-bold">• Hệ thống đích tích hợp:</span> {info.targetSystem}
+            </li>
+          </ul>
         </div>
 
         {/* Section II: Connection Info */}
-        <div className="mt-10 space-y-4">
-          <h3 className="text-base font-bold text-slate-950 font-sans uppercase border-l-4 border-slate-900 pl-3">
+        <div className="mt-8 space-y-3 text-[14px]">
+          <h3 className="text-base font-bold text-slate-900">
             II. Thông tin kết nối API
           </h3>
           
-          <div className="border border-slate-300 rounded-lg overflow-hidden font-sans text-xs">
-            <table className="w-full text-left border-collapse">
-              <tbody>
-                <tr className="border-b border-slate-200">
-                  <td className="py-3.5 px-4 bg-slate-50 font-bold text-slate-700 w-48 border-r border-slate-200">URL Endpoint</td>
-                  <td className="py-3.5 px-4 font-mono text-blue-700 font-bold break-all select-all">{apiUrl}</td>
-                </tr>
-                <tr className="border-b border-slate-200">
-                  <td className="py-3.5 px-4 bg-slate-50 font-bold text-slate-700 w-48 border-r border-slate-200">Phương thức (Method)</td>
-                  <td className="py-3.5 px-4 font-mono text-slate-800 font-bold">GET / POST</td>
-                </tr>
-                <tr className="border-b border-slate-200">
-                  <td className="py-3.5 px-4 bg-slate-50 font-bold text-slate-700 w-48 border-r border-slate-200">Giao thức bảo mật</td>
-                  <td className="py-3.5 px-4 text-slate-800 font-semibold">HTTPS (TLS 1.2+)</td>
-                </tr>
-                <tr className="border-b border-slate-200">
-                  <td className="py-3.5 px-4 bg-slate-50 font-bold text-slate-700 w-48 border-r border-slate-200">Xác thực (Authentication)</td>
-                  <td className="py-3.5 px-4 text-slate-800">OAuth 2.0 (Bearer Token) hoặc API Key</td>
-                </tr>
-                <tr>
-                  <td className="py-3.5 px-4 bg-slate-50 font-bold text-slate-700 w-48 border-r border-slate-200">Định dạng Header</td>
-                  <td className="py-3.5 px-4 space-y-1">
-                    <div className="font-mono text-[11px] text-slate-600"><span className="font-bold text-slate-800">Content-Type:</span> application/json</div>
-                    <div className="font-mono text-[11px] text-slate-600"><span className="font-bold text-slate-800">Authorization:</span> Bearer &lt;token&gt;</div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <table className="w-full border-collapse border border-slate-300 text-left">
+            <tbody>
+              <tr className="border-b border-slate-300">
+                <td className="py-2.5 px-4 bg-slate-50 font-semibold text-slate-700 w-1/3 border-r border-slate-300">URL Endpoint</td>
+                <td className="py-2.5 px-4 font-mono text-blue-600 break-all select-all">{apiUrl}</td>
+              </tr>
+              <tr className="border-b border-slate-300">
+                <td className="py-2.5 px-4 bg-slate-50 font-semibold text-slate-700 w-1/3 border-r border-slate-300">Phương thức (Method)</td>
+                <td className="py-2.5 px-4 font-mono text-slate-800">GET / POST</td>
+              </tr>
+              <tr className="border-b border-slate-300">
+                <td className="py-2.5 px-4 bg-slate-50 font-semibold text-slate-700 w-1/3 border-r border-slate-300">Giao thức bảo mật</td>
+                <td className="py-2.5 px-4 text-slate-800">HTTPS (TLS 1.2+)</td>
+              </tr>
+              <tr className="border-b border-slate-300">
+                <td className="py-2.5 px-4 bg-slate-50 font-semibold text-slate-700 w-1/3 border-r border-slate-300">Xác thực (Authentication)</td>
+                <td className="py-2.5 px-4 text-slate-800">OAuth 2.0 (Bearer Token) hoặc API Key</td>
+              </tr>
+              <tr>
+                <td className="py-2.5 px-4 bg-slate-50 font-semibold text-slate-700 w-1/3 border-r border-slate-300">Định dạng Header</td>
+                <td className="py-2.5 px-4 space-y-1">
+                  <div className="font-mono text-xs text-slate-600"><span className="font-semibold text-slate-800">Content-Type:</span> application/json</div>
+                  <div className="font-mono text-xs text-slate-600"><span className="font-semibold text-slate-800">Authorization:</span> Bearer &lt;token&gt;</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
         {/* Section III: Data Structure */}
-        <div className="mt-10 space-y-4">
+        <div className="mt-8 space-y-3 text-[14px]">
           <div className="flex justify-between items-center">
-            <h3 className="text-base font-bold text-slate-950 font-sans uppercase border-l-4 border-slate-900 pl-3">
+            <h3 className="text-base font-bold text-slate-900">
               III. Cấu trúc dữ liệu (JSON)
             </h3>
             <button
@@ -259,59 +247,45 @@ export function PreviewApiDocsPage() {
               <span>{copied ? 'Đã sao chép' : 'Sao chép JSON'}</span>
             </button>
           </div>
-          <p className="text-sm text-slate-800">
-            Mô tả cấu trúc dữ liệu JSON trả về từ API khi thực hiện truy vấn thành công:
+          <p className="text-slate-700">
+            Mô tả cấu trúc dữ liệu trả về khi gọi API thành công:
           </p>
-          <div className="bg-slate-950 rounded-lg p-4 font-mono text-[11px] text-emerald-400 overflow-x-auto border border-slate-800">
-            <pre><code>{info.responseData}</code></pre>
+          <div style={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#cbd5e1' }} className="rounded-lg p-5 font-mono text-xs overflow-x-auto border">
+            <pre className="whitespace-pre-wrap"><code style={{ color: '#cbd5e1' }}>{info.responseData}</code></pre>
           </div>
         </div>
 
         {/* Section IV: Error Codes */}
-        <div className="mt-10 space-y-4">
-          <h3 className="text-base font-bold text-slate-950 font-sans uppercase border-l-4 border-slate-900 pl-3">
+        <div className="mt-8 space-y-3 text-[14px]">
+          <h3 className="text-base font-bold text-slate-900">
             IV. Bảng mã lỗi (Error Codes)
           </h3>
-          <div className="border border-slate-300 rounded-lg overflow-hidden font-sans text-xs">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-300 font-bold text-slate-700 text-[10px] uppercase">
-                  <th className="py-2.5 px-4 border-r border-slate-200 w-32">Mã lỗi (HTTP)</th>
-                  <th className="py-2.5 px-4">Mô tả chi tiết</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200">
-                <tr>
-                  <td className="py-3 px-4 font-mono font-bold text-slate-700 border-r border-slate-200">200 OK</td>
-                  <td className="py-3 px-4 text-slate-800">Yêu cầu thành công, hệ thống trả về dữ liệu hợp lệ.</td>
-                </tr>
-                <tr>
-                  <td className="py-3 px-4 font-mono font-bold text-red-600 border-r border-slate-200">401 Unauthorized</td>
-                  <td className="py-3 px-4 text-slate-800">Thiếu thông tin xác thực, token không hợp lệ hoặc đã hết hạn.</td>
-                </tr>
-                <tr>
-                  <td className="py-3 px-4 font-mono font-bold text-red-600 border-r border-slate-200">403 Forbidden</td>
-                  <td className="py-3 px-4 text-slate-800">Truy cập bị từ chối do tài khoản không có quyền khai thác dịch vụ này.</td>
-                </tr>
-                <tr>
-                  <td className="py-3 px-4 font-mono font-bold text-red-600 border-r border-slate-200">500 Internal Error</td>
-                  <td className="py-3 px-4 text-slate-800">Lỗi hệ thống máy chủ cung cấp dịch vụ, cần liên hệ bộ phận hỗ trợ kỹ thuật để xử lý.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Footer Signature */}
-        <div className="mt-16 grid grid-cols-2 gap-4 font-sans text-[10px] text-slate-500 uppercase tracking-wider border-t border-slate-200 pt-6">
-          <div>
-            <div>Tài liệu kỹ thuật hệ thống</div>
-            <div className="mt-1 font-mono text-[9px] lowercase">phát hành tự động bởi Core Engine</div>
-          </div>
-          <div className="text-right">
-            <div>Bản quyền © 2026 Cổng dữ liệu DLDC</div>
-            <div className="mt-1 font-mono text-[9px]">Phiên bản tài liệu: 1.0</div>
-          </div>
+          <table className="w-full border-collapse border border-slate-300 text-left">
+            <thead>
+              <tr className="bg-slate-50 border-b border-slate-300 font-semibold text-slate-700">
+                <th className="py-2.5 px-4 border-r border-slate-300 w-1/3">Mã lỗi (HTTP)</th>
+                <th className="py-2.5 px-4">Mô tả chi tiết</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-300 text-slate-700">
+              <tr>
+                <td className="py-2.5 px-4 font-mono border-r border-slate-300">200 OK</td>
+                <td className="py-2.5 px-4">Yêu cầu thành công, hệ thống trả về dữ liệu hợp lệ.</td>
+              </tr>
+              <tr>
+                <td className="py-2.5 px-4 font-mono border-r border-slate-300">401 Unauthorized</td>
+                <td className="py-2.5 px-4">Thiếu thông tin xác thực, token không hợp lệ hoặc đã hết hạn.</td>
+              </tr>
+              <tr>
+                <td className="py-2.5 px-4 font-mono border-r border-slate-300">403 Forbidden</td>
+                <td className="py-2.5 px-4">Truy cập bị từ chối do không có quyền truy cập dữ liệu này.</td>
+              </tr>
+              <tr>
+                <td className="py-2.5 px-4 font-mono border-r border-slate-300">500 Internal Error</td>
+                <td className="py-2.5 px-4">Lỗi hệ thống máy chủ cung cấp dịch vụ, cần liên hệ bộ phận hỗ trợ kỹ thuật.</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
       </div>
@@ -322,6 +296,7 @@ export function PreviewApiDocsPage() {
           body {
             background: white !important;
             padding: 0 !important;
+            margin: 0 !important;
           }
           .no-print {
             display: none !important;
@@ -332,6 +307,7 @@ export function PreviewApiDocsPage() {
             padding: 0 !important;
             margin: 0 !important;
             max-width: 100% !important;
+            width: 100% !important;
           }
         }
       `}</style>

@@ -7,6 +7,13 @@ interface VersionHistoryModalProps {
 
 const mockVersions = [
   {
+    id: 15,
+    version: 'v2.4.6',
+    date: '15/06/2026',
+    time: '14:20',
+    content: '1. Phân hệ Kiểm soát & giám sát cung cấp:\n- Màn hình Sơ đồ giám sát kết nối: Cấu trúc lại Sơ đồ giám sát (Topology Flowchart) rẽ nhánh hiển thị theo từng chặng độc lập. Hỗ trợ hiển thị trực quan trạng thái kết nối song song của nhiều Đơn vị khai thác API trên cùng một đường truyền Gateway (VD: Sở Y tế Bắc Ninh, Quảng Ninh).\n\n2. Phân hệ Dịch vụ chia sẻ:\n- Đồng bộ hóa toàn diện ngôn ngữ thiết kế giao diện: Áp dụng chuẩn thiết kế đa Tab (Dữ liệu cung cấp & Quản lý API đang lấy dữ liệu) cho tất cả các menu CSDL (Trong ngành, Ngoài ngành, Dữ liệu mở, Dữ liệu chủ).\n- Bổ sung Bộ lọc nâng cao: Cung cấp tính năng lọc dữ liệu theo khoảng thời gian và trạng thái xử lý.'
+  },
+  {
     id: 14,
     version: 'v2.4.5',
     date: '08/06/2026',
@@ -174,7 +181,11 @@ export function VersionHistoryModal({ isOpen, onClose }: VersionHistoryModalProp
                 <div className="space-y-2">
                   <div className="flex items-start gap-2">
                     <FileText className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+<<<<<<< HEAD
                     <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{item.content}</p>
+=======
+                    <div className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{item.content}</div>
+>>>>>>> 1e9a0831 (feat: Nang cap v2.4.5 - Hoan thien UI Giam sat va Dich vu chia se)
                   </div>
 
                   <div className="flex items-center gap-6 mt-3 pt-3 border-t border-slate-100/50">

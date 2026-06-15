@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, Check, FileText, Plug, LayoutTemplate, ShieldCheck, Plus, Trash2, Code, Key, Copy, Eye, EyeOff, Database, Send, Save, ArrowLeft, Pencil } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Check, FileText, Plug, LayoutTemplate, ShieldCheck, Plus, Trash2, Code, Key, Copy, Eye, EyeOff, Database, Send, Save, ArrowLeft, Pencil, Clock, ChevronDown } from 'lucide-react';
 
 interface ProvisionServiceModalProps {
   isOpen: boolean;
@@ -8,9 +8,10 @@ interface ProvisionServiceModalProps {
   onSaveDraft?: () => void;
   onSubmitApproval?: () => void;
   service?: any;
+  mode?: 'view' | 'edit';
 }
 
-type TabType = 'general' | 'protocol' | 'packet' | 'access';
+type TabType = 'general' | 'protocol' | 'packet' | 'access' | 'history';
 
 // Mock Database Schema for Civil Registry
 const mockSchema: Record<string, string[]> = {
@@ -21,7 +22,8 @@ const mockSchema: Record<string, string[]> = {
 };
 const tableNames = Object.keys(mockSchema);
 
-export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, onSubmitApproval, service }: ProvisionServiceModalProps) {
+export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, onSubmitApproval, service, mode = 'edit' }: ProvisionServiceModalProps) {
+  const isViewMode = mode === 'view';
   const [activeTab, setActiveTab] = useState<TabType>('general');
   const [accessScope, setAccessScope] = useState('all');
   
@@ -37,7 +39,58 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
   const [isRateLimited, setIsRateLimited] = useState(true);
   const [rateLimitValue, setRateLimitValue] = useState(100);
   const [hasJoin, setHasJoin] = useState(false);
+  const [packetMode, setPacketMode] = useState<'visual' | 'sql'>('visual');
+  const [sqlQuery, setSqlQuery] = useState('SELECT *\nFROM ho_tich_ca_nhan\nWHERE id = :id');
   const [isPublic, setIsPublic] = useState(false);
+  const [contextPath, setContextPath] = useState(service?.contextPath || '');
+  const [contextPathError, setContextPathError] = useState('');
+  
+  const [isAgencyDropdownOpen, setIsAgencyDropdownOpen] = useState(false);
+  const [selectedAgencies, setSelectedAgencies] = useState<string[]>([]);
+  const agencies = [
+    "Bộ Kế hoạch và Đầu tư",
+    "Sở Tài chính tỉnh Bắc Ninh",
+    "Sở Tư pháp tỉnh Bắc Ninh",
+    "Sở Thông tin và Truyền thông tỉnh Bắc Ninh"
+  ];
+  const handleToggleAgency = (agency: string) => {
+    setSelectedAgencies(prev => prev.includes(agency) ? prev.filter(a => a !== agency) : [...prev, agency]);
+  };
+
+  const [apiMethod, setApiMethod] = useState(service?.method || 'GET');
+  const [frequency, setFrequency] = useState(() => {
+    if (service?.frequency !== undefined && service?.frequency !== null) return String(service.frequency);
+    if (service?.freq && !isNaN(Number(service.freq))) return String(service.freq);
+    return '';
+  });
+
+  useEffect(() => {
+    if (isOpen) {
+      setApiMethod(service?.method || 'GET');
+      setFrequency(() => {
+        if (service?.frequency !== undefined && service?.frequency !== null) return String(service.frequency);
+        if (service?.freq && !isNaN(Number(service.freq))) return String(service.freq);
+        return '';
+      });
+      setContextPath(service?.contextPath || '');
+    }
+  }, [isOpen, service]);
+
+  // Mock existing context paths for duplicate check
+  const existingContextPaths = ['/api/v1/ho-tich', '/api/v1/ket-hon', '/api/v1/khai-sinh', '/api/v1/khai-tu'];
+
+  const handleContextPathChange = (value: string) => {
+    setContextPath(value);
+    if (value.trim() === '') {
+      setContextPathError('');
+    } else if (existingContextPaths.includes(value.trim().toLowerCase())) {
+      setContextPathError('Context path đã tồn tại. Vui lòng chọn đường dẫn khác.');
+    } else if (!/^\/[a-z0-9\-\/]*$/.test(value.trim())) {
+      setContextPathError('Định dạng không hợp lệ. VD: /api/v1/ten-api');
+    } else {
+      setContextPathError('');
+    }
+  };
 
   // Dynamic table joins state
   const [primaryTable, setPrimaryTable] = useState('ho_tich_ca_nhan');
@@ -69,6 +122,7 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
     { id: 'protocol' as TabType, label: 'Cấu hình API & Giao thức', icon: <Plug className="w-4 h-4" /> },
     { id: 'packet' as TabType, label: 'Thiết kế cấu trúc gói tin', icon: <LayoutTemplate className="w-4 h-4" /> },
     { id: 'access' as TabType, label: 'Phân quyền truy cập', icon: <ShieldCheck className="w-4 h-4" /> },
+    { id: 'history' as TabType, label: 'Lịch sử', icon: <Clock className="w-4 h-4" /> },
   ];
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -227,7 +281,7 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                   <Plug className="w-6 h-6" />
                </div>
                <h2 className="text-sm font-black text-slate-800 uppercase tracking-widest leading-tight">
-                  {service ? 'Cấu hình Dịch vụ' : 'Dịch vụ Mới'}
+                  {isViewMode ? 'Xem chi tiết Dịch vụ' : (service ? 'Cấu hình Dịch vụ' : 'Dịch vụ Mới')}
                </h2>
                <p className="text-[9px] text-slate-500 mt-1.5 uppercase font-bold tracking-widest">API Provisioning Engine</p>
             </div>
@@ -254,7 +308,13 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
           </div>
 
           {/* Main Content Area */}
-          <div className="flex-1 overflow-y-auto bg-white p-8 custom-scrollbar">
+          <div className={`flex-1 overflow-y-auto bg-white p-8 custom-scrollbar ${isViewMode ? 'pointer-events-none' : ''}`}>
+            {isViewMode && (
+              <div className="mb-4 px-4 py-2.5 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2">
+                <Eye className="w-4 h-4 text-amber-600 shrink-0" />
+                <span className="text-xs font-bold text-amber-700 uppercase tracking-wider">Chế độ xem — Không thể chỉnh sửa</span>
+              </div>
+            )}
             {/* TAB 1: Thông tin chung */}
             {activeTab === 'general' && (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -282,31 +342,52 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                         defaultValue={service ? service.code : ''}
                       />
                     </div>
-                    <div className="md:col-span-2 flex items-center w-full">
-                      <div className="flex-1">
-                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Phân loại dữ liệu <span className="text-red-500">*</span></label>
-                        <select aria-label="Loại dữ liệu" title="Loại dữ liệu" 
-                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 transition-all duration-300 cursor-pointer"
-                        >
-                          <option value="" className="text-slate-400">-- Chọn phân loại --</option>
-                          <option value="ho_tich" className="text-slate-800">Dữ liệu Hộ tịch điện tử</option>
-                          <option value="quoc_tich" className="text-slate-800">Dữ liệu Hồ sơ quốc tịch</option>
-                          <option value="thi_hanh_an" className="text-slate-800">Dữ liệu Thi hành án dân sự</option>
-                          <option value="ly_lich" className="text-slate-800">Dữ liệu Lý lịch tư pháp</option>
-                        </select>
-                      </div>
-                      <div className="flex items-center gap-3 pt-6 ml-8 shrink-0">
-                        <input 
-                          id="is-public-checkbox"
-                          type="checkbox" 
-                          checked={isPublic}
-                          onChange={(e) => setIsPublic(e.target.checked)}
-                          className="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 bg-white cursor-pointer transition-all"
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">API Context Path <span className="text-red-500">*</span></label>
+                      <div className="relative">
+                        <input aria-label="API Context Path" title="API Context Path"
+                          type="text"
+                          className={`w-full px-4 py-2.5 bg-slate-50 border hover:border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:border-blue-500 font-mono text-sm placeholder:text-slate-400 transition-all duration-300 ${
+                            contextPathError 
+                              ? 'border-red-400 focus:ring-red-500/20 text-red-600' 
+                              : contextPath && !contextPathError
+                                ? 'border-emerald-400 focus:ring-emerald-500/20 text-emerald-700'
+                                : 'border-slate-200 focus:ring-blue-500/20 text-slate-800'
+                          }`}
+                          placeholder="VD: /api/v1/ho-tich"
+                          value={contextPath}
+                          onChange={(e) => handleContextPathChange(e.target.value)}
                         />
-                        <label htmlFor="is-public-checkbox" className="text-xs font-bold text-slate-500 hover:text-slate-800 uppercase tracking-wider cursor-pointer select-none whitespace-nowrap transition-all duration-300">
-                          API Công khai
-                        </label>
+                        {contextPath && !contextPathError && (
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-500">
+                            <Check className="w-4 h-4" />
+                          </span>
+                        )}
                       </div>
+                      {contextPathError && (
+                        <p className="mt-1.5 text-xs font-semibold text-red-500 flex items-center gap-1">
+                          <X className="w-3 h-3" />
+                          {contextPathError}
+                        </p>
+                      )}
+                      {contextPath && !contextPathError && (
+                        <p className="mt-1.5 text-xs font-semibold text-emerald-600 flex items-center gap-1">
+                          <Check className="w-3 h-3" />
+                          Context path hợp lệ
+                        </p>
+                      )}
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Phân loại dữ liệu <span className="text-red-500">*</span></label>
+                      <select aria-label="Loại dữ liệu" title="Loại dữ liệu" 
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 transition-all duration-300 cursor-pointer"
+                      >
+                        <option value="" className="text-slate-400">-- Chọn phân loại --</option>
+                        <option value="ho_tich" className="text-slate-800">Dữ liệu Hộ tịch điện tử</option>
+                        <option value="quoc_tich" className="text-slate-800">Dữ liệu Hồ sơ quốc tịch</option>
+                        <option value="thi_hanh_an" className="text-slate-800">Dữ liệu Thi hành án dân sự</option>
+                        <option value="ly_lich" className="text-slate-800">Dữ liệu Lý lịch tư pháp</option>
+                      </select>
                     </div>
                     <div className="md:col-span-2">
                       <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Mô tả nghiệp vụ</label>
@@ -330,7 +411,7 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                     Thiết lập kết nối & Bảo mật
                   </h3>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                       <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Giao thức <span className="text-red-500">*</span></label>
                       <select aria-label="Giao thức" title="Giao thức" 
@@ -341,16 +422,35 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Đồng bộ</label>
-                      <select aria-label="Tần suất" title="Tần suất" 
+                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Phương thức <span className="text-red-500">*</span></label>
+                      <select aria-label="Phương thức" title="Phương thức" 
+                        value={apiMethod}
+                        onChange={(e) => setApiMethod(e.target.value)}
                         className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 transition-all duration-300 cursor-pointer"
                       >
-                        <option value="realtime" className="text-slate-850">Truy vấn Real-time</option>
-                        <option value="daily" className="text-slate-850">Định kỳ (Batch)</option>
+                        <option value="GET" className="text-slate-850">GET</option>
+                        <option value="POST" className="text-slate-850">POST</option>
                       </select>
                     </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Tuần suất cung cấp</label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          min="0"
+                          title="Tuần suất cung cấp (giây)"
+                          placeholder="Không check"
+                          value={frequency}
+                          onChange={(e) => setFrequency(e.target.value)}
+                          className="w-full pl-4 pr-16 py-2.5 bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 transition-all duration-300"
+                        />
+                        <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-xs font-bold text-slate-400">
+                          giây
+                        </div>
+                      </div>
+                    </div>
                     
-                    <div className="md:col-span-2 p-5 bg-slate-50 rounded-xl border border-slate-200 space-y-4 shadow-sm">
+                    <div style={{ gridColumn: '1 / -1' }} className="p-5 bg-slate-50 rounded-xl border border-slate-200 space-y-4 shadow-sm">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className={`p-2.5 rounded-xl ${isRateLimited ? 'bg-blue-50 text-blue-600 border border-blue-100 shadow-[0_0_10px_rgba(37,99,235,0.05)]' : 'bg-slate-100 text-slate-400 border border-slate-200'}`}>
@@ -389,6 +489,25 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
             {/* TAB 3: Thiết kế cấu trúc gói tin */}
             {activeTab === 'packet' && (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div className="flex bg-slate-100 p-1 rounded-xl w-fit border border-slate-200">
+                  <button
+                    type="button"
+                    onClick={() => setPacketMode('visual')}
+                    className={`px-6 py-2 text-sm font-bold rounded-lg transition-all ${packetMode === 'visual' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                  >
+                    Cấu hình trực quan (Visual)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPacketMode('sql')}
+                    className={`px-6 py-2 text-sm font-bold rounded-lg transition-all ${packetMode === 'sql' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                  >
+                    Viết câu lệnh (Raw SQL)
+                  </button>
+                </div>
+
+                {packetMode === 'visual' ? (
+                  <>
                  {/* Data Source Configuration */}
                  <section className="bg-slate-50/50 p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group">
                    <div className="flex items-center justify-between mb-5">
@@ -658,6 +777,26 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                       </table>
                     </div>
                   </section>
+                  </>
+                ) : (
+                  <section className="bg-slate-50/50 p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <div className="flex items-center gap-2.5 mb-5">
+                      <div className="p-1.5 bg-blue-50 rounded-lg text-blue-600">
+                        <Code className="w-4 h-4" />
+                      </div>
+                      <h4 className="text-sm font-bold text-slate-800">Câu lệnh SQL tùy chỉnh</h4>
+                    </div>
+                    <div className="relative">
+                      <textarea
+                        value={sqlQuery}
+                        onChange={(e) => setSqlQuery(e.target.value)}
+                        className="w-full h-64 p-4 font-mono text-sm text-slate-800 bg-white border border-slate-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none resize-y"
+                        placeholder="Nhập câu lệnh SQL (SELECT ... FROM ... WHERE ...)"
+                        spellCheck={false}
+                      />
+                    </div>
+                  </section>
+                )}
  
                   {/* Live API Response Preview */}
                   <section className="bg-slate-950 p-6 rounded-2xl border border-slate-800 shadow-2xl overflow-hidden relative group ring-1 ring-white/5">
@@ -701,59 +840,107 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                     Kiểm soát quyền hạn & Cấp phát Key
                   </h3>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="space-y-5">
-                      <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Chính sách</label>
-                        <select aria-label="Chính sách" title="Chính sách" 
-                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 transition-all duration-300 cursor-pointer"
-                        >
-                          <option value="restricted" className="text-slate-800">Hạn chế (Restricted Gov Access)</option>
-                          <option value="public" className="text-slate-800">Công khai (Public Open Data)</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Đối tượng</label>
-                        <select aria-label="Phạm vi" title="Phạm vi" 
-                          value={accessScope} 
-                          onChange={(e) => setAccessScope(e.target.value)} 
-                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 transition-all duration-300 cursor-pointer"
-                        >
-                          <option value="gov" className="text-slate-800">Khối bộ ngành chuyên trách</option>
-                          <option value="all" className="text-slate-800">Tất cả đối tác</option>
-                        </select>
-                      </div>
+                  <div className="max-w-2xl space-y-5">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Chính sách</label>
+                      <select aria-label="Chính sách" title="Chính sách" 
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 transition-all duration-300 cursor-pointer"
+                      >
+                        <option value="restricted" className="text-slate-800">Hạn chế (Restricted Gov Access)</option>
+                        <option value="public" className="text-slate-800">Công khai (Public Open Data)</option>
+                      </select>
                     </div>
-                    
-                    <div className="p-6 bg-slate-50 border border-slate-200 rounded-2xl relative overflow-hidden group shadow-sm">
-                      <div className="flex justify-between items-center mb-4">
-                        <div className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Master API Access Token</div>
-                        <button type="button" onClick={() => setApiKey('dldc_live_9f8e7d6c5b4a3f2e1d0c')} className="text-[10px] font-bold text-slate-700 bg-white border border-slate-300 px-3 py-1.5 rounded hover:bg-slate-50 hover:text-slate-900 transition-all flex items-center shadow-sm cursor-pointer">
-                          RE-GENERATE
-                        </button>
+                    <div className="relative">
+                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Cơ quan/Đơn vị nhận <span className="text-red-500">*</span></label>
+                      <div 
+                        className="w-full px-4 py-2.5 bg-white border border-slate-200 hover:border-slate-300 rounded-xl flex items-center justify-between cursor-pointer focus:ring-2 focus:ring-blue-500/20 transition-all min-h-[46px]"
+                        onClick={() => setIsAgencyDropdownOpen(!isAgencyDropdownOpen)}
+                      >
+                        <div className="flex flex-wrap gap-2 flex-1 mr-2">
+                          {selectedAgencies.length > 0 ? (
+                            selectedAgencies.map(agency => (
+                              <span 
+                                key={agency} 
+                                className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-700 font-medium text-sm rounded-lg border border-blue-100 shadow-sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleToggleAgency(agency);
+                                }}
+                              >
+                                {agency}
+                                <X className="w-3.5 h-3.5 hover:text-blue-900 cursor-pointer transition-colors" />
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-slate-400">-- Chọn cơ quan/đơn vị nhận --</span>
+                          )}
+                        </div>
+                        <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
                       </div>
                       
-                      <div className="relative mb-4">
-                        <input aria-label="API Key" title="API Key"
-                          type={showKey ? "text" : "password"}
-                          readOnly
-                          value={apiKey || '••••••••••••••••••••••••••••••••'}
-                          className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl font-mono text-sm text-slate-800 pr-12 focus:outline-none focus:border-blue-500/30 transition-all"
-                        />
-                        <button type="button" onClick={() => setShowKey(!showKey)} className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
-                          {showKey ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                        </button>
-                      </div>
+                      {isAgencyDropdownOpen && (
+                        <div className="absolute z-10 w-full mt-2 bg-white border border-slate-200 rounded-xl shadow-lg max-h-60 overflow-y-auto custom-scrollbar">
+                          {agencies.map(agency => (
+                            <label key={agency} className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-0">
+                              <input 
+                                type="checkbox" 
+                                checked={selectedAgencies.includes(agency)}
+                                onChange={() => handleToggleAgency(agency)}
+                                className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer"
+                              />
+                              <span className="text-sm font-bold text-slate-700">{agency}</span>
+                            </label>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </section>
+              </div>
+            )}
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="text-center">
-                           <div className="text-[10px] text-slate-400 uppercase font-bold mb-1">Expiration</div>
-                           <div className="text-xs text-slate-800 font-bold">2026-12-31</div>
-                        </div>
-                        <div className="text-center">
-                           <div className="text-[10px] text-slate-400 uppercase font-bold mb-1">Security</div>
-                           <div className="text-xs text-emerald-600 font-bold uppercase">Enterprise</div>
-                        </div>
+            {/* TAB 5: Lịch sử */}
+            {activeTab === 'history' && (
+              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <section>
+                  <h3 className="text-base font-semibold text-slate-800 mb-6 flex items-center gap-2">
+                    <div className="w-1 h-5 bg-blue-600 rounded-full"></div>
+                    Lịch sử cập nhật cấu hình dịch vụ
+                  </h3>
+                  
+                  <div className="space-y-0 py-2">
+                    {/* Event 1 */}
+                    <div className="flex gap-4">
+                      {/* Timeline column: dot + line */}
+                      <div className="flex flex-col items-center">
+                        <div className="h-3 w-3 rounded-full bg-blue-500 border-2 border-blue-200 shadow-sm shrink-0"></div>
+                        <div className="w-0.5 bg-slate-200 flex-1 min-h-[2rem]"></div>
+                      </div>
+                      {/* Content column */}
+                      <div className="flex flex-col gap-1 pb-6 -mt-0.5">
+                        <span className="text-xs font-bold text-slate-800">
+                          28/05/2026 10:15 - Nguyễn Văn An
+                        </span>
+                        <p className="text-xs text-slate-500 font-medium">
+                          Cập nhật: Bổ sung cấu hình che giấu thông tin trường số_dinh_danh.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Event 2 */}
+                    <div className="flex gap-4">
+                      {/* Timeline column: dot + line */}
+                      <div className="flex flex-col items-center">
+                        <div className="h-3 w-3 rounded-full bg-slate-300 border-2 border-slate-100 shadow-sm shrink-0"></div>
+                      </div>
+                      {/* Content column */}
+                      <div className="flex flex-col gap-1 -mt-0.5">
+                        <span className="text-xs font-bold text-slate-800">
+                          28/05/2026 08:30 - Nguyễn Văn An
+                        </span>
+                        <p className="text-xs text-slate-500 font-medium">
+                          Tạo mới: Thiết lập các thông số cơ bản cho API và chọn bảng dữ liệu gốc.
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -767,67 +954,79 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
         <div className="flex items-center justify-between px-8 py-5 border-t border-slate-200 bg-slate-50/80 backdrop-blur-lg">
            <div className="flex items-center gap-4">
               <div className="flex gap-1">
-                {[1,2,3,4].map(step => (
+                {[1,2,3,4,5].map(step => (
                   <div key={step} className={`h-1 rounded-full transition-all duration-300 ${
                     (activeTab === 'general' && step === 1) || 
                     (activeTab === 'protocol' && step === 2) || 
                     (activeTab === 'packet' && step === 3) || 
-                    (activeTab === 'access' && step === 4) 
+                    (activeTab === 'access' && step === 4) ||
+                    (activeTab === 'history' && step === 5)
                       ? 'w-6 bg-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.4)]' : 'w-2 bg-slate-200'
                   }`}></div>
                 ))}
               </div>
               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                {activeTab === 'general' ? 'Step 1 of 4' : activeTab === 'protocol' ? 'Step 2 of 4' : activeTab === 'packet' ? 'Step 3 of 4' : 'Step 4 of 4'}
+                {activeTab === 'general' ? 'Step 1 of 5' : activeTab === 'protocol' ? 'Step 2 of 5' : activeTab === 'packet' ? 'Step 3 of 5' : activeTab === 'access' ? 'Step 4 of 5' : 'Step 5 of 5'}
               </div>
            </div>
            
            <div className="flex items-center gap-3">
-             <button title="Lưu tạm" aria-label="Lưu tạm"
-              onClick={handleSaveDraft}
-              className="px-6 py-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-xl transition-all duration-300 font-bold text-xs uppercase tracking-widest flex items-center gap-2 cursor-pointer border border-slate-250 bg-white"
-            >
-              <Save className="w-4 h-4" />
-              Lưu tạm
-            </button>
-            <button title="Hủy bỏ" aria-label="Hủy bỏ"
-              onClick={onClose}
-              className="px-6 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl border border-slate-250 bg-white transition-all duration-300 font-bold text-xs uppercase tracking-widest cursor-pointer"
-            >
-              Hủy bỏ
-            </button>
-            {activeTab !== 'general' && (
-              <button 
-                title="Quay lại" aria-label="Quay lại"
-                onClick={() => {
-                  const currentIndex = tabs.findIndex(t => t.id === activeTab);
-                  if (currentIndex > 0) setActiveTab(tabs[currentIndex - 1].id);
-                }} 
-                className="px-6 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl border border-slate-250 bg-white transition-all duration-300 font-bold text-xs uppercase tracking-widest flex items-center gap-2 cursor-pointer"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Quay lại
-              </button>
-            )}
-            {activeTab !== 'access' ? (
-              <button 
-                title="Tiếp tục" aria-label="Tiếp tục"
-                onClick={() => {
-                  const currentIndex = tabs.findIndex(t => t.id === activeTab);
-                  if (currentIndex < tabs.length - 1) setActiveTab(tabs[currentIndex + 1].id);
-                }} 
+            {isViewMode ? (
+              <button title="Đóng" aria-label="Đóng"
+                onClick={onClose}
                 className="px-8 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all duration-300 font-bold text-xs uppercase tracking-widest shadow-lg shadow-blue-500/10 cursor-pointer"
               >
-                Tiếp tục
+                Đóng
               </button>
             ) : (
-              <button title="Trình duyệt" aria-label="Trình duyệt & Gửi phê duyệt"
-                onClick={handleSubmit}
-                className="px-8 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl flex items-center transition-all duration-300 font-bold text-xs uppercase tracking-widest shadow-lg shadow-blue-500/10 cursor-pointer"
-              >
-                <Send className="w-5 h-5 mr-2" />
-                Trình duyệt
-              </button>
+              <>
+              <button title="Lưu tạm" aria-label="Lưu tạm"
+               onClick={handleSaveDraft}
+               className="px-6 py-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-xl transition-all duration-300 font-bold text-xs uppercase tracking-widest flex items-center gap-2 cursor-pointer border border-slate-250 bg-white"
+             >
+               <Save className="w-4 h-4" />
+               Lưu tạm
+             </button>
+             <button title="Hủy bỏ" aria-label="Hủy bỏ"
+               onClick={onClose}
+               className="px-6 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl border border-slate-250 bg-white transition-all duration-300 font-bold text-xs uppercase tracking-widest cursor-pointer"
+             >
+               Hủy bỏ
+             </button>
+             {activeTab !== 'general' && (
+               <button 
+                 title="Quay lại" aria-label="Quay lại"
+                 onClick={() => {
+                   const currentIndex = tabs.findIndex(t => t.id === activeTab);
+                   if (currentIndex > 0) setActiveTab(tabs[currentIndex - 1].id);
+                 }} 
+                 className="px-6 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl border border-slate-250 bg-white transition-all duration-300 font-bold text-xs uppercase tracking-widest flex items-center gap-2 cursor-pointer"
+               >
+                 <ArrowLeft className="w-4 h-4" />
+                 Quay lại
+               </button>
+             )}
+             {activeTab !== 'history' ? (
+               <button 
+                 title="Tiếp tục" aria-label="Tiếp tục"
+                 onClick={() => {
+                   const currentIndex = tabs.findIndex(t => t.id === activeTab);
+                   if (currentIndex < tabs.length - 1) setActiveTab(tabs[currentIndex + 1].id);
+                 }} 
+                 className="px-8 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all duration-300 font-bold text-xs uppercase tracking-widest shadow-lg shadow-blue-500/10 cursor-pointer"
+               >
+                 Tiếp tục
+               </button>
+             ) : (
+               <button title="Trình duyệt" aria-label="Trình duyệt & Gửi phê duyệt"
+                 onClick={handleSubmit}
+                 className="px-8 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl flex items-center transition-all duration-300 font-bold text-xs uppercase tracking-widest shadow-lg shadow-blue-500/10 cursor-pointer"
+               >
+                 <Send className="w-5 h-5 mr-2" />
+                 Trình duyệt
+               </button>
+             )}
+              </>
             )}
            </div>
         </div>

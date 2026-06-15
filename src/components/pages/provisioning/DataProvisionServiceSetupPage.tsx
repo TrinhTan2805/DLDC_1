@@ -49,6 +49,7 @@ export function DataProvisionServiceSetupPage() {
   const [showApiDetailModal, setShowApiDetailModal] = useState(false);
   const [selectedService, setSelectedService] = useState<any>(null);
   const [approvalModalMode, setApprovalModalMode] = useState<'approve' | 'reject'>('approve');
+  const [serviceModalMode, setServiceModalMode] = useState<'view' | 'edit'>('edit');
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -145,7 +146,7 @@ export function DataProvisionServiceSetupPage() {
           </nav>
 
           <button
-            onClick={() => { setSelectedService(null); setShowServiceModal(true); }}
+            onClick={() => { setSelectedService(null); setServiceModalMode('edit'); setShowServiceModal(true); }}
             className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg flex items-center transition-all shadow-md shadow-blue-200 font-bold text-xs uppercase tracking-widest"
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -507,7 +508,8 @@ export function DataProvisionServiceSetupPage() {
                                   <button
                                     onClick={() => {
                                       setSelectedService(item);
-                                      setShowApiDetailModal(true);
+                                      setServiceModalMode('view');
+                                      setShowServiceModal(true);
                                     }}
                                     className="px-3 py-1.5 text-xs font-bold text-slate-500 hover:text-slate-900 border border-slate-200 rounded-lg hover:bg-slate-50 transition-all uppercase tracking-widest flex items-center gap-1.5 cursor-pointer"
                                     title="Chi tiết API"
@@ -522,7 +524,8 @@ export function DataProvisionServiceSetupPage() {
                                 <button
                                   onClick={() => {
                                     setSelectedService(item);
-                                    setShowApiDetailModal(true);
+                                    setServiceModalMode('view');
+                                    setShowServiceModal(true);
                                   }}
                                   className="text-slate-400 hover:text-blue-600 p-1.5 hover:bg-slate-100 rounded-lg transition-all inline-flex items-center justify-center group"
                                   title="Xem chi tiết"
@@ -532,6 +535,7 @@ export function DataProvisionServiceSetupPage() {
                                 <button
                                   onClick={() => {
                                     setSelectedService(item);
+                                    setServiceModalMode('edit');
                                     setShowServiceModal(true);
                                   }}
                                   className="text-slate-400 hover:text-indigo-600 p-1.5 hover:bg-indigo-50 rounded-lg transition-all inline-flex items-center justify-center group"
@@ -583,6 +587,7 @@ export function DataProvisionServiceSetupPage() {
           setShowSubmitApprovalModal(true);
         }}
         service={selectedService}
+        mode={serviceModalMode}
       />
 
       <SubmitApprovalModal

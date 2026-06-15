@@ -13,20 +13,25 @@ import { ScrollText } from 'lucide-react';
 const apiMockStats: Record<string, {
   database: string;
   gatewayStatus: string;
-  partnerSystem: string;
+  partners: Array<{ name: string; connection: 'active' | 'error' }>;
   totalRequests: number;
   successRate: string;
   avgLatency: string;
   chartData: any[];
   logs: any[];
+  sourceConnection: 'active' | 'error';
 }> = {
   'Lấy danh sách Hộ tịch': {
     database: 'CSDL Hộ tịch điện tử',
     gatewayStatus: 'Hoạt động tốt',
-    partnerSystem: 'Sở Y tế tỉnh Bắc Ninh',
+    partners: [
+      { name: 'Sở Y tế tỉnh Bắc Ninh', connection: 'active' },
+      { name: 'Sở Y tế tỉnh Quảng Ninh', connection: 'active' }
+    ],
     totalRequests: 28450,
     successRate: '99.8%',
     avgLatency: '124 ms',
+    sourceConnection: 'active',
     chartData: [
       { name: 'T2', 'Luồng dữ liệu': 250, 'Lỗi kết nối': 2 },
       { name: 'T3', 'Luồng dữ liệu': 310, 'Lỗi kết nối': 1 },
@@ -45,10 +50,13 @@ const apiMockStats: Record<string, {
   'Đồng bộ dữ liệu THADS': {
     database: 'Cơ sở dữ liệu THADS',
     gatewayStatus: 'Ổn định',
-    partnerSystem: 'Hệ thống THADS Quốc gia',
+    partners: [
+      { name: 'Hệ thống THADS Quốc gia', connection: 'active' }
+    ],
     totalRequests: 14200,
     successRate: '98.5%',
     avgLatency: '310 ms',
+    sourceConnection: 'error',
     chartData: [
       { name: 'T2', 'Luồng dữ liệu': 110, 'Lỗi kết nối': 8 },
       { name: 'T3', 'Luồng dữ liệu': 140, 'Lỗi kết nối': 12 },
@@ -66,10 +74,13 @@ const apiMockStats: Record<string, {
   'Đọc thông tin Biện pháp bảo đảm': {
     database: 'CSDL Biện pháp bảo đảm',
     gatewayStatus: 'Hoạt động tốt',
-    partnerSystem: 'Cục Giao dịch bảo đảm',
+    partners: [
+      { name: 'Cục Giao dịch bảo đảm', connection: 'active' }
+    ],
     totalRequests: 8900,
     successRate: '100%',
     avgLatency: '98 ms',
+    sourceConnection: 'active',
     chartData: [
       { name: 'T2', 'Luồng dữ liệu': 80, 'Lỗi kết nối': 0 },
       { name: 'T3', 'Luồng dữ liệu': 95, 'Lỗi kết nối': 0 },
@@ -241,42 +252,116 @@ export function DataProvisionMonitoringPage() {
             <div className="space-y-6">
               
               {/* Topology flowchart mapping to select API */}
-              <div className="bg-slate-50 rounded-xl border border-slate-200 p-8 flex items-center justify-center min-h-[250px]">
-                <div className="flex items-center justify-between w-full max-w-4xl relative">
+              <div className="bg-slate-50 rounded-xl border border-slate-200 p-8 flex items-center justify-center min-h-[300px] overflow-hidden">
+                <div className="flex w-full max-w-5xl items-center relative">
                   
-                  {/* CSDL Source */}
-                  <div className="flex flex-col items-center">
-                    <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center border-4 border-blue-500 z-10 shadow-sm">
+                  {/* SOURCE */}
+                  <div className="relative flex flex-col items-center w-32 shrink-0 z-10">
+                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center border-4 border-blue-500 shadow-sm relative z-10">
                       <Database className="w-8 h-8 text-blue-600" />
                     </div>
-                    <span className="mt-3 text-xs font-bold text-slate-700">{stats.database}</span>
-                    <span className="text-[10px] text-slate-400 mt-0.5">Nguồn dữ liệu nội bộ</span>
+                    <div className="absolute top-full mt-3 flex flex-col items-center w-40 text-center">
+                      <span className="text-xs font-bold text-slate-700">{stats.database}</span>
+                      <span className="text-[10px] text-slate-400 mt-0.5">Nguồn dữ liệu nội bộ</span>
+                    </div>
                   </div>
 
-                  {/* Flowing connector arrows */}
-                  <div className="absolute top-8 left-16 right-16 h-1.5 bg-slate-200 -z-0 overflow-hidden rounded-full flex items-center justify-between">
-                    <div className="h-full bg-amber-500 w-1/3 animate-[pulse_1.5s_infinite] rounded-full"></div>
-                    <ArrowRightLeft className="w-4 h-4 text-slate-300 shrink-0 absolute left-1/2 -translate-x-1/2" />
+                  {/* LINE: Source -> Gateway */}
+                  <div className="flex-1 relative flex items-center justify-center z-0 px-2 min-w-[100px]">
+                    <div className={`w-full h-1.5 rounded-full relative flex items-center justify-center overflow-hidden ${stats.sourceConnection === 'active' ? 'bg-slate-200' : 'bg-rose-100'}`}>
+                      {stats.sourceConnection === 'active' ? (
+                        <>
+                          <div className="absolute left-0 h-full bg-emerald-500 w-1/2 animate-[pulse_1.5s_infinite] rounded-full"></div>
+                          <ArrowRightLeft className="w-4 h-4 text-emerald-600 bg-white rounded-full relative z-10 p-0.5 shadow-sm" />
+                        </>
+                      ) : (
+                        <>
+                          <div className="w-full border-t-2 border-dashed border-rose-400 absolute"></div>
+                          <X className="w-4 h-4 text-white bg-rose-500 rounded-full relative z-10 p-0.5 shadow-sm" />
+                        </>
+                      )}
+                    </div>
+                    <div className="absolute top-full mt-2">
+                      <span className={`text-[10px] font-bold px-3 py-1 rounded-full border whitespace-nowrap ${stats.sourceConnection === 'active' ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : 'text-rose-600 bg-rose-50 border-rose-100'}`}>
+                        {stats.sourceConnection === 'active' ? 'Kết nối ổn định' : 'Mất kết nối'}
+                      </span>
+                    </div>
                   </div>
 
-                  {/* API Gateway core */}
-                  <div className="flex flex-col items-center">
-                    <div className="w-20 h-20 bg-amber-50 rounded-2xl flex items-center justify-center border-4 border-amber-500 z-10 shadow-lg animate-in zoom-in duration-300">
+                  {/* GATEWAY */}
+                  <div className="relative flex flex-col items-center w-40 shrink-0 z-10">
+                    <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center border-4 border-amber-500 shadow-lg animate-in zoom-in duration-300 relative z-10">
                       <Server className="w-10 h-10 text-amber-600 animate-pulse" />
                     </div>
-                    <span className="mt-3 text-xs font-extrabold text-slate-800">CỔNG API GATEWAY</span>
-                    <span className="text-[10px] px-2 py-0.5 bg-green-100 text-green-700 rounded-full mt-1 font-bold">
-                      {stats.gatewayStatus}
-                    </span>
+                    <div className="absolute top-full mt-3 flex flex-col items-center w-48 text-center">
+                      <span className="text-xs font-extrabold text-slate-800">CỔNG API GATEWAY</span>
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full mt-1 font-bold ${stats.gatewayStatus === 'Hoạt động tốt' || stats.gatewayStatus === 'Ổn định' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                        {stats.gatewayStatus}
+                      </span>
+                    </div>
                   </div>
 
-                  {/* Partner destination system */}
-                  <div className="flex flex-col items-center">
-                    <div className="w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center border-4 border-purple-500 z-10 shadow-sm">
-                      <Share2 className="w-8 h-8 text-purple-600" />
-                    </div>
-                    <span className="mt-3 text-xs font-bold text-slate-700">{stats.partnerSystem}</span>
-                    <span className="text-[10px] text-slate-400 mt-0.5">Đơn vị khai thác API</span>
+                  {/* TRUNK LINE FROM GATEWAY (only if multiple partners) */}
+                  {stats.partners && stats.partners.length > 1 && (
+                     <div className="w-6 h-1.5 bg-slate-200 z-0 -mr-0.5 rounded-l-full"></div>
+                  )}
+
+                  {/* PARTNERS CONTAINER */}
+                  <div className={`flex-1 flex flex-col justify-center relative min-w-[150px] ${stats.partners && stats.partners.length === 1 ? 'pl-2' : ''}`}>
+                    
+                     {stats.partners && stats.partners.map((partner, idx) => (
+                       <div key={idx} className={`flex items-center w-full relative ${stats.partners.length > 1 ? 'py-12' : 'py-0'}`}>
+                         
+                         {/* Vertical Trunk Piece for this row */}
+                         {stats.partners.length > 1 && (
+                           <div className="absolute left-0 w-1.5 bg-slate-200 z-0" 
+                                style={{ 
+                                  top: idx === 0 ? '50%' : '0', 
+                                  bottom: idx === stats.partners.length - 1 ? '50%' : '0',
+                                  borderTopLeftRadius: idx === 0 ? '9999px' : '0',
+                                  borderTopRightRadius: idx === 0 ? '9999px' : '0',
+                                  borderBottomLeftRadius: idx === stats.partners.length - 1 ? '9999px' : '0',
+                                  borderBottomRightRadius: idx === stats.partners.length - 1 ? '9999px' : '0',
+                                }}>
+                           </div>
+                         )}
+
+                         {/* Line: Trunk/Gateway -> Partner */}
+                         <div className="flex-1 relative flex items-center justify-center z-0 px-2">
+                           <div className={`w-full h-1.5 ${stats.partners.length > 1 ? 'rounded-r-full' : 'rounded-full'} relative flex items-center justify-center overflow-hidden ${partner.connection === 'active' ? 'bg-slate-200' : 'bg-rose-100'}`}>
+                              {partner.connection === 'active' ? (
+                                <>
+                                  <div className="absolute left-0 h-full bg-emerald-500 w-1/2 animate-[pulse_1.5s_infinite] rounded-full"></div>
+                                  <ArrowRightLeft className="w-4 h-4 text-emerald-600 bg-white rounded-full relative z-10 p-0.5 shadow-sm" />
+                                </>
+                              ) : (
+                                <>
+                                  <div className="w-full border-t-2 border-dashed border-rose-400 absolute"></div>
+                                  <X className="w-4 h-4 text-white bg-rose-500 rounded-full relative z-10 p-0.5 shadow-sm" />
+                                </>
+                              )}
+                           </div>
+                           <div className="absolute top-full mt-2">
+                             <span className={`text-[10px] font-bold px-3 py-1 rounded-full border whitespace-nowrap ${partner.connection === 'active' ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : 'text-rose-600 bg-rose-50 border-rose-100'}`}>
+                               {partner.connection === 'active' ? 'Kết nối ổn định' : 'Mất kết nối'}
+                             </span>
+                           </div>
+                         </div>
+
+                         {/* PARTNER NODE */}
+                         <div className="relative flex flex-col items-center w-32 shrink-0 z-10 ml-2">
+                           <div className={`w-16 h-16 bg-white rounded-full flex items-center justify-center border-4 ${partner.connection === 'active' ? 'border-purple-500' : 'border-slate-300'} shadow-sm relative z-10`}>
+                             <Share2 className={`w-8 h-8 ${partner.connection === 'active' ? 'text-purple-600' : 'text-slate-400'}`} />
+                           </div>
+                           <div className="absolute top-full mt-3 flex flex-col items-center w-48 text-center">
+                             <span className="text-xs font-bold text-slate-700">{partner.name}</span>
+                             <span className="text-[10px] text-slate-400 mt-0.5">Đơn vị khai thác API</span>
+                           </div>
+                         </div>
+                         
+                       </div>
+                     ))}
+
                   </div>
 
                 </div>
