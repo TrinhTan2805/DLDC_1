@@ -71,11 +71,14 @@ export function ApiVersionCompareModal({ isOpen, onClose, apiName, verA, verB }:
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50 text-slate-500 text-xs border-b border-slate-200 uppercase tracking-wider">
+                  {/* Vùng Phiên bản cũ */}
                   <th className="py-3 px-4 font-bold">Thuộc tính</th>
                   <th className="py-3 px-4 font-bold">Cấu trúc cũ ({verB})</th>
                   <th className="py-3 px-4 font-bold">Cấu trúc mới ({verA})</th>
-                  <th className="py-3 px-4 font-bold">Thay đổi</th>
-                  <th className="py-3 px-4 font-bold">Mô tả chi tiết</th>
+                  
+                  {/* Vùng Phiên bản mới (Có vạch chia) */}
+                  <th className="py-3 px-4 font-bold border-l-2 border-slate-200 bg-slate-100/50">Thay đổi</th>
+                  <th className="py-3 px-4 font-bold bg-slate-100/50">Mô tả chi tiết</th>
                 </tr>
               </thead>
               <tbody className="text-sm divide-y divide-slate-100">
@@ -98,7 +101,7 @@ export function ApiVersionCompareModal({ isOpen, onClose, apiName, verA, verB }:
                         prop.typeA
                       )}
                     </td>
-                    <td className="py-3.5 px-4">
+                    <td className="py-3.5 px-4 border-l-2 border-slate-200 bg-slate-50/50">
                       {prop.status === 'unchanged' && (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200">
                           <CheckCircle2 className="w-3.5 h-3.5 text-slate-400" />
@@ -124,7 +127,7 @@ export function ApiVersionCompareModal({ isOpen, onClose, apiName, verA, verB }:
                         </span>
                       )}
                     </td>
-                    <td className="py-3.5 px-4 text-slate-600 text-xs leading-relaxed max-w-xs">
+                    <td className="py-3.5 px-4 text-slate-600 text-xs leading-relaxed max-w-xs bg-slate-50/50">
                       {prop.desc}
                     </td>
                   </tr>

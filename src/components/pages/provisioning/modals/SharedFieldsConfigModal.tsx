@@ -169,18 +169,16 @@ export function SharedFieldsConfigModal({
                         <td className="px-4 py-3.5">
                           <input
                             type="text"
-                            disabled={!field.shared}
-                            className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 font-mono text-xs transition-all disabled:opacity-50 disabled:bg-slate-100"
+                            readOnly
+                            className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-slate-50/80 text-slate-600 font-mono text-xs cursor-default outline-none"
                             value={field.apiKey}
-                            onChange={(e) => handleApiKeyChange(field.id, e.target.value)}
                           />
                         </td>
                         <td className="px-4 py-3.5">
                           <select
-                            disabled={!field.shared}
-                            className="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all disabled:opacity-50 disabled:bg-slate-100 cursor-pointer"
+                            disabled
+                            className="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs bg-slate-50/80 text-slate-600 cursor-default outline-none disabled:opacity-100"
                             value={field.masking}
-                            onChange={(e) => handleMaskingChange(field.id, e.target.value)}
                           >
                             <option value="none">Không che dấu</option>
                             <option value="mask_first_3">Che dấu 3 ký tự đầu</option>
