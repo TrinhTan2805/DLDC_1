@@ -181,11 +181,7 @@ export function VersionHistoryModal({ isOpen, onClose }: VersionHistoryModalProp
                 <div className="space-y-2">
                   <div className="flex items-start gap-2">
                     <FileText className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
-<<<<<<< HEAD
-                    <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{item.content}</p>
-=======
                     <div className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{item.content}</div>
->>>>>>> 1e9a0831 (feat: Nang cap v2.4.5 - Hoan thien UI Giam sat va Dich vu chia se)
                   </div>
 
                   <div className="flex items-center gap-6 mt-3 pt-3 border-t border-slate-100/50">
