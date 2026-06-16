@@ -38,11 +38,7 @@ export function ProvisionAccessControlModal({ isOpen, onClose, apiName, onSave }
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     
-    // Collect selected scopes
-    const scopes: string[] = [];
-    if (form.scopeRead.checked) scopes.push('Đọc (GET)');
-    if (form.scopeWrite.checked) scopes.push('Ghi (POST/PUT)');
-    if (form.scopeReconcile.checked) scopes.push('Đối soát (RECON)');
+    const scopes: string[] = ['Đọc (GET)']; // Default scope since UI is removed
 
     if (onSave) {
       onSave({
@@ -113,7 +109,7 @@ export function ProvisionAccessControlModal({ isOpen, onClose, apiName, onSave }
                   <option value="Sở Lao động - Thương binh và Xã hội">Sở Lao động - Thương binh và Xã hội</option>
                   <option value="Sở Tài chính tỉnh Bắc Ninh">Sở Tài chính tỉnh Bắc Ninh</option>
                   <option value="Sở Giáo dục và Đào tạo">Sở Giáo dục và Đào tạo</option>
-                  <option value="UBND Huyện Tiên Du">UBND Huyện Tiên Du</option>
+                  <option value="Sở Thông tin và Truyền thông tỉnh Bắc Ninh">Sở Thông tin và Truyền thông tỉnh Bắc Ninh</option>
                   <option value="UBND Thành phố Bắc Ninh">UBND Thành phố Bắc Ninh</option>
                 </select>
               </div>
@@ -156,27 +152,6 @@ export function ProvisionAccessControlModal({ isOpen, onClose, apiName, onSave }
                 <p className="text-xs text-slate-500 mt-1.5">
                   * Token truy cập API được khởi tạo tự động cho <span className="font-semibold text-amber-700">{selectedOrg}</span>
                 </p>
-              </div>
-
-              {/* Access Scope Checkboxes */}
-              <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  Phạm vi quyền truy cập (Scopes) <span className="text-red-500">*</span>
-                </label>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <label className="flex items-center gap-2 p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
-                    <input type="checkbox" name="scopeRead" defaultChecked className="rounded border-slate-300 text-amber-600 focus:ring-amber-500" />
-                    <div className="text-xs font-semibold text-slate-700">Đọc dữ liệu (GET)</div>
-                  </label>
-                  <label className="flex items-center gap-2 p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
-                    <input type="checkbox" name="scopeWrite" className="rounded border-slate-300 text-amber-600 focus:ring-amber-500" />
-                    <div className="text-xs font-semibold text-slate-700">Ghi dữ liệu (POST)</div>
-                  </label>
-                  <label className="flex items-center gap-2 p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
-                    <input type="checkbox" name="scopeReconcile" className="rounded border-slate-300 text-amber-600 focus:ring-amber-500" />
-                    <div className="text-xs font-semibold text-slate-700">Chạy đối soát (RECON)</div>
-                  </label>
-                </div>
               </div>
 
 

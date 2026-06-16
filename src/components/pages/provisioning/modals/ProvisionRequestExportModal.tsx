@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Search, FileDown, CheckCircle, Table as TableIcon, Filter, AlertCircle, RefreshCw, Layers, Database, LayoutTemplate, Key, Trash2, Plus, Copy } from 'lucide-react';
+import { X, Search, FileDown, CheckCircle, Table as TableIcon, Filter, AlertCircle, RefreshCw, Layers, Database, LayoutTemplate, Key, Trash2, Plus, Copy, Code } from 'lucide-react';
 
 // Mock Database Schema for Civil Registry
 const mockSchema: Record<string, string[]> = {
@@ -21,6 +21,10 @@ export function ProvisionRequestExportModal({ isOpen, onClose, requestData, onCo
   const [activeStep, setActiveStep] = useState<1 | 2>(1);
   const [isGenerating, setIsGenerating] = useState(false);
   const [exportFormat, setExportFormat] = useState(requestData?.format || 'excel');
+
+  // States for query mode
+  const [queryMode, setQueryMode] = useState<'visual' | 'raw_sql'>('visual');
+  const [rawSql, setRawSql] = useState('SELECT *\nFROM ho_tich_ca_nhan\nWHERE id = :id');
 
   // States for query builder
   const [dateColumn, setDateColumn] = useState('');
@@ -188,7 +192,25 @@ export function ProvisionRequestExportModal({ isOpen, onClose, requestData, onCo
             
             {activeStep === 1 && (
               <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-                <section>
+                {/* Mode Toggle */}
+                <div className="flex items-center gap-1.5 p-1 bg-slate-100/80 rounded-xl w-max border border-slate-200 shadow-inner">
+                  <button
+                    onClick={() => setQueryMode('visual')}
+                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${queryMode === 'visual' ? 'bg-white text-blue-600 shadow border border-slate-200/60' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
+                  >
+                    Cấu hình trực quan (Visual)
+                  </button>
+                  <button
+                    onClick={() => setQueryMode('raw_sql')}
+                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${queryMode === 'raw_sql' ? 'bg-white text-blue-600 shadow border border-slate-200/60' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
+                  >
+                    Viết câu lệnh (Raw SQL)
+                  </button>
+                </div>
+
+                {queryMode === 'visual' ? (
+                  <>
+                    <section>
                   <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center gap-2">
                     <Filter className="w-5 h-5 text-blue-500" />
                     Thiết lập điều kiện truy xuất
@@ -610,9 +632,24 @@ export function ProvisionRequestExportModal({ isOpen, onClose, requestData, onCo
                       </table>
                     </div>
                   </section>
+                  </>
+                ) : (
+                  <section className="bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-sm animate-in fade-in duration-300">
+                    <h3 className="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+                      <Code className="w-5 h-5 text-blue-500" />
+                      Câu lệnh SQL tùy chỉnh
+                    </h3>
+                    <textarea
+                      value={rawSql}
+                      onChange={(e) => setRawSql(e.target.value)}
+                      className="w-full h-64 p-4 font-mono text-sm bg-white border border-slate-300 rounded-xl outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 resize-y shadow-inner"
+                      placeholder="SELECT * FROM ho_tich_ca_nhan WHERE id = :id"
+                    />
+                  </section>
+                )}
 
-                  {/* Live JSON Preview */}
-                  <section className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in duration-300 relative mt-6">
+                {/* Live JSON Preview */}
+                <section className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in duration-300 relative mt-6">
                     <div className="flex justify-between items-center p-4 border-b border-slate-100">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>

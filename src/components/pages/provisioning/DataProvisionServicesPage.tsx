@@ -21,8 +21,9 @@ export function DataProvisionServicesPage({ category, group, title, description 
   // Tab State for Civil Registry
   const [activeDetailTab, setActiveDetailTab] = useState<'du_lieu' | 'api'>('du_lieu');
 
-  // Search filter for right-content list
+  // Search and Filter State
   const [searchRightText, setSearchRightText] = useState('');
+  const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
 
   // Fields Config Modal State
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
@@ -36,7 +37,7 @@ export function DataProvisionServicesPage({ category, group, title, description 
   };
 
   // Check if we are on CSDL Hộ tịch điện tử screen
-  const isHotichPage = group === 'CSDL Hộ tịch điện tử';
+  // (Removed isHotichPage check - we now apply the advanced layout to ALL screens)
 
   // Lọc dữ liệu theo category và group
   const groupData = provisionServicesData.filter(item => {
@@ -66,101 +67,57 @@ export function DataProvisionServicesPage({ category, group, title, description 
     { id: '7', name: 'Trạng thái', apiKey: 'trangThai', shared: sharedCount >= 7, masking: 'none' as const }
   ];
 
-  // Mock list of consumer APIs for "CSDL Hộ tịch điện tử"
-  const [consumerApis, setConsumerApis] = useState(() => [
-    {
-      id: 'api-ht-1',
-      code: 'SVC-HOTICH-001',
-      name: 'API cung cấp dữ liệu Hộ tịch điện tử',
-      endpoint: '/api/v1/hotich/search',
-      method: 'GET',
-      unit: 'Bộ Kế hoạch và Đầu tư',
-      receiver: 'Trần Văn Đạo - 0912345678',
-      time: '05/06/2026 08:00:00',
-      status: 'Hoạt động',
-      sharedCount: 7,
-      fields: getInitialFields(7)
-    },
-    {
-      id: 'api-ht-2',
-      code: 'SVC-HOTICH-001',
-      name: 'API cung cấp dữ liệu Hộ tịch điện tử',
-      endpoint: '/api/v1/hotich/search',
-      method: 'GET',
-      unit: 'UBND Tỉnh Bắc Ninh',
-      receiver: 'Nguyễn Văn A - 0987654321',
-      time: '05/06/2026 09:15:00',
-      status: 'Hoạt động',
-      sharedCount: 5,
-      fields: getInitialFields(5)
-    },
-    {
-      id: 'api-ht-3',
-      code: 'SVC-HOTICH-001',
-      name: 'API cung cấp dữ liệu Hộ tịch điện tử',
-      endpoint: '/api/v1/hotich/search',
-      method: 'GET',
-      unit: 'Sở Tài chính tỉnh Bắc Ninh',
-      receiver: 'Trần Thị B - 0912345678',
-      time: '04/06/2026 14:30:00',
-      status: 'Hoạt động',
-      sharedCount: 4,
-      fields: getInitialFields(4)
-    },
-    {
-      id: 'api-ht-4',
-      code: 'SVC-HOTICH-001',
-      name: 'API cung cấp dữ liệu Hộ tịch điện tử',
-      endpoint: '/api/v1/hotich/search',
-      method: 'GET',
-      unit: 'UBND Huyện Tiên Du',
-      receiver: 'Lê Văn D - 0988888888',
-      time: '03/06/2026 16:45:00',
-      status: 'Tạm ngưng',
-      sharedCount: 6,
-      fields: getInitialFields(6)
-    }
-  ]);
+  // Generic list of consumer APIs that updates based on selected service
+  const [consumerApis, setConsumerApis] = useState<any[]>([]);
 
-  // Mock list of APIs consuming other datasets (original view fallback)
-  const mockConsumerApis = [
-    {
-      id: 'api-1',
-      name: 'Lấy danh sách Hộ tịch (Tỉnh Bắc Ninh)',
-      endpoint: '/api/v1/hotich/bacninh',
-      method: 'GET',
-      requestCount: '1,240',
-      fieldCount: 15,
-      provisionTime: 'Real-time',
-      unit: 'UBND Tỉnh Bắc Ninh',
-      status: 'active',
-      sampleJson: `{\n  "status": "success",\n  "data": {\n    "id": "USR-99812",\n    "ho_ten": "Nguyễn Văn A",\n    "ngay_sinh": "1995-10-15",\n    "so_dinh_danh": "001••••123"\n  }\n}`
-    },
-    {
-      id: 'api-3',
-      name: 'Lấy danh sách Hộ tịch (Tỉnh Quảng Ninh)',
-      endpoint: '/api/v1/hotich/quangninh',
-      method: 'GET',
-      requestCount: '2,150',
-      fieldCount: 15,
-      provisionTime: 'Real-time',
-      unit: 'UBND Tỉnh Quảng Ninh',
-      status: 'active',
-      sampleJson: `{\n  "status": "success",\n  "data": {\n    "id": "USR-99813",\n    "ho_ten": "Trần Văn B",\n    "ngay_sinh": "1990-05-20",\n    "so_dinh_danh": "001••••456"\n  }\n}`
-    },
-    {
-      id: 'api-2',
-      name: 'Tra cứu thông tin Đăng ký kết hôn (Bộ Công An)',
-      endpoint: '/api/v2/kethon/bca',
-      method: 'POST',
-      requestCount: '8,500',
-      fieldCount: 22,
-      provisionTime: 'Daily Batch (00:00)',
-      unit: 'Bộ Công An (C06)',
-      status: 'active',
-      sampleJson: `{\n  "status": "success",\n  "data": {\n    "id_ket_hon": "KH-2026-1122",\n    "ngay_dang_ky": "2026-01-15",\n    "vo_chong": [\n      {"ho_ten": "Nguyễn Văn A", "cccd": "001095000123"},\n      {"ho_ten": "Trần Thị B", "cccd": "001096000456"}\n    ]\n  }\n}`
+  // Update mock APIs when selected service changes
+  useEffect(() => {
+    if (selectedService) {
+      setConsumerApis([
+        {
+          id: `api-1-${selectedService.id}`,
+          code: `SVC-${selectedService.id}-001`,
+          name: `API cung cấp dữ liệu ${selectedService.name}`,
+          endpoint: `/api/v1/${selectedService.category}/search`,
+          method: 'GET',
+          unit: 'Bộ Kế hoạch và Đầu tư',
+          receiver: 'Trần Văn Đạo - 0912345678',
+          time: '05/06/2026 08:00:00',
+          status: 'Hoạt động',
+          sharedCount: 7,
+          fields: getInitialFields(7)
+        },
+        {
+          id: `api-2-${selectedService.id}`,
+          code: `SVC-${selectedService.id}-002`,
+          name: `API chia sẻ ${selectedService.name}`,
+          endpoint: `/api/v1/${selectedService.category}/list`,
+          method: 'GET',
+          unit: 'UBND Tỉnh Bắc Ninh',
+          receiver: 'Nguyễn Văn A - 0987654321',
+          time: '05/06/2026 09:15:00',
+          status: 'Hoạt động',
+          sharedCount: 5,
+          fields: getInitialFields(5)
+        },
+        {
+          id: `api-3-${selectedService.id}`,
+          code: `SVC-${selectedService.id}-003`,
+          name: `API đồng bộ ${selectedService.name}`,
+          endpoint: `/api/v1/${selectedService.category}/sync`,
+          method: 'POST',
+          unit: 'Sở Thông tin và Truyền thông',
+          receiver: 'Lê Văn D - 0988888888',
+          time: '03/06/2026 16:45:00',
+          status: 'Tạm ngưng',
+          sharedCount: 6,
+          fields: getInitialFields(6)
+        }
+      ]);
     }
-  ];
+  }, [selectedService]);
+
+  // Removed legacy mockConsumerApis as all screens now use the advanced table layout
 
   const handleOpenFieldsConfig = (api: any) => {
     setSelectedApiForConfig(api);
@@ -241,57 +198,46 @@ export function DataProvisionServicesPage({ category, group, title, description 
       <div className="flex-1 flex flex-col bg-white overflow-hidden">
         {selectedService ? (
           <>
-            {/* Header / Tab navigation for Civil Registry page */}
-            {isHotichPage ? (
-              <div className="bg-white border-b border-slate-200 shadow-sm z-10 flex flex-col">
-                <div className="px-6 pt-5 pb-3">
-                  <h2 className="text-xl font-bold text-slate-800 mb-1">{selectedService.name}</h2>
-                  <p className="text-xs text-slate-400">
-                    Nguồn dữ liệu: <strong className="text-slate-600">{selectedService.group || selectedService.category}</strong> | Dữ liệu <strong className="text-slate-600">Dùng chung</strong>
-                  </p>
-                </div>
-                
-                {/* Tabs */}
-                <div className="flex px-6 border-t border-slate-100 bg-slate-50/50">
-                  <button
-                    onClick={() => setActiveDetailTab('du_lieu')}
-                    className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
-                      activeDetailTab === 'du_lieu'
-                        ? 'border-orange-500 text-orange-600'
-                        : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
-                    }`}
-                  >
-                    <FileText className="w-4 h-4" />
-                    Dữ liệu cung cấp
-                  </button>
-                  <button
-                    onClick={() => setActiveDetailTab('api')}
-                    className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
-                      activeDetailTab === 'api'
-                        ? 'border-orange-500 text-orange-600'
-                        : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
-                    }`}
-                  >
-                    <Sliders className="w-4 h-4" />
-                    Quản lý API đang lấy dữ liệu
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="p-6 border-b border-slate-200 bg-white shadow-sm z-10">
-                <h2 className="text-xl font-bold text-slate-800 mb-2">{selectedService.name}</h2>
-                <p className="text-sm text-slate-500">
-                  Nguồn dữ liệu: {selectedService.group || selectedService.category} | Dữ liệu {selectedService.category === 'internal' ? 'danh mục nội ngành' : 'dùng chung'}
+            {/* Header / Tab navigation for all Provisioning pages */}
+            <div className="bg-white border-b border-slate-200 shadow-sm z-10 flex flex-col">
+              <div className="px-6 pt-5 pb-3">
+                <h2 className="text-xl font-bold text-slate-800 mb-1">{selectedService.name}</h2>
+                <p className="text-xs text-slate-400">
+                  Nguồn dữ liệu: <strong className="text-slate-600">{selectedService.group || selectedService.category}</strong> | Dữ liệu <strong className="text-slate-600">{selectedService.category === 'internal' ? 'Danh mục nội ngành' : (selectedService.category === 'shared' ? 'Dùng chung' : (selectedService.category === 'master' ? 'Dữ liệu chủ' : 'Dữ liệu mở'))}</strong>
                 </p>
               </div>
-            )}
+              
+              {/* Tabs */}
+              <div className="flex px-6 border-t border-slate-100 bg-slate-50/50">
+                <button
+                  onClick={() => setActiveDetailTab('du_lieu')}
+                  className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
+                    activeDetailTab === 'du_lieu'
+                      ? 'border-orange-500 text-orange-600'
+                      : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
+                  }`}
+                >
+                  <FileText className="w-4 h-4" />
+                  Dữ liệu cung cấp
+                </button>
+                <button
+                  onClick={() => setActiveDetailTab('api')}
+                  className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
+                    activeDetailTab === 'api'
+                      ? 'border-orange-500 text-orange-600'
+                      : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
+                  }`}
+                >
+                  <Sliders className="w-4 h-4" />
+                  Quản lý API đang lấy dữ liệu
+                </button>
+              </div>
+            </div>
             
             <div className="flex-1 overflow-y-auto p-6 bg-slate-50/50">
               <div className="max-w-6xl mx-auto space-y-6">
                 
-                {/* Civil Registry Tabbed Content */}
-                {isHotichPage ? (
-                  <>
+                {/* Tabbed Content */}
                     {/* General Search Toolbar directly below tabs container */}
                     <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between gap-4">
                       <div className="relative flex-1 max-w-xl">
@@ -304,11 +250,52 @@ export function DataProvisionServicesPage({ category, group, title, description 
                           onChange={(e) => setSearchRightText(e.target.value)}
                         />
                       </div>
-                      <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm cursor-pointer">
-                        <Filter className="w-4 h-4 text-slate-500" />
+                      <button 
+                        onClick={() => setShowAdvancedFilter(!showAdvancedFilter)}
+                        className={`flex items-center gap-2 px-4 py-2 border rounded-lg text-sm font-semibold transition-colors shadow-sm cursor-pointer ${showAdvancedFilter ? 'bg-orange-50 border-orange-200 text-orange-700' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'}`}
+                      >
+                        <Filter className={`w-4 h-4 ${showAdvancedFilter ? 'text-orange-500' : 'text-slate-500'}`} />
                         Bộ lọc nâng cao
                       </button>
                     </div>
+
+                    {/* Advanced Filter Panel */}
+                    {showAdvancedFilter && (
+                      <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm animate-in slide-in-from-top-2 duration-200 mb-6 -mt-2">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                          <div>
+                            <label className="block text-xs font-bold text-slate-600 mb-1.5">Khoảng thời gian (Từ ngày)</label>
+                            <input type="date" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-slate-700" />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-slate-600 mb-1.5">Khoảng thời gian (Đến ngày)</label>
+                            <input type="date" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-slate-700" />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-slate-600 mb-1.5">Trạng thái xử lý</label>
+                            <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-slate-700">
+                              <option value="">-- Tất cả trạng thái --</option>
+                              <option value="success">Thành công</option>
+                              <option value="pending">Đang chờ xử lý</option>
+                              <option value="error">Bị lỗi / Từ chối</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div className="flex justify-end gap-3 mt-5 pt-4 border-t border-slate-100">
+                          <button 
+                            onClick={() => setShowAdvancedFilter(false)}
+                            className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg text-sm font-bold hover:bg-slate-50 transition-colors cursor-pointer"
+                          >
+                            Hủy bỏ
+                          </button>
+                          <button 
+                            className="px-6 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-sm font-bold shadow-sm transition-colors cursor-pointer"
+                          >
+                            Áp dụng bộ lọc
+                          </button>
+                        </div>
+                      </div>
+                    )}
 
                     {activeDetailTab === 'du_lieu' ? (
                       /* Tab 1: Dữ liệu cung cấp */
@@ -317,7 +304,7 @@ export function DataProvisionServicesPage({ category, group, title, description 
                       /* Tab 2: Quản lý API đang lấy dữ liệu */
                       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm animate-in fade-in duration-200">
                         <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/50 flex justify-between items-center">
-                          <h3 className="font-bold text-slate-800 text-base">Danh sách các API chia sẻ dữ liệu Hộ tịch</h3>
+                          <h3 className="font-bold text-slate-800 text-base">Danh sách các API chia sẻ dữ liệu "{selectedService.name}"</h3>
                           <span className="text-xs font-semibold text-slate-500">Tìm thấy {filteredConsumerApis.length} API đang kết nối</span>
                         </div>
 
@@ -401,97 +388,6 @@ export function DataProvisionServicesPage({ category, group, title, description 
                         </div>
                       </div>
                     )}
-                  </>
-                ) : (
-                  /* Original View Fallback for other pages */
-                  <>
-                    <ServiceDataTable service={selectedService} />
-                    
-                    <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">
-                      Danh sách API đang lấy dữ liệu từ "{selectedService.name}"
-                    </h3>
-
-                    {mockConsumerApis.map(api => (
-                      <div key={api.id} className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:border-blue-300 transition-colors mb-6">
-                        <div 
-                          className="p-5 cursor-pointer flex items-center justify-between"
-                          onClick={() => setSelectedApi(selectedApi?.id === api.id ? null : api)}
-                        >
-                          <div className="flex items-center gap-4">
-                            <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
-                              <Server className="w-6 h-6" />
-                            </div>
-                            <div>
-                              <h4 className="font-bold text-slate-800 text-base">{api.name}</h4>
-                              <div className="flex items-center gap-3 mt-1.5">
-                                <span className="font-mono text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-bold border border-slate-200">
-                                  {api.method}
-                                </span>
-                                <span className="font-mono text-xs text-slate-500">{api.endpoint}</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100 inline-block mb-1">
-                              Đang hoạt động
-                            </div>
-                            <div className="text-xs text-slate-400 font-medium">Click để xem chi tiết</div>
-                          </div>
-                        </div>
-
-                        {selectedApi?.id === api.id && (
-                          <div className="border-t border-slate-100 bg-slate-50/50 p-6 animate-in slide-in-from-top-2 duration-200">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                              <div className="space-y-4">
-                                <div>
-                                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Đơn vị sử dụng</div>
-                                  <div className="font-semibold text-slate-800 text-sm flex items-center gap-2">
-                                    <ShieldCheck className="w-4 h-4 text-blue-500" />
-                                    {api.unit}
-                                  </div>
-                                </div>
-                                <div>
-                                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Thời gian cung cấp</div>
-                                  <div className="font-semibold text-slate-800 text-sm flex items-center gap-2">
-                                    <Clock className="w-4 h-4 text-amber-500" />
-                                    {api.provisionTime}
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="space-y-4">
-                                <div>
-                                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Số lượng trường dữ liệu (Fields)</div>
-                                  <div className="font-semibold text-slate-800 text-sm flex items-center gap-2">
-                                    <Database className="w-4 h-4 text-emerald-500" />
-                                    {api.fieldCount} trường
-                                  </div>
-                                </div>
-                                <div>
-                                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Lưu lượng truy cập (Requests)</div>
-                                  <div className="font-semibold text-slate-800 text-sm flex items-center gap-2">
-                                    <Activity className="w-4 h-4 text-purple-500" />
-                                    {api.requestCount} / tháng
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="rounded-xl border border-slate-800 overflow-hidden bg-slate-950 shadow-inner">
-                              <div className="bg-slate-900 px-4 py-2 border-b border-slate-800 flex items-center gap-2">
-                                <Code className="w-4 h-4 text-emerald-400" />
-                                <span className="text-xs font-mono font-bold text-emerald-400">JSON Payload (Sample)</span>
-                              </div>
-                              <pre className="p-4 text-xs font-mono text-slate-300 overflow-x-auto">
-                                <code>{api.sampleJson}</code>
-                              </pre>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </>
-                )}
-
               </div>
             </div>
           </>

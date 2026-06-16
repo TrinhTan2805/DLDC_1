@@ -33,7 +33,7 @@ const formatDateTime = (dateStr: string) => {
 
 const mockLogs = [
   { id: 'LOG-001', timestamp: '2026-05-25 14:23:45', ip: '192.168.12.100', status: 200, method: 'GET', endpoint: '/api/v1/hotich/list', latency: '124ms', client: 'Sở Y tế tỉnh Bắc Ninh' },
-  { id: 'LOG-002', timestamp: '2026-05-25 14:21:10', ip: '10.20.30.45', status: 403, method: 'GET', endpoint: '/api/v1/hotich/list', latency: '45ms', client: 'UBND Huyện Tiên Du' },
+  { id: 'LOG-002', timestamp: '2026-05-25 14:21:10', ip: '10.20.30.45', status: 403, method: 'GET', endpoint: '/api/v1/hotich/list', latency: '45ms', client: 'Sở Thông tin và Truyền thông tỉnh Bắc Ninh' },
   { id: 'LOG-003', timestamp: '2026-05-25 13:15:22', ip: '172.16.8.99', status: 200, method: 'POST', endpoint: '/api/v1/thads/sync', latency: '310ms', client: 'Hệ thống THADS Quốc gia' },
   { id: 'LOG-004', timestamp: '2026-05-25 11:45:01', ip: '192.168.20.14', status: 500, method: 'GET', endpoint: '/api/v1/bpbd/get', latency: '5020ms', client: 'Cục Giao dịch bảo đảm' },
   { id: 'LOG-005', timestamp: '2026-05-24 09:30:15', ip: '192.168.12.100', status: 200, method: 'GET', endpoint: '/api/v1/hotich/list', latency: '110ms', client: 'Sở Y tế tỉnh Bắc Ninh' },

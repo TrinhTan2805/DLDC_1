@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { X, User, Building2, Phone, Mail, Link, FileText, Eye, Download } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, User, Building2, Phone, Mail, Link, FileText, Eye, Download, Upload } from 'lucide-react';
 
 interface ProvisionApiModalProps {
   isOpen: boolean;
@@ -10,7 +10,8 @@ interface ProvisionApiModalProps {
 
 export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: ProvisionApiModalProps) {
   const [selectedServiceCode, setSelectedServiceCode] = useState('');
-  const [agencyUnit, setAgencyUnit] = useState('');
+  const [agencyUnits, setAgencyUnits] = useState<string[]>([]);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [targetSystem, setTargetSystem] = useState('');
   
   // Contacts
@@ -22,6 +23,8 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
   // API Connection
   const [apiUrl, setApiUrl] = useState('');
   const [docUrl, setDocUrl] = useState('');
+  const [docFile, setDocFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Times & Status
   const [startDate, setStartDate] = useState('01/05/2026');
@@ -82,12 +85,12 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
     },
     'SVC-PHAPLUAT-004': {
       name: 'API tra cứu Cơ sở dữ liệu Pháp luật',
-      agency: 'UBND Huyện Tiên Du',
-      targetSystem: 'Cổng thông tin pháp luật Huyện Tiên Du',
+      agency: 'Sở Thông tin và Truyền thông tỉnh Bắc Ninh',
+      targetSystem: 'Hệ thống Quản lý Văn bản và Điều hành',
       contactName: 'Lê Văn D',
-      dept: 'Phòng Tư pháp Huyện',
+      dept: 'Phòng Công nghệ thông tin',
       phone: '0988888888',
-      email: 'dunglv@tiendu.gov.vn',
+      email: 'dunglv@bacninh.gov.vn',
       endpoint: 'https://api.dldc.gov.vn/api/v1/phapluat/search',
       doc: 'https://docs.dldc.gov.vn/api/phapluat-v1',
       startDate: '01/04/2026',
@@ -95,11 +98,21 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
     }
   };
 
+  const agencyOptions = [
+    'Bộ Kế hoạch và Đầu tư',
+    'Sở Tài chính tỉnh Bắc Ninh',
+    'Sở Tư pháp tỉnh Bắc Ninh',
+    'Sở Thông tin và Truyền thông tỉnh Bắc Ninh'
+  ];
+
   useEffect(() => {
     if (isOpen) {
       if (apiData) {
         setSelectedServiceCode(apiData.code || 'SVC-HOTICH-001');
-        setAgencyUnit(apiData.consumerUnit || '');
+        const units = apiData.consumerUnit
+          ? apiData.consumerUnit.split(',').map((u: string) => u.trim()).filter(Boolean)
+          : [];
+        setAgencyUnits(units);
         setTargetSystem(apiData.targetSystem || 'Hệ thống Thông tin Quốc gia về Đăng ký Doanh nghiệp');
         
         // Parse contact details
@@ -118,7 +131,7 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
       } else {
         // Clear forms
         setSelectedServiceCode('');
-        setAgencyUnit('');
+        setAgencyUnits([]);
         setTargetSystem('');
         setReceiverName('');
         setReceiverDept('');
@@ -126,10 +139,12 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
         setReceiverEmail('');
         setApiUrl('');
         setDocUrl('');
+        setDocFile(null);
         setStartDate('01/05/2026');
         setEndDate('');
         setStatus('Đã cung cấp tài liệu');
       }
+      setIsDropdownOpen(false);
     }
   }, [isOpen, apiData]);
 
@@ -137,7 +152,7 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
     setSelectedServiceCode(code);
     if (serviceDefaults[code]) {
       const s = serviceDefaults[code];
-      setAgencyUnit(s.agency);
+      setAgencyUnits(s.agency ? [s.agency] : []);
       setTargetSystem(s.targetSystem);
       setReceiverName(s.contactName);
       setReceiverDept(s.dept);
@@ -152,6 +167,10 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (agencyUnits.length === 0) {
+      alert('Vui lòng chọn ít nhất một cơ quan/đơn vị nhận!');
+      return;
+    }
     if (onSave) {
       const selectedService = serviceDefaults[selectedServiceCode];
       
@@ -169,11 +188,11 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
         method: selectedServiceCode === 'SVC-THADS-002' || selectedServiceCode === 'SVC-KETHON-002' || selectedServiceCode === 'SVC-KHAITU-004' ? 'POST' : 'GET',
         version: apiData?.version || 'v1.0',
         status: status,
-        consumerUnit: agencyUnit,
+        consumerUnit: agencyUnits.join(', '),
         receiverPoint: `${receiverName} - ${receiverPhone}`,
         receiverDept,
         receiverEmail,
-        docUrl,
+        docUrl: docFile ? docFile.name : docUrl,
         time: `${startDate} 08:00:00`,
         endDate
       });
@@ -220,21 +239,78 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
             </select>
           </div>
 
-          {/* Agency Dropdown */}
-          <div>
+          {/* Agency Multi-select (Combobox) */}
+          <div className="relative">
             <label className="block font-medium text-slate-700 mb-1.5">Cơ quan/Đơn vị nhận <span className="text-red-500">*</span></label>
-            <select
-              required
-              className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 font-semibold cursor-pointer"
-              value={agencyUnit}
-              onChange={(e) => setAgencyUnit(e.target.value)}
+            
+            {/* Display Box / Dropdown Trigger */}
+            <div 
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="w-full min-h-[42px] px-3 py-1.5 bg-white border border-slate-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 flex flex-wrap gap-1.5 items-center cursor-pointer select-none"
             >
-              <option value="">-- Chọn cơ quan/đơn vị nhận --</option>
-              <option value="Bộ Kế hoạch và Đầu tư">Bộ Kế hoạch và Đầu tư</option>
-              <option value="Sở Tài chính tỉnh Bắc Ninh">Sở Tài chính tỉnh Bắc Ninh</option>
-              <option value="Sở Tư pháp tỉnh Bắc Ninh">Sở Tư pháp tỉnh Bắc Ninh</option>
-              <option value="UBND Huyện Tiên Du">UBND Huyện Tiên Du</option>
-            </select>
+              {agencyUnits.length === 0 ? (
+                <span className="text-slate-400 pl-1">-- Chọn cơ quan/đơn vị nhận --</span>
+              ) : (
+                agencyUnits.map(unit => (
+                  <span 
+                    key={unit} 
+                    className="inline-flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-1 rounded-md border border-blue-200 transition-colors"
+                  >
+                    {unit}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setAgencyUnits(agencyUnits.filter(u => u !== unit));
+                      }}
+                      className="text-blue-500 hover:text-blue-700 hover:bg-blue-200/50 rounded p-0.5"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))
+              )}
+              <div className="ml-auto text-slate-400">
+                <svg className={`w-4 h-4 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Dropdown Menu Options */}
+            {isDropdownOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setIsDropdownOpen(false)} />
+                <div className="absolute left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl z-20 overflow-hidden divide-y divide-slate-100 max-h-60 overflow-y-auto">
+                  {agencyOptions.map(option => {
+                    const isChecked = agencyUnits.includes(option);
+                    return (
+                      <div 
+                        key={option}
+                        onClick={() => {
+                          if (isChecked) {
+                            setAgencyUnits(agencyUnits.filter(u => u !== option));
+                          } else {
+                            setAgencyUnits([...agencyUnits, option]);
+                          }
+                        }}
+                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 cursor-pointer select-none transition-colors"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          readOnly
+                          className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300 cursor-pointer"
+                        />
+                        <span className={`text-slate-700 text-sm font-semibold ${isChecked ? 'text-blue-700 font-bold' : ''}`}>
+                          {option}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
           </div>
 
           {/* Target System */}
@@ -342,34 +418,56 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
             </div>
           </div>
 
-          {/* Document URL */}
+          {/* Document File / URL */}
           <div>
             <label className="block font-medium text-slate-700 mb-1.5">Tài liệu API chia sẻ</label>
             <div className="flex gap-2">
-              <div className="relative flex-1">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+              <div 
+                className="relative flex-1 cursor-pointer group"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 group-hover:text-blue-500 transition-colors">
                   <FileText className="w-4 h-4" />
                 </div>
+                <div className="w-full pl-9 pr-4 py-2 bg-white border border-slate-300 rounded-lg group-hover:border-blue-400 focus-within:ring-2 focus-within:ring-blue-500/20 text-slate-600 font-medium truncate min-h-[42px] flex items-center">
+                  {docFile ? docFile.name : (docUrl || 'Nhấn để đính kèm file tài liệu hướng dẫn...')}
+                </div>
                 <input
-                  type="text"
-                  className="w-full pl-9 pr-4 py-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-blue-600 font-medium font-mono"
-                  placeholder="https://docs.dldc.gov.vn/api/hotich-v1"
-                  value={docUrl}
-                  onChange={(e) => setDocUrl(e.target.value)}
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files.length > 0) {
+                      setDocFile(e.target.files[0]);
+                      setDocUrl('');
+                    }
+                  }}
                 />
               </div>
               <button
                 type="button"
-                onClick={() => window.open(docUrl || '#', '_blank')}
+                onClick={() => fileInputRef.current?.click()}
                 className="px-3 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg transition-colors cursor-pointer text-slate-600"
-                title="Xem trực tuyến"
+                title="Đính kèm tài liệu"
               >
-                <Eye className="w-4 h-4" />
+                <Upload className="w-4 h-4" />
               </button>
               <button
                 type="button"
-                onClick={() => window.open(docUrl || '#', '_blank')}
-                className="px-3 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg transition-colors cursor-pointer text-slate-600"
+                onClick={() => {
+                  if (docFile) {
+                    const url = URL.createObjectURL(docFile);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = docFile.name;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  } else if (docUrl) {
+                    window.open(docUrl, '_blank');
+                  }
+                }}
+                disabled={!docFile && !docUrl}
+                className="px-3 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg transition-colors cursor-pointer text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Tải về tài liệu"
               >
                 <Download className="w-4 h-4" />
