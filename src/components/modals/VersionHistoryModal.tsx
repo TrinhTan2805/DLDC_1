@@ -7,6 +7,29 @@ interface VersionHistoryModalProps {
 
 const mockVersions = [
   {
+    id: 16,
+    version: 'v2.4.7',
+    date: '16/06/2026',
+    time: '18:56',
+    content: `1. Phân hệ Cung cấp dữ liệu (Màn hình Quản lý API cung cấp & đối soát):
+- Màn hình chính: Thiết kế lại toàn diện giao diện trang Quản lý API Cung cấp & Đối soát, đưa thanh Tab chính ra ngoài card, tích hợp bộ lọc collapsible panel, đồng bộ hóa phong cách hiển thị bảng danh sách và tích hợp thanh phân trang cho tất cả các tab.
+- Badge trạng thái: Thay đổi font chữ hiển thị trạng thái trên cả 4 tab từ in đậm (font-semibold) sang chữ thường (font-normal).
+- Tab Phân quyền truy cập: Thêm thanh cuộn dọc cưỡng bức (max-height: 180px) và thanh tìm kiếm nhanh cho cột Danh sách dịch vụ API bên trái; loại bỏ nút "Cấp quyền truy cập API" trùng lặp trên thanh công cụ; đồng thời loại bỏ hoàn toàn cột "Phạm vi quyền (Scopes)" trong bảng danh sách đơn vị.
+- Hộp thoại Cấp quyền truy cập API: Đồng bộ màu chủ đạo sang xanh dương hệ thống, chuyển chữ nhãn trường (labels) sang dạng thường (font-medium), và bỏ ràng buộc bắt buộc nhập (required/dấu hoa thị đỏ) đối với trường "Hiệu lực đến ngày".
+- Cấu hình Đơn vị thụ hưởng trong modal Cấp quyền: Thiết kế lại trường chọn đơn vị thành danh sách hộp chọn (multi-select checkboxes) cuộn dọc cưỡng bức (160px) có ô tìm kiếm nhanh và nút Chọn tất cả / Bỏ chọn tất cả. Các đơn vị được thiết lập mặc định của dịch vụ API sẽ hiển thị ở trạng thái luôn tích chọn và bị khóa (disabled) kèm nhãn "Mặc định dịch vụ".
+- IP Whitelist trong modal Cấp quyền: Bổ sung trường cấu hình IP Whitelist hỗ trợ nhập nhiều địa chỉ IP phân tách bởi dấu phẩy, tự động gán "Tất cả IP" nếu để trống.
+
+2. Phân hệ Cung cấp dữ liệu (Màn hình Thiết lập dịch vụ cung cấp):
+- Màn hình chính: Redesign giao diện theo chuẩn thiết kế phẳng hiện đại, chuyển thanh tab ra ngoài card, thiết kế lại 4 thẻ thống kê (Stat Cards) và panel bộ lọc collapsible.
+- Danh sách dịch vụ: Bổ sung nút Xóa (Trash2 đỏ) cho các dịch vụ đang ở trạng thái Bản nháp, Chờ phê duyệt, Từ chối kèm modal xác nhận xóa dạng overlay.
+- Tinh chỉnh Tab Công khai dịch vụ: Đổi tên trạng thái dịch vụ sang "Đang công khai", thay thế nút chi tiết dạng chữ bằng Eye icon, hiển thị luôn nút Công khai (Share2) và khóa nút khi trạng thái là Đang công khai.
+- Hộp thoại cấu hình/phê duyệt dịch vụ: Tăng z-index và áp dụng style inline để modal che phủ hoàn toàn menu sidebar trái, áp dụng quy chuẩn font chữ 13px và màu sắc focus input mới, lược bỏ tab Lịch sử (History), và di chuyển nút Trình duyệt sang tab Phân quyền.
+
+3. Tối ưu hóa mock dữ liệu và Hệ thống hộp thoại (Modal Portals):
+- Đồng bộ Stacking Context: Áp dụng ReactDOM.createPortal cho toàn bộ 27 modal thuộc phân hệ cung cấp dữ liệu lên thẻ body để đảm bảo hiển thị che phủ hoàn toàn thanh menu sidebar bên trái.
+- Mock dữ liệu nâng cao: Cập nhật bản ghi API Hộ tịch mặc định có nhiều đơn vị nhận, bổ sung logic tự động đồng bộ localStorage, và nâng cấp modal để hiển thị các đơn vị nhận dưới dạng danh sách badge xám chỉ đọc, không cho phép auto-fill đè dữ liệu cũ khi đổi dịch vụ.`
+  },
+  {
     id: 15,
     version: 'v2.4.6',
     date: '15/06/2026',

@@ -1,5 +1,22 @@
 # Lịch sử phiên bản (Changelog)
 
+## v2.4.7 (2026-06-16)
+- **Phân hệ Cung cấp dữ liệu (Màn hình Quản lý API cung cấp & đối soát)**:
+  - Thiết kế lại giao diện trang Quản lý API Cung cấp & Đối soát, chuyển Tab chính ra ngoài card, collapsible panel bộ lọc, đồng bộ bảng danh sách, và tích hợp thanh phân trang.
+  - Thay đổi font hiển thị trạng thái badge thành chữ thường (font-normal).
+  - Bổ sung thanh cuộn dọc (180px) và thanh tìm kiếm nhanh cho danh sách dịch vụ API; loại bỏ cột "Phạm vi quyền (Scopes)" và nút Cấp quyền trùng lặp.
+  - Cập nhật modal Cấp quyền truy cập: màu xanh dương chủ đạo, nhãn dạng font-medium, và bỏ bắt buộc nhập trường "Hiệu lực đến ngày".
+  - Trường Đơn vị thụ hưởng trong modal Cấp quyền đổi sang checkboxes dạng danh sách cuộn có tìm kiếm nhanh, nút chọn tất cả, và tự động khóa các đơn vị mặc định dịch vụ.
+  - Thêm trường IP Whitelist hỗ trợ nhập nhiều IP phân tách bằng dấu phẩy.
+- **Phân hệ Cung cấp dữ liệu (Màn hình Thiết lập dịch vụ cung cấp)**:
+  - Redesign trang phẳng hiện đại, chuyển tab ra ngoài card, thiết kế lại stat cards và bộ lọc.
+  - Bổ sung nút Xóa cho dịch vụ Bản nháp, Chờ phê duyệt, Từ chối kèm modal xác nhận.
+  - Tinh chỉnh tab Công khai dịch vụ: Đổi tên trạng thái sang "Đang công khai", thay thế nút chi tiết bằng Eye icon, hiển thị luôn nút Công khai (Share2) và khóa khi đã công khai.
+  - Nâng cấp modal cấu hình/phê duyệt dịch vụ: tăng z-index che phủ sidebar, font-size 13px, bỏ tab Lịch sử và chuyển nút Trình duyệt sang tab Phân quyền.
+- **Tối ưu hóa mock dữ liệu và Hệ thống hộp thoại**:
+  - Áp dụng `ReactDOM.createPortal` cho toàn bộ 27 modal lên body để giải quyết lỗi che phủ sidebar.
+  - Mock dữ liệu API Hộ tịch có nhiều đơn vị nhận và hiển thị dạng danh sách badge xám chỉ đọc trong modal.
+
 ## v0.1.6 (2026-06-02)
 - **Tính năng & Giao diện (UI/UX)**:
   - **Màn hình Cung cấp dữ liệu theo yêu cầu**: Chuẩn hóa hệ thống icon Thao tác theo quy định:
