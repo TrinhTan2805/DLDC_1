@@ -1,4 +1,5 @@
-import React from 'react';
+﻿import React from 'react';
+import { createPortal } from 'react-dom';
 import { X, Save, ShieldCheck } from 'lucide-react';
 import { ProvisionService } from '../../../../data/provisionServicesData';
 
@@ -11,8 +12,8 @@ interface AccessControlModalProps {
 export function AccessControlModal({ isOpen, onClose, service }: AccessControlModalProps) {
   if (!isOpen || !service) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
@@ -99,5 +100,5 @@ export function AccessControlModal({ isOpen, onClose, service }: AccessControlMo
         </div>
       </div>
     </div>
-  );
+  , document.body);
 }

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Code, Database, HelpCircle, Save, Check, Star, Settings, Wand2, Terminal } from 'lucide-react';
 
 interface CalculatedFieldModalProps {
@@ -298,8 +299,8 @@ export function CalculatedFieldModal({
     },
   ];
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm transition-all duration-300">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm transition-all duration-300">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl h-full max-h-[85vh] flex flex-col border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-200">
         
         {/* Header Section */}
@@ -662,5 +663,5 @@ export function CalculatedFieldModal({
 
       </div>
     </div>
-  );
+  , document.body);
 }

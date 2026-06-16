@@ -1,4 +1,5 @@
-import React from 'react';
+﻿import React from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 interface RecordDetailModalProps {
@@ -28,8 +29,8 @@ export function RecordDetailModal({ isOpen, onClose, recordData, columns }: Reco
   const leftColumn = entries.slice(0, half);
   const rightColumn = entries.slice(half);
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl border border-slate-200 flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
         
         {/* Header */}
@@ -80,5 +81,5 @@ export function RecordDetailModal({ isOpen, onClose, recordData, columns }: Reco
 
       </div>
     </div>
-  );
+  , document.body);
 }

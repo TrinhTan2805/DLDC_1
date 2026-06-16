@@ -1,4 +1,5 @@
-import React from 'react';
+﻿import React from 'react';
+import { createPortal } from 'react-dom';
 import { X, CheckCircle2, Download, FileText } from 'lucide-react';
 import { ReconciliationHistoryEntry } from '../../../../../data/provisionReconciliationData';
 
@@ -21,8 +22,8 @@ export function ProvisionReconciliationDetailsModal({ isOpen, onClose, entry }: 
     reason: i % 2 === 0 ? 'Thiếu ký tự' : 'Sai định dạng ngày',
   })) : [];
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         
         {/* Header */}
@@ -132,5 +133,5 @@ export function ProvisionReconciliationDetailsModal({ isOpen, onClose, entry }: 
 
       </div>
     </div>
-  );
+  , document.body);
 }

@@ -1,4 +1,5 @@
-import React from 'react';
+﻿import React from 'react';
+import { createPortal } from 'react-dom';
 import { X, AlertTriangle, Check } from 'lucide-react';
 
 interface ProvisionServiceUnpublishModalProps {
@@ -19,8 +20,8 @@ export function ProvisionServiceUnpublishModal({ isOpen, onClose, requestData, o
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-md flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
@@ -81,5 +82,5 @@ export function ProvisionServiceUnpublishModal({ isOpen, onClose, requestData, o
         </div>
       </div>
     </div>
-  );
+  , document.body);
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Search, Server, Eye, Edit, Trash2, CheckCircle, XCircle, Settings as SettingsIcon, Database, Globe, X, Save, EyeOff, Eye as EyeIcon, FileCheck, FileText, Shield, GitBranch, Clock, AlertCircle, User, Lock, Share, Wifi, FolderOpen, Mail, MessageSquare, BarChart3, TrendingUp } from "lucide-react";
+import { Plus, Search, Server, Eye, Edit, Trash2, CheckCircle, XCircle, Settings as SettingsIcon, Database, Globe, X, Save, EyeOff, Eye as EyeIcon, FileCheck, FileText, Shield, GitBranch, Clock, AlertCircle, User, Lock, Share, Wifi, FolderOpen, Mail, MessageSquare, BarChart3, TrendingUp, Download, Filter } from "lucide-react";
 import { StatusTag } from '../../common/StatusTag';
 import { MonitoringPage } from './MonitoringPage';
 import { AddProvisionServiceModal } from './AddProvisionServiceModal';
@@ -46,6 +46,9 @@ interface ApprovalRequest {
   reviewer?: string;
   reviewDate?: string;
   note?: string;
+  category?: string;
+  frequency?: string;
+  protocol?: string;
 }
 
 interface LogEntry {
@@ -195,7 +198,10 @@ const mockApprovals: ApprovalRequest[] = [
     submitter: 'Nguyễn Văn A',
     submitDate: '15/04/2025 10:30',
     status: 'pending',
-    note: 'Yêu cầu công bố dịch vụ B (đã hoàn thiện cấu hình kết nối)'
+    note: 'Yêu cầu công bố dịch vụ B (đã hoàn thiện cấu hình kết nối)',
+    category: 'Dữ liệu doanh nghiệp',
+    frequency: 'Thời gian thực',
+    protocol: 'REST',
   },
   {
     id: 'APR002',
@@ -205,7 +211,10 @@ const mockApprovals: ApprovalRequest[] = [
     submitter: 'Phạm Minh D',
     submitDate: '14/04/2025 09:15',
     status: 'pending',
-    note: 'Gửi phê duyệt dịch vụ chia sẻ DKKD cho Bộ KH&ĐT'
+    note: 'Gửi phê duyệt dịch vụ chia sẻ DKKD cho Bộ KH&ĐT',
+    category: 'Dữ liệu doanh nghiệp',
+    frequency: 'Hàng ngày',
+    protocol: 'REST',
   },
   {
     id: 'APR003',
@@ -217,7 +226,10 @@ const mockApprovals: ApprovalRequest[] = [
     status: 'approved',
     reviewer: 'Lê Văn C',
     reviewDate: '12/04/2025 09:15',
-    note: 'Cập nhật tần suất đồng bộ'
+    note: 'Cập nhật tần suất đồng bộ',
+    category: 'Thông tin công dân',
+    frequency: 'Hàng tuần',
+    protocol: 'SOAP',
   }
 ];
 
@@ -444,9 +456,17 @@ export function ServiceSetupPage() {
   
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
-  const [approvalSubTab, setApprovalSubTab] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
+  const [showApprovalFilters, setShowApprovalFilters] = useState(false);
+  const [approvalSearchTerm, setApprovalSearchTerm] = useState('');
+  const [approvalFilterCategory, setApprovalFilterCategory] = useState('all');
+  const [approvalFilterFrequency, setApprovalFilterFrequency] = useState('all');
+  const [approvalFilterProtocol, setApprovalFilterProtocol] = useState('all');
+  const [approvalFilterStatus, setApprovalFilterStatus] = useState('all');
   const [filterType, setFilterType] = useState('all');
   const [filterPublicType, setFilterPublicType] = useState('all');
+  const [showFilters, setShowFilters] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [showAddModal, setShowAddModal] = useState(false);
   const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view' | 'approve'>('add');
   const [showConfigModal, setShowConfigModal] = useState(false);
@@ -601,11 +621,16 @@ export function ServiceSetupPage() {
   });
 
   const filteredApprovals = approvals.filter(a => {
-    const matchesSearch = a.apiName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         a.apiCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         a.submitter.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTab = approvalSubTab === 'all' || a.status === approvalSubTab;
-    return matchesSearch && matchesTab;
+    const term = approvalSearchTerm.toLowerCase();
+    const matchesSearch = !term ||
+      a.apiName.toLowerCase().includes(term) ||
+      a.apiCode.toLowerCase().includes(term) ||
+      a.submitter.toLowerCase().includes(term);
+    const matchesStatus = approvalFilterStatus === 'all' || a.status === approvalFilterStatus;
+    const matchesCategory = approvalFilterCategory === 'all' || a.category === approvalFilterCategory;
+    const matchesFrequency = approvalFilterFrequency === 'all' || a.frequency === approvalFilterFrequency;
+    const matchesProtocol = approvalFilterProtocol === 'all' || a.protocol === approvalFilterProtocol;
+    return matchesSearch && matchesStatus && matchesCategory && matchesFrequency && matchesProtocol;
   });
 
   const filteredPermissions = permissions.filter(perm =>
@@ -620,6 +645,8 @@ export function ServiceSetupPage() {
     ver.apiName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     ver.version.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const paginatedServices = filteredServices.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const handleOpenAddModal = () => {
     setModalMode('add');
@@ -912,11 +939,11 @@ export function ServiceSetupPage() {
   return (
     <div className="space-y-6">
       {/* Tabs */}
-      <div className="border-b border-slate-200">
-        <div className="flex gap-6 overflow-x-auto">
+      <div className="bg-white border-b border-slate-200 px-6">
+        <div className="flex gap-6">
           <button
             onClick={() => setActiveTab('setup')}
-            className={`pb-3 px-1 border-b-2 transition-colors whitespace-nowrap ${
+            className={`flex items-center gap-2 pb-3 pt-4 text-[13px] font-medium transition-colors border-b-2 whitespace-nowrap ${
               activeTab === 'setup'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
@@ -927,7 +954,7 @@ export function ServiceSetupPage() {
 
           <button
             onClick={() => setActiveTab('versions')}
-            className={`pb-3 px-1 border-b-2 transition-colors whitespace-nowrap ${
+            className={`flex items-center gap-2 pb-3 pt-4 text-[13px] font-medium transition-colors border-b-2 whitespace-nowrap ${
               activeTab === 'versions'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
@@ -937,7 +964,7 @@ export function ServiceSetupPage() {
           </button>
           <button
             onClick={() => setActiveTab('monitoring')}
-            className={`pb-3 px-1 border-b-2 transition-colors whitespace-nowrap ${
+            className={`flex items-center gap-2 pb-3 pt-4 text-[13px] font-medium transition-colors border-b-2 whitespace-nowrap ${
               activeTab === 'monitoring'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
@@ -947,7 +974,7 @@ export function ServiceSetupPage() {
           </button>
           <button
             onClick={() => setActiveTab('approvals')}
-            className={`pb-3 px-1 border-b-2 transition-colors whitespace-nowrap flex items-center gap-1.5 ${
+            className={`flex items-center gap-2 pb-3 pt-4 text-[13px] font-medium transition-colors border-b-2 whitespace-nowrap ${
               activeTab === 'approvals'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
@@ -960,7 +987,7 @@ export function ServiceSetupPage() {
           </button>
           <button
             onClick={() => setActiveTab('public')}
-            className={`pb-3 px-1 border-b-2 transition-colors whitespace-nowrap flex items-center gap-1.5 ${
+            className={`flex items-center gap-2 pb-3 pt-4 text-[13px] font-medium transition-colors border-b-2 whitespace-nowrap ${
               activeTab === 'public'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
@@ -980,79 +1007,100 @@ export function ServiceSetupPage() {
       {activeTab === 'setup' && (
         <div className="space-y-4">
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-3">
-        <div className="bg-white border border-slate-200 rounded-lg p-2.5">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Database className="w-4 h-4 text-blue-600" />
+      <div className="grid grid-cols-4 gap-4">
+        <div className="bg-white rounded-lg border border-slate-200 p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-50 rounded-lg">
+              <Database className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <div className="text-xs text-slate-600">Tổng số dịch vụ</div>
-              <div className="text-sm text-slate-900 mt-0.5">{stats.total}</div>
+              <div className="text-base text-slate-500">Tổng số dịch vụ đã thiết lập</div>
+              <div className="text-base font-semibold text-slate-950">{stats.total}</div>
             </div>
           </div>
         </div>
-        <div className="bg-white border border-slate-200 rounded-lg p-2.5">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-              <CheckCircle className="w-4 h-4 text-green-600" />
+        <div className="bg-white rounded-lg border border-slate-200 p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-green-50 rounded-lg">
+              <CheckCircle className="w-5 h-5 text-green-600" />
             </div>
             <div>
-              <div className="text-xs text-slate-600">Đang hoạt động</div>
-              <div className="text-sm text-slate-900 mt-0.5">{stats.active}</div>
+              <div className="text-base text-slate-500">Đang hoạt động</div>
+              <div className="text-base font-semibold text-slate-950">{stats.active}</div>
             </div>
           </div>
         </div>
-        <div className="bg-white border border-slate-200 rounded-lg p-2.5">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Globe className="w-4 h-4 text-blue-600" />
+        <div className="bg-white rounded-lg border border-slate-200 p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-50 rounded-lg">
+              <Globe className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <div className="text-xs text-slate-600">Công khai</div>
-              <div className="text-sm text-slate-900 mt-0.5">{services.filter(s => s.visibility === 'public').length}</div>
+              <div className="text-base text-slate-500">Công khai</div>
+              <div className="text-base font-semibold text-slate-950">{services.filter(s => s.visibility === 'public').length}</div>
             </div>
           </div>
         </div>
-        <div className="bg-white border border-slate-200 rounded-lg p-2.5">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
-              <XCircle className="w-4 h-4 text-slate-600" />
+        <div className="bg-white rounded-lg border border-slate-200 p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-slate-100 rounded-lg">
+              <XCircle className="w-5 h-5 text-slate-600" />
             </div>
             <div>
-              <div className="text-xs text-slate-600">Chưa hoạt động</div>
-              <div className="text-sm text-slate-900 mt-0.5">{stats.inactive}</div>
+              <div className="text-base text-slate-500">Chưa hoạt động</div>
+              <div className="text-base font-semibold text-slate-950">{stats.inactive}</div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white border border-slate-200 rounded-lg p-3">
-        <div className="grid grid-cols-5 gap-3">
-          <div className="relative">
-            <label htmlFor="service-search" className="sr-only">Tìm kiếm dịch vụ</label>
+      {/* Search + Filter + Actions */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex-1 flex items-center gap-3">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
-              id="service-search"
               type="text"
-              aria-label="Tìm kiếm dịch vụ"
-              title="Tìm kiếm theo tên, mã dịch vụ, đơn vị..."
               placeholder="Tìm kiếm theo tên, mã dịch vụ, đơn vị..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+              className="w-full px-4 py-2 pl-10 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
             />
           </div>
-          <div>
-            <label htmlFor="filter-status" className="sr-only">Lọc theo trạng thái</label>
+          <button className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <Search className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={`p-2 rounded-lg border transition-colors ${showFilters ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-[#e2e8f0] text-slate-600 hover:bg-slate-50'}`}
+          >
+            <Filter className="w-4 h-4" />
+          </button>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleOpenAddModal}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 text-[13px] font-medium transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Thêm mới
+          </button>
+          <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 flex items-center gap-2 text-[13px] font-medium transition-colors">
+            <Download className="w-4 h-4" />
+            Kết xuất
+          </button>
+        </div>
+      </div>
+
+      {/* Collapsible Filter Panel */}
+      {showFilters && (
+        <div className="bg-slate-50 p-5 rounded-lg border border-slate-200 grid grid-cols-6 gap-4 animate-in slide-in-from-top-2 duration-200 shadow-sm">
+          <div className="col-span-2">
+            <label className="block text-[13px] text-slate-600 mb-1.5">Trạng thái</label>
             <select
-              id="filter-status"
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              aria-label="Lọc theo trạng thái"
-              title="Lọc theo trạng thái"
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={(e) => { setFilterStatus(e.target.value); setCurrentPage(1); }}
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
             >
               <option value="all">Tất cả trạng thái</option>
               <option value="active">Đang hoạt động</option>
@@ -1061,99 +1109,85 @@ export function ServiceSetupPage() {
               <option value="pending">Đang phê duyệt</option>
             </select>
           </div>
-          <div>
-            <label htmlFor="filter-type" className="sr-only">Lọc theo loại dịch vụ</label>
+          <div className="col-span-2">
+            <label className="block text-[13px] text-slate-600 mb-1.5">Loại dịch vụ</label>
             <select
-              id="filter-type"
               value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              aria-label="Lọc theo loại dịch vụ"
-              title="Lọc theo loại dịch vụ"
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={(e) => { setFilterType(e.target.value); setCurrentPage(1); }}
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
             >
-              <option value="all">Tất cả loại dịch vụ</option>
+              <option value="all">Tất cả loại</option>
               <option value="REST">REST API</option>
               <option value="SOAP">SOAP</option>
               <option value="GraphQL">GraphQL</option>
             </select>
           </div>
-          <div>
-            <label htmlFor="filter-public" className="sr-only">Lọc theo phân loại</label>
+          <div className="col-span-2">
+            <label className="block text-[13px] text-slate-600 mb-1.5">Phân loại</label>
             <select
-              id="filter-public"
               value={filterPublicType}
-              onChange={(e) => setFilterPublicType(e.target.value)}
-              aria-label="Lọc theo phân loại"
-              title="Lọc theo phân loại"
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={(e) => { setFilterPublicType(e.target.value); setCurrentPage(1); }}
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
             >
-              <option value="all">Tất cả phân loại</option>
+              <option value="all">Tất cả</option>
               <option value="public">Công khai</option>
               <option value="private">Không công khai</option>
             </select>
           </div>
         </div>
-      </div>
-
-      {/* Add Service Button */}
-      <div className="flex items-center justify-end">
-        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2" onClick={handleOpenAddModal}>
-          <Plus className="w-4 h-4" />
-          Thêm dịch vụ mới
-        </button>
-      </div>
+      )}
 
       {/* Service List */}
-      <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-slate-50 border-b border-slate-200">
+          <table className="w-full border-collapse text-[13px]">
+            <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-[1]">
               <tr>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">STT</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Mã dịch vụ</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Tên dịch vụ</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Loại</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Phiên bản</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Đơn vị quản lý</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Trạng thái</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Phân loại</th>
-                <th className="px-4 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Thao tác</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">STT</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Mã dịch vụ</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Tên dịch vụ</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Loại</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Phiên bản</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Đơn vị quản lý</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Phân loại</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filteredServices.length === 0 ? (
+              {paginatedServices.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-6 py-8 text-center text-slate-500 text-sm">
+                  <td colSpan={9} className="px-6 py-8 text-center text-slate-500 text-[13px]">
                     Không tìm thấy dịch vụ phù hợp
                   </td>
                 </tr>
               ) : (
-                filteredServices.map((service, index) => (
-                  <tr key={service.id} className="hover:bg-slate-50">
-                    <td className="px-4 py-3 text-sm text-slate-700">{index + 1}</td>
-                    <td className="px-4 py-3 text-sm">
-                      <button 
+                paginatedServices.map((service, index) => (
+                  <tr key={service.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-4 py-3 text-center text-slate-700">{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                    <td className="px-4 py-3 text-center">
+                      <button
                         onClick={() => {
                           setSelectedService(service);
                           setModalMode('view');
                           setShowAddModal(true);
                         }}
-                        className="px-2 py-0.5 bg-slate-100 text-blue-700 hover:bg-blue-600 hover:text-white rounded text-xs transition-all font-mono"
+                        className="px-2 py-0.5 bg-slate-100 text-blue-700 hover:bg-blue-600 hover:text-white rounded-lg text-xs transition-all font-mono"
                       >
                         {service.code}
                       </button>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="text-sm text-slate-900">{service.name}</div>
+                      <div className="text-[13px] text-slate-900">{service.name}</div>
                       <div className="text-xs text-slate-500 mt-0.5">{service.description}</div>
                     </td>
-                    <td className="px-4 py-3 text-sm">{getTypeBadge(service.type)}</td>
-                    <td className="px-4 py-3 text-sm text-slate-700">
+                    <td className="px-4 py-3 text-center">{getTypeBadge(service.type)}</td>
+                    <td className="px-4 py-3 text-center text-slate-700">
                       <code className="text-xs">{service.version}</code>
                     </td>
-                    <td className="px-4 py-3 text-sm text-slate-700">{service.department}</td>
-                    <td className="px-4 py-3 text-sm">{getStatusBadge(service.status)}</td>
-                    <td className="px-4 py-3 text-sm">
+                    <td className="px-4 py-3 text-[13px] text-slate-700">{service.department}</td>
+                    <td className="px-4 py-3 text-center">{getStatusBadge(service.status)}</td>
+                    <td className="px-4 py-3 text-center">
                       <span className={`inline-flex px-2 py-1 text-xs rounded-full ${
                         service.visibility === 'public' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'
                       }`}>
@@ -1161,10 +1195,9 @@ export function ServiceSetupPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-
-                        <button 
-                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded" 
+                      <div className="flex items-center justify-center gap-1">
+                        <button
+                          className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
                           title="Xem chi tiết"
                           aria-label={`Xem chi tiết dịch vụ ${service.name}`}
                           onClick={() => {
@@ -1175,16 +1208,16 @@ export function ServiceSetupPage() {
                         >
                           <Eye className="w-4 h-4" />
                         </button>
-                        <button 
-                          className="p-1.5 text-amber-600 hover:bg-amber-50 rounded" 
+                        <button
+                          className="p-1.5 text-amber-500 hover:bg-amber-50 rounded-lg transition-all"
                           title="Chỉnh sửa"
                           aria-label={`Chỉnh sửa dịch vụ ${service.name}`}
                           onClick={() => handleOpenEditModal(service)}
                         >
                           <Edit className="w-4 h-4" />
                         </button>
-                        <button 
-                          className="p-1.5 text-slate-600 hover:bg-slate-50 rounded" 
+                        <button
+                          className="p-1.5 text-slate-500 hover:bg-slate-100 rounded-lg transition-all"
                           title="Cấu hình"
                           aria-label={`Cấu hình dịch vụ ${service.name}`}
                           onClick={() => {
@@ -1194,8 +1227,8 @@ export function ServiceSetupPage() {
                         >
                           <SettingsIcon className="w-4 h-4" />
                         </button>
-                        <button 
-                          className="p-1.5 text-purple-600 hover:bg-purple-50 rounded" 
+                        <button
+                          className="p-1.5 text-purple-500 hover:bg-purple-50 rounded-lg transition-all"
                           title="Trình duyệt"
                           aria-label={`Trình duyệt dịch vụ ${service.name}`}
                           onClick={() => {
@@ -1205,8 +1238,8 @@ export function ServiceSetupPage() {
                         >
                           <FileCheck className="w-4 h-4" />
                         </button>
-                        <button 
-                          className="p-1.5 text-green-600 hover:bg-green-50 rounded" 
+                        <button
+                          className="p-1.5 text-green-500 hover:bg-green-50 rounded-lg transition-all"
                           title="Duyệt"
                           aria-label={`Phê duyệt dịch vụ ${service.name}`}
                           onClick={() => {
@@ -1217,8 +1250,8 @@ export function ServiceSetupPage() {
                         >
                           <CheckCircle className="w-4 h-4" />
                         </button>
-                        <button 
-                          className="p-1.5 text-red-600 hover:bg-red-50 rounded" 
+                        <button
+                          className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-all"
                           title="Xóa"
                           aria-label={`Xóa dịch vụ ${service.name}`}
                           onClick={() => {
@@ -1235,6 +1268,63 @@ export function ServiceSetupPage() {
               )}
             </tbody>
           </table>
+        </div>
+        {/* Pagination */}
+        <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white text-[13px]">
+          <div className="flex items-center gap-2 text-slate-600">
+            <span>Hiển thị</span>
+            <select
+              value={itemsPerPage}
+              onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
+              className="px-2 py-1 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+            <span>/ {filteredServices.length} bản ghi</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              Trước
+            </button>
+            {Array.from({ length: Math.ceil(filteredServices.length / itemsPerPage) }, (_, i) => i + 1)
+              .filter(p => p === 1 || p === Math.ceil(filteredServices.length / itemsPerPage) || Math.abs(p - currentPage) <= 1)
+              .reduce<(number | string)[]>((acc, p, i, arr) => {
+                if (i > 0 && (p as number) - (arr[i - 1] as number) > 1) acc.push('...');
+                acc.push(p);
+                return acc;
+              }, [])
+              .map((p, i) =>
+                p === '...' ? (
+                  <span key={`ellipsis-${i}`} className="px-2 py-1.5 text-slate-400">…</span>
+                ) : (
+                  <button
+                    key={p}
+                    onClick={() => setCurrentPage(p as number)}
+                    className={`px-3 py-1.5 border rounded-lg transition-colors ${
+                      currentPage === p
+                        ? 'bg-blue-600 text-white border-blue-600'
+                        : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    {p}
+                  </button>
+                )
+              )}
+            <button
+              onClick={() => setCurrentPage(p => Math.min(Math.ceil(filteredServices.length / itemsPerPage), p + 1))}
+              disabled={currentPage === Math.ceil(filteredServices.length / itemsPerPage) || filteredServices.length === 0}
+              className="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              Sau
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -1277,47 +1367,90 @@ export function ServiceSetupPage() {
             </div>
           </div>
 
-          {/* 2. Bộ lọc phụ & Tìm kiếm */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="flex flex-wrap items-center bg-slate-50/50 border-b border-slate-100 px-2 py-1.5 gap-1">
-              {[
-                { id: 'all', label: 'Tất cả', count: approvalStats.total },
-                { id: 'pending', label: 'Chờ phê duyệt', count: approvalStats.pending },
-                { id: 'approved', label: 'Đã phê duyệt', count: approvalStats.approved },
-                { id: 'rejected', label: 'Từ chối', count: approvalStats.rejected },
-              ].map((sub) => (
-                <button
-                  key={sub.id}
-                  onClick={() => setApprovalSubTab(sub.id as any)}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg flex items-center gap-2 transition-all ${
-                    approvalSubTab === sub.id
-                      ? 'bg-white shadow-sm ring-1 ring-slate-200 text-blue-600'
-                      : 'text-slate-500 hover:bg-slate-100'
-                  }`}
-                >
-                  {sub.label}
-                  <span className={`px-1.5 py-0.5 rounded text-[10px] ${
-                    approvalSubTab === sub.id ? 'bg-blue-100 text-blue-600' : 'bg-slate-200 text-slate-500'
-                  }`}>
-                    {sub.count}
-                  </span>
-                </button>
-              ))}
-            </div>
-            <div className="p-4 bg-white">
-              <div className="relative w-full">
+          {/* 2. Tìm kiếm & Bộ lọc */}
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-1 flex items-center gap-3">
+              <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
-                  id="approval-search-input"
                   type="text"
-                  placeholder="Tìm kiếm theo tên, mã danh mục..."
-                  aria-label="Tìm kiếm yêu cầu phê duyệt"
-                  title="Tìm kiếm theo tên, mã danh mục..."
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+                  placeholder="Tìm kiếm theo tên, mã dịch vụ, người gửi..."
+                  value={approvalSearchTerm}
+                  onChange={(e) => setApprovalSearchTerm(e.target.value)}
+                  className="w-full px-4 py-2 pl-10 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                 />
               </div>
+              <button className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                <Search className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setShowApprovalFilters(!showApprovalFilters)}
+                className={`p-2 rounded-lg border transition-colors ${showApprovalFilters ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-[#e2e8f0] text-slate-600 hover:bg-slate-50'}`}
+              >
+                <Filter className="w-4 h-4" />
+              </button>
             </div>
           </div>
+
+          {showApprovalFilters && (
+            <div className="bg-slate-50 p-5 rounded-lg border border-slate-200 grid grid-cols-8 gap-4 animate-in slide-in-from-top-2 duration-200 shadow-sm">
+              <div className="col-span-2">
+                <label className="block text-[13px] text-slate-600 mb-1.5">Trạng thái</label>
+                <select
+                  value={approvalFilterStatus}
+                  onChange={(e) => setApprovalFilterStatus(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                >
+                  <option value="all">Tất cả trạng thái</option>
+                  <option value="pending">Chờ phê duyệt</option>
+                  <option value="approved">Đã phê duyệt</option>
+                  <option value="rejected">Từ chối</option>
+                </select>
+              </div>
+              <div className="col-span-2">
+                <label className="block text-[13px] text-slate-600 mb-1.5">Phân loại dữ liệu</label>
+                <select
+                  value={approvalFilterCategory}
+                  onChange={(e) => setApprovalFilterCategory(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                >
+                  <option value="all">Tất cả phân loại</option>
+                  <option value="Văn bản pháp luật">Văn bản pháp luật</option>
+                  <option value="Dữ liệu doanh nghiệp">Dữ liệu doanh nghiệp</option>
+                  <option value="Thông tin công dân">Thông tin công dân</option>
+                  <option value="Dữ liệu địa lý">Dữ liệu địa lý</option>
+                </select>
+              </div>
+              <div className="col-span-2">
+                <label className="block text-[13px] text-slate-600 mb-1.5">Tần suất</label>
+                <select
+                  value={approvalFilterFrequency}
+                  onChange={(e) => setApprovalFilterFrequency(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                >
+                  <option value="all">Tất cả tần suất</option>
+                  <option value="Thời gian thực">Thời gian thực</option>
+                  <option value="Hàng ngày">Hàng ngày</option>
+                  <option value="Hàng tuần">Hàng tuần</option>
+                  <option value="Hàng tháng">Hàng tháng</option>
+                </select>
+              </div>
+              <div className="col-span-2">
+                <label className="block text-[13px] text-slate-600 mb-1.5">Giao thức</label>
+                <select
+                  value={approvalFilterProtocol}
+                  onChange={(e) => setApprovalFilterProtocol(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                >
+                  <option value="all">Tất cả giao thức</option>
+                  <option value="REST">REST</option>
+                  <option value="SOAP">SOAP</option>
+                  <option value="GraphQL">GraphQL</option>
+                  <option value="SFTP">SFTP</option>
+                </select>
+              </div>
+            </div>
+          )}
 
           {/* 3. Danh sách Card yêu cầu */}
           <div className="space-y-4">

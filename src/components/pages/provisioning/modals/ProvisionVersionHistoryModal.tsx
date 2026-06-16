@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, History, Calendar } from 'lucide-react';
 import { ApiVersionCompareModal } from './ApiVersionCompareModal';
 
@@ -63,8 +64,13 @@ export function ProvisionVersionHistoryModal({ isOpen, onClose, apiData }: Provi
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+  return createPortal(
+    <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200 provision-version-history-modal-root">
+      <style dangerouslySetInnerHTML={{__html: `
+        .provision-version-history-modal-root *:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(svg):not(path):not(circle):not(rect):not(polyline):not(line) {
+          font-size: 13px !important;
+        }
+      `}} />
       <div className="bg-white rounded-xl shadow-xl w-full max-w-7xl flex flex-col border border-slate-200 overflow-hidden max-h-[90vh] animate-in zoom-in-95 duration-200">
         
         {/* Header */}
@@ -152,5 +158,5 @@ export function ProvisionVersionHistoryModal({ isOpen, onClose, apiData }: Provi
         versionB={compareVersions.verB}
       />
     </div>
-  );
+  , document.body);
 }

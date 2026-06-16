@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Save, Eye, EyeOff, ShieldCheck, Database, Check } from 'lucide-react';
 import { Portal } from '../../../common/Portal';
 
@@ -106,7 +107,7 @@ export function SharedFieldsConfigModal({
 
   return (
     <Portal>
-      <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
         <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[85vh] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
           
           {/* Header */}
@@ -232,5 +233,5 @@ export function SharedFieldsConfigModal({
         </div>
       </div>
     </Portal>
-  );
+  , document.body);
 }

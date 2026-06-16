@@ -1,4 +1,5 @@
-import React from 'react';
+﻿import React from 'react';
+import { createPortal } from 'react-dom';
 import { X, Copy, Check } from 'lucide-react';
 
 interface ProvisionServicePublicDetailsModalProps {
@@ -43,8 +44,8 @@ export function ProvisionServicePublicDetailsModal({ isOpen, onClose, service }:
     setTimeout(() => setCopiedBody(false), 2000);
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-[2px] transition-all duration-300">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-[2px] transition-all duration-300">
       {/* Modal card enlarged to max-w-5xl for extra wide screen layout */}
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-200">
         
@@ -197,5 +198,5 @@ export function ProvisionServicePublicDetailsModal({ isOpen, onClose, service }:
 
       </div>
     </div>
-  );
+  , document.body);
 }

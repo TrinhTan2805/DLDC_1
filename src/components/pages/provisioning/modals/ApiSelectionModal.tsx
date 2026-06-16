@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Search, Database, CheckCircle2, XCircle, Activity } from 'lucide-react';
 
 interface ApiItem {
@@ -38,8 +39,8 @@ export function ApiSelectionModal({ isOpen, onClose, onSelect, currentApiId }: A
     return matchSearch && matchDb;
   });
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[85vh]">
         
         {/* Header */}
@@ -157,5 +158,5 @@ export function ApiSelectionModal({ isOpen, onClose, onSelect, currentApiId }: A
         </div>
       </div>
     </div>
-  );
+  , document.body);
 }

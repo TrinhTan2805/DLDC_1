@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Clock, Shield, CheckCircle, Calendar, User, Plug, Activity, Database, Lock, AlertTriangle, Layers, Info, List, Server, FileText } from 'lucide-react';
 
 interface ProvisionApiDetailModalProps {
@@ -36,8 +37,8 @@ export function ProvisionApiDetailModal({ isOpen, onClose, service, onApprove, o
     return dateStr;
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200 max-h-[90vh]">
         {/* Header */}
         <div className="flex items-start justify-between px-6 py-5 border-b border-slate-100 flex-shrink-0 bg-white">
@@ -351,5 +352,5 @@ export function ProvisionApiDetailModal({ isOpen, onClose, service, onApprove, o
         </div>
       </div>
     </div>
-  );
+  , document.body);
 }

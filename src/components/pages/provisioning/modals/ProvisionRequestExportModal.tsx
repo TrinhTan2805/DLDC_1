@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Search, FileDown, CheckCircle, Table as TableIcon, Filter, AlertCircle, RefreshCw, Layers, Database, LayoutTemplate, Key, Trash2, Plus, Copy, Code } from 'lucide-react';
 
 // Mock Database Schema for Civil Registry
@@ -125,8 +126,8 @@ export function ProvisionRequestExportModal({ isOpen, onClose, requestData, onCo
     { id: '3', so_dinh_danh: '001098000789', ho_ten: 'Lê Văn C', ngay_sinh: '08/11/1998', tinh_trang: 'Độc thân' },
   ];
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-all">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-all">
       <div className="bg-white rounded-2xl w-full max-w-5xl flex flex-col max-h-[90vh] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200">
         
         {/* Header */}
@@ -810,5 +811,5 @@ export function ProvisionRequestExportModal({ isOpen, onClose, requestData, onCo
 
       </div>
     </div>
-  );
+  , document.body);
 }

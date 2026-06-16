@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Check, FileText, Plug, LayoutTemplate, ShieldCheck, Plus, Trash2, Code, Key, Copy, Eye, EyeOff, Database, Send, Save, ArrowLeft, Pencil, Clock, ChevronDown } from 'lucide-react';
 
 interface ProvisionServiceModalProps {
@@ -122,7 +123,6 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
     { id: 'protocol' as TabType, label: 'Cấu hình API & Giao thức', icon: <Plug className="w-4 h-4" /> },
     { id: 'packet' as TabType, label: 'Thiết kế cấu trúc gói tin', icon: <LayoutTemplate className="w-4 h-4" /> },
     { id: 'access' as TabType, label: 'Phân quyền truy cập', icon: <ShieldCheck className="w-4 h-4" /> },
-    { id: 'history' as TabType, label: 'Lịch sử', icon: <Clock className="w-4 h-4" /> },
   ];
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -262,8 +262,26 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
     return JSON.stringify(fullResponse, null, 2);
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 bg-black/50 backdrop-blur-sm transition-all duration-300 text-slate-800">
+  return createPortal(
+    <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center p-4 md:p-8 bg-black/50 backdrop-blur-sm transition-all duration-300 text-slate-800 provision-service-modal-root">
+      <style dangerouslySetInnerHTML={{__html: `
+        .provision-service-modal-root *:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(svg):not(path):not(circle):not(rect):not(polyline):not(line) {
+          font-size: 13px !important;
+        }
+        .provision-service-modal-root label {
+          font-weight: 500 !important;
+          text-transform: none !important;
+          letter-spacing: normal !important;
+        }
+        .provision-service-modal-root input:focus, 
+        .provision-service-modal-root select:focus, 
+        .provision-service-modal-root textarea:focus {
+          border-color: #2563eb !important;
+          outline: none !important;
+          box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15) !important;
+          background-color: #fff !important;
+        }
+      `}} />
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-full max-h-[90vh] flex flex-col border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-200">
         <div className="flex flex-1 overflow-hidden relative">
           {/* Close button */}
@@ -280,10 +298,10 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                <div className="p-2.5 bg-blue-50 rounded-xl border border-blue-100 text-blue-600 w-fit mb-3">
                   <Plug className="w-6 h-6" />
                </div>
-               <h2 className="text-sm font-black text-slate-800 uppercase tracking-widest leading-tight">
+               <h2 className="text-[16px] font-bold text-slate-800 uppercase tracking-widest leading-tight">
                   {isViewMode ? 'Xem chi tiết Dịch vụ' : (service ? 'Cấu hình Dịch vụ' : 'Dịch vụ Mới')}
                </h2>
-               <p className="text-[9px] text-slate-500 mt-1.5 uppercase font-bold tracking-widest">API Provisioning Engine</p>
+               <p className="text-[9px] text-slate-500 mt-1.5 uppercase font-bold tracking-widest">Điều phối dữ liệu</p>
             </div>
 
             {tabs.map((tab) => (
@@ -291,7 +309,7 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-5 py-4 text-xs font-bold rounded-xl transition-all duration-300 flex items-center gap-4 group uppercase tracking-wider ${
+                className={`px-5 py-4 text-[13px] font-normal rounded-xl transition-all duration-300 flex items-center gap-4 group uppercase tracking-wider text-left ${
                   activeTab === tab.id 
                     ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600 ring-1 ring-blue-100/50' 
                     : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100/50 border-l-4 border-transparent'
@@ -309,12 +327,6 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
 
           {/* Main Content Area */}
           <div className={`flex-1 overflow-y-auto bg-white p-8 custom-scrollbar ${isViewMode ? 'pointer-events-none' : ''}`}>
-            {isViewMode && (
-              <div className="mb-4 px-4 py-2.5 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2">
-                <Eye className="w-4 h-4 text-amber-600 shrink-0" />
-                <span className="text-xs font-bold text-amber-700 uppercase tracking-wider">Chế độ xem — Không thể chỉnh sửa</span>
-              </div>
-            )}
             {/* TAB 1: Thông tin chung */}
             {activeTab === 'general' && (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -898,55 +910,6 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                 </section>
               </div>
             )}
-
-            {/* TAB 5: Lịch sử */}
-            {activeTab === 'history' && (
-              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <section>
-                  <h3 className="text-base font-semibold text-slate-800 mb-6 flex items-center gap-2">
-                    <div className="w-1 h-5 bg-blue-600 rounded-full"></div>
-                    Lịch sử cập nhật cấu hình dịch vụ
-                  </h3>
-                  
-                  <div className="space-y-0 py-2">
-                    {/* Event 1 */}
-                    <div className="flex gap-4">
-                      {/* Timeline column: dot + line */}
-                      <div className="flex flex-col items-center">
-                        <div className="h-3 w-3 rounded-full bg-blue-500 border-2 border-blue-200 shadow-sm shrink-0"></div>
-                        <div className="w-0.5 bg-slate-200 flex-1 min-h-[2rem]"></div>
-                      </div>
-                      {/* Content column */}
-                      <div className="flex flex-col gap-1 pb-6 -mt-0.5">
-                        <span className="text-xs font-bold text-slate-800">
-                          28/05/2026 10:15 - Nguyễn Văn An
-                        </span>
-                        <p className="text-xs text-slate-500 font-medium">
-                          Cập nhật: Bổ sung cấu hình che giấu thông tin trường số_dinh_danh.
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Event 2 */}
-                    <div className="flex gap-4">
-                      {/* Timeline column: dot + line */}
-                      <div className="flex flex-col items-center">
-                        <div className="h-3 w-3 rounded-full bg-slate-300 border-2 border-slate-100 shadow-sm shrink-0"></div>
-                      </div>
-                      {/* Content column */}
-                      <div className="flex flex-col gap-1 -mt-0.5">
-                        <span className="text-xs font-bold text-slate-800">
-                          28/05/2026 08:30 - Nguyễn Văn An
-                        </span>
-                        <p className="text-xs text-slate-500 font-medium">
-                          Tạo mới: Thiết lập các thông số cơ bản cho API và chọn bảng dữ liệu gốc.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </section>
-              </div>
-            )}
           </div>
         </div>
 
@@ -954,19 +917,18 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
         <div className="flex items-center justify-between px-8 py-5 border-t border-slate-200 bg-slate-50/80 backdrop-blur-lg">
            <div className="flex items-center gap-4">
               <div className="flex gap-1">
-                {[1,2,3,4,5].map(step => (
+                {[1,2,3,4].map(step => (
                   <div key={step} className={`h-1 rounded-full transition-all duration-300 ${
                     (activeTab === 'general' && step === 1) || 
                     (activeTab === 'protocol' && step === 2) || 
                     (activeTab === 'packet' && step === 3) || 
-                    (activeTab === 'access' && step === 4) ||
-                    (activeTab === 'history' && step === 5)
+                    (activeTab === 'access' && step === 4)
                       ? 'w-6 bg-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.4)]' : 'w-2 bg-slate-200'
                   }`}></div>
                 ))}
               </div>
               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                {activeTab === 'general' ? 'Step 1 of 5' : activeTab === 'protocol' ? 'Step 2 of 5' : activeTab === 'packet' ? 'Step 3 of 5' : activeTab === 'access' ? 'Step 4 of 5' : 'Step 5 of 5'}
+                {activeTab === 'general' ? 'Step 1 of 4' : activeTab === 'protocol' ? 'Step 2 of 4' : activeTab === 'packet' ? 'Step 3 of 4' : 'Step 4 of 4'}
               </div>
            </div>
            
@@ -1006,7 +968,7 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                  Quay lại
                </button>
              )}
-             {activeTab !== 'history' ? (
+             {activeTab !== 'access' ? (
                <button 
                  title="Tiếp tục" aria-label="Tiếp tục"
                  onClick={() => {
@@ -1032,5 +994,5 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
         </div>
       </div>
     </div>
-  );
+  , document.body);
 }

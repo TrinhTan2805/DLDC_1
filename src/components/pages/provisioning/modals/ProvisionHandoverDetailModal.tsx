@@ -1,4 +1,5 @@
-import React from 'react';
+﻿import React from 'react';
+import { createPortal } from 'react-dom';
 import { X, FileText, Download, CheckCircle, Clock, User, Building } from 'lucide-react';
 
 interface ProvisionHandoverDetailModalProps {
@@ -20,8 +21,8 @@ export function ProvisionHandoverDetailModal({ isOpen, onClose, requestData }: P
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-lg flex flex-col animate-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
           <h2 className="text-xl font-bold text-slate-800">Chi tiết Bàn giao dữ liệu</h2>
@@ -113,5 +114,5 @@ export function ProvisionHandoverDetailModal({ isOpen, onClose, requestData }: P
         </div>
       </div>
     </div>
-  );
+  , document.body);
 }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X, User, Building2, Phone, Mail, Link, FileText, Eye, Download, Upload } from 'lucide-react';
 
 interface ProvisionApiModalProps {
@@ -202,8 +203,13 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-all duration-300 text-slate-800">
+  return createPortal(
+    <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/50 transition-all duration-300 text-slate-800 provision-api-modal-root">
+      <style dangerouslySetInnerHTML={{__html: `
+        .provision-api-modal-root *:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(svg):not(path):not(circle):not(rect):not(polyline):not(line) {
+          font-size: 13px !important;
+        }
+      `}} />
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col border border-slate-200 overflow-hidden max-h-[90vh] animate-in zoom-in-95 duration-200">
         
         {/* Header */}
@@ -543,5 +549,5 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
 
       </div>
     </div>
-  );
+  , document.body);
 }

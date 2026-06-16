@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Send, UserCheck, AlertCircle } from 'lucide-react';
 
 interface SubmitApprovalModalProps {
@@ -19,8 +20,8 @@ export function SubmitApprovalModal({ isOpen, onClose, onSubmit, service }: Subm
     onSubmit(approver, message);
   };
 
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-all duration-300">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-all duration-300">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between p-6 border-b border-slate-100">
           <div className="flex items-center gap-3">
@@ -99,5 +100,5 @@ export function SubmitApprovalModal({ isOpen, onClose, onSubmit, service }: Subm
         </form>
       </div>
     </div>
-  );
+  , document.body);
 }

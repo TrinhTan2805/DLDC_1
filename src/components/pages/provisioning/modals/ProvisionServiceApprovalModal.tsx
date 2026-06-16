@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, CheckCircle, XCircle } from 'lucide-react';
 
 interface ProvisionServiceApprovalModalProps {
@@ -36,8 +37,13 @@ export function ProvisionServiceApprovalModal({
 
   const isReadOnly = service?.status === 'approved' || service?.status === 'rejected' || service?.status === 'published';
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+  return createPortal(
+    <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/50 provision-service-approval-modal-root">
+      <style dangerouslySetInnerHTML={{__html: `
+        .provision-service-approval-modal-root *:not(h2):not(svg):not(path):not(circle):not(rect):not(polyline):not(line) {
+          font-size: 13px !important;
+        }
+      `}} />
       <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl flex flex-col overflow-visible animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 flex-shrink-0">
@@ -275,5 +281,5 @@ export function ProvisionServiceApprovalModal({
         </div>
       </div>
     </div>
-  );
+  , document.body);
 }
