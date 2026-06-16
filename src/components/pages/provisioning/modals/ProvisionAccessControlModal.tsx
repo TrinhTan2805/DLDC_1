@@ -7,12 +7,20 @@ interface ProvisionAccessControlModalProps {
   onClose: () => void;
   apiName: string;
   onSave?: (data: any) => void;
+  availableOrganizations?: string[];
+  preConfiguredOrganizations?: string[];
 }
 
-export function ProvisionAccessControlModal({ isOpen, onClose, apiName, onSave }: ProvisionAccessControlModalProps) {
-  const [selectedOrg, setSelectedOrg] = useState('Công an tỉnh Bắc Ninh');
-  const [authToken, setAuthToken] = useState('');
-  const [isCopied, setIsCopied] = useState(false);
+export function ProvisionAccessControlModal({ 
+  isOpen, 
+  onClose, 
+  apiName, 
+  onSave, 
+  availableOrganizations = [],
+  preConfiguredOrganizations = [] 
+}: ProvisionAccessControlModalProps) {
+  const [selectedOrgs, setSelectedOrgs] = useState<string[]>([]);
+  const [orgSearchQuery, setOrgSearchQuery] = useState('');
 
   const generateToken = (org: string) => {
     const prefix = org.includes('Công an') ? 'BCA' : org.includes('Y tế') ? 'SYT' : 'ORG';
@@ -22,16 +30,10 @@ export function ProvisionAccessControlModal({ isOpen, onClose, apiName, onSave }
 
   useEffect(() => {
     if (isOpen) {
-      setAuthToken(generateToken(selectedOrg));
-      setIsCopied(false);
+      setSelectedOrgs([...preConfiguredOrganizations]);
+      setOrgSearchQuery('');
     }
-  }, [isOpen, selectedOrg]);
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(authToken);
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 2000);
-  };
+  }, [isOpen, preConfiguredOrganizations]);
 
   if (!isOpen) return null;
 
@@ -39,18 +41,26 @@ export function ProvisionAccessControlModal({ isOpen, onClose, apiName, onSave }
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     
+    const newlySelected = selectedOrgs.filter(org => !preConfiguredOrganizations.includes(org));
+    if (newlySelected.length === 0) {
+      alert('Vui lòng chọn thêm ít nhất một Đơn vị/Tổ chức thụ hưởng mới.');
+      return;
+    }
+
     const scopes: string[] = ['Đọc (GET)']; // Default scope since UI is removed
 
     if (onSave) {
-      onSave({
-        id: Math.random().toString(36).substr(2, 9),
-        organization: selectedOrg,
-        authorization: authToken,
-        scopes: scopes.join(', '),
-        ipWhitelist: 'Tất cả IP',
-        validFrom: form.validFrom.value,
-        validTo: form.validTo.value,
-        status: 'Hợp lệ'
+      newlySelected.forEach(org => {
+        onSave({
+          id: Math.random().toString(36).substr(2, 9),
+          organization: org,
+          authorization: generateToken(org),
+          scopes: scopes.join(', '),
+          ipWhitelist: form.ipWhitelist.value.trim() || 'Tất cả IP',
+          validFrom: form.validFrom.value,
+          validTo: form.validTo.value,
+          status: 'Hợp lệ'
+        });
       });
     }
     onClose();
@@ -68,7 +78,7 @@ export function ProvisionAccessControlModal({ isOpen, onClose, apiName, onSave }
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50/50">
           <div className="flex items-center gap-2">
-            <Shield className="w-5 h-5 text-amber-600" />
+            <Shield className="w-5 h-5 text-blue-600" />
             <h2 className="text-xl font-bold text-slate-800">
               Cấp quyền truy cập API
             </h2>
@@ -88,83 +98,137 @@ export function ProvisionAccessControlModal({ isOpen, onClose, apiName, onSave }
           <div className="flex-1 overflow-y-auto p-6 space-y-5">
             
             {/* Target API info alert */}
-            <div className="p-4 bg-amber-50 rounded-lg border border-amber-200/50 flex items-start gap-3">
-              <Shield className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200/50 flex items-start gap-3">
+              <Shield className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
               <div>
-                <span className="text-xs font-bold text-amber-800 uppercase tracking-wider block">API được chọn cấp quyền</span>
+                <span className="text-xs font-bold text-blue-800 uppercase tracking-wider block">API được chọn cấp quyền</span>
                 <span className="text-sm font-extrabold text-slate-800 mt-1 block">{apiName}</span>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               
-              {/* Partner Organization */}
-              <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-slate-700 mb-1">
-                  Đơn vị / Tổ chức thụ hưởng <span className="text-red-500">*</span>
-                </label>
-                <select
-                  name="organization"
-                  value={selectedOrg}
-                  onChange={(e) => setSelectedOrg(e.target.value)}
-                  required
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm font-medium"
-                >
-                  <option value="Công an tỉnh Bắc Ninh">Công an tỉnh Bắc Ninh</option>
-                  <option value="Sở Y tế tỉnh Bắc Ninh">Sở Y tế tỉnh Bắc Ninh</option>
-                  <option value="Sở Lao động - Thương binh và Xã hội">Sở Lao động - Thương binh và Xã hội</option>
-                  <option value="Sở Tài chính tỉnh Bắc Ninh">Sở Tài chính tỉnh Bắc Ninh</option>
-                  <option value="Sở Giáo dục và Đào tạo">Sở Giáo dục và Đào tạo</option>
-                  <option value="Sở Thông tin và Truyền thông tỉnh Bắc Ninh">Sở Thông tin và Truyền thông tỉnh Bắc Ninh</option>
-                  <option value="UBND Thành phố Bắc Ninh">UBND Thành phố Bắc Ninh</option>
-                </select>
+              {/* Partner Organization - Multi-select with Search & Toggle All */}
+              <div className="md:col-span-2 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-medium text-slate-700">
+                    Đơn vị / Tổ chức thụ hưởng <span className="text-red-500">*</span>
+                  </label>
+                  {(availableOrganizations.length > 0 || preConfiguredOrganizations.length > 0) && (
+                    <div className="flex gap-3 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedOrgs(Array.from(new Set([...preConfiguredOrganizations, ...availableOrganizations])))}
+                        className="text-blue-600 hover:text-blue-800 font-semibold cursor-pointer"
+                      >
+                        Chọn tất cả
+                      </button>
+                      <span className="text-slate-300">|</span>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedOrgs([...preConfiguredOrganizations])}
+                        className="text-slate-500 hover:text-slate-700 font-semibold cursor-pointer"
+                      >
+                        Bỏ chọn tất cả
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {availableOrganizations.length === 0 && preConfiguredOrganizations.length === 0 ? (
+                  <p className="text-slate-500 text-xs italic">Không có đơn vị nào khả dụng. Vui lòng kiểm tra tab Danh sách tài khoản.</p>
+                ) : (
+                  <div className="border border-slate-200 rounded-lg bg-slate-50/30 overflow-hidden flex flex-col">
+                    {/* Search bar inside the list */}
+                    <div className="p-2 border-b border-slate-200 bg-slate-50/50">
+                      <input
+                        type="text"
+                        placeholder="Tìm kiếm nhanh đơn vị..."
+                        value={orgSearchQuery}
+                        onChange={(e) => setOrgSearchQuery(e.target.value)}
+                        className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium"
+                      />
+                    </div>
+                    {/* Items list */}
+                    <div className="p-2 space-y-1 bg-white" style={{ maxHeight: '160px', overflowY: 'scroll' }}>
+                      {Array.from(new Set([...preConfiguredOrganizations, ...availableOrganizations])).filter(org => org.toLowerCase().includes(orgSearchQuery.toLowerCase())).length === 0 ? (
+                        <p className="text-slate-400 text-center py-4 text-xs italic">Không tìm thấy đơn vị phù hợp</p>
+                      ) : (
+                        Array.from(new Set([...preConfiguredOrganizations, ...availableOrganizations]))
+                          .filter(org => org.toLowerCase().includes(orgSearchQuery.toLowerCase()))
+                          .map(org => {
+                            const isPreConfigured = preConfiguredOrganizations.includes(org);
+                            const isChecked = selectedOrgs.includes(org) || isPreConfigured;
+                            return (
+                              <label
+                                key={org}
+                                className={`flex items-center gap-3 px-3 py-2 rounded-lg border transition-all ${
+                                  isPreConfigured
+                                    ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed font-normal'
+                                    : isChecked
+                                    ? 'bg-blue-50/50 border-blue-200 text-blue-700 font-medium cursor-pointer'
+                                    : 'bg-white border-slate-100 text-slate-700 hover:bg-slate-50 cursor-pointer'
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  disabled={isPreConfigured}
+                                  onChange={() => {
+                                    if (isPreConfigured) return;
+                                    if (isChecked) {
+                                      setSelectedOrgs(selectedOrgs.filter(item => item !== org));
+                                    } else {
+                                      setSelectedOrgs([...selectedOrgs, org]);
+                                    }
+                                  }}
+                                  className={`w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500 ${isPreConfigured ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
+                                />
+                                <div className="flex-1 flex items-center justify-between">
+                                  <span className="text-[13px]">{org}</span>
+                                  {isPreConfigured && (
+                                    <span className="text-[11px] font-medium text-slate-400 bg-slate-200/50 px-2 py-0.5 rounded-full border border-slate-200/50 whitespace-nowrap">
+                                      Mặc định dịch vụ
+                                    </span>
+                                  )}
+                                </div>
+                              </label>
+                            );
+                          })
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Authorization Token */}
               <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-slate-700 mb-1">
-                  Authorization Token (riêng cho đơn vị) <span className="text-red-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Authorization Token (riêng cho từng đơn vị) <span className="text-red-500">*</span>
                 </label>
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Key className="h-4 w-4 text-slate-400" />
-                    </div>
-                    <input
-                      name="authorization"
-                      type="text"
-                      readOnly
-                      value={authToken}
-                      className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-mono text-slate-600 focus:outline-none"
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleCopy}
-                    className="px-3 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-600 transition-colors flex items-center justify-center bg-white"
-                    title="Sao chép Token"
-                  >
-                    {isCopied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setAuthToken(generateToken(selectedOrg))}
-                    className="px-3 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-600 transition-colors flex items-center justify-center bg-white"
-                    title="Tạo mới Token"
-                  >
-                    <RefreshCw className="w-4 h-4" />
-                  </button>
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-500 text-xs leading-relaxed">
+                  Hệ thống sẽ tự động khởi tạo mã truy cập (Authorization Token) riêng biệt, ngẫu nhiên và bảo mật cho từng Đơn vị/Tổ chức thụ hưởng được chọn ở trên sau khi nhấn "Cấp quyền truy cập".
                 </div>
-                <p className="text-xs text-slate-500 mt-1.5">
-                  * Token truy cập API được khởi tạo tự động cho <span className="font-semibold text-amber-700">{selectedOrg}</span>
-                </p>
+              </div>
+
+              {/* IP Whitelist */}
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Danh sách IP Whitelist (cách nhau bởi dấu phẩy)
+                </label>
+                <input
+                  name="ipWhitelist"
+                  type="text"
+                  placeholder="Ví dụ: 192.168.1.100, 10.20.30.45 (Để trống để cho phép tất cả IP)"
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm font-medium bg-white"
+                />
               </div>
 
 
 
               {/* Start Date */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 mb-1">
                   Hiệu lực từ ngày <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -172,21 +236,20 @@ export function ProvisionAccessControlModal({ isOpen, onClose, apiName, onSave }
                   type="date"
                   required
                   defaultValue="2026-05-19"
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm"
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm"
                 />
               </div>
 
               {/* End Date */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">
-                  Hiệu lực đến ngày <span className="text-red-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Hiệu lực đến ngày
                 </label>
                 <input
                   name="validTo"
                   type="date"
-                  required
                   defaultValue="2027-05-19"
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm"
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm"
                 />
               </div>
 
@@ -204,7 +267,7 @@ export function ProvisionAccessControlModal({ isOpen, onClose, apiName, onSave }
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg flex items-center transition-colors font-medium text-sm"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center transition-colors font-medium text-sm"
             >
               <Check className="w-4 h-4 mr-2" />
               Cấp quyền truy cập

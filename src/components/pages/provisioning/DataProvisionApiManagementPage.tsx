@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Server, GitCompare, Shield, History, Search, Filter, Plus,
-  Trash2, Edit3, Key, Clock, Calendar, CheckCircle2, XCircle, AlertTriangle, FileJson, Power, FileText, Users, KeyRound, RefreshCw, Lock, Unlock, Copy,
+  Trash2, Edit, Key, Clock, Calendar, CheckCircle2, XCircle, AlertTriangle, FileJson, Power, FileText, Users, KeyRound, RefreshCw, Lock, Unlock, Copy,
   ChevronDown, X, Eye
 } from 'lucide-react';
 
@@ -44,6 +45,7 @@ const formatDateTime = (dateStr: string) => {
 export function DataProvisionApiManagementPage() {
   const [activeTab, setActiveTab] = useState<'api_cung_cap' | 'api_doi_soat' | 'phan_quyen' | 'danh_sach_tai_khoan'>('api_cung_cap');
   const [searchTerm, setSearchTerm] = useState('');
+  const [apiSearchTerm, setApiSearchTerm] = useState('');
 
   // Advanced Filter state
   const [showFilters, setShowFilters] = useState(false);
@@ -82,6 +84,14 @@ export function DataProvisionApiManagementPage() {
 
   const [showAccountModal, setShowAccountModal] = useState(false);
 
+  const [statusConfirmData, setStatusConfirmData] = useState<{
+    id: string;
+    type: 'api' | 'recon';
+    action: 'kích hoạt' | 'tạm ngưng';
+    currentStatus: string;
+    name: string;
+  } | null>(null);
+
   // Success message toast
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const triggerToast = (msg: string) => {
@@ -91,11 +101,22 @@ export function DataProvisionApiManagementPage() {
 
   const [apis, setApis] = useState<any[]>(() => {
     const saved = localStorage.getItem('provision_apis');
-    return saved ? JSON.parse(saved) : [
-      { id: '1', code: 'SVC-HOTICH-001', name: 'API cung cấp dữ liệu Hộ tịch điện tử', endpoint: '/api/v1/hotich/search', method: 'GET', version: 'v1.2', status: 'Hoạt động', desc: 'Dịch vụ khai thác thông tin hộ tịch của công dân', dataType: 'Hộ tịch điện tử', consumerUnit: 'Bộ Kế hoạch và Đầu tư', receiverPoint: 'Nguyễn Văn A - 0987654321', time: '2026-05-24 08:00:00' },
+    let data = saved ? JSON.parse(saved) : null;
+    const defaultData = [
+      { id: '1', code: 'SVC-HOTICH-001', name: 'API cung cấp dữ liệu Hộ tịch điện tử', endpoint: '/api/v1/hotich/search', method: 'GET', version: 'v1.2', status: 'Hoạt động', desc: 'Dịch vụ khai thác thông tin hộ tịch của công dân', dataType: 'Hộ tịch điện tử', consumerUnit: 'Bộ Kế hoạch và Đầu tư, Sở Tài chính tỉnh Bắc Ninh', receiverPoint: 'Nguyễn Văn A - 0987654321', time: '2026-05-24 08:00:00' },
       { id: '2', code: 'SVC-THADS-002', name: 'API đồng bộ dữ liệu thi hành án dân sự', endpoint: '/api/v1/thads/sync', method: 'POST', version: 'v2.0', status: 'Hoạt động', desc: 'Đồng bộ kết quả thi hành án dân sự tỉnh Bắc Ninh', dataType: 'Thi hành án dân sự', consumerUnit: 'Sở Tài chính tỉnh Bắc Ninh', receiverPoint: 'Trần Thị B - 0912345678', time: '2026-05-25 09:30:00' },
       { id: '3', code: 'SVC-BPBD-003', name: 'API đọc thông tin Biện pháp bảo đảm', endpoint: '/api/v1/bpbd/get', method: 'GET', version: 'v1.0', status: 'Hoạt động', desc: 'Đọc thông tin giao dịch bảo đảm', dataType: 'Biện pháp bảo đảm', consumerUnit: 'Sở Tư pháp tỉnh Bắc Ninh', receiverPoint: 'Phạm Văn C - 0901234567', time: '2026-05-25 14:15:00' }
     ];
+
+    if (data && Array.isArray(data)) {
+      const hasMulti = data.some(item => item.consumerUnit && item.consumerUnit.includes(','));
+      if (!hasMulti) {
+        data = data.map(item => item.id === '1' ? { ...item, consumerUnit: 'Bộ Kế hoạch và Đầu tư, Sở Tài chính tỉnh Bắc Ninh' } : item);
+        localStorage.setItem('provision_apis', JSON.stringify(data));
+      }
+      return data;
+    }
+    return defaultData;
   });
 
   useEffect(() => {
@@ -160,26 +181,26 @@ export function DataProvisionApiManagementPage() {
     triggerToast('Đã làm mới App Key thành công!');
   };
 
-  const handleToggleApiStatus = (id: string, currentStatus: string) => {
+  const handleToggleApiStatus = (id: string, currentStatus: string, name: string) => {
     const isTạmNgưng = currentStatus === 'Tạm ngưng';
-    const actionName = isTạmNgưng ? 'kích hoạt lại' : 'tạm ngưng';
-    const newStatus = isTạmNgưng ? 'Hoạt động' : 'Tạm ngưng';
-
-    if (window.confirm(`Bạn có chắc chắn muốn ${actionName} API cung cấp dữ liệu này?`)) {
-      setApis(apis.map(item => item.id === id ? { ...item, status: newStatus } : item));
-      triggerToast(`Đã ${actionName} API thành công!`);
-    }
+    setStatusConfirmData({
+      id,
+      type: 'api',
+      action: isTạmNgưng ? 'kích hoạt' : 'tạm ngưng',
+      currentStatus,
+      name
+    });
   };
 
-  const handleToggleReconStatus = (id: string, currentStatus: string) => {
+  const handleToggleReconStatus = (id: string, currentStatus: string, name: string) => {
     const isInactive = currentStatus === 'inactive';
-    const actionName = isInactive ? 'kích hoạt lại' : 'tạm ngưng';
-    const newStatus = isInactive ? 'active' : 'inactive';
-
-    if (window.confirm(`Bạn có chắc chắn muốn ${actionName} tiến trình đối soát dữ liệu này?`)) {
-      setRecons(recons.map(item => item.id === id ? { ...item, status: newStatus } : item));
-      triggerToast(`Đã ${actionName} tiến trình đối soát thành công!`);
-    }
+    setStatusConfirmData({
+      id,
+      type: 'recon',
+      action: isInactive ? 'kích hoạt' : 'tạm ngưng',
+      currentStatus,
+      name
+    });
   };
 
   const handleDeletePermission = (id: string) => {
@@ -432,16 +453,7 @@ export function DataProvisionApiManagementPage() {
                       Tạo API Đối soát mới
                     </button>
                   )}
-                  {activeTab === 'phan_quyen' && (
-                    <button
-                      onClick={() => setShowAccessModal(true)}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium whitespace-nowrap"
-                      title="Cấp quyền truy cập API"
-                    >
-                      <Key className="w-4 h-4" />
-                      Cấp quyền truy cập API
-                    </button>
-                  )}
+
                   {activeTab === 'danh_sach_tai_khoan' && (
                     <button
                       onClick={() => setShowAccountModal(true)}
@@ -596,7 +608,7 @@ export function DataProvisionApiManagementPage() {
                               </button>
                             </td>
                             <td className="py-3 px-4 text-left">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${api.status === 'Hoạt động' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-slate-50 text-slate-500 border border-slate-200'
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-normal ${api.status === 'Hoạt động' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-slate-50 text-slate-500 border border-slate-200'
                                 }`}>
                                 <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${api.status === 'Hoạt động' ? 'bg-green-500 animate-pulse' : 'bg-slate-400'}`}></span>
                                 {api.status}
@@ -609,7 +621,7 @@ export function DataProvisionApiManagementPage() {
                                   className="p-1.5 text-black hover:text-slate-700 hover:bg-slate-100 rounded-[6px] transition-all inline-flex items-center justify-center group cursor-pointer"
                                   title="Sửa thông tin API"
                                 >
-                                  <Edit3 className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                                  <Edit className="w-4 h-4 group-hover:scale-110 transition-transform" />
                                 </button>
                                 <button
                                   onClick={() => { setSelectedApiForHistory(api); setShowHistoryModal(true); }}
@@ -619,11 +631,8 @@ export function DataProvisionApiManagementPage() {
                                   <History className="w-4 h-4 group-hover:scale-110 transition-transform" />
                                 </button>
                                 <button
-                                  onClick={() => handleToggleApiStatus(api.id, api.status)}
-                                  className={`p-1.5 rounded-[6px] transition-all inline-flex items-center justify-center group cursor-pointer ${api.status === 'Hoạt động'
-                                    ? 'text-orange-500 hover:text-orange-600 hover:bg-orange-50'
-                                    : 'text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50'
-                                    }`}
+                                  onClick={() => handleToggleApiStatus(api.id, api.status, api.name)}
+                                  className="p-1.5 text-black hover:text-slate-700 hover:bg-slate-100 rounded-[6px] transition-all inline-flex items-center justify-center group cursor-pointer"
                                   title={api.status === 'Hoạt động' ? "Tạm ngưng API" : "Kích hoạt API"}
                                 >
                                   <Power className="w-4 h-4 group-hover:scale-110 transition-transform" />
@@ -691,7 +700,7 @@ export function DataProvisionApiManagementPage() {
                               </button>
                             </td>
                             <td className="py-3 px-4 text-left">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${recon.status === 'active' ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'bg-slate-50 text-slate-500 border border-slate-200'
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-normal ${recon.status === 'active' ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'bg-slate-50 text-slate-500 border border-slate-200'
                                 }`}>
                                 <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${recon.status === 'active' ? 'bg-purple-500 animate-pulse' : 'bg-slate-400'}`}></span>
                                 {recon.status === 'active' ? 'Hoạt động' : 'Tạm ngưng'}
@@ -704,7 +713,7 @@ export function DataProvisionApiManagementPage() {
                                   className="p-1.5 text-black hover:text-slate-700 hover:bg-slate-100 rounded-[6px] transition-all inline-flex items-center justify-center group cursor-pointer"
                                   title="Sửa thông tin đối soát"
                                 >
-                                  <Edit3 className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                                  <Edit className="w-4 h-4 group-hover:scale-110 transition-transform" />
                                 </button>
                                 <button
                                   onClick={() => { setSelectedApiForHistory({ ...recon, code: `UC-${recon.id}` }); setShowHistoryModal(true); }}
@@ -714,11 +723,8 @@ export function DataProvisionApiManagementPage() {
                                   <History className="w-4 h-4 group-hover:scale-110 transition-transform" />
                                 </button>
                                 <button
-                                  onClick={() => handleToggleReconStatus(recon.id, recon.status)}
-                                  className={`p-1.5 rounded-[6px] transition-all inline-flex items-center justify-center group cursor-pointer ${recon.status === 'active'
-                                    ? 'text-orange-500 hover:text-orange-600 hover:bg-orange-50'
-                                    : 'text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50'
-                                    }`}
+                                  onClick={() => handleToggleReconStatus(recon.id, recon.status, recon.name)}
+                                  className="p-1.5 text-black hover:text-slate-700 hover:bg-slate-100 rounded-[6px] transition-all inline-flex items-center justify-center group cursor-pointer"
                                   title={recon.status === 'active' ? "Tạm ngưng tiến trình đối soát" : "Kích hoạt tiến trình đối soát"}
                                 >
                                   <Power className="w-4 h-4 group-hover:scale-110 transition-transform" />
@@ -744,8 +750,22 @@ export function DataProvisionApiManagementPage() {
                   <div className="bg-slate-50 p-4 border-b border-slate-200">
                     <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Danh sách dịch vụ API</h4>
                   </div>
-                  <div className="p-2 space-y-1">
-                    {apis.map(api => (
+                  
+                  {/* Search API Input */}
+                  <div className="p-2 bg-slate-50/50 border-b border-slate-100">
+                    <input
+                      type="text"
+                      placeholder="Tìm kiếm dịch vụ API..."
+                      className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium"
+                      value={apiSearchTerm}
+                      onChange={(e) => setApiSearchTerm(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="p-2 space-y-1 custom-scrollbar" style={{ maxHeight: '180px', overflowY: 'scroll' }}>
+                    {apis
+                      .filter(api => api.name.toLowerCase().includes(apiSearchTerm.toLowerCase()))
+                      .map(api => (
                       <button
                         key={api.id}
                         onClick={() => setSelectedApiForAccess(api.name)}
@@ -783,7 +803,6 @@ export function DataProvisionApiManagementPage() {
                         <thead>
                           <tr className="bg-slate-50 text-[13px] font-semibold text-slate-500 border-b border-slate-200 uppercase tracking-tight">
                             <th className="py-3 px-4 text-left font-semibold">Đơn vị được cấp quyền</th>
-                            <th className="py-3 px-4 text-left font-semibold">Phạm vi quyền (Scopes)</th>
                             <th className="py-3 px-4 text-left font-semibold">IP Whitelist</th>
                             <th className="py-3 px-4 text-left font-semibold">Thời hạn hiệu lực</th>
                             <th className="py-3 px-4 text-left font-semibold">Trạng thái</th>
@@ -793,7 +812,7 @@ export function DataProvisionApiManagementPage() {
                         <tbody className="divide-y divide-slate-100 text-slate-700 text-[13px]">
                           {paginatedPermissions.length === 0 ? (
                             <tr>
-                              <td colSpan={6} className="py-8 text-center text-slate-500 font-medium">
+                              <td colSpan={5} className="py-8 text-center text-slate-500 font-medium">
                                 Chưa có đơn vị nào được cấp quyền khai thác API này.
                               </td>
                             </tr>
@@ -801,11 +820,6 @@ export function DataProvisionApiManagementPage() {
                             paginatedPermissions.map(perm => (
                               <tr key={perm.id} className="hover:bg-slate-50/50 transition-all border-b border-slate-100">
                                 <td className="py-3.5 px-4 font-semibold text-slate-800">{perm.organization}</td>
-                                <td className="py-3.5 px-4 text-xs">
-                                  <span className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded border border-slate-200">
-                                    {perm.scopes}
-                                  </span>
-                                </td>
                                 <td className="py-3.5 px-4 font-mono text-xs text-slate-500">{perm.ipWhitelist}</td>
                                 <td className="py-3.5 px-4 text-slate-600 text-xs">
                                   <div className="flex items-center gap-1.5">
@@ -814,7 +828,7 @@ export function DataProvisionApiManagementPage() {
                                   </div>
                                 </td>
                                 <td className="py-3.5 px-4">
-                                  <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${perm.status === 'Hợp lệ' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'
+                                  <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-normal ${perm.status === 'Hợp lệ' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'
                                     }`}>
                                     <CheckCircle2 className={`w-3.5 h-3.5 ${perm.status === 'Hợp lệ' ? 'text-emerald-500' : 'text-red-500'} shrink-0`} />
                                     {perm.status}
@@ -885,7 +899,7 @@ export function DataProvisionApiManagementPage() {
                             </td>
                             <td className="py-3.5 px-4 text-left text-slate-400 font-mono text-xs">{formatDateTime(acc.createdAt)}</td>
                             <td className="py-3.5 px-4 text-left">
-                              <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${acc.status === 'Hoạt động' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-slate-50 text-slate-500 border border-slate-200'}`}>
+                              <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-normal ${acc.status === 'Hoạt động' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-slate-50 text-slate-500 border border-slate-200'}`}>
                                 {acc.status === 'Hoạt động' ? <Unlock className="w-3.5 h-3.5 text-green-500 shrink-0" /> : <Lock className="w-3.5 h-3.5 text-slate-400 shrink-0" />}
                                 {acc.status}
                               </span>
@@ -959,6 +973,14 @@ export function DataProvisionApiManagementPage() {
         onClose={() => setShowAccessModal(false)}
         apiName={selectedApiForAccess}
         onSave={handleSavePermission}
+        availableOrganizations={Array.from(new Set(accounts.map(a => a.organization)))}
+        preConfiguredOrganizations={(() => {
+          const apiObj = apis.find(api => api.name === selectedApiForAccess);
+          if (apiObj && apiObj.consumerUnit) {
+            return apiObj.consumerUnit.split(',').map((u: string) => u.trim()).filter(Boolean);
+          }
+          return [];
+        })()}
       />
 
       {/* Version History Modal */}
@@ -1049,6 +1071,62 @@ export function DataProvisionApiManagementPage() {
           </div>
         </div>
       )}
+
+      {statusConfirmData && createPortal(
+        <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200">
+            <div className={`px-6 py-4 border-b border-slate-200 flex items-center gap-3 ${statusConfirmData.action === 'kích hoạt' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
+              <AlertTriangle className="w-5 h-5 shrink-0" />
+              <h3 className="font-bold text-[15px] uppercase">
+                Xác nhận {statusConfirmData.action} {statusConfirmData.type === 'api' ? 'API' : 'tiến trình đối soát'}
+              </h3>
+            </div>
+            <div className="p-6">
+              <div className="text-slate-600 text-[13px] leading-relaxed">
+                Bạn có chắc chắn muốn <span className="font-semibold text-slate-900">{statusConfirmData.action}</span> {statusConfirmData.type === 'api' ? 'API cung cấp' : 'tiến trình đối soát'}:
+                <span className="font-bold text-blue-600 block mt-2 text-sm">{statusConfirmData.name}</span>
+                <div className="mt-4">
+                  {statusConfirmData.action === 'tạm ngưng' ? (
+                    <span className="text-red-500 font-medium">Lưu ý: Hệ thống đối tác sẽ không thể kết nối hoặc đối soát thông tin qua dịch vụ này cho đến khi được kích hoạt lại.</span>
+                  ) : (
+                    <span className="text-slate-500">Dịch vụ này sẽ quay trở lại trạng thái Hoạt động bình thường.</span>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-3">
+              <button
+                onClick={() => setStatusConfirmData(null)}
+                className="px-4 py-2 text-[13px] font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                onClick={() => {
+                  const { id, type, action, currentStatus } = statusConfirmData;
+                  if (type === 'api') {
+                    const isTạmNgưng = currentStatus === 'Tạm ngưng';
+                    const newStatus = isTạmNgưng ? 'Hoạt động' : 'Tạm ngưng';
+                    setApis(apis.map(item => item.id === id ? { ...item, status: newStatus } : item));
+                    triggerToast(`Đã ${action} API thành công!`);
+                  } else {
+                    const isInactive = currentStatus === 'inactive';
+                    const newStatus = isInactive ? 'active' : 'inactive';
+                    setRecons(recons.map(item => item.id === id ? { ...item, status: newStatus } : item));
+                    triggerToast(`Đã ${action} tiến trình đối soát thành công!`);
+                  }
+                  setStatusConfirmData(null);
+                }}
+                className={`px-4 py-2 text-[13px] font-medium text-white rounded-lg shadow-sm transition-colors cursor-pointer ${
+                  statusConfirmData.action === 'kích hoạt' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-amber-600 hover:bg-amber-700'
+                }`}
+              >
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
+      , document.body)}
     </div>
   );
 }

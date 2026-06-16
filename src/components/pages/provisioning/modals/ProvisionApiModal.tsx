@@ -2,6 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, User, Building2, Phone, Mail, Link, FileText, Eye, Download, Upload } from 'lucide-react';
 
+const getTodayFormatted = () => {
+  const today = new Date();
+  const day = String(today.getDate()).padStart(2, '0');
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const year = today.getFullYear();
+  return `${day}/${month}/${year}`;
+};
+
 interface ProvisionApiModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -28,7 +36,7 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Times & Status
-  const [startDate, setStartDate] = useState('01/05/2026');
+  const [startDate, setStartDate] = useState(getTodayFormatted());
   const [endDate, setEndDate] = useState('');
   const [status, setStatus] = useState('Đã cung cấp tài liệu');
 
@@ -47,7 +55,7 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
   }> = {
     'SVC-HOTICH-001': {
       name: 'API cung cấp dữ liệu Hộ tịch điện tử',
-      agency: 'Bộ Kế hoạch và Đầu tư',
+      agency: 'Bộ Kế hoạch và Đầu tư, Sở Tài chính tỉnh Bắc Ninh',
       targetSystem: 'Hệ thống Thông tin Quốc gia về Đăng ký Doanh nghiệp',
       contactName: 'Trần Văn Đạo',
       dept: 'Cục Quản lý Đăng ký Kinh doanh',
@@ -126,7 +134,7 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
 
         setApiUrl(apiData.endpoint ? `https://api.dldc.gov.vn${apiData.endpoint}` : '');
         setDocUrl(apiData.docUrl || 'https://docs.dldc.gov.vn/api/hotich-v1');
-        setStartDate(apiData.time ? apiData.time.split(' ')[0] : '01/05/2026');
+        setStartDate(apiData.time ? apiData.time.split(' ')[0] : getTodayFormatted());
         setEndDate(apiData.endDate || '');
         setStatus(apiData.status || 'Đã cung cấp tài liệu');
       } else {
@@ -141,7 +149,7 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
         setApiUrl('');
         setDocUrl('');
         setDocFile(null);
-        setStartDate('01/05/2026');
+        setStartDate(getTodayFormatted());
         setEndDate('');
         setStatus('Đã cung cấp tài liệu');
       }
@@ -153,15 +161,7 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
     setSelectedServiceCode(code);
     if (serviceDefaults[code]) {
       const s = serviceDefaults[code];
-      setAgencyUnits(s.agency ? [s.agency] : []);
-      setTargetSystem(s.targetSystem);
-      setReceiverName(s.contactName);
-      setReceiverDept(s.dept);
-      setReceiverPhone(s.phone);
-      setReceiverEmail(s.email);
-      setApiUrl(s.endpoint);
-      setDocUrl(s.doc);
-      setStartDate(s.startDate);
+      setAgencyUnits(s.agency ? s.agency.split(',').map((u: string) => u.trim()).filter(Boolean) : []);
       setStatus(s.status);
     }
   };
@@ -245,78 +245,25 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
             </select>
           </div>
 
-          {/* Agency Multi-select (Combobox) */}
-          <div className="relative">
+          {/* Agency Multi-select (Combobox) -> Changed to Read-only Badge list */}
+          <div>
             <label className="block font-medium text-slate-700 mb-1.5">Cơ quan/Đơn vị nhận <span className="text-red-500">*</span></label>
-            
-            {/* Display Box / Dropdown Trigger */}
             <div 
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="w-full min-h-[42px] px-3 py-1.5 bg-white border border-slate-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 flex flex-wrap gap-1.5 items-center cursor-pointer select-none"
+              className="w-full min-h-[42px] px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg flex flex-wrap gap-1.5 items-center cursor-not-allowed select-none opacity-90"
             >
               {agencyUnits.length === 0 ? (
-                <span className="text-slate-400 pl-1">-- Chọn cơ quan/đơn vị nhận --</span>
+                <span className="text-slate-400 text-[13px] pl-1">-- Vui lòng chọn dịch vụ API phía trên --</span>
               ) : (
                 agencyUnits.map(unit => (
                   <span 
                     key={unit} 
-                    className="inline-flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-1 rounded-md border border-blue-200 transition-colors"
+                    className="inline-flex items-center bg-slate-200 text-slate-700 text-[12px] font-semibold px-2.5 py-0.5 rounded-md border border-slate-300"
                   >
                     {unit}
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setAgencyUnits(agencyUnits.filter(u => u !== unit));
-                      }}
-                      className="text-blue-500 hover:text-blue-700 hover:bg-blue-200/50 rounded p-0.5"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
                   </span>
                 ))
               )}
-              <div className="ml-auto text-slate-400">
-                <svg className={`w-4 h-4 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
             </div>
-
-            {/* Dropdown Menu Options */}
-            {isDropdownOpen && (
-              <>
-                <div className="fixed inset-0 z-10" onClick={() => setIsDropdownOpen(false)} />
-                <div className="absolute left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl z-20 overflow-hidden divide-y divide-slate-100 max-h-60 overflow-y-auto">
-                  {agencyOptions.map(option => {
-                    const isChecked = agencyUnits.includes(option);
-                    return (
-                      <div 
-                        key={option}
-                        onClick={() => {
-                          if (isChecked) {
-                            setAgencyUnits(agencyUnits.filter(u => u !== option));
-                          } else {
-                            setAgencyUnits([...agencyUnits, option]);
-                          }
-                        }}
-                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 cursor-pointer select-none transition-colors"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          readOnly
-                          className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300 cursor-pointer"
-                        />
-                        <span className={`text-slate-700 text-sm font-semibold ${isChecked ? 'text-blue-700 font-bold' : ''}`}>
-                          {option}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </>
-            )}
           </div>
 
           {/* Target System */}
@@ -510,23 +457,8 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
                   onChange={(e) => setEndDate(e.target.value)}
                 />
               </div>
-
-              {/* Status */}
-              <div className="md:col-span-2">
-                <label className="block font-medium text-slate-700 mb-1.5">Trạng thái</label>
-                <select
-                  className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 font-semibold cursor-pointer"
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                >
-                  <option value="Đã cung cấp tài liệu">Đã cung cấp tài liệu</option>
-                  <option value="Chưa cung cấp tài liệu">Chưa cung cấp tài liệu</option>
-                  <option value="Tạm ngưng">Tạm ngưng</option>
-                </select>
-              </div>
             </div>
           </div>
-
         </form>
 
         {/* Footer */}
