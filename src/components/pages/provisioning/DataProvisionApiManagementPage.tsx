@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import {
   Server, GitCompare, Shield, History, Search, Filter, Plus,
@@ -43,7 +44,39 @@ const formatDateTime = (dateStr: string) => {
 };
 
 export function DataProvisionApiManagementPage() {
-  const [activeTab, setActiveTab] = useState<'api_cung_cap' | 'api_doi_soat' | 'phan_quyen' | 'danh_sach_tai_khoan'>('api_cung_cap');
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const getInitialTab = () => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab === 'api_cung_cap' || tab === 'api_doi_soat' || tab === 'phan_quyen' || tab === 'danh_sach_tai_khoan') {
+      return tab as 'api_cung_cap' | 'api_doi_soat' | 'phan_quyen' | 'danh_sach_tai_khoan';
+    }
+    return 'api_cung_cap';
+  };
+
+  const [activeTab, setActiveTab] = useState<'api_cung_cap' | 'api_doi_soat' | 'phan_quyen' | 'danh_sach_tai_khoan'>(getInitialTab);
+
+  const handleTabChange = (tab: 'api_cung_cap' | 'api_doi_soat' | 'phan_quyen' | 'danh_sach_tai_khoan') => {
+    setActiveTab(tab);
+    setSearchTerm('');
+    setCurrentPage(1);
+    const params = new URLSearchParams(location.search);
+    params.set('tab', tab);
+    navigate(`${location.pathname}?${params.toString()}`, { replace: true });
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    if (tab === 'api_cung_cap' || tab === 'api_doi_soat' || tab === 'phan_quyen' || tab === 'danh_sach_tai_khoan') {
+      if (tab !== activeTab) {
+        setActiveTab(tab);
+      }
+    }
+  }, [location.search, activeTab]);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [apiSearchTerm, setApiSearchTerm] = useState('');
 
@@ -72,17 +105,19 @@ export function DataProvisionApiManagementPage() {
   // Modals state
   const [showApiModal, setShowApiModal] = useState(false);
   const [selectedApi, setSelectedApi] = useState<any>(null);
+  const [apiModalMode, setApiModalMode] = useState<'view' | 'edit'>('edit');
 
   const [showReconModal, setShowReconModal] = useState(false);
   const [selectedRecon, setSelectedRecon] = useState<any>(null);
 
   const [showAccessModal, setShowAccessModal] = useState(false);
-  const [selectedApiForAccess, setSelectedApiForAccess] = useState<string>('Lấy danh sách Hộ tịch');
+  const [selectedApiForAccess, setSelectedApiForAccess] = useState<string>('API cung cấp dữ liệu Hộ tịch điện tử');
 
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [selectedApiForHistory, setSelectedApiForHistory] = useState<any>(null);
 
   const [showAccountModal, setShowAccountModal] = useState(false);
+  const [selectedAccount, setSelectedAccount] = useState<any>(null);
 
   const [statusConfirmData, setStatusConfirmData] = useState<{
     id: string;
@@ -123,6 +158,73 @@ export function DataProvisionApiManagementPage() {
     localStorage.setItem('provision_apis', JSON.stringify(apis));
   }, [apis]);
 
+  useEffect(() => {
+    if (!selectedApiForAccess) return;
+    const apiObj = apis.find(api => api.name === selectedApiForAccess);
+    if (!apiObj || !apiObj.consumerUnit) return;
+
+    const defaultUnits = apiObj.consumerUnit.split(',').map((u: string) => u.trim()).filter(Boolean);
+
+    // Auto fill missing permissions
+    setPermissions(prev => {
+      const missingPermissions: any[] = [];
+      defaultUnits.forEach(unit => {
+        const exists = prev.some(p => p.apiName === selectedApiForAccess && p.organization === unit);
+        if (!exists) {
+          missingPermissions.push({
+            id: 'p_auto_' + Math.random().toString(36).substr(2, 9),
+            apiName: selectedApiForAccess,
+            organization: unit,
+            scopes: 'Đọc (GET)',
+            ipWhitelist: 'Tất cả IP',
+            validFrom: '2026-06-16',
+            validTo: '2027-06-16',
+            status: 'Hợp lệ'
+          });
+        }
+      });
+      if (missingPermissions.length > 0) {
+        return [...prev, ...missingPermissions];
+      }
+      return prev;
+    });
+
+    // Auto fill missing accounts
+    setAccounts(prev => {
+      const missingAccounts: any[] = [];
+      defaultUnits.forEach(unit => {
+        const exists = prev.some(a => a.apiName === selectedApiForAccess && a.organization === unit);
+        if (!exists) {
+          let prefix = 'org';
+          if (unit.includes('Công an')) prefix = 'ca';
+          else if (unit.includes('Y tế')) prefix = 'yte';
+          else if (unit.includes('Tài chính')) prefix = 'tc';
+          else if (unit.includes('Kế hoạch')) prefix = 'khdt';
+          else if (unit.includes('Lao động')) prefix = 'sld';
+          else if (unit.includes('Giáo dục')) prefix = 'sgd';
+          else if (unit.includes('Thông tin')) prefix = 'stttt';
+          
+          const rand = Math.floor(10 + Math.random() * 90);
+          const username = `${prefix}_bacninh_${rand}`;
+          
+          missingAccounts.push({
+            id: 'acc_auto_' + Math.random().toString(36).substr(2, 9),
+            username: username,
+            apiName: selectedApiForAccess,
+            organization: unit,
+            clientId: 'client_' + Math.random().toString(36).substring(2, 10),
+            status: 'Hoạt động',
+            createdAt: '2026-06-16'
+          });
+        }
+      });
+      if (missingAccounts.length > 0) {
+        return [...prev, ...missingAccounts];
+      }
+      return prev;
+    });
+  }, [selectedApiForAccess, apis]);
+
   const [recons, setRecons] = useState<any[]>([
     { id: '662', name: 'Đối soát tổng hợp danh mục dữ liệu dùng chung', targetSystem: 'Hệ thống đích (Các Bộ/Ngành)', schedule: 'Định kỳ (Hàng ngày) / Theo yêu cầu', linkedApi: 'Lấy danh sách Hộ tịch', status: 'active' },
     { id: '663', name: 'Đối soát cung cấp dữ liệu Hộ tịch điện tử', targetSystem: 'Hệ thống Bộ Tư pháp', schedule: 'Định kỳ (Hàng tuần) / Theo yêu cầu', linkedApi: 'Lấy danh sách Hộ tịch', status: 'active' },
@@ -130,17 +232,43 @@ export function DataProvisionApiManagementPage() {
     { id: '665', name: 'Đối soát cung cấp dữ liệu biện pháp bảo đảm', targetSystem: 'Cục Giao dịch bảo đảm', schedule: 'Theo yêu cầu', linkedApi: 'Đọc thông tin Biện pháp bảo đảm', status: 'inactive' }
   ]);
 
-  const [permissions, setPermissions] = useState<any[]>([
-    { id: 'p1', apiName: 'Lấy danh sách Hộ tịch', organization: 'Công an tỉnh Bắc Ninh', scopes: 'Đọc (GET)', ipWhitelist: '192.168.12.100', validFrom: '2026-05-01', validTo: '2027-05-01', status: 'Hợp lệ' },
-    { id: 'p2', apiName: 'Lấy danh sách Hộ tịch', organization: 'Sở Y tế tỉnh Bắc Ninh', scopes: 'Đọc (GET)', ipWhitelist: '10.20.30.45', validFrom: '2026-04-15', validTo: '2027-04-15', status: 'Hợp lệ' },
-    { id: 'p3', apiName: 'Đồng bộ dữ liệu THADS', organization: 'Sở Tài chính tỉnh Bắc Ninh', scopes: 'Đọc (GET), Ghi (POST)', ipWhitelist: '172.16.8.99', validFrom: '2026-05-10', validTo: '2027-05-10', status: 'Hợp lệ' }
-  ]);
+  const [permissions, setPermissions] = useState<any[]>(() => {
+    const saved = localStorage.getItem('provision_permissions');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {}
+    }
+    return [
+      { id: 'p1', apiName: 'API cung cấp dữ liệu Hộ tịch điện tử', organization: 'Công an tỉnh Bắc Ninh', scopes: 'Đọc (GET)', ipWhitelist: '192.168.12.100', validFrom: '2026-05-01', validTo: '2027-05-01', status: 'Hợp lệ' },
+      { id: 'p2', apiName: 'API cung cấp dữ liệu Hộ tịch điện tử', organization: 'Sở Y tế tỉnh Bắc Ninh', scopes: 'Đọc (GET)', ipWhitelist: '10.20.30.45', validFrom: '2026-04-15', validTo: '2027-04-15', status: 'Hợp lệ' },
+      { id: 'p3', apiName: 'API đồng bộ dữ liệu thi hành án dân sự', organization: 'Sở Tài chính tỉnh Bắc Ninh', scopes: 'Đọc (GET), Ghi (POST)', ipWhitelist: '172.16.8.99', validFrom: '2026-05-10', validTo: '2027-05-10', status: 'Hợp lệ' }
+    ];
+  });
 
-  const [accounts, setAccounts] = useState<any[]>([
-    { id: 'acc1', username: 'yte_bacninh_01', apiName: 'Lấy danh sách Hộ tịch', organization: 'Sở Y tế tỉnh Bắc Ninh', clientId: 'client_7a9b8c2d', status: 'Hoạt động', createdAt: '2026-05-15' },
-    { id: 'acc2', username: 'ca_bacninh_01', apiName: 'Lấy danh sách Hộ tịch', organization: 'Công an tỉnh Bắc Ninh', clientId: 'client_3x9v2m1l', status: 'Hoạt động', createdAt: '2026-05-10' },
-    { id: 'acc3', username: 'tc_bacninh_01', apiName: 'Đồng bộ dữ liệu THADS', organization: 'Sở Tài chính tỉnh Bắc Ninh', clientId: 'client_9k2m4n5b', status: 'Hoạt động', createdAt: '2026-05-12' }
-  ]);
+  useEffect(() => {
+    localStorage.setItem('provision_permissions', JSON.stringify(permissions));
+  }, [permissions]);
+
+  const [accounts, setAccounts] = useState<any[]>(() => {
+    const saved = localStorage.getItem('provision_accounts');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {}
+    }
+    return [
+      { id: 'acc1', username: 'yte_bacninh_01', apiName: 'API cung cấp dữ liệu Hộ tịch điện tử', organization: 'Sở Y tế tỉnh Bắc Ninh', clientId: 'client_7a9b8c2d', status: 'Hoạt động', createdAt: '2026-05-15' },
+      { id: 'acc2', username: 'ca_bacninh_01', apiName: 'API cung cấp dữ liệu Hộ tịch điện tử', organization: 'Công an tỉnh Bắc Ninh', clientId: 'client_3x9v2m1l', status: 'Hoạt động', createdAt: '2026-05-10' },
+      { id: 'acc3', username: 'tc_bacninh_01', apiName: 'API đồng bộ dữ liệu thi hành án dân sự', organization: 'Sở Tài chính tỉnh Bắc Ninh', clientId: 'client_9k2m4n5b', status: 'Hoạt động', createdAt: '2026-05-12' }
+    ];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('provision_accounts', JSON.stringify(accounts));
+  }, [accounts]);
 
   const [selectedUnitForAccount, setSelectedUnitForAccount] = useState<string>('Sở Y tế tỉnh Bắc Ninh');
 
@@ -341,7 +469,7 @@ export function DataProvisionApiManagementPage() {
         <div className="bg-white border-b border-slate-200 px-6">
           <div className="flex gap-6">
             <button
-              onClick={() => { setActiveTab('api_cung_cap'); setSearchTerm(''); setCurrentPage(1); }}
+              onClick={() => handleTabChange('api_cung_cap')}
               className={`flex items-center gap-2 pb-3 pt-4 text-[13px] font-medium transition-colors border-b-2 whitespace-nowrap ${
                 activeTab === 'api_cung_cap'
                   ? 'border-blue-600 text-blue-600'
@@ -352,7 +480,7 @@ export function DataProvisionApiManagementPage() {
               API Cung cấp dữ liệu ({apis.length})
             </button>
             <button
-              onClick={() => { setActiveTab('api_doi_soat'); setSearchTerm(''); setCurrentPage(1); }}
+              onClick={() => handleTabChange('api_doi_soat')}
               className={`flex items-center gap-2 pb-3 pt-4 text-[13px] font-medium transition-colors border-b-2 whitespace-nowrap ${
                 activeTab === 'api_doi_soat'
                   ? 'border-blue-600 text-blue-600'
@@ -363,7 +491,7 @@ export function DataProvisionApiManagementPage() {
               API Đối soát dữ liệu ({recons.length})
             </button>
             <button
-              onClick={() => { setActiveTab('phan_quyen'); setSearchTerm(''); setCurrentPage(1); }}
+              onClick={() => handleTabChange('phan_quyen')}
               className={`flex items-center gap-2 pb-3 pt-4 text-[13px] font-medium transition-colors border-b-2 whitespace-nowrap ${
                 activeTab === 'phan_quyen'
                   ? 'border-blue-600 text-blue-600'
@@ -374,7 +502,7 @@ export function DataProvisionApiManagementPage() {
               Phân quyền truy cập ({permissions.length})
             </button>
             <button
-              onClick={() => { setActiveTab('danh_sach_tai_khoan'); setSearchTerm(''); setCurrentPage(1); }}
+              onClick={() => handleTabChange('danh_sach_tai_khoan')}
               className={`flex items-center gap-2 pb-3 pt-4 text-[13px] font-medium transition-colors border-b-2 whitespace-nowrap ${
                 activeTab === 'danh_sach_tai_khoan'
                   ? 'border-blue-600 text-blue-600'
@@ -392,174 +520,180 @@ export function DataProvisionApiManagementPage() {
           <div className="space-y-6">
             
             {/* Filters and Actions */}
-            <div className="mb-6">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex-1 flex items-center gap-3">
-                  <div className="relative flex-1">
-                    <input
-                      type="text"
-                      placeholder={
-                        activeTab === 'api_cung_cap'
-                          ? "Tìm kiếm API cung cấp theo tên, mã hoặc endpoint..."
-                          : activeTab === 'api_doi_soat'
-                          ? "Tìm kiếm API đối soát theo tên hoặc hệ thống..."
-                          : activeTab === 'phan_quyen'
-                          ? "Tìm kiếm quyền truy cập theo đơn vị..."
-                          : "Tìm kiếm tài khoản theo username hoặc đơn vị..."
-                      }
-                      className="w-full px-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
-                      value={searchTerm}
-                      onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-                    />
+            {activeTab !== 'phan_quyen' && (
+              <div className="mb-6">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex-1 flex items-center gap-3">
+                    <div className="relative flex-1">
+                      <input
+                        type="text"
+                        placeholder={
+                          activeTab === 'api_cung_cap'
+                            ? "Tìm kiếm API cung cấp theo tên, mã hoặc endpoint..."
+                            : activeTab === 'api_doi_soat'
+                            ? "Tìm kiếm API đối soát theo tên hoặc hệ thống..."
+                            : activeTab === 'phan_quyen'
+                            ? "Tìm kiếm quyền truy cập theo đơn vị..."
+                            : "Tìm kiếm tài khoản theo username hoặc đơn vị..."
+                        }
+                        className="w-full px-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                        value={searchTerm}
+                        onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+                      />
+                    </div>
+                    <button className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center">
+                      <Search className="w-5 h-5" />
+                    </button>
+                    {(activeTab === 'api_cung_cap' || activeTab === 'api_doi_soat') && (
+                      <button
+                        onClick={() => setShowFilters(!showFilters)}
+                        className={`p-2 rounded-lg transition-colors shadow-sm flex items-center justify-center border ${showFilters ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-[#e2e8f0] text-slate-600 hover:bg-slate-50'}`}
+                        title="Bộ lọc"
+                      >
+                        {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
+                      </button>
+                    )}
                   </div>
-                  <button className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center">
-                    <Search className="w-5 h-5" />
-                  </button>
-                  {(activeTab === 'api_cung_cap' || activeTab === 'api_doi_soat') && (
-                    <button
-                      onClick={() => setShowFilters(!showFilters)}
-                      className={`p-2 rounded-lg transition-colors shadow-sm flex items-center justify-center border ${showFilters ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-[#e2e8f0] text-slate-600 hover:bg-slate-50'}`}
-                      title="Bộ lọc"
-                    >
-                      {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
-                    </button>
-                  )}
+
+                  <div className="flex items-center gap-3">
+                    {activeTab === 'api_cung_cap' && (
+                      <button
+                        onClick={() => {
+                          setSelectedApi(null);
+                          setApiModalMode('edit');
+                          setShowApiModal(true);
+                        }}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium whitespace-nowrap"
+                        title="Tạo API Cung cấp mới"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Tạo API Cung cấp mới
+                      </button>
+                    )}
+                    {activeTab === 'api_doi_soat' && (
+                      <button
+                        onClick={() => {
+                          setSelectedRecon(null);
+                          setShowReconModal(true);
+                        }}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium whitespace-nowrap"
+                        title="Tạo API Đối soát mới"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Tạo API Đối soát mới
+                      </button>
+                    )}
+
+                    {activeTab === 'danh_sach_tai_khoan' && (
+                      <button
+                        onClick={() => {
+                          setSelectedAccount(null);
+                          setShowAccountModal(true);
+                        }}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium whitespace-nowrap"
+                        title="Tạo tài khoản mới"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Tạo tài khoản mới
+                      </button>
+                    )}
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  {activeTab === 'api_cung_cap' && (
-                    <button
-                      onClick={() => {
-                        setSelectedApi(null);
-                        setShowApiModal(true);
-                      }}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium whitespace-nowrap"
-                      title="Tạo API Cung cấp mới"
-                    >
-                      <Plus className="w-4 h-4" />
-                      Tạo API Cung cấp mới
-                    </button>
-                  )}
-                  {activeTab === 'api_doi_soat' && (
-                    <button
-                      onClick={() => {
-                        setSelectedRecon(null);
-                        setShowReconModal(true);
-                      }}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium whitespace-nowrap"
-                      title="Tạo API Đối soát mới"
-                    >
-                      <Plus className="w-4 h-4" />
-                      Tạo API Đối soát mới
-                    </button>
-                  )}
-
-                  {activeTab === 'danh_sach_tai_khoan' && (
-                    <button
-                      onClick={() => setShowAccountModal(true)}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium whitespace-nowrap"
-                      title="Tạo tài khoản mới"
-                    >
-                      <Plus className="w-4 h-4" />
-                      Tạo tài khoản mới
-                    </button>
-                  )}
-                </div>
+                {/* Row 2: Filters Panel */}
+                {showFilters && (activeTab === 'api_cung_cap' || activeTab === 'api_doi_soat') && (
+                  <div className="bg-slate-50 p-5 rounded-lg border border-slate-200 grid grid-cols-4 gap-4 mt-4 animate-in slide-in-from-top-2 duration-200 shadow-sm relative z-20">
+                    <div className="absolute -top-2 right-[200px] w-4 h-4 bg-slate-50 border-t border-l border-slate-200 transform rotate-45"></div>
+                    {activeTab === 'api_cung_cap' && (
+                      <>
+                        <div>
+                          <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">Phương thức kết nối</label>
+                          <select
+                            value={filterMethod}
+                            onChange={(e) => { setFilterMethod(e.target.value); setCurrentPage(1); }}
+                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm cursor-pointer"
+                          >
+                            <option value="All">Tất cả phương thức</option>
+                            <option value="GET">GET</option>
+                            <option value="POST">POST</option>
+                            <option value="PUT">PUT</option>
+                            <option value="DELETE">DELETE</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">Trạng thái API</label>
+                          <select
+                            value={filterStatus}
+                            onChange={(e) => { setFilterStatus(e.target.value); setCurrentPage(1); }}
+                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm cursor-pointer"
+                          >
+                            <option value="All">Tất cả trạng thái</option>
+                            <option value="Hoạt động">Hoạt động (Active)</option>
+                            <option value="Tạm ngưng">Tạm ngưng (Inactive)</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">Phiên bản API</label>
+                          <select
+                            value={filterVersion}
+                            onChange={(e) => { setFilterVersion(e.target.value); setCurrentPage(1); }}
+                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm cursor-pointer"
+                          >
+                            <option value="All">Tất cả phiên bản</option>
+                            <option value="v1.0">v1.0</option>
+                            <option value="v1.1">v1.1</option>
+                            <option value="v1.2">v1.2</option>
+                            <option value="v2.0">v2.0</option>
+                          </select>
+                        </div>
+                      </>
+                    )}
+                    {activeTab === 'api_doi_soat' && (
+                      <>
+                        <div>
+                          <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">Tần suất đối soát</label>
+                          <select
+                            value={filterReconSchedule}
+                            onChange={(e) => { setFilterReconSchedule(e.target.value); setCurrentPage(1); }}
+                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm cursor-pointer"
+                          >
+                            <option value="All">Tất cả tần suất</option>
+                            <option value="Hàng ngày">Hàng ngày (Daily)</option>
+                            <option value="Hàng tuần">Hàng tuần (Weekly)</option>
+                            <option value="Theo yêu cầu">Theo yêu cầu (On-demand)</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">Trạng thái đối soát</label>
+                          <select
+                            value={filterStatus}
+                            onChange={(e) => { setFilterStatus(e.target.value); setCurrentPage(1); }}
+                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm cursor-pointer"
+                          >
+                            <option value="All">Tất cả trạng thái</option>
+                            <option value="Hoạt động">Hoạt động (Active)</option>
+                            <option value="Tạm ngưng">Tạm ngưng (Inactive)</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">API liên kết đối soát</label>
+                          <select
+                            value={filterReconApi}
+                            onChange={(e) => { setFilterReconApi(e.target.value); setCurrentPage(1); }}
+                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm cursor-pointer"
+                          >
+                            <option value="All">Tất cả API liên kết</option>
+                            <option value="Lấy danh sách Hộ tịch">Lấy danh sách Hộ tịch</option>
+                            <option value="Đồng bộ dữ liệu THADS">Đồng bộ dữ liệu THADS</option>
+                            <option value="Đọc thông tin Biện pháp bảo đảm">Đọc thông tin Biện pháp bảo đảm</option>
+                          </select>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
-
-              {/* Row 2: Filters Panel */}
-              {showFilters && (activeTab === 'api_cung_cap' || activeTab === 'api_doi_soat') && (
-                <div className="bg-slate-50 p-5 rounded-lg border border-slate-200 grid grid-cols-4 gap-4 mt-4 animate-in slide-in-from-top-2 duration-200 shadow-sm relative z-20">
-                  <div className="absolute -top-2 right-[200px] w-4 h-4 bg-slate-50 border-t border-l border-slate-200 transform rotate-45"></div>
-                  {activeTab === 'api_cung_cap' && (
-                    <>
-                      <div>
-                        <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">Phương thức kết nối</label>
-                        <select
-                          value={filterMethod}
-                          onChange={(e) => { setFilterMethod(e.target.value); setCurrentPage(1); }}
-                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm cursor-pointer"
-                        >
-                          <option value="All">Tất cả phương thức</option>
-                          <option value="GET">GET</option>
-                          <option value="POST">POST</option>
-                          <option value="PUT">PUT</option>
-                          <option value="DELETE">DELETE</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">Trạng thái API</label>
-                        <select
-                          value={filterStatus}
-                          onChange={(e) => { setFilterStatus(e.target.value); setCurrentPage(1); }}
-                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm cursor-pointer"
-                        >
-                          <option value="All">Tất cả trạng thái</option>
-                          <option value="Hoạt động">Hoạt động (Active)</option>
-                          <option value="Tạm ngưng">Tạm ngưng (Inactive)</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">Phiên bản API</label>
-                        <select
-                          value={filterVersion}
-                          onChange={(e) => { setFilterVersion(e.target.value); setCurrentPage(1); }}
-                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm cursor-pointer"
-                        >
-                          <option value="All">Tất cả phiên bản</option>
-                          <option value="v1.0">v1.0</option>
-                          <option value="v1.1">v1.1</option>
-                          <option value="v1.2">v1.2</option>
-                          <option value="v2.0">v2.0</option>
-                        </select>
-                      </div>
-                    </>
-                  )}
-                  {activeTab === 'api_doi_soat' && (
-                    <>
-                      <div>
-                        <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">Tần suất đối soát</label>
-                        <select
-                          value={filterReconSchedule}
-                          onChange={(e) => { setFilterReconSchedule(e.target.value); setCurrentPage(1); }}
-                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm cursor-pointer"
-                        >
-                          <option value="All">Tất cả tần suất</option>
-                          <option value="Hàng ngày">Hàng ngày (Daily)</option>
-                          <option value="Hàng tuần">Hàng tuần (Weekly)</option>
-                          <option value="Theo yêu cầu">Theo yêu cầu (On-demand)</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">Trạng thái đối soát</label>
-                        <select
-                          value={filterStatus}
-                          onChange={(e) => { setFilterStatus(e.target.value); setCurrentPage(1); }}
-                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm cursor-pointer"
-                        >
-                          <option value="All">Tất cả trạng thái</option>
-                          <option value="Hoạt động">Hoạt động (Active)</option>
-                          <option value="Tạm ngưng">Tạm ngưng (Inactive)</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">API liên kết đối soát</label>
-                        <select
-                          value={filterReconApi}
-                          onChange={(e) => { setFilterReconApi(e.target.value); setCurrentPage(1); }}
-                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm cursor-pointer"
-                        >
-                          <option value="All">Tất cả API liên kết</option>
-                          <option value="Lấy danh sách Hộ tịch">Lấy danh sách Hộ tịch</option>
-                          <option value="Đồng bộ dữ liệu THADS">Đồng bộ dữ liệu THADS</option>
-                          <option value="Đọc thông tin Biện pháp bảo đảm">Đọc thông tin Biện pháp bảo đảm</option>
-                        </select>
-                      </div>
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
+            )}
 
             {/* TAB 1: API CUNG CẤP DỮ LIỆU */}
             {activeTab === 'api_cung_cap' && (
@@ -617,7 +751,14 @@ export function DataProvisionApiManagementPage() {
                             <td className="py-3 px-4 text-center">
                               <div className="flex items-center justify-center gap-1">
                                 <button
-                                  onClick={() => { setSelectedApi(api); setShowApiModal(true); }}
+                                  onClick={() => { setSelectedApi(api); setApiModalMode('view'); setShowApiModal(true); }}
+                                  className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-[6px] transition-all inline-flex items-center justify-center group cursor-pointer"
+                                  title="Xem chi tiết API"
+                                >
+                                  <Eye className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                                </button>
+                                <button
+                                  onClick={() => { setSelectedApi(api); setApiModalMode('edit'); setShowApiModal(true); }}
                                   className="p-1.5 text-black hover:text-slate-700 hover:bg-slate-100 rounded-[6px] transition-all inline-flex items-center justify-center group cursor-pointer"
                                   title="Sửa thông tin API"
                                 >
@@ -803,9 +944,9 @@ export function DataProvisionApiManagementPage() {
                         <thead>
                           <tr className="bg-slate-50 text-[13px] font-semibold text-slate-500 border-b border-slate-200 uppercase tracking-tight">
                             <th className="py-3 px-4 text-left font-semibold">Đơn vị được cấp quyền</th>
+                            <th className="py-3 px-4 text-left font-semibold">Tài khoản (Username)</th>
                             <th className="py-3 px-4 text-left font-semibold">IP Whitelist</th>
                             <th className="py-3 px-4 text-left font-semibold">Thời hạn hiệu lực</th>
-                            <th className="py-3 px-4 text-left font-semibold">Trạng thái</th>
                             <th className="py-3 px-4 text-center font-semibold">Thu hồi</th>
                           </tr>
                         </thead>
@@ -820,19 +961,18 @@ export function DataProvisionApiManagementPage() {
                             paginatedPermissions.map(perm => (
                               <tr key={perm.id} className="hover:bg-slate-50/50 transition-all border-b border-slate-100">
                                 <td className="py-3.5 px-4 font-semibold text-slate-800">{perm.organization}</td>
+                                <td className="py-3.5 px-4 text-xs font-semibold text-slate-600">
+                                  {(() => {
+                                    const acc = accounts.find(a => a.organization === perm.organization && a.apiName === perm.apiName);
+                                    return acc ? acc.username : '-';
+                                  })()}
+                                </td>
                                 <td className="py-3.5 px-4 font-mono text-xs text-slate-500">{perm.ipWhitelist}</td>
                                 <td className="py-3.5 px-4 text-slate-600 text-xs">
                                   <div className="flex items-center gap-1.5">
                                     <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                                     <span>{perm.validFrom} ~ {perm.validTo}</span>
                                   </div>
-                                </td>
-                                <td className="py-3.5 px-4">
-                                  <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-normal ${perm.status === 'Hợp lệ' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'
-                                    }`}>
-                                    <CheckCircle2 className={`w-3.5 h-3.5 ${perm.status === 'Hợp lệ' ? 'text-emerald-500' : 'text-red-500'} shrink-0`} />
-                                    {perm.status}
-                                  </span>
                                 </td>
                                 <td className="py-3.5 px-4 text-center">
                                   <button
@@ -866,7 +1006,6 @@ export function DataProvisionApiManagementPage() {
                         <th className="py-3 px-4 text-left font-semibold">Tài khoản (Username)</th>
                         <th className="py-3 px-4 text-left font-semibold">Đơn vị được cấp quyền</th>
                         <th className="py-3 px-4 text-left font-semibold">Client ID / App Key</th>
-                        <th className="py-3 px-4 text-left font-semibold">API được phép gọi</th>
                         <th className="py-3 px-4 text-left font-semibold">Ngày tạo</th>
                         <th className="py-3 px-4 text-left font-semibold">Trạng thái</th>
                         <th className="py-3 px-4 text-center font-semibold">Thao tác</th>
@@ -875,7 +1014,7 @@ export function DataProvisionApiManagementPage() {
                     <tbody className="divide-y divide-slate-100 text-slate-700 text-[13px]">
                       {paginatedAccounts.length === 0 ? (
                         <tr>
-                          <td colSpan={7} className="py-8 text-center text-slate-500 font-medium">
+                          <td colSpan={6} className="py-8 text-center text-slate-500 font-medium">
                             Chưa có tài khoản nào được tạo.
                           </td>
                         </tr>
@@ -892,11 +1031,6 @@ export function DataProvisionApiManagementPage() {
                             </td>
                             <td className="py-3.5 px-4 text-left font-medium text-slate-600">{acc.organization}</td>
                             <td className="py-3.5 px-4 text-left font-mono text-xs text-slate-500">{acc.clientId}</td>
-                            <td className="py-3.5 px-4 text-left text-xs">
-                              <span className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded border border-slate-200">
-                                {acc.apiName}
-                              </span>
-                            </td>
                             <td className="py-3.5 px-4 text-left text-slate-400 font-mono text-xs">{formatDateTime(acc.createdAt)}</td>
                             <td className="py-3.5 px-4 text-left">
                               <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-normal ${acc.status === 'Hoạt động' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-slate-50 text-slate-500 border border-slate-200'}`}>
@@ -906,6 +1040,16 @@ export function DataProvisionApiManagementPage() {
                             </td>
                             <td className="py-3.5 px-4 text-center">
                               <div className="flex items-center justify-center gap-1">
+                                <button
+                                  onClick={() => {
+                                    setSelectedAccount(acc);
+                                    setShowAccountModal(true);
+                                  }}
+                                  className="p-1.5 text-black hover:text-slate-700 hover:bg-slate-100 rounded-[6px] transition-all inline-flex items-center justify-center group cursor-pointer"
+                                  title="Chỉnh sửa tài khoản"
+                                >
+                                  <Edit className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                                </button>
                                 <button
                                   onClick={() => setConfirmRefreshAccountId(acc.id)}
                                   className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-[6px] transition-colors"
@@ -957,6 +1101,7 @@ export function DataProvisionApiManagementPage() {
         onClose={() => setShowApiModal(false)}
         apiData={selectedApi}
         onSave={handleSaveApi}
+        mode={apiModalMode}
       />
 
       {/* API Reconciliation Modal */}
@@ -994,17 +1139,23 @@ export function DataProvisionApiManagementPage() {
       <ProvisionAccountModal
         isOpen={showAccountModal}
         onClose={() => setShowAccountModal(false)}
-        organizations={Array.from(new Set(permissions.map(p => p.organization)))}
+        organizations={Array.from(new Set([...accounts.map(a => a.organization), 'Bộ Kế hoạch và Đầu tư', 'Sở Tài chính tỉnh Bắc Ninh', 'Sở Tư pháp tỉnh Bắc Ninh', 'Sở Thông tin và Truyền thông tỉnh Bắc Ninh', 'Công an tỉnh Bắc Ninh', 'Sở Y tế tỉnh Bắc Ninh']))}
+        accountData={selectedAccount}
         onSave={(data) => {
-          setAccounts([...accounts, { ...data, id: `acc_${Date.now()}`, status: 'Hoạt động', createdAt: new Date().toISOString().split('T')[0] }]);
-          setSelectedUnitForAccount(data.organization);
-          triggerToast('Đã tạo tài khoản mới thành công!');
+          if (selectedAccount) {
+            setAccounts(accounts.map(a => a.id === selectedAccount.id ? { ...a, ...data } : a));
+            triggerToast('Đã cập nhật tài khoản thành công!');
+          } else {
+            setAccounts([...accounts, { ...data, id: `acc_${Date.now()}`, status: 'Hoạt động', createdAt: new Date().toISOString().split('T')[0] }]);
+            setSelectedUnitForAccount(data.organization);
+            triggerToast('Đã tạo tài khoản mới thành công!');
+          }
         }}
       />
 
       {/* Confirm Refresh Token Modal */}
-      {confirmRefreshAccountId && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+      {confirmRefreshAccountId && createPortal(
+        <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
             <div className="px-6 py-4 border-b border-slate-200 flex items-center gap-3 bg-amber-50 text-amber-700">
               <RefreshCw className="w-5 h-5" />
@@ -1032,11 +1183,11 @@ export function DataProvisionApiManagementPage() {
             </div>
           </div>
         </div>
-      )}
+      , document.body)}
 
       {/* New Token Result Modal */}
-      {newTokenResult && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+      {newTokenResult && createPortal(
+        <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
             <div className="px-6 py-4 border-b border-slate-200 flex items-center gap-3 bg-green-50 text-green-700">
               <KeyRound className="w-5 h-5" />
@@ -1070,7 +1221,7 @@ export function DataProvisionApiManagementPage() {
             </div>
           </div>
         </div>
-      )}
+      , document.body)}
 
       {statusConfirmData && createPortal(
         <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">

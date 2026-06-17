@@ -39,7 +39,38 @@ const formatDateTime = (dateStr: string) => {
 };
 
 export function DataProvisionServiceSetupPage() {
-  const [activeTab, setActiveTab] = useState<'setup' | 'approve' | 'publish'>('setup');
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const getInitialTab = () => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab === 'setup' || tab === 'approve' || tab === 'publish') {
+      return tab as 'setup' | 'approve' | 'publish';
+    }
+    return 'setup';
+  };
+
+  const [activeTab, setActiveTab] = useState<'setup' | 'approve' | 'publish'>(getInitialTab);
+
+  const handleTabChange = (tab: 'setup' | 'approve' | 'publish') => {
+    setActiveTab(tab);
+    setCurrentPage(1);
+    const params = new URLSearchParams(location.search);
+    params.set('tab', tab);
+    navigate(`${location.pathname}?${params.toString()}`, { replace: true });
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    if (tab === 'setup' || tab === 'approve' || tab === 'publish') {
+      if (tab !== activeTab) {
+        setActiveTab(tab);
+      }
+    }
+  }, [location.search, activeTab]);
+
   const [approvalSearchTerm, setApprovalSearchTerm] = useState('');
   const [showApprovalFilters, setShowApprovalFilters] = useState(false);
   const [approvalFilterDataType, setApprovalFilterDataType] = useState('all');
@@ -56,15 +87,14 @@ export function DataProvisionServiceSetupPage() {
   const [approvalModalMode, setApprovalModalMode] = useState<'approve' | 'reject'>('approve');
   const [serviceModalMode, setServiceModalMode] = useState<'view' | 'edit'>('edit');
 
-  const location = useLocation();
-  const navigate = useNavigate();
-
   useEffect(() => {
     if (location.search.includes('action=create')) {
       setSelectedService(null);
       setShowServiceModal(true);
       // Clean up the URL to prevent reopening on refresh
-      navigate(location.pathname, { replace: true });
+      const params = new URLSearchParams(location.search);
+      params.delete('action');
+      navigate(`${location.pathname}?${params.toString()}`, { replace: true });
     }
   }, [location.search, navigate]);
 
@@ -86,12 +116,25 @@ export function DataProvisionServiceSetupPage() {
   };
 
   // Dynamic services list (including standard fields from UI mockups)
-  const [services, setServices] = useState([
-    { id: '1', name: 'API cung cấp dữ liệu Hộ tịch điện tử', code: 'SVC-HOTICH-001', type: 'Dữ liệu Hộ tịch', freq: 'Thời gian thực', protocol: 'REST API (JSON)', status: 'published', date: '2026-05-24 08:00:00', publishDate: '25/05/2026 09:00:00', creator: 'Hệ thống BTP' },
-    { id: '2', name: 'API đối soát dữ liệu đăng ký kết hôn', code: 'SVC-KETHON-002', type: 'Dữ liệu kết hôn', freq: 'Hàng ngày', protocol: 'REST API (JSON)', status: 'pending', date: '2026-05-25 09:30:00', publishDate: '', creator: 'Nguyễn Văn A' },
-    { id: '3', name: 'API cung cấp thông tin khai sinh', code: 'SVC-KHAISINH-003', type: 'Dữ liệu khai sinh', freq: 'Thời gian thực', protocol: 'REST API (JSON)', status: 'draft', date: '2026-05-25 14:15:00', publishDate: '', creator: 'Trần Thị B' },
-    { id: '4', name: 'API đối soát dữ liệu khai tử', code: 'SVC-KHAITU-004', type: 'Dữ liệu khai tử', freq: 'Hàng tuần', protocol: 'SOAP (XML)', status: 'rejected', date: '2026-05-23 16:45:00', publishDate: '', creator: 'Lê Văn C' }
-  ]);
+  const [services, setServices] = useState<any[]>(() => {
+    const saved = localStorage.getItem('provision_services');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {}
+    }
+    return [
+      { id: '1', name: 'API cung cấp dữ liệu Hộ tịch điện tử', code: 'SVC-HOTICH-001', type: 'Dữ liệu Hộ tịch', freq: 'Thời gian thực', protocol: 'REST API (JSON)', status: 'published', date: '2026-05-24 08:00:00', publishDate: '25/05/2026 09:00:00', creator: 'Hệ thống BTP', consumerUnit: 'Bộ Kế hoạch và Đầu tư, Sở Tài chính tỉnh Bắc Ninh' },
+      { id: '2', name: 'API đối soát dữ liệu đăng ký kết hôn', code: 'SVC-KETHON-002', type: 'Dữ liệu kết hôn', freq: 'Hàng ngày', protocol: 'REST API (JSON)', status: 'pending', date: '2026-05-25 09:30:00', publishDate: '', creator: 'Nguyễn Văn A', consumerUnit: 'Sở Tài chính tỉnh Bắc Ninh' },
+      { id: '3', name: 'API cung cấp thông tin khai sinh', code: 'SVC-KHAISINH-003', type: 'Dữ liệu khai sinh', freq: 'Thời gian thực', protocol: 'REST API (JSON)', status: 'draft', date: '2026-05-25 14:15:00', publishDate: '', creator: 'Trần Thị B', consumerUnit: 'Công an tỉnh Bắc Ninh' },
+      { id: '4', name: 'API đối soát dữ liệu khai tử', code: 'SVC-KHAITU-004', type: 'Dữ liệu khai tử', freq: 'Hàng tuần', protocol: 'SOAP (XML)', status: 'rejected', date: '2026-05-23 16:45:00', publishDate: '', creator: 'Lê Văn C', consumerUnit: 'Sở Y tế tỉnh Bắc Ninh' }
+    ];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('provision_services', JSON.stringify(services));
+  }, [services]);
 
   const filteredServices = services.filter(item => {
     // 1. Tab-specific base filter
@@ -138,7 +181,7 @@ export function DataProvisionServiceSetupPage() {
         <div className="bg-white border-b border-slate-200 px-6">
           <div className="flex gap-6">
             <button
-              onClick={() => { setActiveTab('setup'); setCurrentPage(1); }}
+              onClick={() => handleTabChange('setup')}
               className={`flex items-center gap-2 pb-3 pt-4 text-[13px] font-medium transition-colors border-b-2 whitespace-nowrap ${
                 activeTab === 'setup'
                   ? 'border-blue-600 text-blue-600'
@@ -149,7 +192,7 @@ export function DataProvisionServiceSetupPage() {
               Thiết lập dịch vụ
             </button>
             <button
-              onClick={() => { setActiveTab('approve'); setCurrentPage(1); }}
+              onClick={() => handleTabChange('approve')}
               className={`flex items-center gap-2 pb-3 pt-4 text-[13px] font-medium transition-colors border-b-2 whitespace-nowrap ${
                 activeTab === 'approve'
                   ? 'border-blue-600 text-blue-600'
@@ -160,7 +203,7 @@ export function DataProvisionServiceSetupPage() {
               Kiểm tra & Phê duyệt
             </button>
             <button
-              onClick={() => { setActiveTab('publish'); setCurrentPage(1); }}
+              onClick={() => handleTabChange('publish')}
               className={`flex items-center gap-2 pb-3 pt-4 text-[13px] font-medium transition-colors border-b-2 whitespace-nowrap ${
                 activeTab === 'publish'
                   ? 'border-blue-600 text-blue-600'
@@ -362,58 +405,25 @@ export function DataProvisionServiceSetupPage() {
             <div className="space-y-4">
               {/* Stat Cards */}
               {activeTab === 'setup' && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-in fade-in duration-300">
-                  <div className="bg-white rounded-lg border border-slate-200 p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-blue-50 rounded-lg">
-                        <Database className="w-5 h-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <div className="text-xs text-slate-500">Tổng số API</div>
-                        <div className="text-lg font-bold text-slate-950">{services.length}</div>
-                        <div className="text-[11px] text-slate-400 font-medium">Đang cấu hình chia sẻ</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-white rounded-lg border border-slate-200 p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-green-50 rounded-lg">
-                        <CheckCircle className="w-5 h-5 text-green-600" />
-                      </div>
-                      <div>
-                        <div className="text-xs text-slate-500">Đang công khai</div>
-                        <div className="text-lg font-bold text-slate-950">{services.filter(s => s.status === 'published').length}</div>
-                        <div className="text-[11px] text-slate-400 font-medium">Đã xuất bản & kết nối</div>
+                <div className="flex gap-3 animate-in fade-in duration-300">
+                  {[
+                    { label: 'Tổng số API', value: services.length, icon: <Database className="w-4 h-4 text-blue-600" />, bg: 'bg-blue-50' },
+                    { label: 'Đang công khai', value: services.filter(s => s.status === 'published').length, icon: <CheckCircle className="w-4 h-4 text-green-600" />, bg: 'bg-green-50' },
+                    { label: 'Chờ phê duyệt', value: services.filter(s => s.status === 'pending').length, icon: <Clock className="w-4 h-4 text-amber-600" />, bg: 'bg-amber-50' },
+                    { label: 'Đã từ chối', value: services.filter(s => s.status === 'rejected').length, icon: <XCircle className="w-4 h-4 text-red-600" />, bg: 'bg-red-50' },
+                    { label: 'Đã duyệt', value: services.filter(s => s.status === 'approved').length, icon: <CheckCircle className="w-4 h-4 text-emerald-600" />, bg: 'bg-emerald-50' },
+                    { label: 'Bản nháp', value: services.filter(s => s.status === 'draft').length, icon: <FileText className="w-4 h-4 text-slate-500" />, bg: 'bg-slate-100' },
+                  ].map(card => (
+                    <div key={card.label} className="flex-1 bg-white rounded-lg border border-slate-200 px-3 py-3">
+                      <div className="flex items-center gap-2">
+                        <div className={`p-1.5 ${card.bg} rounded-md flex-shrink-0`}>{card.icon}</div>
+                        <div className="min-w-0">
+                          <div className="text-[11px] text-slate-500 truncate">{card.label}</div>
+                          <div className="text-base font-bold text-slate-950 leading-tight">{card.value}</div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-
-                  <div className="bg-white rounded-lg border border-slate-200 p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-amber-50 rounded-lg">
-                        <Clock className="w-5 h-5 text-amber-600" />
-                      </div>
-                      <div>
-                        <div className="text-xs text-slate-500">Chờ phê duyệt</div>
-                        <div className="text-lg font-bold text-slate-950">{services.filter(s => s.status === 'pending').length}</div>
-                        <div className="text-[11px] text-slate-400 font-medium">Đang chờ hội đồng duyệt</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-white rounded-lg border border-slate-200 p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-red-50 rounded-lg">
-                        <XCircle className="w-5 h-5 text-red-600" />
-                      </div>
-                      <div>
-                        <div className="text-xs text-slate-500">Đã từ chối</div>
-                        <div className="text-lg font-bold text-slate-950">{services.filter(s => s.status === 'rejected').length}</div>
-                        <div className="text-[11px] text-slate-400 font-medium">Cần cập nhật cấu hình</div>
-                      </div>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               )}
 
@@ -747,18 +757,50 @@ export function DataProvisionServiceSetupPage() {
       <ProvisionServiceModal
         isOpen={showServiceModal}
         onClose={() => setShowServiceModal(false)}
-        onSave={(isPublic) => {
-          if (isPublic) setActiveTab('publish');
+        onSave={(data, isPublic) => {
+          const now = new Date();
+          const day = String(now.getDate()).padStart(2, '0');
+          const month = String(now.getMonth() + 1).padStart(2, '0');
+          const year = now.getFullYear();
+          const h = String(now.getHours()).padStart(2, '0');
+          const m = String(now.getMinutes()).padStart(2, '0');
+          const s = String(now.getSeconds()).padStart(2, '0');
+          const dateStr = `${day}/${month}/${year} ${h}:${m}:${s}`;
+          
+          const newService = {
+            ...data,
+            id: selectedService ? selectedService.id : Date.now().toString(),
+            status: isPublic ? 'published' : (selectedService?.status || 'draft'),
+            creator: selectedService ? selectedService.creator : 'Hệ thống BTP',
+            date: selectedService ? selectedService.date : dateStr,
+            publishDate: isPublic ? dateStr : (selectedService?.publishDate || '')
+          };
+
+          if (selectedService) {
+            setServices(services.map(s => s.id === selectedService.id ? newService : s));
+          } else {
+            setServices([...services, newService]);
+          }
+          if (isPublic) {
+            setActiveTab('publish');
+          }
         }}
-        onSaveDraft={() => {
-          const newService = selectedService ? { ...selectedService, status: 'draft' } : {
-            id: Date.now().toString(),
-            name: 'Bản nháp dịch vụ mới',
-            code: `DV_DRAFT_${Math.floor(Math.random() * 1000)}`,
-            type: 'Chưa xác định',
-            freq: 'Chưa cấu hình',
-            protocol: 'REST API',
-            status: 'draft'
+        onSaveDraft={(data) => {
+          const now = new Date();
+          const day = String(now.getDate()).padStart(2, '0');
+          const month = String(now.getMonth() + 1).padStart(2, '0');
+          const year = now.getFullYear();
+          const h = String(now.getHours()).padStart(2, '0');
+          const m = String(now.getMinutes()).padStart(2, '0');
+          const s = String(now.getSeconds()).padStart(2, '0');
+          const dateStr = `${day}/${month}/${year} ${h}:${m}:${s}`;
+          
+          const newService = {
+            ...data,
+            id: selectedService ? selectedService.id : Date.now().toString(),
+            status: 'draft',
+            creator: selectedService ? selectedService.creator : 'Hệ thống BTP',
+            date: selectedService ? selectedService.date : dateStr
           };
 
           if (selectedService) {
@@ -769,7 +811,8 @@ export function DataProvisionServiceSetupPage() {
           setShowServiceModal(false);
           alert("Đã lưu bản nháp dịch vụ!");
         }}
-        onSubmitApproval={() => {
+        onSubmitApproval={(data) => {
+          setSelectedService(data);
           setShowServiceModal(false);
           setShowSubmitApprovalModal(true);
         }}

@@ -37,6 +37,32 @@ export function ProvisionAccessControlModal({
 
   if (!isOpen) return null;
 
+  const getUsernameForOrg = (org: string) => {
+    const saved = localStorage.getItem('provision_accounts');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          const found = parsed.find((a: any) => a.organization === org && a.apiName === apiName);
+          if (found) return found.username;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    // Fallback if not found: generate a default prefix based on organization name
+    let prefix = 'org';
+    if (org.includes('Công an')) prefix = 'ca';
+    else if (org.includes('Y tế')) prefix = 'yte';
+    else if (org.includes('Tài chính')) prefix = 'tc';
+    else if (org.includes('Kế hoạch')) prefix = 'khdt';
+    else if (org.includes('Lao động')) prefix = 'sld';
+    else if (org.includes('Giáo dục')) prefix = 'sgd';
+    else if (org.includes('Thông tin')) prefix = 'stttt';
+    
+    return `${prefix}_bacninh_default`;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
@@ -54,7 +80,7 @@ export function ProvisionAccessControlModal({
         onSave({
           id: Math.random().toString(36).substr(2, 9),
           organization: org,
-          authorization: generateToken(org),
+          authorization: getUsernameForOrg(org),
           scopes: scopes.join(', '),
           ipWhitelist: form.ipWhitelist.value.trim() || 'Tất cả IP',
           validFrom: form.validFrom.value,
@@ -201,13 +227,25 @@ export function ProvisionAccessControlModal({
                 )}
               </div>
 
-              {/* Authorization Token */}
+              {/* Tài khoản (Username) */}
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Authorization Token (riêng cho từng đơn vị) <span className="text-red-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Tài khoản (Username)
                 </label>
-                <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-500 text-xs leading-relaxed">
-                  Hệ thống sẽ tự động khởi tạo mã truy cập (Authorization Token) riêng biệt, ngẫu nhiên và bảo mật cho từng Đơn vị/Tổ chức thụ hưởng được chọn ở trên sau khi nhấn "Cấp quyền truy cập".
+                <div className="border border-slate-200 rounded-lg p-3 bg-slate-50 space-y-1.5 min-h-[42px] max-h-[120px] overflow-y-auto">
+                  {selectedOrgs.length === 0 ? (
+                    <span className="text-slate-400 text-xs italic">Chưa chọn đơn vị thụ hưởng</span>
+                  ) : (
+                    selectedOrgs.map(org => {
+                      const username = getUsernameForOrg(org);
+                      return (
+                        <div key={org} className="flex justify-between items-center text-xs">
+                          <span className="text-slate-600 font-medium">{org}</span>
+                          <span className="font-mono font-bold text-slate-800 bg-slate-200/50 px-2.5 py-0.5 rounded border border-slate-200/50">{username}</span>
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
               </div>
 

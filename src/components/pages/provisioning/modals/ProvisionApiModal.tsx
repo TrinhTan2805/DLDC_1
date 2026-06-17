@@ -15,9 +15,11 @@ interface ProvisionApiModalProps {
   onClose: () => void;
   apiData?: any;
   onSave?: (data: any) => void;
+  mode?: 'view' | 'edit';
 }
 
-export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: ProvisionApiModalProps) {
+export function ProvisionApiModal({ isOpen, onClose, apiData, onSave, mode = 'edit' }: ProvisionApiModalProps) {
+  const isViewMode = mode === 'view';
   const [selectedServiceCode, setSelectedServiceCode] = useState('');
   const [agencyUnits, setAgencyUnits] = useState<string[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -159,6 +161,28 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
 
   const handleServiceChange = (code: string) => {
     setSelectedServiceCode(code);
+    
+    // Check localStorage first
+    const savedServices = localStorage.getItem('provision_services');
+    if (savedServices) {
+      try {
+        const parsed = JSON.parse(savedServices);
+        if (Array.isArray(parsed)) {
+          const found = parsed.find(s => s.code === code);
+          if (found) {
+            const units = found.consumerUnit
+              ? found.consumerUnit.split(',').map((u: string) => u.trim()).filter(Boolean)
+              : [];
+            setAgencyUnits(units);
+            setStatus(found.status === 'published' ? 'Đã cung cấp tài liệu' : 'Chưa cung cấp tài liệu');
+            return;
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
     if (serviceDefaults[code]) {
       const s = serviceDefaults[code];
       setAgencyUnits(s.agency ? s.agency.split(',').map((u: string) => u.trim()).filter(Boolean) : []);
@@ -215,7 +239,7 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
           <h2 className="text-lg font-bold text-slate-900">
-            {apiData ? 'Cập nhật cấu hình API cung cấp' : 'Tạo mới API cung cấp'}
+            {isViewMode ? 'Chi tiết API cung cấp' : (apiData ? 'Cập nhật cấu hình API cung cấp' : 'Tạo mới API cung cấp')}
           </h2>
           <button title="Đóng" aria-label="Đóng"
             onClick={onClose}
@@ -233,7 +257,8 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
             <label className="block font-medium text-slate-700 mb-1.5">Dịch vụ API được cấp <span className="text-red-500">*</span></label>
             <select
               required
-              className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 font-semibold cursor-pointer"
+              disabled={isViewMode}
+              className={`w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 font-semibold ${isViewMode ? 'bg-slate-50 cursor-not-allowed' : 'bg-white cursor-pointer'}`}
               value={selectedServiceCode}
               onChange={(e) => handleServiceChange(e.target.value)}
             >
@@ -271,7 +296,8 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
             <label className="block font-medium text-slate-700 mb-1.5">Hệ thống đích tích hợp API</label>
             <input
               type="text"
-              className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800"
+              disabled={isViewMode}
+              className={`w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 ${isViewMode ? 'bg-slate-50 cursor-not-allowed' : 'bg-white'}`}
               placeholder="Nhập tên hệ thống đích tích hợp..."
               value={targetSystem}
               onChange={(e) => setTargetSystem(e.target.value)}
@@ -293,7 +319,8 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
                   <input
                     type="text"
                     required
-                    className="w-full pl-9 pr-4 py-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800"
+                    disabled={isViewMode}
+                    className={`w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 ${isViewMode ? 'bg-slate-50 cursor-not-allowed' : 'bg-white'}`}
                     placeholder="Trần Văn Đạo"
                     value={receiverName}
                     onChange={(e) => setReceiverName(e.target.value)}
@@ -310,7 +337,8 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
                   </div>
                   <input
                     type="text"
-                    className="w-full pl-9 pr-4 py-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800"
+                    disabled={isViewMode}
+                    className={`w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 ${isViewMode ? 'bg-slate-50 cursor-not-allowed' : 'bg-white'}`}
                     placeholder="Cục Quản lý Đăng ký Kinh doanh"
                     value={receiverDept}
                     onChange={(e) => setReceiverDept(e.target.value)}
@@ -327,7 +355,8 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
                   </div>
                   <input
                     type="text"
-                    className="w-full pl-9 pr-4 py-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 font-mono"
+                    disabled={isViewMode}
+                    className={`w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 font-mono ${isViewMode ? 'bg-slate-50 cursor-not-allowed' : 'bg-white'}`}
                     placeholder="0912345678"
                     value={receiverPhone}
                     onChange={(e) => setReceiverPhone(e.target.value)}
@@ -344,7 +373,8 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
                   </div>
                   <input
                     type="email"
-                    className="w-full pl-9 pr-4 py-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 font-mono"
+                    disabled={isViewMode}
+                    className={`w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 font-mono ${isViewMode ? 'bg-slate-50 cursor-not-allowed' : 'bg-white'}`}
                     placeholder="daotv@mpi.gov.vn"
                     value={receiverEmail}
                     onChange={(e) => setReceiverEmail(e.target.value)}
@@ -363,7 +393,8 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
               </div>
               <input
                 type="text"
-                className="w-full pl-9 pr-4 py-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 font-mono"
+                disabled={isViewMode}
+                className={`w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 font-mono ${isViewMode ? 'bg-slate-50 cursor-not-allowed' : 'bg-white'}`}
                 placeholder="https://api.dldc.gov.vn/api/v1/hotich/search"
                 value={apiUrl}
                 onChange={(e) => setApiUrl(e.target.value)}
@@ -377,12 +408,12 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
             <div className="flex gap-2">
               <div 
                 className="relative flex-1 cursor-pointer group"
-                onClick={() => fileInputRef.current?.click()}
+                onClick={() => { if (!isViewMode) fileInputRef.current?.click(); }}
               >
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 group-hover:text-blue-500 transition-colors">
                   <FileText className="w-4 h-4" />
                 </div>
-                <div className="w-full pl-9 pr-4 py-2 bg-white border border-slate-300 rounded-lg group-hover:border-blue-400 focus-within:ring-2 focus-within:ring-blue-500/20 text-slate-600 font-medium truncate min-h-[42px] flex items-center">
+                <div className={`w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-slate-600 font-medium truncate min-h-[42px] flex items-center ${isViewMode ? 'bg-slate-50 cursor-not-allowed' : 'bg-white group-hover:border-blue-400 focus-within:ring-2 focus-within:ring-blue-500/20'}`}>
                   {docFile ? docFile.name : (docUrl || 'Nhấn để đính kèm file tài liệu hướng dẫn...')}
                 </div>
                 <input
@@ -399,8 +430,9 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
               </div>
               <button
                 type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="px-3 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg transition-colors cursor-pointer text-slate-600"
+                disabled={isViewMode}
+                onClick={() => { if (!isViewMode) fileInputRef.current?.click(); }}
+                className={`px-3 py-2 border border-slate-300 rounded-lg transition-colors text-slate-600 ${isViewMode ? 'bg-slate-50 cursor-not-allowed opacity-50' : 'bg-slate-100 hover:bg-slate-200 cursor-pointer'}`}
                 title="Đính kèm tài liệu"
               >
                 <Upload className="w-4 h-4" />
@@ -439,7 +471,8 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
                 <input
                   type="text"
                   required
-                  className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 font-mono"
+                  disabled={isViewMode}
+                  className={`w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 font-mono ${isViewMode ? 'bg-slate-50 cursor-not-allowed' : 'bg-white'}`}
                   placeholder="dd/mm/yyyy"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
@@ -451,7 +484,8 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
                 <label className="block font-medium text-slate-700 mb-1.5">Ngày kết thúc hiệu lực</label>
                 <input
                   type="text"
-                  className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 font-mono"
+                  disabled={isViewMode}
+                  className={`w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 font-mono ${isViewMode ? 'bg-slate-50 cursor-not-allowed' : 'bg-white'}`}
                   placeholder="dd/mm/yyyy"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
@@ -463,20 +497,32 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave }: Provisio
 
         {/* Footer */}
         <div className="px-6 py-4 border-t border-slate-200 flex justify-end space-x-3 bg-slate-50">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-5 py-2 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors font-medium cursor-pointer"
-          >
-            Hủy bỏ
-          </button>
-          <button
-            type="button"
-            onClick={handleSubmit}
-            className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center transition-colors font-bold cursor-pointer shadow-md"
-          >
-            Lưu cấu hình
-          </button>
+          {isViewMode ? (
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-bold cursor-pointer shadow-md text-[13px]"
+            >
+              Đóng
+            </button>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-5 py-2 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors font-medium cursor-pointer"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="button"
+                onClick={handleSubmit}
+                className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center transition-colors font-bold cursor-pointer shadow-md"
+              >
+                Lưu cấu hình
+              </button>
+            </>
+          )}
         </div>
 
       </div>

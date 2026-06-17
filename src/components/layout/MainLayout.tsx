@@ -454,7 +454,7 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
           description={currentPageConfig.description}
           onUserMenuClick={handleUserMenuClick}
           currentPage={currentPage}
-          breadcrumb={getBreadcrumbPath(currentPage)}
+          breadcrumb={getBreadcrumbPath(currentPage, location.search)}
         />
 
         {/* Page Content */}
@@ -843,17 +843,104 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
 }
 
 // Helper function to get breadcrumb path
-const getBreadcrumbPath = (pageId: string): string[] => {
+const getBreadcrumbPath = (pageId: string, search: string = ''): string[] => {
   if (pageId === 'connection-management' || pageId.startsWith('connection-management/')) {
     return ['Quản trị & vận hành', 'Danh mục đơn vị cấp dl', 'Quản lý kết nối', pageId === 'connection-management/agents' ? 'Trạm kết nối' : 'Hệ thống nguồn'];
   }
   if (pageId === 'collection-setup' || pageId.startsWith('collection-setup/')) {
     return ['Quản lý thu thập', 'Thiết lập thu thập', pageId === 'collection-setup/version' ? 'Quản lý nhật ký' : 'Thiết lập dịch vụ'];
   }
+
+  const params = new URLSearchParams(search);
+  const tab = params.get('tab');
+
+  if (pageId === 'provisioning-service-setup') {
+    const base = ['Cung cấp dữ liệu', 'Thiết lập điều phối dữ liệu'];
+    if (tab === 'setup') return [...base, 'Thiết lập dịch vụ'];
+    if (tab === 'approve') return [...base, 'Kiểm tra & Phê duyệt'];
+    if (tab === 'publish') return [...base, 'Công khai dịch vụ'];
+    return [...base, 'Thiết lập dịch vụ'];
+  }
+
+  if (pageId === 'provisioning-api-management') {
+    const base = ['Cung cấp dữ liệu', 'Quản lý API cung cấp & đối soát'];
+    if (tab === 'api_cung_cap') return [...base, 'API Cung cấp dữ liệu'];
+    if (tab === 'api_doi_soat') return [...base, 'API Đối soát dữ liệu'];
+    if (tab === 'phan_quyen') return [...base, 'Phân quyền truy cập'];
+    if (tab === 'danh_sach_tai_khoan') return [...base, 'Danh sách tài khoản'];
+    return [...base, 'API Cung cấp dữ liệu'];
+  }
+
+  if (pageId === 'provision-dashboard') {
+    return ['Cung cấp dữ liệu', 'Tổng quan Cung cấp'];
+  }
+
+  if (pageId.match(/^reconciliation-\d+$/)) {
+    return ['Cung cấp dữ liệu', 'Đối soát cung cấp', `Chi tiết đối soát #${pageId.replace('reconciliation-', '')}`];
+  }
+
+  if (pageId === 'provisioning-catalog-internal') {
+    const base = ['Cung cấp dữ liệu', 'Danh sách dịch vụ cung cấp', 'Dữ liệu danh mục nội ngành'];
+    if (tab === 'du_lieu') return [...base, 'Dữ liệu cung cấp'];
+    if (tab === 'api') return [...base, 'Quản lý API đang lấy dữ liệu'];
+    return base;
+  }
+  if (pageId === 'provisioning-catalog-shared') {
+    const base = ['Cung cấp dữ liệu', 'Danh sách dịch vụ cung cấp', 'Dữ liệu dùng chung'];
+    if (tab === 'du_lieu') return [...base, 'Dữ liệu cung cấp'];
+    if (tab === 'api') return [...base, 'Quản lý API đang lấy dữ liệu'];
+    return base;
+  }
+  if (pageId === 'provisioning-catalog-open' || pageId === 'provisioning-open') {
+    const base = ['Cung cấp dữ liệu', 'Danh sách dịch vụ cung cấp', 'Dữ liệu mở'];
+    if (tab === 'du_lieu') return [...base, 'Dữ liệu cung cấp'];
+    if (tab === 'api') return [...base, 'Quản lý API đang lấy dữ liệu'];
+    return base;
+  }
+  if (pageId === 'provisioning-catalog-master' || pageId === 'provisioning-master') {
+    const base = ['Cung cấp dữ liệu', 'Danh sách dịch vụ cung cấp', 'Dữ liệu chủ'];
+    if (tab === 'du_lieu') return [...base, 'Dữ liệu cung cấp'];
+    if (tab === 'api') return [...base, 'Quản lý API đang lấy dữ liệu'];
+    return base;
+  }
+
+  if (pageId.startsWith('provisioning-shared-')) {
+    const groupNameMap: Record<string, string> = {
+      'hotich': 'CSDL Hộ tịch điện tử',
+      'quoctich': 'Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch',
+      'tha': 'Cơ sở dữ liệu thi hành án dân sự',
+      'bpbd': 'Cơ sở dữ liệu về biện pháp bảo đảm',
+      'qgpl': 'CSDL quốc gia về pháp luật',
+      'tttp': 'Cơ sở dữ liệu tương trợ tư pháp về dân sự',
+      'tgpl': 'Hệ thống thông tin trợ giúp pháp lý',
+      'pbgd': 'CSDL phổ biến, giáo dục pháp luật và hoà giải cơ sở',
+      'dgts': 'CSDL quản lý đấu giá tài sản',
+      'htqt': 'CSDL Hợp tác quốc tế'
+    };
+    const key = pageId.replace('provisioning-shared-', '');
+    const base = ['Cung cấp dữ liệu', 'Danh sách dịch vụ cung cấp', 'Dữ liệu dùng chung', groupNameMap[key] || 'Chi tiết dịch vụ'];
+    if (tab === 'du_lieu') return [...base, 'Dữ liệu cung cấp'];
+    if (tab === 'api') return [...base, 'Quản lý API đang lấy dữ liệu'];
+    return base;
+  }
+
+  if (pageId.startsWith('provisioning-internal-')) {
+    const groupNameMap: Record<string, string> = {
+      'banan': 'CSDL Thông tin Bản án',
+      'danhmuc': 'Danh mục',
+      'bhxh': 'BHXH và Giảm nghèo',
+      'ncc': 'Người có công',
+      'treem': 'Trẻ em'
+    };
+    const key = pageId.replace('provisioning-internal-', '');
+    const base = ['Cung cấp dữ liệu', 'Danh sách dịch vụ cung cấp', 'CSDL Ngoài ngành', groupNameMap[key] || 'Chi tiết dịch vụ'];
+    if (tab === 'du_lieu') return [...base, 'Dữ liệu cung cấp'];
+    if (tab === 'api') return [...base, 'Quản lý API đang lấy dữ liệu'];
+    return base;
+  }
+
   const breadcrumbMap: Record<string, string[]> = {
     // Provisioning
-    'provisioning-service-setup': ['Cung cấp dữ liệu', 'Thiết lập điều phối dữ liệu'],
-    'provisioning-api-management': ['Cung cấp dữ liệu', 'Quản lý API cung cấp & đối soát'],
     'provisioning-data-request': ['Cung cấp dữ liệu', 'Cung cấp dữ liệu theo yêu cầu'],
     'provisioning-monitoring': ['Cung cấp dữ liệu', 'Kiểm soát & giám sát cung cấp'],
     // Dashboard

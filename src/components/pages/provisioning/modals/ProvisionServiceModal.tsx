@@ -5,9 +5,9 @@ import { X, Check, FileText, Plug, LayoutTemplate, ShieldCheck, Plus, Trash2, Co
 interface ProvisionServiceModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave?: (isPublic: boolean) => void;
-  onSaveDraft?: () => void;
-  onSubmitApproval?: () => void;
+  onSave?: (data: any, isPublic: boolean) => void;
+  onSaveDraft?: (data: any) => void;
+  onSubmitApproval?: (data: any) => void;
   service?: any;
   mode?: 'view' | 'edit';
 }
@@ -28,6 +28,13 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
   const [activeTab, setActiveTab] = useState<TabType>('general');
   const [accessScope, setAccessScope] = useState('all');
   
+  // General Tab States
+  const [serviceName, setServiceName] = useState('');
+  const [serviceCode, setServiceCode] = useState('');
+  const [dataType, setDataType] = useState('');
+  const [protocol, setProtocol] = useState('rest');
+  const [description, setDescription] = useState('');
+
   // States for packet design (Tab 3)
   const [format, setFormat] = useState('json');
   const [fields, setFields] = useState<any[]>([
@@ -48,12 +55,15 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
   
   const [isAgencyDropdownOpen, setIsAgencyDropdownOpen] = useState(false);
   const [selectedAgencies, setSelectedAgencies] = useState<string[]>([]);
-  const agencies = [
+  const [agencies, setAgencies] = useState<string[]>([
     "Bộ Kế hoạch và Đầu tư",
     "Sở Tài chính tỉnh Bắc Ninh",
     "Sở Tư pháp tỉnh Bắc Ninh",
-    "Sở Thông tin và Truyền thông tỉnh Bắc Ninh"
-  ];
+    "Sở Thông tin và Truyền thông tỉnh Bắc Ninh",
+    "Công an tỉnh Bắc Ninh",
+    "Sở Y tế tỉnh Bắc Ninh"
+  ]);
+
   const handleToggleAgency = (agency: string) => {
     setSelectedAgencies(prev => prev.includes(agency) ? prev.filter(a => a !== agency) : [...prev, agency]);
   };
@@ -67,6 +77,11 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
 
   useEffect(() => {
     if (isOpen) {
+      setServiceName(service?.name || '');
+      setServiceCode(service?.code || '');
+      setDataType(service?.type || 'Dữ liệu Hộ tịch');
+      setProtocol(service?.protocol?.toLowerCase().includes('soap') ? 'soap' : 'rest');
+      setDescription(service?.desc || service?.description || '');
       setApiMethod(service?.method || 'GET');
       setFrequency(() => {
         if (service?.frequency !== undefined && service?.frequency !== null) return String(service.frequency);
@@ -74,6 +89,28 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
         return '';
       });
       setContextPath(service?.contextPath || '');
+      
+      if (service?.consumerUnit) {
+        setSelectedAgencies(service.consumerUnit.split(',').map((u: string) => u.trim()).filter(Boolean));
+      } else {
+        setSelectedAgencies([]);
+      }
+
+      // Load agencies from accounts list in localStorage
+      const savedAccounts = localStorage.getItem('provision_accounts');
+      if (savedAccounts) {
+        try {
+          const parsed = JSON.parse(savedAccounts);
+          if (Array.isArray(parsed)) {
+            const uniqueOrgs = Array.from(new Set(parsed.map((a: any) => a.organization).filter(Boolean)));
+            if (uniqueOrgs.length > 0) {
+              setAgencies(uniqueOrgs);
+            }
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
     }
   }, [isOpen, service]);
 
@@ -127,17 +164,42 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const updatedData = {
+      ...service,
+      name: serviceName,
+      code: serviceCode,
+      type: dataType,
+      freq: frequency || 'Thời gian thực',
+      protocol: protocol === 'soap' ? 'SOAP (XML)' : 'REST API (JSON)',
+      method: apiMethod,
+      contextPath,
+      consumerUnit: selectedAgencies.join(', '),
+      desc: description
+    };
     if (onSubmitApproval) {
-      onSubmitApproval();
+      onSubmitApproval(updatedData);
     } else {
-      if (onSave) onSave(isPublic);
+      if (onSave) onSave(updatedData, isPublic);
       alert(service ? 'Cập nhật dịch vụ thành công!' : 'Khởi tạo dịch vụ cung cấp thành công!');
     }
     onClose();
   };
 
   const handleSaveDraft = () => {
-    if (onSaveDraft) onSaveDraft();
+    const updatedData = {
+      ...service,
+      name: serviceName || 'Bản nháp dịch vụ mới',
+      code: serviceCode || `DV_DRAFT_${Math.floor(Math.random() * 1000)}`,
+      type: dataType || 'Chưa xác định',
+      freq: frequency || 'Chưa cấu hình',
+      protocol: protocol === 'soap' ? 'SOAP (XML)' : 'REST API (JSON)',
+      method: apiMethod,
+      contextPath,
+      consumerUnit: selectedAgencies.join(', '),
+      desc: description,
+      status: 'draft'
+    };
+    if (onSaveDraft) onSaveDraft(updatedData);
     onClose();
   };
 
@@ -342,7 +404,8 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                         type="text"
                         className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 placeholder:text-slate-400 transition-all duration-300"
                         placeholder="Nhập tên dịch vụ..."
-                        defaultValue={service ? service.name : ''}
+                        value={serviceName}
+                        onChange={(e) => setServiceName(e.target.value)}
                       />
                     </div>
                     <div className="md:col-span-2">
@@ -351,7 +414,8 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                         type="text"
                         className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-blue-600 font-mono text-sm placeholder:text-slate-400 transition-all duration-300 font-semibold"
                         placeholder="VD: api_v1_hotich"
-                        defaultValue={service ? service.code : ''}
+                        value={serviceCode}
+                        onChange={(e) => setServiceCode(e.target.value)}
                       />
                     </div>
                     <div className="md:col-span-2">
@@ -392,13 +456,15 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                     <div className="md:col-span-2">
                       <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Phân loại dữ liệu <span className="text-red-500">*</span></label>
                       <select aria-label="Loại dữ liệu" title="Loại dữ liệu" 
+                        value={dataType}
+                        onChange={(e) => setDataType(e.target.value)}
                         className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 transition-all duration-300 cursor-pointer"
                       >
                         <option value="" className="text-slate-400">-- Chọn phân loại --</option>
-                        <option value="ho_tich" className="text-slate-800">Dữ liệu Hộ tịch điện tử</option>
-                        <option value="quoc_tich" className="text-slate-800">Dữ liệu Hồ sơ quốc tịch</option>
-                        <option value="thi_hanh_an" className="text-slate-800">Dữ liệu Thi hành án dân sự</option>
-                        <option value="ly_lich" className="text-slate-800">Dữ liệu Lý lịch tư pháp</option>
+                        <option value="Dữ liệu Hộ tịch" className="text-slate-800">Dữ liệu Hộ tịch</option>
+                        <option value="Dữ liệu khai sinh" className="text-slate-800">Dữ liệu khai sinh</option>
+                        <option value="Dữ liệu kết hôn" className="text-slate-800">Dữ liệu kết hôn</option>
+                        <option value="Dữ liệu khai tử" className="text-slate-800">Dữ liệu khai tử</option>
                       </select>
                     </div>
                     <div className="md:col-span-2">
@@ -407,6 +473,8 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                         className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 placeholder:text-slate-400 transition-all duration-300"
                         rows={4}
                         placeholder="Mô tả chi tiết mục đích API..."
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
                       ></textarea>
                     </div>
                   </div>

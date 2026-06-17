@@ -7,10 +7,11 @@ interface ProvisionAccountModalProps {
   onClose: () => void;
   organizations: string[];
   onSave?: (data: any) => void;
+  accountData?: any;
 }
 
-export function ProvisionAccountModal({ isOpen, onClose, organizations, onSave }: ProvisionAccountModalProps) {
-  const [selectedOrg, setSelectedOrg] = useState(organizations[0] || 'Sở Y tế tỉnh Bắc Ninh');
+export function ProvisionAccountModal({ isOpen, onClose, organizations, onSave, accountData }: ProvisionAccountModalProps) {
+  const [selectedOrg, setSelectedOrg] = useState('');
   const [username, setUsername] = useState('');
   const [clientId, setClientId] = useState('');
   const [apiName, setApiName] = useState('Lấy danh sách Hộ tịch');
@@ -22,14 +23,18 @@ export function ProvisionAccountModal({ isOpen, onClose, organizations, onSave }
 
   useEffect(() => {
     if (isOpen) {
-      setClientId(generateClientId());
-      setUsername('');
-      if (organizations.length > 0) {
-        setSelectedOrg(organizations[0]);
+      if (accountData) {
+        setSelectedOrg(accountData.organization || '');
+        setUsername(accountData.username || '');
+        setClientId(accountData.clientId || '');
+      } else {
+        setClientId(generateClientId());
+        setUsername('');
+        setSelectedOrg('');
       }
       setIsCopied(false);
     }
-  }, [isOpen, organizations]);
+  }, [isOpen, accountData]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(clientId);
@@ -43,6 +48,7 @@ export function ProvisionAccountModal({ isOpen, onClose, organizations, onSave }
     e.preventDefault();
     if (onSave) {
       onSave({
+        ...accountData,
         organization: selectedOrg,
         username: username,
         clientId: clientId,
@@ -66,7 +72,7 @@ export function ProvisionAccountModal({ isOpen, onClose, organizations, onSave }
           <div className="flex items-center gap-2">
             <Users className="w-5 h-5 text-blue-600" />
             <h2 className="text-xl font-bold text-slate-800">
-              Tạo tài khoản API mới
+              {accountData ? 'Cập nhật tài khoản API' : 'Tạo tài khoản API mới'}
             </h2>
           </div>
           <button 
@@ -85,45 +91,25 @@ export function ProvisionAccountModal({ isOpen, onClose, organizations, onSave }
             
             {/* Target Organization */}
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-slate-700 mb-1">
                 Đơn vị được cấp quyền <span className="text-red-500">*</span>
               </label>
-              <select
+              <input
+                type="text"
                 required
                 value={selectedOrg}
                 onChange={(e) => setSelectedOrg(e.target.value)}
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm font-medium"
-              >
-                {organizations.map((org, index) => (
-                  <option key={index} value={org}>{org}</option>
-                ))}
-              </select>
+                placeholder="Nhập tên đơn vị được cấp quyền (vd: Sở Y tế tỉnh Bắc Ninh)"
+                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm font-medium bg-white"
+              />
               <p className="text-[11px] text-slate-500 mt-1">
                 Tài khoản này sẽ được gắn vào cấu hình phân quyền của đơn vị trên.
               </p>
             </div>
 
-            {/* Target API */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">
-                API được phép truy cập <span className="text-red-500">*</span>
-              </label>
-              <select
-                required
-                value={apiName}
-                onChange={(e) => setApiName(e.target.value)}
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm font-medium"
-              >
-                <option value="Lấy danh sách Hộ tịch">Lấy danh sách Hộ tịch</option>
-                <option value="Đồng bộ dữ liệu THADS">Đồng bộ dữ liệu THADS</option>
-                <option value="Tra cứu Cơ sở dữ liệu Pháp luật">Tra cứu Cơ sở dữ liệu Pháp luật</option>
-                <option value="Đọc thông tin Biện pháp bảo đảm">Đọc thông tin Biện pháp bảo đảm</option>
-              </select>
-            </div>
-
             {/* Username */}
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-slate-700 mb-1">
                 Tên tài khoản (Username) <span className="text-red-500">*</span>
               </label>
               <div className="relative">
@@ -143,7 +129,7 @@ export function ProvisionAccountModal({ isOpen, onClose, organizations, onSave }
 
             {/* Client ID */}
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-slate-700 mb-1">
                 Client ID / App Key <span className="text-red-500">*</span>
               </label>
               <div className="flex gap-2">
@@ -193,7 +179,7 @@ export function ProvisionAccountModal({ isOpen, onClose, organizations, onSave }
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center transition-colors font-medium text-sm shadow-sm"
             >
               <Check className="w-4 h-4 mr-2" />
-              Tạo tài khoản
+              {accountData ? 'Lưu thay đổi' : 'Tạo tài khoản'}
             </button>
           </div>
         </form>

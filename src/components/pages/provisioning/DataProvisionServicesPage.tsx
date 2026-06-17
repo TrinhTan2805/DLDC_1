@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Search, Server, Clock, ShieldCheck, Activity, Code, Database, FileText, Sliders, Play, Square, Check, X, Filter } from 'lucide-react';
 import { provisionServicesData, ProvisionService } from '../../../data/provisionServicesData';
 import { ServiceDataTable } from './components/ServiceDataTable';
@@ -12,6 +13,18 @@ interface DataProvisionServicesPageProps {
 }
 
 export function DataProvisionServicesPage({ category, group, title, description }: DataProvisionServicesPageProps) {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const getInitialTab = () => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab === 'du_lieu' || tab === 'api') {
+      return tab as 'du_lieu' | 'api';
+    }
+    return 'du_lieu';
+  };
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedService, setSelectedService] = useState<ProvisionService | null>(null);
   
@@ -19,7 +32,24 @@ export function DataProvisionServicesPage({ category, group, title, description 
   const [selectedApi, setSelectedApi] = useState<any>(null);
 
   // Tab State for Civil Registry
-  const [activeDetailTab, setActiveDetailTab] = useState<'du_lieu' | 'api'>('du_lieu');
+  const [activeDetailTab, setActiveDetailTab] = useState<'du_lieu' | 'api'>(getInitialTab);
+
+  const handleTabChange = (tab: 'du_lieu' | 'api') => {
+    setActiveDetailTab(tab);
+    const params = new URLSearchParams(location.search);
+    params.set('tab', tab);
+    navigate(`${location.pathname}?${params.toString()}`, { replace: true });
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    if (tab === 'du_lieu' || tab === 'api') {
+      if (tab !== activeDetailTab) {
+        setActiveDetailTab(tab);
+      }
+    }
+  }, [location.search, activeDetailTab]);
 
   // Search and Filter State
   const [searchRightText, setSearchRightText] = useState('');
@@ -210,7 +240,7 @@ export function DataProvisionServicesPage({ category, group, title, description 
               {/* Tabs */}
               <div className="flex px-6 border-t border-slate-100 bg-slate-50/50">
                 <button
-                  onClick={() => setActiveDetailTab('du_lieu')}
+                  onClick={() => handleTabChange('du_lieu')}
                   className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
                     activeDetailTab === 'du_lieu'
                       ? 'border-orange-500 text-orange-600'
@@ -221,7 +251,7 @@ export function DataProvisionServicesPage({ category, group, title, description 
                   Dữ liệu cung cấp
                 </button>
                 <button
-                  onClick={() => setActiveDetailTab('api')}
+                  onClick={() => handleTabChange('api')}
                   className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
                     activeDetailTab === 'api'
                       ? 'border-orange-500 text-orange-600'
