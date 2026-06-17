@@ -463,7 +463,6 @@ export function AccountManagementLogPage() {
             </div>
           </div>
         )}
-      </div>
 
       {/* Account Logs Table */}
       <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">

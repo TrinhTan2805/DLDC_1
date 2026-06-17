@@ -327,9 +327,6 @@ export function ConfigChangeLogPage() {
           </button>
         </div>
       </div>
-          </button>
-        </div>
-      </div>
       {activeTab === 'logs' ? (
         <>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -730,6 +727,9 @@ export function ConfigChangeLogPage() {
             </div>
           )}
         </>
+      ) : (
+        <LogRetentionConfigPage />
+      )}
     </div>
   );
 }
