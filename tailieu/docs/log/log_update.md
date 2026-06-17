@@ -23,6 +23,15 @@
 3. Cập nhật thiết kế modal So sánh phiên bản API (`ApiVersionCompareModal.tsx`):
    - Đổi màu nền và màu chữ của icon `GitCompare` ở tiêu đề từ màu cam (`bg-amber-50 text-amber-600 border-amber-100`) sang màu xanh dương (`bg-blue-50 text-blue-600 border-blue-100`).
    - Đổi toàn bộ các văn bản, nhãn thông tin và giá trị so sánh trong modal về màu đen (`text-black`).
+4. Thiết kế lại trang Yêu cầu sử dụng dữ liệu (`DataProvisionRequestPage.tsx`) đồng bộ theo phong cách của màn hình **Quản lý API Cung cấp & Đối soát**:
+   - Di chuyển thanh Tab chính ra bên ngoài container và thêm biểu tượng và số lượng bản ghi cho 3 tab (Tiếp nhận yêu cầu, Tra cứu & Kết xuất, Bàn giao dữ liệu).
+   - Thiết kế lại thanh tìm kiếm, bộ lọc nâng cao collapsible và nút "Tạo yêu cầu" với màu xanh dương chủ đạo hệ thống (`bg-blue-600` / `hover:bg-blue-700`).
+   - Đồng bộ hóa bảng dữ liệu: header màu xám nhạt (`bg-slate-50`), cỡ chữ `13px` trong container `api-requests-page-root`, các nút thao tác dạng icon-only có hover background chuyên nghiệp và badge trạng thái đầy đủ màu sắc.
+   - Bổ sung tính năng phân trang (`renderPagination`) ở cuối bảng danh sách.
+5. Áp dụng quy tắc Hộp thoại 5.4 trong `compomennt.md` khi nhấn nút chỉnh sửa và xem chi tiết tại tab Tiếp nhận yêu cầu của màn hình Cung cấp dữ liệu theo yêu cầu:
+   - Cập nhật z-index (`z-[999999]`, inline style `zIndex: 999999`) và lớp backdrop overlay chuẩn (`bg-black/50` thay vì `bg-slate-900/50 backdrop-blur-sm`).
+   - Chuẩn hóa typography font chữ nhãn (`text-[13px] font-medium`) và các trường dữ liệu, định dạng file, nút bấm sử dụng tông màu xanh dương (`bg-blue-600` / `hover:bg-blue-700`, `accent-blue-650 w-4 h-4`) thay vì các tông màu không đồng bộ.
+   - Các modal được cập nhật bao gồm: `ProvisionDataRequestModal.tsx`, `ProvisionRequestApprovalModal.tsx`, `ProvisionRequestExportModal.tsx`, `ProvisionHandoverDetailModal.tsx`, `ProvisionPublishDetailModal.tsx`.
 
 **Các file bị ảnh hưởng:**
 - `src/components/layout/MainLayout.tsx`
@@ -30,6 +39,12 @@
 - `src/components/pages/provisioning/DataProvisionApiManagementPage.tsx`
 - `src/components/pages/provisioning/DataProvisionServicesPage.tsx`
 - `src/components/pages/provisioning/modals/ApiVersionCompareModal.tsx`
+- `src/components/pages/provisioning/DataProvisionRequestPage.tsx`
+- `src/components/pages/provisioning/modals/ProvisionDataRequestModal.tsx`
+- `src/components/pages/provisioning/modals/ProvisionRequestApprovalModal.tsx`
+- `src/components/pages/provisioning/modals/ProvisionRequestExportModal.tsx`
+- `src/components/pages/provisioning/modals/ProvisionHandoverDetailModal.tsx`
+- `src/components/pages/provisioning/modals/ProvisionPublishDetailModal.tsx`
 
 ## Phiên bản 2.4.8 (Ngày cập nhật: 17/06/2026)
 

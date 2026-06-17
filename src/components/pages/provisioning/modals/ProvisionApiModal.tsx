@@ -306,7 +306,7 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave, mode = 'ed
 
           {/* Section: Contacts */}
           <div className="space-y-4 pt-2">
-            <h3 className="font-bold text-slate-900 border-b border-slate-100 pb-2">Thông tin Đầu mối tiếp nhận</h3>
+            <h3 className="font-bold text-slate-900 border-b border-slate-100 pb-2">Thông tin Đầu mối chủ quản dữ liệu</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Receiver Name */}

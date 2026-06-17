@@ -127,6 +127,8 @@ export function DataProvisionApiManagementPage() {
     name: string;
   } | null>(null);
 
+  const [deleteConfirmApi, setDeleteConfirmApi] = useState<{ id: string; name: string } | null>(null);
+
   // Success message toast
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const triggerToast = (msg: string) => {
@@ -320,6 +322,18 @@ export function DataProvisionApiManagementPage() {
     });
   };
 
+  const handleDeleteApi = (id: string, name: string) => {
+    setDeleteConfirmApi({ id, name });
+  };
+
+  const confirmDeleteApi = (id: string) => {
+    const updated = apis.filter(item => item.id !== id);
+    setApis(updated);
+    localStorage.setItem('provision_apis', JSON.stringify(updated));
+    setDeleteConfirmApi(null);
+    triggerToast('Đã xóa API thành công!');
+  };
+
   const handleToggleReconStatus = (id: string, currentStatus: string, name: string) => {
     const isInactive = currentStatus === 'inactive';
     setStatusConfirmData({
@@ -477,7 +491,7 @@ export function DataProvisionApiManagementPage() {
               }`}
             >
               <Server className="w-5 h-5" />
-              API Cung cấp dữ liệu ({apis.length})
+              API Cung cấp dữ liệu
             </button>
             <button
               onClick={() => handleTabChange('api_doi_soat')}
@@ -488,7 +502,7 @@ export function DataProvisionApiManagementPage() {
               }`}
             >
               <GitCompare className="w-5 h-5" />
-              API Đối soát dữ liệu ({recons.length})
+              API Đối soát dữ liệu
             </button>
             <button
               onClick={() => handleTabChange('phan_quyen')}
@@ -499,7 +513,7 @@ export function DataProvisionApiManagementPage() {
               }`}
             >
               <Shield className="w-5 h-5" />
-              Phân quyền truy cập ({permissions.length})
+              Phân quyền truy cập
             </button>
             <button
               onClick={() => handleTabChange('danh_sach_tai_khoan')}
@@ -510,7 +524,7 @@ export function DataProvisionApiManagementPage() {
               }`}
             >
               <Users className="w-5 h-5" />
-              Danh sách tài khoản ({accounts.length})
+              Danh sách tài khoản
             </button>
           </div>
         </div>
@@ -777,6 +791,13 @@ export function DataProvisionApiManagementPage() {
                                   title={api.status === 'Hoạt động' ? "Tạm ngưng API" : "Kích hoạt API"}
                                 >
                                   <Power className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteApi(api.id, api.name)}
+                                  className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-[6px] transition-all inline-flex items-center justify-center group cursor-pointer"
+                                  title="Xóa API"
+                                >
+                                  <Trash2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
                                 </button>
                               </div>
                             </td>
@@ -1273,6 +1294,49 @@ export function DataProvisionApiManagementPage() {
                 }`}
               >
                 Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
+      , document.body)}
+
+      {deleteConfirmApi && createPortal(
+        <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200">
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-red-50">
+              <div className="flex items-center gap-3 text-red-700">
+                <Trash2 className="w-5 h-5 shrink-0" />
+                <h3 className="font-bold text-[15px] uppercase">Xác nhận xóa API</h3>
+              </div>
+              <button
+                onClick={() => setDeleteConfirmApi(null)}
+                className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="text-slate-600 text-[13px] leading-relaxed">
+                Bạn có chắc chắn muốn xóa API:
+                <span className="font-bold text-blue-600 block mt-2 text-sm">{deleteConfirmApi.name}</span>
+                <div className="mt-4 flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  <span className="text-amber-700 font-medium text-[13px]">Cảnh báo: Xóa API sẽ đồng thời xóa tất cả quyền truy cập đã cấp cho API này. Thao tác này không thể hoàn tác.</span>
+                </div>
+              </div>
+            </div>
+            <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-3">
+              <button
+                onClick={() => setDeleteConfirmApi(null)}
+                className="px-4 py-2 text-[13px] font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                onClick={() => confirmDeleteApi(deleteConfirmApi.id)}
+                className="px-4 py-2 text-[13px] font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg shadow-sm transition-colors cursor-pointer"
+              >
+                Xóa API
               </button>
             </div>
           </div>

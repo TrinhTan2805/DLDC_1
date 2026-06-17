@@ -8,6 +8,8 @@ interface SystemConfig {
   loginAttemptWindowMinutes: number;
   sessionTimeoutMinutes: number;
   backupSchedule: 'daily' | 'weekly' | 'monthly';
+  backupDayOfWeek: number;
+  backupDayOfMonth: number;
   backupRetentionDays: number;
   backupTime: string;
   blurringAlgorithms: {
@@ -25,6 +27,8 @@ const defaultConfig: SystemConfig = {
   loginAttemptWindowMinutes: 15,
   sessionTimeoutMinutes: 30,
   backupSchedule: 'daily',
+  backupDayOfWeek: 4,
+  backupDayOfMonth: 1,
   backupRetentionDays: 30,
   backupTime: '02:00',
   blurringAlgorithms: {
@@ -349,6 +353,40 @@ export function SystemConfigPage() {
                 <div className="text-sm">Hàng tháng</div>
               </button>
             </div>
+
+            {config.backupSchedule === 'weekly' && (
+              <div className="mt-4">
+                <label className="block text-sm text-slate-900 mb-2">
+                  Chọn ngày trong tuần (Thứ)
+                </label>
+                <select
+                  value={config.backupDayOfWeek}
+                  onChange={(e) => handleChange('backupDayOfWeek', parseInt(e.target.value))}
+                  className="px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm"
+                >
+                  {[['2','Thứ 2'],['3','Thứ 3'],['4','Thứ 4'],['5','Thứ 5'],['6','Thứ 6'],['7','Thứ 7'],['8','Chủ nhật']].map(([val, label]) => (
+                    <option key={val} value={val}>{label}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {config.backupSchedule === 'monthly' && (
+              <div className="mt-4">
+                <label className="block text-sm text-slate-900 mb-2">
+                  Chọn ngày trong tháng
+                </label>
+                <select
+                  value={config.backupDayOfMonth}
+                  onChange={(e) => handleChange('backupDayOfMonth', parseInt(e.target.value))}
+                  className="px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm"
+                >
+                  {Array.from({ length: 28 }, (_, i) => i + 1).map(d => (
+                    <option key={d} value={d}>Ngày {d}</option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
 
           {/* Backup Time */}
