@@ -49,8 +49,7 @@ export function FilesTab({
 
   return (
     <div className="space-y-6">
-      {/* Top Filter and Actions Row */}
-      <div className="flex items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm sticky top-0 z-10">
+      <div className="flex flex-col md:flex-row items-center gap-3">
         <OpenDataCategoryFilters
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}

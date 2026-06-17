@@ -933,285 +933,283 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
 
     return (
       <div className="space-y-3 mb-6">
-        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
-          <div className="flex flex-col md:flex-row items-center gap-3">
-            <div className="flex-1 w-full flex items-center gap-2">
-              <div className="flex-1 relative">
-                <input
-                  type="text"
-                  placeholder={placeholder}
-                  value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-400 bg-white hover:bg-slate-50/50 font-medium shadow-sm"
-                />
-              </div>
-              <button
-                type="button"
-                className="w-10 h-10 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shrink-0 transition-all cursor-pointer active:scale-95 shadow-sm"
-                title="Tìm kiếm"
-              >
-                <Search className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowFilters(!showFilters)}
-                className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all border cursor-pointer active:scale-95 ${
-                  showFilters
-                    ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-sm'
-                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                }`}
-                title={showFilters ? "Đóng bộ lọc" : "Bộ lọc nâng cao"}
-              >
-                {showFilters ? <X className="w-4.5 h-4.5" /> : <Filter className="w-4 h-4" />}
-              </button>
+        <div className="flex flex-col md:flex-row items-center gap-3">
+          <div className="flex-1 w-full flex items-center gap-2">
+            <div className="flex-1 relative">
+              <input
+                type="text"
+                placeholder={placeholder}
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                className="w-full px-4 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-400 bg-white hover:bg-slate-50/50 font-medium shadow-sm"
+              />
             </div>
-            
-            <div className="flex items-center gap-2 w-full md:w-auto">
-              {showAddButton && (
-                <button
-                  type="button"
-                  onClick={onAddClick}
-                  className="flex-1 md:flex-none px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[14px] font-medium flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
-                >
-                  <Plus className="w-4 h-4" />
-                  {addLabel}
-                </button>
-              )}
-            </div>
+            <button
+              type="button"
+              className="w-10 h-10 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shrink-0 transition-all cursor-pointer active:scale-95 shadow-sm"
+              title="Tìm kiếm"
+            >
+              <Search className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowFilters(!showFilters)}
+              className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all border cursor-pointer active:scale-95 ${
+                showFilters
+                  ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-sm'
+                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+              }`}
+              title={showFilters ? "Đóng bộ lọc" : "Bộ lọc nâng cao"}
+            >
+              {showFilters ? <X className="w-4.5 h-4.5" /> : <Filter className="w-4 h-4" />}
+            </button>
           </div>
-
-          {/* Advanced Collapsible Filter Panel */}
-          {showFilters && (
-            <div className="relative mt-3 p-4 bg-white border border-slate-200 rounded-xl shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] before:content-[''] before:absolute before:-top-[7px] before:right-[208px] md:before:right-[auto] md:before:left-[calc(100%-100px)] lg:before:left-[calc(100%-242px)] before:w-3 before:h-3 before:bg-white before:rotate-45 before:border-l before:border-t before:border-slate-200">
-              {activeTab === 'license' && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Trạng thái giấy phép</label>
-                    <div className="relative">
-                      <select
-                        value={licenseStatusFilter}
-                        onChange={(e) => setLicenseStatusFilter(e.target.value)}
-                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                      >
-                        <option value="all">Tất cả trạng thái</option>
-                        <option value="active">Còn hiệu lực</option>
-                        <option value="inactive">Hết hiệu lực</option>
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'management' && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Trạng thái danh mục</label>
-                    <div className="relative">
-                      <select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                      >
-                        <option value="">Tất cả trạng thái</option>
-                        <option value="draft">Bản nháp</option>
-                        <option value="pending">Chờ duyệt</option>
-                        <option value="approved">Đã phê duyệt</option>
-                        <option value="rejected">Từ chối</option>
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Đơn vị chủ trì</label>
-                    <div className="relative">
-                      <select
-                        value={unitFilter}
-                        onChange={(e) => setUnitFilter(e.target.value)}
-                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                      >
-                        <option value="">Tất cả đơn vị</option>
-                        {units.map((unit) => (
-                          <option key={unit.id} value={unit.name}>
-                            {unit.name}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Tần suất cập nhật</label>
-                    <div className="relative">
-                      <select
-                        value={frequencyFilter}
-                        onChange={(e) => setFrequencyFilter(e.target.value)}
-                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                      >
-                        <option value="">Tất cả tần suất</option>
-                        <option value="monthly">Hàng tháng</option>
-                        <option value="quarterly">Hàng quý</option>
-                        <option value="yearly">Hàng năm</option>
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'approval' && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Trạng thái phê duyệt</label>
-                    <div className="relative">
-                      <select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                      >
-                        <option value="">Tất cả trạng thái</option>
-                        <option value="pending">Chờ duyệt</option>
-                        <option value="approved">Đã phê duyệt</option>
-                        <option value="rejected">Từ chối</option>
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Đơn vị chủ trì</label>
-                    <div className="relative">
-                      <select
-                        value={unitFilter}
-                        onChange={(e) => setUnitFilter(e.target.value)}
-                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                      >
-                        <option value="">Tất cả đơn vị</option>
-                        {units.map((unit) => (
-                          <option key={unit.id} value={unit.name}>
-                            {unit.name}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Tần suất cập nhật</label>
-                    <div className="relative">
-                      <select
-                        value={frequencyFilter}
-                        onChange={(e) => setFrequencyFilter(e.target.value)}
-                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                      >
-                        <option value="">Tất cả tần suất</option>
-                        <option value="monthly">Hàng tháng</option>
-                        <option value="quarterly">Hàng quý</option>
-                        <option value="yearly">Hàng năm</option>
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'metadata' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Tần suất</label>
-                    <div className="relative">
-                      <select
-                        value={metadataFrequencyFilter}
-                        onChange={(e) => setMetadataFrequencyFilter(e.target.value)}
-                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                      >
-                        <option value="all">Tất cả tần suất</option>
-                        <option value="daily">Hàng ngày</option>
-                        <option value="weekly">Hàng tuần</option>
-                        <option value="monthly">Hàng tháng</option>
-                        <option value="quarterly">Hàng quý</option>
-                        <option value="yearly">Hàng năm</option>
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Lĩnh vực</label>
-                    <div className="relative">
-                      <select
-                        value={metadataFieldFilter}
-                        onChange={(e) => setMetadataFieldFilter(e.target.value)}
-                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                      >
-                        <option value="all">Tất cả lĩnh vực</option>
-                        {allFields.map((field, idx) => (
-                          <option key={idx} value={field}>{field}</option>
-                        ))}
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'history' && (
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Từ ngày</label>
-                    <input
-                      type="date"
-                      value={fromDate}
-                      onChange={(e) => setFromDate(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-xl text-sm outline-none font-medium text-slate-700"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Đến ngày</label>
-                    <input
-                      type="date"
-                      value={toDate}
-                      onChange={(e) => setToDate(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-xl text-sm outline-none font-medium text-slate-700"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Loại thay đổi</label>
-                    <div className="relative">
-                      <select
-                        value={changeTypeFilter}
-                        onChange={(e) => setChangeTypeFilter(e.target.value)}
-                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                      >
-                        <option value="">Tất cả</option>
-                        <option value="create_category">Tạo danh mục</option>
-                        <option value="edit_category">Chỉnh sửa DM</option>
-                        <option value="grant_permission">Cấp quyền</option>
-                        <option value="add_metadata">Thêm metadata</option>
-                        <option value="edit_metadata">Sửa metadata</option>
-                        <option value="add_license">Thêm giấy phép</option>
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Trạng thái</label>
-                    <div className="relative">
-                      <select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                      >
-                        <option value="">Tất cả</option>
-                        <option value="applied">Đã áp dụng</option>
-                        <option value="pending">Chờ xử lý</option>
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+          
+          <div className="flex items-center gap-2 w-full md:w-auto">
+            {showAddButton && (
+              <button
+                type="button"
+                onClick={onAddClick}
+                className="flex-1 md:flex-none px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[14px] font-medium flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                {addLabel}
+              </button>
+            )}
+          </div>
         </div>
+
+        {/* Advanced Collapsible Filter Panel */}
+        {showFilters && (
+          <div className="relative p-4 bg-white border border-slate-200 rounded-xl shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] before:content-[''] before:absolute before:-top-[7px] before:right-[208px] md:before:right-[auto] md:before:left-[calc(100%-100px)] lg:before:left-[calc(100%-242px)] before:w-3 before:h-3 before:bg-white before:rotate-45 before:border-l before:border-t before:border-slate-200">
+            {activeTab === 'license' && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Trạng thái giấy phép</label>
+                  <div className="relative">
+                    <select
+                      value={licenseStatusFilter}
+                      onChange={(e) => setLicenseStatusFilter(e.target.value)}
+                      className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+                    >
+                      <option value="all">Tất cả trạng thái</option>
+                      <option value="active">Còn hiệu lực</option>
+                      <option value="inactive">Hết hiệu lực</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'management' && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Trạng thái danh mục</label>
+                  <div className="relative">
+                    <select
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                      className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+                    >
+                      <option value="">Tất cả trạng thái</option>
+                      <option value="draft">Bản nháp</option>
+                      <option value="pending">Chờ duyệt</option>
+                      <option value="approved">Đã phê duyệt</option>
+                      <option value="rejected">Từ chối</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Đơn vị chủ trì</label>
+                  <div className="relative">
+                    <select
+                      value={unitFilter}
+                      onChange={(e) => setUnitFilter(e.target.value)}
+                      className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+                    >
+                      <option value="">Tất cả đơn vị</option>
+                      {units.map((unit) => (
+                        <option key={unit.id} value={unit.name}>
+                          {unit.name}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Tần suất cập nhật</label>
+                  <div className="relative">
+                    <select
+                      value={frequencyFilter}
+                      onChange={(e) => setFrequencyFilter(e.target.value)}
+                      className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+                    >
+                      <option value="">Tất cả tần suất</option>
+                      <option value="monthly">Hàng tháng</option>
+                      <option value="quarterly">Hàng quý</option>
+                      <option value="yearly">Hàng năm</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'approval' && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Trạng thái phê duyệt</label>
+                  <div className="relative">
+                    <select
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                      className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+                    >
+                      <option value="">Tất cả trạng thái</option>
+                      <option value="pending">Chờ duyệt</option>
+                      <option value="approved">Đã phê duyệt</option>
+                      <option value="rejected">Từ chối</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Đơn vị chủ trì</label>
+                  <div className="relative">
+                    <select
+                      value={unitFilter}
+                      onChange={(e) => setUnitFilter(e.target.value)}
+                      className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+                    >
+                      <option value="">Tất cả đơn vị</option>
+                      {units.map((unit) => (
+                        <option key={unit.id} value={unit.name}>
+                          {unit.name}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Tần suất cập nhật</label>
+                  <div className="relative">
+                    <select
+                      value={frequencyFilter}
+                      onChange={(e) => setFrequencyFilter(e.target.value)}
+                      className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+                    >
+                      <option value="">Tất cả tần suất</option>
+                      <option value="monthly">Hàng tháng</option>
+                      <option value="quarterly">Hàng quý</option>
+                      <option value="yearly">Hàng năm</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'metadata' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Tần suất</label>
+                  <div className="relative">
+                    <select
+                      value={metadataFrequencyFilter}
+                      onChange={(e) => setMetadataFrequencyFilter(e.target.value)}
+                      className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+                    >
+                      <option value="all">Tất cả tần suất</option>
+                      <option value="daily">Hàng ngày</option>
+                      <option value="weekly">Hàng tuần</option>
+                      <option value="monthly">Hàng tháng</option>
+                      <option value="quarterly">Hàng quý</option>
+                      <option value="yearly">Hàng năm</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Lĩnh vực</label>
+                  <div className="relative">
+                    <select
+                      value={metadataFieldFilter}
+                      onChange={(e) => setMetadataFieldFilter(e.target.value)}
+                      className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+                    >
+                      <option value="all">Tất cả lĩnh vực</option>
+                      {allFields.map((field, idx) => (
+                        <option key={idx} value={field}>{field}</option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'history' && (
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Từ ngày</label>
+                  <input
+                    type="date"
+                    value={fromDate}
+                    onChange={(e) => setFromDate(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-xl text-sm outline-none font-medium text-slate-700"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Đến ngày</label>
+                  <input
+                    type="date"
+                    value={toDate}
+                    onChange={(e) => setToDate(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-xl text-sm outline-none font-medium text-slate-700"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Loại thay đổi</label>
+                  <div className="relative">
+                    <select
+                      value={changeTypeFilter}
+                      onChange={(e) => setChangeTypeFilter(e.target.value)}
+                      className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+                    >
+                      <option value="">Tất cả</option>
+                      <option value="create_category">Tạo danh mục</option>
+                      <option value="edit_category">Chỉnh sửa DM</option>
+                      <option value="grant_permission">Cấp quyền</option>
+                      <option value="add_metadata">Thêm metadata</option>
+                      <option value="edit_metadata">Sửa metadata</option>
+                      <option value="add_license">Thêm giấy phép</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Trạng thái</label>
+                  <div className="relative">
+                    <select
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                      className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+                    >
+                      <option value="">Tất cả</option>
+                      <option value="applied">Đã áp dụng</option>
+                      <option value="pending">Chờ xử lý</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     );
 

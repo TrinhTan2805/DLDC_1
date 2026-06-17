@@ -40,15 +40,15 @@ export function VersionHistoryTab({
                     <th className="px-6 py-4 text-[14px] font-semibold text-right">Thao tác</th>
                   </tr>
                </thead>
-               <tbody className="divide-y divide-slate-100">
+               <tbody className="divide-y divide-slate-100 bg-white">
                  {filteredData.map(item => (
-                   <tr key={item.id} className="hover:bg-slate-50/50 transition-all">
-                     <td className="px-6 py-4 text-[14px]"><code className="px-2 py-0.5 bg-slate-100 text-blue-700 rounded text-xs">{item.code}</code></td>
-                     <td className="px-6 py-4 text-[14px] text-slate-900 font-semibold">{item.name}</td>
-                     <td className="px-6 py-4 text-[14px] text-slate-600">v1.3</td>
-                     <td className="px-6 py-4 text-[14px] text-slate-600">{item.updatedDate}</td>
-                     <td className="px-6 py-4 text-[14px] text-slate-600">{item.updatedBy || 'Nguyễn Văn A'}</td>
-                     <td className="px-6 py-4 text-right">
+                   <tr key={item.id} className="hover:bg-slate-50 transition-all group border-b border-slate-100">
+                     <td className="px-4 py-3 text-[13px] text-left"><code className="px-2 py-0.5 bg-slate-100 text-blue-700 rounded text-xs">{item.code}</code></td>
+                     <td className="px-4 py-3 text-[13px] text-slate-900 font-semibold text-left">{item.name}</td>
+                     <td className="px-4 py-3 text-[13px] text-slate-600 text-left">v1.3</td>
+                     <td className="px-4 py-3 text-[13px] text-slate-600 text-left">{item.updatedDate}</td>
+                     <td className="px-4 py-3 text-[13px] text-slate-600 text-left">{item.updatedBy || 'Nguyễn Văn A'}</td>
+                     <td className="px-4 py-3 text-right">
                        <div className="flex items-center justify-end">
                          <button 
                            onClick={() => setSelectedDatasetForVersion(item)}
@@ -102,25 +102,25 @@ export function VersionHistoryTab({
                   <th className="px-6 py-4 text-[14px] font-semibold text-right">Thao tác</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 bg-white">
                 {sampleVersionHistory.map(item => (
-                  <tr key={item.id} className="hover:bg-slate-50/50 transition-all">
-                    <td className="px-6 py-4 font-semibold text-slate-700 text-[14px]">{item.version}</td>
-                    <td className="px-6 py-4 text-[14px] text-slate-600 leading-relaxed font-normal">{item.changes}</td>
-                    <td className="px-6 py-4 text-[14px] text-slate-900">{item.updatedBy}</td>
-                    <td className="px-6 py-4 text-[14px] text-slate-900">{item.updatedDate}</td>
-                    <td className="px-6 py-4 text-[14px]">
+                  <tr key={item.id} className="hover:bg-slate-50 transition-all group border-b border-slate-100">
+                    <td className="px-4 py-3 font-semibold text-slate-700 text-[13px] text-left">{item.version}</td>
+                    <td className="px-4 py-3 text-[13px] text-slate-600 leading-relaxed font-normal text-left">{item.changes}</td>
+                    <td className="px-4 py-3 text-[13px] text-slate-900 text-left">{item.updatedBy}</td>
+                    <td className="px-4 py-3 text-[13px] text-slate-900 text-left">{item.updatedDate}</td>
+                    <td className="px-4 py-3 text-[13px] text-left">
                       {item.status === 'Hiện tại' ? (
                         <span className="px-2 py-1 text-xs bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-full font-medium">Hiện tại</span>
                       ) : (
                         <span className="px-2 py-1 text-xs bg-slate-100 text-slate-600 border border-slate-200 rounded-full font-medium">Lịch sử</span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex items-center justify-center gap-1">
                         <button
                           onClick={() => alert(`Đang tải về bộ dữ liệu phiên bản ${item.version}...`)}
-                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors cursor-pointer"
+                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
                           title={`Tải xuống bản ${item.version}`}
                         >
                           <Download className="w-4 h-4" />
@@ -131,7 +131,7 @@ export function VersionHistoryTab({
                                setSelectedVersionToRestore(item);
                                setShowRestoreModal(true);
                             }}
-                            className="p-1.5 text-orange-600 hover:bg-orange-50 rounded transition-colors cursor-pointer"
+                            className="p-1.5 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors cursor-pointer"
                             title={`Khôi phục về bản ${item.version}`}
                           >
                             <RotateCcw className="w-4 h-4" />

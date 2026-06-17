@@ -3,7 +3,16 @@
 ## Phiên bản 2.4.8 (Ngày cập nhật: 17/06/2026)
 
 **Nội dung thay đổi:**
-1. **Đồng bộ luồng và cấu hình dữ liệu**:
+1. **Đồng bộ thiết kế Danh sách danh mục dữ liệu mở**:
+   - Đồng bộ thiết kế của màn hình **Danh sách tổ chức thực hiện trợ giúp pháp lý** (và các màn hình danh sách A-J khác) giống với màn hình **Thiết lập danh mục dữ liệu mở** (`open-data/OpenDataSetupPage.tsx`).
+   - Cấu trúc lại `OpenDataCategoryPage.tsx`: Loại bỏ card wrapper bên ngoài và lớp nền xám nhạt ở tab content để đưa thanh tab (`OpenDataCategoryTabBar.tsx`) ra ngoài, kéo rộng toàn màn hình.
+   - Thiết kế lại thanh tìm kiếm và bộ lọc: Loại bỏ icon Search bên trong ô nhập, bổ sung nút Search màu xanh dương và nút bộ lọc nâng cao toggle.
+   - Nâng cấp bộ lọc nâng cao (`OpenDataCategoryFilterPanel`) hỗ trợ caret chỉ lên trỏ vào nút bộ lọc và đồng bộ shadow.
+   - Gộp hàng tìm kiếm và bộ lọc nâng cao vào trong cùng một Card wrapper (`FilesTab.tsx`).
+   - Đồng bộ hóa bảng dữ liệu (`OpenDataCategoryGrid.tsx` và `VersionHistoryTab.tsx`): Chuyển đổi khoảng cách padding và cỡ chữ các ô (TD) về `px-4 py-3 text-[13px]`, đồng bộ các nút Thao tác hành động sang `rounded-lg`.
+   - Đồng bộ thanh phân trang (`OpenDataCategoryPagination.tsx`): Cấu hình bộ chọn số lượng dòng trên trang sang `10`, `20`, `50`, `100` và cập nhật style bo góc `rounded-lg` và ring focus.
+   - Loại bỏ lớp bọc ngoài (card wrapper `bg-white border rounded-xl p-4 shadow-sm`) tại thanh tìm kiếm, bộ lọc, và nút hành động của màn hình Thiết lập danh mục dữ liệu mở (`OpenDataSetupPage.tsx`) cho tất cả các tab (Giấy phép, Quản lý danh mục, Phê duyệt, Metadata, Lịch sử thay đổi) để các thành phần này nằm trực tiếp trên nền xám nhạt, đồng bộ với thiết kế của màn hình Danh sách.
+2. **Đồng bộ luồng và cấu hình dữ liệu**:
    - Lưu trữ và đồng bộ hóa danh sách dịch vụ (`provision_services`), phân quyền (`provision_permissions`), và tài khoản (`provision_accounts`) vào `localStorage`.
    - Cấu hình cho modal API cung cấp (`ProvisionApiModal.tsx`) tự động truy vấn đơn vị nhận mặc định từ các dịch vụ đã được thiết lập để hiển thị dưới dạng badge chỉ đọc (read-only) tương ứng khi chọn hoặc chỉnh sửa API.
    - Tự động điền dữ liệu `consumerUnit` (Đơn vị nhận mặc định) của dịch vụ khi khởi tạo, đồng thời đồng bộ hóa các đơn vị nhận mặc định sang tab Phân quyền truy cập và Danh sách tài khoản khi người dùng chọn API tương ứng.
@@ -12,7 +21,7 @@
    - Loại bỏ thanh tìm kiếm tại màn Phân quyền truy cập, loại bỏ cột "API được phép gọi" và API được phép truy cập trong danh sách/modal tài khoản.
    - Thay đổi phương thức khai báo Đơn vị được cấp quyền trong modal Tạo tài khoản thành nhập tay tự do (input text).
    - Nút làm mới App Key được cập nhật sang Custom Modal UI an toàn và hỗ trợ sao chép Key mới.
-2. **Breadcrumb và định tuyến chi tiết (Routing)**:
+3. **Breadcrumb và định tuyến chi tiết (Routing)**:
    - Cập nhật breadcrumb phân cấp chi tiết cho Dashboard, Thiết lập điều phối, Quản lý API, Đối soát và các dịch vụ cung cấp danh mục.
    - Đồng bộ trạng thái Tab với URL Query Parameter `tab` trong `DataProvisionServiceSetupPage.tsx`, `DataProvisionApiManagementPage.tsx` và `DataProvisionServicesPage.tsx`.
 3. **Thiết kế lại trang Yêu cầu sử dụng dữ liệu (`DataProvisionRequestPage.tsx`)**:
@@ -30,6 +39,15 @@
    - Thiết kế lại giao diện của modal `SharedFieldsConfigModal.tsx` và trang `DataProvisionServicesPage.tsx` sang tông màu xanh dương chủ đạo của hệ thống (`bg-blue-600`, `text-blue-700`, v.v.) và cỡ chữ `13px` theo quy định.
 
 **Các file bị ảnh hưởng:**
+- `src/components/pages/open-data/OpenDataSetupPage.tsx`
+- `src/components/pages/open-data-category/OpenDataCategoryPage.tsx`
+- `src/components/pages/open-data-category/components/OpenDataCategoryTabBar.tsx`
+- `src/components/pages/open-data-category/components/OpenDataCategoryFilters.tsx`
+- `src/components/pages/open-data-category/components/OpenDataCategoryActions.tsx`
+- `src/components/pages/open-data-category/components/tabs/FilesTab.tsx`
+- `src/components/pages/open-data-category/components/tabs/OpenDataCategoryGrid.tsx`
+- `src/components/pages/open-data-category/components/tabs/OpenDataCategoryPagination.tsx`
+- `src/components/pages/open-data-category/components/tabs/VersionHistoryTab.tsx`
 - `src/components/layout/MainLayout.tsx`
 - `src/components/pages/provisioning/DataProvisionServiceSetupPage.tsx`
 - `src/components/pages/provisioning/DataProvisionApiManagementPage.tsx`

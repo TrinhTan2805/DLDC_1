@@ -17,7 +17,7 @@ export function OpenDataCategoryActions({
       {onImportClick && (
         <button
           onClick={onImportClick}
-          className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 transition-all text-sm font-medium active:scale-95 whitespace-nowrap shadow-sm cursor-pointer"
+          className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 transition-all text-[14px] font-medium active:scale-95 whitespace-nowrap shadow-sm cursor-pointer"
         >
           <Upload className="w-4 h-4 text-slate-500" />
           Import
@@ -26,7 +26,7 @@ export function OpenDataCategoryActions({
       {onExportClick && (
         <button
           onClick={onExportClick}
-          className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 transition-all text-sm font-medium active:scale-95 whitespace-nowrap shadow-sm cursor-pointer"
+          className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 transition-all text-[14px] font-medium active:scale-95 whitespace-nowrap shadow-sm cursor-pointer"
         >
           <Download className="w-4 h-4 text-slate-500" />
           Export

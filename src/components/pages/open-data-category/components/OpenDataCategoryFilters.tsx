@@ -21,25 +21,33 @@ export function OpenDataCategoryFilters({
   return (
     <div className="flex-1 flex items-center gap-2">
       {/* Search Input */}
-      <div className="flex-1 relative group">
-        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+      <div className="flex-1 relative">
         <input
           type="text"
           placeholder="Tìm kiếm theo mã, tên tệp dữ liệu..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-[14px] bg-slate-50/50 hover:bg-slate-50 transition-all font-medium"
+          className="w-full px-4 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-400 bg-white hover:bg-slate-50/50 font-medium shadow-sm"
         />
       </div>
+
+      {/* Search Button */}
+      <button
+        type="button"
+        className="w-10 h-10 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shrink-0 transition-all cursor-pointer active:scale-95 shadow-sm"
+        title="Tìm kiếm"
+      >
+        <Search className="w-4 h-4" />
+      </button>
 
       {/* Filter Toggle Button */}
       <button
         type="button"
         onClick={() => setShowFilters(!showFilters)}
-        className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all cursor-pointer ${
+        className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all border cursor-pointer active:scale-95 ${
           showFilters
-            ? 'bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 shadow-sm'
-            : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+            ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-sm'
+            : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
         }`}
         title={showFilters ? "Đóng bộ lọc" : "Bộ lọc nâng cao"}
       >
@@ -59,7 +67,7 @@ export function OpenDataCategoryFilterPanel({
   setStatusFilter
 }: OpenDataCategoryFilterPanelProps) {
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-[0_1px_3px_rgba(0,0,0,0.05)] mt-3">
+    <div className="relative mt-3 p-4 bg-white border border-slate-200 rounded-xl shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] before:content-[''] before:absolute before:-top-[7px] before:right-[208px] md:before:right-[auto] md:before:left-[calc(100%-100px)] lg:before:left-[calc(100%-242px)] before:w-3 before:h-3 before:bg-white before:rotate-45 before:border-l before:border-t before:border-slate-200">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Trạng thái công khai</label>

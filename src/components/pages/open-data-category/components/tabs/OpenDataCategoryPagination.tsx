@@ -31,13 +31,13 @@ export function OpenDataCategoryPagination({
             setPageSize(Number(e.target.value));
             setCurrentPage(1);
           }}
-          className="px-2 py-1 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px] cursor-pointer"
+          className="px-2 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 bg-white text-[13px] cursor-pointer"
           title="Số bản ghi trên trang"
         >
-          <option value={5}>5</option>
           <option value={10}>10</option>
           <option value={20}>20</option>
           <option value={50}>50</option>
+          <option value={100}>100</option>
         </select>
         <span className="text-slate-600">bản ghi/trang</span>
       </div>

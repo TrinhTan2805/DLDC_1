@@ -843,60 +843,58 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
         </div>
       </div>
     )}
-    <div className="h-full flex flex-col bg-slate-50 relative z-0 p-6 space-y-6 overflow-y-auto">
-      {/* Tabs and Content Wrapper Card */}
-      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex flex-col">
-        <OpenDataCategoryTabBar activeTab={activeTab} setActiveTab={setActiveTab} />
+    <div className="space-y-6">
+      {/* Tabs Header */}
+      <OpenDataCategoryTabBar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-        {/* Tab Content Container */}
-        <div className="p-6 bg-slate-50/20 min-h-[600px] space-y-6">
-          {activeTab === 'category' && (
-            <FilesTab
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              statusFilter={statusFilter}
-              setStatusFilter={setStatusFilter}
-              filteredData={filteredData}
-              paginatedData={paginatedData}
-              totalItems={totalItems}
-              currentPage={currentPage}
-              setCurrentPage={setCurrentPage}
-              pageSize={pageSize}
-              setPageSize={setPageSize}
-              onViewDetail={(item) => {
-                setSelectedItem(item);
-                setShowDetailModal(true);
-              }}
-              onEdit={(item) => {
-                setSelectedItem(item);
-                setShowEditModal(true);
-              }}
-              onDelete={(item) => {
-                setSelectedItem(item);
-                setShowDeleteModal(true);
-              }}
-              activeTab={activeTab}
-              onAddClick={() => {
-                setFormData({ code: '', name: '', description: '', status: 'active', keywords: '', licenseId: '', publisher: '', fileName: '' });
-                setUploadStatus('idle');
-                setShowAddModal(true);
-              }}
-              onImportClick={() => alert('Nhập dữ liệu thành công!')}
-              onExportClick={() => alert('Xuất báo cáo thành công!')}
-            />
-          )}
+      {/* Main Tab Content */}
+      <div className="p-6">
+        {activeTab === 'category' && (
+          <FilesTab
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            filteredData={filteredData}
+            paginatedData={paginatedData}
+            totalItems={totalItems}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            pageSize={pageSize}
+            setPageSize={setPageSize}
+            onViewDetail={(item) => {
+              setSelectedItem(item);
+              setShowDetailModal(true);
+            }}
+            onEdit={(item) => {
+              setSelectedItem(item);
+              setShowEditModal(true);
+            }}
+            onDelete={(item) => {
+              setSelectedItem(item);
+              setShowDeleteModal(true);
+            }}
+            activeTab={activeTab}
+            onAddClick={() => {
+              setFormData({ code: '', name: '', description: '', status: 'active', keywords: '', licenseId: '', publisher: '', fileName: '' });
+              setUploadStatus('idle');
+              setShowAddModal(true);
+            }}
+            onImportClick={() => alert('Nhập dữ liệu thành công!')}
+            onExportClick={() => alert('Xuất báo cáo thành công!')}
+          />
+        )}
 
-          {activeTab === 'version' && (
-            <VersionHistoryTab
-              filteredData={filteredData}
-              selectedDatasetForVersion={selectedDatasetForVersion}
-              setSelectedDatasetForVersion={setSelectedDatasetForVersion}
-              sampleVersionHistory={sampleVersionHistory}
-              setSelectedVersionToRestore={setSelectedVersionToRestore}
-              setShowRestoreModal={setShowRestoreModal}
-            />
-          )}
-        </div>
+        {activeTab === 'version' && (
+          <VersionHistoryTab
+            filteredData={filteredData}
+            selectedDatasetForVersion={selectedDatasetForVersion}
+            setSelectedDatasetForVersion={setSelectedDatasetForVersion}
+            sampleVersionHistory={sampleVersionHistory}
+            setSelectedVersionToRestore={setSelectedVersionToRestore}
+            setShowRestoreModal={setShowRestoreModal}
+          />
+        )}
       </div>
 
       {/* Add Modal */}
