@@ -1,54 +1,33 @@
 # Nhật ký cập nhật hệ thống (Changelog)
  
-## Phiên bản 2.4.9 (Ngày cập nhật: 17/06/2026)
-
-**Cập nhật bổ sung (17/06/2026):**
-- Sửa lỗi React Error #31 (Objects are not valid as a React child) tại modal Cấu hình trường:
-  - Loại bỏ ký tự thừa `, document.body` ở phần `return` của modal `SharedFieldsConfigModal.tsx` khi chuyển đổi sang sử dụng component wrapper `<Portal>`.
-  - Thiết kế lại giao diện của modal `SharedFieldsConfigModal.tsx` và trang `DataProvisionServicesPage.tsx` sang tông màu xanh dương chủ đạo của hệ thống (`bg-blue-600`, `text-blue-750`, v.v.) và cỡ chữ `13px` theo quy định.
-- Bỏ bảng grid **Dữ liệu chi tiết lưu lượng (7 ngày qua)** khỏi tab **Nhật ký khai thác (Audit Logs)** trong `DataProvisionMonitoringPage.tsx`.
-  - Trước đây khối `else` render bảng này cho cả 2 tab `bao_cao` và `nhat_ky` do logic ternary chỉ kiểm tra `!== luong_du_lieu`.
-  - Đã tách thành 3-way conditional: `luong_du_lieu` → sơ đồ giám sát, `bao_cao` → bảng chi tiết lưu lượng, `nhat_ky` → `<AuditLogsTab />` (không có bảng).
-  - Tab **Báo cáo hiệu năng đồ thị** giữ nguyên bảng, không bị ảnh hưởng.
-
----
-
+## Phiên bản 2.4.8 (Ngày cập nhật: 17/06/2026)
 
 **Nội dung thay đổi:**
-1. Thêm Breadcrumb và định tuyến chi tiết (Routing) cho toàn bộ phân hệ Cung cấp dữ liệu (Data Provision):
-   - Cập nhật hàm trợ giúp `getBreadcrumbPath` trong `MainLayout.tsx` để nhận thêm tham số `search` (URL Query Params).
-   - Thiết lập cấu trúc breadcrumb phân cấp chi tiết cho tất cả các trang cung cấp dữ liệu:
-     - Dashboard cung cấp dữ liệu (`provision-dashboard`): `['Cung cấp dữ liệu', 'Tổng quan Cung cấp']`.
-     - Thiết lập điều phối dữ liệu (`provisioning-service-setup`): Phân cấp cụ thể theo tab đang hoạt động (`tab=setup` -> Cấu hình/Thiết lập dịch vụ, `tab=approve` -> Kiểm tra & Phê duyệt, `tab=publish` -> Công khai dịch vụ).
-     - Quản lý API cung cấp & đối soát (`provisioning-api-management`): Phân cấp cụ thể theo tab đang hoạt động (`tab=api_cung_cap` -> API Cung cấp dữ liệu, `tab=api_doi_soat` -> API Đối soát dữ liệu, `tab=phan_quyen` -> Phân quyền truy cập, `tab=danh_sach_tai_khoan` -> Danh sách tài khoản).
-     - Đối soát cung cấp (`reconciliation-<id>`): `['Cung cấp dữ liệu', 'Đối soát cung cấp', 'Chi tiết đối soát #<id>']`.
-     - Danh sách dịch vụ cung cấp theo danh mục/nhóm (`provisioning-catalog-*`, `provisioning-shared-*`, `provisioning-internal-*`): Phân cấp đến từng danh mục, nhóm dữ liệu và theo dõi tab chi tiết (`tab=du_lieu` -> Dữ liệu cung cấp, `tab=api` -> Quản lý API đang lấy dữ liệu).
-   - Đồng bộ trạng thái Tab với URL Query Parameter `tab` trong `DataProvisionServiceSetupPage.tsx` và `DataProvisionApiManagementPage.tsx` bằng cách khởi tạo state từ URL và cập nhật URL bằng `useNavigate` khi chuyển đổi tab.
-   - Đồng bộ trạng thái Tab chi tiết gói tin chia sẻ với URL Query Parameter `tab` trong `DataProvisionServicesPage.tsx`.
-2. Thiết kế lại Modal So sánh/Xem chi tiết phiên bản API (`ApiVersionCompareModal.tsx`):
-   - Thiết kế lại giao diện theo bố cục song song: Cấu trúc phiên bản cũ (`versionB`) bên trái, Cấu trúc phiên bản mới (`versionA`) bên phải.
-   - Loại bỏ hoàn toàn dòng mô tả (description) dưới tên các trường thuộc tính và cột trạng thái (status column) để giao diện tối giản, rõ ràng theo yêu cầu.
-   - Mỗi bên hiển thị 2 cột thông tin chính: Trường thuộc tính (Property Name) và Kiểu dữ liệu/Cấu trúc (Data Type) nằm ngang cạnh nhau (sử dụng layout Flexbox `w-1/2` thay vì CSS Grid bị rớt dòng chồng lên nhau).
-   - Căn chỉnh thẳng hàng chính xác giữa các dòng thuộc tính đối chiếu bằng cấu trúc lưới grid đồng bộ, chèn các placeholder chỉ rõ trường được thêm mới ở phiên bản mới hoặc bị lược bỏ ở phiên bản cũ.
-   - Thay đổi kiểu dáng nút "Đóng so sánh": Đổi từ màu đen sang màu xanh biển chủ đạo của hệ thống (`bg-blue-600` / `hover:bg-blue-700`) và chuyển định dạng chữ từ in đậm (`font-bold`) thành bình thường (`font-medium`).
-   - Sửa lỗi truyền nhận tham số (`versionA` và `versionB`) từ modal lịch sử (`ProvisionVersionHistoryModal.tsx`) giúp hiển thị chính xác tên phiên bản được so sánh.
-3. Cập nhật thiết kế modal So sánh phiên bản API (`ApiVersionCompareModal.tsx`):
-   - Đổi màu nền và màu chữ của icon `GitCompare` ở tiêu đề từ màu cam (`bg-amber-50 text-amber-600 border-amber-100`) sang màu xanh dương (`bg-blue-50 text-blue-600 border-blue-100`).
-   - Đổi toàn bộ các văn bản, nhãn thông tin và giá trị so sánh trong modal về màu đen (`text-black`).
-4. Thiết kế lại trang Yêu cầu sử dụng dữ liệu (`DataProvisionRequestPage.tsx`) đồng bộ theo phong cách của màn hình **Quản lý API Cung cấp & Đối soát**:
-   - Di chuyển thanh Tab chính ra bên ngoài container và thêm biểu tượng và số lượng bản ghi cho 3 tab (Tiếp nhận yêu cầu, Tra cứu & Kết xuất, Bàn giao dữ liệu).
-   - Thiết kế lại thanh tìm kiếm, bộ lọc nâng cao collapsible và nút "Tạo yêu cầu" với màu xanh dương chủ đạo hệ thống (`bg-blue-600` / `hover:bg-blue-700`).
-   - Đồng bộ hóa bảng dữ liệu: header màu xám nhạt (`bg-slate-50`), cỡ chữ `13px` trong container `api-requests-page-root`, các nút thao tác dạng icon-only có hover background chuyên nghiệp và badge trạng thái đầy đủ màu sắc.
-   - Bổ sung tính năng phân trang (`renderPagination`) ở cuối bảng danh sách.
-5. Áp dụng quy tắc Hộp thoại 5.4 trong `compomennt.md` khi nhấn nút chỉnh sửa, xem chi tiết, bàn giao, công khai, và hủy công khai tại các tab của màn hình Cung cấp dữ liệu theo yêu cầu:
-   - Cập nhật z-index (`z-[999999]`, inline style `zIndex: 999999`) và lớp backdrop overlay chuẩn (`bg-black/50` thay vì `bg-slate-900/50 backdrop-blur-sm`).
-   - Chuẩn hóa typography font chữ nhãn (`text-[13px] font-medium`) và các trường dữ liệu, định dạng file, nút bấm sử dụng tông màu xanh dương (`bg-blue-600` / `hover:bg-blue-700`, `accent-blue-650 w-4 h-4`) thay vì các tông màu không đồng bộ.
-   - Các modal được cập nhật bao gồm: `ProvisionDataRequestModal.tsx`, `ProvisionRequestApprovalModal.tsx`, `ProvisionRequestExportModal.tsx`, `ProvisionHandoverDetailModal.tsx`, `ProvisionPublishDetailModal.tsx`, `ProvisionRequestHandoverModal.tsx`, `ProvisionServicePublishModal.tsx`, `ProvisionServiceUnpublishModal.tsx`.
-6. Đồng bộ thiết kế mục **Kiểm soát & Giám sát cung cấp** (`DataProvisionMonitoringPage.tsx` và `AuditLogsTab.tsx`):
-   - Chuyển tông màu chủ đạo từ màu hổ phách/cam sang màu xanh dương cho nút xuất báo cáo, active tabs, bộ chọn select API, cổng API Gateway, đồ thị AreaChart, và các icons liên quan.
-   - Thêm bộ phân trang động ở cuối bảng dữ liệu chi tiết lưu lượng và bảng Audit logs để quản lý dữ liệu lớn chuyên nghiệp.
+1. **Đồng bộ luồng và cấu hình dữ liệu**:
+   - Lưu trữ và đồng bộ hóa danh sách dịch vụ (`provision_services`), phân quyền (`provision_permissions`), và tài khoản (`provision_accounts`) vào `localStorage`.
+   - Cấu hình cho modal API cung cấp (`ProvisionApiModal.tsx`) tự động truy vấn đơn vị nhận mặc định từ các dịch vụ đã được thiết lập để hiển thị dưới dạng badge chỉ đọc (read-only) tương ứng khi chọn hoặc chỉnh sửa API.
+   - Tự động điền dữ liệu `consumerUnit` (Đơn vị nhận mặc định) của dịch vụ khi khởi tạo, đồng thời đồng bộ hóa các đơn vị nhận mặc định sang tab Phân quyền truy cập và Danh sách tài khoản khi người dùng chọn API tương ứng.
+   - Cập nhật modal tạo tài khoản mới (`ProvisionAccountModal.tsx`) để lấy danh sách đơn vị từ tài khoản hiện tại kết hợp danh sách đơn vị mặc định của hệ thống.
+   - Bổ sung nút Chỉnh sửa tài khoản tại tab Danh sách tài khoản và nút Xem chi tiết (icon Eye) trước nút Sửa thông tin API.
+   - Loại bỏ thanh tìm kiếm tại màn Phân quyền truy cập, loại bỏ cột "API được phép gọi" và API được phép truy cập trong danh sách/modal tài khoản.
+   - Thay đổi phương thức khai báo Đơn vị được cấp quyền trong modal Tạo tài khoản thành nhập tay tự do (input text).
+   - Nút làm mới App Key được cập nhật sang Custom Modal UI an toàn và hỗ trợ sao chép Key mới.
+2. **Breadcrumb và định tuyến chi tiết (Routing)**:
+   - Cập nhật breadcrumb phân cấp chi tiết cho Dashboard, Thiết lập điều phối, Quản lý API, Đối soát và các dịch vụ cung cấp danh mục.
+   - Đồng bộ trạng thái Tab với URL Query Parameter `tab` trong `DataProvisionServiceSetupPage.tsx`, `DataProvisionApiManagementPage.tsx` và `DataProvisionServicesPage.tsx`.
+3. **Thiết kế lại trang Yêu cầu sử dụng dữ liệu (`DataProvisionRequestPage.tsx`)**:
+   - Di chuyển thanh Tab chính ra ngoài container và bổ sung biểu tượng và số lượng bản ghi cho các tab.
+   - Thiết kế lại bộ lọc collapsible nâng cao và nút Tạo yêu cầu với màu xanh dương chủ đạo.
+   - Đồng bộ hóa bảng dữ liệu (cỡ chữ 13px, header màu xám nhạt, hover styles) và bổ sung phân trang.
+   - Áp dụng quy tắc 5.4 Hộp thoại (z-index 999999, backdrop `bg-black/50`) cho các modal bàn giao, công khai, phê duyệt...
+4. **Đồng bộ thiết kế mục Kiểm soát & Giám sát cung cấp (`DataProvisionMonitoringPage.tsx` và `AuditLogsTab.tsx`)**:
+   - Chuyển tông màu chủ đạo từ màu hổ phách/cam sang màu xanh dương cho nút xuất báo cáo, active tabs, bộ chọn select API, cổng API Gateway, đồ thị AreaChart và các icons.
+   - Thêm bộ phân trang động ở cuối bảng dữ liệu chi tiết lưu lượng và bảng Audit logs.
    - Ép font chữ toàn trang và các components con về kích thước `13px` thông qua class root và style inline.
-   - Áp dụng quy tắc Hộp thoại 5.4 và đổi màu nút đóng sang xanh dương đối với modal chi tiết logs và modal xuất báo cáo (`ProvisionExportReportModal.tsx`).
+   - Áp dụng quy tắc Hộp thoại 5.4 cho modal chi tiết logs và modal xuất báo cáo.
+5. **Dịch vụ chia sẻ & Sửa lỗi React Error #31**:
+   - Sửa lỗi React Error #31 (Objects are not valid as a React child) tại modal Cấu hình trường bằng cách loại bỏ ký tự thừa `, document.body` ở phần `return` của modal `SharedFieldsConfigModal.tsx` khi chuyển đổi sang sử dụng component wrapper `<Portal>`.
+   - Thiết kế lại giao diện của modal `SharedFieldsConfigModal.tsx` và trang `DataProvisionServicesPage.tsx` sang tông màu xanh dương chủ đạo của hệ thống (`bg-blue-600`, `text-blue-700`, v.v.) và cỡ chữ `13px` theo quy định.
 
 **Các file bị ảnh hưởng:**
 - `src/components/layout/MainLayout.tsx`
@@ -68,50 +47,14 @@
 - `src/components/pages/provisioning/DataProvisionMonitoringPage.tsx`
 - `src/components/pages/provisioning/tabs/AuditLogsTab.tsx`
 - `src/components/pages/provisioning/modals/ProvisionExportReportModal.tsx`
-
-## Phiên bản 2.4.8 (Ngày cập nhật: 17/06/2026)
-
-**Nội dung thay đổi:**
-1. Đồng bộ luồng và cấu hình dữ liệu giữa "Thiết lập điều phối dữ liệu" (Service Setup) và "Quản lý API cung cấp & đối soát" (API Management):
-   - Lưu trữ và đồng bộ hóa danh sách dịch vụ (`provision_services`), phân quyền (`provision_permissions`), và tài khoản (`provision_accounts`) vào `localStorage`.
-   - Cấu trúc lại trường "Cơ quan/Đơn vị nhận" (Tab Phân quyền truy cập trong modal Thiết lập dịch vụ `ProvisionServiceModal.tsx`) để tải động danh sách đơn vị thụ hưởng từ danh sách "Đơn vị được cấp quyền" tại tab Danh sách tài khoản (`provision_accounts` trong localStorage).
-   - Tự động điền dữ liệu `consumerUnit` (Đơn vị nhận mặc định) của dịch vụ khi khởi tạo, đồng thời đồng bộ hóa các đơn vị nhận mặc định sang tab Phân quyền truy cập và Danh sách tài khoản khi người dùng chọn API tương ứng.
-   - Cập nhật modal tạo tài khoản mới (`ProvisionAccountModal.tsx`) để lấy danh sách đơn vị từ tài khoản hiện tại kết hợp danh sách đơn vị mặc định của hệ thống.
-   - Cấu hình cho modal API cung cấp (`ProvisionApiModal.tsx`) tự động truy vấn đơn vị nhận mặc định từ các dịch vụ đã được thiết lập để hiển thị dưới dạng badge chỉ đọc (read-only) tương ứng khi chọn hoặc chỉnh sửa API.
-2. Thêm tính năng Xem chi tiết API cung cấp dữ liệu:
-   - Bổ sung nút Xem chi tiết (icon Eye) trước nút Sửa thông tin API trong bảng danh sách API cung cấp dữ liệu.
-   - Thiết lập trạng thái `apiModalMode` ('view' / 'edit') để mở modal `ProvisionApiModal` ở chế độ chỉ đọc khi nhấn nút Xem chi tiết.
-   - Vô hiệu hóa tất cả các trường dữ liệu và file đính kèm, thay thế nút Lưu cấu hình bằng nút Đóng trong footer modal khi ở chế độ xem chi tiết.
-   - Sửa lỗi chính tả class `bg-slate-55` thành `bg-slate-50` cho phần select dịch vụ trong modal khi bị disabled.
-3. Loại bỏ thanh tìm kiếm tại màn Phân quyền truy cập:
-   - Ẩn toàn bộ phần thanh tìm kiếm & bộ lọc (`Filters and Actions` row) của màn hình Quản lý API khi chuyển sang tab "Phân quyền truy cập" (`activeTab === 'phan_quyen'`) để tối ưu hóa không gian hiển thị và tránh dư thừa giao diện.
-4. Cập nhật trường Authorization trong modal Cấp quyền truy cập API (`ProvisionAccessControlModal.tsx`):
-   - Đổi tên nhãn trường từ "Authorization Token (riêng cho từng đơn vị) *" thành "Tài khoản (Username)".
-   - Khóa không cho phép người dùng nhập/chỉnh sửa, tự động tra cứu hiển thị tài khoản (username) tương ứng với từng đơn vị thụ hưởng được chọn từ Danh sách tài khoản (`provision_accounts` trong localStorage).
-5. Loại bỏ cột trạng thái tại danh sách đơn vị được cấp quyền trong Phân quyền truy cập:
-   - Xóa cột "Trạng thái" khỏi bảng danh sách đơn vị thụ hưởng đã được cấp quyền truy cập API và điều chỉnh `colSpan` của bảng từ 6 xuống 5 để căn chỉnh giao diện chuẩn xác.
-6. Loại bỏ trường API được phép truy cập/gọi trong Danh sách tài khoản và modal Tạo tài khoản:
-   - Xóa trường select "API được phép truy cập *" khỏi giao diện modal Tạo tài khoản mới (`ProvisionAccountModal.tsx`).
-   - Xóa cột "API được phép gọi" khỏi bảng danh sách tài khoản tại tab "Danh sách tài khoản" (`activeTab === 'danh_sach_tai_khoan'`) và chuyển `colSpan` bảng từ 7 về 6 để giao diện hiển thị chính xác.
-7. Thay đổi phương thức khai báo Đơn vị được cấp quyền trong modal Tạo tài khoản:
-   - Đổi thẻ `<select>` chọn danh sách đơn vị thành thẻ `<input type="text">` nhập tay tự do trong modal `ProvisionAccountModal.tsx` để người dùng linh hoạt điền tên đơn vị.
-8. Bỏ in đậm tiêu đề các trường tại modal Tạo tài khoản:
-   - Thay đổi font chữ của các thẻ `<label>` từ in đậm (`font-semibold`) thành bình thường (`font-medium`) cho cả 3 trường thông tin trong modal `ProvisionAccountModal.tsx` để đồng bộ chuẩn thiết kế labels của hệ thống.
-9. Bổ sung nút Chỉnh sửa tài khoản tại tab Danh sách tài khoản:
-   - Thêm nút Chỉnh sửa tài khoản (icon Edit màu đen) vào cột Thao tác của bảng tài khoản.
-   - Thêm trạng thái `selectedAccount` để lưu trữ dữ liệu tài khoản được chọn chỉnh sửa và truyền vào `ProvisionAccountModal`.
-   - Cập nhật modal `ProvisionAccountModal` hỗ trợ nạp dữ liệu khi chỉnh sửa (đổi tiêu đề thành "Cập nhật tài khoản API" và nút thành "Lưu thay đổi") và xử lý callback `onSave` để cập nhật trực tiếp vào danh sách.
-10. Sửa lỗi hiển thị che phủ của Modal Xác nhận làm mới App Key và Kết quả Key mới:
-    - Chuyển đổi hai hộp thoại này sang sử dụng `createPortal` để render trực tiếp vào `document.body`.
-    - Thiết lập thuộc tính `zIndex: 999999` và class `z-[999999]` tương ứng để che phủ hoàn toàn, đảm bảo hiển thị trên cùng và trên cả thanh menu sidebar bên trái.
-
-**Các file bị ảnh hưởng:**
-- `src/components/pages/provisioning/DataProvisionServiceSetupPage.tsx`
-- `src/components/pages/provisioning/DataProvisionApiManagementPage.tsx`
-- `src/components/pages/provisioning/modals/ProvisionServiceModal.tsx`
-- `src/components/pages/provisioning/modals/ProvisionApiModal.tsx`
+- `src/components/pages/provisioning/modals/SharedFieldsConfigModal.tsx`
 - `src/components/pages/provisioning/modals/ProvisionAccessControlModal.tsx`
 - `src/components/pages/provisioning/modals/ProvisionAccountModal.tsx`
+- `src/components/pages/provisioning/modals/ProvisionServiceModal.tsx`
+- `src/components/pages/provisioning/modals/ProvisionApiModal.tsx`
+- `package.json`
+- `CHANGELOG.md`
+- `src/components/modals/VersionHistoryModal.tsx`
 
 ## Phiên bản 2.4.5 — Patch 9 (Ngày cập nhật: 16/06/2026)
 

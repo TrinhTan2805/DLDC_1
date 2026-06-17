@@ -7,6 +7,37 @@ interface VersionHistoryModalProps {
 
 const mockVersions = [
   {
+    id: 17,
+    version: 'v2.4.8',
+    date: '17/06/2026',
+    time: '18:12',
+    content: `1. Đồng bộ dữ liệu & chức năng Cung cấp:
+- Đồng bộ hóa cấu hình và danh sách dữ liệu (dịch vụ, phân quyền, tài khoản) sang localStorage.
+- Tự động điền đơn vị nhận mặc định cho các dịch vụ mới và liên kết động đến tab Phân quyền, Danh sách tài khoản.
+- Bổ sung tính năng Xem chi tiết API ở chế độ chỉ đọc và nút Chỉnh sửa tài khoản.
+- Tối ưu hóa UI/UX: Ẩn thanh lọc tại Phân quyền, thay thế dropdown đơn vị bằng input text tự do, và loại bỏ cột API được phép gọi.
+- Chuyển đổi các thông báo xác nhận App Key sang Custom Modal UI an toàn và hỗ trợ sao chép Key mới.
+
+2. Breadcrumb & Điều hướng (Routing):
+- Bổ sung Breadcrumb phân cấp chi tiết cho toàn bộ các trang Cung cấp dữ liệu.
+- Đồng bộ hóa trạng thái Tab với URL Query Parameter tab trong trang Thiết lập dịch vụ, Quản lý API, và Dịch vụ chia sẻ.
+
+3. Thiết kế lại trang Yêu cầu sử dụng dữ liệu (DataProvisionRequestPage):
+- Chuyển thanh Tab chính ra ngoài card, thêm icons và số lượng bản ghi.
+- Đồng bộ hóa bảng dữ liệu (cỡ chữ 13px, hover style) và tích hợp thanh phân trang.
+- Áp dụng quy tắc 5.4 Hộp thoại (z-index 999999, backdrop bg-black/50) cho tất cả các modal nghiệp vụ (bàn giao, công khai, phê duyệt).
+
+4. Kiểm soát & Giám sát cung cấp (DataProvisionMonitoringPage):
+- Chuyển đổi màu sắc chủ đạo từ cam/hổ phách sang xanh dương thương hiệu (#2563eb).
+- Tích hợp thanh phân trang cho bảng chi tiết lưu lượng và bảng Audit logs.
+- Ép font chữ hiển thị về 13px cho toàn trang và các modal liên quan.
+- Áp dụng quy tắc 5.4 Hộp thoại cho modal chi tiết logs và modal xuất báo cáo.
+
+5. Dịch vụ chia sẻ & Sửa lỗi React Error #31:
+- Khắc phục triệt để lỗi React crash Error #31 tại modal Cấu hình trường bằng cách gỡ bỏ toán tử dấu phẩy dư thừa , document.body ở câu lệnh return trong SharedFieldsConfigModal.tsx.
+- Thiết kế lại giao diện của modal Cấu hình trường và trang Dịch vụ chia sẻ sang tông màu xanh dương và cỡ chữ 13px đồng bộ.`
+  },
+  {
     id: 16,
     version: 'v2.4.7',
     date: '16/06/2026',
