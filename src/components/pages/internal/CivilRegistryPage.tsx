@@ -10,7 +10,7 @@ const mockData = [
 export function CivilRegistryPage() {
   return (
     <GenericDataTable
-      title="Hệ thống quản lý hộ tịch"
+      title="Hệ thống quản lý Bộ Tư Pháp hộ tịch"
       description="Quản lý toàn bộ hồ sơ hộ tịch"
       icon={FileUser}
       iconColor="blue"

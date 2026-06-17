@@ -16,9 +16,9 @@ export function ProcessingNationalityPage() {
   return (
     <div className="space-y-6">
       <div className="bg-white border border-slate-200 rounded-lg p-6">
-        <h2 className="text-xl text-slate-900 mb-2">Hệ thống quản lý hồ sơ quốc tịch</h2>
+        <h2 className="text-xl text-slate-900 mb-2">Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch</h2>
         <p className="text-slate-600">
-          Quản lý xử lý dữ liệu từ Hệ thống quản lý hồ sơ quốc tịch thuộc Cục Hành chính tư pháp.
+          Quản lý xử lý dữ liệu từ Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch thuộc Cục Hành chính tư pháp.
         </p>
       </div>
       <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
@@ -44,7 +44,7 @@ export function ProcessingNationalityPage() {
           {activeTab === 'data' && (
             <GenericDataTable
               title="Dữ liệu quốc tịch"
-              description="Danh sách dữ liệu từ Hệ thống quản lý hồ sơ quốc tịch"
+              description="Danh sách dữ liệu từ Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch"
               icon={Database}
               iconColor="purple"
               columns={[
@@ -71,9 +71,9 @@ export function ProcessingNationalityPage() {
           )}
 
           {activeTab === 'processing' && (
-            <ProcessingConfigManager 
-              title="Hệ thống quản lý hồ sơ quốc tịch"
-              description="Quản lý xử lý dữ liệu từ Hệ thống quản lý hồ sơ quốc tịch thuộc Cục Hành chính tư pháp."
+            <ProcessingConfigManager
+              title="Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch"
+              description="Quản lý xử lý dữ liệu từ Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch thuộc Cục Hành chính tư pháp."
               dataSourceKey="nationality"
             />
           )}
@@ -128,9 +128,8 @@ export function ProcessingNationalityPage() {
                           </div>
                         </td>
                         <td className="px-4 py-3">
-                          <span className={`inline-flex items-center px-2 py-1 text-xs rounded ${
-                            log.status === 'success' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
-                          }`}>
+                          <span className={`inline-flex items-center px-2 py-1 text-xs rounded ${log.status === 'success' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+                            }`}>
                             {log.status === 'success' ? 'Hoàn thành' : 'Có cảnh báo'}
                           </span>
                         </td>

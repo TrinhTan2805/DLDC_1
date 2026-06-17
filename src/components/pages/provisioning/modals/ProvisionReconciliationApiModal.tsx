@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { X, Check } from 'lucide-react';
 
 interface ProvisionReconciliationApiModalProps {
@@ -26,8 +27,13 @@ export function ProvisionReconciliationApiModal({ isOpen, onClose, apiData, onSa
     onClose();
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+  return createPortal(
+    <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200 provision-reconciliation-api-modal-root">
+      <style dangerouslySetInnerHTML={{__html: `
+        .provision-reconciliation-api-modal-root *:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(svg):not(path):not(circle):not(rect):not(polyline):not(line) {
+          font-size: 13px !important;
+        }
+      `}} />
       <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-200">
         
         {/* Header */}
@@ -148,5 +154,5 @@ export function ProvisionReconciliationApiModal({ isOpen, onClose, apiData, onSa
 
       </div>
     </div>
-  );
+  , document.body);
 }

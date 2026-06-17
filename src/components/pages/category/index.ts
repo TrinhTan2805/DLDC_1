@@ -13,3 +13,4 @@ export { CategoryGPage } from './CategoryGPage';
 export { CategoryHPage } from './CategoryHPage';
 export { CategoryIPage } from './CategoryIPage';
 export { CategoryJPage } from './CategoryJPage';
+export { CategoryMojUnitsPage } from './CategoryMojUnitsPage';

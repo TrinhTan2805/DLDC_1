@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Settings, Search, Filter, Play, GitCompare, Calendar, History, CheckCircle2, AlertTriangle, XCircle, ArrowRight } from 'lucide-react';
-import { reconciliationData, reconciliationHistoryData } from '../../../data/provisionReconciliationData';
-
+import { reconciliationData, reconciliationHistoryData, ReconciliationHistoryEntry } from '../../../data/provisionReconciliationData';
+import { ProvisionReconciliationDetailsModal } from './modals/ProvisionReconciliationDetailsModal';
 export function ProvisionReconciliationPage({ processId }: { processId?: string }) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedEntry, setSelectedEntry] = useState<ReconciliationHistoryEntry | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   
   // Find the specific process
   const process = reconciliationData.find(p => p.id === processId);
@@ -68,12 +70,12 @@ export function ProvisionReconciliationPage({ processId }: { processId?: string 
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="flex items-center px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg shadow-sm hover:bg-slate-50 transition-colors font-medium">
-            <Settings className="w-4 h-4 mr-2" />
+          <button className="group flex items-center px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg shadow-sm hover:bg-slate-50 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all font-medium duration-200">
+            <Settings className="w-4 h-4 mr-2 text-slate-500 group-hover:text-slate-700 group-hover:rotate-45 transition-all duration-300" />
             Cấu hình
           </button>
-          <button className="flex items-center px-4 py-2 bg-amber-500 text-white rounded-lg shadow-sm hover:bg-amber-600 transition-colors font-medium">
-            <Play className="w-4 h-4 mr-2" />
+          <button className="group flex items-center px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg shadow-sm hover:shadow-md hover:shadow-amber-500/20 hover:-translate-y-0.5 active:translate-y-0 transition-all font-medium duration-200">
+            <Play className="w-4 h-4 mr-2 fill-current group-hover:scale-110 transition-transform duration-300" />
             Đối soát ngay
           </button>
         </div>
@@ -187,8 +189,12 @@ export function ProvisionReconciliationPage({ processId }: { processId?: string 
                     {entry.note || '-'}
                   </td>
                   <td className="py-3 px-4 text-center">
-                    <button className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Xem chi tiết">
-                      <ArrowRight className="w-4 h-4" />
+                    <button 
+                      onClick={() => { setSelectedEntry(entry as ReconciliationHistoryEntry); setIsDetailsModalOpen(true); }}
+                      className="group inline-flex items-center justify-center p-2 text-blue-600 bg-blue-50/50 hover:bg-blue-100 rounded-lg transition-all duration-200 hover:shadow-sm" 
+                      title="Xem chi tiết"
+                    >
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
                     </button>
                   </td>
                 </tr>
@@ -214,6 +220,12 @@ export function ProvisionReconciliationPage({ processId }: { processId?: string 
           </div>
         )}
       </div>
+      
+      <ProvisionReconciliationDetailsModal 
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+        entry={selectedEntry}
+      />
     </div>
   );
 }

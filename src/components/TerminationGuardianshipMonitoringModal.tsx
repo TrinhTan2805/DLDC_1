@@ -138,6 +138,11 @@ export function TerminationGuardianshipMonitoringModal({
           <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0 bg-white sticky top-0 z-20">
             <div>
               <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
+              <p className="text-sm text-slate-500 mt-1">
+                Tích hợp: {title}.
+                <br />
+                Thuộc đơn vị: Cục Hành chính tư pháp.
+              </p>
             </div>
             {!isInline && (
               <button
@@ -184,10 +189,12 @@ export function TerminationGuardianshipMonitoringModal({
                       <button className="p-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 transition-all shadow-sm" title="Tải lại">
                         <RefreshCw className="w-4 h-4" />
                       </button>
-                      <button className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all flex items-center gap-2 text-sm font-semibold shadow-sm">
-                        <Download className="w-4 h-4" />
-                        Kết xuất
-                      </button>
+                      {!isInline && (
+                        <button className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all flex items-center gap-2 text-sm font-semibold shadow-sm">
+                          <Download className="w-4 h-4" />
+                          Kết xuất
+                        </button>
+                      )}
                     </div>
                   </div>
 

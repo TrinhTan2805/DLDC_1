@@ -40,7 +40,7 @@ const sections: Section[] = [
       {
         id: 'overview',
         title: '1.1. Tổng quan',
-        content: 'Hệ thống Kho Dữ liệu Dùng Chung (DLDC) là nền tảng tập trung thu thập, xử lý, quản lý và chia sẻ dữ liệu giữa các đơn vị trong và ngoài ngành. Hệ thống được xây dựng nhằm đảm bảo tính nhất quán, chính xác và khả năng khai thác hiệu quả dữ liệu phục vụ công tác quản lý nhà nước.'
+        content: 'Hệ thống Kho DLDC (DLDC) là nền tảng tập trung thu thập, xử lý, quản lý và chia sẻ dữ liệu giữa các đơn vị trong và ngoài ngành. Hệ thống được xây dựng nhằm đảm bảo tính nhất quán, chính xác và khả năng khai thác hiệu quả dữ liệu phục vụ công tác quản lý nhà nước.'
       },
       {
         id: 'architecture',
@@ -99,7 +99,7 @@ const sections: Section[] = [
       {
         id: 'feedback',
         title: '3.4. Hệ thống phản hồi nguồn',
-        content: 'Cơ chế phản hồi về hệ thống nguồn khi phát hiện lỗi:\n\n1. Tự động gửi thông báo lỗi về hệ thống nguồn qua API\n2. Tạo ticket trong hệ thống quản lý sự cố\n3. Gửi email/notification cho đơn vị quản lý nguồn dữ liệu\n4. Theo dõi tiến độ xử lý từ phía nguồn\n5. Tự động thu thập lại sau khi nguồn sửa xong\n\nThống kê số lượng lỗi theo nguồn để đánh giá chất lượng dữ liệu đầu vào.'
+        content: 'Cơ chế phản hồi về hệ thống nguồn khi phát hiện lỗi:\n\n1. Tự động gửi thông báo lỗi về hệ thống nguồn qua API\n2. Tạo ticket trong Hệ thống quản lý Bộ Tư Pháp sự cố\n3. Gửi email/notification cho đơn vị quản lý nguồn dữ liệu\n4. Theo dõi tiến độ xử lý từ phía nguồn\n5. Tự động thu thập lại sau khi nguồn sửa xong\n\nThống kê số lượng lỗi theo nguồn để đánh giá chất lượng dữ liệu đầu vào.'
       }
     ]
   },

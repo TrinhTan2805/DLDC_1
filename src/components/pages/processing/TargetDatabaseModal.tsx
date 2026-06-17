@@ -20,7 +20,7 @@ export function TargetDatabaseModal({ isOpen, onClose, onSave, editingData }: Ta
     schema: '',
     note: ''
   });
-  
+
   const [password, setPassword] = useState('');
 
   useEffect(() => {
@@ -58,7 +58,7 @@ export function TargetDatabaseModal({ isOpen, onClose, onSave, editingData }: Ta
   };
 
   return createPortal(
-    <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px', zIndex: 999999 }}>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px', zIndex: 999999 }}>
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh] border border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-200">
         {/* Header */}
         <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10">
@@ -67,10 +67,10 @@ export function TargetDatabaseModal({ isOpen, onClose, onSave, editingData }: Ta
               <Database className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-800">
+              <h2 className="text-[16px] font-bold text-slate-800">
                 {editingData ? 'Cập nhật kết nối CSDL' : 'Thêm kết nối CSDL mới'}
               </h2>
-              <p className="text-xs text-slate-500 font-medium uppercase tracking-wider mt-0.5">Thông tin kết nối hệ thống</p>
+              <p className="text-[11px] text-slate-500 font-medium uppercase tracking-wider mt-0.5">Thông tin kết nối hệ thống</p>
             </div>
           </div>
           <button

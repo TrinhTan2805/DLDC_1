@@ -16,6 +16,7 @@ import { ProcessedDataPage } from '../pages/processing/ProcessedDataPage';
 import { CategoryManagementPage } from '../pages/CategoryManagementPage';
 import { ScreenFlowDiagram } from '../pages/ScreenFlowDiagram';
 import CategorySetupPage from '../pages/category/CategorySetupPage';
+import { CategoryMojUnitsPage } from '../pages/category/CategoryMojUnitsPage';
 import { CategoryAPage } from '../pages/category/CategoryAPage';
 import { CategoryBPage } from '../pages/category/CategoryBPage';
 import { CategoryCPage } from '../pages/category/CategoryCPage';
@@ -38,6 +39,7 @@ import { CategorySetupPageNew } from '../pages/category/CategorySetupPageNew';
 import { OpenDataCategoryPage } from '../pages/OpenDataCategoryPage';
 import { OpenDataSetupPage } from '../pages/open-data/OpenDataSetupPage';
 import { OpenDataPublishedListPage } from '../pages/open-data/OpenDataPublishedListPage';
+import { OpenDataPublicPortal } from '../pages/open-data/OpenDataPublicPortal';
 import { OpenDataReportPage } from '../pages/open-data-report/OpenDataReportPage';
 import { OpenDataCategoryAPage } from '../pages/open-data-category/OpenDataCategoryAPage';
 import { OpenDataCategoryBPage } from '../pages/open-data-category/OpenDataCategoryBPage';
@@ -69,6 +71,7 @@ import { MasterDataAPage as MasterDataUpdateAPage } from '../pages/master-data/M
 import MasterDataReportsPage from '../pages/master-data/MasterDataReportsPage';
 import { DataCoordinationPage } from '../pages/DataCoordinationPage';
 import { ProvisionReconciliationPage } from '../pages/provisioning/DataReconciliationPage';
+import { CategoryDashboardPage } from '../pages/category/CategoryDashboardPage';
 import { ServiceSetupPage } from '../pages/orchestration/ServiceSetupPageUpdated';
 import { APIManagementPage } from '../pages/orchestration/APIManagementPage';
 import { DataReconciliationAPIPage } from '../pages/orchestration/DataReconciliationAPIPage';
@@ -91,6 +94,7 @@ import { FunctionManagementPage } from '../pages/admin/FunctionManagementPage';
 import { RoleManagementPage } from '../pages/admin/RoleManagementPage';
 import { SecurityConfigPage } from '../pages/admin/SecurityConfigPage';
 import { AccessLogPage } from '../pages/admin/AccessLogPage';
+import { LoginLogPage } from '../pages/admin/LoginLogPage';
 import { ErrorLogPage } from '../pages/admin/ErrorLogPage';
 import { AccountManagementLogPage } from '../pages/admin/AccountManagementLogPage';
 import { ConfigChangeLogPage } from '../pages/admin/ConfigChangeLogPage';
@@ -191,6 +195,7 @@ import { DataProvisionApiManagementPage } from '../pages/provisioning/DataProvis
 import { DataProvisionRequestPage } from '../pages/provisioning/DataProvisionRequestPage';
 import { DataProvisionMonitoringPage } from '../pages/provisioning/DataProvisionMonitoringPage';
 import { DataProvisionServicesPage } from '../pages/provisioning/DataProvisionServicesPage';
+import { DataProvisionDashboard } from '../pages/provisioning/DataProvisionDashboard';
 
 // Page configuration for titles and descriptions
 const pageConfig: Record<string, { title: string; description: string }> = {
@@ -205,6 +210,10 @@ const pageConfig: Record<string, { title: string; description: string }> = {
   dashboard: {
     title: 'Tổng quan hệ thống',
     description: 'Theo dõi tổng quan hoạt động và thống kê hệ thống kho dữ liệu DLDC'
+  },
+  'provision-dashboard': {
+    title: 'Tổng quan Cung cấp',
+    description: 'Trung tâm điều khiển và giám sát hoạt động cung cấp dữ liệu'
   },
   'provisioning-service-setup': {
     title: 'Thiết lập điều phối dữ liệu',
@@ -239,7 +248,7 @@ const pageConfig: Record<string, { title: string; description: string }> = {
     description: 'Danh mục dịch vụ cung cấp dữ liệu chủ'
   },
   'provisioning-shared-hotich': { title: 'CSDL Hộ tịch điện tử', description: 'Cung cấp dữ liệu CSDL Hộ tịch điện tử' },
-  'provisioning-shared-quoctich': { title: 'Hệ thống quản lý hồ sơ quốc tịch', description: 'Cung cấp dữ liệu Hệ thống quản lý hồ sơ quốc tịch' },
+  'provisioning-shared-quoctich': { title: 'Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch', description: 'Cung cấp dữ liệu Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch' },
   'provisioning-shared-tha': { title: 'Cơ sở dữ liệu thi hành án dân sự', description: 'Cung cấp dữ liệu Cơ sở dữ liệu thi hành án dân sự' },
   'provisioning-shared-bpbd': { title: 'Cơ sở dữ liệu về biện pháp bảo đảm', description: 'Cung cấp dữ liệu Cơ sở dữ liệu về biện pháp bảo đảm' },
   'provisioning-shared-qgpl': { title: 'CSDL quốc gia về pháp luật', description: 'Cung cấp dữ liệu CSDL quốc gia về pháp luật' },
@@ -248,13 +257,13 @@ const pageConfig: Record<string, { title: string; description: string }> = {
   'provisioning-shared-pbgd': { title: 'CSDL phổ biến, giáo dục pháp luật', description: 'Cung cấp dữ liệu CSDL phổ biến, giáo dục pháp luật và hoà giải cơ sở' },
   'provisioning-shared-dgts': { title: 'CSDL quản lý đấu giá tài sản', description: 'Cung cấp dữ liệu CSDL quản lý đấu giá tài sản' },
   'provisioning-shared-htqt': { title: 'CSDL Hợp tác quốc tế', description: 'Cung cấp dữ liệu CSDL Hợp tác quốc tế' },
-  
+
   'provisioning-internal-banan': { title: 'CSDL Thông tin Bản án', description: 'Cung cấp dữ liệu CSDL Thông tin Bản án' },
   'provisioning-internal-danhmuc': { title: 'Danh mục nội ngành', description: 'Cung cấp dữ liệu Danh mục' },
   'provisioning-internal-bhxh': { title: 'BHXH và Giảm nghèo', description: 'Cung cấp dữ liệu BHXH và Giảm nghèo' },
   'provisioning-internal-ncc': { title: 'Người có công', description: 'Cung cấp dữ liệu Người có công' },
   'provisioning-internal-treem': { title: 'Trẻ em', description: 'Cung cấp dữ liệu Trẻ em' },
-  
+
   'provisioning-open': { title: 'Dữ liệu mở', description: 'Danh mục dịch vụ cung cấp dữ liệu mở' },
   'provisioning-master': { title: 'Dữ liệu chủ', description: 'Danh mục dịch vụ cung cấp dữ liệu chủ' },
 
@@ -265,6 +274,10 @@ const pageConfig: Record<string, { title: string; description: string }> = {
   'collection-dashboard': {
     title: 'Dashboard - Quản lý thu thập',
     description: 'Theo dõi tổng quan hoạt động thu thập dữ liệu'
+  },
+  'category-dashboard': {
+    title: 'Tổng quan Quản lý Danh mục',
+    description: 'Giám sát số liệu và hoạt động quản trị danh mục dùng chung'
   },
   'category-setup': {
     title: 'Thiết lập danh mục',
@@ -303,8 +316,20 @@ const pageConfig: Record<string, { title: string; description: string }> = {
     description: 'Quản lý và theo dõi các danh mục dữ liệu mở được công khai'
   },
   'open-data-category-a': {
-    title: 'Danh mục dữ liệu mở A',
-    description: 'Quản lý chi tiết danh mục dữ liệu mở A'
+    title: 'Danh sách tổ chức thực hiện trợ giúp pháp lý',
+    description: 'Chi tiết danh sách tổ chức thực hiện trợ giúp pháp lý'
+  },
+  'open-data-category-b': {
+    title: 'Danh sách người thực hiện trợ giúp pháp lý',
+    description: 'Chi tiết danh sách người thực hiện trợ giúp pháp lý'
+  },
+  'open-data-category-c': {
+    title: 'Danh sách Luật sư Việt Nam',
+    description: 'Chi tiết danh sách Luật sư Việt Nam'
+  },
+  'category-moj-units': {
+    title: 'Danh mục đơn vị thuộc Bộ Tư Pháp',
+    description: 'Biên tập và quản lý danh mục mã các đơn vị trực thuộc Bộ Tư Pháp'
   },
   'category-a': {
     title: 'Biên tập danh mục A',
@@ -320,7 +345,11 @@ const pageConfig: Record<string, { title: string; description: string }> = {
   },
   'open-data-report': {
     title: 'Báo cáo thống kê dữ liệu mở',
-    description: 'Tìm ki��m, thống kê và phân tích dữ liệu mở'
+    description: 'Tìm kim, thống kê và phân tích dữ liệu mở'
+  },
+  'open-data-public-portal': {
+    title: 'Cổng dữ liệu mở',
+    description: 'Nền tảng chia sẻ dữ liệu công khai, minh bạch'
   },
   'master-data-reports': {
     title: 'Báo cáo tìm kiếm dữ liệu chủ',
@@ -381,6 +410,8 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
     };
   }, [navigate]);
 
+
+
   const handleUserMenuClick = (action: 'profile' | 'change-password' | 'change-background' | 'access-history' | 'action-history' | 'logout') => {
     switch (action) {
       case 'profile':
@@ -407,9 +438,9 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
   return (
     <div className="flex h-screen bg-slate-50">
       {/* Sidebar */}
-      <Sidebar 
-        currentPage={currentPage} 
-        onNavigate={setCurrentPage} 
+      <Sidebar
+        currentPage={currentPage}
+        onNavigate={setCurrentPage}
         isCollapsed={isCollapsed}
         onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
       />
@@ -422,7 +453,7 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
           description={currentPageConfig.description}
           onUserMenuClick={handleUserMenuClick}
           currentPage={currentPage}
-          breadcrumb={getBreadcrumbPath(currentPage)}
+          breadcrumb={getBreadcrumbPath(currentPage, location.search)}
         />
 
         {/* Page Content */}
@@ -434,8 +465,8 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'collection' && <DataCollectionPage />}
             {/* view-collected-data mapping removed - clicking it now only toggles dropdown */}
             {(currentPage === 'collection-setup' || currentPage.startsWith('collection-setup/')) && (
-              <CollectionSetupPage 
-                onNavigate={setCurrentPage} 
+              <CollectionSetupPage
+                onNavigate={setCurrentPage}
                 activeTab={currentPage === 'collection-setup/version' ? 'version' : 'service-setup'}
                 onTabChange={(tab) => setCurrentPage(`collection-setup/${tab === 'version' ? 'version' : 'service-setup'}`)}
               />
@@ -463,7 +494,9 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'target-database-management' && <TargetDatabaseManagementPage />}
             {currentPage.startsWith('target-database-detail-') && <TargetDatabaseDetailPage databaseId={currentPage.replace('target-database-detail-', '')} />}
             {currentPage === 'category' && <CategoryManagementPage />}
+            {currentPage === 'category-dashboard' && <CategoryDashboardPage />}
             {currentPage === 'category-setup' && <CategorySetupPage userRole={userRole} />}
+            {currentPage === 'category-moj-units' && <CategoryMojUnitsPage />}
             {currentPage === 'category-a' && <CategoryAPage />}
             {currentPage === 'category-b' && <CategoryBPage />}
             {currentPage === 'category-c' && <CategoryCPage />}
@@ -496,6 +529,7 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'open-data-category-i' && <OpenDataCategoryIPage />}
             {currentPage === 'open-data-category-j' && <OpenDataCategoryJPage />}
             {currentPage === 'open-data-report' && <OpenDataReportPage onBack={() => setCurrentPage('open-data')} />}
+            {currentPage === 'open-data-public-portal' && <OpenDataPublicPortal />}
             {currentPage === 'open-data-category-setup' && <CategorySetupPageNew />}
             {currentPage === 'quality' && <QualityControlPage />}
             {currentPage === 'notifications' && <NotificationPage />}
@@ -517,15 +551,16 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'master-data-update-b' && <ProcessingNationalityPage />}
             {currentPage === 'master-data-update-c' && <ProcessingJudgmentPage />}
             {currentPage === 'master-data-reports' && <MasterDataReportsPage />}
+            {currentPage === 'provision-dashboard' && <DataProvisionDashboard />}
             {currentPage === 'provisioning-service-setup' && <DataProvisionServiceSetupPage />}
             {currentPage === 'provisioning-api-management' && <DataProvisionApiManagementPage />}
             {currentPage === 'provisioning-data-request' && <DataProvisionRequestPage />}
             {currentPage === 'provisioning-monitoring' && <DataProvisionMonitoringPage />}
             {currentPage === 'provisioning-catalog-internal' && <DataProvisionServicesPage category="internal" title="Dữ liệu danh mục nội ngành" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu danh mục nội ngành" />}
             {currentPage === 'provisioning-catalog-shared' && <DataProvisionServicesPage category="shared" title="Dữ liệu dùng chung" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu dùng chung" />}
-            
+
             {currentPage === 'provisioning-shared-hotich' && <DataProvisionServicesPage category="shared" group="CSDL Hộ tịch điện tử" title="CSDL Hộ tịch điện tử" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu CSDL Hộ tịch điện tử" />}
-            {currentPage === 'provisioning-shared-quoctich' && <DataProvisionServicesPage category="shared" group="Hệ thống quản lý hồ sơ quốc tịch" title="Hệ thống quản lý hồ sơ quốc tịch" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu Hệ thống quản lý hồ sơ quốc tịch" />}
+            {currentPage === 'provisioning-shared-quoctich' && <DataProvisionServicesPage category="shared" group="Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch" title="Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch" />}
             {currentPage === 'provisioning-shared-tha' && <DataProvisionServicesPage category="shared" group="Cơ sở dữ liệu thi hành án dân sự" title="Cơ sở dữ liệu thi hành án dân sự" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu Cơ sở dữ liệu thi hành án dân sự" />}
             {currentPage === 'provisioning-shared-bpbd' && <DataProvisionServicesPage category="shared" group="Cơ sở dữ liệu về biện pháp bảo đảm" title="Cơ sở dữ liệu về biện pháp bảo đảm" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu Cơ sở dữ liệu về biện pháp bảo đảm" />}
             {currentPage === 'provisioning-shared-qgpl' && <DataProvisionServicesPage category="shared" group="CSDL quốc gia về pháp luật" title="CSDL quốc gia về pháp luật" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu CSDL quốc gia về pháp luật" />}
@@ -564,11 +599,12 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'reconciliation' && <DataReconciliationPage />}
             {currentPage === 'admin' && <SystemAdminPage />}
             {currentPage === 'admin-users' && <UserManagementPage />}
-            {currentPage === 'admin-groups' && <GroupManagementPage />}
+            {(currentPage === 'admin-groups' || currentPage.startsWith('admin-groups-')) && <GroupManagementPage currentPage={currentPage} />}
             {currentPage === 'admin-functions' && <FunctionManagementPage />}
             {currentPage === 'admin-roles' && <RoleManagementPage />}
             {currentPage === 'admin-function-config' && <SystemAdminPage initialTab="function-config" />}
             {currentPage === 'admin-config' && <SecurityConfigPage />}
+            {currentPage === 'admin-login-log' && <LoginLogPage />}
             {currentPage === 'admin-access-log' && <AccessLogPage />}
             {currentPage === 'admin-error-log' && <ErrorLogPage />}
             {currentPage === 'admin-account-log' && <AccountManagementLogPage />}
@@ -812,22 +848,109 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
 }
 
 // Helper function to get breadcrumb path
-const getBreadcrumbPath = (pageId: string): string[] => {
+const getBreadcrumbPath = (pageId: string, search: string = ''): string[] => {
   if (pageId === 'connection-management' || pageId.startsWith('connection-management/')) {
     const subPage = pageId === 'connection-management/agents' 
       ? 'Trạm kết nối' 
       : pageId === 'connection-management/source-systems' 
         ? 'Hệ thống nguồn' 
         : 'Quản lý đơn vị';
-    return ['Quản trị & vận hành', 'Quản lý kết nối', subPage];
+    return ['Quản trị & vận hành', 'Danh mục đơn vị cấp dl', 'Quản lý kết nối', subPage];
   }
   if (pageId === 'collection-setup' || pageId.startsWith('collection-setup/')) {
     return ['Quản lý thu thập', 'Thiết lập thu thập', pageId === 'collection-setup/version' ? 'Quản lý nhật ký' : 'Thiết lập dịch vụ'];
   }
+
+  const params = new URLSearchParams(search);
+  const tab = params.get('tab');
+
+  if (pageId === 'provisioning-service-setup') {
+    const base = ['Cung cấp dữ liệu', 'Thiết lập điều phối dữ liệu'];
+    if (tab === 'setup') return [...base, 'Thiết lập dịch vụ'];
+    if (tab === 'approve') return [...base, 'Kiểm tra & Phê duyệt'];
+    if (tab === 'publish') return [...base, 'Công khai dịch vụ'];
+    return [...base, 'Thiết lập dịch vụ'];
+  }
+
+  if (pageId === 'provisioning-api-management') {
+    const base = ['Cung cấp dữ liệu', 'Quản lý API cung cấp & đối soát'];
+    if (tab === 'api_cung_cap') return [...base, 'API Cung cấp dữ liệu'];
+    if (tab === 'api_doi_soat') return [...base, 'API Đối soát dữ liệu'];
+    if (tab === 'phan_quyen') return [...base, 'Phân quyền truy cập'];
+    if (tab === 'danh_sach_tai_khoan') return [...base, 'Danh sách tài khoản'];
+    return [...base, 'API Cung cấp dữ liệu'];
+  }
+
+  if (pageId === 'provision-dashboard') {
+    return ['Cung cấp dữ liệu', 'Tổng quan Cung cấp'];
+  }
+
+  if (pageId.match(/^reconciliation-\d+$/)) {
+    return ['Cung cấp dữ liệu', 'Đối soát cung cấp', `Chi tiết đối soát #${pageId.replace('reconciliation-', '')}`];
+  }
+
+  if (pageId === 'provisioning-catalog-internal') {
+    const base = ['Cung cấp dữ liệu', 'Danh sách dịch vụ cung cấp', 'Dữ liệu danh mục nội ngành'];
+    if (tab === 'du_lieu') return [...base, 'Dữ liệu cung cấp'];
+    if (tab === 'api') return [...base, 'Quản lý API đang lấy dữ liệu'];
+    return base;
+  }
+  if (pageId === 'provisioning-catalog-shared') {
+    const base = ['Cung cấp dữ liệu', 'Danh sách dịch vụ cung cấp', 'Dữ liệu dùng chung'];
+    if (tab === 'du_lieu') return [...base, 'Dữ liệu cung cấp'];
+    if (tab === 'api') return [...base, 'Quản lý API đang lấy dữ liệu'];
+    return base;
+  }
+  if (pageId === 'provisioning-catalog-open' || pageId === 'provisioning-open') {
+    const base = ['Cung cấp dữ liệu', 'Danh sách dịch vụ cung cấp', 'Dữ liệu mở'];
+    if (tab === 'du_lieu') return [...base, 'Dữ liệu cung cấp'];
+    if (tab === 'api') return [...base, 'Quản lý API đang lấy dữ liệu'];
+    return base;
+  }
+  if (pageId === 'provisioning-catalog-master' || pageId === 'provisioning-master') {
+    const base = ['Cung cấp dữ liệu', 'Danh sách dịch vụ cung cấp', 'Dữ liệu chủ'];
+    if (tab === 'du_lieu') return [...base, 'Dữ liệu cung cấp'];
+    if (tab === 'api') return [...base, 'Quản lý API đang lấy dữ liệu'];
+    return base;
+  }
+
+  if (pageId.startsWith('provisioning-shared-')) {
+    const groupNameMap: Record<string, string> = {
+      'hotich': 'CSDL Hộ tịch điện tử',
+      'quoctich': 'Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch',
+      'tha': 'Cơ sở dữ liệu thi hành án dân sự',
+      'bpbd': 'Cơ sở dữ liệu về biện pháp bảo đảm',
+      'qgpl': 'CSDL quốc gia về pháp luật',
+      'tttp': 'Cơ sở dữ liệu tương trợ tư pháp về dân sự',
+      'tgpl': 'Hệ thống thông tin trợ giúp pháp lý',
+      'pbgd': 'CSDL phổ biến, giáo dục pháp luật và hoà giải cơ sở',
+      'dgts': 'CSDL quản lý đấu giá tài sản',
+      'htqt': 'CSDL Hợp tác quốc tế'
+    };
+    const key = pageId.replace('provisioning-shared-', '');
+    const base = ['Cung cấp dữ liệu', 'Danh sách dịch vụ cung cấp', 'Dữ liệu dùng chung', groupNameMap[key] || 'Chi tiết dịch vụ'];
+    if (tab === 'du_lieu') return [...base, 'Dữ liệu cung cấp'];
+    if (tab === 'api') return [...base, 'Quản lý API đang lấy dữ liệu'];
+    return base;
+  }
+
+  if (pageId.startsWith('provisioning-internal-')) {
+    const groupNameMap: Record<string, string> = {
+      'banan': 'CSDL Thông tin Bản án',
+      'danhmuc': 'Danh mục',
+      'bhxh': 'BHXH và Giảm nghèo',
+      'ncc': 'Người có công',
+      'treem': 'Trẻ em'
+    };
+    const key = pageId.replace('provisioning-internal-', '');
+    const base = ['Cung cấp dữ liệu', 'Danh sách dịch vụ cung cấp', 'CSDL Ngoài ngành', groupNameMap[key] || 'Chi tiết dịch vụ'];
+    if (tab === 'du_lieu') return [...base, 'Dữ liệu cung cấp'];
+    if (tab === 'api') return [...base, 'Quản lý API đang lấy dữ liệu'];
+    return base;
+  }
+
   const breadcrumbMap: Record<string, string[]> = {
     // Provisioning
-    'provisioning-service-setup': ['Cung cấp dữ liệu', 'Thiết lập điều phối dữ liệu'],
-    'provisioning-api-management': ['Cung cấp dữ liệu', 'Quản lý API cung cấp & đối soát'],
     'provisioning-data-request': ['Cung cấp dữ liệu', 'Cung cấp dữ liệu theo yêu cầu'],
     'provisioning-monitoring': ['Cung cấp dữ liệu', 'Kiểm soát & giám sát cung cấp'],
     // Dashboard
@@ -904,7 +1027,6 @@ const getBreadcrumbPath = (pageId: string): string[] => {
 
     // Processing
     'processed-data': ['Xử lý dữ liệu', 'Dữ liệu đã xử lý'],
-    'target-database-management': ['Quản trị & vận hành', 'Quản lý CSDL đích'],
     'processing-internal-data': ['Xử lý dữ liệu', 'CSDL Trong ngành'],
     'processing-data-info-civil-registry': ['Xử lý dữ liệu', 'CSDL Trong ngành', 'CSDL Hộ tịch điện tử'],
     'processing-data-info-case-management': ['Xử lý dữ liệu', 'CSDL Trong ngành', 'HT quản lý hồ sơ QT'],
@@ -929,6 +1051,7 @@ const getBreadcrumbPath = (pageId: string): string[] => {
     // Category
     'category-setup': ['Quản lý danh mục', 'Thiết lập danh mục'],
     'category-list': ['Quản lý danh mục', 'Biên tập danh mục'],
+    'category-moj-units': ['Quản lý danh mục', 'Danh sách danh mục', 'Đơn vị thuộc BTP'],
     'category-a': ['Quản lý danh mục', 'Biên tập danh mục', 'Biên tập danh mục A'],
     'category-published-list': ['Quản lý danh mục', 'Công khai danh mục'],
     'category-report-group': ['Quản lý danh mục', 'Thống kê danh mục'],
@@ -941,7 +1064,9 @@ const getBreadcrumbPath = (pageId: string): string[] => {
     // Open Data
     'open-data-setup': ['Dữ liệu mở', 'Quản lý danh mục'],
     'open-data-category-list': ['Dữ liệu mở', 'Biên tập danh mục'],
-    'open-data-category-a': ['Dữ liệu mở', 'Biên tập danh mục', 'Biên tập danh mục A'],
+    'open-data-category-a': ['Dữ liệu mở', 'Biên tập danh mục', 'Danh sách tổ chức thực hiện trợ giúp pháp lý'],
+    'open-data-category-b': ['Dữ liệu mở', 'Biên tập danh mục', 'Danh sách người thực hiện trợ giúp pháp lý'],
+    'open-data-category-c': ['Dữ liệu mở', 'Biên tập danh mục', 'Danh sách Luật sư Việt Nam'],
     'open-data-published-list': ['Dữ liệu mở', 'Công bố dữ liệu mở'],
     'open-data-report': ['Dữ liệu mở', 'Thống kê dữ liệu mở'],
 
@@ -980,17 +1105,19 @@ const getBreadcrumbPath = (pageId: string): string[] => {
     'provision-external-children-group': ['Điều phối dữ liệu', 'Dịch vụ cung cấp dữ liệu', 'CSDL Ngoài ngành', 'Trẻ em'],
 
     // Admin
-    'connection-management': ['Quản trị & vận hành', 'Quản lý kết nối'],
+    'connection-management': ['Quản trị & vận hành', 'Danh mục đơn vị cấp dữ liệu', 'Quản lý kết nối'],
+    'target-database-management': ['Quản trị & vận hành', 'Danh mục đơn vị cấp dữ liệu', 'Quản lý CSDL đích'],
     'admin-users': ['Quản trị & vận hành', 'Quản trị người dùng', 'Quản lý người dùng'],
     'admin-groups': ['Quản trị & vận hành', 'Quản trị người dùng', 'Quản lý nhóm người dùng'],
     'admin-functions': ['Quản trị & vận hành', 'Quản trị người dùng', 'Danh sách chức năng'],
     'admin-config': ['Quản trị & vận hành', 'Cấu hình hệ thống', 'Thiết lập cấu hình hệ thống'],
-    'admin-password-rules': ['Quản trị & vận hành', 'Cấu hình hệ thống', 'Thiết lập quy tắc đặt mật khẩu'],
     'admin-backup': ['Quản trị & vận hành', 'Cấu hình hệ thống', 'Sao lưu dự phòng'],
+    'admin-login-log': ['Quản trị & vận hành', 'Quản lý nhật ký', 'Nhật ký đăng nhập'],
     'admin-access-log': ['Quản trị & vận hành', 'Quản lý nhật ký', 'Nhật ký truy cập'],
     'admin-error-log': ['Quản trị & vận hành', 'Quản lý nhật ký', 'Nhật ký các lỗi phát sinh'],
     'admin-account-log': ['Quản trị & vận hành', 'Quản lý nhật ký', 'Nhật ký quản lý tài khoản'],
     'admin-config-log': ['Quản trị & vận hành', 'Quản lý nhật ký', 'Nhật ký thay đổi cấu hình'],
+    'admin-log-retention': ['Quản trị & vận hành', 'Quản lý nhật ký', 'Quản lý thời gian lưu trữ nhật ký'],
     'admin-statistics': ['Quản trị & vận hành', 'Thống kê & báo cáo', 'Xem biểu đồ thống kê'],
 
     // Notifications

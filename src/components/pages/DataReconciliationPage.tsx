@@ -421,7 +421,7 @@ export function DataReconciliationPage() {
                   <div className="text-xs text-slate-500 font-normal">(Hệ thống cung cấp)</div>
                 </th>
                 <th className="px-6 py-4 text-left text-sm text-slate-600 w-[140px]">
-                  <div>Bản ghi kho DLDC</div>
+                  <div>Bản ghi Kho DLDC</div>
                   <div className="text-xs text-slate-500 font-normal">(Đã thu thập)</div>
                 </th>
                 <th className="px-6 py-4 text-left text-sm text-slate-600 w-[140px]">
@@ -479,9 +479,9 @@ export function DataReconciliationPage() {
                       <div className="flex-1 bg-slate-200 rounded-full h-1.5">
                         <div
                           className={`h-1.5 rounded-full ${item.successRate >= 99.99 ? 'bg-green-500' :
-                              item.successRate >= 99.9 ? 'bg-blue-500' :
-                                item.successRate >= 99.5 ? 'bg-amber-500' :
-                                  'bg-red-500'
+                            item.successRate >= 99.9 ? 'bg-blue-500' :
+                              item.successRate >= 99.5 ? 'bg-amber-500' :
+                                'bg-red-500'
                             }`}
                           style={{ width: `${item.successRate}%` } as any}
                         />
@@ -497,8 +497,8 @@ export function DataReconciliationPage() {
                         onClick={() => setConfirmReconcileId(item.id)}
                         disabled={reconcilingId === item.id || item.status === 'in-progress'}
                         className={`p-2 rounded-lg transition-colors ${reconcilingId === item.id || item.status === 'in-progress'
-                            ? 'text-slate-300 cursor-not-allowed'
-                            : 'text-blue-600 hover:bg-blue-50'
+                          ? 'text-slate-300 cursor-not-allowed'
+                          : 'text-blue-600 hover:bg-blue-50'
                           }`}
                         title="Đối soát ngay"
                       >
@@ -571,7 +571,7 @@ export function DataReconciliationPage() {
                     <span className="text-slate-900">{item.sourceRecords.toLocaleString('vi-VN')}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-slate-600">Bản ghi kho DLDC:</span>
+                    <span className="text-slate-600">Bản ghi Kho DLDC:</span>
                     <span className="text-slate-900">{item.collectedRecords.toLocaleString('vi-VN')}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
@@ -667,7 +667,7 @@ export function DataReconciliationPage() {
                         <div className="text-sm">{selectedReconciliation.sourceRecords.toLocaleString('vi-VN')}</div>
                       </div>
                       <div className="bg-white bg-opacity-50 rounded p-2">
-                        <div className="text-xs text-slate-600 mb-1">Bản ghi kho DLDC</div>
+                        <div className="text-xs text-slate-600 mb-1">Bản ghi Kho DLDC</div>
                         <div className="text-sm">{selectedReconciliation.collectedRecords.toLocaleString('vi-VN')}</div>
                       </div>
                       <div className="bg-white bg-opacity-50 rounded p-2">
@@ -700,7 +700,7 @@ export function DataReconciliationPage() {
                             Giá trị nguồn
                           </th>
                           <th className="px-4 py-3 text-left text-xs text-slate-600">
-                            Giá trị kho DLDC
+                            Giá trị Kho DLDC
                           </th>
                           <th className="px-4 py-3 text-left text-xs text-slate-600">
                             Giá trị đích

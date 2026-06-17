@@ -36,16 +36,16 @@ interface WizardData {
   apiMethod?: 'GET' | 'POST' | 'PUT';
   updateStrategy?: UpdateStrategyType;
   syncFrequency?: SyncFrequencyType;
-  
+
   // Step 2
   attributes: AttributeForm[];
-  
+
   // Step 3
   mergeRules: string[];
-  
+
   // Step 4
   relationships: string[];
-  
+
   // Step 5
   approvalNotes: string;
 }
@@ -105,7 +105,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
         return;
       }
     }
-    
+
     if (currentStep < 5) {
       setCurrentStep(currentStep + 1);
     }
@@ -131,7 +131,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
       alert('Vui lòng điền tên trường và tên hiển thị');
       return;
     }
-    
+
     // Check duplicate
     if (wizardData.attributes.some(a => a.fieldName === currentAttribute.fieldName)) {
       alert('Tên trường đã tồn tại');
@@ -182,20 +182,18 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
               <div key={step.number} className="flex items-center flex-1">
                 <div className="flex flex-col items-center flex-1">
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center text-sm transition-colors ${
-                      currentStep > step.number
-                        ? 'bg-green-600 text-white'
-                        : currentStep === step.number
+                    className={`w-10 h-10 rounded-full flex items-center justify-center text-sm transition-colors ${currentStep > step.number
+                      ? 'bg-green-600 text-white'
+                      : currentStep === step.number
                         ? 'bg-blue-600 text-white'
                         : 'bg-slate-200 text-slate-600'
-                    }`}
+                      }`}
                   >
                     {currentStep > step.number ? <Check className="w-5 h-5" /> : step.number}
                   </div>
                   <p
-                    className={`text-xs mt-2 text-center ${
-                      currentStep === step.number ? 'text-blue-600' : 'text-slate-600'
-                    }`}
+                    className={`text-xs mt-2 text-center ${currentStep === step.number ? 'text-blue-600' : 'text-slate-600'
+                      }`}
                   >
                     {step.title}
                   </p>
@@ -292,7 +290,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
 
               <div className="pt-4 border-t border-slate-200">
                 <h4 className="text-sm text-slate-900 mb-3">Cấu hình nguồn dữ liệu</h4>
-                
+
                 <div className="mb-3">
                   <label className="block text-sm text-slate-700 mb-1">
                     Nguồn dữ liệu <span className="text-red-600">*</span>

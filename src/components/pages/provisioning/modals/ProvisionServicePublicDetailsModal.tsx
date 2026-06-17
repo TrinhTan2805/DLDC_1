@@ -1,4 +1,5 @@
-import React from 'react';
+﻿import React from 'react';
+import { createPortal } from 'react-dom';
 import { X, Copy, Check } from 'lucide-react';
 
 interface ProvisionServicePublicDetailsModalProps {
@@ -43,8 +44,8 @@ export function ProvisionServicePublicDetailsModal({ isOpen, onClose, service }:
     setTimeout(() => setCopiedBody(false), 2000);
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-[2px] transition-all duration-300">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-[2px] transition-all duration-300">
       {/* Modal card enlarged to max-w-5xl for extra wide screen layout */}
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-200">
         
@@ -117,7 +118,7 @@ export function ProvisionServicePublicDetailsModal({ isOpen, onClose, service }:
                 <button
                   type="button"
                   onClick={handleCopyLink}
-                  className="p-2 text-slate-400 hover:text-amber-600 hover:bg-slate-50 rounded border border-slate-200 transition-all shrink-0"
+                  className="p-2 text-slate-400 hover:text-blue-600 hover:bg-slate-50 rounded border border-slate-200 transition-all shrink-0"
                   title="Sao chép Link"
                 >
                   {copiedLink ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
@@ -140,7 +141,7 @@ export function ProvisionServicePublicDetailsModal({ isOpen, onClose, service }:
                 <button
                   type="button"
                   onClick={handleCopyBody}
-                  className="p-2 text-slate-400 hover:text-amber-600 hover:bg-slate-50 rounded border border-slate-200 transition-all shrink-0 mt-1"
+                  className="p-2 text-slate-400 hover:text-blue-600 hover:bg-slate-50 rounded border border-slate-200 transition-all shrink-0 mt-1"
                   title="Sao chép Body payload"
                 >
                   {copiedBody ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
@@ -157,6 +158,18 @@ export function ProvisionServicePublicDetailsModal({ isOpen, onClose, service }:
                 {service.isPublic ? 'Public' : 'Private'}
               </div>
             </div>
+
+            {/* Lý do công khai */}
+            {service.publishReason && (
+              <div className="flex flex-col md:flex-row items-center bg-white w-full">
+                <div className="px-4 py-3 bg-slate-50/50 md:border-r border-slate-200 text-xs font-bold text-slate-700 md:w-1/4 flex items-center shrink-0 self-stretch">
+                  Lý do công khai:
+                </div>
+                <div className="px-4 py-3 flex-1 text-xs text-slate-800 w-full italic">
+                  {service.publishReason}
+                </div>
+              </div>
+            )}
 
             {/* Trạng thái */}
             <div className="flex flex-col md:flex-row items-center bg-white w-full">
@@ -185,5 +198,5 @@ export function ProvisionServicePublicDetailsModal({ isOpen, onClose, service }:
 
       </div>
     </div>
-  );
+  , document.body);
 }

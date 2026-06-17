@@ -34,6 +34,29 @@ export function SourceSystemModal({ isOpen, onClose, onSave, editingData, units 
     note: ''
   });
 
+  const [mojUnits, setMojUnits] = useState<any[]>([]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('moj_units');
+    if (saved) {
+      try {
+        setMojUnits(JSON.parse(saved));
+      } catch (e) {
+        // Fallback
+      }
+    } else {
+      const initialUnits = [
+        { id: '1', code: 'BTP', name: 'Bộ Tư pháp', type: 'internal' },
+        { id: '2', code: 'CNTT', name: 'Cục Công nghệ thông tin', type: 'internal' },
+        { id: '3', code: 'HCTP', name: 'Cục Hành chính tư pháp', type: 'internal' },
+        { id: '4', code: 'THADS', name: 'Cục Quản lý thi hành án dân sự', type: 'internal' },
+        { id: '5', code: 'GDPL', name: 'Cục Phổ biến, giáo dục pháp luật', type: 'internal' },
+        { id: '6', code: 'BTTP', name: 'Cục Bổ trợ tư pháp', type: 'internal' },
+      ];
+      setMojUnits(initialUnits);
+    }
+  }, [isOpen]);
+
   useEffect(() => {
     if (editingData) {
       setFormData(editingData);
@@ -53,6 +76,27 @@ export function SourceSystemModal({ isOpen, onClose, onSave, editingData, units 
 
   if (!isOpen) return null;
 
+  const hasEditingUnit = editingData && mojUnits.some(u => u.name === editingData.unitName);
+  const dropdownOptions = [...mojUnits];
+  if (editingData && editingData.unitName && !hasEditingUnit) {
+    dropdownOptions.push({
+      id: 'editing-temp',
+      code: 'TEMP',
+      name: editingData.unitName,
+      type: editingData.sourceType === 'Ngoài ngành' ? 'external' : 'internal'
+    });
+  }
+
+  const handleUnitChange = (unitName: string) => {
+    const selectedUnit = dropdownOptions.find(u => u.name === unitName);
+    const sourceType = (selectedUnit?.type === 'external') ? 'Ngoài ngành' : 'Trong ngành';
+    setFormData(prev => ({
+      ...prev,
+      unitName,
+      sourceType
+    }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(formData);
@@ -61,7 +105,7 @@ export function SourceSystemModal({ isOpen, onClose, onSave, editingData, units 
 
   return (
     <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px' }}>
-      <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 font-sans backdrop-blur-sm">
         <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white z-10 rounded-t-lg">
@@ -101,15 +145,31 @@ export function SourceSystemModal({ isOpen, onClose, onSave, editingData, units 
                 <select
                   required
                   value={formData.unitName}
-                  onChange={(e) => setFormData({ ...formData, unitName: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-[13px]"
+                  onChange={(e) => handleUnitChange(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px]"
                 >
                   <option value="">Chọn đơn vị</option>
-                  {units.map((unit) => (
-                    <option key={unit.id} value={unit.unitName}>
-                      {unit.unitName}
+                  {dropdownOptions.map(unit => (
+                    <option key={unit.id} value={unit.name}>
+                      {unit.name} ({unit.code})
                     </option>
                   ))}
+                </select>
+              </div>
+
+              <div className="col-span-2 sm:col-span-1">
+                <label className="block text-[13px] font-medium text-slate-700 mb-1">
+                  Loại nguồn <span className="text-red-500">*</span>
+                </label>
+                <select
+                  required
+                  value={formData.sourceType}
+                  onChange={(e) => setFormData({ ...formData, sourceType: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px]"
+                >
+                  <option value="">Chọn loại nguồn</option>
+                  <option value="Trong ngành">Trong ngành</option>
+                  <option value="Ngoài ngành">Ngoài ngành</option>
                 </select>
               </div>
 

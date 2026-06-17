@@ -1,7 +1,7 @@
 export const initialSourceSystems = [
   {
     id: '1',
-    systemName: 'Hệ thống Quản lý Hộ tịch điện tử',
+    systemName: 'Hệ thống quản lý Bộ Tư Pháp Hộ tịch điện tử',
     unitName: 'Cục Hộ tịch, quốc tịch, chứng thực',
     sourceType: 'Trong ngành',
     address: '58-60 Trần Phú, Ba Đình, Hà Nội',

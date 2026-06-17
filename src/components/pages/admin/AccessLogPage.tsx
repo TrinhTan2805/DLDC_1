@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { StatusTag } from '../../common/StatusTag';
 import { toast } from 'sonner';
+import { StatsCard } from '../../common/StatsCard';
 
 interface AccessLog {
   id: number;
@@ -593,6 +594,14 @@ export function AccessLogPage() {
             Nhật ký đăng nhập
           </button>
         </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <StatsCard icon={ScrollText} iconColor="blue" title="Tổng lượt truy cập (24h)" value="24,532" />
+        <StatsCard icon={CheckCircle2} iconColor="green" title="Tác vụ thành công" value="24,410" />
+        <StatsCard icon={AlertCircle} iconColor="red" title="Tác vụ thất bại" value="122" />
+        <StatsCard icon={Activity} iconColor="purple" title="Phân hệ đã truy cập" value="8" />
       </div>
 
       {activeTab === 'access' ? (

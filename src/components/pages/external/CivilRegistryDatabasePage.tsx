@@ -260,6 +260,7 @@ export function CivilRegistryDatabasePage({ mode = 'thu thập', context = 'thu 
             onClose={() => {}}
             isInline={true}
             title={selectedStat.title}
+            description={`Tích hợp: ${selectedStat.title}.\nThuộc đơn vị: Cục Hành chính tư pháp.`}
             totalRecords={selectedStat.lastMonth + selectedStat.thisMonth}
             newRecords={selectedStat.thisMonth}
             updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}

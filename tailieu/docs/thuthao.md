@@ -85,7 +85,7 @@ Module Thu thập thuộc lớp **Quản lý, thu thập dữ liệu** trong ki�
 
 ## 4.1. DC1-QTHT-QTHT-692.Màn đăng nhập
 ### Mục đích
-Cho phép người sử dụng truy cập vào hệ thống Kho Dữ liệu Dùng Chung.
+Cho phép người sử dụng truy cập vào hệ thống Kho DLDC.
 
 ## 4.2. DC1-TQ. Tổng quan (Dashboard)
 ### Mục đích

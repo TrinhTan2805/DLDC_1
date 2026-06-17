@@ -31,7 +31,7 @@ III.2.1.1	CSDL Hộ tịch điện tử
 195	 làm sạch Bộ dữ liệu hồ sơ đăng ký giám sát việc giám hộ
 198	 làm sạch Bộ dữ liệu hồ sơ đăng ký chấm dứt giám sát việc giám hộ
 201	 làm sạch Bộ dữ liệu hồ sơ ghi vào sổ việc ly hôn/hủy việc kết hôn đã thực hiện tại cơ quan có thẩm quyền của nước ngoài (ghi chú ly hôn)
-III.2.1.2	Hệ thống quản lý hồ sơ quốc tịch
+III.2.1.2	Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch
 204	 làm sạch Nhập Quốc tịch
 207	 làm sạch Thôi Quốc tịch
 210	 làm sạch Trở lại Quốc tịch

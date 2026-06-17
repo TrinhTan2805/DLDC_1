@@ -1,4 +1,4 @@
-# Hệ thống Quản lý và Khai thác Kho dữ liệu DLDC_1
+# Hệ thống quản lý Bộ Tư Pháp và Khai thác Kho dữ liệu DLDC_1
 
 Tài liệu này mô tả chi tiết luồng xử lý và luân chuyển dữ liệu (Data Flow) trong hệ thống DLDC_1, bao gồm các module mới được thiết lập.
 

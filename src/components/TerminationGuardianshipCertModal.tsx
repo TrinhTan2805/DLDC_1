@@ -153,8 +153,13 @@ export function TerminationGuardianshipCertModal({
       {/* Container */}
       <div className={isInline ? "w-full flex flex-col" : "fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"}>
         {isInline && (
-          <div className="flex items-center justify-between mb-0">
+          <div className="flex flex-col mb-4">
             <h2 className="text-xl font-bold text-slate-900">{title}</h2>
+            <p className="text-sm text-slate-500 mt-1">
+              Tích hợp: {title}.
+              <br />
+              Thuộc đơn vị: Cục Hành chính tư pháp.
+            </p>
           </div>
         )}
         
@@ -164,6 +169,11 @@ export function TerminationGuardianshipCertModal({
             <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0 bg-white sticky top-0 z-20 rounded-t-lg">
               <div>
                 <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
+                <p className="text-sm text-slate-500 mt-1">
+                  Tích hợp: {title}.
+                  <br />
+                  Thuộc đơn vị: Cục Hành chính tư pháp.
+                </p>
               </div>
               <button
                  onClick={onClose}

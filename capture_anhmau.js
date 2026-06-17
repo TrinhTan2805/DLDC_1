@@ -3,23 +3,23 @@ const fs = require('fs');
 const path = require('path');
 
 // ============================================================
-// CONFIG: App chạy tại port 3002
+// CONFIG: App chạy tại port 3000
 // ============================================================
-const BASE_URL = 'http://localhost:3002';
+const BASE_URL = 'http://localhost:3000';
 const IMG_DIR = path.join(__dirname, 'tailieu', 'tailieuphantich', 'images');
 
 // Danh sách 10 loại hồ sơ cần chụp (tên menu + slug ảnh)
 const HO_SO_LIST = [
-    { menuName: 'Hồ sơ cấp GĐKN kết hôn',                         slug: 'gdknkethon'    },
-    { menuName: 'Hồ sơ đăng ký khai tử',                           slug: 'khaitu'        },
-    { menuName: 'Hồ sơ DK nhận cha, mẹ, con',                      slug: 'nhancha'       },
-    { menuName: 'Hồ sơ đăng ký nuôi con nuôi',                     slug: 'nuoicnuoi'     },
-    { menuName: 'Hồ sơ đăng ký giám hộ',                           slug: 'giamho'        },
-    { menuName: 'Hồ sơ DK chấm dứt giám hộ',                      slug: 'chamdutgiamho' },
+    { menuName: 'Hồ sơ cấp GĐKN kết hôn', slug: 'gdknkethon' },
+    { menuName: 'Hồ sơ đăng ký khai tử', slug: 'khaitu' },
+    { menuName: 'Hồ sơ DK nhận cha, mẹ, con', slug: 'nhancha' },
+    { menuName: 'Hồ sơ đăng ký nuôi con nuôi', slug: 'nuoicnuoi' },
+    { menuName: 'Hồ sơ đăng ký giám hộ', slug: 'giamho' },
+    { menuName: 'Hồ sơ DK chấm dứt giám hộ', slug: 'chamdutgiamho' },
     { menuName: 'Hồ sơ DK thay đổi TT hộ tịch, văn danh dự dân tộc', slug: 'thaydoihotich' },
-    { menuName: 'Hồ sơ đăng ký kiểm sát việc giám hộ',             slug: 'kiemsatgiamho' },
-    { menuName: 'Hồ sơ đăng ký giám sát việc giám hộ',             slug: 'giamsatgiamho' },
-    { menuName: 'Hồ sơ ly hôn/hủy kết hôn ở nước ngoài',           slug: 'lyhon'         },
+    { menuName: 'Hồ sơ đăng ký kiểm sát việc giám hộ', slug: 'kiemsatgiamho' },
+    { menuName: 'Hồ sơ đăng ký giám sát việc giám hộ', slug: 'giamsatgiamho' },
+    { menuName: 'Hồ sơ ly hôn/hủy kết hôn ở nước ngoài', slug: 'lyhon' },
 ];
 
 (async () => {
@@ -54,7 +54,7 @@ const HO_SO_LIST = [
     if (loginBtn) {
         console.log('Đang đăng nhập...');
         await loginBtn.click();
-        await page.waitForNavigation({ waitUntil: 'networkidle2' }).catch(() => {});
+        await page.waitForNavigation({ waitUntil: 'networkidle2' }).catch(() => { });
     }
     await delay(2000);
 
@@ -181,7 +181,7 @@ const HO_SO_LIST = [
 
             // 3b. Thử click các tab con trong popup nếu có
             await clickTab('Bên chồng');
-            await screenshotPopup(`mauthuthapCSDL_${s}_img_002b.png`).catch(() => {});
+            await screenshotPopup(`mauthuthapCSDL_${s}_img_002b.png`).catch(() => { });
 
             await closePopup();
         }

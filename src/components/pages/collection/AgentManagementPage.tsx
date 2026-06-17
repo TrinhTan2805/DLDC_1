@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Plus, Search, Edit, Trash2, Eye, RefreshCw, Monitor, Shield, CheckCircle2, XCircle, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import { AgentModal } from './AgentModal';
 import { AgentDetailModal } from './AgentDetailModal';
+import { AgentDeleteConfirmModal } from './AgentDeleteConfirmModal';
 import { initialAgents, Agent } from './mockAgents';
 import { StatusTag } from '../../common/StatusTag';
 
@@ -17,8 +18,10 @@ export function AgentManagementPage() {
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Agent | null>(null);
   const [viewingItem, setViewingItem] = useState<Agent | null>(null);
+  const [deletingItem, setDeletingItem] = useState<Agent | null>(null);
 
   // Filtered data
   const filteredData = data.filter(item => {
@@ -42,10 +45,9 @@ export function AgentManagementPage() {
     setIsDetailModalOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa agent này?')) {
-      setData(data.filter(item => item.id !== id));
-    }
+  const handleDelete = (item: Agent) => {
+    setDeletingItem(item);
+    setIsDeleteModalOpen(true);
   };
 
   const handleSave = (savedData: any) => {
@@ -214,7 +216,7 @@ export function AgentManagementPage() {
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => handleDelete(item.id)}
+                            onClick={() => handleDelete(item)}
                             className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                             title="Xóa"
                           >
@@ -318,6 +320,20 @@ export function AgentManagementPage() {
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
         data={viewingItem}
+      />
+
+      <AgentDeleteConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setDeletingItem(null);
+        }}
+        onConfirm={() => {
+          if (deletingItem) {
+            setData(data.filter(item => item.id !== deletingItem.id));
+          }
+        }}
+        agentName={deletingItem?.name || ''}
       />
     </div>
     </div>

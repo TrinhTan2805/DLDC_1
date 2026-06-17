@@ -1,88 +1,11 @@
 import { useState, useEffect } from "react";
-import {
-  LayoutDashboard,
-  Database,
-  Settings,
-  Share2,
-  GitCompare,
-  Shield,
-  FileText,
-  FolderTree,
-  HardDrive,
-  Network,
-  Globe,
-  ChevronDown,
-  ChevronRight,
-  ChevronLeft,
-  Monitor,
-  Users,
-  UsersRound,
-  List,
-  Key,
-  Sliders,
-  ScrollText,
-  Database as DatabaseBackup,
-  BarChart3,
-  Building2,
-  Building,
-  UserCircle2,
-  MapPin,
-  Flag,
-  Church,
-  Landmark,
-  Map,
-  Heart,
-  FileUser,
-  HandHeart,
-  UserMinus,
-  Baby,
-  Activity,
-  UserCog,
-  Accessibility,
-  Medal,
-  Shield as ShieldIcon,
-  Users2,
-  Stamp,
-  Scale,
-  FileCheck,
-  Briefcase,
-  Factory,
-  Coins,
-  ScrollText as DocumentText,
-  BookOpen,
-  FileBadge,
-  Gavel,
-  Lock,
-  BookMarked,
-  ClipboardList,
-  GraduationCap,
-  FileSearch,
-  Search,
-  Handshake,
-  Bell,
-  MessageSquare,
-  CheckSquare,
-  AlertTriangle,
-  Plug,
-  UploadIcon,
-  RefreshCw,
-  Server,
-  Eye,
-  FolderOpen,
-  HelpCircle,
-  Package,
-  FolderCog,
-  Circle,
-  History as HistoryIcon,
-  X,
-  Link2,
-  Zap,
-} from "lucide-react";
+import { LayoutDashboard, Database, Settings, Share2, GitCompare, Shield, FileText, FolderTree, HardDrive, Network, Globe, ChevronDown, ChevronRight, ChevronLeft, Monitor, Users, UsersRound, List, Key, Sliders, ScrollText, Database as DatabaseBackup, BarChart3, Building2, Building, UserCircle2, MapPin, Flag, Church, Landmark, Map, Heart, FileUser, HandHeart, UserMinus, Baby, Activity, UserCog, Accessibility, Medal, Shield as ShieldIcon, Users2, Stamp, Scale, FileCheck, Briefcase, Factory, Coins, ScrollText as DocumentText, BookOpen, FileBadge, Gavel, Lock, BookMarked, ClipboardList, GraduationCap, FileSearch, Search, Handshake, Bell, MessageSquare, CheckSquare, AlertTriangle, Plug, UploadIcon, RefreshCw, Server, Eye, FolderOpen, HelpCircle, Package, FolderCog, Circle, History as HistoryIcon, X, Link2, Zap } from "lucide-react";
 import imgLogo from "figma:asset/0b9fbf72a74cf9ec02b7371d312e91e368f930d8.png";
 import imgImageLogo from "figma:asset/009541fc5d689d29107b655d2b8ecd57f6d4b3ff.png";
 
 import { VersionHistoryModal } from "../modals/VersionHistoryModal";
 import { reconciliationData } from "../../data/provisionReconciliationData";
+import { initialSourceSystems } from "../pages/collection/mockSourceSystems";
 
 interface SidebarProps {
   currentPage: string;
@@ -392,6 +315,11 @@ const menuItems: MenuItem[] = [
     color: "text-indigo-600",
     subItems: [
       {
+        id: "category-dashboard",
+        label: "Tổng quan danh mục",
+        icon: LayoutDashboard,
+      },
+      {
         id: "category-setup",
         label: "Thiết lập danh mục",
         icon: Settings,
@@ -402,16 +330,16 @@ const menuItems: MenuItem[] = [
         icon: List,
         subItems: [
           {
+            id: "category-moj-units",
+            label: "Đơn vị thuộc BTP",
+            icon: FolderOpen,
+          },
+          {
             id: "category-a",
             label: "Biên tập danh mục A",
             icon: FolderOpen,
           },
         ],
-      },
-      {
-        id: "category-published-list",
-        label: "Công khai danh mục",
-        icon: FileText,
       },
       {
         id: "category-report-group",
@@ -465,7 +393,17 @@ const menuItems: MenuItem[] = [
         subItems: [
           {
             id: "open-data-category-a",
-            label: "Biên tập danh mục A",
+            label: "Danh sách tổ chức thực hiện trợ giúp pháp lý",
+            icon: FolderOpen,
+          },
+          {
+            id: "open-data-category-b",
+            label: "Danh sách người thực hiện trợ giúp pháp lý",
+            icon: FolderOpen,
+          },
+          {
+            id: "open-data-category-c",
+            label: "Danh sách Luật sư Việt Nam",
             icon: FolderOpen,
           },
         ],
@@ -518,6 +456,11 @@ const menuItems: MenuItem[] = [
     color: "text-amber-600",
     subItems: [
       {
+        id: "provision-dashboard",
+        label: "Tổng quan cung cấp",
+        icon: LayoutDashboard,
+      },
+      {
         id: "provisioning-service-setup",
         label: "Thiết lập điều phối dữ liệu",
         icon: Settings,
@@ -539,7 +482,7 @@ const menuItems: MenuItem[] = [
       },
       {
         id: "provisioning-service-catalog",
-        label: "Danh mục dịch vụ cung cấp",
+        label: "Dịch vụ chia sẻ",
         icon: Database,
         isGroup: true,
         subItems: [
@@ -605,14 +548,22 @@ const menuItems: MenuItem[] = [
     color: "text-red-600",
     subItems: [
       {
-        id: "connection-management",
-        label: "Quản lý kết nối",
-        icon: Link2,
-      },
-      {
-        id: "target-database-management",
-        label: "Quản lý CSDL đích",
+        id: "data-management-category",
+        label: "Danh mục đơn vị quản lý dữ liệu",
         icon: Database,
+        isGroup: true,
+        subItems: [
+          {
+            id: "connection-management",
+            label: "Quản lý kết nối",
+            icon: Link2,
+          },
+          {
+            id: "target-database-management",
+            label: "Quản lý CSDL đích",
+            icon: Database,
+          }
+        ]
       },
       {
         id: "admin-user-management-group",
@@ -666,6 +617,11 @@ const menuItems: MenuItem[] = [
         icon: ScrollText,
         isGroup: true,
         subItems: [
+          {
+            id: "admin-login-log",
+            label: "Nhật ký đăng nhập",
+            icon: ScrollText,
+          },
           {
             id: "admin-access-log",
             label: "Nhật ký truy cập",
@@ -732,7 +688,7 @@ export function Sidebar({
 }: SidebarProps) {
   const [expandedMenus, setExpandedMenus] = useState<
     Set<string>
-  >(new Set(['data-provisioning'])); // Default expand data-provisioning as it's the main page for now
+  >(new Set()); // Mặc định ẩn các module con
   const [searchTerm, setSearchTerm] = useState("");
   const [showVersionHistory, setShowVersionHistory] = useState(false);
 
@@ -764,17 +720,17 @@ export function Sidebar({
           {!isCollapsed && (
             <div className="whitespace-nowrap animate-in fade-in slide-in-from-left-2 duration-300 overflow-hidden">
               <div className="text-slate-900 text-base leading-5 font-bold truncate">
-                Kho Dữ liệu dùng chung
+                Kho DLDC
               </div>
               <div className="text-[10px] text-slate-500 leading-4 uppercase font-bold tracking-tight truncate">
-                Hệ thống quản lý
+                Hệ thống quản lý Bộ Tư Pháp
               </div>
             </div>
           )}
         </div>
-        
+
         {isCollapsed ? (
-          <button 
+          <button
             onClick={onToggleCollapse}
             className="absolute top-1/2 -translate-y-1/2 w-6 h-6 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-400 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50 transition-all z-50 shadow-sm"
             style={{ right: '-12px' }}
@@ -783,7 +739,7 @@ export function Sidebar({
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
         ) : (
-          <button 
+          <button
             onClick={onToggleCollapse}
             className="w-7 h-7 flex-shrink-0 bg-white border border-slate-200 rounded flex items-center justify-center text-slate-500 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50 transition-all shadow-sm ml-2"
             title="Thu gọn menu"
@@ -797,13 +753,13 @@ export function Sidebar({
       <div className={`px-4 py-3 border-b border-slate-100 ${isCollapsed ? 'flex justify-center' : ''}`}>
         <div className="relative group w-full">
           {isCollapsed ? (
-             <button 
-               onClick={onToggleCollapse}
-               className="w-full flex justify-center p-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-white transition-all"
-               title="Tìm kiếm menu"
-             >
-               <Search className="w-5 h-5" />
-             </button>
+            <button
+              onClick={onToggleCollapse}
+              className="w-full flex justify-center p-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-white transition-all"
+              title="Tìm kiếm menu"
+            >
+              <Search className="w-5 h-5" />
+            </button>
           ) : (
             <>
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
@@ -899,7 +855,9 @@ export function Sidebar({
                     {item.subItems?.map((subItem: SubMenuItem) => {
                       const SubIcon = subItem.icon;
                       const isSubActive =
-                        currentPage === subItem.id || currentPage.startsWith(subItem.id + '/');
+                        currentPage === subItem.id || 
+                        currentPage.startsWith(subItem.id + '/') ||
+                        (subItem.id === 'admin-config-log' && currentPage === 'admin-log-retention');
                       const isSubExpanded = expandedMenus.has(
                         subItem.id,
                       );
@@ -1004,8 +962,7 @@ export function Sidebar({
                                           <div className="ml-4 mt-0.5 space-y-0.5">
                                             {nestedItem.subItems?.map(
                                               (level4Item: any) => {
-                                                const Level4Icon =
-                                                  level4Item.icon;
+                                                const Level4Icon = level4Item.icon;
                                                 const isLevel4Active =
                                                   currentPage ===
                                                   level4Item.id;
@@ -1022,13 +979,13 @@ export function Sidebar({
                                                     }
                                                     title={level4Item.label}
                                                     aria-label={level4Item.label}
-                                                    className={`w-full flex items-center gap-2 px-2 py-1 rounded-lg transition-all ${isLevel4Active
-                                                      ? "bg-blue-50 text-blue-700"
+                                                    className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg transition-all ${isLevel4Active
+                                                      ? "bg-blue-50 text-blue-700 font-medium"
                                                       : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                                                       }`}
                                                   >
-                                                    {Level4Icon && <Level4Icon className="w-2.5 h-2.5 flex-shrink-0" />}
-                                                    <span className="text-xs truncate">
+                                                    {Level4Icon && <Level4Icon className="w-3 h-3 flex-shrink-0" />}
+                                                    <span className="text-xs truncate flex-1 text-left">
                                                       {
                                                         level4Item.label
                                                       }
@@ -1089,7 +1046,7 @@ export function Sidebar({
               </span>
             )}
           </div>
-          {!isCollapsed && <div className="text-xs text-slate-900 font-bold">v2.2.0</div>}
+          {!isCollapsed && <div className="text-xs text-slate-900 font-bold">v2.4.6</div>}
         </button>
       </div>
 

@@ -6,13 +6,13 @@ const puppeteer = require('puppeteer');
     await page.setViewport({ width: 1440, height: 900 });
 
     try {
-        await page.goto('http://localhost:3002', { waitUntil: 'networkidle2' });
-        
+        await page.goto('http://localhost:3000', { waitUntil: 'networkidle2' });
+
         // 1. Login
         const loginBtn = await page.$('button[type="submit"]');
         if (loginBtn) {
             await loginBtn.click();
-            await page.waitForNavigation({ waitUntil: 'networkidle2' }).catch(() => {});
+            await page.waitForNavigation({ waitUntil: 'networkidle2' }).catch(() => { });
         }
 
         await new Promise(r => setTimeout(r, 2000));
@@ -37,9 +37,9 @@ const puppeteer = require('puppeteer');
             const node = spans.find(span => span.textContent.trim() === 'Quản lý thu thập');
             if (node) node.closest('div').click();
         });
-        
+
         await new Promise(r => setTimeout(r, 1000));
-        
+
         // Click CSDL Trong ngành
         await page.evaluate(() => {
             const spans = Array.from(document.querySelectorAll('aside span'));
@@ -48,7 +48,7 @@ const puppeteer = require('puppeteer');
         });
 
         await new Promise(r => setTimeout(r, 1000));
-        
+
         // Click CSDL Ngoài ngành
         await page.evaluate(() => {
             const spans = Array.from(document.querySelectorAll('aside span'));
@@ -63,14 +63,14 @@ const puppeteer = require('puppeteer');
         console.log(expandedTree);
 
         await page.screenshot({ path: 'D:/tuphap/khodldc/dldc_1/sidebar_expanded.png', fullPage: true });
-        
+
         // Try clicking on "CSDL Thông tin Bản án" to see if it has a sub-menu
         await page.evaluate(() => {
             const spans = Array.from(document.querySelectorAll('aside span'));
             const node = spans.find(span => span.textContent.trim().includes('Bản án'));
             if (node) node.closest('div').click();
         });
-        
+
         await new Promise(r => setTimeout(r, 1000));
         await page.screenshot({ path: 'D:/tuphap/khodldc/dldc_1/sidebar_module_clicked.png', fullPage: true });
 

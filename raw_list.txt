@@ -1,216 +1,216 @@
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Thông tin Bản án, quyết định từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Thông tin Bản án, quyết định từ hệ thống nguồn thông qua kênh tích hợp
 hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Danh mục giới tính từ hệ thống nguồn thông qua kênh tích hợp
-Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Danh mục và mã các Tôn giáo từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Danh mục cơ quan từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Danh mục đơn vị hành chính từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Danh mục và mã mối quan hệ trong gia đình từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Danh mục mã giấy tờ tùy thân từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Bảo trợ xã hội và giảm nghèo - Hưởng trợ giúp xã hội từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Bảo trợ xã hội và giảm nghèo - Hưởng trợ giúp xã hội từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Bảo trợ xã hội và giảm nghèo - Thông tin người nghèo, cận nghèo từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Bảo trợ xã hội và giảm nghèo - Người đơn thân từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Bảo trợ xã hội và giảm nghèo - Trẻ em là đối tượng bảo trợ xã hội từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Bảo trợ xã hội và giảm nghèo -Người có HIV từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Bảo trợ xã hội và giảm nghèo -Người cao tuổi từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Bảo trợ xã hội và giảm nghèo - Thông tin về người khuyết tật từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Người có công - Hồ sơ công nhận người có công từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Người có công - Hồ sơ liệt sĩ: từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Người có công - Hồ sơ công nhận thân nhân người có công từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Trẻ em -Trẻ em từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệuiệu hồ sơ đăng ký khai sinh từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệuiệu hồ sơ đăng ký kết hôn từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệuiệu hồ sơ cấp Giấy xác nhận tình trạng hôn nhân từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệuiệu hồ sơ đăng ký khai tử từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệuiệu hồ sơ đăng ký nhận cha, mẹ, con từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệuiệu hồ sơ đăng ký nuôi con nuôi từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệuiệu hồ sơ đăng ký giám hộ từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệuiệu hồ sơ đăng ký chấm dứt giám hộ từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệuiệu hồ sơ đăng ký thay đổi, cải chính, bổ sung thông tin hộ tịch, xác định lại dân tộc từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệuiệu hồ sơ đăng ký giám sát việc giám hộ từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệuiệu hồ sơ đăng ký chấm dứt giám sát việc giám hộ từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệuiệu hồ sơ ghi vào sổ việc ly hôn/hủy việc kết hôn đã thực hiện tại cơ quan có thẩm quyền của nước ng từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Nhập Quốc tịch từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Thôi Quốc tịch từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Trở lại Quốc tịch từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Yêu cầu thi hành án của cá nhân, cơ quan, tổ chức từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Quyết định thi hành án dân sự từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Người phải thi hành án, người được thi hành án, người có quyền lợi nghĩa vụ liên quan từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Nghĩa vụ thi hành án từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Trạng thái thi hành án từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Tài sản thi hành án từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Xác minh điều kiện trong thi hành án dân sự từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Cưỡng chế thi hành án trong thi hành án dân sự từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Áp dụng biện pháp bảo đảm trong thi hành án dân sự từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Chứng từ nghiệp vụ trong thi hành án dân sự từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Biên lai thu tiền thi hành án dân sự từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Vật chứng trong thi hành án dân sự từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Thẩm định giá tài sản trong thi hành án dân sự từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Đấu giá tài sản trong thi hành án dân sự từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Giải quyết khiếu nại, tố cáo trong thi hành án dân sự từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Hướng dẫn nghiệp vụ trong thi hành án dân sự từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Thông tin chung (Bao gồm người đăng ký và Hợp đồng bảo đảm) từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Bên bảo đảm từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Bên nhận bảo đảm từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Tài sản bảo đảm từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Văn bản quy phạm pháp luật từ hệ thống nguồn thông qua kênh tích hợp
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Nội dung của văn bản quy phạm pháp luật từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Danh mục giới tính từ hệ thống nguồn thông qua kênh tích hợp
+Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
+Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
+Kho DLDC tiếp nhận dữ liệu Danh mục và mã các Tôn giáo từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Danh mục cơ quan từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Danh mục đơn vị hành chính từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Danh mục và mã mối quan hệ trong gia đình từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Danh mục mã giấy tờ tùy thân từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Bảo trợ xã hội và giảm nghèo - Hưởng trợ giúp xã hội từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Bảo trợ xã hội và giảm nghèo - Hưởng trợ giúp xã hội từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Bảo trợ xã hội và giảm nghèo - Thông tin người nghèo, cận nghèo từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Bảo trợ xã hội và giảm nghèo - Người đơn thân từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Bảo trợ xã hội và giảm nghèo - Trẻ em là đối tượng bảo trợ xã hội từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Bảo trợ xã hội và giảm nghèo -Người có HIV từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Bảo trợ xã hội và giảm nghèo -Người cao tuổi từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Bảo trợ xã hội và giảm nghèo - Thông tin về người khuyết tật từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Người có công - Hồ sơ công nhận người có công từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Người có công - Hồ sơ liệt sĩ: từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Người có công - Hồ sơ công nhận thân nhân người có công từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Trẻ em -Trẻ em từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệuiệu hồ sơ đăng ký khai sinh từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệuiệu hồ sơ đăng ký kết hôn từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệuiệu hồ sơ cấp Giấy xác nhận tình trạng hôn nhân từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệuiệu hồ sơ đăng ký khai tử từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệuiệu hồ sơ đăng ký nhận cha, mẹ, con từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệuiệu hồ sơ đăng ký nuôi con nuôi từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệuiệu hồ sơ đăng ký giám hộ từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệuiệu hồ sơ đăng ký chấm dứt giám hộ từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệuiệu hồ sơ đăng ký thay đổi, cải chính, bổ sung thông tin hộ tịch, xác định lại dân tộc từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệuiệu hồ sơ đăng ký giám sát việc giám hộ từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệuiệu hồ sơ đăng ký chấm dứt giám sát việc giám hộ từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệuiệu hồ sơ ghi vào sổ việc ly hôn/hủy việc kết hôn đã thực hiện tại cơ quan có thẩm quyền của nước ng từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Nhập Quốc tịch từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Thôi Quốc tịch từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Trở lại Quốc tịch từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Yêu cầu thi hành án của cá nhân, cơ quan, tổ chức từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Quyết định thi hành án dân sự từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Người phải thi hành án, người được thi hành án, người có quyền lợi nghĩa vụ liên quan từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Nghĩa vụ thi hành án từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Trạng thái thi hành án từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Tài sản thi hành án từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Xác minh điều kiện trong thi hành án dân sự từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Cưỡng chế thi hành án trong thi hành án dân sự từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Áp dụng biện pháp bảo đảm trong thi hành án dân sự từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Chứng từ nghiệp vụ trong thi hành án dân sự từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Biên lai thu tiền thi hành án dân sự từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Vật chứng trong thi hành án dân sự từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Thẩm định giá tài sản trong thi hành án dân sự từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Đấu giá tài sản trong thi hành án dân sự từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Giải quyết khiếu nại, tố cáo trong thi hành án dân sự từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Hướng dẫn nghiệp vụ trong thi hành án dân sự từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Thông tin chung (Bao gồm người đăng ký và Hợp đồng bảo đảm) từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Bên bảo đảm từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Bên nhận bảo đảm từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Tài sản bảo đảm từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Văn bản quy phạm pháp luật từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Nội dung của văn bản quy phạm pháp luật từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Quan hệ giữa các điều khoản trong các văn bản quy phạm pháp luật từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Quan hệ giữa các điều khoản trong các văn bản quy phạm pháp luật từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Văn bản hợp nhất từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Văn bản hợp nhất từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Hệ thống hóa văn bản quy phạm pháp luật từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Hệ thống hóa văn bản quy phạm pháp luật từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Hồ sơ ủy thác tư pháp đến từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Hồ sơ ủy thác tư pháp đến từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Hồ sơ ủy thác tư pháp đi từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Hồ sơ ủy thác tư pháp đi từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Tổ chức thực hiện trợ giúp pháp lý từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Tổ chức thực hiện trợ giúp pháp lý từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Tổ chức đăng ký tham gia trợ giúp pháp lý từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Tổ chức đăng ký tham gia trợ giúp pháp lý từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Thông tin văn bản cử người thực hiện trợ giúp pháp lý từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Thông tin văn bản cử người thực hiện trợ giúp pháp lý từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Trung tâm TGPL nhà nước từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Trung tâm TGPL nhà nước từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Chi nhánh TGPL từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Chi nhánh TGPL từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Người thực hiện TGPL từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Người thực hiện TGPL từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Báo cáo viên pháp luật từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Báo cáo viên pháp luật từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Tuyên truyền viên pháp luật từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Tuyên truyền viên pháp luật từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Chương trình, kế hoạch về phổ biến, giáo dục pháp luật từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Chương trình, kế hoạch về phổ biến, giáo dục pháp luật từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Hội đồng phối hợp phổ biến, giáo dục pháp luật từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Hội đồng phối hợp phổ biến, giáo dục pháp luật từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Đề án từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Đề án từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Hội nghị tập huấn (trực tuyến, trực tiếp) từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Hội nghị tập huấn (trực tuyến, trực tiếp) từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Hội thảo từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Hội thảo từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Tổ hoà giải từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Tổ hoà giải từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Hoà giải viên từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Hoà giải viên từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Vụ việc hoà giải từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Vụ việc hoà giải từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Tập huấn viên từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Tập huấn viên từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Kinh phí phổ biến giáo dục pháp luật từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Kinh phí phổ biến giáo dục pháp luật từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Tiêu chí, chỉ tiêu tiếp cận pháp luật từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Tiêu chí, chỉ tiêu tiếp cận pháp luật từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Đánh giá cấp xã đạt chuẩn tiếp cận pháp luật từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Đánh giá cấp xã đạt chuẩn tiếp cận pháp luật từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Cuộc PBGDPL từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Cuộc PBGDPL từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Cuộc thi tìm hiểu về pháp luật từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Cuộc thi tìm hiểu về pháp luật từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Đấu giá viên từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Đấu giá viên từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Tổ chức hành nghề đấu giá từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Tổ chức hành nghề đấu giá từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Người có tài sản đấu giá từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Người có tài sản đấu giá từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Thông tin việc đấu giá từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Thông tin việc đấu giá từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Tài sản đấu giá từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Tài sản đấu giá từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Công chứng viên từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Công chứng viên từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Thông tin ngăn chặn từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Thông tin ngăn chặn từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Tổ chức hành nghề công chứng từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Tổ chức hành nghề công chứng từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Tài sản trong giao dịch công chứng từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Tài sản trong giao dịch công chứng từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Kết quả hoạt động công chứng từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Kết quả hoạt động công chứng từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Quản tài viên từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Quản tài viên từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Doanh nghiệp quản lý, thanh lý tài sản từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Doanh nghiệp quản lý, thanh lý tài sản từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Luật sư Việt Nam từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Luật sư Việt Nam từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Người được cấp chứng chỉ hành nghề luật sư từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Người được cấp chứng chỉ hành nghề luật sư từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Tổ chức hành nghề luật sư Việt Nam từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Tổ chức hành nghề luật sư Việt Nam từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Luật sư nước ngoài từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Luật sư nước ngoài từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Tổ chức hành nghề luật sư nước ngoài từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Tổ chức hành nghề luật sư nước ngoài từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Trọng tài viên từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Trọng tài viên từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Trung tâm trọng tài từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Trung tâm trọng tài từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Chi nhánh của tổ chức trọng tài từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Chi nhánh của tổ chức trọng tài từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Văn phòng đại diện của trung tâm trọng tài từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Văn phòng đại diện của trung tâm trọng tài từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Hòa giải viên thương mại từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Hòa giải viên thương mại từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Trung tâm hòa giải thương mại từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Trung tâm hòa giải thương mại từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Giám định viên tư pháp từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Giám định viên tư pháp từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Thông tin điều ước quốc tế, thỏa thuận quốc tế từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Thông tin điều ước quốc tế, thỏa thuận quốc tế từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Thông tin chương trình dự án từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Thông tin chương trình dự án từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Danh sách chuyên gia từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Danh sách chuyên gia từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Thông tin hội nghị, hội thảo từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Thông tin hội nghị, hội thảo từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Thông tin sản phẩm nghiên cứu, truyền thông từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Thông tin sản phẩm nghiên cứu, truyền thông từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu Thông tin Đoàn từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu Thông tin Đoàn từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu thống kê trong lĩnh vực Xây dựng văn bản quy phạm pháp luật theo Thông tư của Bộ trưởng Bộ Tư pháp từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu thống kê trong lĩnh vực Xây dựng văn bản quy phạm pháp luật theo Thông tư của Bộ trưởng Bộ Tư pháp từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu thống kê trong lĩnh vực Kiểm tra văn bản quy phạm pháp luật theo Thông tư của Bộ trưởng Bộ Tư pháp từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu thống kê trong lĩnh vực Kiểm tra văn bản quy phạm pháp luật theo Thông tư của Bộ trưởng Bộ Tư pháp từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu thống kê trong lĩnh vực Rà soát văn bản quy phạm pháp luật theo Thông tư của Bộ trưởng Bộ Tư pháp q từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu thống kê trong lĩnh vực Rà soát văn bản quy phạm pháp luật theo Thông tư của Bộ trưởng Bộ Tư pháp q từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu thống kê trong lĩnh vực Tổ chức và người làm công tác pháp chế theo Thông tư của Bộ trưởng Bộ Tư ph từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu thống kê trong lĩnh vực Tổ chức và người làm công tác pháp chế theo Thông tư của Bộ trưởng Bộ Tư ph từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu thống kê trong lĩnh vực Phổ biến, giáo dục pháp luật theo Thông tư của Bộ trưởng Bộ Tư pháp quy địn từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu thống kê trong lĩnh vực Phổ biến, giáo dục pháp luật theo Thông tư của Bộ trưởng Bộ Tư pháp quy địn từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu thống kê trong lĩnh vực Hòa giải ở cơ sở theo Thông tư của Bộ trưởng Bộ Tư pháp quy định một số nội từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu thống kê trong lĩnh vực Hòa giải ở cơ sở theo Thông tư của Bộ trưởng Bộ Tư pháp quy định một số nội từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu thống kê trong lĩnh vực Chuẩn tiếp cận pháp luật theo Thông tư của Bộ trưởng Bộ Tư pháp quy định mộ từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu thống kê trong lĩnh vực Chuẩn tiếp cận pháp luật theo Thông tư của Bộ trưởng Bộ Tư pháp quy định mộ từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu thống kê trong lĩnh vực Hộ tịch theo Thông tư của Bộ trưởng Bộ Tư pháp quy định một số nội dung về từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu thống kê trong lĩnh vực Hộ tịch theo Thông tư của Bộ trưởng Bộ Tư pháp quy định một số nội dung về từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu thống kê trong lĩnh vực Chứng thực theo Thông tư của Bộ trưởng Bộ Tư pháp quy định một số nội dung từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu thống kê trong lĩnh vực Chứng thực theo Thông tư của Bộ trưởng Bộ Tư pháp quy định một số nội dung từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu thống kê trong lĩnh vực Lý lịch tư pháp theo Thông tư của Bộ trưởng Bộ Tư pháp quy định một số nội từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu thống kê trong lĩnh vực Lý lịch tư pháp theo Thông tư của Bộ trưởng Bộ Tư pháp quy định một số nội từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu thống kê trong lĩnh vực Nuôi con nuôi theo Thông tư của Bộ trưởng Bộ Tư pháp quy định một số nội du từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu thống kê trong lĩnh vực Nuôi con nuôi theo Thông tư của Bộ trưởng Bộ Tư pháp quy định một số nội du từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu thống kê trong lĩnh vực Trợ giúp pháp lý theo Thông tư của Bộ trưởng Bộ Tư pháp quy định một số nội từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu thống kê trong lĩnh vực Trợ giúp pháp lý theo Thông tư của Bộ trưởng Bộ Tư pháp quy định một số nội từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu thống kê trong lĩnh vực Đăng ký giao dịch bảo đảm theo Thông tư của Bộ trưởng Bộ Tư pháp quy định m từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu thống kê trong lĩnh vực Đăng ký giao dịch bảo đảm theo Thông tư của Bộ trưởng Bộ Tư pháp quy định m từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu thống kê trong lĩnh vực Luật sư theo Thông tư của Bộ trưởng Bộ Tư pháp quy định một số nội dung về từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu thống kê trong lĩnh vực Luật sư theo Thông tư của Bộ trưởng Bộ Tư pháp quy định một số nội dung về từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu thống kê trong lĩnh vực Công chứng theo Thông tư của Bộ trưởng Bộ Tư pháp quy định một số nội dung từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu thống kê trong lĩnh vực Công chứng theo Thông tư của Bộ trưởng Bộ Tư pháp quy định một số nội dung từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu thống kê trong lĩnh vực Giám định tư pháp theo Thông tư của Bộ trưởng Bộ Tư pháp quy định một số nộ từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu thống kê trong lĩnh vực Giám định tư pháp theo Thông tư của Bộ trưởng Bộ Tư pháp quy định một số nộ từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu thống kê trong lĩnh vực Đấu giá tài sản theo Thông tư của Bộ trưởng Bộ Tư pháp quy định một số nội từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu thống kê trong lĩnh vực Đấu giá tài sản theo Thông tư của Bộ trưởng Bộ Tư pháp quy định một số nội từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu thống kê trong lĩnh vực Trọng tài thương mại theo Thông tư của Bộ trưởng Bộ Tư pháp quy định một số từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu thống kê trong lĩnh vực Trọng tài thương mại theo Thông tư của Bộ trưởng Bộ Tư pháp quy định một số từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu thống kê trong lĩnh vực Hòa giải thương mại theo Thông tư của Bộ trưởng Bộ Tư pháp quy định một số từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu thống kê trong lĩnh vực Hòa giải thương mại theo Thông tư của Bộ trưởng Bộ Tư pháp quy định một số từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu thống kê trong lĩnh vực Quản lý thanh lý tài sản theo Thông tư của Bộ trưởng Bộ Tư pháp quy định mộ từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu thống kê trong lĩnh vực Quản lý thanh lý tài sản theo Thông tư của Bộ trưởng Bộ Tư pháp quy định mộ từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công
-Kho dữ liệu dùng chung tiếp nhận dữ liệu thống kê trong lĩnh vực Tương trợ tư pháp theo Thông tư của Bộ trưởng Bộ Tư pháp quy định một số nộ từ hệ thống nguồn thông qua kênh tích hợp
+Kho DLDC tiếp nhận dữ liệu thống kê trong lĩnh vực Tương trợ tư pháp theo Thông tư của Bộ trưởng Bộ Tư pháp quy định một số nộ từ hệ thống nguồn thông qua kênh tích hợp
 Hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công

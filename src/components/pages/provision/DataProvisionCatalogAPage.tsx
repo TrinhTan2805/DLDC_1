@@ -171,7 +171,7 @@ const mockProvisionHistory: ProvisionHistory[] = [
   },
   {
     id: '4',
-    targetSystem: 'Hệ thống Quản lý văn bản Bộ Tư pháp',
+    targetSystem: 'Hệ thống quản lý Bộ Tư Pháp văn bản Bộ Tư pháp',
     targetSystemCode: 'CSDL-004',
     provisionDate: '17/12/2024',
     provisionTime: '11:20:08',
@@ -243,29 +243,27 @@ export function DataProvisionCatalogAPage() {
   return (
     <div className="space-y-6">
       <PageHeader title="Danh mục chủ - Loại A" icon={FileText} />
-      
+
       {/* Tabs */}
       <div className="bg-white border border-slate-200 rounded-lg">
         <div className="border-b border-slate-200">
           <div className="flex items-center gap-1 px-2">
             <button
               onClick={() => setActiveTab('data')}
-              className={`flex items-center gap-2 px-4 py-3 text-sm border-b-2 transition-colors ${
-                activeTab === 'data'
-                  ? 'border-purple-600 text-purple-600'
-                  : 'border-transparent text-slate-600 hover:text-slate-900'
-              }`}
+              className={`flex items-center gap-2 px-4 py-3 text-sm border-b-2 transition-colors ${activeTab === 'data'
+                ? 'border-purple-600 text-purple-600'
+                : 'border-transparent text-slate-600 hover:text-slate-900'
+                }`}
             >
               <FileText className="w-4 h-4" />
               Danh sách dữ liệu
             </button>
             <button
               onClick={() => setActiveTab('history')}
-              className={`flex items-center gap-2 px-4 py-3 text-sm border-b-2 transition-colors ${
-                activeTab === 'history'
-                  ? 'border-purple-600 text-purple-600'
-                  : 'border-transparent text-slate-600 hover:text-slate-900'
-              }`}
+              className={`flex items-center gap-2 px-4 py-3 text-sm border-b-2 transition-colors ${activeTab === 'history'
+                ? 'border-purple-600 text-purple-600'
+                : 'border-transparent text-slate-600 hover:text-slate-900'
+                }`}
             >
               <HistoryIcon className="w-4 h-4" />
               Lịch sử cung cấp
@@ -327,11 +325,10 @@ export function DataProvisionCatalogAPage() {
                         <td className="px-4 py-3 text-sm text-slate-700">{record.birthDate}</td>
                         <td className="px-4 py-3 text-sm text-slate-700">{record.idNumber}</td>
                         <td className="px-4 py-3 text-sm">
-                          <span className={`px-2 py-1 text-xs rounded ${
-                            record.statusLabel === 'Đã xử lý' 
-                              ? 'bg-green-100 text-green-700' 
-                              : 'bg-blue-100 text-blue-700'
-                          }`}>
+                          <span className={`px-2 py-1 text-xs rounded ${record.statusLabel === 'Đã xử lý'
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-blue-100 text-blue-700'
+                            }`}>
                             {record.statusLabel}
                           </span>
                         </td>
@@ -402,13 +399,12 @@ export function DataProvisionCatalogAPage() {
                         <td className="px-4 py-3 text-sm text-slate-700">{history.recordCount}</td>
                         <td className="px-4 py-3 text-sm text-slate-900">{history.performer}</td>
                         <td className="px-4 py-3 text-sm">
-                          <span className={`px-2 py-1 text-xs rounded ${
-                            history.status === 'Thành công' 
-                              ? 'bg-green-100 text-green-700' 
-                              : history.status === 'Thất bại'
-                                ? 'bg-red-100 text-red-700'
-                                : 'bg-blue-100 text-blue-700'
-                          }`}>
+                          <span className={`px-2 py-1 text-xs rounded ${history.status === 'Thành công'
+                            ? 'bg-green-100 text-green-700'
+                            : history.status === 'Thất bại'
+                              ? 'bg-red-100 text-red-700'
+                              : 'bg-blue-100 text-blue-700'
+                            }`}>
                             {history.status}
                           </span>
                           {getStatusIcon(history.status)}

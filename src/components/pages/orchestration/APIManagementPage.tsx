@@ -122,7 +122,7 @@ const mockAPIs: API[] = [
     id: '4',
     code: 'API004',
     name: 'API đồng bộ dữ liệu công chứng',
-    description: 'API đồng bộ dữ liệu từ hệ thống công chứng về kho DLDC',
+    description: 'API đồng bộ dữ liệu từ hệ thống công chứng về Kho DLDC',
     type: 'active',
     method: 'POST',
     status: 'error',
@@ -178,7 +178,7 @@ const mockAPIs: API[] = [
     id: '6',
     code: 'API006',
     name: 'API xuất dữ liệu báo cáo thống kê',
-    description: 'API xuất dữ liệu báo cáo và thống kê từ kho DLDC',
+    description: 'API xuất dữ liệu báo cáo và thống kê từ Kho DLDC',
     type: 'active',
     method: 'GET',
     status: 'active',
@@ -210,7 +210,7 @@ export function APIManagementPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
-  
+
   // Modal states
   const [showAddModal, setShowAddModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
@@ -221,17 +221,17 @@ export function APIManagementPage() {
   const [showTestModal, setShowTestModal] = useState(false);
   const [showMonitorModal, setShowMonitorModal] = useState(false);
   const [selectedAPI, setSelectedAPI] = useState<API | null>(null);
-  
+
   // Test API states
   const [testUrl, setTestUrl] = useState('');
   const [testMethod, setTestMethod] = useState('GET');
-  const [testHeaders, setTestHeaders] = useState<{key: string, value: string}[]>([]);
-  const [testParams, setTestParams] = useState<{key: string, value: string}[]>([]);
+  const [testHeaders, setTestHeaders] = useState<{ key: string, value: string }[]>([]);
+  const [testParams, setTestParams] = useState<{ key: string, value: string }[]>([]);
   const [testBody, setTestBody] = useState('');
   const [testResponse, setTestResponse] = useState<any>(null);
   const [isTestLoading, setIsTestLoading] = useState(false);
   const [copiedResponse, setCopiedResponse] = useState(false);
-  
+
   // Form states
   const [formData, setFormData] = useState<any>({
     name: '',
@@ -248,9 +248,9 @@ export function APIManagementPage() {
     isActive: true,
     type: 'active'
   });
-  
-  const [headers, setHeaders] = useState<{key: string, value: string}[]>([]);
-  const [queryParams, setQueryParams] = useState<{key: string, value: string}[]>([]);
+
+  const [headers, setHeaders] = useState<{ key: string, value: string }[]>([]);
+  const [queryParams, setQueryParams] = useState<{ key: string, value: string }[]>([]);
 
   // Export dropdown state
   const [showExportDropdown, setShowExportDropdown] = useState(false);
@@ -260,8 +260,8 @@ export function APIManagementPage() {
   const filteredAPIs = apis.filter(api => {
     const matchesTab = api.type === activeTab;
     const matchesSearch = api.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         api.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         api.endpoint.toLowerCase().includes(searchTerm.toLowerCase());
+      api.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      api.endpoint.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'all' || api.status === filterStatus;
     return matchesTab && matchesSearch && matchesStatus;
   });
@@ -273,18 +273,18 @@ export function APIManagementPage() {
       error: 'Lỗi'
     };
     return (
-      <StatusTag 
-        label={labels[status as keyof typeof labels]} 
-        variant={status === 'active' ? 'green' : status === 'inactive' ? 'slate' : 'red'} 
+      <StatusTag
+        label={labels[status as keyof typeof labels]}
+        variant={status === 'active' ? 'green' : status === 'inactive' ? 'slate' : 'red'}
       />
     );
   };
 
   const getTypeBadge = (type: string) => {
     return (
-      <StatusTag 
-        label={type === 'active' ? 'Chủ động' : 'Thụ động'} 
-        variant={type === 'active' ? 'blue' : 'purple'} 
+      <StatusTag
+        label={type === 'active' ? 'Chủ động' : 'Thụ động'}
+        variant={type === 'active' ? 'blue' : 'purple'}
         icon={type === 'active' ? <Upload className="w-3 h-3" /> : <Download className="w-3 h-3" />}
       />
     );
@@ -292,9 +292,9 @@ export function APIManagementPage() {
 
   const getMethodBadge = (method: string) => {
     return (
-      <StatusTag 
-        label={method} 
-        variant={method === 'GET' ? 'green' : method === 'POST' ? 'blue' : method === 'PUT' ? 'orange' : 'red'} 
+      <StatusTag
+        label={method}
+        variant={method === 'GET' ? 'green' : method === 'POST' ? 'blue' : method === 'PUT' ? 'orange' : 'red'}
       />
     );
   };
@@ -310,7 +310,7 @@ export function APIManagementPage() {
   // Export single API
   const handleExportSingleAPI = (api: API, format: 'json' | 'csv' | 'xml' | 'excel') => {
     const filename = `api_${api.code}_${new Date().toISOString().split('T')[0]}`;
-    
+
     if (format === 'json') {
       const jsonStr = JSON.stringify(api, null, 2);
       const blob = new Blob([jsonStr], { type: 'application/json' });
@@ -412,7 +412,7 @@ export function APIManagementPage() {
   const handleExport = (format: 'json' | 'csv' | 'xml' | 'excel') => {
     const dataToExport = filteredAPIs.length > 0 ? filteredAPIs : apis;
     const filename = `api_list_${new Date().toISOString().split('T')[0]}`;
-    
+
     if (format === 'json') {
       const jsonStr = JSON.stringify(dataToExport, null, 2);
       const blob = new Blob([jsonStr], { type: 'application/json' });
@@ -511,11 +511,10 @@ export function APIManagementPage() {
           <div className="flex">
             <button
               onClick={() => setActiveTab('active')}
-              className={`px-6 py-3 text-sm transition-colors relative ${
-                activeTab === 'active'
-                  ? 'text-blue-600'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
+              className={`px-6 py-3 text-sm transition-colors relative ${activeTab === 'active'
+                ? 'text-blue-600'
+                : 'text-slate-600 hover:text-slate-900'
+                }`}
             >
               <div className="flex items-center gap-2">
                 <Upload className="w-4 h-4" />
@@ -527,11 +526,10 @@ export function APIManagementPage() {
             </button>
             <button
               onClick={() => setActiveTab('passive')}
-              className={`px-6 py-3 text-sm transition-colors relative ${
-                activeTab === 'passive'
-                  ? 'text-blue-600'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
+              className={`px-6 py-3 text-sm transition-colors relative ${activeTab === 'passive'
+                ? 'text-blue-600'
+                : 'text-slate-600 hover:text-slate-900'
+                }`}
             >
               <div className="flex items-center gap-2">
                 <Download className="w-4 h-4" />
@@ -642,13 +640,13 @@ export function APIManagementPage() {
                 <option value="inactive">Tạm dừng</option>
                 <option value="error">Lỗi</option>
               </select>
-              <button 
+              <button
                 className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2 whitespace-nowrap"
               >
                 <FileDown className="w-4 h-4" />
                 Xuất dữ liệu
               </button>
-              <button 
+              <button
                 onClick={() => {
                   setFormData({
                     name: '',
@@ -737,8 +735,8 @@ export function APIManagementPage() {
                         <td className="px-4 py-3">{getStatusBadge(api.status)}</td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
-                            <button 
-                              className="p-1.5 text-blue-600 hover:bg-blue-50 rounded" 
+                            <button
+                              className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"
                               title="Xem chi tiết"
                               aria-label={`Xem chi tiết API ${api.name}`}
                               onClick={() => {
@@ -748,8 +746,8 @@ export function APIManagementPage() {
                             >
                               <Eye className="w-4 h-4" />
                             </button>
-                            <button 
-                              className="p-1.5 text-amber-600 hover:bg-amber-50 rounded" 
+                            <button
+                              className="p-1.5 text-amber-600 hover:bg-amber-50 rounded"
                               title="Chỉnh sửa"
                               aria-label={`Chỉnh sửa API ${api.name}`}
                               onClick={() => {
@@ -760,8 +758,8 @@ export function APIManagementPage() {
                             >
                               <Edit className="w-4 h-4" />
                             </button>
-                            <button 
-                              className="p-1.5 text-green-600 hover:bg-green-50 rounded" 
+                            <button
+                              className="p-1.5 text-green-600 hover:bg-green-50 rounded"
                               title="Giám sát"
                               aria-label={`Giám sát API ${api.name}`}
                               onClick={() => {
@@ -771,21 +769,21 @@ export function APIManagementPage() {
                             >
                               <Activity className="w-4 h-4" />
                             </button>
-                            
+
                             {/* Export dropdown for single API */}
                             <div className="relative">
-                              <button 
-                                className="p-1.5 text-purple-600 hover:bg-purple-50 rounded" 
+                              <button
+                                className="p-1.5 text-purple-600 hover:bg-purple-50 rounded"
                                 title="Xuất dữ liệu"
                                 onClick={() => setExportDropdownId(exportDropdownId === api.id ? null : api.id)}
                               >
                                 <FileDown className="w-4 h-4" />
                               </button>
-                              
+
                               {exportDropdownId === api.id && (
                                 <>
-                                  <div 
-                                    className="fixed inset-0 z-10" 
+                                  <div
+                                    className="fixed inset-0 z-10"
                                     onClick={() => setExportDropdownId(null)}
                                   />
                                   <div className="absolute right-0 mt-1 w-36 bg-white border border-slate-200 rounded-lg shadow-lg z-20">
@@ -823,10 +821,10 @@ export function APIManagementPage() {
                                 </>
                               )}
                             </div>
-                            
+
                             {api.publishStatus === 'published' ? (
-                              <button 
-                                className="p-1.5 text-red-600 hover:bg-red-50 rounded" 
+                              <button
+                                className="p-1.5 text-red-600 hover:bg-red-50 rounded"
                                 title="Hủy công bố"
                                 onClick={() => {
                                   setSelectedAPI(api);
@@ -836,8 +834,8 @@ export function APIManagementPage() {
                                 <XCircle className="w-4 h-4" />
                               </button>
                             ) : (
-                              <button 
-                                className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded" 
+                              <button
+                                className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded"
                                 title="Công bố"
                                 aria-label={`Công bố API ${api.name}`}
                                 onClick={() => {
@@ -848,8 +846,8 @@ export function APIManagementPage() {
                                 <CheckCircle className="w-4 h-4" />
                               </button>
                             )}
-                            <button 
-                              className="p-1.5 text-red-600 hover:bg-red-50 rounded" 
+                            <button
+                              className="p-1.5 text-red-600 hover:bg-red-50 rounded"
                               title="Xóa"
                               aria-label={`Xóa API ${api.name}`}
                               onClick={() => {
@@ -875,8 +873,8 @@ export function APIManagementPage() {
               <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
                 <div className="flex items-center justify-between p-6 border-b border-slate-200">
                   <h2 className="text-slate-900">Thêm API mới</h2>
-                  <button 
-                    onClick={() => setShowAddModal(false)} 
+                  <button
+                    onClick={() => setShowAddModal(false)}
                     className="text-slate-400 hover:text-slate-600"
                     title="Đóng"
                     aria-label="Đóng bảng thêm API"
@@ -884,7 +882,7 @@ export function APIManagementPage() {
                     <X className="w-5 h-5" />
                   </button>
                 </div>
-                
+
                 <div className="p-6">
                   <APIFormFields
                     formData={formData}
@@ -901,7 +899,7 @@ export function APIManagementPage() {
                     onClick={() => {
                       setTestUrl(`${formData.baseUrl || ''}${formData.endpoint || ''}`);
                       setTestMethod(formData.httpMethod || 'GET');
-                      setTestHeaders(headers.length > 0 ? headers : (formData.headerName && formData.apiKey ? [{key: formData.headerName, value: formData.apiKey}] : []));
+                      setTestHeaders(headers.length > 0 ? headers : (formData.headerName && formData.apiKey ? [{ key: formData.headerName, value: formData.apiKey }] : []));
                       setTestParams(queryParams);
                       setTestBody('');
                       setTestResponse(null);
@@ -942,8 +940,8 @@ export function APIManagementPage() {
               <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
                 <div className="flex items-center justify-between p-6 border-b border-slate-200">
                   <h2 className="text-slate-900">Chỉnh sửa API</h2>
-                  <button 
-                    onClick={() => setShowEditModal(false)} 
+                  <button
+                    onClick={() => setShowEditModal(false)}
                     className="text-slate-400 hover:text-slate-600"
                     title="Đóng bản chỉnh sửa"
                     aria-label="Đóng bản chỉnh sửa"
@@ -951,7 +949,7 @@ export function APIManagementPage() {
                     <X className="w-5 h-5" />
                   </button>
                 </div>
-                
+
                 <div className="p-6 space-y-6">
                   <APIFormFields
                     formData={formData}
@@ -1016,7 +1014,7 @@ export function APIManagementPage() {
                     onClick={() => {
                       setTestUrl(`${formData.baseUrl || ''}${formData.endpoint || ''}`);
                       setTestMethod(formData.httpMethod || 'GET');
-                      setTestHeaders(headers.length > 0 ? headers : (formData.headerName && formData.apiKey ? [{key: formData.headerName, value: formData.apiKey}] : []));
+                      setTestHeaders(headers.length > 0 ? headers : (formData.headerName && formData.apiKey ? [{ key: formData.headerName, value: formData.apiKey }] : []));
                       setTestParams(queryParams);
                       setTestBody('');
                       setTestResponse(null);
@@ -1057,8 +1055,8 @@ export function APIManagementPage() {
               <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
                 <div className="flex items-center justify-between p-6 border-b border-slate-200">
                   <h2 className="text-slate-900">Chi tiết API</h2>
-                  <button 
-                    onClick={() => setShowViewModal(false)} 
+                  <button
+                    onClick={() => setShowViewModal(false)}
                     className="text-slate-400 hover:text-slate-600"
                     title="Đóng chi tiết"
                     aria-label="Đóng bảng chi tiết API"
@@ -1066,7 +1064,7 @@ export function APIManagementPage() {
                     <X className="w-5 h-5" />
                   </button>
                 </div>
-                
+
                 <div className="p-6 space-y-6">
                   {/* Loại API */}
                   <div>
@@ -1088,7 +1086,7 @@ export function APIManagementPage() {
                   {/* Cấu hình Endpoint */}
                   <div className="space-y-4">
                     <h3 className="text-sm text-slate-900">Cấu hình Endpoint</h3>
-                    
+
                     <div>
                       <label className="block text-xs text-slate-500 mb-1">Base URL</label>
                       <div className="text-sm text-slate-900 break-all">{selectedAPI.baseUrl || 'N/A'}</div>
@@ -1114,7 +1112,7 @@ export function APIManagementPage() {
                   {/* Xác thực */}
                   <div className="space-y-4">
                     <h3 className="text-sm text-slate-900">Xác thực</h3>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="block text-xs text-slate-500 mb-1">Loại xác thực</label>
@@ -1135,7 +1133,7 @@ export function APIManagementPage() {
                   {/* Cấu hình đơn vị LSGP */}
                   <div className="space-y-4">
                     <h3 className="text-sm text-slate-900">Cấu hình đơn vị LSGP (Liên sở giữa phòng)</h3>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="block text-xs text-slate-500 mb-1">Mã đơn vị</label>
@@ -1166,7 +1164,7 @@ export function APIManagementPage() {
                   {/* Thống kê hoạt động */}
                   <div className="space-y-4 border-t border-slate-200 pt-4">
                     <h3 className="text-sm text-slate-900">Thống kê hoạt động</h3>
-                    
+
                     <div className="grid grid-cols-3 gap-4">
                       <div>
                         <label className="block text-xs text-slate-500 mb-1">Số lượt gọi</label>
@@ -1191,7 +1189,7 @@ export function APIManagementPage() {
                   {/* Thông tin hệ thống */}
                   <div className="space-y-4 border-t border-slate-200 pt-4">
                     <h3 className="text-sm text-slate-900">Thông tin hệ thống</h3>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="block text-xs text-slate-500 mb-1">Ngày tạo</label>
@@ -1238,8 +1236,8 @@ export function APIManagementPage() {
               <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
                 <div className="flex items-center justify-between p-6 border-b border-slate-200">
                   <h2 className="text-slate-900">Xác nhận xóa</h2>
-                  <button 
-                    onClick={() => setShowDeleteModal(false)} 
+                  <button
+                    onClick={() => setShowDeleteModal(false)}
                     className="text-slate-400 hover:text-slate-600"
                     title="Hủy"
                     aria-label="Đóng bảng xóa hồ sơ"
@@ -1279,8 +1277,8 @@ export function APIManagementPage() {
               <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
                 <div className="flex items-center justify-between p-6 border-b border-slate-200">
                   <h2 className="text-slate-900">Xác nhận công bố</h2>
-                  <button 
-                    onClick={() => setShowPublishModal(false)} 
+                  <button
+                    onClick={() => setShowPublishModal(false)}
                     className="text-slate-400 hover:text-slate-600"
                     title="Đóng cửa sổ"
                     aria-label="Đóng xác nhận công bố"
@@ -1313,8 +1311,8 @@ export function APIManagementPage() {
                   <button
                     onClick={() => {
                       if (selectedAPI) {
-                        setApis(apis.map(api => 
-                          api.id === selectedAPI.id 
+                        setApis(apis.map(api =>
+                          api.id === selectedAPI.id
                             ? { ...api, publishStatus: 'published' as const }
                             : api
                         ));
@@ -1337,8 +1335,8 @@ export function APIManagementPage() {
               <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
                 <div className="flex items-center justify-between p-6 border-b border-slate-200">
                   <h2 className="text-slate-900">Xác nhận hủy công bố</h2>
-                  <button 
-                    onClick={() => setShowUnpublishModal(false)} 
+                  <button
+                    onClick={() => setShowUnpublishModal(false)}
                     className="text-slate-400 hover:text-slate-600"
                     title="Đóng cửa sổ"
                     aria-label="Đóng xác nhận hủy công bố"
@@ -1371,8 +1369,8 @@ export function APIManagementPage() {
                   <button
                     onClick={() => {
                       if (selectedAPI) {
-                        setApis(apis.map(api => 
-                          api.id === selectedAPI.id 
+                        setApis(apis.map(api =>
+                          api.id === selectedAPI.id
                             ? { ...api, publishStatus: 'unpublished' as const }
                             : api
                         ));
@@ -1420,8 +1418,8 @@ export function APIManagementPage() {
                 <h2 className="text-lg text-slate-900">Giám sát API</h2>
                 <p className="text-sm text-slate-600 mt-1">{selectedAPI.name}</p>
               </div>
-              <button 
-                onClick={() => setShowMonitorModal(false)} 
+              <button
+                onClick={() => setShowMonitorModal(false)}
                 className="text-slate-400 hover:text-slate-600"
                 title="Đóng cửa sổ"
                 aria-label="Đóng bảng giám sát"
@@ -1429,7 +1427,7 @@ export function APIManagementPage() {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
+
             <div className="p-6 space-y-6">
               {/* Stats Overview */}
               <div className="grid grid-cols-4 gap-4">
@@ -1532,15 +1530,15 @@ export function APIManagementPage() {
                       <span className="text-slate-600">Requests thành công</span>
                       <span className="text-green-600 font-medium">{Math.round(selectedAPI.requestCount * selectedAPI.successRate / 100)}</span>
                     </div>
-                    <div 
-                      className="w-full bg-slate-200 rounded-full h-2" 
-                      role="progressbar" 
-                      aria-valuenow={selectedAPI?.successRate ?? 0} 
-                      aria-valuemin={0} 
+                    <div
+                      className="w-full bg-slate-200 rounded-full h-2"
+                      role="progressbar"
+                      aria-valuenow={selectedAPI?.successRate ?? 0}
+                      aria-valuemin={0}
                       aria-valuemax={100}
                       aria-label="Requests thành công"
                     >
-                      <div 
+                      <div
                         style={{ '--progress-width': `${selectedAPI?.successRate ?? 0}%` } as React.CSSProperties}
                         className="bg-green-500 h-2 rounded-full w-[var(--progress-width)]"
                       ></div>
@@ -1551,7 +1549,7 @@ export function APIManagementPage() {
                       <span className="text-slate-600">Requests thất bại</span>
                       <span className="text-red-600 font-medium">{selectedAPI.requestCount - Math.round(selectedAPI.requestCount * selectedAPI.successRate / 100)}</span>
                     </div>
-                    <div 
+                    <div
                       className="w-full bg-slate-200 rounded-full h-2"
                       role="progressbar"
                       aria-valuenow={selectedAPI ? (100 - selectedAPI.successRate) : 0}
@@ -1559,7 +1557,7 @@ export function APIManagementPage() {
                       aria-valuemax={100}
                       aria-label="Requests thất bại"
                     >
-                      <div 
+                      <div
                         style={{ '--progress-width': `${selectedAPI ? (100 - selectedAPI.successRate) : 0}%` } as React.CSSProperties}
                         className="bg-red-500 h-2 rounded-full w-[var(--progress-width)]"
                       ></div>

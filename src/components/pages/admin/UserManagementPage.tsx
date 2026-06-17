@@ -20,7 +20,7 @@ interface User {
   errors: string[];
 }
 
-const usersData: User[] = [
+const initialUsersData: User[] = [
   { 
     id: 1, 
     name: 'Nguyễn Văn An', 
@@ -77,23 +77,39 @@ const usersData: User[] = [
     createdDate: '15/01/2024', 
     lastLogin: '09:05:10 14:05:2026' 
   },
+  { 
+    id: 5, 
+    name: 'Hoàng Văn Đồng bộ', 
+    username: 'hoangvandongbo', 
+    email: 'hoangvandongbo@moj.gov.vn', 
+    phone: '0912345682', 
+    department: 'Cục Công nghệ thông tin', 
+    role: '',
+    groups: [],
+    permissions: [],
+    status: 'active', 
+    createdDate: '29/05/2026', 
+    lastLogin: '' 
+  },
 ];
+
+const availableRoles = ['Quản trị hệ thống', 'Quản trị nghiệp vụ', 'Người dùng cơ bản', 'Quản trị viên', 'Biên tập viên', 'Người xem'];
 
 const availableGroups = [
-  { id: 1, name: 'Quản trị hệ thống', code: 'QTHT' },
-  { id: 2, name: 'Lãnh đạo Bộ phận quản trị', code: 'LDBPQT' },
-  { id: 3, name: 'Cán bộ nghiệp vụ Hộ tịch điện tử', code: 'HTDT' },
-  { id: 4, name: 'Cán bộ nghiệp vụ quản lý hồ sơ quốc tịch', code: 'HSQT' },
-  { id: 5, name: 'Cán bộ nghiệp vụ thi hành án dân sự', code: 'THADS' },
-  { id: 6, name: 'Cán bộ nghiệp vụ CSDL quốc gia về pháp luật', code: 'CSDLPL' },
-  { id: 7, name: 'Lãnh đạo nghiệp vụ Hộ tịch điện tử', code: 'LDHTDT' },
-  { id: 8, name: 'Lãnh đạo nghiệp vụ quản lý hồ sơ quốc tịch', code: 'LDHSQT' },
+  { id: 1, name: 'Quản trị hệ thống', code: 'QTHT', role: 'Quản trị hệ thống' },
+  { id: 2, name: 'Lãnh đạo Bộ phận quản trị', code: 'LDBPQT', role: 'Quản trị nghiệp vụ' },
+  { id: 3, name: 'Cán bộ nghiệp vụ Hộ tịch điện tử', code: 'HTDT', role: 'Người dùng cơ bản' },
+  { id: 4, name: 'Cán bộ nghiệp vụ quản lý hồ sơ quốc tịch', code: 'HSQT', role: 'Người dùng cơ bản' },
+  { id: 5, name: 'Cán bộ nghiệp vụ thi hành án dân sự', code: 'THADS', role: 'Người dùng cơ bản' },
+  { id: 6, name: 'Cán bộ nghiệp vụ CSDL quốc gia về pháp luật', code: 'CSDLPL', role: 'Người dùng cơ bản' },
+  { id: 7, name: 'Lãnh đạo nghiệp vụ Hộ tịch điện tử', code: 'LDHTDT', role: 'Quản trị nghiệp vụ' },
+  { id: 8, name: 'Lãnh đạo nghiệp vụ quản lý hồ sơ quốc tịch', code: 'LDHSQT', role: 'Quản trị nghiệp vụ' },
 ];
 
-type ModalType = 'add' | 'edit' | 'detail' | 'delete' | 'lock' | 'unlock' | 'assign-group' | 'reset-password' | 'import' | 'export' | 'sync' | null;
+type ModalType = 'add' | 'edit' | 'detail' | 'delete' | 'lock' | 'unlock' | 'assign-group' | 'assign-role' | 'reset-password' | 'import' | 'export' | 'sync' | null;
 
 export function UserManagementPage() {
-  const [users, setUsers] = useState<User[]>(usersData);
+  const [users, setUsers] = useState<User[]>(initialUsersData);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterDepartment, setFilterDepartment] = useState('all');
@@ -123,7 +139,6 @@ export function UserManagementPage() {
     ...availableGroups.map(g => g.name),
     ...users.flatMap(u => u.groups || [])
   ].filter(Boolean)));
-
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -168,6 +183,8 @@ export function UserManagementPage() {
     }
   };
 
+  const [selectedRole, setSelectedRole] = useState<string>('');
+
   const handleCloseModal = () => {
     if (prevModalType === 'detail' && selectedUser) {
       setModalType('detail');
@@ -176,6 +193,7 @@ export function UserManagementPage() {
       setModalType(null);
       setSelectedUser(null);
       setSelectedGroups([]);
+      setSelectedRole('');
       setPrevModalType(null);
     }
   };
@@ -194,7 +212,15 @@ export function UserManagementPage() {
       .filter(g => selectedGroups.includes(g.id))
       .map(g => g.name);
 
-    const updatedUser = { ...selectedUser, groups: newGroupNames };
+    let newRole = selectedUser.role;
+    if (selectedGroups.length > 0) {
+      const firstGroup = availableGroups.find(g => g.id === selectedGroups[0]);
+      if (firstGroup) {
+        newRole = firstGroup.role;
+      }
+    }
+
+    const updatedUser = { ...selectedUser, groups: newGroupNames, role: newRole };
     setUsers(users.map(u => u.id === selectedUser.id ? updatedUser : u));
     setSelectedUser(updatedUser);
 
@@ -326,7 +352,7 @@ export function UserManagementPage() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <button className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center">
+            <button title="Tìm kiếm" aria-label="Tìm kiếm" className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center">
               <Search className="w-5 h-5" />
             </button>
             <button
@@ -364,6 +390,8 @@ export function UserManagementPage() {
             <div className="space-y-1.5 relative z-10">
               <label className="text-[13px] font-medium text-slate-700">Trạng thái</label>
               <select
+                title="Lọc theo trạng thái"
+                aria-label="Lọc theo trạng thái"
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
@@ -418,7 +446,7 @@ export function UserManagementPage() {
                 <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Đơn vị</th>
                 <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Vai trò</th>
                 <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái</th>
-                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Đăng nhập</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Đăng nhập gần nhất</th>
                 <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Thao tác</th>
               </tr>
             </thead>
@@ -435,7 +463,22 @@ export function UserManagementPage() {
                     <td className="px-4 py-3 text-center text-[13px] text-slate-700">{user.email}</td>
                     <td className="px-4 py-3 text-center text-[13px] text-slate-700 max-w-[120px]"><div className="leading-tight">{user.department}</div></td>
                     <td className="px-4 py-3 text-center">
-                      <StatusTag label={user.role} variant="blue" />
+                      {user.role ? (
+                        <div 
+                          onClick={() => { setSelectedUser(user); setSelectedRole(user.role); handleOpenModal('assign-role', user); }}
+                          className="cursor-pointer hover:opacity-80 inline-block"
+                          title="Đổi vai trò"
+                        >
+                          <StatusTag label={user.role} variant="blue" />
+                        </div>
+                      ) : (
+                        <button 
+                          onClick={() => { setSelectedUser(user); setSelectedRole(''); handleOpenModal('assign-role', user); }}
+                          className="px-3 py-1 bg-slate-100 text-slate-600 border border-slate-200 rounded text-xs hover:bg-slate-200 transition-colors font-medium whitespace-nowrap"
+                        >
+                          Chọn vai trò
+                        </button>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-center">
                       <StatusTag 
@@ -589,6 +632,8 @@ export function UserManagementPage() {
                 <div className="md:col-span-2">
                   <label className="block text-sm text-slate-700 mb-2">Đơn vị <span className="text-red-600">*</span></label>
                   <select
+                    title="Đơn vị"
+                    aria-label="Đơn vị"
                     value={formData.department}
                     onChange={(e) => setFormData({ ...formData, department: e.target.value })}
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -604,6 +649,8 @@ export function UserManagementPage() {
                 <div>
                   <label className="block text-sm text-slate-700 mb-2">Vai trò <span className="text-red-600">*</span></label>
                   <select
+                    title="Vai trò"
+                    aria-label="Vai trò"
                     value={formData.role}
                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -616,6 +663,8 @@ export function UserManagementPage() {
                 <div>
                   <label className="block text-sm text-slate-700 mb-2">Trạng thái</label>
                   <select
+                    title="Trạng thái"
+                    aria-label="Trạng thái"
                     value={formData.status}
                     onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -948,6 +997,60 @@ export function UserManagementPage() {
           </div>
         </div>
       )}
+
+      {/* Assign Role Modal */}
+      {modalType === 'assign-role' && selectedUser && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={handleCloseModal}>
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white z-10">
+              <div>
+                <h3 className="text-slate-900">Gán vai trò</h3>
+                <p className="text-sm text-slate-600 mt-1">Người dùng: <span className="font-medium text-slate-900">{selectedUser.name}</span></p>
+              </div>
+              <button onClick={handleCloseModal} className="text-slate-400 hover:text-slate-600" title="Đóng">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="space-y-3 mb-6">
+                {availableRoles.map(role => (
+                  <label key={role} className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${selectedRole === role ? 'border-blue-500 bg-blue-50' : 'border-slate-200 hover:bg-slate-50'}`}>
+                    <input
+                      type="radio"
+                      name="role-selection"
+                      checked={selectedRole === role}
+                      onChange={() => setSelectedRole(role)}
+                      className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-slate-900 font-medium">{role}</span>
+                  </label>
+                ))}
+              </div>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => {
+                    const updatedUsers = users.map(u => 
+                      u.id === selectedUser.id ? { ...u, role: selectedRole } : u
+                    );
+                    setUsers(updatedUsers);
+                    handleCloseModal();
+                  }}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm flex-1"
+                >
+                  Lưu thay đổi
+                </button>
+                <button 
+                  onClick={handleCloseModal} 
+                  className="px-6 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-medium text-sm flex-1"
+                >
+                  Hủy
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

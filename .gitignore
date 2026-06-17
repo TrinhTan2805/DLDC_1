@@ -5,3 +5,5 @@ Tools/MD_to_DOCX/build/
 Tools/MD_to_DOCX/dist/
 *.exe
 *.pkg
+
+src_backup.zip

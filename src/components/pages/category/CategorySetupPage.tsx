@@ -50,7 +50,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
 
   // Form & Modal States
   const [showWizard, setShowWizard] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
+  const [isViewMode, setIsViewMode] = useState(false);
   const [wizardStep, setWizardStep] = useState(1);
   const [wizardEntityId, setWizardEntityId] = useState<string | null>(null);
   const [editingEntity, setEditingEntity] = useState<MasterDataEntity | null>(null);
@@ -72,89 +72,98 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
   const [approvalTab, setApprovalTab] = useState<ApprovalType>('category');
   const [requests, setRequests] = useState<ApprovalRequest[]>([
     {
-      id: '1', type: 'category', entityId: '1', entityCode: 'MD-CITIZEN-001',
-      entityName: 'Bộ dữ liệu chủ Công dân', requestedBy: 'Nguyễn Văn A',
+      id: '1', type: 'category', entityId: '1', entityCode: 'DM-GIOITINH',
+      entityName: 'Dữ liệu Danh mục giới tính', requestedBy: 'Nguyễn Văn A',
       requestedDate: '20/12/2024 14:30', status: 'pending'
     },
     {
-      id: '2', type: 'category', entityId: '2', entityCode: 'MD-ORG-001',
-      entityName: 'Bộ dữ liệu chủ Tổ chức', requestedBy: 'Trần Thị B',
+      id: '2', type: 'category', entityId: '2', entityCode: 'DM-DANTOC',
+      entityName: 'Dữ liệu Danh mục và mã các dân tộc', requestedBy: 'Trần Thị B',
       requestedDate: '18/12/2024 10:15', status: 'pending'
     },
     {
-      id: '3', type: 'structure', entityId: '1', entityCode: 'MD-LAND-001',
-      entityName: 'Bộ dữ liệu chủ Đất đai', requestedBy: 'Lê Minh C',
+      id: '3', type: 'structure', entityId: '3', entityCode: 'DM-QUOCGIA',
+      entityName: 'Dữ liệu Danh mục và mã Quốc gia, Quốc tịch', requestedBy: 'Lê Minh C',
       requestedDate: '15/12/2024 09:00', status: 'approved',
       reviewedBy: 'Giám đốc Nguyễn X', reviewedDate: '16/12/2024'
     },
     {
-      id: '4', type: 'category', entityId: '3', entityCode: 'MD-TAX-001',
-      entityName: 'Bộ dữ liệu chủ Thuế', requestedBy: 'Phạm Văn D',
+      id: '4', type: 'category', entityId: '4', entityCode: 'DM-TONGIAO',
+      entityName: 'Dữ liệu Danh mục và mã các Tôn giáo', requestedBy: 'Phạm Văn D',
       requestedDate: '14/12/2024 11:30', status: 'approved',
       reviewedBy: 'Trưởng phòng Trần Y', reviewedDate: '15/12/2024'
     },
     {
-      id: '5', type: 'structure', entityId: '2', entityCode: 'MD-HEALTH-001',
-      entityName: 'Bộ dữ liệu chủ Sức khỏe', requestedBy: 'Ngô Thị E',
+      id: '5', type: 'structure', entityId: '5', entityCode: 'DM-COQUAN',
+      entityName: 'Dữ liệu Danh mục cơ quan', requestedBy: 'Ngô Thị E',
       requestedDate: '12/12/2024 16:45', status: 'rejected',
       reviewedBy: 'Giám đốc Lê Z', reviewedDate: '13/12/2024',
-      comments: 'Thiếu trường mã số BHYT bắt buộc'
+      comments: 'Thiếu trường mã số định danh bắt buộc'
     },
     {
-      id: '6', type: 'category', entityId: '1', entityCode: 'MD-VEHICLE-001',
-      entityName: 'Bộ dữ liệu chủ Phương tiện', requestedBy: 'Hoàng Văn F',
+      id: '6', type: 'category', entityId: '6', entityCode: 'DM-HC',
+      entityName: 'Dữ liệu Danh mục đơn vị hành chính', requestedBy: 'Hoàng Văn F',
       requestedDate: '10/12/2024 08:30', status: 'pending'
     },
     {
-      id: '7', type: 'structure', entityId: '3', entityCode: 'MD-EDU-001',
-      entityName: 'Bộ dữ liệu chủ Giáo dục', requestedBy: 'Vũ Thị G',
+      id: '7', type: 'structure', entityId: '7', entityCode: 'DM-QUANHEGD',
+      entityName: 'Dữ liệu Danh mục và mã mối quan hệ trong gia đình', requestedBy: 'Vũ Thị G',
       requestedDate: '08/12/2024 13:00', status: 'approved',
       reviewedBy: 'Trưởng phòng Nguyễn A', reviewedDate: '09/12/2024'
     },
     {
-      id: '8', type: 'category', entityId: '2', entityCode: 'MD-INSURANCE-001',
-      entityName: 'Bộ dữ liệu chủ Bảo hiểm', requestedBy: 'Đặng Minh H',
+      id: '8', type: 'category', entityId: '8', entityCode: 'DM-GTTT',
+      entityName: 'Dữ liệu Danh mục mã giấy tờ tùy thân', requestedBy: 'Đặng Minh H',
       requestedDate: '06/12/2024 10:00', status: 'pending'
     },
     {
-      id: '9', type: 'structure', entityId: '1', entityCode: 'MD-BUSINESS-001',
-      entityName: 'Bộ dữ liệu chủ Doanh nghiệp', requestedBy: 'Bùi Thị I',
+      id: '9', type: 'structure', entityId: '1', entityCode: 'DM-GIOITINH',
+      entityName: 'Dữ liệu Danh mục giới tính', requestedBy: 'Bùi Thị I',
       requestedDate: '04/12/2024 15:20', status: 'rejected',
       reviewedBy: 'Giám đốc Trần B', reviewedDate: '05/12/2024',
-      comments: 'Cấu trúc dữ liệu không phù hợp với tiêu chuẩn VGSI'
+      comments: 'Cấu trúc dữ liệu không phù hợp với tiêu chuẩn'
     },
     {
-      id: '10', type: 'category', entityId: '3', entityCode: 'MD-SOCIAL-001',
-      entityName: 'Bộ dữ liệu chủ An sinh xã hội', requestedBy: 'Tô Văn J',
+      id: '10', type: 'category', entityId: '2', entityCode: 'DM-DANTOC',
+      entityName: 'Dữ liệu Danh mục và mã các dân tộc', requestedBy: 'Tô Văn J',
       requestedDate: '02/12/2024 09:45', status: 'pending'
     },
     {
-      id: '11', type: 'version', entityId: '1', entityCode: 'MD-CITIZEN-001',
-      entityName: 'Bộ dữ liệu chủ Công dân', requestedBy: 'Lý Quốc K',
+      id: '11', type: 'version', entityId: '1', entityCode: 'DM-GIOITINH',
+      entityName: 'Dữ liệu Danh mục giới tính', requestedBy: 'Lý Quốc K',
       requestedDate: '01/12/2024 10:10', status: 'pending',
       changes: { prevVersion: 1, currentVersion: 2, impactCount: 3 }
     },
     {
-      id: '12', type: 'relationship', entityId: '3', entityCode: 'MD-SOCIAL-001',
-      entityName: 'Bộ dữ liệu chủ An sinh xã hội', requestedBy: 'Đỗ Văn P',
+      id: '12', type: 'relationship', entityId: '7', entityCode: 'DM-QUANHEGD',
+      entityName: 'Dữ liệu Danh mục và mã mối quan hệ trong gia đình', requestedBy: 'Đỗ Văn P',
       requestedDate: '30/11/2024 09:12', status: 'pending',
-      changes: { targetEntity: 'Bộ dữ liệu hộ nghèo', relationshipType: '1-1', sourceKey: 'id', targetKey: 'social_id' }
+      changes: { targetEntity: 'Dữ liệu Danh mục giới tính', relationshipType: '1-1', sourceKey: 'id', targetKey: 'gioitinh_id' }
     },
     {
-      id: '11', type: 'structure', entityId: '2', entityCode: 'MD-POLICE-001',
-      entityName: 'Bộ dữ liệu chủ Công an', requestedBy: 'Cao Thị K',
-      requestedDate: '01/12/2024 11:00', status: 'approved',
-      reviewedBy: 'Giám đốc Phạm C', reviewedDate: '01/12/2024'
+      id: '13', type: 'expire', entityId: '3', entityCode: 'DM-QUOCGIA',
+      entityName: 'Dữ liệu Danh mục và mã Quốc gia, Quốc tịch', requestedBy: 'Trần Văn X',
+      requestedDate: '25/12/2024 08:30', status: 'pending',
+      comments: 'Ngừng sử dụng từ 01/01/2025. Lý do: Tích hợp vào danh mục khác.'
     },
     {
-      id: '12', type: 'category', entityId: '1', entityCode: 'MD-COURT-001',
-      entityName: 'Bộ dữ liệu chủ Tòa án', requestedBy: 'Lý Minh L',
-      requestedDate: '28/11/2024 14:00', status: 'pending'
+      id: '14', type: 'expire', entityId: '5', entityCode: 'DM-COQUAN',
+      entityName: 'Dữ liệu Danh mục cơ quan', requestedBy: 'Lê Thị Y',
+      requestedDate: '20/12/2024 14:00', status: 'approved',
+      reviewedBy: 'Giám đốc Nguyễn Z', reviewedDate: '21/12/2024',
+      comments: 'Đồng ý ngừng sử dụng, đã kiểm tra không còn ràng buộc khóa ngoại.'
     },
+    {
+      id: '15', type: 'expire', entityId: '4', entityCode: 'DM-TONGIAO',
+      entityName: 'Dữ liệu Danh mục và mã các Tôn giáo', requestedBy: 'Phạm Minh T',
+      requestedDate: '18/12/2024 10:15', status: 'rejected',
+      reviewedBy: 'Phó Giám đốc Trần B', reviewedDate: '19/12/2024',
+      comments: 'Từ chối do danh mục vẫn đang được sử dụng ở 2 hệ thống vệ tinh.'
+    }
   ]);
   const [statusFilter, setStatusFilter] = useState<ApprovalStatus | 'all'>('all');
   const [showApprovalModal, setShowApprovalModal] = useState(false);
-  const [approvalRequestData, setApprovalRequestData] = useState<{ id: string; code: string; name: string; type: 'category' | 'structure' | 'attribute' | 'relationship' } | null>(null);
+  const [approvalRequestData, setApprovalRequestData] = useState<{ id: string; code: string; name: string; type: 'category' | 'structure' | 'attribute' | 'relationship' | 'expire' } | null>(null);
   const [pendingApprovalData, setPendingApprovalData] = useState<any>(null);
   const [approvalRequestForm, setApprovalRequestForm] = useState({ reviewer: '', note: '' });
   const [showReviewModal, setShowReviewModal] = useState(false);
@@ -197,16 +206,31 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
   // Hành động - Sửa và Thêm mới (Đã tách biệt)
   // --------------------------------------------------------------------------------
 
-  // Hành động Sửa: Sử dụng Popup đơn giản
+  // Hành động Xem chi tiết
+  const handleView = (entity: MasterDataEntity) => {
+    setEditingEntity(entity);
+    setFormData(entity);
+    setWizardEntityId(entity.id);
+    setWizardStep(1);
+    setIsViewMode(true);
+    setShowWizard(true);
+  };
+
+  // Hành động Sửa: Dùng chung Wizard với Thêm mới
   const handleEdit = (entity: MasterDataEntity) => {
     setEditingEntity(entity);
     setFormData(entity);
-    setShowEditModal(true);
+    setWizardEntityId(entity.id);
+    setWizardStep(1);
+    setIsViewMode(false);
+    setShowWizard(true);
   };
 
   const confirmEdit = (updatedData: Partial<MasterDataEntity>) => {
+    // Không dùng hàm này cho Save sửa nữa (do sửa qua Wizard) nhưng giữ lại dự phòng
     setEntities(entities.map(e => e.id === editingEntity?.id ? { ...e, ...updatedData } as MasterDataEntity : e));
     setShowEditModal(false);
+    setIsViewMode(false);
     setEditingEntity(null);
   };
 
@@ -231,6 +255,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
     setEditingEntity(null);
     setWizardEntityId(null);
     setWizardStep(1);
+    setIsViewMode(false);
     setShowWizard(true);
   };
 
@@ -242,7 +267,11 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
 
     let savedId = '';
     if (editingEntity) {
-      const updated = entities.map(e => e.id === editingEntity.id ? { ...e, ...formData } as MasterDataEntity : e);
+      const updated = entities.map(e => e.id === editingEntity.id ? { 
+        ...e, 
+        ...formData,
+        version: (e.version || 1) + 1 // Tự động tăng phiên bản
+      } as MasterDataEntity : e);
       setEntities(updated);
       savedId = editingEntity.id;
     } else {
@@ -254,7 +283,8 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
         createdDate: new Date().toLocaleDateString('vi-VN'),
         updatedDate: new Date().toLocaleDateString('vi-VN'),
         createdBy: 'Admin',
-        lifecycleStatus: 'draft'
+        lifecycleStatus: 'draft',
+        version: 1 // Phiên bản đầu tiên
       };
       setEntities([...entities, newEntity]);
       setWizardEntityId(newId);
@@ -347,7 +377,6 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
 
   const isAnyModalOpen = !!(
     showWizard ||
-    showEditModal ||
     genericConfirm?.isOpen ||
     showDeleteModal ||
     showDeleteAttributeModal ||
@@ -393,6 +422,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
               userRole={userRole} publishedEntities={publishedEntities}
               onAdd={handleAdd}
               onEdit={handleEdit} onDelete={handleDelete}
+              onView={handleView}
               onSubmitApproval={confirmSubmitApproval}
               onPublish={(e) => { setEntityToPublish(e); setShowPublishModal(true); }} 
               onUnpublish={(e) => { /* Mock unpublish */ }}
@@ -466,26 +496,24 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
         <Portal>
         {/* Wizard chỉ dành cho Thêm mới */}
         <CategoryWizardModal
-          isOpen={showWizard} onClose={() => setShowWizard(false)}
-          step={wizardStep} setStep={setWizardStep}
-          entityId={wizardEntityId} formData={formData} setFormData={setFormData}
+          isOpen={showWizard}
+          onClose={() => setShowWizard(false)}
+          step={wizardStep}
+          setStep={setWizardStep}
+          entityId={wizardEntityId}
+          formData={formData}
+          setFormData={setFormData}
           onSaveStep1={handleSaveStep1}
-          entities={entities} attributes={attributes}
+          entities={entities}
+          attributes={attributes}
           selectedAttributes={selectedAttributes}
           onSelectAttribute={(id) => setSelectedAttributes(prev => prev.includes(id) ? prev.filter(sid => sid !== id) : [...prev, id])}
           onSelectAllAttributes={(checked) => setSelectedAttributes(checked ? attributes.map(a => a.id) : [])}
-          onAddAttribute={() => { }}
-          onEditAttribute={() => { }}
+          onAddAttribute={() => { setAttributeFormData(defaultAttribute); setShowAttributeModal(true); }}
+          onEditAttribute={(attr) => { setAttributeFormData(attr); setShowAttributeModal(true); }}
           onDeleteAttribute={() => { }}
           getDataTypeLabel={getDataTypeLabel}
-        />
-
-        {/* Popup riêng dành cho Sửa */}
-        <EditCategoryModal
-          isOpen={showEditModal}
-          onClose={() => setShowEditModal(false)}
-          data={formData}
-          onSave={confirmEdit}
+          isViewOnly={isViewMode}
         />
 
         {genericConfirm && (
@@ -546,6 +574,8 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
             // Cập nhật lifecycle status của entity nếu approved
             if (pendingApprovalData?.type === 'category') {
               setEntities(entities.map(e => e.id === pendingApprovalData.entityId ? { ...e, lifecycleStatus: 'active' } as MasterDataEntity : e));
+            } else if (pendingApprovalData?.type === 'expire') {
+              setEntities(entities.map(e => e.id === pendingApprovalData.entityId ? { ...e, lifecycleStatus: 'inactive' } as MasterDataEntity : e));
             }
             setShowSimpleApproveModal(false);
           }}
@@ -560,6 +590,8 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
             // Cập nhật lifecycle status của entity nếu rejected
             if (pendingApprovalData?.type === 'category') {
               setEntities(entities.map(e => e.id === pendingApprovalData.entityId ? { ...e, lifecycleStatus: 'draft' } as MasterDataEntity : e));
+            } else if (pendingApprovalData?.type === 'expire') {
+              setEntities(entities.map(e => e.id === pendingApprovalData.entityId ? { ...e, lifecycleStatus: 'active' } as MasterDataEntity : e));
             }
             setShowSimpleRejectModal(false);
           }}
@@ -569,6 +601,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
           isOpen={showReviewModal}
           onClose={() => setShowReviewModal(false)}
           requests={Array.isArray(pendingApprovalData) ? pendingApprovalData : []}
+          entities={entities}
           attributes={attributes}
           onApprove={(ids, note, partialStatuses) => {
             setRequests(requests.map(r => {
@@ -597,7 +630,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
               
               setRequests([{
                  id: `req-exp-${Date.now()}`,
-                 type: 'category',
+                 type: 'expire',
                  actionType: 'expire',
                  entityId: expireEntity.id,
                  entityCode: expireEntity.code,
@@ -605,7 +638,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
                  requestedBy: 'Nguyễn Văn A',
                  requestedDate: new Date().toLocaleDateString('vi-VN'),
                  status: 'pending',
-                 comments: `Ngừng sử dụng từ ${data.expireDate}. Lý do: ${data.reason}. ${data.note}`
+                 comments: `Ngừng sử dụng từ ${data.expireDate}. Lý do: ${data.reason}. Lãnh đạo trình duyệt: ${data.approver}. ${data.note}`
               }, ...requests]);
               
               setEntities(entities.map(e => e.id === expireEntity.id ? { ...e, lifecycleStatus: 'pending_expiration' } as MasterDataEntity : e));

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Download, ChevronRight, ChevronDown, RefreshCw, Save, Trash2, Search, Edit, X } from 'lucide-react';
+import { Plus, Download, ChevronRight, ChevronDown, RefreshCw, Save, Trash2, Search, Edit, X, Settings, Users, Database, Shield, FileText, Lock, Home, Folder, Activity, Bell, HelpCircle } from 'lucide-react';
 import { menuStructure } from './menuStructure';
 
 interface LocalMenuItem {
@@ -27,18 +27,79 @@ interface FunctionDetail {
   i18nKey: string;
   type: string;
   active: boolean;
+  generateSimilarUI?: boolean;
+  dataSourceType?: string;
 }
+
+
+const systemIcons = [
+  { value: 'Settings', label: 'Settings (Cấu hình)' },
+  { value: 'Users', label: 'Users (Người dùng)' },
+  { value: 'Database', label: 'Database (Cơ sở dữ liệu)' },
+  { value: 'Shield', label: 'Shield (Bảo mật)' },
+  { value: 'FileText', label: 'FileText (Nhật ký / Tài liệu)' },
+  { value: 'Lock', label: 'Lock (Phân quyền)' },
+  { value: 'Home', label: 'Home (Trang chủ)' },
+  { value: 'Folder', label: 'Folder (Danh mục)' },
+  { value: 'Activity', label: 'Activity (Hoạt động)' },
+  { value: 'Bell', label: 'Bell (Thông báo)' },
+  { value: 'HelpCircle', label: 'HelpCircle (Trợ giúp)' },
+];
+
+const IconComponents: Record<string, React.ComponentType<{ className?: string }>> = {
+  Settings,
+  Users,
+  Database,
+  Shield,
+  FileText,
+  Lock,
+  Home,
+  Folder,
+  Activity,
+  Bell,
+  HelpCircle,
+};
+
+const removeVietnameseTones = (str: string) => {
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D');
+};
 
 const flattenMenuStructure = (items: any[], parentId: string | null = null): LocalMenuItem[] => {
   let flatList: LocalMenuItem[] = [];
   items.forEach(item => {
+    const id = item.id;
+    const isDatabaseOrSystemLeaf = 
+      id.startsWith('data-info-') ||
+      id.startsWith('external-') ||
+      (id.startsWith('reconciliation-internal-') && id !== 'reconciliation-internal-ministry') ||
+      (id.startsWith('reconciliation-external-') && id !== 'reconciliation-external-ministry') ||
+      id.startsWith('processing-data-info-') ||
+      id.startsWith('processing-external-') ||
+      (id.startsWith('provisioning-shared-') && id !== 'provisioning-shared') ||
+      (id.startsWith('provisioning-internal-') && id !== 'provisioning-internal') ||
+      id === 'provisioning-open' ||
+      id === 'provisioning-master';
+
+    if (isDatabaseOrSystemLeaf) {
+      return;
+    }
+
     flatList.push({
       id: item.id,
       name: item.name,
       code: item.id,
       parentId: parentId
     });
-    if (item.children) {
+    
+    // Do not traverse children of "CSDL Trong ngành" and "CSDL Ngoài ngành"
+    const nameNormalized = removeVietnameseTones(item.name || '').toLowerCase().trim();
+    const shouldSkipChildren = nameNormalized === 'csdl trong nganh' || nameNormalized === 'csdl ngoai nganh';
+    
+    if (item.children && !shouldSkipChildren) {
       flatList = flatList.concat(flattenMenuStructure(item.children, item.id));
     }
   });
@@ -102,6 +163,8 @@ export function FunctionManagementPage() {
     i18nKey: '',
     type: 'page',
     active: true,
+    generateSimilarUI: false,
+    dataSourceType: 'database',
   });
 
   const [addFormData, setAddFormData] = useState<FunctionDetail>({
@@ -114,6 +177,8 @@ export function FunctionManagementPage() {
     i18nKey: '',
     type: 'page',
     active: true,
+    generateSimilarUI: false,
+    dataSourceType: 'database',
   });
 
   const toggleMenuExpansion = (menuId: string) => {
@@ -207,6 +272,8 @@ export function FunctionManagementPage() {
       i18nKey: '',
       type: '',
       active: true,
+      generateSimilarUI: false,
+      dataSourceType: 'database',
     });
   };
 
@@ -229,6 +296,8 @@ export function FunctionManagementPage() {
       i18nKey: '',
       type: 'page',
       active: true,
+      generateSimilarUI: false,
+      dataSourceType: 'database',
     });
   };
 
@@ -303,21 +372,46 @@ export function FunctionManagementPage() {
         </h2>
 
         <div className="mt-6 space-y-5">
-          {/* Row 1: Chức năng cha & Đường dẫn tới chức năng */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Row 1: Chức năng cha & Đường dẫn tới chức năng & Số thứ tự */}
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="block text-sm text-slate-700 mb-2">
                 Chức năng cha
               </label>
               <select
+                aria-label="Chức năng cha"
+                title="Chức năng cha"
                 value={formData.parentId || ''}
                 onChange={(e) => setFormData({ ...formData, parentId: e.target.value || null })}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
               >
                 <option value="">Chọn chức năng cha</option>
-                {localMenuItems.map(item => (
-                  <option key={item.id} value={item.id}>{item.name}</option>
-                ))}
+                {localMenuItems
+                  .filter(item => {
+                    const nameNormalized = removeVietnameseTones(item.name || '').toLowerCase().trim();
+                    if (nameNormalized === 'csdl trong nganh' || nameNormalized === 'csdl ngoai nganh') {
+                      return true;
+                    }
+                    const excludes = [
+                      'csdl',
+                      'he thong',
+                      'ht quan ly ho so qt',
+                      'httt tro giup phap ly',
+                      'phan mem tk nganh tu phap',
+                      'danh muc',
+                      'bhxh va giam ngheo',
+                      'nguoi co cong',
+                      'tre em',
+                      'doi soat tong hop',
+                      'doi soat du lieu tu bo',
+                      'thu thap so lieu thong ke',
+                      'httt cac to chuc hanh nghe cong chung'
+                    ];
+                    return !excludes.some(term => nameNormalized.includes(term));
+                  })
+                  .map(item => (
+                    <option key={item.id} value={item.id}>{item.name}</option>
+                  ))}
               </select>
             </div>
             <div>
@@ -335,6 +429,19 @@ export function FunctionManagementPage() {
                 ))}
               </select>
             </div>
+            <div>
+              <label className="block text-sm text-slate-700 mb-2">
+                Số thứ tự
+              </label>
+              <input
+                aria-label="Số thứ tự"
+                title="Số thứ tự"
+                type="number"
+                value={formData.order}
+                onChange={(e) => setFormData({ ...formData, order: Number(e.target.value) })}
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+              />
+            </div>
           </div>
 
           {/* Row 2: Tên chức năng & Mã chức năng */}
@@ -344,6 +451,8 @@ export function FunctionManagementPage() {
                 Tên chức năng <span className="text-red-600">*</span>
               </label>
               <input
+                aria-label="Tên chức năng"
+                title="Tên chức năng"
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -355,6 +464,8 @@ export function FunctionManagementPage() {
                 Mã chức năng
               </label>
               <input
+                aria-label="Mã chức năng"
+                title="Mã chức năng"
                 type="text"
                 value={formData.code}
                 onChange={(e) => setFormData({ ...formData, code: e.target.value })}
@@ -365,60 +476,88 @@ export function FunctionManagementPage() {
 
 
 
+<<<<<<< HEAD
 
-
-          {/* Row 5: Component Path */}
-          <div>
-            <label className="block text-sm text-slate-700 mb-2">
-              Component Path
-            </label>
-            <input
-              type="text"
-              value={formData.componentPath}
-              onChange={(e) => setFormData({ ...formData, componentPath: e.target.value })}
-              placeholder="/components/DanhMucLoaiVanBan"
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-            />
+=======
+          {/* Row 4: Đường dẫn (Path) */}
+                    {/* Row 3: Tính năng liên kết & Chọn icon */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm text-slate-700 mb-2">
+                Tính năng liên kết
+              </label>
+              <select
+                aria-label="Tính năng liên kết"
+                title="Tính năng liên kết"
+                value={formData.linkedFeature || ''}
+                onChange={(e) => setFormData({ ...formData, linkedFeature: e.target.value })}
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
+              >
+                <option value="">-- Chọn tính năng liên kết --</option>
+                {localMenuItems
+                  .filter(item => {
+                    const nameNormalized = removeVietnameseTones(item.name || '').toLowerCase().trim();
+                    if (nameNormalized === 'csdl trong nganh' || nameNormalized === 'csdl ngoai nganh') {
+                      return true;
+                    }
+                    const excludes = [
+                      'csdl',
+                      'he thong',
+                      'ht quan ly ho so qt',
+                      'httt tro giup phap ly',
+                      'phan mem tk nganh tu phap',
+                      'danh muc',
+                      'bhxh va giam ngheo',
+                      'nguoi co cong',
+                      'tre em',
+                      'doi soat tong hop',
+                      'doi soat du lieu tu bo',
+                      'thu thap so lieu thong ke',
+                      'httt cac to chuc hanh nghe cong chung'
+                    ];
+                    return !excludes.some(term => nameNormalized.includes(term));
+                  })
+                  .map(item => (
+                    <option key={item.id} value={item.id}>{item.name}</option>
+                  ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm text-slate-700 mb-2">
+                Chọn icon
+              </label>
+              <div className="flex gap-2 items-center">
+                <select
+                  aria-label="Chọn icon"
+                  title="Chọn icon"
+                  value={formData.icon || ''}
+                  onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
+                  className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
+                >
+                  <option value="">-- Chọn icon --</option>
+                  {systemIcons.map(icon => (
+                    <option key={icon.value} value={icon.value}>{icon.label}</option>
+                  ))}
+                </select>
+                {formData.icon && IconComponents[formData.icon] && (
+                  <div className="p-2 bg-slate-100 rounded-lg border border-slate-200">
+                    {React.createElement(IconComponents[formData.icon], { className: "w-5 h-5 text-blue-600" })}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
+>>>>>>> upstream/main
 
-          {/* Row 6: Dịch khóa (i18n key) */}
-          <div>
-            <label className="block text-sm text-slate-700 mb-2">
-              Dịch khóa (i18n key)
-            </label>
-            <input
-              type="text"
-              value={formData.i18nKey}
-              onChange={(e) => setFormData({ ...formData, i18nKey: e.target.value })}
-              placeholder="menu.category.document"
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-            />
-          </div>
-
-          {/* Row 7: Loại */}
-          <div>
-            <label className="block text-sm text-slate-700 mb-2">
-              Loại
-            </label>
-            <select
-              value={formData.type}
-              onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-            >
-              <option value="">Chọn loại</option>
-              <option value="menu">Menu</option>
-              <option value="page">Page</option>
-              <option value="function">Function</option>
-            </select>
-          </div>
-
-          {/* Row 8: Toggles */}
-          <div className="flex gap-8">
+          {/* Row 4: Trạng thái */}
+          <div className="flex gap-8 border-t border-slate-100 pt-4">
             <div className="flex items-center gap-3">
               <label className="text-sm text-slate-700">
-                Trạng thái
+                Trạng thái hoạt động
               </label>
               <button
+                aria-label="Chuyển đổi trạng thái"
+                title="Chuyển đổi trạng thái"
                 onClick={() => setFormData({ ...formData, active: !formData.active })}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                   formData.active ? 'bg-blue-600' : 'bg-slate-300'
@@ -430,13 +569,11 @@ export function FunctionManagementPage() {
                   }`}
                 />
               </button>
-              <span className="text-sm text-slate-600">
+              <span className="text-sm text-slate-600 font-medium">
                 {formData.active ? 'Hoạt động' : 'Không hoạt động'}
               </span>
             </div>
           </div>
-
-
         </div>
 
         {/* Action Buttons */}
@@ -473,18 +610,43 @@ export function FunctionManagementPage() {
               </button>
             </div>
             <div className="p-6 space-y-5">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm text-slate-700 mb-2">Chức năng cha</label>
                   <select
+                    aria-label="Chức năng cha"
+                    title="Chức năng cha"
                     value={addFormData.parentId || ''}
                     onChange={(e) => handleParentIdChange(e.target.value || null)}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
                   >
                     <option value="">Chọn chức năng cha</option>
-                    {localMenuItems.map(item => (
-                      <option key={item.id} value={item.id}>{item.name}</option>
-                    ))}
+                    {localMenuItems
+                  .filter(item => {
+                    const nameNormalized = removeVietnameseTones(item.name || '').toLowerCase().trim();
+                    if (nameNormalized === 'csdl trong nganh' || nameNormalized === 'csdl ngoai nganh') {
+                      return true;
+                    }
+                    const excludes = [
+                      'csdl',
+                      'he thong',
+                      'ht quan ly ho so qt',
+                      'httt tro giup phap ly',
+                      'phan mem tk nganh tu phap',
+                      'danh muc',
+                      'bhxh va giam ngheo',
+                      'nguoi co cong',
+                      'tre em',
+                      'doi soat tong hop',
+                      'doi soat du lieu tu bo',
+                      'thu thap so lieu thong ke',
+                      'httt cac to chuc hanh nghe cong chung'
+                    ];
+                    return !excludes.some(term => nameNormalized.includes(term));
+                  })
+                  .map(item => (
+                    <option key={item.id} value={item.id}>{item.name}</option>
+                  ))}
                   </select>
                 </div>
                 <div>
@@ -500,12 +662,29 @@ export function FunctionManagementPage() {
                     ))}
                   </select>
                 </div>
+                <div>
+                  <label className="block text-sm text-slate-700 mb-2">Số thứ tự</label>
+                  <input
+                    aria-label="Số thứ tự"
+                    title="Số thứ tự"
+                    type="number"
+                    value={addFormData.order}
+                    onChange={(e) => setAddFormData({ ...addFormData, order: Number(e.target.value) })}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    min={addFormData.parentId ? 2 : 1}
+                  />
+                  {addFormData.parentId && addFormData.order === 1 && (
+                    <p className="text-red-500 text-xs mt-1">Không được là 1 khi đã có chức năng cha</p>
+                  )}
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm text-slate-700 mb-2">Tên chức năng <span className="text-red-600">*</span></label>
                   <input
+                    aria-label="Tên chức năng"
+                    title="Tên chức năng"
                     type="text"
                     value={addFormData.name}
                     onChange={(e) => setAddFormData({ ...addFormData, name: e.target.value })}
@@ -515,6 +694,8 @@ export function FunctionManagementPage() {
                 <div>
                   <label className="block text-sm text-slate-700 mb-2">Mã chức năng <span className="text-red-600">*</span></label>
                   <input
+                    aria-label="Mã chức năng"
+                    title="Mã chức năng"
                     type="text"
                     value={addFormData.code}
                     onChange={(e) => setAddFormData({ ...addFormData, code: e.target.value })}
@@ -523,48 +704,77 @@ export function FunctionManagementPage() {
                 </div>
               </div>
 
-
-
-              <div>
-                <label className="block text-sm text-slate-700 mb-2">Component Path</label>
-                <input
-                  type="text"
-                  value={addFormData.componentPath}
-                  onChange={(e) => setAddFormData({ ...addFormData, componentPath: e.target.value })}
-                  placeholder="/components/DanhMucLoaiVanBan"
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                />
+              {/* Row 3: Tính năng liên kết & Chọn icon */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-slate-700 mb-2">Tính năng liên kết</label>
+                  <select
+                    aria-label="Tính năng liên kết"
+                    title="Tính năng liên kết"
+                    value={addFormData.linkedFeature || ''}
+                    onChange={(e) => setAddFormData({ ...addFormData, linkedFeature: e.target.value })}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
+                  >
+                    <option value="">-- Chọn tính năng liên kết --</option>
+                    {localMenuItems
+                  .filter(item => {
+                    const nameNormalized = removeVietnameseTones(item.name || '').toLowerCase().trim();
+                    if (nameNormalized === 'csdl trong nganh' || nameNormalized === 'csdl ngoai nganh') {
+                      return true;
+                    }
+                    const excludes = [
+                      'csdl',
+                      'he thong',
+                      'ht quan ly ho so qt',
+                      'httt tro giup phap ly',
+                      'phan mem tk nganh tu phap',
+                      'danh muc',
+                      'bhxh va giam ngheo',
+                      'nguoi co cong',
+                      'tre em',
+                      'doi soat tong hop',
+                      'doi soat du lieu tu bo',
+                      'thu thap so lieu thong ke',
+                      'httt cac to chuc hanh nghe cong chung'
+                    ];
+                    return !excludes.some(term => nameNormalized.includes(term));
+                  })
+                  .map(item => (
+                    <option key={item.id} value={item.id}>{item.name}</option>
+                  ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm text-slate-700 mb-2">Chọn icon</label>
+                  <div className="flex gap-2 items-center">
+                    <select
+                      aria-label="Chọn icon"
+                      title="Chọn icon"
+                      value={addFormData.icon || ''}
+                      onChange={(e) => setAddFormData({ ...addFormData, icon: e.target.value })}
+                      className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
+                    >
+                      <option value="">-- Chọn icon --</option>
+                      {systemIcons.map(icon => (
+                        <option key={icon.value} value={icon.value}>{icon.label}</option>
+                      ))}
+                    </select>
+                    {addFormData.icon && IconComponents[addFormData.icon] && (
+                      <div className="p-2 bg-slate-100 rounded-lg border border-slate-200">
+                        {React.createElement(IconComponents[addFormData.icon], { className: "w-5 h-5 text-blue-600" })}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm text-slate-700 mb-2">Dịch khóa (i18n key)</label>
-                <input
-                  type="text"
-                  value={addFormData.i18nKey}
-                  onChange={(e) => setAddFormData({ ...addFormData, i18nKey: e.target.value })}
-                  placeholder="menu.category.document"
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm text-slate-700 mb-2">Loại</label>
-                <select
-                  value={addFormData.type}
-                  onChange={(e) => setAddFormData({ ...addFormData, type: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                >
-                  <option value="">Chọn loại</option>
-                  <option value="menu">Menu</option>
-                  <option value="page">Page</option>
-                  <option value="function">Function</option>
-                </select>
-              </div>
-
-              <div className="flex gap-8">
+              {/* Row 4: Trạng thái */}
+              <div className="flex gap-8 border-t border-slate-100 pt-4">
                 <div className="flex items-center gap-3">
-                  <label className="text-sm text-slate-700">Trạng thái</label>
+                  <label className="text-sm text-slate-700">Trạng thái hoạt động</label>
                   <button
+                    aria-label="Chuyển đổi trạng thái"
+                    title="Chuyển đổi trạng thái"
                     onClick={() => setAddFormData({ ...addFormData, active: !addFormData.active })}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                       addFormData.active ? 'bg-blue-600' : 'bg-slate-300'
@@ -576,13 +786,13 @@ export function FunctionManagementPage() {
                       }`}
                     />
                   </button>
-                  <span className="text-sm text-slate-600">
+                  <span className="text-sm text-slate-600 font-medium">
                     {addFormData.active ? 'Hoạt động' : 'Không hoạt động'}
                   </span>
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 mt-6 pt-6 border-t border-slate-200">
+            <div className="flex items-center justify-end gap-3 mt-6 pt-6 border-t border-slate-200">
                 <button
                   onClick={() => setModalType(null)}
                   className="px-4 py-2 text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"

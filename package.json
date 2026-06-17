@@ -1,6 +1,6 @@
 {
   "name": "DLDC_1",
-  "version": "0.1.0",
+  "version": "2.4.8",
   "private": true,
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.3",
@@ -60,7 +60,7 @@
     "vite": "6.3.5"
   },
   "scripts": {
-    "dev": "vite --port 3002 --strictPort",
+    "dev": "vite --port 3000 --strictPort",
     "build": "vite build",
     "deploy:private": "npm run build && firebase hosting:channel:deploy private-preview"
   }

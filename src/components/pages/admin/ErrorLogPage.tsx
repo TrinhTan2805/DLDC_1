@@ -186,15 +186,42 @@ export function ErrorLogPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
+  const parseDate = (dateStr: string) => {
+    if (!dateStr) return null;
+    const [datePart] = dateStr.split(' ');
+    const [day, month, year] = datePart.split('/');
+    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
+
   const filteredLogs = errorLogs.filter(log => {
     const matchesSearch = log.errorMessage.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          log.errorCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          log.module.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesSeverity = filterSeverity === 'all' || log.severity === filterSeverity;
     const matchesModule = filterModule === 'all' || log.module === filterModule;
-    const matchesStartDate = !startDate || log.timestamp.split(' ')[0] >= startDate.split('-').reverse().join('/');
-    const matchesEndDate = !endDate || log.timestamp.split(' ')[0] <= endDate.split('-').reverse().join('/');
-    return matchesSearch && matchesSeverity && matchesModule && matchesStartDate && matchesEndDate;
+
+    let matchesDate = true;
+    if (startDate || endDate) {
+      const logDate = parseDate(log.timestamp);
+      if (logDate) {
+        if (startDate) {
+          const start = new Date(startDate);
+          start.setHours(0, 0, 0, 0);
+          if (logDate < start) matchesDate = false;
+        }
+        if (endDate) {
+          const end = new Date(endDate);
+          end.setHours(23, 59, 59, 999);
+          if (logDate > end) matchesDate = false;
+        }
+      }
+    }
+    return matchesSearch && matchesSeverity && matchesModule && matchesDate;
   });
 
   const handleViewDetail = (log: ErrorLog) => {
@@ -207,6 +234,9 @@ export function ErrorLogPage() {
     setSelectedLog(null);
   };
 
+  const handleExportExcel = () => {
+    alert('Đang kết xuất nhật ký lỗi ra file Excel...');
+  };
   const getSeverityIcon = (severity: ErrorLog['severity']) => {
     switch (severity) {
       case 'critical':
@@ -266,7 +296,6 @@ export function ErrorLogPage() {
           font-size: 13px !important;
         }
       `}</style>
-
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <StatsCard 
@@ -300,12 +329,12 @@ export function ErrorLogPage() {
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 flex items-center gap-3">
             <div className="relative flex-1">
-              <input
+              <input aria-label="Input field"
                 type="text"
                 placeholder="Tìm kiếm mã lỗi, thông báo, module..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full px-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                value={searchTerm}
+                onChange={handleSearchChange}
               />
             </div>
             <button className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center">
@@ -319,6 +348,16 @@ export function ErrorLogPage() {
               {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
             </button>
           </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleExportExcel}
+              className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium"
+            >
+              <Download className="w-4 h-4" />
+              Kết xuất
+            </button>
+          </div>
         </div>
 
         {/* Collapsible Filters Row */}
@@ -328,9 +367,12 @@ export function ErrorLogPage() {
 
             <div className="space-y-1.5 relative z-10">
               <label className="text-[13px] font-medium text-slate-700">Mức độ</label>
-              <select
+              <select aria-label="Select box"
                 value={filterSeverity}
-                onChange={(e) => setFilterSeverity(e.target.value)}
+                onChange={(e) => {
+                  setFilterSeverity(e.target.value);
+                  setCurrentPage(1);
+                }}
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
               >
                 <option value="all">Tất cả mức độ</option>
@@ -342,11 +384,14 @@ export function ErrorLogPage() {
             </div>
 
             <div className="space-y-1.5 relative z-10">
-              <label className="text-[13px] font-medium text-slate-700">Module</label>
-              <select
-                value={filterModule}
-                onChange={(e) => setFilterModule(e.target.value)}
+              <label className="text-[13px] font-medium text-slate-700">Phân hệ</label>
+              <select aria-label="Select box"
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                value={filterModule}
+                onChange={(e) => {
+                  setFilterModule(e.target.value);
+                  setCurrentPage(1);
+                }}
               >
                 <option value="all">Tất cả module</option>
                 {uniqueModules.map(module => (
@@ -358,11 +403,14 @@ export function ErrorLogPage() {
             <div className="space-y-1.5 relative z-10">
               <label className="text-[13px] font-medium text-slate-700">Thời gian từ</label>
               <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
-                <input
+                <input aria-label="Input field"
                   type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
                   className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-slate-700 p-0"
+                  value={startDate}
+                  onChange={(e) => {
+                    setStartDate(e.target.value);
+                    setCurrentPage(1);
+                  }}
                 />
                 <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
               </div>
@@ -371,11 +419,14 @@ export function ErrorLogPage() {
             <div className="space-y-1.5 relative z-10">
               <label className="text-[13px] font-medium text-slate-700">Thời gian đến</label>
               <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
-                <input
+                <input aria-label="Input field"
                   type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
                   className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-slate-700 p-0"
+                  value={endDate}
+                  onChange={(e) => {
+                    setEndDate(e.target.value);
+                    setCurrentPage(1);
+                  }}
                 />
                 <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
               </div>
@@ -446,27 +497,34 @@ export function ErrorLogPage() {
                     </td>
                   </tr>
                 ))}
+              {filteredLogs.length === 0 && (
+                <tr>
+                  <td colSpan={9} className="px-4 py-8 text-center text-slate-500 text-[13px]">
+                    Không tìm thấy bản ghi nào phù hợp
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
-        
+
         {/* Pagination */}
         <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white sm:px-6 collection-pagination text-[13px]">
           <div className="flex items-center gap-2">
             <span className="text-slate-600">Hiển thị</span>
-            <select
+            <select aria-label="Select record count" 
+              className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px]"
+              title="Số bản ghi trên trang"
               value={itemsPerPage}
               onChange={(e) => {
                 setItemsPerPage(Number(e.target.value));
                 setCurrentPage(1);
               }}
-              className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px]"
-              title="Số bản ghi trên trang"
             >
-              <option value={5}>5</option>
               <option value={10}>10</option>
               <option value={20}>20</option>
               <option value={50}>50</option>
+              <option value={100}>100</option>
             </select>
             <span className="text-slate-600">bản ghi/trang</span>
           </div>
@@ -517,8 +575,14 @@ export function ErrorLogPage() {
 
       {/* Detail Modal */}
       {showDetailModal && selectedLog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-5xl w-full max-h-[90vh] overflow-y-auto shadow-xl">
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={closeDetailModal}
+        >
+          <div 
+            className="bg-white rounded-lg max-w-5xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-slate-200">
               <div className="flex items-center gap-3">

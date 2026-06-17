@@ -49,7 +49,7 @@ const systemInfoMap: Record<string, { name: string; provisionDate: string; provi
     note: 'Lỗi kết nối mạng'
   },
   'DLDC-004': {
-    name: 'Hệ thống Quản lý văn bản Bộ Tư pháp',
+    name: 'Hệ thống quản lý Bộ Tư Pháp văn bản Bộ Tư pháp',
     provisionDate: '17/12/2024',
     provisionTime: '11:20:08',
     status: 'Thành công',
@@ -140,7 +140,7 @@ const mockProvisionHistory: ProvisionHistory[] = [
   },
   {
     id: '4',
-    targetSystem: 'Hệ thống Quản lý văn bản Bộ Tư pháp',
+    targetSystem: 'Hệ thống quản lý Bộ Tư Pháp văn bản Bộ Tư pháp',
     targetSystemCode: 'DLDC-004',
     provisionDate: '17/12/2024',
     provisionTime: '11:20:08',
@@ -214,29 +214,27 @@ export function DataProvisionDldcAPage() {
   return (
     <div className="space-y-6">
       <PageHeader title="CSDL DLDC - Loại A" icon={Database} />
-      
+
       {/* Tabs */}
       <div className="bg-white border border-slate-200 rounded-lg">
         <div className="border-b border-slate-200">
           <div className="flex items-center gap-1 px-2">
             <button
               onClick={() => setActiveTab('data')}
-              className={`flex items-center gap-2 px-4 py-3 text-sm border-b-2 transition-colors ${
-                activeTab === 'data'
-                  ? 'border-purple-600 text-purple-600'
-                  : 'border-transparent text-slate-600 hover:text-slate-900'
-              }`}
+              className={`flex items-center gap-2 px-4 py-3 text-sm border-b-2 transition-colors ${activeTab === 'data'
+                ? 'border-purple-600 text-purple-600'
+                : 'border-transparent text-slate-600 hover:text-slate-900'
+                }`}
             >
               <FileText className="w-4 h-4" />
               Danh sách dữ liệu
             </button>
             <button
               onClick={() => setActiveTab('history')}
-              className={`flex items-center gap-2 px-4 py-3 text-sm border-b-2 transition-colors ${
-                activeTab === 'history'
-                  ? 'border-purple-600 text-purple-600'
-                  : 'border-transparent text-slate-600 hover:text-slate-900'
-              }`}
+              className={`flex items-center gap-2 px-4 py-3 text-sm border-b-2 transition-colors ${activeTab === 'history'
+                ? 'border-purple-600 text-purple-600'
+                : 'border-transparent text-slate-600 hover:text-slate-900'
+                }`}
             >
               <HistoryIcon className="w-4 h-4" />
               Lịch sử cung cấp
@@ -297,7 +295,7 @@ export function DataProvisionDldcAPage() {
                         <td className="px-4 py-3 text-sm">
                           <div className="flex flex-wrap gap-1">
                             {record.providedSystems.map((system, idx) => (
-                              <span 
+                              <span
                                 key={idx}
                                 className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded"
                                 title={`Đã cung cấp cho ${system}`}
@@ -312,11 +310,10 @@ export function DataProvisionDldcAPage() {
                           </div>
                         </td>
                         <td className="px-4 py-3 text-sm">
-                          <span className={`px-2 py-1 text-xs rounded ${
-                            record.statusLabel === 'Đã xử lý' 
-                              ? 'bg-green-100 text-green-700' 
-                              : 'bg-blue-100 text-blue-700'
-                          }`}>
+                          <span className={`px-2 py-1 text-xs rounded ${record.statusLabel === 'Đã xử lý'
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-blue-100 text-blue-700'
+                            }`}>
                             {record.statusLabel}
                           </span>
                         </td>
@@ -379,13 +376,12 @@ export function DataProvisionDldcAPage() {
                         <td className="px-4 py-3 text-sm">
                           <div className="flex items-center gap-2">
                             {getStatusIcon(history.status)}
-                            <span className={`px-2 py-1 text-xs rounded ${
-                              history.status === 'Thành công' 
-                                ? 'bg-green-100 text-green-700'
-                                : history.status === 'Thất bại'
+                            <span className={`px-2 py-1 text-xs rounded ${history.status === 'Thành công'
+                              ? 'bg-green-100 text-green-700'
+                              : history.status === 'Thất bại'
                                 ? 'bg-red-100 text-red-700'
                                 : 'bg-blue-100 text-blue-700'
-                            }`}>
+                              }`}>
                               {history.status}
                             </span>
                           </div>
@@ -452,11 +448,10 @@ export function DataProvisionDldcAPage() {
                   <div className="bg-slate-50 p-3 rounded-lg border border-slate-200">
                     <span className="text-xs text-slate-600">Trạng thái xử lý</span>
                     <p className="text-sm mt-1">
-                      <span className={`px-2 py-1 text-xs rounded ${
-                        selectedRecord.statusLabel === 'Đã xử lý' 
-                          ? 'bg-green-100 text-green-700' 
-                          : 'bg-blue-100 text-blue-700'
-                      }`}>
+                      <span className={`px-2 py-1 text-xs rounded ${selectedRecord.statusLabel === 'Đã xử lý'
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-blue-100 text-blue-700'
+                        }`}>
                         {selectedRecord.statusLabel}
                       </span>
                     </p>
@@ -470,7 +465,7 @@ export function DataProvisionDldcAPage() {
                   <Share2 className="w-4 h-4 text-purple-600" />
                   Các phần mềm/hệ thống đã chia sẻ thông tin này ({selectedRecord.providedSystems.length})
                 </h4>
-                
+
                 {selectedRecord.providedSystems.length > 0 ? (
                   <div className="border border-slate-200 rounded-lg overflow-hidden">
                     <table className="w-full">
@@ -503,13 +498,12 @@ export function DataProvisionDldcAPage() {
                               <td className="px-4 py-3 text-sm">
                                 <div className="flex items-center gap-2">
                                   {systemInfo?.status && getStatusIcon(systemInfo.status)}
-                                  <span className={`px-2 py-1 text-xs rounded ${
-                                    systemInfo?.status === 'Thành công' 
-                                      ? 'bg-green-100 text-green-700'
-                                      : systemInfo?.status === 'Thất bại'
+                                  <span className={`px-2 py-1 text-xs rounded ${systemInfo?.status === 'Thành công'
+                                    ? 'bg-green-100 text-green-700'
+                                    : systemInfo?.status === 'Thất bại'
                                       ? 'bg-red-100 text-red-700'
                                       : 'bg-blue-100 text-blue-700'
-                                  }`}>
+                                    }`}>
                                     {systemInfo?.status || 'N/A'}
                                   </span>
                                 </div>

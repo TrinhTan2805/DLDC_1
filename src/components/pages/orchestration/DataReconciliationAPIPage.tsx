@@ -123,14 +123,14 @@ export function DataReconciliationAPIPage() {
   const [apis, setApis] = useState<ReconciliationAPI[]>(mockReconciliationAPIs);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
-  
+
   // Modal states
   const [showAddModal, setShowAddModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedAPI, setSelectedAPI] = useState<ReconciliationAPI | null>(null);
-  
+
   // Form state
   const [formData, setFormData] = useState<any>({
     code: '',
@@ -147,9 +147,9 @@ export function DataReconciliationAPIPage() {
   // Filter APIs
   const filteredAPIs = apis.filter(api => {
     const matchesSearch = api.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         api.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         api.sourceSystem.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         api.targetSystem.toLowerCase().includes(searchTerm.toLowerCase());
+      api.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      api.sourceSystem.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      api.targetSystem.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'all' || api.status === filterStatus;
     return matchesSearch && matchesStatus;
   });
@@ -161,18 +161,18 @@ export function DataReconciliationAPIPage() {
       error: 'Lỗi'
     };
     return (
-      <StatusTag 
-        label={labels[status as keyof typeof labels]} 
-        variant={status === 'active' ? 'green' : status === 'inactive' ? 'slate' : 'red'} 
+      <StatusTag
+        label={labels[status as keyof typeof labels]}
+        variant={status === 'active' ? 'green' : status === 'inactive' ? 'slate' : 'red'}
       />
     );
   };
 
   const getMethodBadge = (method: string) => {
     return (
-      <StatusTag 
-        label={method} 
-        variant={method === 'GET' ? 'green' : method === 'POST' ? 'blue' : method === 'PUT' ? 'orange' : 'red'} 
+      <StatusTag
+        label={method}
+        variant={method === 'GET' ? 'green' : method === 'POST' ? 'blue' : method === 'PUT' ? 'orange' : 'red'}
       />
     );
   };
@@ -284,7 +284,7 @@ export function DataReconciliationAPIPage() {
               <option value="inactive">Tạm dừng</option>
               <option value="error">Lỗi</option>
             </select>
-            <button 
+            <button
               onClick={() => {
                 resetForm();
                 setShowAddModal(true);
@@ -339,20 +339,18 @@ export function DataReconciliationAPIPage() {
                       <td className="px-4 py-3 text-xs text-slate-600">{api.frequency}</td>
                       <td className="px-4 py-3 text-sm">
                         <div className="flex items-center gap-2">
-                          <span className={`${
-                            api.matchRate >= 95 ? 'text-green-700' : 
-                            api.matchRate >= 85 ? 'text-amber-700' : 
-                            'text-red-700'
-                          }`}>
+                          <span className={`${api.matchRate >= 95 ? 'text-green-700' :
+                            api.matchRate >= 85 ? 'text-amber-700' :
+                              'text-red-700'
+                            }`}>
                             {api.matchRate}%
                           </span>
                           <div className="w-16 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                            <div 
-                              className={`h-full ${
-                                api.matchRate >= 95 ? 'bg-green-500' : 
-                                api.matchRate >= 85 ? 'bg-amber-500' : 
-                                'bg-red-500'
-                              }`}
+                            <div
+                              className={`h-full ${api.matchRate >= 95 ? 'bg-green-500' :
+                                api.matchRate >= 85 ? 'bg-amber-500' :
+                                  'bg-red-500'
+                                }`}
                               style={{ width: `${api.matchRate}%` }}
                             />
                           </div>
@@ -361,8 +359,8 @@ export function DataReconciliationAPIPage() {
                       <td className="px-4 py-3">{getStatusBadge(api.status)}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <button 
-                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded" 
+                          <button
+                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"
                             title="Xem chi tiết"
                             onClick={() => {
                               setSelectedAPI(api);
@@ -371,8 +369,8 @@ export function DataReconciliationAPIPage() {
                           >
                             <Eye className="w-4 h-4" />
                           </button>
-                          <button 
-                            className="p-1.5 text-amber-600 hover:bg-amber-50 rounded" 
+                          <button
+                            className="p-1.5 text-amber-600 hover:bg-amber-50 rounded"
                             title="Chỉnh sửa"
                             onClick={() => {
                               setSelectedAPI(api);
@@ -382,14 +380,14 @@ export function DataReconciliationAPIPage() {
                           >
                             <Edit className="w-4 h-4" />
                           </button>
-                          <button 
-                            className="p-1.5 text-green-600 hover:bg-green-50 rounded" 
+                          <button
+                            className="p-1.5 text-green-600 hover:bg-green-50 rounded"
                             title="Chạy ngay"
                           >
                             <Activity className="w-4 h-4" />
                           </button>
-                          <button 
-                            className="p-1.5 text-red-600 hover:bg-red-50 rounded" 
+                          <button
+                            className="p-1.5 text-red-600 hover:bg-red-50 rounded"
                             title="Xóa"
                             onClick={() => {
                               setSelectedAPI(api);
@@ -419,7 +417,7 @@ export function DataReconciliationAPIPage() {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
+
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -427,7 +425,7 @@ export function DataReconciliationAPIPage() {
                   <input
                     type="text"
                     value={formData.code}
-                    onChange={(e) => setFormData({...formData, code: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, code: e.target.value })}
                     placeholder="RC-API001"
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -436,7 +434,7 @@ export function DataReconciliationAPIPage() {
                   <label className="block text-xs text-slate-600 mb-1">Phương thức</label>
                   <select
                     value={formData.method}
-                    onChange={(e) => setFormData({...formData, method: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, method: e.target.value })}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="GET">GET</option>
@@ -452,7 +450,7 @@ export function DataReconciliationAPIPage() {
                 <input
                   type="text"
                   value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="Nhập tên API đối soát"
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -462,7 +460,7 @@ export function DataReconciliationAPIPage() {
                 <label className="block text-xs text-slate-600 mb-1">Mô tả</label>
                 <textarea
                   value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Nhập mô tả chi tiết về API"
                   rows={3}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -474,7 +472,7 @@ export function DataReconciliationAPIPage() {
                 <input
                   type="text"
                   value={formData.targetSystem}
-                  onChange={(e) => setFormData({...formData, targetSystem: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, targetSystem: e.target.value })}
                   placeholder="Tên hệ thống đích"
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -485,7 +483,7 @@ export function DataReconciliationAPIPage() {
                 <input
                   type="text"
                   value={formData.endpoint}
-                  onChange={(e) => setFormData({...formData, endpoint: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, endpoint: e.target.value })}
                   placeholder="/api/v1/reconcile/..."
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -496,7 +494,7 @@ export function DataReconciliationAPIPage() {
                   <label className="block text-xs text-slate-600 mb-1">Tần suất thực hiện</label>
                   <select
                     value={formData.frequency}
-                    onChange={(e) => setFormData({...formData, frequency: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, frequency: e.target.value })}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="Hàng ngày">Hàng ngày</option>
@@ -510,7 +508,7 @@ export function DataReconciliationAPIPage() {
                   <label className="block text-xs text-slate-600 mb-1">Trạng thái</label>
                   <select
                     value={formData.status}
-                    onChange={(e) => setFormData({...formData, status: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="active">Hoạt động</option>
@@ -552,7 +550,7 @@ export function DataReconciliationAPIPage() {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
+
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -560,7 +558,7 @@ export function DataReconciliationAPIPage() {
                   <input
                     type="text"
                     value={formData.code}
-                    onChange={(e) => setFormData({...formData, code: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, code: e.target.value })}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -568,7 +566,7 @@ export function DataReconciliationAPIPage() {
                   <label className="block text-xs text-slate-600 mb-1">Phương thức</label>
                   <select
                     value={formData.method}
-                    onChange={(e) => setFormData({...formData, method: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, method: e.target.value })}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="GET">GET</option>
@@ -584,7 +582,7 @@ export function DataReconciliationAPIPage() {
                 <input
                   type="text"
                   value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -593,7 +591,7 @@ export function DataReconciliationAPIPage() {
                 <label className="block text-xs text-slate-600 mb-1">Mô tả</label>
                 <textarea
                   value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={3}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -604,7 +602,7 @@ export function DataReconciliationAPIPage() {
                 <input
                   type="text"
                   value={formData.targetSystem}
-                  onChange={(e) => setFormData({...formData, targetSystem: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, targetSystem: e.target.value })}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -614,7 +612,7 @@ export function DataReconciliationAPIPage() {
                 <input
                   type="text"
                   value={formData.endpoint}
-                  onChange={(e) => setFormData({...formData, endpoint: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, endpoint: e.target.value })}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -624,7 +622,7 @@ export function DataReconciliationAPIPage() {
                   <label className="block text-xs text-slate-600 mb-1">Tần suất thực hiện</label>
                   <select
                     value={formData.frequency}
-                    onChange={(e) => setFormData({...formData, frequency: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, frequency: e.target.value })}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="Hàng ngày">Hàng ngày</option>
@@ -638,7 +636,7 @@ export function DataReconciliationAPIPage() {
                   <label className="block text-xs text-slate-600 mb-1">Trạng thái</label>
                   <select
                     value={formData.status}
-                    onChange={(e) => setFormData({...formData, status: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="active">Hoạt động</option>
@@ -681,12 +679,12 @@ export function DataReconciliationAPIPage() {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
+
             <div className="p-6 space-y-6">
               {/* Thông tin cơ bản */}
               <div className="space-y-4">
                 <h3 className="text-sm text-slate-900">Thông tin cơ bản</h3>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs text-slate-500 mb-1">Mã API</label>
@@ -719,7 +717,7 @@ export function DataReconciliationAPIPage() {
               {/* Cấu hình hệ thống */}
               <div className="space-y-4 border-t border-slate-200 pt-4">
                 <h3 className="text-sm text-slate-900">Cấu hình hệ thống</h3>
-                
+
                 <div>
                   <label className="block text-xs text-slate-500 mb-1">Hệ thống đích</label>
                   <div className="text-sm text-slate-900">{selectedAPI.targetSystem}</div>
@@ -740,7 +738,7 @@ export function DataReconciliationAPIPage() {
               {/* Thống kê đối soát */}
               <div className="space-y-4 border-t border-slate-200 pt-4">
                 <h3 className="text-sm text-slate-900">Thống kê đối soát</h3>
-                
+
                 <div className="grid grid-cols-3 gap-4">
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                     <div className="text-xs text-blue-600 mb-1">Tổng bản ghi</div>
@@ -761,12 +759,11 @@ export function DataReconciliationAPIPage() {
                   <div className="flex items-center gap-3">
                     <div className="text-sm text-slate-900">{selectedAPI.matchRate}%</div>
                     <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
-                      <div 
-                        className={`h-full ${
-                          selectedAPI.matchRate >= 95 ? 'bg-green-500' : 
-                          selectedAPI.matchRate >= 85 ? 'bg-amber-500' : 
-                          'bg-red-500'
-                        }`}
+                      <div
+                        className={`h-full ${selectedAPI.matchRate >= 95 ? 'bg-green-500' :
+                          selectedAPI.matchRate >= 85 ? 'bg-amber-500' :
+                            'bg-red-500'
+                          }`}
                         style={{ width: `${selectedAPI.matchRate}%` }}
                       />
                     </div>
@@ -782,7 +779,7 @@ export function DataReconciliationAPIPage() {
               {/* Thông tin hệ thống */}
               <div className="space-y-4 border-t border-slate-200 pt-4">
                 <h3 className="text-sm text-slate-900">Thông tin hệ thống</h3>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs text-slate-500 mb-1">Ngày tạo</label>

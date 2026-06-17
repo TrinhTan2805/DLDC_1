@@ -37,7 +37,7 @@ export const apiGroups = [
     ]
   },
   {
-    groupName: "Hệ thống quản lý hồ sơ quốc tịch",
+    groupName: "Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch",
     items: [
       { id: "item_dx0cqj00l", name: "204	 làm sạch Nhập Quốc tịch", code: "API_ITEM_DX0CQJ00L" },
       { id: "item_21tnh18ie", name: "207	 làm sạch Thôi Quốc tịch", code: "API_ITEM_21TNH18IE" },

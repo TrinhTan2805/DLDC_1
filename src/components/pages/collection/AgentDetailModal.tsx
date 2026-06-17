@@ -13,17 +13,17 @@ export function AgentDetailModal({ isOpen, onClose, data }: AgentDetailModalProp
   if (!isOpen || !data) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 font-sans" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 font-sans backdrop-blur-sm">
       <div className="bg-white rounded-lg shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden border border-slate-200 flex flex-col" style={{ fontSize: '13px' }}>
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white z-10 rounded-t-lg shrink-0">
-          <h2 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
-            <Monitor className="w-5 h-5 text-blue-600" /> Chi tiết trạm kết nối
+        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-white rounded-t-lg shrink-0 text-slate-900">
+          <h2 className="text-[16px] font-bold flex items-center gap-2 text-slate-800">
+            <Monitor className="w-5 h-5 text-blue-600" /> Thông tin Trạm kết nối
           </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 transition-colors"
+          <button 
+            type="button" 
+            onClick={onClose} 
+            className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-1.5 rounded-lg transition-colors"
             title="Đóng"
           >
             <X className="w-5 h-5" />
@@ -209,12 +209,18 @@ export function AgentDetailModal({ isOpen, onClose, data }: AgentDetailModalProp
                     <label className="w-24 text-[13px] font-medium text-slate-700">Ngày</label>
                     <div className="flex-1 flex items-center gap-2">
                        <div className="relative flex-1">
-                          <input type="text" defaultValue="Từ ngày" className="w-full px-3 py-2 border border-slate-300 rounded focus:outline-none bg-white h-10 pr-10 text-[13px]" />
-                          <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                          <input 
+                            type="date" 
+                            className="w-full px-3 py-2 border border-slate-300 rounded focus:outline-none bg-white h-10 pr-10 text-[13px] text-slate-700" 
+                          />
+                          <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                        </div>
                        <div className="relative flex-1">
-                          <input type="text" defaultValue="Đến ngày" className="w-full px-3 py-2 border border-slate-300 rounded focus:outline-none bg-white h-10 pr-10 text-[13px]" />
-                          <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                          <input 
+                            type="date" 
+                            className="w-full px-3 py-2 border border-slate-300 rounded focus:outline-none bg-white h-10 pr-10 text-[13px] text-slate-700" 
+                          />
+                          <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                        </div>
                     </div>
                   </div>
@@ -272,7 +278,7 @@ export function AgentDetailModal({ isOpen, onClose, data }: AgentDetailModalProp
         <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex justify-end shrink-0">
           <button
             onClick={onClose}
-            className="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-700 bg-white font-medium text-[13px] shadow-sm transition-colors"
+            className="px-8 py-2 text-[13px] font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-sm"
           >
             Đóng
           </button>

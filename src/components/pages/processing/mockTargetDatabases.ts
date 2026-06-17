@@ -14,7 +14,7 @@ export interface TargetDatabase {
 export const initialTargetDatabases: TargetDatabase[] = [
   {
     id: '1',
-    name: 'CSDL Kho dữ liệu dùng chung',
+    name: 'CSDL Kho DLDC',
     type: 'PostgreSQL',
     host: '10.15.20.45',
     port: '5432',

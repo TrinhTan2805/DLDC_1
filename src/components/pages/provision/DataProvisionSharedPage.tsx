@@ -51,7 +51,7 @@ const mockPermissions: AccessPermission[] = [
     expiryDate: '31/12/2025',
     approver: 'Lê Văn C',
     requestedBy: 'Phạm Văn D',
-    purpose: 'Tích hợp dữ liệu vào hệ thống quản lý xã hội',
+    purpose: 'Tích hợp dữ liệu vào Hệ thống quản lý Bộ Tư Pháp xã hội',
     currentUsage: 12456
   },
   {
@@ -117,8 +117,8 @@ export function DataProvisionSharedPage() {
 
   const filteredPermissions = permissions.filter(perm => {
     const matchesSearch = perm.organization.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         perm.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         perm.dataPackage.toLowerCase().includes(searchTerm.toLowerCase());
+      perm.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      perm.dataPackage.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'all' || perm.status === filterStatus;
     const matchesOrgType = filterOrgType === 'all' || perm.organizationType === filterOrgType;
     return matchesSearch && matchesStatus && matchesOrgType;

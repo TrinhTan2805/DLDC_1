@@ -245,7 +245,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-2xl font-bold text-slate-800">Chi tiết cơ sở dữ liệu đích</h1>
+        <h1 className="text-[16px] font-bold text-slate-800">Chi tiết cơ sở dữ liệu đích</h1>
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm w-full flex flex-col flex-1 border border-slate-200 overflow-hidden">
@@ -257,7 +257,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
             </div>
             <div>
               <div className="flex items-center gap-2 mb-0.5">
-                <h2 className="text-2xl font-bold text-slate-800">{data.name}</h2>
+                <h2 className="text-[16px] font-bold text-slate-800">{data.name}</h2>
               </div>
               <p className="text-[13px] text-slate-500 font-medium flex items-center gap-1.5">
                 <Link2 className="w-4 h-4" /> {data.type} • {data.host}:{data.port}
@@ -376,7 +376,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                               value={newTableName} 
                               onChange={(e) => setNewTableName(e.target.value)}
                               placeholder="Tên bảng (VD: PERSON_INFO)"
-                              className="w-full text-lg font-bold text-slate-800 border-b-2 border-blue-500 focus:outline-none bg-transparent px-1 py-1"
+                              className="w-full text-[13px] font-bold text-slate-800 border-b-2 border-blue-500 focus:outline-none bg-transparent px-1 py-1"
                               autoFocus
                             />
                           </div>
@@ -426,7 +426,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                                 value={newTableName} 
                                 onChange={(e) => setNewTableName(e.target.value)}
                                 onKeyDown={(e) => { if (e.key === 'Enter') handleSaveRename(); if (e.key === 'Escape') setIsRenamingTable(false); }}
-                                className="text-lg font-bold text-slate-800 border-b-2 border-blue-500 focus:outline-none bg-transparent px-1"
+                                className="text-[13px] font-bold text-slate-800 border-b-2 border-blue-500 focus:outline-none bg-transparent px-1"
                                 autoFocus
                               />
                               <button onClick={handleSaveRename} className="p-1 text-blue-600 hover:bg-blue-50 rounded" title="Lưu tên">

@@ -466,7 +466,7 @@ export function MergeRulesManagementTab() {
               {/* Basic Info */}
               <div className="space-y-4">
                 <h4 className="text-sm text-slate-900">Thông tin cơ bản</h4>
-                
+
                 <div>
                   <label className="block text-sm text-slate-700 mb-1">
                     Tên quy tắc <span className="text-red-600">*</span>
@@ -517,7 +517,7 @@ export function MergeRulesManagementTab() {
               {/* Data Sources */}
               <div className="space-y-4 border-t border-slate-200 pt-6">
                 <h4 className="text-sm text-slate-900">Cấu hình nguồn dữ liệu</h4>
-                
+
                 {/* Add Source Form */}
                 <div className="bg-blue-50 p-4 rounded-lg space-y-3">
                   <p className="text-sm text-slate-700">Thêm nguồn dữ liệu</p>
@@ -624,7 +624,7 @@ export function MergeRulesManagementTab() {
               {/* Match Rules */}
               <div className="space-y-4 border-t border-slate-200 pt-6">
                 <h4 className="text-sm text-slate-900">Quy tắc so khớp</h4>
-                
+
                 {/* Add Match Rule Form */}
                 <div className="bg-green-50 p-4 rounded-lg space-y-3">
                   <p className="text-sm text-slate-700">Thêm quy tắc so khớp</p>
@@ -713,7 +713,7 @@ export function MergeRulesManagementTab() {
               {/* Extract Rules */}
               <div className="space-y-4 border-t border-slate-200 pt-6">
                 <h4 className="text-sm text-slate-900">Quy tắc trích rút và chuyển đổi</h4>
-                
+
                 {/* Add Extract Rule Form */}
                 <div className="bg-purple-50 p-4 rounded-lg space-y-3">
                   <p className="text-sm text-slate-700">Thêm quy tắc trích rút</p>
