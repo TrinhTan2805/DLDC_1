@@ -476,11 +476,7 @@ export function FunctionManagementPage() {
 
 
 
-<<<<<<< HEAD
-
-=======
-          {/* Row 4: Đường dẫn (Path) */}
-                    {/* Row 3: Tính năng liên kết & Chọn icon */}
+          {/* Row 3: Tính năng liên kết & Chọn icon */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-slate-700 mb-2">
@@ -547,7 +543,6 @@ export function FunctionManagementPage() {
               </div>
             </div>
           </div>
->>>>>>> upstream/main
 
           {/* Row 4: Trạng thái */}
           <div className="flex gap-8 border-t border-slate-100 pt-4">
