@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   Activity, BarChart3, Download, Network, Share2, Server, Database, 
   AlertCircle, ChevronRight, X, Clock, HelpCircle, CheckCircle2, ArrowRightLeft,
   ChevronDown, Search, Check
 } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { ProvisionExportReportModal } from './modals/ProvisionExportReportModal';
 import { AuditLogsTab } from './tabs/AuditLogsTab';
 import { ScrollText } from 'lucide-react';
@@ -112,6 +112,10 @@ export function DataProvisionMonitoringPage() {
   const [selectedDatabase, setSelectedDatabase] = useState<string>('');
   const [selectedApi, setSelectedApi] = useState<string>('Lấy danh sách Hộ tịch');
   
+  // Pagination for detailed table
+  const [tablePage, setTablePage] = useState(1);
+  const [tableItemsPerPage, setTableItemsPerPage] = useState(10);
+  
   const filteredApis = selectedDatabase ? apiList.filter(api => api.database === selectedDatabase) : apiList;
 
   // Auto-select first API when database changes
@@ -123,131 +127,232 @@ export function DataProvisionMonitoringPage() {
       }
     }
   }, [selectedDatabase, filteredApis, selectedApi]);
+
+  React.useEffect(() => {
+    setTablePage(1);
+  }, [selectedApi]);
   
   // Log Detail modal state
   const [selectedLog, setSelectedLog] = useState<any>(null);
 
   const stats = apiMockStats[selectedApi] || apiMockStats['Lấy danh sách Hộ tịch'];
 
-  return (
-    <div className="space-y-6">
-      
-      {/* Top Banner and Actions */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-800">Kiểm soát & Giám sát cung cấp</h2>
-          <p className="text-slate-500 mt-1">Giám sát hiệu năng kết nối API thời gian thực, lưu lượng Gateway và báo cáo logs</p>
+  const paginatedChartData = React.useMemo(() => {
+    return stats.chartData.slice((tablePage - 1) * tableItemsPerPage, tablePage * tableItemsPerPage);
+  }, [stats.chartData, tablePage, tableItemsPerPage]);
+
+  const renderTablePagination = (totalItems: number) => {
+    const totalPages = Math.ceil(totalItems / tableItemsPerPage) || 1;
+    return (
+      <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white sm:px-6 text-[13px] collection-pagination">
+        <div className="flex items-center gap-2">
+          <span className="text-slate-600">Hiển thị</span>
+          <select aria-label="Select record count" 
+            value={tableItemsPerPage}
+            onChange={(e) => { setTableItemsPerPage(Number(e.target.value)); setTablePage(1); }}
+            className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px]"
+            title="Số bản ghi trên trang"
+          >
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+          </select>
+          <span className="text-slate-600">bản ghi/trang</span>
         </div>
-        <div className="flex items-center gap-3 w-full md:w-auto">
-          
-          {/* Cascading API Selectors */}
-          <div className="flex flex-col sm:flex-row items-center gap-0 bg-white border border-slate-200 rounded-lg p-1 shadow-sm shrink-0">
+        
+        <div className="flex items-center gap-4">
+          <span className="text-slate-600">
+            {totalItems === 0 ? 0 : (tablePage - 1) * tableItemsPerPage + 1} - {Math.min(tablePage * tableItemsPerPage, totalItems)} / {totalItems}
+          </span>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setTablePage(tablePage > 1 ? tablePage - 1 : tablePage)}
+              disabled={tablePage === 1}
+              className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
+            >
+              Trước
+            </button>
             
-            {/* Database Selector */}
-            <div className="flex items-center px-3 py-1.5 hover:bg-slate-50 rounded-md transition-colors border-b sm:border-b-0 sm:border-r border-slate-100">
-              <Database className="w-3.5 h-3.5 text-slate-400 mr-2 shrink-0" />
-              <select
-                value={selectedDatabase}
-                onChange={(e) => setSelectedDatabase(e.target.value)}
-                className="text-xs font-bold text-slate-600 bg-transparent focus:outline-none cursor-pointer max-w-[150px] truncate"
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+              <button
+                key={page}
+                onClick={() => setTablePage(page)}
+                className={`px-3 py-1.5 border rounded-lg font-medium text-[13px] transition-colors ${
+                  tablePage === page
+                    ? 'bg-blue-600 border-blue-600 text-white'
+                    : 'border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
+                }`}
               >
-                <option value="">Tất cả CSDL</option>
-                {databases.map(db => (
-                  <option key={db} value={db}>{db}</option>
-                ))}
-              </select>
+                {page}
+              </button>
+            ))}
+
+            <button
+              onClick={() => {
+                if (tablePage < totalPages) {
+                  setTablePage(tablePage + 1);
+                }
+              }}
+              disabled={tablePage === totalPages || totalItems === 0}
+              className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
+            >
+              Sau
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="monitoring-page-root" style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px' }}>
+      <style dangerouslySetInnerHTML={{__html: `
+        .monitoring-page-root *:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(svg):not(path):not(circle):not(rect):not(polyline):not(line) {
+          font-size: 13px !important;
+        }
+        .monitoring-page-root .stat-card-title {
+          font-size: 16px !important;
+        }
+      `}} />
+      <div className="space-y-6">
+        
+        {/* Page Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+          <div>
+            <h1 className="text-base font-bold text-slate-900">Kiểm soát & Giám sát cung cấp</h1>
+            <p className="text-xs text-slate-500 mt-1">Giám sát hiệu năng kết nối API thời gian thực, lưu lượng Gateway và báo cáo logs</p>
+          </div>
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            
+            {/* Cascading API Selectors */}
+            <div className="flex flex-col sm:flex-row items-center gap-0 bg-white border border-slate-200 rounded-lg p-1 shadow-sm shrink-0">
+              
+              {/* Database Selector */}
+              <div className="flex items-center px-3 py-1.5 hover:bg-slate-50 rounded-md transition-colors border-b sm:border-b-0 sm:border-r border-slate-100">
+                <Database className="w-3.5 h-3.5 text-slate-400 mr-2 shrink-0" />
+                <select
+                  value={selectedDatabase}
+                  onChange={(e) => setSelectedDatabase(e.target.value)}
+                  className="text-xs font-bold text-slate-600 bg-transparent focus:outline-none cursor-pointer max-w-[150px] truncate"
+                >
+                  <option value="">Tất cả CSDL</option>
+                  {databases.map(db => (
+                    <option key={db} value={db}>{db}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* API Selector */}
+              <div className="flex items-center px-3 py-1.5 hover:bg-slate-50 rounded-md transition-colors">
+                <span className="text-[10px] font-bold text-slate-400 uppercase mr-2 shrink-0">API:</span>
+                <select
+                  value={selectedApi}
+                  onChange={(e) => setSelectedApi(e.target.value)}
+                  className="text-xs font-semibold text-blue-700 bg-transparent focus:outline-none cursor-pointer max-w-[200px] truncate"
+                >
+                  {filteredApis.map(api => (
+                    <option key={api.id} value={api.id}>{api.name}</option>
+                  ))}
+                </select>
+              </div>
+
             </div>
 
-            {/* API Selector */}
-            <div className="flex items-center px-3 py-1.5 hover:bg-slate-50 rounded-md transition-colors">
-              <span className="text-[10px] font-bold text-slate-400 uppercase mr-2 shrink-0">API:</span>
-              <select
-                value={selectedApi}
-                onChange={(e) => setSelectedApi(e.target.value)}
-                className="text-xs font-extrabold text-amber-700 bg-transparent focus:outline-none cursor-pointer max-w-[200px] truncate"
-              >
-                {filteredApis.map(api => (
-                  <option key={api.id} value={api.id}>{api.name}</option>
-                ))}
-              </select>
-            </div>
+            <button 
+              onClick={() => setShowExportModal(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition-colors font-medium text-[13px] shadow-sm shrink-0"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Xuất báo cáo
+            </button>
+          </div>
+        </div>
 
+        {/* Overview performance stat cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+            <div className="p-2 bg-blue-50 rounded-lg shrink-0">
+              <Activity className="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <span className="stat-card-title text-[16px] text-slate-500 block">Tổng số yêu cầu (7 ngày)</span>
+              <span className="text-xl font-bold text-slate-800 block">{stats.totalRequests.toLocaleString()}</span>
+            </div>
+          </div>
+          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+            <div className="p-2 bg-emerald-50 rounded-lg shrink-0">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+            </div>
+            <div>
+              <span className="stat-card-title text-[16px] text-slate-500 block">Tỷ lệ thành công</span>
+              <span className="text-xl font-bold text-emerald-600 block">{stats.successRate}</span>
+            </div>
+          </div>
+          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+            <div className="p-2 bg-blue-50 rounded-lg shrink-0">
+              <Clock className="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <span className="stat-card-title text-[16px] text-slate-500 block">Độ trễ trung bình</span>
+              <span className="text-xl font-bold text-blue-600 block">{stats.avgLatency}</span>
+            </div>
+          </div>
+          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+            <div className="p-2 bg-emerald-50 rounded-lg shrink-0">
+              <Server className="w-5 h-5 text-emerald-600" />
+            </div>
+            <div>
+              <span className="stat-card-title text-[16px] text-slate-500 block">Trạng thái Cổng Gateway</span>
+              <span className="text-xl font-bold text-slate-800 block flex items-center gap-1.5">
+                <span className="w-2 h-2 bg-emerald-500 rounded-full inline-block animate-pulse"></span>
+                {stats.gatewayStatus}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation tabs */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="border-b border-slate-200 bg-slate-50/50">
+            <nav className="flex space-x-6 px-6" aria-label="Tabs">
+              <button
+                onClick={() => setActiveTab('luong_du_lieu')}
+                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-[13px] flex items-center transition-colors ${
+                  activeTab === 'luong_du_lieu'
+                    ? 'border-blue-600 text-blue-600 font-semibold'
+                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                }`}
+              >
+                <Network className="w-4 h-4 mr-2" />
+                Sơ đồ giám sát & Logs kết nối
+              </button>
+              <button
+                onClick={() => setActiveTab('bao_cao')}
+                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-[13px] flex items-center transition-colors ${
+                  activeTab === 'bao_cao'
+                    ? 'border-blue-600 text-blue-600 font-semibold'
+                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                }`}
+              >
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Báo cáo hiệu năng đồ thị
+              </button>
+              <button
+                onClick={() => setActiveTab('nhat_ky')}
+                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-[13px] flex items-center transition-colors ${
+                  activeTab === 'nhat_ky'
+                    ? 'border-blue-600 text-blue-600 font-semibold'
+                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                }`}
+              >
+                <ScrollText className="w-4 h-4 mr-2" />
+                Nhật ký khai thác (Audit Logs)
+              </button>
+            </nav>
           </div>
 
-          <button 
-            onClick={() => setShowExportModal(true)}
-            className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg flex items-center transition-colors font-bold shadow-md hover:scale-[1.02] text-sm shrink-0"
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Xuất báo cáo
-          </button>
-        </div>
-      </div>
-
-      {/* Overview performance stat cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <span className="text-xs font-semibold text-slate-400 block">Tổng số yêu cầu (7 ngày)</span>
-          <span className="text-2xl font-extrabold text-slate-800 mt-1 block">{stats.totalRequests.toLocaleString()}</span>
-        </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <span className="text-xs font-semibold text-slate-400 block">Tỷ lệ thành công</span>
-          <span className="text-2xl font-extrabold text-emerald-600 mt-1 block">{stats.successRate}</span>
-        </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <span className="text-xs font-semibold text-slate-400 block">Độ trễ trung bình</span>
-          <span className="text-2xl font-extrabold text-amber-600 mt-1 block">{stats.avgLatency}</span>
-        </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <span className="text-xs font-semibold text-slate-400 block">Trạng thái Cổng Gateway</span>
-          <span className="text-2xl font-extrabold text-slate-800 mt-1 block flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full inline-block animate-pulse"></span>
-            {stats.gatewayStatus}
-          </span>
-        </div>
-      </div>
-
-      {/* Navigation tabs */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="border-b border-slate-200 bg-slate-50/50">
-          <nav className="flex space-x-8 px-6" aria-label="Tabs">
-            <button
-              onClick={() => setActiveTab('luong_du_lieu')}
-              className={`whitespace-nowrap py-4 px-1 border-b-2 font-bold text-sm flex items-center transition-colors ${
-                activeTab === 'luong_du_lieu'
-                  ? 'border-amber-500 text-amber-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-              }`}
-            >
-              <Network className="w-4 h-4 mr-2" />
-              Sơ đồ giám sát & Logs kết nối
-            </button>
-            <button
-              onClick={() => setActiveTab('bao_cao')}
-              className={`whitespace-nowrap py-4 px-1 border-b-2 font-bold text-sm flex items-center transition-colors ${
-                activeTab === 'bao_cao'
-                  ? 'border-amber-500 text-amber-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-              }`}
-            >
-              <BarChart3 className="w-4 h-4 mr-2" />
-              Báo cáo hiệu năng đồ thị
-            </button>
-            <button
-              onClick={() => setActiveTab('nhat_ky')}
-              className={`whitespace-nowrap py-4 px-1 border-b-2 font-bold text-sm flex items-center transition-colors ${
-                activeTab === 'nhat_ky'
-                  ? 'border-amber-500 text-amber-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-              }`}
-            >
-              <ScrollText className="w-4 h-4 mr-2" />
-              Nhật ký khai thác (Audit Logs)
-            </button>
-          </nav>
-        </div>
-
-        <div className="p-6">
+          <div className="p-6">
           {activeTab === 'luong_du_lieu' ? (
             <div className="space-y-6">
               
@@ -290,12 +395,12 @@ export function DataProvisionMonitoringPage() {
 
                   {/* GATEWAY */}
                   <div className="relative flex flex-col items-center w-40 shrink-0 z-10">
-                    <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center border-4 border-amber-500 shadow-lg animate-in zoom-in duration-300 relative z-10">
-                      <Server className="w-10 h-10 text-amber-600 animate-pulse" />
+                    <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center border-4 border-blue-500 shadow-lg animate-in zoom-in duration-300 relative z-10">
+                      <Server className="w-10 h-10 text-blue-600 animate-pulse" />
                     </div>
                     <div className="absolute top-full mt-3 flex flex-col items-center w-48 text-center">
                       <span className="text-xs font-extrabold text-slate-800">CỔNG API GATEWAY</span>
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full mt-1 font-bold ${stats.gatewayStatus === 'Hoạt động tốt' || stats.gatewayStatus === 'Ổn định' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full mt-1 font-bold ${stats.gatewayStatus === 'Hoạt động tốt' || stats.gatewayStatus === 'Ổn định' ? 'bg-green-150 text-green-700' : 'bg-blue-50 text-blue-700 border border-blue-200'}`}>
                         {stats.gatewayStatus}
                       </span>
                     </div>
@@ -369,8 +474,8 @@ export function DataProvisionMonitoringPage() {
 
               {/* Dynamic Connection logs for chosen API */}
               <div>
-                <h3 className="text-sm font-extrabold text-slate-800 mb-4 flex items-center uppercase tracking-wider">
-                  <Activity className="w-4.5 h-4.5 text-amber-600 mr-1.5" /> 
+                <h3 className="text-[13px] font-extrabold text-slate-800 mb-4 flex items-center uppercase tracking-wider">
+                  <Activity className="w-4 h-4 text-blue-600 mr-1.5" /> 
                   Nhật ký kết nối gần đây
                 </h3>
                 
@@ -414,68 +519,29 @@ export function DataProvisionMonitoringPage() {
               </div>
 
             </div>
-          ) : (
+          ) : activeTab === 'bao_cao' ? (
             <div className="space-y-6">
-              
-              {/* Dynamic Recharts graphs showing dynamic stats based on chosen API */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="h-auto border border-slate-200 rounded-xl p-4 flex flex-col bg-white">
-                  <h3 className="font-bold text-slate-700 mb-4 text-center text-xs uppercase tracking-wider">Lưu lượng truy cập API (7 ngày qua)</h3>
-                  <div className="w-full h-[250px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={stats.chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                        <defs>
-                          <linearGradient id="colorLuong" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
-                          </linearGradient>
-                        </defs>
-                        <XAxis dataKey="name" tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
-                        <YAxis domain={[0, 400]} axisLine={{ stroke: '#cbd5e1' }} tickLine={true} tick={{ fill: '#94a3b8', fontSize: 11 }} />
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} horizontal={true} />
-                        <RechartsTooltip />
-                        <Area type="linear" dataKey="Luồng dữ liệu" stroke="#f59e0b" fillOpacity={1} fill="url(#colorLuong)" />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-
-                <div className="h-auto border border-slate-200 rounded-xl p-4 flex flex-col bg-white">
-                  <h3 className="font-bold text-slate-700 mb-4 text-center text-xs uppercase tracking-wider">Thống kê lỗi / Cảnh báo kết nối</h3>
-                  <div className="w-full h-[250px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={stats.chartData}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} horizontal={true} />
-                        <XAxis dataKey="name" tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
-                        <YAxis domain={[0, 50]} axisLine={{ stroke: '#cbd5e1' }} tickLine={true} tick={{ fill: '#94a3b8', fontSize: 11 }} />
-                        <RechartsTooltip />
-                        <Bar dataKey="Lỗi kết nối" fill="#ef4444" radius={[4, 4, 0, 0]} barSize={35} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-              </div>
 
               {/* Detailed Data Table */}
               <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm mt-6">
                 <div className="px-5 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
                   <h3 className="font-bold text-slate-800 text-sm flex items-center">
-                    <Database className="w-4 h-4 mr-2 text-amber-600" />
+                    <Database className="w-4 h-4 mr-2 text-blue-600" />
                     Dữ liệu chi tiết lưu lượng (7 ngày qua)
                   </h3>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm">
-                    <thead className="bg-slate-50 text-slate-500">
+                    <thead className="bg-slate-50 text-[13px] font-semibold text-slate-500 border-b border-slate-200 uppercase tracking-tight">
                       <tr>
-                        <th className="px-6 py-3 font-semibold border-b border-slate-200">Ngày</th>
-                        <th className="px-6 py-3 font-semibold border-b border-slate-200 text-right">Lưu lượng truy cập</th>
-                        <th className="px-6 py-3 font-semibold border-b border-slate-200 text-right">Lỗi kết nối</th>
-                        <th className="px-6 py-3 font-semibold border-b border-slate-200 text-right">Tỷ lệ lỗi</th>
+                        <th className="px-6 py-3 font-semibold">Ngày</th>
+                        <th className="px-6 py-3 font-semibold text-right">Lưu lượng truy cập</th>
+                        <th className="px-6 py-3 font-semibold text-right">Lỗi kết nối</th>
+                        <th className="px-6 py-3 font-semibold text-right">Tỷ lệ lỗi</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {stats.chartData.map((row, idx) => {
+                      {paginatedChartData.map((row, idx) => {
                         const total = row['Luồng dữ liệu'] + row['Lỗi kết nối'];
                         const errorRate = total > 0 ? ((row['Lỗi kết nối'] / total) * 100).toFixed(1) : '0.0';
                         return (
@@ -500,7 +566,7 @@ export function DataProvisionMonitoringPage() {
                         );
                       })}
                       {/* Summary row */}
-                      <tr className="bg-slate-50 font-bold text-slate-800">
+                      <tr className="bg-slate-50/50 font-bold text-slate-800">
                         <td className="px-6 py-3">Tổng cộng</td>
                         <td className="px-6 py-3 text-right font-mono">
                           {stats.chartData.reduce((acc, row) => acc + row['Luồng dữ liệu'], 0).toLocaleString()}
@@ -509,26 +575,31 @@ export function DataProvisionMonitoringPage() {
                           {stats.chartData.reduce((acc, row) => acc + row['Lỗi kết nối'], 0).toLocaleString()}
                         </td>
                         <td className="px-6 py-3 text-right">
-                          {((stats.chartData.reduce((acc, row) => acc + row['Lỗi kết nối'], 0) / 
+                          {((stats.chartData.reduce((acc, row) => acc + row['Lỗi kết nối'], 0) /
                             (stats.chartData.reduce((acc, row) => acc + row['Luồng dữ liệu'] + row['Lỗi kết nối'], 0) || 1)) * 100).toFixed(1)}%
                         </td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
+                {renderTablePagination(stats.chartData.length)}
               </div>
 
             </div>
-          )}
-          {activeTab === 'nhat_ky' && (
+          ) : (
             <AuditLogsTab />
           )}
         </div>
       </div>
 
       {/* API Log Details Modal */}
-      {selectedLog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+      {selectedLog && createPortal(
+        <div style={{ zIndex: 999999 }} className="monitoring-page-root fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200">
+          <style dangerouslySetInnerHTML={{__html: `
+            .monitoring-page-root *:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(svg):not(path):not(circle):not(rect):not(polyline):not(line) {
+              font-size: 13px !important;
+            }
+          `}} />
           <div className="bg-white rounded-xl shadow-xl w-full max-w-lg border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-200">
             
             {/* Header */}
@@ -551,7 +622,7 @@ export function DataProvisionMonitoringPage() {
             <div className="p-5 space-y-4">
               
               {/* Error/Info message bubble */}
-              <div className={`p-4 rounded-lg border text-xs font-semibold leading-relaxed ${
+              <div className={`p-4 rounded-lg border text-[13px] font-medium leading-relaxed ${
                 selectedLog.type === 'ERROR' ? 'bg-rose-50 border-rose-200 text-rose-800' : selectedLog.type === 'WARN' ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-blue-50 border-blue-200 text-blue-800'
               }`}>
                 {selectedLog.message}
@@ -560,24 +631,24 @@ export function DataProvisionMonitoringPage() {
               {/* Metadatas */}
               <div className="border border-slate-100 rounded-lg divide-y divide-slate-100">
                 <div className="grid grid-cols-3 py-2.5 px-3">
-                  <span className="text-xs font-bold text-slate-400">Thời gian log:</span>
-                  <span className="text-xs text-slate-700 font-mono col-span-2">{selectedLog.time}</span>
+                  <span className="text-[13px] font-medium text-slate-400">Thời gian log:</span>
+                  <span className="text-[13px] text-slate-700 font-mono col-span-2">{selectedLog.time}</span>
                 </div>
                 <div className="grid grid-cols-3 py-2.5 px-3">
-                  <span className="text-xs font-bold text-slate-400">Mức độ cảnh báo:</span>
-                  <span className="text-xs col-span-2 font-bold uppercase">{selectedLog.type}</span>
+                  <span className="text-[13px] font-medium text-slate-400">Mức độ cảnh báo:</span>
+                  <span className="text-[13px] col-span-2 font-semibold uppercase">{selectedLog.type}</span>
                 </div>
                 <div className="grid grid-cols-3 py-2.5 px-3">
-                  <span className="text-xs font-bold text-slate-400">IP Đối tác khai thác:</span>
-                  <span className="text-xs text-slate-700 font-mono col-span-2">{selectedLog.clientIp}</span>
+                  <span className="text-[13px] font-medium text-slate-400">IP Đối tác khai thác:</span>
+                  <span className="text-[13px] text-slate-700 font-mono col-span-2">{selectedLog.clientIp}</span>
                 </div>
                 <div className="grid grid-cols-3 py-2.5 px-3">
-                  <span className="text-xs font-bold text-slate-400">Độ trễ phản hồi:</span>
-                  <span className="text-xs text-amber-600 font-bold font-mono col-span-2">{selectedLog.latency}</span>
+                  <span className="text-[13px] font-medium text-slate-400">Độ trễ phản hồi:</span>
+                  <span className="text-[13px] text-blue-600 font-semibold font-mono col-span-2">{selectedLog.latency}</span>
                 </div>
                 <div className="grid grid-cols-3 py-2.5 px-3">
-                  <span className="text-xs font-bold text-slate-400">Kích thước phản hồi:</span>
-                  <span className="text-xs text-slate-700 font-mono col-span-2">{selectedLog.responseSize}</span>
+                  <span className="text-[13px] font-medium text-slate-400">Kích thước phản hồi:</span>
+                  <span className="text-[13px] text-slate-700 font-mono col-span-2">{selectedLog.responseSize}</span>
                 </div>
               </div>
 
@@ -588,7 +659,7 @@ export function DataProvisionMonitoringPage() {
               <button
                 type="button"
                 onClick={() => setSelectedLog(null)}
-                className="px-4 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded text-xs font-bold transition-all shadow-sm"
+                className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2 font-medium text-[13px] transition-colors shadow-sm animate-in fade-in"
               >
                 Đóng
               </button>
@@ -596,7 +667,7 @@ export function DataProvisionMonitoringPage() {
 
           </div>
         </div>
-      )}
+      , document.body)}
 
       {/* Reports exporting modal */}
       <ProvisionExportReportModal 
@@ -605,5 +676,6 @@ export function DataProvisionMonitoringPage() {
       />
 
     </div>
+  </div>
   );
 }

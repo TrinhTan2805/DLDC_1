@@ -2,6 +2,18 @@
  
 ## Phiên bản 2.4.9 (Ngày cập nhật: 17/06/2026)
 
+**Cập nhật bổ sung (17/06/2026):**
+- Sửa lỗi React Error #31 (Objects are not valid as a React child) tại modal Cấu hình trường:
+  - Loại bỏ ký tự thừa `, document.body` ở phần `return` của modal `SharedFieldsConfigModal.tsx` khi chuyển đổi sang sử dụng component wrapper `<Portal>`.
+  - Thiết kế lại giao diện của modal `SharedFieldsConfigModal.tsx` và trang `DataProvisionServicesPage.tsx` sang tông màu xanh dương chủ đạo của hệ thống (`bg-blue-600`, `text-blue-750`, v.v.) và cỡ chữ `13px` theo quy định.
+- Bỏ bảng grid **Dữ liệu chi tiết lưu lượng (7 ngày qua)** khỏi tab **Nhật ký khai thác (Audit Logs)** trong `DataProvisionMonitoringPage.tsx`.
+  - Trước đây khối `else` render bảng này cho cả 2 tab `bao_cao` và `nhat_ky` do logic ternary chỉ kiểm tra `!== luong_du_lieu`.
+  - Đã tách thành 3-way conditional: `luong_du_lieu` → sơ đồ giám sát, `bao_cao` → bảng chi tiết lưu lượng, `nhat_ky` → `<AuditLogsTab />` (không có bảng).
+  - Tab **Báo cáo hiệu năng đồ thị** giữ nguyên bảng, không bị ảnh hưởng.
+
+---
+
+
 **Nội dung thay đổi:**
 1. Thêm Breadcrumb và định tuyến chi tiết (Routing) cho toàn bộ phân hệ Cung cấp dữ liệu (Data Provision):
    - Cập nhật hàm trợ giúp `getBreadcrumbPath` trong `MainLayout.tsx` để nhận thêm tham số `search` (URL Query Params).
@@ -28,10 +40,15 @@
    - Thiết kế lại thanh tìm kiếm, bộ lọc nâng cao collapsible và nút "Tạo yêu cầu" với màu xanh dương chủ đạo hệ thống (`bg-blue-600` / `hover:bg-blue-700`).
    - Đồng bộ hóa bảng dữ liệu: header màu xám nhạt (`bg-slate-50`), cỡ chữ `13px` trong container `api-requests-page-root`, các nút thao tác dạng icon-only có hover background chuyên nghiệp và badge trạng thái đầy đủ màu sắc.
    - Bổ sung tính năng phân trang (`renderPagination`) ở cuối bảng danh sách.
-5. Áp dụng quy tắc Hộp thoại 5.4 trong `compomennt.md` khi nhấn nút chỉnh sửa và xem chi tiết tại tab Tiếp nhận yêu cầu của màn hình Cung cấp dữ liệu theo yêu cầu:
+5. Áp dụng quy tắc Hộp thoại 5.4 trong `compomennt.md` khi nhấn nút chỉnh sửa, xem chi tiết, bàn giao, công khai, và hủy công khai tại các tab của màn hình Cung cấp dữ liệu theo yêu cầu:
    - Cập nhật z-index (`z-[999999]`, inline style `zIndex: 999999`) và lớp backdrop overlay chuẩn (`bg-black/50` thay vì `bg-slate-900/50 backdrop-blur-sm`).
    - Chuẩn hóa typography font chữ nhãn (`text-[13px] font-medium`) và các trường dữ liệu, định dạng file, nút bấm sử dụng tông màu xanh dương (`bg-blue-600` / `hover:bg-blue-700`, `accent-blue-650 w-4 h-4`) thay vì các tông màu không đồng bộ.
-   - Các modal được cập nhật bao gồm: `ProvisionDataRequestModal.tsx`, `ProvisionRequestApprovalModal.tsx`, `ProvisionRequestExportModal.tsx`, `ProvisionHandoverDetailModal.tsx`, `ProvisionPublishDetailModal.tsx`.
+   - Các modal được cập nhật bao gồm: `ProvisionDataRequestModal.tsx`, `ProvisionRequestApprovalModal.tsx`, `ProvisionRequestExportModal.tsx`, `ProvisionHandoverDetailModal.tsx`, `ProvisionPublishDetailModal.tsx`, `ProvisionRequestHandoverModal.tsx`, `ProvisionServicePublishModal.tsx`, `ProvisionServiceUnpublishModal.tsx`.
+6. Đồng bộ thiết kế mục **Kiểm soát & Giám sát cung cấp** (`DataProvisionMonitoringPage.tsx` và `AuditLogsTab.tsx`):
+   - Chuyển tông màu chủ đạo từ màu hổ phách/cam sang màu xanh dương cho nút xuất báo cáo, active tabs, bộ chọn select API, cổng API Gateway, đồ thị AreaChart, và các icons liên quan.
+   - Thêm bộ phân trang động ở cuối bảng dữ liệu chi tiết lưu lượng và bảng Audit logs để quản lý dữ liệu lớn chuyên nghiệp.
+   - Ép font chữ toàn trang và các components con về kích thước `13px` thông qua class root và style inline.
+   - Áp dụng quy tắc Hộp thoại 5.4 và đổi màu nút đóng sang xanh dương đối với modal chi tiết logs và modal xuất báo cáo (`ProvisionExportReportModal.tsx`).
 
 **Các file bị ảnh hưởng:**
 - `src/components/layout/MainLayout.tsx`
@@ -45,6 +62,12 @@
 - `src/components/pages/provisioning/modals/ProvisionRequestExportModal.tsx`
 - `src/components/pages/provisioning/modals/ProvisionHandoverDetailModal.tsx`
 - `src/components/pages/provisioning/modals/ProvisionPublishDetailModal.tsx`
+- `src/components/pages/provisioning/modals/ProvisionRequestHandoverModal.tsx`
+- `src/components/pages/provisioning/modals/ProvisionServicePublishModal.tsx`
+- `src/components/pages/provisioning/modals/ProvisionServiceUnpublishModal.tsx`
+- `src/components/pages/provisioning/DataProvisionMonitoringPage.tsx`
+- `src/components/pages/provisioning/tabs/AuditLogsTab.tsx`
+- `src/components/pages/provisioning/modals/ProvisionExportReportModal.tsx`
 
 ## Phiên bản 2.4.8 (Ngày cập nhật: 17/06/2026)
 

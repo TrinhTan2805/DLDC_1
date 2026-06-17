@@ -36,13 +36,13 @@ export function ProvisionRequestApprovalModal({ isOpen, onClose, requestData, on
 
           <div>
             <label className="block text-[13px] font-semibold text-slate-700 mb-2">Quyết định xử lý</label>
-            <div className="flex space-x-4">
-              <button onClick={() => setStatus('approve')} className={`flex-1 flex flex-col items-center p-4 border rounded-xl ${status === 'approve' ? 'border-emerald-500 bg-emerald-50/50 text-emerald-800 ring-2 ring-emerald-500/20' : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'}`}>
+            <div className="flex gap-8">
+              <button onClick={() => setStatus('approve')} className={`flex-1 flex flex-col items-center p-4 rounded-xl border-2 transition-all ${status === 'approve' ? 'border-emerald-600 bg-white text-emerald-700' : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'}`}>
                 <CheckCircle className={`w-8 h-8 mb-2 ${status === 'approve' ? 'text-emerald-600' : 'text-slate-400'}`} />
                 <span className="font-bold text-[11px] uppercase tracking-wider">Phê duyệt</span>
               </button>
-              <button onClick={() => setStatus('reject')} className={`flex-1 flex flex-col items-center p-4 border rounded-xl ${status === 'reject' ? 'border-red-500 bg-red-50/50 text-red-800 ring-2 ring-red-500/20' : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'}`}>
-                <XCircle className={`w-8 h-8 mb-2 ${status === 'reject' ? 'text-red-600' : 'text-slate-400'}`} />
+              <button onClick={() => setStatus('reject')} className={`flex-1 flex flex-col items-center p-4 rounded-xl border-2 transition-all ${status === 'reject' ? 'border-red-500 bg-white text-red-600' : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'}`}>
+                <XCircle className={`w-8 h-8 mb-2 ${status === 'reject' ? 'text-red-500' : 'text-slate-400'}`} />
                 <span className="font-bold text-[11px] uppercase tracking-wider">Từ chối</span>
               </button>
             </div>

@@ -54,6 +54,7 @@ type DataRequest = {
   toDate?: string;
   format: 'excel' | 'csv' | 'json' | 'xml';
   status: RequestStatus;
+  rejectReason?: string;
   handoverDetails?: any;
   publishDetails?: any;
 };
@@ -145,8 +146,8 @@ export function DataProvisionRequestPage() {
     setRequests((prev) => prev.map((item) => (item.id === id ? { ...item, status: 'DA_PHE_DUYET' } : item)));
   };
 
-  const handleReject = (id: string) => {
-    setRequests((prev) => prev.map((item) => (item.id === id ? { ...item, status: 'TU_CHOI' } : item)));
+  const handleReject = (id: string, reason: string) => {
+    setRequests((prev) => prev.map((item) => (item.id === id ? { ...item, status: 'TU_CHOI', rejectReason: reason } : item)));
   };
 
   const handleCreateRequest = (payload: CreateDataRequestPayload) => {
@@ -181,6 +182,7 @@ export function DataProvisionRequestPage() {
     setRequests((prev) => prev.map((item) => (item.id === id ? { ...item, status: 'DA_XUAT' } : item)));
   };
 
+  const [showViewRequestModal, setShowViewRequestModal] = useState(false);
   const [showHandoverDetailModal, setShowHandoverDetailModal] = useState(false);
   const [showPublishDetailModal, setShowPublishDetailModal] = useState(false);
 
@@ -218,6 +220,11 @@ export function DataProvisionRequestPage() {
       }
       return item;
     }));
+  };
+
+  const handleViewRequest = (item: DataRequest) => {
+    setSelectedRequest(item);
+    setShowViewRequestModal(true);
   };
 
   const handleViewHandoverDetail = (item: DataRequest) => {
@@ -513,82 +520,64 @@ export function DataProvisionRequestPage() {
                           </td>
                           <td className="py-3 px-4 text-center">
                             <div className="flex items-center justify-center gap-1.5 flex-nowrap">
-                              {activeTab === 'tiep_nhan' && item.status === 'CHO_XU_LY' && (
+                              {/* TIEP_NHAN: Edit chỉ cho CHO_XU_LY, Eye cho tất cả trạng thái */}
+                              {activeTab === 'tiep_nhan' && (
                                 <>
                                   <button
                                     title="Chỉnh sửa"
-                                    onClick={() => { setSelectedRequest(item); setShowRequestModal(true); }}
-                                    className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-[6px] transition-all inline-flex items-center justify-center cursor-pointer"
+                                    onClick={() => { if (item.status !== 'DA_XUAT' && item.status !== 'DA_PHE_DUYET') { setSelectedRequest(item); setShowRequestModal(true); } }}
+                                    disabled={item.status === 'DA_XUAT' || item.status === 'DA_PHE_DUYET'}
+                                    className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-[6px] transition-all inline-flex items-center justify-center cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:text-slate-500 disabled:hover:bg-transparent"
                                   >
                                     <Edit className="w-4 h-4" />
                                   </button>
                                   <button
                                     title="Xem chi tiết"
-                                    onClick={() => handleExportClick(item)}
+                                    onClick={() => handleViewRequest(item)}
                                     className="p-1.5 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-[6px] transition-all inline-flex items-center justify-center cursor-pointer"
                                   >
                                     <Eye className="w-4 h-4" />
                                   </button>
                                 </>
                               )}
-                              {activeTab === 'tiep_nhan' && item.status === 'DA_BAN_GIAO' && (
-                                <button
-                                  title="Xem chi tiết Bàn giao"
-                                  onClick={() => handleViewHandoverDetail(item)}
-                                  className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-[6px] transition-all inline-flex items-center justify-center cursor-pointer"
-                                >
-                                  <Eye className="w-4 h-4" />
-                                </button>
-                              )}
-                              {activeTab === 'tiep_nhan' && (item.status === 'DA_CONG_KHAI' || item.status === 'HUY_CONG_KHAI') && (
-                                <button
-                                  title="Xem chi tiết Công khai"
-                                  onClick={() => handleViewPublishDetail(item)}
-                                  className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-[6px] transition-all inline-flex items-center justify-center cursor-pointer"
-                                >
-                                  <Eye className="w-4 h-4" />
-                                </button>
-                              )}
+                              {/* TRA_CUU tab */}
                               {activeTab === 'tra_cuu' && item.status === 'CHO_XU_LY' && (
                                 <button
                                   title="Tiếp nhận"
                                   onClick={() => { setSelectedRequest(item); setShowApprovalModal(true); }}
-                                  className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 border border-blue-200 bg-blue-50/50 rounded-[6px] transition-all inline-flex items-center justify-center cursor-pointer shadow-sm animate-pulse"
+                                  className="p-1.5 text-slate-700 hover:text-black hover:bg-slate-100 rounded-[6px] transition-all inline-flex items-center justify-center cursor-pointer"
                                 >
                                   <CheckCircle className="w-4 h-4" />
                                 </button>
                               )}
-                              {(activeTab === 'tra_cuu' || item.status === 'DA_PHE_DUYET' || item.status === 'DA_XUAT') && (
+                              {activeTab === 'tra_cuu' && (item.status === 'DA_PHE_DUYET' || item.status === 'DA_XUAT') && (
                                 <button
-                                  title={activeTab === 'tiep_nhan' ? "Xem chi tiết" : "Thiết lập kết xuất"}
+                                  title="Thiết lập kết xuất"
                                   onClick={() => handleExportClick(item)}
-                                  className={activeTab === 'tiep_nhan'
-                                    ? "p-1.5 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-[6px] transition-all inline-flex items-center justify-center cursor-pointer"
-                                    : "p-1.5 text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 border border-emerald-200 bg-emerald-50/50 rounded-[6px] transition-all inline-flex items-center justify-center cursor-pointer shadow-sm"}
+                                  className="p-1.5 text-slate-700 hover:text-black hover:bg-slate-100 rounded-[6px] transition-all inline-flex items-center justify-center cursor-pointer"
                                 >
-                                  {activeTab === 'tiep_nhan' ? <Eye className="w-4 h-4" /> : <Settings className="w-4 h-4" />}
+                                  <Settings className="w-4 h-4" />
                                 </button>
                               )}
+                              {/* BAN_GIAO tab */}
                               {activeTab === 'ban_giao' && (
                                 <>
-                                  {item.status === 'DA_XUAT' && (
-                                    <>
-                                      <button
-                                        title="Bàn giao"
-                                        onClick={() => handleHandoverClick(item)}
-                                        className="p-1.5 text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 border border-indigo-200 bg-indigo-50/50 rounded-[6px] transition-all inline-flex items-center justify-center cursor-pointer shadow-sm"
-                                      >
-                                        <Send className="w-4 h-4" />
-                                      </button>
-                                      <button
-                                        title="Công khai"
-                                        onClick={() => handlePublishClick(item)}
-                                        className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 border border-blue-200 bg-blue-50/50 rounded-[6px] transition-all inline-flex items-center justify-center cursor-pointer shadow-sm"
-                                      >
-                                        <Globe className="w-4 h-4" />
-                                      </button>
-                                    </>
-                                  )}
+                                  <button
+                                    title="Bàn giao"
+                                    onClick={() => handleHandoverClick(item)}
+                                    disabled={item.status !== 'DA_XUAT'}
+                                    className="p-1.5 text-slate-700 hover:text-black hover:bg-slate-100 rounded-[6px] transition-all inline-flex items-center justify-center cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:text-slate-700 disabled:hover:bg-transparent"
+                                  >
+                                    <Send className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    title="Công khai"
+                                    onClick={() => handlePublishClick(item)}
+                                    disabled={item.status !== 'DA_XUAT'}
+                                    className="p-1.5 text-slate-700 hover:text-black hover:bg-slate-100 rounded-[6px] transition-all inline-flex items-center justify-center cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:text-slate-700 disabled:hover:bg-transparent"
+                                  >
+                                    <Globe className="w-4 h-4" />
+                                  </button>
                                   {item.status === 'DA_BAN_GIAO' && (
                                     <button
                                       title="Xem chi tiết Bàn giao"
@@ -634,7 +623,8 @@ export function DataProvisionRequestPage() {
 
       </div>
       <ProvisionDataRequestModal isOpen={showRequestModal} onClose={() => { setShowRequestModal(false); setSelectedRequest(null); }} onCreate={handleCreateRequest} requestData={selectedRequest} />
-      <ProvisionRequestApprovalModal isOpen={showApprovalModal} onClose={() => setShowApprovalModal(false)} requestData={selectedRequest} onApprove={handleApprove} onReject={(id) => handleReject(id)} />
+      <ProvisionDataRequestModal viewOnly isOpen={showViewRequestModal} onClose={() => { setShowViewRequestModal(false); setSelectedRequest(null); }} requestData={selectedRequest} />
+      <ProvisionRequestApprovalModal isOpen={showApprovalModal} onClose={() => setShowApprovalModal(false)} requestData={selectedRequest} onApprove={handleApprove} onReject={handleReject} />
       <ProvisionRequestExportModal isOpen={showExportModal} onClose={() => setShowExportModal(false)} requestData={selectedRequest} onConfirmExport={handleConfirmExport} />
       <ProvisionRequestHandoverModal isOpen={showHandoverModal} onClose={() => setShowHandoverModal(false)} requestData={selectedRequest} onConfirmHandover={handleConfirmHandover} />
       <ProvisionServicePublishModal isOpen={showPublishModal} onClose={() => setShowPublishModal(false)} requestData={selectedRequest} onConfirmPublish={handleConfirmPublish} />

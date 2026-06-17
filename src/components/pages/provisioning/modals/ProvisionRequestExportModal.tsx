@@ -129,7 +129,14 @@ export function ProvisionRequestExportModal({ isOpen, onClose, requestData, onCo
   return createPortal(
     <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/50 transition-all">
       <div className="bg-white rounded-2xl w-full max-w-5xl flex flex-col max-h-[90vh] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200">
-        
+        <style dangerouslySetInnerHTML={{__html: `
+          .export-modal-body,
+          .export-modal-body *:not(svg):not(path):not(circle):not(rect):not(polyline):not(line) {
+            font-size: 13px !important;
+            font-weight: 400 !important;
+          }
+        `}} />
+
         {/* Header */}
         <div className="flex justify-between items-center px-6 py-5 border-b border-slate-200 bg-slate-50">
           <div>
@@ -149,7 +156,7 @@ export function ProvisionRequestExportModal({ isOpen, onClose, requestData, onCo
         </div>
 
         {/* Content */}
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 overflow-hidden export-modal-body">
           
           {/* Left Sidebar - Steps */}
           <div className="w-64 bg-slate-50 border-r border-slate-200 p-6 flex flex-col gap-6 shrink-0">
@@ -762,7 +769,7 @@ export function ProvisionRequestExportModal({ isOpen, onClose, requestData, onCo
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 bg-slate-50 border-t border-slate-200">
+        <div className="flex items-center justify-between px-6 py-4 bg-slate-50 border-t border-slate-200 export-modal-body">
           <button 
             onClick={onClose}
             className="px-5 py-2 text-sm font-bold text-slate-500 hover:text-slate-800 border border-slate-200 hover:bg-slate-100 rounded-lg transition-colors uppercase tracking-widest"

@@ -241,9 +241,9 @@ export function DataProvisionServicesPage({ category, group, title, description 
               <div className="flex px-6 border-t border-slate-100 bg-slate-50/50">
                 <button
                   onClick={() => handleTabChange('du_lieu')}
-                  className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
+                  className={`flex items-center gap-2 px-4 py-3 text-[13px] font-semibold border-b-2 transition-all cursor-pointer ${
                     activeDetailTab === 'du_lieu'
-                      ? 'border-orange-500 text-orange-600'
+                      ? 'border-blue-600 text-blue-600'
                       : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
                   }`}
                 >
@@ -252,9 +252,9 @@ export function DataProvisionServicesPage({ category, group, title, description 
                 </button>
                 <button
                   onClick={() => handleTabChange('api')}
-                  className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
+                  className={`flex items-center gap-2 px-4 py-3 text-[13px] font-semibold border-b-2 transition-all cursor-pointer ${
                     activeDetailTab === 'api'
-                      ? 'border-orange-500 text-orange-600'
+                      ? 'border-blue-600 text-blue-600'
                       : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
                   }`}
                 >
@@ -275,16 +275,16 @@ export function DataProvisionServicesPage({ category, group, title, description 
                         <input
                           type="text"
                           placeholder="Tìm theo mã YC, cơ quan, loại dữ liệu..."
-                          className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
+                          className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                           value={searchRightText}
                           onChange={(e) => setSearchRightText(e.target.value)}
                         />
                       </div>
                       <button 
                         onClick={() => setShowAdvancedFilter(!showAdvancedFilter)}
-                        className={`flex items-center gap-2 px-4 py-2 border rounded-lg text-sm font-semibold transition-colors shadow-sm cursor-pointer ${showAdvancedFilter ? 'bg-orange-50 border-orange-200 text-orange-700' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'}`}
+                        className={`flex items-center gap-2 px-4 py-2 border rounded-lg text-[13px] font-semibold transition-colors shadow-sm cursor-pointer ${showAdvancedFilter ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'}`}
                       >
-                        <Filter className={`w-4 h-4 ${showAdvancedFilter ? 'text-orange-500' : 'text-slate-500'}`} />
+                        <Filter className={`w-4 h-4 ${showAdvancedFilter ? 'text-blue-500' : 'text-slate-500'}`} />
                         Bộ lọc nâng cao
                       </button>
                     </div>
@@ -294,16 +294,16 @@ export function DataProvisionServicesPage({ category, group, title, description 
                       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm animate-in slide-in-from-top-2 duration-200 mb-6 -mt-2">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                           <div>
-                            <label className="block text-xs font-bold text-slate-600 mb-1.5">Khoảng thời gian (Từ ngày)</label>
-                            <input type="date" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-slate-700" />
+                            <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Khoảng thời gian (Từ ngày)</label>
+                            <input type="date" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-700" />
                           </div>
                           <div>
-                            <label className="block text-xs font-bold text-slate-600 mb-1.5">Khoảng thời gian (Đến ngày)</label>
-                            <input type="date" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-slate-700" />
+                            <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Khoảng thời gian (Đến ngày)</label>
+                            <input type="date" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-700" />
                           </div>
                           <div>
-                            <label className="block text-xs font-bold text-slate-600 mb-1.5">Trạng thái xử lý</label>
-                            <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-slate-700">
+                            <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Trạng thái xử lý</label>
+                            <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-700">
                               <option value="">-- Tất cả trạng thái --</option>
                               <option value="success">Thành công</option>
                               <option value="pending">Đang chờ xử lý</option>
@@ -314,12 +314,12 @@ export function DataProvisionServicesPage({ category, group, title, description 
                         <div className="flex justify-end gap-3 mt-5 pt-4 border-t border-slate-100">
                           <button 
                             onClick={() => setShowAdvancedFilter(false)}
-                            className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg text-sm font-bold hover:bg-slate-50 transition-colors cursor-pointer"
+                            className="bg-white text-[#020817] border border-[#e2e8f0] hover:bg-slate-50 rounded-lg px-4 py-2 font-medium text-[13px] transition-colors shadow-sm cursor-pointer"
                           >
                             Hủy bỏ
                           </button>
                           <button 
-                            className="px-6 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-sm font-bold shadow-sm transition-colors cursor-pointer"
+                            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[13px] font-medium shadow-sm transition-colors cursor-pointer"
                           >
                             Áp dụng bộ lọc
                           </button>
@@ -397,7 +397,7 @@ export function DataProvisionServicesPage({ category, group, title, description 
                                   <td className="px-4 py-4 text-center">
                                     <button
                                       onClick={() => handleOpenFieldsConfig(api)}
-                                      className="p-1.5 bg-amber-50 text-amber-700 hover:bg-amber-100 rounded-lg border border-amber-200 transition-colors shadow-sm inline-flex items-center gap-1 cursor-pointer font-semibold"
+                                      className="p-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg border border-blue-200 transition-colors shadow-sm inline-flex items-center gap-1 cursor-pointer font-semibold"
                                       title="Điều chỉnh các trường dữ liệu chia sẻ"
                                     >
                                       <Sliders className="w-3.5 h-3.5" />

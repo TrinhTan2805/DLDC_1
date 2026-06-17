@@ -42,6 +42,8 @@ const mockLogs = [
 export function AuditLogsTab() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const filteredLogs = mockLogs.filter(log => {
     const matchesSearch = log.client.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -52,6 +54,14 @@ export function AuditLogsTab() {
                           (statusFilter === 'Error' && log.status !== 200);
     return matchesSearch && matchesStatus;
   });
+
+  const paginatedLogs = React.useMemo(() => {
+    return filteredLogs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  }, [filteredLogs, currentPage, itemsPerPage]);
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter]);
 
   const getStatusIcon = (status: number) => {
     if (status === 200) return <CheckCircle2 className="w-4 h-4 text-emerald-500" />;
@@ -75,20 +85,20 @@ export function AuditLogsTab() {
             placeholder="Tìm kiếm theo IP, Client hoặc Endpoint..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+            className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
           />
         </div>
         <div className="flex items-center gap-3 w-full md:w-auto">
           <select 
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-amber-500/20 font-medium"
+            className="px-4 py-2 border border-slate-200 rounded-lg text-[13px] bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium cursor-pointer"
           >
             <option value="All">Tất cả trạng thái</option>
             <option value="Success">Thành công (200 OK)</option>
             <option value="Error">Lỗi (4xx, 5xx)</option>
           </select>
-          <button className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-sm font-bold flex items-center transition-colors shadow-sm">
+          <button className="px-4 py-2 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-lg text-[13px] font-medium flex items-center transition-colors shadow-sm cursor-pointer">
             <Filter className="w-4 h-4 mr-2" />
             Lọc nâng cao
           </button>
@@ -99,19 +109,19 @@ export function AuditLogsTab() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse whitespace-nowrap">
             <thead>
-              <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200">
-                <th className="px-6 py-3 font-bold">Mã Log</th>
-                <th className="px-6 py-3 font-bold">Thời gian (Timestamp)</th>
-                <th className="px-6 py-3 font-bold">Client / Đơn vị gọi</th>
-                <th className="px-6 py-3 font-bold">IP Address</th>
-                <th className="px-6 py-3 font-bold">API Endpoint</th>
-                <th className="px-6 py-3 font-bold">Status</th>
-                <th className="px-6 py-3 font-bold text-right">Độ trễ</th>
-                <th className="px-6 py-3 font-bold text-center">Chi tiết</th>
+              <tr className="bg-slate-50 text-[13px] font-semibold text-slate-500 border-b border-slate-200 uppercase tracking-tight">
+                <th className="px-6 py-3 font-semibold">Mã Log</th>
+                <th className="px-6 py-3 font-semibold">Thời gian (Timestamp)</th>
+                <th className="px-6 py-3 font-semibold">Client / Đơn vị gọi</th>
+                <th className="px-6 py-3 font-semibold">IP Address</th>
+                <th className="px-6 py-3 font-semibold">API Endpoint</th>
+                <th className="px-6 py-3 font-semibold">Status</th>
+                <th className="px-6 py-3 font-semibold text-right">Độ trễ</th>
+                <th className="px-6 py-3 font-semibold text-center">Chi tiết</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-sm">
-              {filteredLogs.map(log => (
+              {paginatedLogs.map(log => (
                 <tr key={log.id} className="hover:bg-slate-50/70 transition-colors">
                   <td className="px-6 py-4 font-mono font-bold text-slate-500 text-xs">{log.id}</td>
                   <td className="px-6 py-4 text-slate-600">
@@ -142,7 +152,7 @@ export function AuditLogsTab() {
                     {log.latency}
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <button className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded transition-colors" title="Xem Payload">
+                    <button className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-[6px] transition-all inline-flex items-center justify-center cursor-pointer" title="Xem Payload">
                       <Eye className="w-4 h-4 mx-auto" />
                     </button>
                   </td>
@@ -158,6 +168,71 @@ export function AuditLogsTab() {
             </tbody>
           </table>
         </div>
+        {/* Pagination */}
+        {(() => {
+          const totalItems = filteredLogs.length;
+          const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+          return (
+            <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white sm:px-6 text-[13px] collection-pagination">
+              <div className="flex items-center gap-2">
+                <span className="text-slate-600">Hiển thị</span>
+                <select aria-label="Select record count" 
+                  value={itemsPerPage}
+                  onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
+                  className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px]"
+                  title="Số bản ghi trên trang"
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                </select>
+                <span className="text-slate-600">bản ghi/trang</span>
+              </div>
+              
+              <div className="flex items-center gap-4">
+                <span className="text-slate-600">
+                  {totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, totalItems)} / {totalItems}
+                </span>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : currentPage)}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
+                  >
+                    Trước
+                  </button>
+                  
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-1.5 border rounded-lg font-medium text-[13px] transition-colors ${
+                        currentPage === page
+                          ? 'bg-blue-600 border-blue-600 text-white'
+                          : 'border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+
+                  <button
+                    onClick={() => {
+                      if (currentPage < totalPages) {
+                        setCurrentPage(currentPage + 1);
+                      }
+                    }}
+                    disabled={currentPage === totalPages || totalItems === 0}
+                    className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
+                  >
+                    Sau
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
       </div>
     </div>
   );
