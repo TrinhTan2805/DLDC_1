@@ -453,6 +453,7 @@ export function ConfigChangeLogPage() {
               </div>
             )}
           </div>
+        </div>
 
           <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
