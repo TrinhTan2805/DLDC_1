@@ -86,7 +86,7 @@ const accessTrends = [
   { month: 'T6', views: 7200, downloads: 2100 },
 ];
 
-const COLORS = ['#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+const COLORS = ['#0ea5e9', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
 
 export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
   const [activeTab, setActiveTab] = useState<'search' | 'statistics' | 'classification' | 'access'>('search');
@@ -141,7 +141,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
             onClick={() => setActiveTab('search')}
             className={`flex items-center gap-2 px-3 py-2 border-b-2 transition-all ${
               activeTab === 'search'
-                ? 'border-emerald-600 text-emerald-600 bg-emerald-50'
+                ? 'border-blue-600 text-blue-600 bg-blue-50'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -152,7 +152,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
             onClick={() => setActiveTab('statistics')}
             className={`flex items-center gap-2 px-3 py-2 border-b-2 transition-all ${
               activeTab === 'statistics'
-                ? 'border-emerald-600 text-emerald-600 bg-emerald-50'
+                ? 'border-blue-600 text-blue-600 bg-blue-50'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -163,7 +163,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
             onClick={() => setActiveTab('classification')}
             className={`flex items-center gap-2 px-3 py-2 border-b-2 transition-all ${
               activeTab === 'classification'
-                ? 'border-emerald-600 text-emerald-600 bg-emerald-50'
+                ? 'border-blue-600 text-blue-600 bg-blue-50'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -174,7 +174,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
             onClick={() => setActiveTab('access')}
             className={`flex items-center gap-2 px-3 py-2 border-b-2 transition-all ${
               activeTab === 'access'
-                ? 'border-emerald-600 text-emerald-600 bg-emerald-50'
+                ? 'border-blue-600 text-blue-600 bg-blue-50'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -192,7 +192,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
             {/* Filter Panel */}
             <div className="bg-white border border-slate-200 rounded-lg p-6">
               <h3 className="text-slate-900 mb-4 flex items-center gap-2">
-                <Filter className="w-5 h-5 text-emerald-600" />
+                <Filter className="w-5 h-5 text-blue-600" />
                 Bộ lọc tìm kiếm
               </h3>
               
@@ -204,7 +204,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                     placeholder="Nhập từ khóa..."
                     value={searchKeyword}
                     onChange={(e) => setSearchKeyword(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 
@@ -213,7 +213,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                   <select
                     value={filterCategory}
                     onChange={(e) => setFilterCategory(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="all">Tất cả</option>
                     <option value="Văn bản pháp luật">Văn bản pháp luật</option>
@@ -228,7 +228,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                   <select
                     value={filterAgency}
                     onChange={(e) => setFilterAgency(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="all">Tất cả</option>
                     <option value="Bộ Tư pháp">Bộ Tư pháp</option>
@@ -245,7 +245,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                   <select
                     value={filterFormat}
                     onChange={(e) => setFilterFormat(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="all">Tất cả</option>
                     <option value="JSON">JSON</option>
@@ -260,7 +260,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                   <select
                     value={filterLicense}
                     onChange={(e) => setFilterLicense(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="all">Tất cả</option>
                     <option value="CC BY 4.0">CC BY 4.0</option>
@@ -270,7 +270,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                 </div>
 
                 <div className="flex items-end gap-2">
-                  <button className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 flex items-center justify-center gap-2">
+                  <button className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2">
                     <Search className="w-4 h-4" />
                     Tìm kiếm
                   </button>
@@ -294,7 +294,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
             <div className="bg-white border border-slate-200 rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div className="text-sm text-slate-600">
-                  Tìm thấy <span className="text-emerald-600">{filteredDatasets.length}</span> kết quả
+                  Tìm thấy <span className="text-blue-600">{filteredDatasets.length}</span> kết quả
                 </div>
                 <div className="flex items-center gap-2">
                   <button 
@@ -367,7 +367,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
             {/* Filter Panel */}
             <div className="bg-white border border-slate-200 rounded-lg p-6">
               <h3 className="text-slate-900 mb-4 flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-emerald-600" />
+                <BarChart3 className="w-5 h-5 text-blue-600" />
                 Thiết lập báo cáo
               </h3>
               
@@ -377,7 +377,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                   <select
                     value={statsGroupBy}
                     onChange={(e) => setStatsGroupBy(e.target.value as any)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="category">Theo chủ đề</option>
                     <option value="agency">Theo cơ quan công bố</option>
@@ -391,7 +391,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                   <select
                     value={statsTimeRange}
                     onChange={(e) => setStatsTimeRange(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="2024">Năm 2024</option>
                     <option value="2023">Năm 2023</option>
@@ -401,7 +401,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                 </div>
 
                 <div className="flex items-end gap-2">
-                  <button className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 flex items-center justify-center gap-2">
+                  <button className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2">
                     <BarChart3 className="w-4 h-4" />
                     Tạo báo cáo
                   </button>
@@ -429,7 +429,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
               <div className="bg-white border border-slate-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm text-slate-600">Cơ quan công bố</span>
-                  <Building2 className="w-5 h-5 text-emerald-600" />
+                  <Building2 className="w-5 h-5 text-blue-600" />
                 </div>
                 <div className="text-2xl text-slate-900">25</div>
                 <div className="text-xs text-green-600 mt-1">+3 cơ quan mới</div>
@@ -471,7 +471,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey={statsGroupBy === 'category' ? 'count' : 'datasets'} fill="#10b981" />
+                  <Bar dataKey={statsGroupBy === 'category' ? 'count' : 'datasets'} fill="#3b82f6" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -654,7 +654,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
             {/* Filter Panel */}
             <div className="bg-white border border-slate-200 rounded-lg p-6">
               <h3 className="text-slate-900 mb-4 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-emerald-600" />
+                <TrendingUp className="w-5 h-5 text-blue-600" />
                 Thiết lập báo cáo truy cập
               </h3>
               
@@ -664,7 +664,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                   <select
                     value={accessTimeRange}
                     onChange={(e) => setAccessTimeRange(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="7days">7 ngày gần nhất</option>
                     <option value="1month">1 tháng gần nhất</option>
@@ -716,7 +716,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
               <div className="bg-white border border-slate-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm text-slate-600">Tổng lượt tải</span>
-                  <Download className="w-5 h-5 text-emerald-600" />
+                  <Download className="w-5 h-5 text-blue-600" />
                 </div>
                 <div className="text-2xl text-slate-900">8,860</div>
                 <div className="text-xs text-green-600 mt-1">+22% so với kỳ trước</div>
@@ -755,7 +755,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                     <Line type="monotone" dataKey="views" stroke="#0ea5e9" strokeWidth={2} name="Lượt xem" />
                   )}
                   {(accessMetric === 'both' || accessMetric === 'downloads') && (
-                    <Line type="monotone" dataKey="downloads" stroke="#10b981" strokeWidth={2} name="Lượt tải" />
+                    <Line type="monotone" dataKey="downloads" stroke="#3b82f6" strokeWidth={2} name="Lượt tải" />
                   )}
                 </LineChart>
               </ResponsiveContainer>
@@ -813,7 +813,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
             <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
               <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
                 <h3 className="text-slate-900">Nhật ký hoạt động gần đây</h3>
-                <button className="text-sm text-emerald-600 hover:text-emerald-700">Xem tất cả</button>
+                <button className="text-sm text-blue-600 hover:text-blue-700">Xem tất cả</button>
               </div>
               <div className="divide-y divide-slate-200">
                 {[

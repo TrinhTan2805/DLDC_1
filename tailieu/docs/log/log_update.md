@@ -1,5 +1,41 @@
 # Nhật ký cập nhật hệ thống (Changelog)
- 
+
+## Phiên bản 2.4.8 — Patch 2 (Ngày cập nhật: 18/06/2026)
+
+**Nội dung thay đổi:**
+1. **Chuyển đổi tông màu Thống kê dữ liệu mở sang xanh dương chủ đạo**:
+   - Thay đổi toàn bộ các tabs ("Tìm kiếm và lọc", "Báo cáo thống kê", "Báo cáo phân loại", "Thống kê lượt truy cập") từ thiết kế màu xanh lá/emerald (`emerald`) sang màu xanh dương (`blue`) đồng bộ với hệ thống.
+   - Cập nhật các màu nền của tab active (`bg-blue-50`), màu text active (`text-blue-600` / `text-blue-700`), và đường viền active (`border-blue-600`).
+   - Cập nhật các ô nhập liệu tìm kiếm, bộ lọc, input selection focus states (`focus:ring-blue-500` / `focus:border-blue-500`).
+   - Thay đổi style các nút Tìm kiếm, Xử lý dữ liệu, Thiết lập báo cáo, v.v., sang màu xanh dương chủ đạo (`bg-blue-600 hover:bg-blue-700`).
+   - Cập nhật màu sắc của biểu đồ (BarChart fill, Line stroke trong Recharts) từ màu xanh lá/emerald (`#10b981`, `#059669`) sang màu xanh dương (`#2563eb`, `#3b82f6`) và cập nhật mảng màu COLORS.
+   - Thay đổi các badges, text trends, và các biểu tượng (Filter, TrendingUp, PieChart, BarChart3, Download, Building2) thành màu xanh dương.
+2. **Đồng bộ thiết kế thanh tìm kiếm, bộ lọc và các nút hành động (Yêu cầu công bố)**:
+   - Thiết kế lại hàng tìm kiếm của Tab **Yêu cầu công bố** (`OpenDataPublishedListPage.tsx`) đồng bộ theo phong cách của mục **Thiết lập danh mục > tab Giấy phép**:
+     - Ô nhập tìm kiếm (Input) sử dụng bo góc `rounded-xl` (12px), padding `py-2.5`, text `text-[14px]`, không chứa icon Search bên trong, placeholder đổi thành "Tìm kiếm theo mã, tên tệp dữ liệu...".
+     - Nút Tìm kiếm (`Search`) màu xanh dương, nút Bộ lọc nâng cao (`Filter`) màu trắng viền nhạt, đều có bo góc `rounded-xl` và hiệu ứng active scale-95.
+     - Tích hợp thêm nút **Import** và **Export** dạng `rounded-xl` màu trắng viền nhạt và nút **Gửi yêu cầu công bố** dạng `rounded-xl` màu xanh dương đồng bộ hoàn toàn với thiết kế giao diện của hệ thống thiết lập danh mục dữ liệu mở.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/open-data/OpenDataStatisticsPage.tsx`
+- `src/components/pages/open-data-report/OpenDataReportPage.tsx`
+- `src/components/pages/open-data/OpenDataReportPage.tsx`
+- `src/components/pages/open-data/OpenDataPublishedListPage.tsx`
+
+## Phiên bản 2.4.8 — Patch 1 (Ngày cập nhật: 18/06/2026)
+
+**Nội dung thay đổi:**
+1. **Đồng bộ thiết kế Lịch công bố dữ liệu mở**:
+   - Chỉnh sửa lại thiết kế màn hình **Lịch công bố** (Tab 4 của màn hình Công bố dữ liệu mở `open-data/OpenDataPublishedListPage.tsx`) đồng bộ với giao diện của Tab **Yêu cầu công bố**.
+   - Thiết kế lại thanh tìm kiếm: Chuyển icon Search ra ngoài ô nhập liệu thành một nút Tìm kiếm riêng biệt màu xanh dương (`bg-blue-600`), loại bỏ icon bên trong input, tăng bo góc thành `rounded-2xl`, đổi placeholder thành "Tìm kiếm theo mã, tên tập dữ liệu...".
+   - Chuyển bộ lọc nâng cao (Tần suất công bố, Trạng thái lịch) vào panel rút gọn dạng collapsible (`showFilters`), kích hoạt bằng nút Toggle Filter màu xanh dương/xám.
+   - Loại bỏ lớp bọc ngoài (card wrapper `bg-white border rounded-xl p-4 shadow-sm`) tại thanh tìm kiếm, bộ lọc, và nút hành động của màn hình Lịch công bố (`OpenDataPublishedListPage.tsx`) để các thành phần này nằm trực tiếp trên nền xám nhạt.
+   - Nút **Thêm lịch mới** được thiết kế lại với phong cách Button Primary bo góc tròn mềm mại (`rounded-xl px-5 py-2.5 text-[14px] font-medium transition-all active:scale-95`).
+   - Cập nhật định dạng hàng của bảng dữ liệu lịch công bố: điều chỉnh padding và cỡ chữ của các ô (TD) sang `px-4 py-3 text-[13px]`, đồng bộ badge trạng thái hoạt động/tạm dừng (`font-medium`).
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/open-data/OpenDataPublishedListPage.tsx`
+
 ## Phiên bản 2.4.8 (Ngày cập nhật: 17/06/2026)
 
 **Nội dung thay đổi:**
@@ -492,3 +528,74 @@ Redesign thanh tìm kiếm & bộ lọc tại tab **Kiểm tra & Phê duyệt** 
 - `src/components/pages/provisioning/DataProvisionApiManagementPage.tsx`
 - `src/components/pages/provisioning/modals/ProvisionApiModal.tsx`
 - `src/components/pages/provisioning/modals/ProvisionAccessControlModal.tsx`
+
+---
+
+## Phiên bản 2.4.9 (Ngày cập nhật: 18/06/2026)
+
+**Nội dung thay đổi:**
+1. **Thiết kế đồng bộ tại tab Yêu cầu công bố và tab Phê duyệt (Công bố dữ liệu mở):**
+   - Loại bỏ card bọc ngoài (card container) tại thanh công cụ tìm kiếm, bộ lọc và các nút chức năng.
+   - Thiết kế lại ô nhập liệu tìm kiếm, nút kích hoạt tìm kiếm, và nút đóng/mở bộ lọc nâng cao sử dụng cấu trúc bo góc `rounded-xl` (12px), độ cao nhất quán, màu nền hover/focus và hiệu ứng chuyển đổi trạng thái nhẹ nhàng.
+   - Di chuyển bảng bộ lọc nâng cao thành khối riêng độc lập bên dưới thanh tìm kiếm chính để giao diện trở nên thông thoáng và chuyên nghiệp.
+   - Loại bỏ hoàn toàn hai nút Import/Export khỏi thanh công cụ của cả hai tab Yêu cầu công bố và Phê duyệt.
+   - Định dạng lại nút hành động "Gửi yêu cầu công bố" sử dụng thiết kế góc bo tròn `rounded-xl` (12px) thống nhất với hệ thống.
+2. **Thiết kế đồng bộ tại tab Lịch công bố:**
+   - Loại bỏ khung bọc ngoài (card container) tại thanh công cụ tìm kiếm, bộ lọc và các nút chức năng.
+   - Thiết kế lại ô nhập liệu tìm kiếm, nút kích hoạt tìm kiếm, và nút đóng/mở bộ lọc nâng cao sử dụng cấu trúc bo góc `rounded-xl` (12px), độ cao nhất quán, màu nền hover/focus và hiệu ứng chuyển đổi trạng thái nhẹ nhàng.
+   - Chuyển bộ lọc tần suất công bố và trạng thái lịch vào bảng bộ lọc nâng cao hiển thị động bên dưới.
+   - Định dạng lại nút hành động "Thêm lịch mới" sử dụng thiết kế góc bo tròn `rounded-xl` (12px) thống nhất với hệ thống.
+3. **Cập nhật giao diện thanh chọn Tab (Tabs Header):**
+   - Loại bỏ thuộc tính chữ đậm (`font-semibold`) khi một tab được kích hoạt/lựa chọn tại màn hình **Công bố dữ liệu mở**, chuyển về thuộc tính chữ thường vừa (`font-medium`) đồng nhất.
+4. **Cải tiến quy trình Gửi yêu cầu công bố (Yêu cầu công bố):**
+   - Chuyển đổi trường nhập tự do "Tên tập dữ liệu" thành danh sách lựa chọn (`select`) từ danh mục tệp dữ liệu đã được thiết lập/cấu hình metadata trước đó.
+   - Hỗ trợ tự động điền (autofill) các thông tin metadata đi kèm bao gồm: Danh mục dữ liệu mở, Giấy phép, Từ khóa, Cơ quan công bố và Mô tả.
+   - Cho phép người dùng chỉnh sửa các trường thông tin tự động điền này, đồng thời tích hợp cơ chế validate thời gian thực (real-time validation) để đảm bảo các dữ liệu sau khi sửa đổi vẫn nằm trong phạm vi cấu hình metadata cho phép (báo lỗi và chặn gửi yêu cầu / lưu nháp nếu vi phạm).
+
+5. **Cải tiến Modal Chi tiết tệp dữ liệu mở (Thiết lập danh mục):**
+   - Thiết kế lại Modal Xem chi tiết của tệp dữ liệu mở thuộc Danh mục dữ liệu mở có giao diện đồng bộ với Modal Gửi yêu cầu công bố mới.
+   - Hiển thị đầy đủ thông tin: Tên tập dữ liệu, Danh mục dữ liệu mở, Giấy phép, Từ khóa, Cơ quan công bố, Thông tin mô tả.
+   - Thêm phần trực quan hóa Dạng tải dữ liệu dưới dạng các Tabs lựa chọn tĩnh (Tải lên tệp / Lấy từ API) và phần biểu diễn file Excel trực quan.
+   - Hiển thị cấu trúc Metadata yêu cầu (danh sách tiêu đề cột mong muốn) dưới dạng các nhãn tag màu xanh dương tinh tế tùy biến theo từng danh mục dữ liệu.
+   - Đồng bộ hóa thiết kế chân trang (Modal Footer) và các nút hành động (Gửi phê duyệt, Phê duyệt, Từ chối, Công khai, Bỏ công khai) theo đúng chuẩn thiết kế hệ thống.
+6. **Bổ sung Mock Data và hỗ trợ hiển thị dữ liệu API (Thiết lập danh mục):**
+   - Thêm 2 bản ghi mock dữ liệu cho trường hợp Dạng tải dữ liệu là "Lấy từ API":
+     * Bản ghi 1: API nội bộ Bộ Tư pháp (Internal API) - GET.
+     * Bản ghi 2: API của cơ quan nhà nước từ Cổng DVC Quốc gia (External API) - POST.
+   - Cập nhật cấu trúc hiển thị cột "Metadata" tại bảng danh sách tệp dữ liệu hiển thị nhãn "API - Nội bộ" hoặc "API - Cơ quan nhà nước".
+   - Cập nhật Modal Chi tiết tự động chuyển đổi giao diện hiển thị thông tin chi tiết API (URL, Method, Params, Headers, Mô tả API) thay vì sơ đồ tệp Excel khi chọn xem các bản ghi dạng API.
+7. **Loại bỏ nút Import/Export khỏi danh sách tệp dữ liệu (Thiết lập danh mục):**
+   - Loại bỏ hoàn toàn nút Import và Export khỏi thanh công cụ trên tab danh sách tệp dữ liệu của màn hình Biên tập danh mục dữ liệu mở.
+8. **Cải tiến Modal Chỉnh sửa tệp dữ liệu mở (Thiết lập danh mục):**
+   - Thiết kế lại Modal Chỉnh sửa với giao diện đồng bộ hoàn toàn với Modal Xem chi tiết và Modal Gửi yêu cầu công bố mới.
+   - Cho phép chỉnh sửa trực tiếp các trường thông tin: Tên tập dữ liệu, Giấy phép, Từ khóa, Cơ quan công bố, Thông tin mô tả.
+   - Khóa (để ở dạng read-only) các phần liên quan đến phương thức phân phối dữ liệu gốc theo đúng yêu cầu:
+     * Khóa nút chuyển đổi Dạng tải dữ liệu.
+     * Khóa Tệp dữ liệu đã tải lên (nếu dạng tải là Tệp).
+     * Khóa toàn bộ các cấu hình API chi tiết bao gồm URL, Method, Params, Headers (nếu dạng tải là API).
+   - Tích hợp liên kết hai chiều (two-way binding) with state của component giúp các thay đổi được lưu và phản hồi ngay lập tức trên bảng danh sách khi bấm nút "Lưu thay đổi".
+9. **Loại bỏ nút Thêm tệp dữ liệu (Thiết lập danh mục):**
+   - Loại bỏ nút "+ Thêm tệp dữ liệu" tại thanh công cụ (Toolbar) trên tab danh sách của màn hình Thiết lập danh mục dữ liệu mở.
+10. **Bổ sung bộ lọc nâng cao (Thiết lập danh mục):**
+    - Bổ sung bộ lọc theo **Giấy phép** (License): Cho phép lọc danh sách theo giấy phép (Tất cả, Giấy phép dữ liệu mở công cộng, Giấy phép ODC-BY).
+    - Bổ sung bộ lọc theo khoảng **Ngày gửi công bố** (thay cho Ngày tạo): Cung cấp 2 ô chọn ngày: "Từ ngày" (startDateFilter) và "Đến ngày" (endDateFilter) để lọc các bản ghi được gửi công bố trong khoảng thời gian mong muốn.
+    - Cập nhật logic lọc (`filteredData`) thực hiện kiểm duyệt, so khớp chính xác chuỗi ngày tháng ở định dạng DD/MM/YYYY của dữ liệu bản ghi với khoảng ngày đã chọn.
+11. **Đổi tên hiển thị từ "Ngày tạo" sang "Ngày gửi công bố":**
+    - Đổi tên cột hiển thị trên bảng danh sách tệp dữ liệu từ "Ngày tạo" thành "Ngày gửi công bố".
+    - Đổi tên nhãn tiêu đề của bộ lọc từ ngày/đến ngày từ "Ngày tạo" thành "Ngày gửi công bố".
+12. **Cập nhật kiểu dáng nhãn bộ lọc nâng cao:**
+    - Thay đổi kích thước chữ của các nhãn bộ lọc nâng cao (Trạng thái công khai, Giấy phép, Ngày gửi công bố) tăng lên 13px (`text-[13px]`).
+    - Bỏ in đậm chữ (chuyển sang `font-normal`) và bỏ viết hoa chữ (`uppercase`) để có thiết kế thanh lịch, nhẹ nhàng theo yêu cầu.
+13. **Thêm tính năng Lịch sử phiên bản tệp dữ liệu:**
+    - Thêm nút "Lịch sử phiên bản" (Icon History) tại cột Thao tác trên bảng danh sách tệp dữ liệu.
+    - Phát triển modal **Lịch sử phiên bản** hiển thị danh sách phiên bản của tệp dữ liệu: "Tên tệp dữ liệu", "Phiên bản", "Người cập nhật", "Ngày phát hành", "Ghi chú thay đổi", "Trạng thái".
+    - Tích hợp modal con **So sánh cấu trúc phiên bản** (tự động phát hiện kiểu API / Tệp Excel để hiển thị bảng so sánh cấu trúc thuộc tính trước và sau cập nhật).
+    - Cung cấp nút **Khôi phục phiên bản** và **Tải về** tệp dữ liệu/API tương ứng trực tiếp tại modal so sánh cấu trúc.
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.4.8 -> 2.4.9)
+- `src/components/pages/open-data/OpenDataPublishedListPage.tsx`
+- `src/components/pages/open-data-category/OpenDataCategoryPage.tsx`
+- `src/components/pages/open-data-category/components/tabs/OpenDataCategoryGrid.tsx`
+- `src/components/pages/open-data-category/components/tabs/FilesTab.tsx`
+- `src/components/pages/open-data-category/components/OpenDataCategoryFilters.tsx`

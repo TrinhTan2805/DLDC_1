@@ -168,6 +168,49 @@ const APPROVED_CATEGORIES = [
     expectedHeaders: ['Họ và tên', 'Ngày sinh', 'Giới tính', 'Quốc tịch', 'Số Chứng chỉ hành nghề luật sư', 'Số Thẻ luật sư', 'Nơi làm việc/nơi hành nghề', 'Thành viên Đoàn Luật sư', 'Tình trạng hành nghề']
   }
 ];
+interface ConfiguredMetadataFile {
+  fileName: string;
+  categoryCode: string;
+  categoryName: string;
+  license: string;
+  keywords: string;
+  publisher: string;
+  description: string;
+  format: string;
+}
+
+const CONFIGURED_METADATA_FILES: ConfiguredMetadataFile[] = [
+  {
+    fileName: 'danh_sach_to_chuc_tgpl.xlsx',
+    categoryCode: 'ODC001',
+    categoryName: 'Danh sách tổ chức thực hiện trợ giúp pháp lý',
+    license: 'Giấy phép dữ liệu mở công cộng',
+    keywords: 'luật, mở, thống kê',
+    publisher: 'Bộ Tư pháp',
+    description: 'Dữ liệu tổ chức thực hiện trợ giúp pháp lý bao gồm các trung tâm nhà nước và văn phòng hợp đồng.',
+    format: 'CSV'
+  },
+  {
+    fileName: 'danh_sach_nguoi_tgpl.json',
+    categoryCode: 'ODC002',
+    categoryName: 'Danh sách người thực hiện trợ giúp pháp lý',
+    license: 'Giấy phép ODC-BY',
+    keywords: 'doanh nghiệp, đăng ký',
+    publisher: 'Cục Bổ trợ tư pháp',
+    description: 'Dữ liệu danh sách trợ giúp viên pháp luật và luật sư cộng tác viên.',
+    format: 'JSON'
+  },
+  {
+    fileName: 'danh_sach_luat_su.xlsx',
+    categoryCode: 'ODC003',
+    categoryName: 'Danh sách Luật sư Việt Nam',
+    license: 'Giấy phép dữ liệu mở công cộng',
+    keywords: 'luật sư, bổ trợ tư pháp',
+    publisher: 'Bộ Tư pháp',
+    description: 'Yêu cầu công bố dữ liệu danh sách Luật sư Việt Nam cập nhật.',
+    format: 'CSV'
+  }
+];
 
 const WAREHOUSE_DATABASES = [
   { id: 'db_tgpl_org', name: 'CSDL Trợ giúp pháp lý - Bảng tổ chức' },
@@ -399,6 +442,44 @@ export function OpenDataPublishedListPage() {
   const [requestPublisher, setRequestPublisher] = useState('Bộ Tư pháp');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
+  const [formValidationError, setFormValidationError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!requestFileName) {
+      setFormValidationError(null);
+      return;
+    }
+    const config = CONFIGURED_METADATA_FILES.find(f => f.fileName === requestFileName);
+    if (!config) {
+      setFormValidationError(null);
+      return;
+    }
+
+    if (requestCategory && requestCategory !== config.categoryCode) {
+      setFormValidationError(`Danh mục dữ liệu mở không khớp với cấu hình metadata của tệp (${config.categoryName}).`);
+      return;
+    }
+    if (requestLicense && requestLicense !== config.license) {
+      setFormValidationError(`Giấy phép không khớp với cấu hình metadata của tệp (${config.license}).`);
+      return;
+    }
+    if (requestPublisher && requestPublisher.trim().toLowerCase() !== config.publisher.toLowerCase()) {
+      setFormValidationError(`Cơ quan công bố không khớp với cấu hình metadata của tệp (${config.publisher}).`);
+      return;
+    }
+    if (requestKeywords) {
+      const configKeywords = config.keywords.split(',').map(k => k.trim().toLowerCase());
+      const currentKeywords = requestKeywords.split(',').map(k => k.trim().toLowerCase());
+      const missingKeywords = configKeywords.filter(k => !currentKeywords.includes(k));
+      if (missingKeywords.length > 0) {
+        setFormValidationError(`Từ khóa thiếu các từ bắt buộc trong cấu hình metadata: ${missingKeywords.join(', ')}.`);
+        return;
+      }
+    }
+
+    setFormValidationError(null);
+  }, [requestFileName, requestCategory, requestLicense, requestKeywords, requestPublisher]);
+
   const [uploadType, setUploadType] = useState<'file' | 'api'>('file');
   const [apiType, setApiType] = useState<'internal' | 'external'>('internal');
   const [selectedInternalApiId, setSelectedInternalApiId] = useState('');
@@ -620,6 +701,8 @@ export function OpenDataPublishedListPage() {
     if (!file) return;
     processFile(file);
   };
+
+
 
   const processFile = (file: File) => {
     const MAX_SIZE = 100 * 1024 * 1024; // 100MB
@@ -893,7 +976,7 @@ export function OpenDataPublishedListPage() {
             onClick={() => setActiveTab('requests')}
             className={`flex items-center gap-2 px-6 py-4 text-[14px] transition-all border-b-2 font-medium cursor-pointer ${
               activeTab === 'requests'
-                ? 'border-blue-600 text-blue-600 bg-blue-50/50 font-semibold'
+                ? 'border-blue-600 text-blue-600 bg-blue-50/50 font-medium'
                 : 'border-transparent text-slate-500 hover:text-slate-900 hover:border-slate-300'
             }`}
           >
@@ -908,7 +991,7 @@ export function OpenDataPublishedListPage() {
             }}
             className={`flex items-center gap-2 px-6 py-4 text-[14px] transition-all border-b-2 font-medium cursor-pointer ${
               activeTab === 'approval'
-                ? 'border-blue-600 text-blue-600 bg-blue-50/50 font-semibold'
+                ? 'border-blue-600 text-blue-600 bg-blue-50/50 font-medium'
                 : 'border-transparent text-slate-500 hover:text-slate-900 hover:border-slate-300'
             }`}
           >
@@ -920,7 +1003,7 @@ export function OpenDataPublishedListPage() {
             onClick={() => setActiveTab('schedule')}
             className={`flex items-center gap-2 px-6 py-4 text-[14px] transition-all border-b-2 font-medium cursor-pointer ${
               activeTab === 'schedule'
-                ? 'border-blue-600 text-blue-600 bg-blue-50/50 font-semibold'
+                ? 'border-blue-600 text-blue-600 bg-blue-50/50 font-medium'
                 : 'border-transparent text-slate-500 hover:text-slate-900 hover:border-slate-300'
             }`}
           >
@@ -936,107 +1019,118 @@ export function OpenDataPublishedListPage() {
         {/* RENDER TAB 1: YÊU CẦU CÔNG BỐ */}
         {activeTab === 'requests' && (
           <div className="space-y-4 animate-fade-in">
-            {/* Filter and Search Row */}
-            <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-[0_1px_3px_rgba(0,0,0,0.05)] space-y-3">
-              <div className="flex flex-col md:flex-row items-center gap-3">
-                <div className="flex-1 w-full flex items-center gap-2">
-                  <div className="flex-1 relative group">
-                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-                    <input
-                      type="text"
-                      placeholder="Tìm kiếm theo tên tệp dữ liệu..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-400 bg-slate-50/50 hover:bg-slate-50 font-medium"
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setShowFilters(!showFilters)}
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all cursor-pointer ${
-                      showFilters
-                        ? 'bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 shadow-sm'
-                        : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                    }`}
-                    title={showFilters ? "Đóng bộ lọc" : "Bộ lọc nâng cao"}
-                  >
-                    {showFilters ? <X className="w-4.5 h-4.5" /> : <Filter className="w-4 h-4" />}
-                  </button>
+                        {/* Filter and Search Row */}
+            <div className="flex flex-col md:flex-row items-center gap-3 w-full">
+              <div className="flex-1 flex items-center gap-2 w-full">
+                {/* Search Input */}
+                <div className="flex-1 relative">
+                  <input
+                    type="text"
+                    placeholder="Tìm kiếm theo mã, tên tệp dữ liệu..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full px-4 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-400 bg-white hover:bg-slate-50/50 font-medium shadow-sm"
+                  />
                 </div>
-                
-                <div className="flex items-center gap-2 w-full md:w-auto">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      resetRequestForm();
-                      setShowRequestModal(true);
-                    }}
-                    className="flex-1 md:flex-none px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[14px] font-medium flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Gửi yêu cầu công bố
-                  </button>
-                </div>
+
+                {/* Search Button */}
+                <button
+                  type="button"
+                  className="w-10 h-10 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shrink-0 transition-all cursor-pointer active:scale-95 shadow-sm"
+                  title="Tìm kiếm"
+                >
+                  <Search className="w-4 h-4" />
+                </button>
+
+                {/* Filter Toggle Button */}
+                <button
+                  type="button"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all border cursor-pointer active:scale-95 ${
+                    showFilters
+                      ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-sm'
+                      : 'bg-white border-slate-200 text-slate-650 hover:bg-slate-50'
+                  }`}
+                  title={showFilters ? "Đóng bộ lọc" : "Bộ lọc nâng cao"}
+                >
+                  {showFilters ? <X className="w-4.5 h-4.5" /> : <Filter className="w-4 h-4" />}
+                </button>
               </div>
 
-              {/* Advanced Collapsible Filter Panel */}
-              {showFilters && (
-                <div className="mt-4 pt-4 border-t border-slate-100">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Trạng thái yêu cầu</label>
-                      <div className="relative">
-                        <select
-                          value={selectedStatus}
-                          onChange={(e) => setSelectedStatus(e.target.value)}
-                          className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                        >
-                          <option value="all">Tất cả trạng thái</option>
-                          <option value="draft">Bản nháp</option>
-                          <option value="pending">Chờ công bố</option>
-                          <option value="approved">Đã công bố</option>
-                          <option value="rejected">Từ chối</option>
-                        </select>
-                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                      </div>
+              {/* Action Buttons */}
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetRequestForm();
+                    setShowRequestModal(true);
+                  }}
+                  className="flex-1 md:flex-none px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[14px] font-medium flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  Gửi yêu cầu công bố
+                </button>
+              </div>
+            </div>
+
+            {/* Advanced Collapsible Filter Panel */}
+            {showFilters && (
+              <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-sm">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Trạng thái yêu cầu</label>
+                    <div className="relative">
+                      <select
+                        value={selectedStatus}
+                        onChange={(e) => setSelectedStatus(e.target.value)}
+                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+                      >
+                        <option value="all">Tất cả trạng thái</option>
+                        <option value="draft">Bản nháp</option>
+                        <option value="pending">Chờ công bố</option>
+                        <option value="approved">Đã công bố</option>
+                        <option value="rejected">Từ chối</option>
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                     </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Danh mục mở</label>
-                      <div className="relative">
-                        <select
-                          value={selectedCategory}
-                          onChange={(e) => setSelectedCategory(e.target.value)}
-                          className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                        >
-                          <option value="all">Tất cả danh mục</option>
-                          <option value="Danh sách tổ chức thực hiện trợ giúp pháp lý">Danh sách tổ chức thực hiện trợ giúp pháp lý</option>
-                          <option value="Danh sách người thực hiện trợ giúp pháp lý">Danh sách người thực hiện trợ giúp pháp lý</option>
-                          <option value="Danh sách Luật sư Việt Nam">Danh sách Luật sư Việt Nam</option>
-                        </select>
-                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                      </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Danh mục mở</label>
+                    <div className="relative">
+                      <select
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+                      >
+                        <option value="all">Tất cả danh mục</option>
+                        <option value="Danh sách tổ chức thực hiện trợ giúp pháp lý">Danh sách tổ chức thực hiện trợ giúp pháp lý</option>
+                        <option value="Danh sách người thực hiện trợ giúp pháp lý">Danh sách người thực hiện trợ giúp pháp lý</option>
+                        <option value="Danh sách Luật sư Việt Nam">Danh sách Luật sư Việt Nam</option>
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                     </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Cơ quan công bố</label>
-                      <div className="relative">
-                        <select
-                          value={selectedPublisher}
-                          onChange={(e) => setSelectedPublisher(e.target.value)}
-                          className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                        >
-                          <option value="all">Tất cả cơ quan</option>
-                          <option value="Bộ Tư pháp">Bộ Tư pháp</option>
-                          <option value="Cục Bổ trợ tư pháp">Cục Bổ trợ tư pháp</option>
-                        </select>
-                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                      </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Cơ quan công bố</label>
+                    <div className="relative">
+                      <select
+                        value={selectedPublisher}
+                        onChange={(e) => setSelectedPublisher(e.target.value)}
+                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+                      >
+                        <option value="all">Tất cả cơ quan</option>
+                        <option value="Bộ Tư pháp">Bộ Tư pháp</option>
+                        <option value="Cục Bổ trợ tư pháp">Cục Bổ trợ tư pháp</option>
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                     </div>
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
-            {/* Grid Data Table */}
+
+{/* Grid Data Table */}
             <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
@@ -1106,95 +1200,104 @@ export function OpenDataPublishedListPage() {
         {/* RENDER TAB 2: PHÊ DUYỆT */}
         {activeTab === 'approval' && (
           <div className="space-y-4 animate-fade-in">
-            {/* Filter and Search Row */}
-            <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-[0_1px_3px_rgba(0,0,0,0.05)] space-y-3">
-              <div className="flex flex-col md:flex-row items-center gap-3">
-                <div className="flex-1 w-full flex items-center gap-2">
-                  <div className="flex-1 relative group">
-                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-                    <input
-                      type="text"
-                      placeholder="Tìm kiếm theo tên tệp dữ liệu..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-400 bg-slate-50/50 hover:bg-slate-50 font-medium"
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setShowFilters(!showFilters)}
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all cursor-pointer ${
-                      showFilters
-                        ? 'bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 shadow-sm'
-                        : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                    }`}
-                    title={showFilters ? "Đóng bộ lọc" : "Bộ lọc nâng cao"}
-                  >
-                    {showFilters ? <X className="w-4.5 h-4.5" /> : <Filter className="w-4 h-4" />}
-                  </button>
+                        {/* Filter and Search Row */}
+            <div className="flex flex-col md:flex-row items-center gap-3 w-full">
+              <div className="flex-1 flex items-center gap-2 w-full">
+                {/* Search Input */}
+                <div className="flex-1 relative">
+                  <input
+                    type="text"
+                    placeholder="Tìm kiếm theo tên tệp dữ liệu..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full px-4 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-400 bg-white hover:bg-slate-50/50 font-medium shadow-sm"
+                  />
                 </div>
-                
-                <div className="flex items-center gap-2 w-full md:w-auto">
-                </div>
+
+                {/* Search Button */}
+                <button
+                  type="button"
+                  className="w-10 h-10 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shrink-0 transition-all cursor-pointer active:scale-95 shadow-sm"
+                  title="Tìm kiếm"
+                >
+                  <Search className="w-4 h-4" />
+                </button>
+
+                {/* Filter Toggle Button */}
+                <button
+                  type="button"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all border cursor-pointer active:scale-95 ${
+                    showFilters
+                      ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-sm'
+                      : 'bg-white border-slate-200 text-slate-655 hover:bg-slate-50'
+                  }`}
+                  title={showFilters ? "Đóng bộ lọc" : "Bộ lọc nâng cao"}
+                >
+                  {showFilters ? <X className="w-4.5 h-4.5" /> : <Filter className="w-4 h-4" />}
+                </button>
               </div>
 
-              {/* Advanced Collapsible Filter Panel */}
-              {showFilters && (
-                <div className="mt-4 pt-4 border-t border-slate-100">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Trạng thái yêu cầu</label>
-                      <div className="relative">
-                        <select
-                          value={selectedStatus}
-                          onChange={(e) => setSelectedStatus(e.target.value)}
-                          className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                        >
-                          <option value="all">Tất cả trạng thái</option>
-                          <option value="pending">Chờ công bố</option>
-                          <option value="approved">Đã công bố</option>
-                          <option value="rejected">Từ chối</option>
-                        </select>
-                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                      </div>
+
+            </div>
+
+            {/* Advanced Collapsible Filter Panel */}
+            {showFilters && (
+              <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-sm">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Trạng thái yêu cầu</label>
+                    <div className="relative">
+                      <select
+                        value={selectedStatus}
+                        onChange={(e) => setSelectedStatus(e.target.value)}
+                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+                      >
+                        <option value="all">Tất cả trạng thái</option>
+                        <option value="pending">Chờ công bố</option>
+                        <option value="approved">Đã công bố</option>
+                        <option value="rejected">Từ chối</option>
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                     </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Danh mục mở</label>
-                      <div className="relative">
-                        <select
-                          value={selectedCategory}
-                          onChange={(e) => setSelectedCategory(e.target.value)}
-                          className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                        >
-                          <option value="all">Tất cả danh mục</option>
-                          <option value="Danh sách tổ chức thực hiện trợ giúp pháp lý">Danh sách tổ chức thực hiện trợ giúp pháp lý</option>
-                          <option value="Danh sách người thực hiện trợ giúp pháp lý">Danh sách người thực hiện trợ giúp pháp lý</option>
-                          <option value="Danh sách Luật sư Việt Nam">Danh sách Luật sư Việt Nam</option>
-                        </select>
-                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                      </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Danh mục mở</label>
+                    <div className="relative">
+                      <select
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+                      >
+                        <option value="all">Tất cả danh mục</option>
+                        <option value="Danh sách tổ chức thực hiện trợ giúp pháp lý">Danh sách tổ chức thực hiện trợ giúp pháp lý</option>
+                        <option value="Danh sách người thực hiện trợ giúp pháp lý">Danh sách người thực hiện trợ giúp pháp lý</option>
+                        <option value="Danh sách Luật sư Việt Nam">Danh sách Luật sư Việt Nam</option>
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                     </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Cơ quan công bố</label>
-                      <div className="relative">
-                        <select
-                          value={selectedPublisher}
-                          onChange={(e) => setSelectedPublisher(e.target.value)}
-                          className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                        >
-                          <option value="all">Tất cả cơ quan</option>
-                          <option value="Bộ Tư pháp">Bộ Tư pháp</option>
-                          <option value="Cục Bổ trợ tư pháp">Cục Bổ trợ tư pháp</option>
-                        </select>
-                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                      </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Cơ quan công bố</label>
+                    <div className="relative">
+                      <select
+                        value={selectedPublisher}
+                        onChange={(e) => setSelectedPublisher(e.target.value)}
+                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+                      >
+                        <option value="all">Tất cả cơ quan</option>
+                        <option value="Bộ Tư pháp">Bộ Tư pháp</option>
+                        <option value="Cục Bổ trợ tư pháp">Cục Bổ trợ tư pháp</option>
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                     </div>
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
-            {/* Grid Data Table */}
+
+{/* Grid Data Table */}
             <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
@@ -1274,96 +1377,114 @@ export function OpenDataPublishedListPage() {
         {activeTab === 'schedule' && (
           <div className="space-y-4 animate-fade-in">
             {/* Filter and Search Row */}
-            <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-4">
-              <div className="flex flex-col lg:flex-row items-center justify-between gap-3">
-                {/* Search input with clear button inside */}
-                <div className="relative flex-1 w-full">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <div className="flex flex-col md:flex-row items-center gap-3 w-full">
+              <div className="flex-1 flex items-center gap-2 w-full">
+                {/* Search Input */}
+                <div className="flex-1 relative">
                   <input
                     type="text"
                     placeholder="Tìm kiếm theo tên tập dữ liệu, nguồn dữ liệu..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-9 pr-9 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] outline-none focus:ring-2 focus:ring-blue-100 transition-all placeholder:text-slate-400 h-10"
+                    className="w-full px-4 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-400 bg-white hover:bg-slate-50/50 font-medium shadow-sm"
                   />
-                  {searchTerm && (
-                    <button
-                      type="button"
-                      onClick={() => setSearchTerm('')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-100 transition-all"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  )}
                 </div>
-                
-                <div className="flex items-center gap-2 w-full lg:w-auto shrink-0 justify-end">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setScheduleFormData({
-                        datasetId: '',
-                        frequency: 'daily',
-                        startTime: '08:00',
-                        startDate: '',
-                        endDate: '',
-                        publishFormat: 'api',
-                        targetAudience: '',
-                        contactInfo: '',
-                        dataSource: '',
-                        weeklyDays: [],
-                        monthlyDay: 1,
-                        quarterlyDay: 1,
-                        quarterlyMonth: 1
-                      });
-                      setIsEditingSchedule(false);
-                      setSelectedSchedule(null);
-                      setShowScheduleModal(true);
-                    }}
-                    className="flex-1 lg:flex-none px-4 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[13px] font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-sm whitespace-nowrap cursor-pointer"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Thêm lịch mới
-                  </button>
-                </div>
+
+                {/* Search Button */}
+                <button
+                  type="button"
+                  className="w-10 h-10 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shrink-0 transition-all cursor-pointer active:scale-95 shadow-sm"
+                  title="Tìm kiếm"
+                >
+                  <Search className="w-4 h-4" />
+                </button>
+
+                {/* Filter Toggle Button */}
+                <button
+                  type="button"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all border cursor-pointer active:scale-95 ${
+                    showFilters
+                      ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-sm'
+                      : 'bg-white border-slate-200 text-slate-655 hover:bg-slate-50'
+                  }`}
+                  title={showFilters ? "Đóng bộ lọc" : "Bộ lọc nâng cao"}
+                >
+                  {showFilters ? <X className="w-4.5 h-4.5" /> : <Filter className="w-4 h-4" />}
+                </button>
               </div>
 
-              {/* Filters Row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-100 pt-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Tần suất công bố</label>
-                  <div className="relative">
-                    <select
-                      value={selectedScheduleFrequency}
-                      onChange={(e) => setSelectedScheduleFrequency(e.target.value)}
-                      className="w-full pl-3 pr-8 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-100 transition-all appearance-none cursor-pointer text-slate-700 h-10"
-                    >
-                      <option value="all">Tất cả tần suất</option>
-                      <option value="daily">Hàng ngày</option>
-                      <option value="weekly">Hàng tuần</option>
-                      <option value="monthly">Hàng tháng</option>
-                      <option value="quarterly">Hàng quý</option>
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+              {/* Action Buttons */}
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setScheduleFormData({
+                      datasetId: '',
+                      frequency: 'daily',
+                      startTime: '08:00',
+                      startDate: '',
+                      endDate: '',
+                      publishFormat: 'api',
+                      targetAudience: '',
+                      contactInfo: '',
+                      dataSource: '',
+                      weeklyDays: [],
+                      monthlyDay: 1,
+                      quarterlyDay: 1,
+                      quarterlyMonth: 1
+                    });
+                    setIsEditingSchedule(false);
+                    setSelectedSchedule(null);
+                    setShowScheduleModal(true);
+                  }}
+                  className="flex-1 lg:flex-none px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[14px] font-medium flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  Thêm lịch mới
+                </button>
+              </div>
+            </div>
+
+            {/* Advanced Collapsible Filter Panel */}
+            {showFilters && (
+              <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Tần suất công bố</label>
+                    <div className="relative">
+                      <select
+                        value={selectedScheduleFrequency}
+                        onChange={(e) => setSelectedScheduleFrequency(e.target.value)}
+                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+                      >
+                        <option value="all">Tất cả tần suất</option>
+                        <option value="daily">Hàng ngày</option>
+                        <option value="weekly">Hàng tuần</option>
+                        <option value="monthly">Hàng tháng</option>
+                        <option value="quarterly">Hàng quý</option>
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Trạng thái lịch</label>
-                  <div className="relative">
-                    <select
-                      value={selectedScheduleStatus}
-                      onChange={(e) => setSelectedScheduleStatus(e.target.value)}
-                      className="w-full pl-3 pr-8 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-100 transition-all appearance-none cursor-pointer text-slate-700 h-10"
-                    >
-                      <option value="all">Tất cả trạng thái</option>
-                      <option value="active">Hoạt động</option>
-                      <option value="inactive">Tạm dừng</option>
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Trạng thái lịch</label>
+                    <div className="relative">
+                      <select
+                        value={selectedScheduleStatus}
+                        onChange={(e) => setSelectedScheduleStatus(e.target.value)}
+                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+                      >
+                        <option value="all">Tất cả trạng thái</option>
+                        <option value="active">Hoạt động</option>
+                        <option value="inactive">Tạm dừng</option>
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Schedules Table */}
             <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
@@ -1628,14 +1749,35 @@ export function OpenDataPublishedListPage() {
                   <label className="block font-semibold text-slate-700 mb-1">
                     Tên tập dữ liệu <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Nhập tên tập dữ liệu (ví dụ: Danh sách tổ chức TGPL Quý 2/2026)"
+                  <select
                     value={requestFileName}
-                    onChange={(e) => setRequestFileName(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                    required
+                    onChange={(e) => {
+                      const selectedFile = e.target.value;
+                      setRequestFileName(selectedFile);
+                      const fileConfig = CONFIGURED_METADATA_FILES.find(f => f.fileName === selectedFile);
+                      if (fileConfig) {
+                        setRequestCategory(fileConfig.categoryCode);
+                        setRequestLicense(fileConfig.license);
+                        setRequestKeywords(fileConfig.keywords);
+                        setRequestPublisher(fileConfig.publisher);
+                        setRequestDescription(fileConfig.description);
+                        setValidationError(null);
+                        setValidationSuccess(false);
+                        if (uploadedFile) {
+                          runValidation(uploadedFile, fileConfig.categoryCode, false);
+                        }
+                      }
+                    }}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  >
+                    <option value="">-- Chọn tệp dữ liệu đã cấu hình --</option>
+                    {CONFIGURED_METADATA_FILES.map(file => (
+                      <option key={file.fileName} value={file.fileName}>
+                        {file.fileName}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div>
@@ -1925,6 +2067,16 @@ export function OpenDataPublishedListPage() {
                 )}
               </div>
 
+              {formValidationError && (
+                <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg text-sm flex items-start gap-2 mb-4 animate-fade-in">
+                  <AlertTriangle className="w-5 h-5 mt-0.5 shrink-0 text-amber-600" />
+                  <div>
+                    <span className="font-semibold">Thông tin chỉnh sửa không hợp lệ so với metadata cho phép:</span>
+                    <p className="mt-1 text-xs text-amber-700">{formValidationError}</p>
+                  </div>
+                </div>
+              )}
+
               <div className="border-t border-slate-200 pt-4 flex items-center justify-between gap-3 bg-white">
                 <button
                   type="button"
@@ -1937,16 +2089,21 @@ export function OpenDataPublishedListPage() {
                   <button
                     type="button"
                     onClick={handleSaveDraft}
-                    className="px-4 py-2 border border-slate-300 text-slate-600 hover:bg-slate-50 rounded-lg font-semibold text-sm flex items-center gap-1.5 transition-colors cursor-pointer"
+                    disabled={!!formValidationError}
+                    className={`px-4 py-2 border rounded-lg font-semibold text-sm flex items-center gap-1.5 transition-colors ${
+                      formValidationError
+                        ? 'bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed'
+                        : 'border-slate-300 text-slate-600 hover:bg-slate-50 cursor-pointer'
+                    }`}
                   >
                     <Save className="w-4 h-4" />
                     Lưu nháp
                   </button>
                   <button
                     type="submit"
-                    disabled={uploadType === 'file' && !validationSuccess}
+                    disabled={(uploadType === 'file' && !validationSuccess) || !!formValidationError}
                     className={`px-4 py-2 text-white rounded-lg font-semibold text-sm flex items-center gap-2 shadow-sm transition-all ${
-                      uploadType === 'api' || validationSuccess
+                      (uploadType === 'api' || validationSuccess) && !formValidationError
                         ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
                         : 'bg-slate-300 cursor-not-allowed text-slate-500'
                     }`}

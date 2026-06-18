@@ -20,10 +20,14 @@ interface FilesTabProps {
   onViewDetail: (item: CategoryItem) => void;
   onEdit: (item: CategoryItem) => void;
   onDelete: (item: CategoryItem) => void;
+  onViewVersion?: (item: CategoryItem) => void;
   activeTab: string;
-  onAddClick?: () => void;
-  onImportClick?: () => void;
-  onExportClick?: () => void;
+  licenseFilter: string;
+  setLicenseFilter: (license: string) => void;
+  startDateFilter: string;
+  setStartDateFilter: (date: string) => void;
+  endDateFilter: string;
+  setEndDateFilter: (date: string) => void;
 }
 
 export function FilesTab({
@@ -40,10 +44,14 @@ export function FilesTab({
   onViewDetail,
   onEdit,
   onDelete,
+  onViewVersion,
   activeTab,
-  onAddClick,
-  onImportClick,
-  onExportClick
+  licenseFilter,
+  setLicenseFilter,
+  startDateFilter,
+  setStartDateFilter,
+  endDateFilter,
+  setEndDateFilter
 }: FilesTabProps) {
   const [showFilters, setShowFilters] = useState(false);
 
@@ -58,11 +66,7 @@ export function FilesTab({
           showFilters={showFilters}
           setShowFilters={setShowFilters}
         />
-        <OpenDataCategoryActions
-          onAddClick={onAddClick}
-          onImportClick={onImportClick}
-          onExportClick={onExportClick}
-        />
+        <OpenDataCategoryActions />
       </div>
 
       {/* Advanced Filter Collapsible Panel */}
@@ -70,6 +74,12 @@ export function FilesTab({
         <OpenDataCategoryFilterPanel
           statusFilter={statusFilter}
           setStatusFilter={setStatusFilter}
+          licenseFilter={licenseFilter}
+          setLicenseFilter={setLicenseFilter}
+          startDateFilter={startDateFilter}
+          setStartDateFilter={setStartDateFilter}
+          endDateFilter={endDateFilter}
+          setEndDateFilter={setEndDateFilter}
         />
       )}
 
@@ -82,6 +92,7 @@ export function FilesTab({
           onViewDetail={onViewDetail}
           onEdit={onEdit}
           onDelete={onDelete}
+          onViewVersion={onViewVersion}
           activeTab={activeTab}
         />
         <OpenDataCategoryPagination

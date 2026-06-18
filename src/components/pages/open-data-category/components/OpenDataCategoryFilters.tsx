@@ -60,17 +60,30 @@ export function OpenDataCategoryFilters({
 interface OpenDataCategoryFilterPanelProps {
   statusFilter: string;
   setStatusFilter: (status: string) => void;
+  licenseFilter: string;
+  setLicenseFilter: (license: string) => void;
+  startDateFilter: string;
+  setStartDateFilter: (date: string) => void;
+  endDateFilter: string;
+  setEndDateFilter: (date: string) => void;
 }
 
 export function OpenDataCategoryFilterPanel({
   statusFilter,
-  setStatusFilter
+  setStatusFilter,
+  licenseFilter,
+  setLicenseFilter,
+  startDateFilter,
+  setStartDateFilter,
+  endDateFilter,
+  setEndDateFilter
 }: OpenDataCategoryFilterPanelProps) {
   return (
     <div className="relative mt-3 p-4 bg-white border border-slate-200 rounded-xl shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] before:content-[''] before:absolute before:-top-[7px] before:right-[208px] md:before:right-[auto] md:before:left-[calc(100%-100px)] lg:before:left-[calc(100%-242px)] before:w-3 before:h-3 before:bg-white before:rotate-45 before:border-l before:border-t before:border-slate-200">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Trạng thái công khai */}
         <div>
-          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Trạng thái công khai</label>
+          <label className="block text-[13px] text-slate-600 mb-2 font-normal">Trạng thái công khai</label>
           <div className="relative">
             <select
               value={statusFilter}
@@ -82,6 +95,44 @@ export function OpenDataCategoryFilterPanel({
               <option value="unpublished">Chưa công khai</option>
             </select>
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+          </div>
+        </div>
+
+        {/* Giấy phép */}
+        <div>
+          <label className="block text-[13px] text-slate-600 mb-2 font-normal">Giấy phép</label>
+          <div className="relative">
+            <select
+              value={licenseFilter}
+              onChange={(e) => setLicenseFilter(e.target.value)}
+              className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+            >
+              <option value="all">Tất cả giấy phép</option>
+              <option value="Giấy phép dữ liệu mở công cộng">Giấy phép dữ liệu mở công cộng</option>
+              <option value="Giấy phép ODC-BY">Giấy phép ODC-BY</option>
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+          </div>
+        </div>
+
+        {/* Ngày gửi công bố */}
+        <div>
+          <label className="block text-[13px] text-slate-600 mb-2 font-normal">Ngày gửi công bố</label>
+          <div className="grid grid-cols-2 gap-2">
+            <input
+              type="date"
+              value={startDateFilter}
+              onChange={(e) => setStartDateFilter(e.target.value)}
+              className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-slate-750 font-medium"
+              placeholder="Từ ngày"
+            />
+            <input
+              type="date"
+              value={endDateFilter}
+              onChange={(e) => setEndDateFilter(e.target.value)}
+              className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-slate-750 font-medium"
+              placeholder="Đến ngày"
+            />
           </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Eye, Edit2, Trash2 } from 'lucide-react';
+import { Eye, Edit2, Trash2, History } from 'lucide-react';
 import { CategoryItem } from '../../OpenDataCategoryPage';
 
 interface OpenDataCategoryGridProps {
@@ -9,6 +9,7 @@ interface OpenDataCategoryGridProps {
   onViewDetail: (item: CategoryItem) => void;
   onEdit: (item: CategoryItem) => void;
   onDelete: (item: CategoryItem) => void;
+  onViewVersion?: (item: CategoryItem) => void;
   activeTab: string;
 }
 
@@ -19,6 +20,7 @@ export function OpenDataCategoryGrid({
   onViewDetail,
   onEdit,
   onDelete,
+  onViewVersion,
   activeTab
 }: OpenDataCategoryGridProps) {
   return (
@@ -31,7 +33,7 @@ export function OpenDataCategoryGrid({
             <th className="px-6 py-4 text-[14px] font-semibold text-left">Metadata</th>
             <th className="px-6 py-4 text-[14px] font-semibold text-left">Giấy phép</th>
             <th className="px-6 py-4 text-[14px] font-semibold text-left">Công khai</th>
-            <th className="px-6 py-4 text-[14px] font-semibold text-left">Ngày tạo</th>
+            <th className="px-6 py-4 text-[14px] font-semibold text-left">Ngày gửi công bố</th>
             <th className="px-6 py-4 text-[14px] font-semibold text-left">Người cập nhật</th>
             <th className="px-6 py-4 text-[14px] font-semibold text-right w-40">Thao tác</th>
           </tr>
@@ -46,15 +48,23 @@ export function OpenDataCategoryGrid({
                 </td>
                 <td className="px-4 py-3 text-left text-[13px]">
                   <div className="flex flex-wrap gap-1.5">
-                    <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded text-[11px] font-semibold">Excel</span>
+                    <span className={`px-2 py-0.5 border rounded text-[11px] font-semibold ${
+                      item.uploadType === 'api' 
+                        ? 'bg-purple-50 text-purple-700 border-purple-100' 
+                        : 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                    }`}>
+                      {item.uploadType === 'api' ? 'API' : 'Excel'}
+                    </span>
                     <span className="px-2 py-0.5 bg-slate-100 text-slate-600 border border-slate-200 rounded text-[11px]">
-                      {item.id === 1 ? '3 cột' : item.id === 2 ? '6 cột' : '9 cột'}
+                      {item.uploadType === 'api' 
+                        ? (item.apiType === 'internal' ? 'Nội bộ' : 'Cơ quan nhà nước') 
+                        : (item.id === 1 ? '3 cột' : item.id === 2 ? '6 cột' : '9 cột')}
                     </span>
                   </div>
                 </td>
                 <td className="px-4 py-3 text-left text-[13px]">
                   <span className="px-2 py-1 bg-blue-50 text-blue-700 border border-blue-100 rounded text-[11px] font-medium">
-                    {item.id === 2 ? 'Giấy phép ODC-BY' : 'Giấy phép dữ liệu mở công cộng'}
+                    {item.licenseId || (item.id === 2 ? 'Giấy phép ODC-BY' : 'Giấy phép dữ liệu mở công cộng')}
                   </span>
                 </td>
                 <td className="px-4 py-3 text-center">
@@ -81,6 +91,13 @@ export function OpenDataCategoryGrid({
                     </button>
                     {activeTab === 'category' && (
                       <>
+                        <button
+                          onClick={() => onViewVersion && onViewVersion(item)}
+                          className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                          title="Lịch sử phiên bản"
+                        >
+                          <History className="w-4 h-4" />
+                        </button>
                         <button
                           onClick={() => onEdit(item)}
                           className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"

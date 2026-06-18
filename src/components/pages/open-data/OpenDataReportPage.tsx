@@ -74,7 +74,7 @@ export function OpenDataReportPage() {
           <button
             onClick={() => setActiveTab('search')}
             className={`flex items-center gap-2 px-6 py-3 text-sm transition-colors ${activeTab === 'search'
-                ? 'bg-emerald-50 text-emerald-700 border-b-2 border-emerald-600'
+                ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-600'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               }`}
           >
@@ -84,7 +84,7 @@ export function OpenDataReportPage() {
           <button
             onClick={() => setActiveTab('report')}
             className={`flex items-center gap-2 px-6 py-3 text-sm transition-colors ${activeTab === 'report'
-                ? 'bg-emerald-50 text-emerald-700 border-b-2 border-emerald-600'
+                ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-600'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               }`}
           >
@@ -112,7 +112,7 @@ export function OpenDataReportPage() {
                         type="text"
                         value={searchKeyword}
                         onChange={(e) => setSearchKeyword(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="Nhập từ khóa tìm kiếm..."
                       />
                     </div>
@@ -123,7 +123,7 @@ export function OpenDataReportPage() {
                       <select
                         value={searchCategory}
                         onChange={(e) => setSearchCategory(e.target.value)}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="all">Tất cả danh mục</option>
                         <option value="Biên tập danh mục A">Biên tập danh mục A</option>
@@ -136,7 +136,7 @@ export function OpenDataReportPage() {
                       <select
                         value={searchFormat}
                         onChange={(e) => setSearchFormat(e.target.value)}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="all">Tất cả định dạng</option>
                         <option value="JSON">JSON</option>
@@ -157,7 +157,7 @@ export function OpenDataReportPage() {
                     >
                       Đặt lại
                     </button>
-                    <button className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 flex items-center gap-2">
+                    <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
                       <Search className="w-4 h-4" />
                       Tìm kiếm
                     </button>
@@ -171,7 +171,7 @@ export function OpenDataReportPage() {
                   <h3 className="text-sm text-slate-900">
                     Kết quả tìm kiếm ({filteredResults.length})
                   </h3>
-                  <button className="px-4 py-2 text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 flex items-center gap-2">
+                  <button className="px-4 py-2 text-sm text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 flex items-center gap-2">
                     <Download className="w-4 h-4" />
                     Xuất kết quả
                   </button>
@@ -201,7 +201,7 @@ export function OpenDataReportPage() {
                           <tr key={result.id} className="hover:bg-slate-50">
                             <td className="px-4 py-3 text-sm text-slate-700">{index + 1}</td>
                             <td className="px-4 py-3 text-sm">
-                              <code className="px-2 py-0.5 bg-slate-100 text-emerald-700 rounded text-xs">
+                              <code className="px-2 py-0.5 bg-slate-100 text-blue-700 rounded text-xs">
                                 {result.code}
                               </code>
                             </td>
@@ -238,14 +238,14 @@ export function OpenDataReportPage() {
                   <select
                     value={reportPeriod}
                     onChange={(e) => setReportPeriod(e.target.value)}
-                    className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="week">Tuần này</option>
                     <option value="month">Tháng này</option>
                     <option value="quarter">Quý này</option>
                     <option value="year">Năm này</option>
                   </select>
-                  <button className="ml-auto px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 flex items-center gap-2">
+                  <button className="ml-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
                     <Download className="w-4 h-4" />
                     Xuất báo cáo
                   </button>
@@ -295,7 +295,7 @@ export function OpenDataReportPage() {
                           </div>
                           <div className="w-full bg-slate-200 rounded-full h-2">
                             <div
-                              className="bg-emerald-600 h-2 rounded-full"
+                              className="bg-blue-600 h-2 rounded-full"
                               style={{ width: `${percentage}%` }}
                             ></div>
                           </div>
