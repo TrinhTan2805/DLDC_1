@@ -1469,11 +1469,11 @@ export const menuStructure: MenuItem[] = [
     children: [
       {
         id: "open-data-setup",
-        name: "Thiết lập danh mục",
+        name: "Thiết lập danh mục dữ liệu mở",
         functions: [
           {
             id: "open-data-setup-func",
-            name: "Thiết lập danh mục",
+            name: "Thiết lập danh mục dữ liệu mở",
             actions: [
               "Xem",
               "Thêm",
@@ -1492,7 +1492,7 @@ export const menuStructure: MenuItem[] = [
       },
       {
         id: "open-data-category-list",
-        name: "Danh sách danh mục",
+        name: "Danh sách danh mục dữ liệu mở",
         children: [
           {
             id: "open-data-category-a",

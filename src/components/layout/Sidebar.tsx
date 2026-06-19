@@ -383,12 +383,12 @@ const menuItems: MenuItem[] = [
     subItems: [
       {
         id: "open-data-setup",
-        label: "Thiết lập danh mục",
+        label: "Thiết lập danh mục dữ liệu mở",
         icon: Settings,
       },
       {
         id: "open-data-category-list",
-        label: "Danh sách danh mục",
+        label: "Danh sách danh mục dữ liệu mở",
         icon: List,
         subItems: [
           {

@@ -9,7 +9,7 @@
 ## 1. PHÂN HỆ ĐĂNG NHẬP & CORE
 
 - `[ ]` Màn hình Đăng nhập (`pages/LoginPage.tsx`)
-- `[ ]` Cấu trúc Menu & Điều hướng chính (`admin/menuStructure.ts`)
+- `[x]` Cấu trúc Menu & Điều hướng chính (`admin/menuStructure.ts`)
 
 ---
 

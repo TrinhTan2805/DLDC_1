@@ -1,8 +1,70 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Phiên bản 2.5.9 (Ngày cập nhật: 19/06/2026)
+
+**Nội dung thay đổi:**
+1. **Thiết kế lại luồng Phê duyệt & Công bố trong trang Quản lý yêu cầu công bố**:
+   - Thay đổi nút **"Phê duyệt & Công bố"** để mở form xác nhận phê duyệt dạng inline ngay bên dưới nội dung chi tiết của modal thay vì mở một popup modal đè lên (`showApproveConfirmModal`).
+   - Hành vi toggle inline form này tương tự như luồng của nút **"Từ chối duyệt"**.
+   - Khi chọn Phê duyệt & Công bố, hiển thị Textarea nhập ý kiến phê duyệt và danh sách "Sau khi phê duyệt" cùng với hai nút hành động: **"Quay lại"** (quay lại màn hình xem metadata ban đầu) và **"Xác nhận Phê duyệt"** (để tiến hành phê duyệt).
+   - Tối ưu hóa giao diện và kích thước font chữ đồng bộ ở mức `13px` (`text-[13px]`) và không in đậm (`font-normal`) cho toàn bộ form và nút hành động.
+2. **Khắc phục lỗi mất dữ liệu xem trước dòng đầu**:
+   - Định nghĩa hàm helper `getPreviewFallback` để lấy tiêu đề cột và hàng dữ liệu mẫu tương ứng với từng danh mục dữ liệu mở khi tệp dữ liệu hoặc API không có sẵn thông tin xem trước.
+   - Bổ sung thông tin tiêu đề và dữ liệu hàng cho bản ghi **API Danh sách Luật sư Việt Nam** (id: '6') trong mockPublishedData.
+   - Cập nhật hàm `createNewRecord` để điền tự động dữ liệu xem trước khi người dùng đăng ký đề xuất công bố mới có định dạng chia sẻ là API.
+   - Cập nhật logic render JSX của tab **Xem trước dữ liệu dòng đầu** trong modal phê duyệt yêu cầu để tự động sử dụng dữ liệu dự phòng từ `getPreviewFallback` khi dữ liệu xem trước của bản ghi bị trống, đồng thời đồng bộ giao diện header bảng sử dụng `font-semibold text-slate-500 bg-slate-50` theo chuẩn thiết kế.
+3. **Đồng bộ nhãn thanh tab và cỡ chữ trong phân hệ Công bố dữ liệu mở**:
+   - Đổi tên tab **"Phê duyệt"** thành **"Phê duyệt dữ liệu mở"** để mô tả chính xác và nhất quán với phân hệ.
+   - Ép toàn bộ kích thước font chữ của thanh tab, thanh tìm kiếm, các nút bấm, bộ chọn lọc và các bảng grid về cỡ chữ `13px` (`text-[13px]`) theo đúng tiêu chuẩn hệ thống thiết kế.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/open-data/OpenDataPublishedListPage.tsx`
+
+---
+
+## Phiên bản 2.4.8 — Patch 4 (Ngày cập nhật: 19/06/2026)
+
+**Nội dung thay đổi:**
+1. **Thiết kế lại trường "Nguồn dữ liệu" trong modal Metadata thành "Cấu hình Nguồn dữ liệu"**:
+   - Thay thế checkbox đơn giản ("Tải tệp", "API") bằng UI cấu hình database/table đầy đủ.
+   - Thêm dropdown chọn **cơ sở dữ liệu đích** (CSDL Hộ tịch, Địa chính, Dân số, Tư pháp).
+   - Sau khi chọn CSDL: hiển thị dropdown chọn **bảng dữ liệu chính** (Primary Table).
+   - Toggle **"Sử dụng liên kết bảng (Join)"**: khi bật, hiện section bảng liên kết bổ sung.
+   - Mỗi bảng join có: kiểu liên kết (LEFT/INNER/RIGHT JOIN), bảng bổ sung, điều kiện join (cột trái = cột phải), nút xóa, alias tự động.
+   - Thêm nút **"+ Thêm bảng liên kết"** để thêm nhiều bảng join.
+2. **Đổi options trường "Định dạng"**: CSV/JSON/XML/Excel/PDF → **File Excel** và **API** (giữ multi-select checkbox).
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/open-data/OpenDataSetupPage.tsx` (thêm types `JoinTable`, `DataSourceConfig`; thêm constants `MOCK_DATABASES`, `MOCK_TABLES`, `TABLE_COLUMNS`, `DEFAULT_DATA_SOURCE`; thêm state `dataSourceConfig`; thay thế UI Nguồn dữ liệu)
+
+---
+
+## Phiên bản 2.4.8 — Patch 3 (Ngày cập nhật: 19/06/2026)
+
+**Nội dung thay đổi:**
+1. **Xóa trường "Tên tệp dữ liệu" khỏi modal Thêm mới/Chỉnh sửa Metadata**:
+   - Phân hệ: Dữ liệu mở > Thiết lập danh mục dữ liệu mở > tab Metadata
+   - Xóa input field "Tên tệp dữ liệu" khỏi cả modal Thêm mới và Chỉnh sửa metadata (dùng chung form).
+   - Cập nhật validation: bỏ điều kiện bắt buộc `!metadataFormData.fileName`, chỉ còn kiểm tra `categoryCodes`.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/open-data/OpenDataSetupPage.tsx` (xóa form field, cập nhật validation)
+
+---
+
 ## Phiên bản 2.4.8 — Patch 2 (Ngày cập nhật: 18/06/2026)
 
 **Nội dung thay đổi:**
+1. **Đổi tên mục menu trong phân hệ Dữ liệu mở**:
+   - "Thiết lập danh mục" → **"Thiết lập danh mục dữ liệu mở"**
+   - "Danh sách danh mục" → **"Danh sách danh mục dữ liệu mở"**
+   - Các mục tương tự trong **Quản lý danh mục** (`category-setup`, `category-list`) giữ nguyên, không bị ảnh hưởng.
+
+**Các file bị ảnh hưởng:**
+- `src/components/layout/Sidebar.tsx` (nhãn menu hiển thị người dùng, `id: open-data-setup` và `id: open-data-category-list`)
+- `src/components/pages/admin/menuStructure.ts` (cấu trúc phân quyền, `id: open-data-setup`, `open-data-setup-func`, `open-data-category-list`)
+
+
 1. **Chuyển đổi tông màu Thống kê dữ liệu mở sang xanh dương chủ đạo**:
    - Thay đổi toàn bộ các tabs ("Tìm kiếm và lọc", "Báo cáo thống kê", "Báo cáo phân loại", "Thống kê lượt truy cập") từ thiết kế màu xanh lá/emerald (`emerald`) sang màu xanh dương (`blue`) đồng bộ với hệ thống.
    - Cập nhật các màu nền của tab active (`bg-blue-50`), màu text active (`text-blue-600` / `text-blue-700`), và đường viền active (`border-blue-600`).
@@ -599,3 +661,133 @@ Redesign thanh tìm kiếm & bộ lọc tại tab **Kiểm tra & Phê duyệt** 
 - `src/components/pages/open-data-category/components/tabs/OpenDataCategoryGrid.tsx`
 - `src/components/pages/open-data-category/components/tabs/FilesTab.tsx`
 - `src/components/pages/open-data-category/components/OpenDataCategoryFilters.tsx`
+
+---
+
+## Phiên bản 2.5.0 (Ngày cập nhật: 19/06/2026)
+
+**Nội dung thay đổi:**
+1. **Cập nhật nhãn và lựa chọn định dạng tại Form tạo mới/chỉnh sửa Metadata (Thiết lập danh mục):**
+   - Thay đổi nhãn trường "Định dạng" thành "Định dạng chia sẻ" trên bảng danh sách, modal xem chi tiết và modal thêm mới/chỉnh sửa metadata.
+   - Sửa đổi các hộp chọn (checkbox) lựa chọn định dạng từ "File Excel" thành "File excel" và "API" cho đồng bộ.
+2. **Cập nhật nhãn và lựa chọn định dạng tại Form gửi yêu cầu công bố dữ liệu (Yêu cầu công bố & đề xuất):**
+   - Thay đổi nhãn trường "Định dạng dữ liệu" thành "Định dạng chia sẻ" trong modal gửi yêu cầu công bố dữ liệu.
+   - Chuyển đổi từ dạng chọn đơn (select dropdown) thành hộp kiểm (checkbox) cho phép chọn nhiều giá trị ("File excel" và "API") để đồng nhất với cấu trúc metadata.
+   - Cập nhật các trường cấu hình metadata mẫu (`CONFIGURED_METADATA_FILES`) và dữ liệu mẫu (`mockPublishedData`) sử dụng định dạng "File excel" và "API" tương ứng để hiển thị và tự động điền (autofill) chính xác.
+   - Cấu trúc lại hàm lưu bản ghi để phân tích chuỗi định dạng đã chọn thành danh sách mảng dữ liệu khi gửi yêu cầu.
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.4.9 -> 2.5.0)
+- `src/components/pages/open-data/OpenDataSetupPage.tsx`
+- `src/components/pages/open-data/OpenDataPublishedListPage.tsx`
+
+---
+
+## Phiên bản 2.5.1 (Ngày cập nhật: 19/06/2026)
+
+**Nội dung thay đổi:**
+1. **Cập nhật kiểu chữ nhãn trường (form labels) tại Form gửi yêu cầu công bố dữ liệu:**
+   - Loại bỏ in đậm (`font-semibold`) chuyển về kiểu chữ thường (`font-normal`) cho toàn bộ các tiêu đề trường nhập liệu và chọn lựa trong modal Gửi yêu cầu công bố dữ liệu (Tên tệp dữ liệu, Chọn metadata đã cấu hình, Danh mục dữ liệu mở, Giấy phép, Từ khóa, Cơ quan công bố, Định dạng chia sẻ, Tần suất cập nhật, Thông tin mô tả, Cấu hình nguồn dữ liệu).
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.0 -> 2.5.1)
+- `src/components/pages/open-data/OpenDataPublishedListPage.tsx`
+
+---
+
+## Phiên bản 2.5.2 (Ngày cập nhật: 19/06/2026)
+
+**Nội dung thay đổi:**
+1. **Đồng bộ hóa các trường thông tin trong Modal Phê duyệt yêu cầu công bố:**
+   - Cập nhật phần thông tin chung của modal Phê duyệt yêu cầu công bố để hiển thị đầy đủ các trường đồng bộ với form gửi yêu cầu công bố: Tên tệp đề xuất, Danh mục mở, Người đề xuất, Cơ quan công bố, Giấy phép, Từ khóa, Tần suất cập nhật, Định dạng chia sẻ, và Thông tin mô tả.
+2. **Thêm tab xem thử Metadata và Dữ liệu dòng đầu:**
+   - Phân chia khu vực xem thử thành 2 tab:
+     * **Xem metadata:** Hiển thị chi tiết cấu hình cơ sở dữ liệu đích, bảng dữ liệu chính, bảng liên kết (Join) và danh sách chi tiết các trường dữ liệu được chọn khi gửi yêu cầu công bố (bao gồm tên cột, bảng nguồn, kiểu dữ liệu, API field và trạng thái bảo mật/mask).
+     * **Xem trước dữ liệu dòng đầu:** Hiển thị bảng xem thử dữ liệu dòng đầu thực tế như trước.
+   - Thêm cấu trúc lưu trữ và fallback thông tin metadata của bản ghi đề xuất.
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.1 -> 2.5.2)
+- `src/components/pages/open-data/OpenDataPublishedListPage.tsx`
+
+---
+
+## Phiên bản 2.5.3 (Ngày cập nhật: 19/06/2026)
+
+**Nội dung thay đổi:**
+1. **Thay đổi màu chữ trong Modal Phê duyệt yêu cầu công bố sang toàn bộ màu đen:**
+   - Thay đổi các class màu chữ từ màu xám nhạt/trung bình (`text-slate-900`, `text-slate-800`, `text-slate-700`, `text-slate-600`, `text-slate-500`, `text-blue-700`) sang toàn bộ màu đen (`text-black`) cho các nhãn trường, giá trị trường, các tab và toàn bộ thông tin hiển thị bên trong modal Phê duyệt yêu cầu công bố.
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.2 -> 2.5.3)
+- `src/components/pages/open-data/OpenDataPublishedListPage.tsx`
+
+---
+
+## Phiên bản 2.5.4 (Ngày cập nhật: 19/06/2026)
+
+**Nội dung thay đổi:**
+1. **Định dạng kích thước chữ trong Modal Phê duyệt yêu cầu công bố:**
+   - Điều chỉnh và cố định kích thước chữ (font-size) về mức `13px` (`text-[13px]`) cho toàn bộ nội dung, nhãn trường, giá trị, bảng dữ liệu, tab chọn và khu vực nhập lý do từ chối phê duyệt bên trong modal Phê duyệt yêu cầu công bố (chỉ trừ phần Header tiêu đề chính của modal).
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.3 -> 2.5.4)
+- `src/components/pages/open-data/OpenDataPublishedListPage.tsx`
+
+---
+
+## Phiên bản 2.5.5 (Ngày cập nhật: 19/06/2026)
+
+**Nội dung thay đổi:**
+1. **Định dạng kích thước chữ trong các bảng dữ liệu con (Approval Modal):**
+   - Ép kích thước chữ (font-size) về mức `13px` (`text-[13px]`) cho tất cả các phần tiêu đề cột (`<th>`) và ô dữ liệu (`<td>`) của bảng Metadata (tab Xem metadata) và bảng dữ liệu xem trước (tab Xem trước dữ liệu dòng đầu) để đảm bảo toàn bộ thông tin hiển thị đạt kích thước thống nhất.
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.4 -> 2.5.5)
+- `src/components/pages/open-data/OpenDataPublishedListPage.tsx`
+
+---
+
+## Phiên bản 2.5.6 (Ngày cập nhật: 19/06/2026)
+
+**Nội dung thay đổi:**
+1. **Định dạng kích thước chữ các nút bấm (Buttons) trong Modal Phê duyệt:**
+   - Thay đổi kích thước chữ (font-size) của tất cả các nút hành động ở chân trang (Từ chối duyệt, Phê duyệt & Công bố, Quay lại, Xác nhận Từ chối) về mức `13px` (`text-[13px]`) để đồng bộ hoàn toàn với kích thước chung trong Modal.
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.5 -> 2.5.6)
+- `src/components/pages/open-data/OpenDataPublishedListPage.tsx`
+
+---
+
+## Phiên bản 2.5.7 (Ngày cập nhật: 19/06/2026)
+
+**Nội dung thay đổi:**
+1. **Loại bỏ in đậm giá trị cấu hình nguồn dữ liệu đích (Approval Modal):**
+   - Thay đổi kiểu chữ của giá trị hiển thị Cơ sở dữ liệu đích và Bảng chính (trong tab Xem metadata thuộc Modal Phê duyệt yêu cầu công bố) từ in đậm (`font-semibold`) sang kiểu chữ thường (`font-normal`).
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.6 -> 2.5.7)
+- `src/components/pages/open-data/OpenDataPublishedListPage.tsx`
+
+---
+
+## Phiên bản 2.5.8 (Ngày cập nhật: 19/06/2026)
+
+**Nội dung thay đổi:**
+1. **Loại bỏ in đậm và tăng khoảng cách nút bấm (Approval Modal):**
+   - Loại bỏ in đậm (`font-semibold`) chuyển về kiểu chữ thường (`font-normal`) trên toàn bộ các nút hành động ở chân trang modal Phê duyệt.
+   - Tăng khoảng cách (gap) giữa các nút bấm ở footer từ `gap-2.5` (10px) lên `gap-4` (16px) để tạo giao diện thoáng hơn.
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.7 -> 2.5.8)
+- `src/components/pages/open-data/OpenDataPublishedListPage.tsx`
+
+
+
+
+
+
+
+
+

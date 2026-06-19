@@ -5517,6 +5517,9 @@ table td [class*='text-slate-'], table td [class*='text-gray-'] {
 .text-\[16px\] {
   font-size: 16px !important;
 }
+.text-\[18px\] {
+  font-size: 18px !important;
+}
 .text-\[13px\] {
   font-size: 13px !important;
 }
