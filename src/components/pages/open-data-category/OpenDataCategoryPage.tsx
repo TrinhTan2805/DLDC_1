@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Plus, Edit2, Trash2, Download, Upload, Filter, FileText, Info, Edit, CheckCircle, XCircle, Eye, Clock, FileCheck, Shield, History as HistoryIcon, File, ExternalLink, CheckSquare, ChevronDown, RotateCcw, ArrowLeft, PlusCircle, PauseCircle, PlayCircle, X, Globe, FileSpreadsheet } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Download, Upload, Filter, FileText, Info, Edit, CheckCircle, XCircle, Eye, Clock, FileCheck, Shield, History as HistoryIcon, File, ExternalLink, CheckSquare, ChevronDown, RotateCcw, ArrowLeft, PlusCircle, PauseCircle, PlayCircle, X, Globe, FileSpreadsheet, Database } from 'lucide-react';
 
 import { OpenDataCategoryTabBar } from './components/OpenDataCategoryTabBar';
 import { FilesTab } from './components/tabs/FilesTab';
@@ -24,6 +24,16 @@ export interface CategoryItem {
   licenseId?: string;
   publisher?: string;
   fileName?: string;
+  format?: string[];
+  frequency?: string;
+  uploadType?: string;
+  apiType?: string;
+  apiTitle?: string;
+  apiUrl?: string;
+  apiMethod?: string;
+  apiDesc?: string;
+  apiParams?: string;
+  apiHeaders?: string;
 }
 
 export interface VersionHistoryItem {
@@ -94,7 +104,7 @@ const sampleData: CategoryItem[] = [
     id: 1,
     code: 'ODCAT001',
     name: 'Mục 1',
-    description: 'Mô tả mục dữ liệu mở 1',
+    description: 'Dữ liệu tổ chức thực hiện trợ giúp pháp lý bao gồm các trung tâm nhà nước và văn phòng hợp đồng.',
     status: 'active',
     publishStatus: 'published',
     approvalStatus: 'approved',
@@ -103,13 +113,15 @@ const sampleData: CategoryItem[] = [
     fileName: 'danh_sach_to_chuc_tgpl.xlsx',
     keywords: 'luật, mở, thống kê',
     publisher: 'Bộ Tư pháp',
-    licenseId: 'Giấy phép dữ liệu mở công cộng'
+    licenseId: 'Giấy phép dữ liệu mở công cộng',
+    format: ['excel'],
+    frequency: 'monthly',
   },
   {
     id: 2,
     code: 'ODCAT002',
     name: 'Mục 2',
-    description: 'Mô tả mục dữ liệu mở 2',
+    description: 'Dữ liệu danh sách trợ giúp viên pháp luật và luật sư cộng tác viên.',
     status: 'active',
     publishStatus: 'published',
     approvalStatus: 'approved',
@@ -118,13 +130,15 @@ const sampleData: CategoryItem[] = [
     fileName: 'danh_sach_nguoi_tgpl.json',
     keywords: 'doanh nghiệp, đăng ký',
     publisher: 'Cục Bổ trợ tư pháp',
-    licenseId: 'Giấy phép ODC-BY'
+    licenseId: 'Giấy phép ODC-BY',
+    format: ['api'],
+    frequency: 'weekly',
   },
   {
     id: 3,
     code: 'ODCAT003',
     name: 'Mục 3',
-    description: 'Mô tả mục dữ liệu mở 3',
+    description: 'Yêu cầu công bố dữ liệu danh sách Luật sư Việt Nam cập nhật.',
     status: 'inactive',
     publishStatus: 'unpublished',
     approvalStatus: 'draft',
@@ -133,7 +147,9 @@ const sampleData: CategoryItem[] = [
     fileName: 'danh_sach_luat_su.xlsx',
     keywords: 'luật sư, bổ trợ tư pháp',
     publisher: 'Bộ Tư pháp',
-    licenseId: 'Giấy phép dữ liệu mở công cộng'
+    licenseId: 'Giấy phép dữ liệu mở công cộng',
+    format: ['excel'],
+    frequency: 'quarterly',
   },
   {
     id: 4,
@@ -302,6 +318,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [showUnpublishModal, setShowUnpublishModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [detailModalTab, setDetailModalTab] = useState<'general' | 'data'>('general');
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<CategoryItem | null>(null);
   const [data, setData] = useState<CategoryItem[]>(sampleData);
@@ -1010,23 +1027,15 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
             setPageSize={setPageSize}
             onViewDetail={(item) => {
               setSelectedItem(item);
+              setDetailModalTab('general');
               setShowDetailModal(true);
-            }}
-            onEdit={(item) => {
-              setSelectedItem(item);
-              setShowEditModal(true);
-            }}
-            onDelete={(item) => {
-              setSelectedItem(item);
-              setShowDeleteModal(true);
             }}
             onViewVersion={(item) => {
               setSelectedDatasetForVersionHistory(item);
               setShowVersionHistoryModal(true);
             }}
             activeTab={activeTab}
-            licenseFilter={licenseFilter}
-            setLicenseFilter={setLicenseFilter}
+
             startDateFilter={startDateFilter}
             setStartDateFilter={setStartDateFilter}
             endDateFilter={endDateFilter}
@@ -1415,7 +1424,28 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
               </button>
             </div>
             
+            {/* Tab bar */}
+            <div className="px-6 pt-4 pb-0 border-b border-slate-200">
+              <div className="inline-flex items-center bg-slate-100 rounded-lg p-1 gap-1">
+                <button
+                  onClick={() => setDetailModalTab('general')}
+                  className={`flex items-center gap-1.5 px-4 py-1.5 rounded-md text-[13px] font-medium transition-all cursor-pointer ${detailModalTab === 'general' ? 'bg-white text-blue-600 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                  <FileText className={`w-3.5 h-3.5 ${detailModalTab === 'general' ? 'text-blue-600' : 'text-slate-400'}`} />
+                  Thông tin chung
+                </button>
+                <button
+                  onClick={() => setDetailModalTab('data')}
+                  className={`flex items-center gap-1.5 px-4 py-1.5 rounded-md text-[13px] font-medium transition-all cursor-pointer ${detailModalTab === 'data' ? 'bg-white text-blue-600 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                  <Database className={`w-3.5 h-3.5 ${detailModalTab === 'data' ? 'text-blue-600' : 'text-slate-400'}`} />
+                  Dữ liệu nguồn
+                </button>
+              </div>
+            </div>
+
             <div className="p-6 space-y-6 flex-1 text-[13px]">
+              {detailModalTab === 'general' && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="col-span-1 md:col-span-2">
                   <label className="block font-semibold text-slate-700 mb-1">Tên tập dữ liệu</label>
@@ -1429,162 +1459,132 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
 
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">Danh mục dữ liệu mở</label>
-                  <input
-                    type="text"
-                    readOnly
-                    value={categoryName}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-slate-50 outline-none text-slate-600 font-medium"
-                  />
+                  <input type="text" readOnly value={categoryName}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-slate-50 outline-none text-slate-600 font-medium" />
                 </div>
 
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">Giấy phép</label>
-                  <input
-                    type="text"
-                    readOnly
-                    value={selectedItem.licenseId === 'l2' || selectedItem.licenseId === 'Giấy phép ODC-BY' || selectedItem.licenseId?.toString().includes('ODC-BY') ? 'Giấy phép ODC-BY' : 'Giấy phép dữ liệu mở công cộng'}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-slate-50 outline-none text-slate-600 font-medium"
-                  />
+                  <input type="text" readOnly
+                    value={selectedItem.licenseId?.toString().includes('ODC-BY') ? 'Giấy phép ODC-BY' : 'Giấy phép dữ liệu mở công cộng'}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-slate-50 outline-none text-slate-600 font-medium" />
                 </div>
 
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">Từ khóa</label>
-                  <input
-                    type="text"
-                    readOnly
-                    value={selectedItem.keywords || 'luật, mở, thống kê'}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-slate-50 outline-none text-slate-600 font-medium"
-                  />
+                  <input type="text" readOnly value={selectedItem.keywords || '—'}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-slate-50 outline-none text-slate-600 font-medium" />
                 </div>
 
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">Cơ quan công bố</label>
-                  <input
-                    type="text"
-                    readOnly
-                    value={selectedItem.publisher || 'Bộ Tư pháp'}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-slate-50 outline-none text-slate-600 font-medium"
-                  />
+                  <input type="text" readOnly value={selectedItem.publisher || 'Bộ Tư pháp'}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-slate-50 outline-none text-slate-600 font-medium" />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Định dạng chia sẻ</label>
+                  <div className="flex flex-wrap gap-2 px-3 py-2 border border-slate-300 rounded-lg bg-slate-50 min-h-[38px] items-center">
+                    {(selectedItem.format && selectedItem.format.length > 0) ? selectedItem.format.map(f => (
+                      <span key={f} className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-100 rounded text-xs font-medium">
+                        {f === 'excel' ? 'Excel' : f === 'api' ? 'API' : f}
+                      </span>
+                    )) : <span className="text-slate-400 text-sm">—</span>}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Tần suất cập nhật</label>
+                  <input type="text" readOnly
+                    value={selectedItem.frequency === 'daily' ? 'Hàng ngày' : selectedItem.frequency === 'weekly' ? 'Hàng tuần' : selectedItem.frequency === 'monthly' ? 'Hàng tháng' : selectedItem.frequency === 'quarterly' ? 'Hàng quý' : selectedItem.frequency === 'yearly' ? 'Hàng năm' : '—'}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-slate-50 outline-none text-slate-600 font-medium" />
                 </div>
 
                 <div className="col-span-1 md:col-span-2">
                   <label className="block font-semibold text-slate-700 mb-1">Thông tin mô tả</label>
-                  <textarea
-                    rows={2}
-                    readOnly
-                    value={selectedItem.description || 'Mô tả nội dung tập dữ liệu công bố...'}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-slate-50 outline-none text-slate-600 font-medium"
-                  />
+                  <textarea rows={2} readOnly value={selectedItem.description || '—'}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-slate-50 outline-none text-slate-600 font-medium" />
                 </div>
 
-                {/* Upload Type Selector */}
-                <div className="col-span-1 md:col-span-2">
-                  <label className="block font-semibold text-slate-700 mb-2">Dạng tải dữ liệu</label>
-                  <div className="flex gap-3">
-                    <button
-                      type="button"
-                      disabled
-                      className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg border text-sm font-semibold cursor-not-allowed ${
-                        selectedItem.uploadType !== 'api'
-                          ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-                          : 'bg-white text-slate-400 border-slate-200'
-                      }`}
-                    >
-                      <Upload className="w-4 h-4" />
-                      Tải lên tệp
-                    </button>
-                    <button
-                      type="button"
-                      disabled
-                      className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg border text-sm font-semibold cursor-not-allowed ${
-                        selectedItem.uploadType === 'api'
-                          ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-                          : 'bg-white text-slate-400 border-slate-200'
-                      }`}
-                    >
-                      <Globe className="w-4 h-4" />
-                      Lấy từ API
-                    </button>
-                  </div>
-                </div>
-
-                {selectedItem.uploadType === 'api' ? (
-                  <div className="col-span-1 md:col-span-2 space-y-4">
-                    <div className="border border-slate-200 rounded-xl p-4 bg-slate-50 space-y-4">
-                      <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
-                        <div className="text-sm font-semibold text-slate-900 flex items-center gap-1.5">
-                          <Globe className="w-4.5 h-4.5 text-purple-600" />
-                          <span>Chi tiết cấu hình API ({selectedItem.apiType === 'internal' ? 'Nội bộ' : 'Cơ quan nhà nước'})</span>
-                        </div>
-                        <span className="px-2 py-0.5 bg-purple-50 text-purple-700 border border-purple-100 rounded text-xs font-semibold uppercase">{selectedItem.apiMethod || 'GET'}</span>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-[13px]">
-                        <div className="col-span-1 md:col-span-2">
-                          <label className="block font-semibold text-slate-600 mb-1">Tiêu đề API / Mã kết nối</label>
-                          <input type="text" readOnly value={selectedItem.apiTitle || 'API Chia sẻ dữ liệu'} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white outline-none text-slate-600 font-medium" />
-                        </div>
-                        <div className="col-span-1 md:col-span-2">
-                          <label className="block font-semibold text-slate-600 mb-1">Đường dẫn dịch vụ chia sẻ (URL API)</label>
-                          <input type="text" readOnly value={selectedItem.apiUrl || ''} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white outline-none font-mono text-slate-600" />
-                        </div>
-                        {selectedItem.apiDesc && (
-                          <div className="col-span-1 md:col-span-2">
-                            <label className="block font-semibold text-slate-600 mb-1">Mô tả chi tiết API</label>
-                            <textarea rows={2} readOnly value={selectedItem.apiDesc} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white outline-none text-slate-600 font-medium" />
-                          </div>
-                        )}
-                        {selectedItem.apiType === 'external' && (
-                          <>
-                            <div>
-                              <label className="block font-semibold text-slate-600 mb-1">Tham số (Query Params)</label>
-                              <input type="text" readOnly value={selectedItem.apiParams || ''} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white outline-none font-mono text-slate-650" />
-                            </div>
-                            <div>
-                              <label className="block font-semibold text-slate-600 mb-1">Headers</label>
-                              <input type="text" readOnly value={selectedItem.apiHeaders || ''} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white outline-none font-mono text-slate-650" />
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    {/* FILE DETAIL BOX */}
-                    <div className="col-span-1 md:col-span-2 bg-slate-50 border border-slate-200 rounded-lg p-3">
-                      <div className="flex items-start gap-2">
-                        <Info className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
-                        <div>
-                          <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-1">Cấu trúc Metadata yêu cầu</h4>
-                          <p className="text-xs text-slate-600 mb-2">Tệp dữ liệu tải lên bắt buộc phải chứa các cột tiêu đề ở dòng đầu tiên:</p>
-                          <div className="flex flex-wrap gap-1.5">
-                            {getExpectedHeaders().map((hdr, idx) => (
-                              <span key={idx} className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-100 rounded text-xs font-medium">{hdr}</span>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* FILE DISPLAY SECTION */}
-                    <div className="col-span-1 md:col-span-2">
-                      <label className="block font-semibold text-slate-700 mb-1">Tệp dữ liệu đã tải lên</label>
-                      <div className="border border-slate-200 rounded-xl p-4 bg-slate-50 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
-                            <FileSpreadsheet className="w-6 h-6" />
-                          </div>
-                          <div>
-                            <div className="text-sm font-semibold text-slate-900 truncate max-w-md">{selectedItem.fileName || selectedItem.name}</div>
-                            <div className="text-xs text-slate-500">154.0 KB</div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
               </div>
+              )}
+
+              {detailModalTab === 'data' && (() => {
+                const catIdToCode: Record<string, string> = {
+                  'open-data-category-a': 'ODC001',
+                  'open-data-category-b': 'ODC002',
+                  'open-data-category-c': 'ODC003',
+                };
+                const CATEGORY_DB_CONFIG: Record<string, { dbName: string; mainTable: string; joinTables: string[]; fields: string[] }> = {
+                  ODC001: { dbName: 'CSDL Trợ giúp pháp lý', mainTable: 'to_chuc_tgpl', joinTables: ['vu_viec_tgpl'], fields: ['id', 'ten_to_chuc', 'loai_hinh', 'dia_chi', 'nguoi_dai_dien', 'so_dien_thoai', 'ngay_thanh_lap', 'trang_thai'] },
+                  ODC002: { dbName: 'CSDL Trợ giúp pháp lý', mainTable: 'nguoi_tgpl', joinTables: ['chung_chi'], fields: ['id', 'ho_ten', 'so_nam_hanh_nghe', 'vai_tro', 'so_chung_chi', 'trang_thai'] },
+                  ODC003: { dbName: 'CSDL Bổ trợ tư pháp', mainTable: 'luat_su', joinTables: ['doan_luat_su'], fields: ['id', 'ho_ten', 'ngay_sinh', 'gioi_tinh', 'quoc_tich', 'so_chung_chi_hn', 'so_the_luat_su', 'noi_lam_viec', 'doan_luat_su', 'tinh_trang_hn'] },
+                };
+                const SAMPLE_ROWS: Record<string, Record<string, string>[]> = {
+                  ODC001: [
+                    { id: '1', ten_to_chuc: 'Trung tâm TGPL TP. Hà Nội', loai_hinh: 'Nhà nước', dia_chi: '60 Trần Phú, Hà Nội', nguoi_dai_dien: 'Nguyễn Văn A', so_dien_thoai: '024.3845.xxxx', ngay_thanh_lap: '01/01/2015', trang_thai: 'Hoạt động' },
+                    { id: '2', ten_to_chuc: 'VP Luật sư Thành Đô', loai_hinh: 'Hợp đồng', dia_chi: '12 Lý Thường Kiệt, HN', nguoi_dai_dien: 'Trần Thị B', so_dien_thoai: '024.3854.xxxx', ngay_thanh_lap: '05/03/2018', trang_thai: 'Hoạt động' },
+                  ],
+                  ODC002: [
+                    { id: '1', ho_ten: 'Nguyễn Văn An', so_nam_hanh_nghe: '8', vai_tro: 'Trợ giúp viên', so_chung_chi: 'TGV-001/2016', trang_thai: 'Hoạt động' },
+                    { id: '2', ho_ten: 'Lê Thị Bình', so_nam_hanh_nghe: '5', vai_tro: 'Luật sư cộng tác', so_chung_chi: 'LS-123/2019', trang_thai: 'Hoạt động' },
+                  ],
+                  ODC003: [
+                    { id: '1', ho_ten: 'Lê Văn Long', ngay_sinh: '15/08/1985', gioi_tinh: 'Nam', quoc_tich: 'Việt Nam', so_chung_chi_hn: 'CC-9988-BTP', so_the_luat_su: 'THE-1234-LS', noi_lam_viec: 'VP Luật sư Long & Partners', doan_luat_su: 'TP. Hà Nội', tinh_trang_hn: 'Đang hoạt động' },
+                    { id: '2', ho_ten: 'Phạm Thị Hoa', ngay_sinh: '22/04/1990', gioi_tinh: 'Nữ', quoc_tich: 'Việt Nam', so_chung_chi_hn: 'CC-5544-BTP', so_the_luat_su: 'THE-5678-LS', noi_lam_viec: 'Công ty Luật TNHH Sen Vàng', doan_luat_su: 'TP. HCM', tinh_trang_hn: 'Đang hoạt động' },
+                  ],
+                };
+                const code = catIdToCode[categoryId] || '';
+                const config = CATEGORY_DB_CONFIG[code];
+                const rows = SAMPLE_ROWS[code] || [];
+                if (!config) return (
+                  <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-2">
+                    <Database className="w-8 h-8" />
+                    <p className="text-sm">Chưa có cấu hình nguồn dữ liệu</p>
+                  </div>
+                );
+                return (
+                  <div className="space-y-3">
+                    <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-[13px] space-y-1.5">
+                      <div className="flex gap-2">
+                        <span className="text-slate-500 w-28 shrink-0">Cơ sở dữ liệu:</span>
+                        <span className="text-slate-800 font-medium">{config.dbName}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="text-slate-500 w-28 shrink-0">Bảng dữ liệu:</span>
+                        <span className="text-slate-800">{[config.mainTable, ...config.joinTables].join(', ')}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="text-slate-500 w-28 shrink-0">Các trường:</span>
+                        <span className="text-slate-800 break-all">{config.fields.join(', ')}</span>
+                      </div>
+                    </div>
+                    {rows.length > 0 && (
+                      <div className="overflow-x-auto border border-slate-200 rounded-lg">
+                        <table className="w-full text-[12px]">
+                          <thead className="bg-slate-50 border-b border-slate-200">
+                            <tr>
+                              {config.fields.map(f => (
+                                <th key={f} className="px-3 py-2 text-left font-semibold text-slate-600 whitespace-nowrap">{f}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 bg-white">
+                            {rows.map((row, i) => (
+                              <tr key={i} className="hover:bg-slate-50">
+                                {config.fields.map(f => (
+                                  <td key={f} className="px-3 py-2 text-slate-700 whitespace-nowrap">{row[f] || '—'}</td>
+                                ))}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
             </div>
 
             <div className="sticky bottom-0 bg-slate-50 border-t border-slate-200 px-6 py-4 flex items-center justify-between">
@@ -1649,25 +1649,6 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                   </button>
                 )}
 
-                {/* Unpublish - when published */}
-                {selectedItem.publishStatus === 'published' && (
-                  <button
-                    onClick={() => {
-                      setData(data.map(item =>
-                        item.id === selectedItem.id
-                          ? { ...item, publishStatus: 'unpublished' as const }
-                          : item
-                      ));
-                      setShowDetailModal(false);
-                      setSelectedItem(null);
-                      alert('Đã bỏ công khai thành công!');
-                    }}
-                    className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center gap-1.5 text-sm font-semibold cursor-pointer transition-all active:scale-95 shadow-sm"
-                  >
-                    <XCircle className="w-4 h-4" />
-                    Bỏ công khai
-                  </button>
-                )}
               </div>
 
               <button

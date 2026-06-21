@@ -41,6 +41,7 @@ import { OpenDataSetupPage } from '../pages/open-data/OpenDataSetupPage';
 import { OpenDataPublishedListPage } from '../pages/open-data/OpenDataPublishedListPage';
 import { OpenDataPublicPortal } from '../pages/open-data/OpenDataPublicPortal';
 import { OpenDataReportPage } from '../pages/open-data-report/OpenDataReportPage';
+import { OpenDataCategoryListPage } from '../pages/open-data-category/OpenDataCategoryListPage';
 import { OpenDataCategoryAPage } from '../pages/open-data-category/OpenDataCategoryAPage';
 import { OpenDataCategoryBPage } from '../pages/open-data-category/OpenDataCategoryBPage';
 import { OpenDataCategoryCPage } from '../pages/open-data-category/OpenDataCategoryCPage';
@@ -517,6 +518,7 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'new-category-setup' && <NewCategorySetupPage />}
             {currentPage === 'open-data' && <OpenDataCategoryPage />}
             {currentPage === 'open-data-setup' && <OpenDataSetupPage onNavigate={setCurrentPage} />}
+            {currentPage === 'open-data-category-list' && <OpenDataCategoryListPage />}
             {currentPage === 'open-data-published-list' && <OpenDataPublishedListPage />}
             {currentPage === 'open-data-category-a' && <OpenDataCategoryAPage />}
             {currentPage === 'open-data-category-b' && <OpenDataCategoryBPage />}

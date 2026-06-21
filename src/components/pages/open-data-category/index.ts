@@ -1,4 +1,5 @@
 export { OpenDataCategorySetupPage } from './OpenDataCategorySetupPage';
+export { OpenDataCategoryListPage } from './OpenDataCategoryListPage';
 export { OpenDataCategoryAPage } from './OpenDataCategoryAPage';
 export { OpenDataCategoryBPage } from './OpenDataCategoryBPage';
 export { OpenDataCategoryCPage } from './OpenDataCategoryCPage';

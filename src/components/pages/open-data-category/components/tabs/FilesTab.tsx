@@ -18,12 +18,8 @@ interface FilesTabProps {
   pageSize: number;
   setPageSize: (size: number) => void;
   onViewDetail: (item: CategoryItem) => void;
-  onEdit: (item: CategoryItem) => void;
-  onDelete: (item: CategoryItem) => void;
   onViewVersion?: (item: CategoryItem) => void;
   activeTab: string;
-  licenseFilter: string;
-  setLicenseFilter: (license: string) => void;
   startDateFilter: string;
   setStartDateFilter: (date: string) => void;
   endDateFilter: string;
@@ -42,12 +38,8 @@ export function FilesTab({
   pageSize,
   setPageSize,
   onViewDetail,
-  onEdit,
-  onDelete,
   onViewVersion,
   activeTab,
-  licenseFilter,
-  setLicenseFilter,
   startDateFilter,
   setStartDateFilter,
   endDateFilter,
@@ -74,8 +66,6 @@ export function FilesTab({
         <OpenDataCategoryFilterPanel
           statusFilter={statusFilter}
           setStatusFilter={setStatusFilter}
-          licenseFilter={licenseFilter}
-          setLicenseFilter={setLicenseFilter}
           startDateFilter={startDateFilter}
           setStartDateFilter={setStartDateFilter}
           endDateFilter={endDateFilter}
@@ -90,8 +80,6 @@ export function FilesTab({
           currentPage={currentPage}
           pageSize={pageSize}
           onViewDetail={onViewDetail}
-          onEdit={onEdit}
-          onDelete={onDelete}
           onViewVersion={onViewVersion}
           activeTab={activeTab}
         />

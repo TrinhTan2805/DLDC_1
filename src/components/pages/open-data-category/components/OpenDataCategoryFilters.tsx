@@ -60,8 +60,6 @@ export function OpenDataCategoryFilters({
 interface OpenDataCategoryFilterPanelProps {
   statusFilter: string;
   setStatusFilter: (status: string) => void;
-  licenseFilter: string;
-  setLicenseFilter: (license: string) => void;
   startDateFilter: string;
   setStartDateFilter: (date: string) => void;
   endDateFilter: string;
@@ -71,8 +69,6 @@ interface OpenDataCategoryFilterPanelProps {
 export function OpenDataCategoryFilterPanel({
   statusFilter,
   setStatusFilter,
-  licenseFilter,
-  setLicenseFilter,
   startDateFilter,
   setStartDateFilter,
   endDateFilter,
@@ -93,23 +89,6 @@ export function OpenDataCategoryFilterPanel({
               <option value="all">Tất cả trạng thái</option>
               <option value="published">Đã công khai</option>
               <option value="unpublished">Chưa công khai</option>
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-          </div>
-        </div>
-
-        {/* Giấy phép */}
-        <div>
-          <label className="block text-[13px] text-slate-600 mb-2 font-normal">Giấy phép</label>
-          <div className="relative">
-            <select
-              value={licenseFilter}
-              onChange={(e) => setLicenseFilter(e.target.value)}
-              className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[14px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-            >
-              <option value="all">Tất cả giấy phép</option>
-              <option value="Giấy phép dữ liệu mở công cộng">Giấy phép dữ liệu mở công cộng</option>
-              <option value="Giấy phép ODC-BY">Giấy phép ODC-BY</option>
             </select>
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
           </div>

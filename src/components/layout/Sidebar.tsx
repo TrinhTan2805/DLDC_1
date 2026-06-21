@@ -390,23 +390,6 @@ const menuItems: MenuItem[] = [
         id: "open-data-category-list",
         label: "Danh sách danh mục dữ liệu mở",
         icon: List,
-        subItems: [
-          {
-            id: "open-data-category-a",
-            label: "Danh sách tổ chức thực hiện trợ giúp pháp lý",
-            icon: FolderOpen,
-          },
-          {
-            id: "open-data-category-b",
-            label: "Danh sách người thực hiện trợ giúp pháp lý",
-            icon: FolderOpen,
-          },
-          {
-            id: "open-data-category-c",
-            label: "Danh sách Luật sư Việt Nam",
-            icon: FolderOpen,
-          },
-        ],
       },
       {
         id: "open-data-published-list",

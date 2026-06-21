@@ -8,28 +8,28 @@ interface OpenDataCategoryTabBarProps {
 
 export function OpenDataCategoryTabBar({ activeTab, setActiveTab }: OpenDataCategoryTabBarProps) {
   return (
-    <div className="bg-white border-b border-slate-200">
-      <div className="flex px-6 gap-2">
+    <div className="px-6 pt-4">
+      <div className="inline-flex items-center bg-slate-100 rounded-lg p-1 gap-1">
         <button
           onClick={() => setActiveTab('category')}
-          className={`flex items-center gap-2 px-6 py-4 text-[14px] font-medium transition-all border-b-2 cursor-pointer ${
+          className={`flex items-center gap-1.5 px-4 py-1.5 rounded-md text-[13px] font-medium transition-all cursor-pointer ${
             activeTab === 'category'
-              ? 'border-blue-600 text-blue-600 bg-blue-50/50'
-              : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
+              ? 'bg-white text-blue-600 shadow-sm ring-1 ring-slate-200'
+              : 'text-slate-500 hover:text-slate-700'
           }`}
         >
-          <FileText className={`w-4 h-4 ${activeTab === 'category' ? 'text-blue-600' : 'text-slate-400'}`} />
+          <FileText className={`w-3.5 h-3.5 ${activeTab === 'category' ? 'text-blue-600' : 'text-slate-400'}`} />
           Tệp dữ liệu
         </button>
         <button
           onClick={() => setActiveTab('version')}
-          className={`flex items-center gap-2 px-6 py-4 text-[14px] font-medium transition-all border-b-2 cursor-pointer ${
+          className={`flex items-center gap-1.5 px-4 py-1.5 rounded-md text-[13px] font-medium transition-all cursor-pointer ${
             activeTab === 'version'
-              ? 'border-blue-600 text-blue-600 bg-blue-50/50'
-              : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
+              ? 'bg-white text-blue-600 shadow-sm ring-1 ring-slate-200'
+              : 'text-slate-500 hover:text-slate-700'
           }`}
         >
-          <HistoryIcon className={`w-4 h-4 ${activeTab === 'version' ? 'text-blue-600' : 'text-slate-400'}`} />
+          <HistoryIcon className={`w-3.5 h-3.5 ${activeTab === 'version' ? 'text-blue-600' : 'text-slate-400'}`} />
           Lịch sử thay đổi
         </button>
       </div>
