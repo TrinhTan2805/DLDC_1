@@ -1051,7 +1051,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
             {activeTab === 'license' && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Trạng thái giấy phép</label>
+                  <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Trạng thái giấy phép</label>
                   <div className="relative">
                     <select
                       value={licenseStatusFilter}
@@ -1071,7 +1071,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
             {activeTab === 'management' && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Trạng thái danh mục</label>
+                  <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Trạng thái danh mục</label>
                   <div className="relative">
                     <select
                       value={statusFilter}
@@ -1088,7 +1088,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Đơn vị chủ trì</label>
+                  <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Đơn vị chủ trì</label>
                   <div className="relative">
                     <select
                       value={unitFilter}
@@ -1106,7 +1106,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Tần suất cập nhật</label>
+                  <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Tần suất cập nhật</label>
                   <div className="relative">
                     <select
                       value={frequencyFilter}
@@ -1127,7 +1127,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
             {activeTab === 'approval' && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Trạng thái phê duyệt</label>
+                  <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Trạng thái phê duyệt</label>
                   <div className="relative">
                     <select
                       value={statusFilter}
@@ -1143,7 +1143,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Đơn vị chủ trì</label>
+                  <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Đơn vị chủ trì</label>
                   <div className="relative">
                     <select
                       value={unitFilter}
@@ -1161,7 +1161,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Tần suất cập nhật</label>
+                  <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Tần suất cập nhật</label>
                   <div className="relative">
                     <select
                       value={frequencyFilter}
@@ -1182,7 +1182,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
             {activeTab === 'metadata' && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Tần suất</label>
+                  <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Tần suất</label>
                   <div className="relative">
                     <select
                       value={metadataFrequencyFilter}
@@ -1200,7 +1200,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Lĩnh vực</label>
+                  <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Lĩnh vực</label>
                   <div className="relative">
                     <select
                       value={metadataFieldFilter}
@@ -1600,7 +1600,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
       yearly: 'Hàng năm'
     };
     return (
-      <span className={`px-2 py-1 text-xs border rounded-full ${styles[status as keyof typeof styles]}`}>
+      <span className={`px-2 py-1 text-xs border rounded-full whitespace-nowrap ${styles[status as keyof typeof styles]}`}>
         {labels[status as keyof typeof labels] || status}
       </span>
     );
@@ -1621,7 +1621,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
       rejected: 'Từ chối'
     };
     return (
-      <span className={`px-2 py-1 text-xs border rounded-full ${styles[status as keyof typeof styles]}`}>
+      <span className={`px-2 py-1 text-xs border rounded-full whitespace-nowrap ${styles[status as keyof typeof styles]}`}>
         {labels[status as keyof typeof labels] || status}
       </span>
     );
@@ -1850,7 +1850,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                           {item.frequency === 'daily' ? 'Hàng ngày' : item.frequency === 'weekly' ? 'Hàng tuần' : item.frequency === 'monthly' ? 'Hàng tháng' : 'Hàng quý'}
                         </td>
                         <td className="px-4 py-3 text-center">
-                          <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${item.status === 'active' ? 'bg-green-50 text-green-700 border-green-100' : 'bg-slate-100 text-slate-700 border-slate-200'}`}>
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border whitespace-nowrap ${item.status === 'active' ? 'bg-green-50 text-green-700 border-green-100' : 'bg-slate-100 text-slate-700 border-slate-200'}`}>
                             {item.status === 'active' ? 'Hoạt động' : 'Ngừng'}
                           </span>
                         </td>
@@ -1893,11 +1893,11 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                         <td className="px-6 py-4 text-left text-slate-600 max-w-xs truncate text-[13px]" title={item.terms}>{item.terms}</td>
                         <td className="px-6 py-4 text-center">
                           {item.status === 'active' ? (
-                            <span className="px-2.5 py-1 text-xs bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-full font-medium">
+                            <span className="px-2.5 py-1 text-xs bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-full font-medium whitespace-nowrap">
                               Còn hiệu lực
                             </span>
                           ) : (
-                            <span className="px-2.5 py-1 text-xs bg-slate-100 text-slate-600 border border-slate-200 rounded-full font-medium">
+                            <span className="px-2.5 py-1 text-xs bg-slate-100 text-slate-600 border border-slate-200 rounded-full font-medium whitespace-nowrap">
                               Hết hiệu lực
                             </span>
                           )}
@@ -2049,10 +2049,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4 shadow-xl border border-slate-100">
             <div className="sticky top-0 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between z-10">
-              <div>
-                <h3 className="text-[16px] font-bold text-slate-900">Chi tiết Metadata</h3>
-                <p className="text-xs text-slate-500 mt-0.5 font-normal">Thông tin chi tiết cấu hình metadata của tập dữ liệu mở</p>
-              </div>
+              <h3 className="text-[18px] font-bold text-slate-900">Chi tiết Metadata</h3>
               <button
                 onClick={() => setShowViewMetadataModal(false)}
                 className="text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
@@ -2220,14 +2217,9 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4">
             <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900">
-                  {selectedMetadata ? 'Chỉnh sửa Metadata' : 'Thêm mới Metadata'}
-                </h3>
-                <p className="text-sm text-slate-500 mt-1">
-                  Quản lý thông tin metadata cho dữ liệu mở, bao gồm giấy phép, định dạng chia sẻ và nguồn dữ liệu.
-                </p>
-              </div>
+              <h3 className="text-[18px] font-semibold text-slate-900">
+                {selectedMetadata ? 'Chỉnh sửa Metadata' : 'Thêm mới Metadata'}
+              </h3>
               <button onClick={() => setShowMetadataModal(false)} className="text-slate-400 hover:text-slate-600" aria-label="Đóng" title="Đóng">
                 <X className="w-5 h-5" />
               </button>
@@ -2563,14 +2555,9 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4">
             <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-              <div>
-                <h3 className="text-[15px] font-semibold text-slate-900">
-                  {isLicenseViewOnly ? 'Xem chi tiết giấy phép' : selectedLicense ? 'Chỉnh sửa giấy phép' : 'Thêm mới giấy phép'}
-                </h3>
-                <p className="text-[13px] text-slate-500 mt-1">
-                  Quản lý giấy phép chuẩn, điều kiện sử dụng và liên kết tham chiếu.
-                </p>
-              </div>
+              <h3 className="text-[18px] font-semibold text-slate-900">
+                {isLicenseViewOnly ? 'Xem chi tiết giấy phép' : selectedLicense ? 'Chỉnh sửa giấy phép' : 'Thêm mới giấy phép'}
+              </h3>
               <button onClick={() => setShowLicenseModal(false)} className="text-slate-400 hover:text-slate-600" aria-label="Đóng" title="Đóng">
                 <X className="w-5 h-5" />
               </button>
@@ -2578,7 +2565,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[13px] text-slate-700 mb-2">Tên giấy phép *</label>
+                  <label className="block text-[13px] text-slate-700 mb-2">Tên giấy phép <span className="text-red-500">*</span></label>
                   <input
                     type="text"
                     value={licenseFormData.name}
@@ -2589,7 +2576,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   />
                 </div>
                 <div>
-                  <label className="block text-[13px] text-slate-700 mb-2">Tên viết tắt *</label>
+                  <label className="block text-[13px] text-slate-700 mb-2">Tên viết tắt <span className="text-red-500">*</span></label>
                   <input
                     type="text"
                     value={licenseFormData.shortName}
@@ -2608,7 +2595,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                 </div>
               </div>
               <div>
-                <label className="block text-[13px] text-slate-700 mb-2">Mô tả *</label>
+                <label className="block text-[13px] text-slate-700 mb-2">Mô tả <span className="text-red-500">*</span></label>
                 <textarea
                   value={licenseFormData.description}
                   onChange={(e) => setLicenseFormData({ ...licenseFormData, description: e.target.value })}
@@ -2619,7 +2606,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                 />
               </div>
               <div>
-                <label className="block text-[13px] text-slate-700 mb-2">Điều kiện sử dụng *</label>
+                <label className="block text-[13px] text-slate-700 mb-2">Điều kiện sử dụng <span className="text-red-500">*</span></label>
                 <textarea
                   value={licenseFormData.terms}
                   onChange={(e) => setLicenseFormData({ ...licenseFormData, terms: e.target.value })}
@@ -2630,7 +2617,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                 />
               </div>
               <div>
-                <label className="block text-[13px] text-slate-700 mb-2">Liên kết tham chiếu *</label>
+                <label className="block text-[13px] text-slate-700 mb-2">Liên kết tham chiếu <span className="text-red-500">*</span></label>
                 <input
                   type="text"
                   value={licenseFormData.referenceUrl}
@@ -2697,7 +2684,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4">
             <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-              <h3 className="text-[15px] font-semibold text-slate-900">
+              <h3 className="text-[18px] font-semibold text-slate-900">
                 {activeTab === 'management' ? 'Thêm danh mục mới' : 'Thêm quy tắc cập nhật mới'}
               </h3>
               <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600" aria-label="Đóng" title="Đóng">
@@ -2730,7 +2717,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
               */}
 
               <div>
-                <label className="block text-[13px] text-slate-700 mb-2">Mã danh mục *</label>
+                <label className="block text-[13px] text-slate-700 mb-2">Mã danh mục <span className="text-red-500">*</span></label>
                 <input
                   type="text"
                   value={formData.code}
@@ -2740,7 +2727,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                 />
               </div>
               <div>
-                <label className="block text-[13px] text-slate-700 mb-2">Tên danh mục *</label>
+                <label className="block text-[13px] text-slate-700 mb-2">Tên danh mục <span className="text-red-500">*</span></label>
                 <input
                   type="text"
                   value={formData.name}
@@ -2772,7 +2759,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                 />
               </div>
               <div>
-                <label className="block text-[13px] text-slate-700 mb-2">Đơn vị chủ trì cung cấp *</label>
+                <label className="block text-[13px] text-slate-700 mb-2">Đơn vị chủ trì cung cấp <span className="text-red-500">*</span></label>
                 <select
                   value={formData.dataField}
                   onChange={(e) => setFormData({ ...formData, dataField: e.target.value })}
@@ -2817,7 +2804,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
               </button>
               <button
                 onClick={handleSaveAdd}
-                className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-[13px] font-medium"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-[13px] font-medium"
               >
                 <Save className="w-4 h-4 inline mr-2" />
                 Lưu
@@ -2841,7 +2828,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4">
             <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-              <h3 className="text-[15px] font-semibold text-slate-900">Chi tiết danh mục</h3>
+              <h3 className="text-[18px] font-semibold text-slate-900">Chi tiết danh mục</h3>
               <button onClick={() => setShowViewModal(false)} className="text-slate-400 hover:text-slate-600" aria-label="Đóng" title="Đóng">
                 <X className="w-5 h-5" />
               </button>
@@ -2953,14 +2940,14 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4">
             <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-              <h3 className="text-[15px] font-semibold text-slate-900">Chỉnh sửa danh mục</h3>
+              <h3 className="text-[18px] font-semibold text-slate-900">Chỉnh sửa danh mục</h3>
               <button onClick={() => setShowEditModal(false)} className="text-slate-400 hover:text-slate-600" aria-label="Đóng" title="Đóng">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-[13px] text-slate-700 mb-2">Mã danh mục *</label>
+                <label className="block text-[13px] text-slate-700 mb-2">Mã danh mục <span className="text-red-500">*</span></label>
                 <input
                   type="text"
                   value={formData.code}
@@ -2971,7 +2958,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                 />
               </div>
               <div>
-                <label className="block text-[13px] text-slate-700 mb-2">Tên danh mục *</label>
+                <label className="block text-[13px] text-slate-700 mb-2">Tên danh mục <span className="text-red-500">*</span></label>
                 <input
                   type="text"
                   value={formData.name}
@@ -3005,7 +2992,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                 />
               </div>
               <div>
-                <label className="block text-[13px] text-slate-700 mb-2">Đơn vị chủ trì cung cấp *</label>
+                <label className="block text-[13px] text-slate-700 mb-2">Đơn vị chủ trì cung cấp <span className="text-red-500">*</span></label>
                 <select
                   value={formData.dataField}
                   onChange={(e) => setFormData({ ...formData, dataField: e.target.value })}
@@ -3051,7 +3038,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
               </button>
               <button
                 onClick={handleSaveEdit}
-                className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-[13px] font-medium"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-[13px] font-medium"
               >
                 <Save className="w-4 h-4 inline mr-2" />
                 Lưu
@@ -3080,7 +3067,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                 <>
                   <div className="flex items-center gap-3 text-red-600 mb-4">
                     <AlertCircle className="w-6 h-6 shrink-0" />
-                    <h3 className="text-[15px] font-bold text-slate-900">Không thể xóa danh mục</h3>
+                    <h3 className="text-[18px] font-bold text-slate-900">Không thể xóa danh mục</h3>
                   </div>
                   <p className="text-[13px] text-slate-600 mb-6 leading-relaxed">
                     Không thể xóa danh mục đã được sử dụng. Vui lòng xóa dữ liệu/metadata của danh mục để thực hiện tiếp tác vụ.
@@ -3096,7 +3083,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                 </>
               ) : (
                 <>
-                  <h3 className="text-[15px] font-semibold text-slate-900 mb-4">Xác nhận xóa</h3>
+                  <h3 className="text-[18px] font-semibold text-slate-900 mb-4">Xác nhận xóa</h3>
                   <p className="text-[13px] text-slate-600 mb-6">
                     Bạn có chắc chắn muốn xóa danh mục <strong>{selectedCategory.name}</strong>?
                   </p>
@@ -3164,27 +3151,6 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   rows={5}
                   placeholder="Nhập ý kiến phê duyệt (nếu có)...&#10;Ví dụ: Đồng ý phê duyệt danh mục dữ liệu mở theo đề xuất của đơn vị."
                 />
-              </div>
-
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
-                <div>
-                  <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-wider">Tên danh mục</div>
-                  <div className="text-[13px] font-bold text-slate-900 mt-1">{selectedCategory.name}</div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-wider">Mã danh mục</div>
-                    <div className="text-[13px] text-slate-800 font-medium mt-0.5">{selectedCategory.code}</div>
-                  </div>
-                  <div>
-                    <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-wider">Đơn vị chủ trì cung cấp</div>
-                    <div className="text-[13px] text-slate-800 font-medium mt-0.5">{selectedCategory.dataField}</div>
-                  </div>
-                </div>
-                <div>
-                  <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-wider">Định dạng dữ liệu</div>
-                  <div className="text-[13px] text-slate-800 mt-0.5">{selectedCategory.dataFormat.join(', ')}</div>
-                </div>
               </div>
             </div>
 
@@ -3296,7 +3262,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg w-full max-w-lg m-4">
             <div className="border-b border-slate-200 px-6 py-4">
-              <h3 className="text-[15px] font-semibold text-slate-900">Trình duyệt danh mục</h3>
+              <h3 className="text-[18px] font-semibold text-slate-900">Trình duyệt danh mục</h3>
             </div>
 
             <div className="p-6 space-y-4">

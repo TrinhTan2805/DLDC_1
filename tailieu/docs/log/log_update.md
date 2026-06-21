@@ -1,5 +1,167 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Phiên bản 2.5.22 (Ngày cập nhật: 20/06/2026)
+
+**Nội dung thay đổi:**
+1. **Đổi màu nút xem chi tiết trong cột thao tác màn Phê duyệt dữ liệu mở**:
+   - Chỉnh sửa file `src/components/pages/open-data/OpenDataApprovalPage.tsx` và `src/components/pages/open-data/OpenDataPublishedListPage.tsx` để đổi màu nút bấm Xem chi tiết (icon mắt `Eye`) trong các bảng danh sách thuộc màn/phân hệ Phê duyệt dữ liệu mở từ màu xanh dương sang màu đen/slate (`text-slate-700 hover:text-black hover:bg-slate-100`).
+
+**Các file bị ảnh hưởng:**
+- `package.json`
+- `src/components/pages/open-data/OpenDataApprovalPage.tsx`
+- `src/components/pages/open-data/OpenDataPublishedListPage.tsx`
+
+---
+
+## Phiên bản 2.5.21 (Ngày cập nhật: 20/06/2026)
+
+**Nội dung thay đổi:**
+1. **Ẩn thông tin chung và thêm văn bản mô tả khi bấm từ chối phê duyệt yêu cầu công bố**:
+   - Chỉnh sửa file `src/components/pages/open-data/OpenDataPublishedListPage.tsx` để ẩn đi khối thông tin chung của tệp đề xuất khi bấm nút **Từ chối duyệt** (`showRejectForm` bằng true).
+   - Thêm hộp văn bản mô tả quy trình/quy định tương tự như bên phê duyệt, nằm ngay phía dưới ô nhập lý do từ chối.
+
+**Các file bị ảnh hưởng:**
+- `package.json`
+- `src/components/pages/open-data/OpenDataPublishedListPage.tsx`
+
+---
+
+## Phiên bản 2.5.20 (Ngày cập nhật: 20/06/2026)
+
+**Nội dung thay đổi:**
+1. **Loại bỏ khối thông tin chung trong modal Phê duyệt yêu cầu công bố khi mở form phê duyệt**:
+   - Chỉnh sửa file `src/components/pages/open-data/OpenDataPublishedListPage.tsx` để ẩn đi khối thông tin tệp đề xuất/thông tin chung khi người dùng bấm nút **Phê duyệt & Công bố** (`showApproveForm` bằng true). Việc này giúp tối ưu hóa không gian hiển thị, tránh việc phần nhập ý kiến bị đẩy xuống quá xa hoặc gây tràn màn hình.
+
+**Các file bị ảnh hưởng:**
+- `package.json`
+- `src/components/pages/open-data/OpenDataPublishedListPage.tsx`
+
+---
+
+## Phiên bản 2.5.19 (Ngày cập nhật: 20/06/2026)
+
+**Nội dung thay đổi:**
+1. **Thiết kế lại tiêu đề (Header) của các modal trong tab Metadata**:
+   - Tăng kích thước font chữ tiêu đề (Header Title) lên `18px` (`text-[18px]`) cho các modal tương tác trong tab Metadata: modal Chi tiết Metadata (`showViewMetadataModal`) và modal Thêm mới/Chỉnh sửa Metadata (`showMetadataModal`).
+   - Loại bỏ các phần mô tả phụ không cần thiết nằm ngay dưới tiêu đề của các modal này.
+
+**Các file bị ảnh hưởng:**
+- `package.json`
+- `src/components/pages/open-data/OpenDataSetupPage.tsx`
+
+---
+
+## Phiên bản 2.5.18 (Ngày cập nhật: 20/06/2026)
+
+**Nội dung thay đổi:**
+1. **Loại bỏ khối thông tin danh mục trùng lặp trong modal Phê duyệt danh mục**:
+   - Chỉnh sửa file `src/components/pages/open-data/OpenDataSetupPage.tsx` để xóa bỏ khối thông tin chi tiết danh mục ở phía dưới ý kiến phê duyệt (bao gồm Tên danh mục, Mã danh mục, Đơn vị chủ trì, Định dạng dữ liệu) trong modal Phê duyệt danh mục (`showApprovalModal` với hành động `approved`) nhằm làm giao diện trực quan và tránh lặp lại thông tin đã hiển thị ở phần trên.
+
+**Các file bị ảnh hưởng:**
+- `package.json`
+- `src/components/pages/open-data/OpenDataSetupPage.tsx`
+
+---
+
+## Phiên bản 2.5.17 (Ngày cập nhật: 20/06/2026)
+
+**Nội dung thay đổi:**
+1. **Thiết kế lại tiêu đề (Header) của các modal trong tab Quản lý danh mục**:
+   - Tăng kích thước font chữ tiêu đề (Header Title) lên `18px` (`text-[18px]`) cho tất cả các modal tương tác trong tab Quản lý danh mục, bao gồm: modal Thêm danh mục mới (`showAddModal`), modal Chi tiết danh mục (`showViewModal`), modal Chỉnh sửa danh mục (`showEditModal`), modal Xác nhận xóa (`showDeleteModal`), và modal Trình duyệt danh mục (`showApprovalModal` với hành động `pending`).
+   - Loại bỏ các phần mô tả phụ không cần thiết nằm ngay dưới tiêu đề của các modal này.
+
+**Các file bị ảnh hưởng:**
+- `package.json`
+- `src/components/pages/open-data/OpenDataSetupPage.tsx`
+
+---
+
+## Phiên bản 2.5.16 (Ngày cập nhật: 20/06/2026)
+
+**Nội dung thay đổi:**
+1. **Đổi màu nút Lưu tại modal Thêm mới & Chỉnh sửa danh mục**:
+   - Thay đổi màu nền và màu hover của nút **Lưu** từ màu xanh lá (`bg-emerald-600 hover:bg-emerald-700`) sang màu xanh dương của hệ thống (`bg-blue-600 hover:bg-blue-700`) trong cả hai modal Thêm mới danh mục (`showAddModal`) và Chỉnh sửa danh mục (`showEditModal`) tại màn hình Thiết lập danh mục dữ liệu mở.
+
+**Các file bị ảnh hưởng:**
+- `package.json`
+- `src/components/pages/open-data/OpenDataSetupPage.tsx`
+
+---
+
+## Phiên bản 2.5.15 (Ngày cập nhật: 20/06/2026)
+
+**Nội dung thay đổi:**
+1. **Đổi màu dấu bắt buộc (*) trong modal thêm mới và sửa danh mục**:
+   - Chỉnh sửa file `src/components/pages/open-data/OpenDataSetupPage.tsx` để đổi màu của các dấu hoa thị bắt buộc (`*`) trong form của modal thêm mới (`showAddModal`) và sửa danh mục (`showEditModal`) sang màu đỏ (`text-red-500`).
+
+**Các file bị ảnh hưởng:**
+- `package.json`
+- `src/components/pages/open-data/OpenDataSetupPage.tsx`
+
+---
+
+## Phiên bản 2.5.14 (Ngày cập nhật: 20/06/2026)
+
+**Nội dung thay đổi:**
+1. **Đổi màu chữ các bộ lọc nâng cao sang màu đen**:
+   - Chỉnh sửa nhãn (label) của bộ lọc tại các tab **Giấy phép**, **Quản lý danh mục**, **Phê duyệt danh mục**, và **Metadata** để đổi màu chữ từ màu xám (`text-slate-500`) sang màu đen (`text-black`).
+
+**Các file bị ảnh hưởng:**
+- `package.json`
+- `src/components/pages/open-data/OpenDataSetupPage.tsx`
+
+---
+
+## Phiên bản 2.5.13 (Ngày cập nhật: 20/06/2026)
+
+**Nội dung thay đổi:**
+1. **Chỉnh sửa kích thước font và kiểu chữ trong các bộ lọc**:
+   - Chỉnh sửa nhãn (label) của bộ lọc tại các tab **Giấy phép**, **Quản lý danh mục**, **Phê duyệt danh mục**, và **Metadata** về kích thước font `13px` (`text-[13px]`) và đổi kiểu chữ từ in đậm sang thường (`font-normal`) thay vì `text-xs font-semibold` cũ.
+
+**Các file bị ảnh hưởng:**
+- `package.json`
+- `src/components/pages/open-data/OpenDataSetupPage.tsx`
+
+---
+
+## Phiên bản 2.5.12 (Ngày cập nhật: 20/06/2026)
+
+**Nội dung thay đổi:**
+1. **Thiết kế lại tiêu đề (Header) của modal Giấy phép**:
+   - Tăng kích thước font chữ tiêu đề (Header Title) cho các modal Thêm mới, Chỉnh sửa, và Xem chi tiết giấy phép lên `18px` (`text-[18px]`).
+   - Loại bỏ đoạn văn bản mô tả nằm phía dưới tiêu đề để giao diện gọn gàng hơn.
+
+**Các file bị ảnh hưởng:**
+- `package.json`
+- `src/components/pages/open-data/OpenDataSetupPage.tsx`
+
+---
+
+## Phiên bản 2.5.11 (Ngày cập nhật: 20/06/2026)
+
+**Nội dung thay đổi:**
+1. **Đổi màu dấu bắt buộc (*) trong modal Giấy phép sang màu đỏ**:
+   - Chỉnh sửa file `src/components/pages/open-data/OpenDataSetupPage.tsx` để đổi màu các dấu hoa thị bắt buộc (`*`) trong form của modal Giấy phép (Thêm mới, Xem chi tiết, Chỉnh sửa) sang màu đỏ (`text-red-500`) theo đúng chuẩn thiết kế hệ thống.
+
+**Các file bị ảnh hưởng:**
+- `package.json`
+- `src/components/pages/open-data/OpenDataSetupPage.tsx`
+
+---
+
+## Phiên bản 2.5.10 (Ngày cập nhật: 20/06/2026)
+
+**Nội dung thay đổi:**
+1. **Sửa lỗi badge trạng thái bị xuống dòng ở tab Giấy phép**:
+   - Thêm class `whitespace-nowrap` vào các badge hiển thị trạng thái "Còn hiệu lực" và "Hết hiệu lực" tại bảng danh sách Giấy phép thuộc màn hình **Thiết lập danh mục dữ liệu mở** (`OpenDataSetupPage.tsx`) để tránh tình trạng chữ bị xuống dòng khi co giãn màn hình.
+   - Thêm class `whitespace-nowrap` vào badge trạng thái trong hàm `getStatusBadge` và `getApprovalStatusBadge` để thống nhất hành vi hiển thị không bị ngắt dòng cho tất cả các tab khác.
+
+**Các file bị ảnh hưởng:**
+- `package.json`
+- `src/components/pages/open-data/OpenDataSetupPage.tsx`
+
+---
+
 ## Phiên bản 2.5.9 (Ngày cập nhật: 19/06/2026)
 
 **Nội dung thay đổi:**

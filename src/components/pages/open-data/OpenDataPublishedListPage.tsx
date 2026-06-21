@@ -1286,7 +1286,7 @@ export function OpenDataPublishedListPage() {
                             <div className="flex items-center justify-center gap-1">
                               <button
                                 onClick={() => handleViewDetail(item)}
-                                className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                                className="p-1.5 text-slate-500 hover:text-black hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
                                 title="Xem chi tiết"
                               >
                                 <Eye className="w-4 h-4" />
@@ -1461,7 +1461,7 @@ export function OpenDataPublishedListPage() {
                                 setShowRejectForm(false);
                                 setShowApprovalModal(true);
                               }}
-                              className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg inline-flex items-center justify-center cursor-pointer transition-colors"
+                              className="p-1.5 text-slate-700 hover:text-black hover:bg-slate-100 rounded-lg inline-flex items-center justify-center cursor-pointer transition-colors"
                               title="Xem chi tiết & Phê duyệt"
                             >
                               <Eye className="w-4 h-4" />
@@ -2428,67 +2428,89 @@ export function OpenDataPublishedListPage() {
             </div>
             
             <div className="p-6 space-y-4 flex-1 text-[13px]">
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-[13px]">
-                <div className="col-span-1 md:col-span-2">
-                  <div className="text-[13px] font-semibold text-black uppercase">Tên tệp đề xuất</div>
-                  <div className="text-[13px] font-bold text-black mt-1 flex items-center gap-1.5">
-                    <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
-                    {selectedApprovalItem.fileName}
+              {!showApproveForm && !showRejectForm && (
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-[13px]">
+                  <div className="col-span-1 md:col-span-2">
+                    <div className="text-[13px] font-semibold text-black uppercase">Tên tệp đề xuất</div>
+                    <div className="text-[13px] font-bold text-black mt-1 flex items-center gap-1.5">
+                      <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+                      {selectedApprovalItem.fileName}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[13px] font-semibold text-black uppercase">Danh mục mở</div>
+                    <div className="text-[13px] text-black font-medium mt-0.5">{selectedApprovalItem.category}</div>
+                  </div>
+                  <div>
+                    <div className="text-[13px] font-semibold text-black uppercase">Người đề xuất</div>
+                    <div className="text-[13px] text-black font-medium mt-0.5">{selectedApprovalItem.creator}</div>
+                  </div>
+                  <div>
+                    <div className="text-[13px] font-semibold text-black uppercase">Cơ quan công bố</div>
+                    <div className="text-[13px] text-black font-medium mt-0.5">{selectedApprovalItem.publisher}</div>
+                  </div>
+                  <div>
+                    <div className="text-[13px] font-semibold text-black uppercase">Giấy phép</div>
+                    <div className="text-[13px] text-black font-medium mt-0.5">{selectedApprovalItem.license}</div>
+                  </div>
+                  <div>
+                    <div className="text-[13px] font-semibold text-black uppercase">Từ khóa</div>
+                    <div className="text-[13px] text-black font-medium mt-0.5">{selectedApprovalItem.keywords || 'N/A'}</div>
+                  </div>
+                  <div>
+                    <div className="text-[13px] font-semibold text-black uppercase">Tần suất cập nhật</div>
+                    <div className="text-[13px] text-black font-medium mt-0.5">{getFrequencyLabel(selectedApprovalItem.frequency || 'monthly')}</div>
+                  </div>
+                  <div className="col-span-1 md:col-span-2">
+                    <div className="text-[13px] font-semibold text-black uppercase">Định dạng chia sẻ</div>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {selectedApprovalItem.format?.map((fmt, i) => (
+                        <span key={i} className="px-1.5 py-0.5 bg-blue-50 text-black border border-blue-100 rounded text-[13px] font-medium">
+                          {fmt}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="col-span-1 md:col-span-2">
+                    <div className="text-[13px] font-semibold text-black uppercase">Thông tin mô tả</div>
+                    <div className="text-[13px] text-black font-medium mt-0.5 whitespace-pre-wrap">{selectedApprovalItem.description || 'Không có mô tả'}</div>
                   </div>
                 </div>
-                <div>
-                  <div className="text-[13px] font-semibold text-black uppercase">Danh mục mở</div>
-                  <div className="text-[13px] text-black font-medium mt-0.5">{selectedApprovalItem.category}</div>
-                </div>
-                <div>
-                  <div className="text-[13px] font-semibold text-black uppercase">Người đề xuất</div>
-                  <div className="text-[13px] text-black font-medium mt-0.5">{selectedApprovalItem.creator}</div>
-                </div>
-                <div>
-                  <div className="text-[13px] font-semibold text-black uppercase">Cơ quan công bố</div>
-                  <div className="text-[13px] text-black font-medium mt-0.5">{selectedApprovalItem.publisher}</div>
-                </div>
-                <div>
-                  <div className="text-[13px] font-semibold text-black uppercase">Giấy phép</div>
-                  <div className="text-[13px] text-black font-medium mt-0.5">{selectedApprovalItem.license}</div>
-                </div>
-                <div>
-                  <div className="text-[13px] font-semibold text-black uppercase">Từ khóa</div>
-                  <div className="text-[13px] text-black font-medium mt-0.5">{selectedApprovalItem.keywords || 'N/A'}</div>
-                </div>
-                <div>
-                  <div className="text-[13px] font-semibold text-black uppercase">Tần suất cập nhật</div>
-                  <div className="text-[13px] text-black font-medium mt-0.5">{getFrequencyLabel(selectedApprovalItem.frequency || 'monthly')}</div>
-                </div>
-                <div className="col-span-1 md:col-span-2">
-                  <div className="text-[13px] font-semibold text-black uppercase">Định dạng chia sẻ</div>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {selectedApprovalItem.format?.map((fmt, i) => (
-                      <span key={i} className="px-1.5 py-0.5 bg-blue-50 text-black border border-blue-100 rounded text-[13px] font-medium">
-                        {fmt}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <div className="col-span-1 md:col-span-2">
-                  <div className="text-[13px] font-semibold text-black uppercase">Thông tin mô tả</div>
-                  <div className="text-[13px] text-black font-medium mt-0.5 whitespace-pre-wrap">{selectedApprovalItem.description || 'Không có mô tả'}</div>
-                </div>
-              </div>
+              )}
 
               {showRejectForm ? (
-                <div className="space-y-2 pt-2 animate-fade-in">
-                  <label className="block text-[13px] font-semibold text-slate-700">
-                    Lý do từ chối phê duyệt <span className="text-red-500">*</span>
-                  </label>
-                  <textarea
-                    rows={4}
-                    required
-                    placeholder="Nhập lý do từ chối cụ thể để cán bộ chỉnh sửa..."
-                    value={rejectReason}
-                    onChange={(e) => setRejectReason(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 font-normal"
-                  />
+                <div className="space-y-4 pt-2 animate-fade-in text-[13px] text-black">
+                  <div>
+                    <label className="block text-[13px] font-semibold text-slate-700 mb-2">
+                      Lý do từ chối phê duyệt <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      rows={4}
+                      required
+                      placeholder="Nhập lý do từ chối cụ thể để cán bộ chỉnh sửa..."
+                      value={rejectReason}
+                      onChange={(e) => setRejectReason(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 font-normal resize-none"
+                    />
+                  </div>
+
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                    <div className="text-[13px] font-semibold text-slate-700 mb-2">Sau khi từ chối phê duyệt:</div>
+                    <ul className="space-y-1.5">
+                      <li className="flex items-start gap-2 text-[13px] text-slate-655 font-normal">
+                        <XCircle className="w-3.5 h-3.5 text-red-500 mt-0.5 shrink-0" />
+                        Yêu cầu công bố sẽ chuyển sang trạng thái "Từ chối"
+                      </li>
+                      <li className="flex items-start gap-2 text-[13px] text-slate-655 font-normal">
+                        <XCircle className="w-3.5 h-3.5 text-red-500 mt-0.5 shrink-0" />
+                        Lý do từ chối sẽ được gửi phản hồi lại cho đơn vị đề xuất
+                      </li>
+                      <li className="flex items-start gap-2 text-[13px] text-slate-655 font-normal">
+                        <XCircle className="w-3.5 h-3.5 text-red-500 mt-0.5 shrink-0" />
+                        Đơn vị đề xuất có thể chỉnh sửa thông tin và gửi lại yêu cầu mới
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               ) : showApproveForm ? (
                 <div className="space-y-4 pt-2 animate-fade-in text-[13px] text-black">

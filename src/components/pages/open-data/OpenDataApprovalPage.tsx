@@ -283,7 +283,7 @@ export function OpenDataApprovalPage() {
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <button
-                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"
+                            className="p-1.5 text-slate-700 hover:text-black hover:bg-slate-100 rounded transition-colors"
                             title="Xem chi tiết"
                             onClick={() => {
                               setSelectedRequest(request);
