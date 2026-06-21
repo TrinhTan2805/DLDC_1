@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Search, FileText, Calendar, User, Download, Eye, Filter, ChevronDown, Globe, CheckCircle, AlertCircle, RefreshCw, XCircle, Send, Upload, X, FileSpreadsheet, Info, Plus, Clock, Database, Trash2, Edit, PlusCircle, PauseCircle, PlayCircle, Edit2, Shield, Menu, Save, AlertTriangle } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { Search, FileText, Calendar, User, Download, Eye, Filter, ChevronDown, Globe, CheckCircle, AlertCircle, RefreshCw, XCircle, Send, Upload, X, FileSpreadsheet, Info, Plus, Clock, Database, Trash2, Edit, PlusCircle, PauseCircle, PlayCircle, Edit2, SquarePen, Shield, Menu, Save, AlertTriangle } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 interface PublishedData {
@@ -24,6 +25,7 @@ interface PublishedData {
   mainTable?: string;
   joinTables?: any[];
   dataFields?: any[];
+  approvalNote?: string;
 }
 
 const getPreviewFallback = (categoryName: string) => {
@@ -73,6 +75,7 @@ const mockPublishedData: PublishedData[] = [
     license: 'Giấy phép dữ liệu mở công cộng',
     fileSize: '154 KB',
     dataSource: 'CSDL Trợ giúp pháp lý - Bảng tổ chức',
+    approvalNote: 'Đồng ý phê duyệt và công bố dữ liệu mở theo đề xuất của đơn vị. Dữ liệu đã được kiểm tra và đáp ứng đầy đủ các tiêu chí công bố.',
     previewHeaders: ['Tên tổ chức thực hiện trợ giúp pháp lý', 'Người đại diện', 'Địa chỉ liên hệ'],
     previewRows: [
       ['Trung tâm Trợ giúp pháp lý nhà nước Tỉnh A', 'Nguyễn Văn Nam', '123 Hùng Vương, Tỉnh A'],
@@ -95,6 +98,7 @@ const mockPublishedData: PublishedData[] = [
     license: 'Giấy phép ODC-BY',
     fileSize: '168 KB',
     dataSource: 'CSDL Trợ giúp pháp lý - Bảng người thực hiện',
+    approvalNote: 'Dữ liệu đủ điều kiện công bố, đã kiểm tra tính đầy đủ và chính xác. Đồng ý kích hoạt công bố.',
     previewHeaders: ['Họ tên', 'Số năm hành nghề', 'Vai trò', 'Tổ chức hành nghề', 'Địa chỉ tổ chức', 'Số điện thoại tổ chức'],
     previewRows: [
       ['Nguyễn Văn An', '10', 'Trợ giúp viên pháp luật', 'Trung tâm TGPL Nhà nước Tỉnh X', 'Đường Hùng Vương, Tỉnh X', '0243.123.456'],
@@ -159,6 +163,7 @@ const mockPublishedData: PublishedData[] = [
     license: 'Giấy phép ODC-BY',
     fileSize: '450 KB',
     dataSource: 'CSDL Luật sư Việt Nam',
+    approvalNote: 'Từ chối do tệp dữ liệu thiếu các cột thông tin bắt buộc theo quy định: Số Chứng chỉ hành nghề, Đoàn Luật sư, Tình trạng hành nghề. Đề nghị bổ sung đầy đủ và nộp lại.',
     previewHeaders: ['Họ và tên', 'Ngày sinh', 'Số Thẻ luật sư'],
     previewRows: [
       ['Nguyễn Văn B', '12/12/1970', 'THE-0001-LS']
@@ -179,6 +184,7 @@ const mockPublishedData: PublishedData[] = [
     license: 'Giấy phép dữ liệu mở công cộng',
     fileSize: '-',
     dataSource: 'API: GET - https://api.moj.gov.vn/luatsu',
+    approvalNote: 'API đạt tiêu chuẩn kỹ thuật và bảo mật. Đồng ý kích hoạt và công bố.',
     previewHeaders: ['Họ và tên', 'Ngày sinh', 'Giới tính', 'Quốc tịch', 'Số Chứng chỉ hành nghề luật sư', 'Số Thẻ luật sư', 'Nơi làm việc/nơi hành nghề', 'Thành viên Đoàn Luật sư', 'Tình trạng hành nghề'],
     previewRows: [
       ['Lê Văn Long', '15/08/1985', 'Nam', 'Việt Nam', 'CC-9988-BTP', 'THE-1234-LS', 'Văn phòng Luật sư Long & Partners', 'Đoàn Luật sư TP. Hà Nội', 'Đang hoạt động'],
@@ -544,8 +550,10 @@ export function OpenDataPublishedListPage() {
 
   // Form Request States
   const [showRequestModal, setShowRequestModal] = useState(false);
+  const [editingItem, setEditingItem] = useState<PublishedData | null>(null);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [successPopupMessage, setSuccessPopupMessage] = useState('Yêu cầu công bố đã được ghi nhận');
+  const [scheduleStatusConfirm, setScheduleStatusConfirm] = useState<{ schedule: ScheduleItem; action: 'pause' | 'resume' } | null>(null);
   const [requestFileName, setRequestFileName] = useState('');
   const [requestDescription, setRequestDescription] = useState('');
   const [requestCategory, setRequestCategory] = useState('');
@@ -918,13 +926,23 @@ export function OpenDataPublishedListPage() {
       alert("Vui lòng chọn bảng dữ liệu chính!");
       return;
     }
-    const newRecord = createNewRecord('pending');
-    setDataList([newRecord, ...dataList]);
-    setShowRequestModal(false);
-    setSuccessPopupMessage('Yêu cầu công bố đã được gửi đi phê duyệt');
-    setShowSuccessPopup(true);
-    setTimeout(() => setShowSuccessPopup(false), 3000);
-    resetRequestForm();
+    if (editingItem) {
+      const updatedRecord = { ...createNewRecord('pending'), id: editingItem.id, creator: editingItem.creator, createdDate: editingItem.createdDate };
+      setDataList(dataList.map(d => d.id === editingItem.id ? updatedRecord : d));
+      setShowRequestModal(false);
+      setSuccessPopupMessage('Yêu cầu công bố đã được cập nhật');
+      setShowSuccessPopup(true);
+      setTimeout(() => setShowSuccessPopup(false), 3000);
+      resetRequestForm();
+    } else {
+      const newRecord = createNewRecord('pending');
+      setDataList([newRecord, ...dataList]);
+      setShowRequestModal(false);
+      setSuccessPopupMessage('Yêu cầu công bố đã được gửi đi phê duyệt');
+      setShowSuccessPopup(true);
+      setTimeout(() => setShowSuccessPopup(false), 3000);
+      resetRequestForm();
+    }
   };
 
   const handleSaveDraft = () => {
@@ -932,16 +950,27 @@ export function OpenDataPublishedListPage() {
       alert("Vui lòng chọn tập dữ liệu trước khi lưu nháp!");
       return;
     }
-    const newRecord = createNewRecord('draft');
-    setDataList([newRecord, ...dataList]);
-    setShowRequestModal(false);
-    setSuccessPopupMessage('Yêu cầu công bố đã được lưu nháp');
-    setShowSuccessPopup(true);
-    setTimeout(() => setShowSuccessPopup(false), 3000);
-    resetRequestForm();
+    if (editingItem) {
+      const updatedRecord = { ...createNewRecord('draft'), id: editingItem.id, creator: editingItem.creator, createdDate: editingItem.createdDate };
+      setDataList(dataList.map(d => d.id === editingItem.id ? updatedRecord : d));
+      setShowRequestModal(false);
+      setSuccessPopupMessage('Yêu cầu công bố đã được lưu nháp');
+      setShowSuccessPopup(true);
+      setTimeout(() => setShowSuccessPopup(false), 3000);
+      resetRequestForm();
+    } else {
+      const newRecord = createNewRecord('draft');
+      setDataList([newRecord, ...dataList]);
+      setShowRequestModal(false);
+      setSuccessPopupMessage('Yêu cầu công bố đã được lưu nháp');
+      setShowSuccessPopup(true);
+      setTimeout(() => setShowSuccessPopup(false), 3000);
+      resetRequestForm();
+    }
   };
 
   const resetRequestForm = () => {
+    setEditingItem(null);
     setRequestFileName('');
     setRequestDescription('');
     setRequestCategory('');
@@ -972,13 +1001,34 @@ export function OpenDataPublishedListPage() {
     setDataFields([]);
   };
 
+  const handleEditRequest = (item: PublishedData) => {
+    resetRequestForm();
+    setEditingItem(item);
+    setRequestFileName(item.fileName);
+    setRequestDescription(item.description);
+    const catObj = APPROVED_CATEGORIES.find(c => c.name === item.category);
+    setRequestCategory(catObj ? catObj.code : '');
+    setRequestKeywords(item.keywords);
+    setRequestLicense(item.license);
+    setRequestPublisher(item.publisher);
+    setRequestFormat(item.format || []);
+    setRequestFrequency(item.frequency || '');
+    setSourceDbId(item.sourceDbId || '');
+    setMainTable(item.mainTable || '');
+    const jts = item.joinTables || [];
+    setHasJoin(jts.length > 0);
+    setJoinTables(jts);
+    setDataFields(item.dataFields || []);
+    setShowRequestModal(true);
+  };
+
   // Approval actions
   const handleApprove = (item: PublishedData, opinion?: string) => {
-    setDataList(dataList.map(d => d.id === item.id ? { 
-      ...d, 
-      status: 'approved', 
-      approver: 'Lãnh đạo Nghiệp vụ', 
-      description: opinion ? `${d.description}\n[Ý kiến phê duyệt: ${opinion}]` : d.description 
+    setDataList(dataList.map(d => d.id === item.id ? {
+      ...d,
+      status: 'approved',
+      approver: 'Lãnh đạo Nghiệp vụ',
+      approvalNote: opinion || undefined
     } : d));
     setShowApprovalModal(false);
     setShowApproveForm(false);
@@ -994,11 +1044,11 @@ export function OpenDataPublishedListPage() {
       setRejectReasonError(true);
       return;
     }
-    setDataList(dataList.map(d => d.id === selectedApprovalItem.id ? { 
-      ...d, 
-      status: 'rejected', 
-      approver: 'Lãnh đạo Nghiệp vụ', 
-      description: `${d.description}\n[Từ chối do: ${rejectReason}]` 
+    setDataList(dataList.map(d => d.id === selectedApprovalItem.id ? {
+      ...d,
+      status: 'rejected',
+      approver: 'Lãnh đạo Nghiệp vụ',
+      approvalNote: rejectReason
     } : d));
     setShowApprovalModal(false);
     setShowRejectConfirmModal(false);
@@ -1185,7 +1235,7 @@ export function OpenDataPublishedListPage() {
               <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-sm">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Trạng thái yêu cầu</label>
+                    <label className="block text-[13px] text-black mb-2">Trạng thái yêu cầu</label>
                     <div className="relative">
                       <select
                         value={selectedStatus}
@@ -1202,7 +1252,7 @@ export function OpenDataPublishedListPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Danh mục mở</label>
+                    <label className="block text-[13px] text-black mb-2">Danh mục mở</label>
                     <div className="relative">
                       <select
                         value={selectedCategory}
@@ -1218,7 +1268,7 @@ export function OpenDataPublishedListPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Cơ quan công bố</label>
+                    <label className="block text-[13px] text-black mb-2">Cơ quan công bố</label>
                     <div className="relative">
                       <select
                         value={selectedPublisher}
@@ -1268,11 +1318,10 @@ export function OpenDataPublishedListPage() {
                             {(currentPageNum - 1) * pageSize + index + 1}
                           </td>
                           <td className="px-4 py-3 text-left text-[13px]">
-                            <div 
-                              className="font-semibold text-blue-600 flex items-center gap-1.5 cursor-pointer hover:underline" 
+                            <div
+                              className="text-black"
                               onClick={() => handleViewDetail(item)}
                             >
-                              <FileSpreadsheet className="w-4 h-4 text-emerald-600 shrink-0" />
                               {item.fileName || 'Không có tên tệp'}
                             </div>
                           </td>
@@ -1290,6 +1339,13 @@ export function OpenDataPublishedListPage() {
                                 title="Xem chi tiết"
                               >
                                 <Eye className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleEditRequest(item)}
+                                className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                                title="Chỉnh sửa"
+                              >
+                                <SquarePen className="w-4 h-4" />
                               </button>
                             </div>
                           </td>
@@ -1353,7 +1409,7 @@ export function OpenDataPublishedListPage() {
               <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-sm">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Trạng thái yêu cầu</label>
+                    <label className="block text-[13px] text-black mb-2">Trạng thái yêu cầu</label>
                     <div className="relative">
                       <select
                         value={selectedStatus}
@@ -1369,7 +1425,7 @@ export function OpenDataPublishedListPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Danh mục mở</label>
+                    <label className="block text-[13px] text-black mb-2">Danh mục mở</label>
                     <div className="relative">
                       <select
                         value={selectedCategory}
@@ -1385,7 +1441,7 @@ export function OpenDataPublishedListPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Cơ quan công bố</label>
+                    <label className="block text-[13px] text-black mb-2">Cơ quan công bố</label>
                     <div className="relative">
                       <select
                         value={selectedPublisher}
@@ -1432,20 +1488,17 @@ export function OpenDataPublishedListPage() {
                         <tr key={item.id} className="hover:bg-slate-50 transition-all border-b border-slate-100">
                           <td className="px-4 py-3 text-center text-slate-500 font-medium text-[13px]">{(currentPageNum - 1) * pageSize + index + 1}</td>
                           <td className="px-4 py-3 text-left text-[13px]">
-                            <div className="flex items-center gap-1.5">
-                              <FileSpreadsheet className="w-4 h-4 text-emerald-600 shrink-0" />
-                              <span 
-                                className="font-semibold text-blue-600 hover:underline cursor-pointer"
-                                onClick={() => {
-                                  setSelectedApprovalItem(item);
-                                  setRejectReason('');
-                                  setShowRejectForm(false);
-                                  setShowApprovalModal(true);
-                                }}
-                              >
-                                {item.fileName}
-                              </span>
-                            </div>
+                            <span
+                              className="text-black"
+                              onClick={() => {
+                                setSelectedApprovalItem(item);
+                                setRejectReason('');
+                                setShowRejectForm(false);
+                                setShowApprovalModal(true);
+                              }}
+                            >
+                              {item.fileName}
+                            </span>
                           </td>
                           <td className="px-4 py-3 text-slate-700 font-medium text-[13px]">{item.category}</td>
                           <td className="px-4 py-3 text-slate-500 text-[13px]">{item.publisher}</td>
@@ -1558,7 +1611,7 @@ export function OpenDataPublishedListPage() {
               <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-sm">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Tần suất công bố</label>
+                    <label className="block text-[13px] text-black mb-2">Tần suất công bố</label>
                     <div className="relative">
                       <select
                         value={selectedScheduleFrequency}
@@ -1575,7 +1628,7 @@ export function OpenDataPublishedListPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Trạng thái lịch</label>
+                    <label className="block text-[13px] text-black mb-2">Trạng thái lịch</label>
                     <div className="relative">
                       <select
                         value={selectedScheduleStatus}
@@ -1624,10 +1677,9 @@ export function OpenDataPublishedListPage() {
                             {(currentPageNum - 1) * pageSize + index + 1}
                           </td>
                           <td className="px-4 py-3 text-left text-[13px]">
-                            <div className="flex items-center gap-1.5">
-                              <Calendar className="w-4 h-4 text-purple-500 shrink-0" />
-                              <span 
-                                className="font-semibold text-blue-600 hover:underline cursor-pointer"
+                            <div>
+                              <span
+                                className="text-black"
                                 onClick={() => {
                                   setSelectedSchedule(schedule);
                                   setIsEditingSchedule(true);
@@ -1682,7 +1734,7 @@ export function OpenDataPublishedListPage() {
                           <td className="px-4 py-3.5 text-slate-500">{schedule.lastRun || 'Chưa chạy'}</td>
                           <td className="px-4 py-3.5 text-slate-600 font-semibold">{schedule.nextRun}</td>
                           <td className="px-4 py-3.5 text-center">
-                            <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold border ${schedule.status === 'active' ? 'bg-green-50 text-green-600 border-green-200' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
+                            <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs border ${schedule.status === 'active' ? 'bg-green-50 text-green-600 border-green-200' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
                               {schedule.status === 'active' ? 'Hoạt động' : 'Tạm dừng'}
                             </span>
                           </td>
@@ -1716,9 +1768,7 @@ export function OpenDataPublishedListPage() {
                               </button>
                               {schedule.status === 'active' ? (
                                 <button
-                                  onClick={() => {
-                                    setSchedules(schedules.map(s => s.id === schedule.id ? { ...s, status: 'inactive' } : s));
-                                  }}
+                                  onClick={() => setScheduleStatusConfirm({ schedule, action: 'pause' })}
                                   className="p-1.5 text-slate-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg cursor-pointer transition-colors"
                                   title="Tạm dừng"
                                 >
@@ -1726,9 +1776,7 @@ export function OpenDataPublishedListPage() {
                                 </button>
                               ) : (
                                 <button
-                                  onClick={() => {
-                                    setSchedules(schedules.map(s => s.id === schedule.id ? { ...s, status: 'active' } : s));
-                                  }}
+                                  onClick={() => setScheduleStatusConfirm({ schedule, action: 'resume' })}
                                   className="p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg cursor-pointer transition-colors"
                                   title="Tiếp tục"
                                 >
@@ -1764,7 +1812,10 @@ export function OpenDataPublishedListPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fade-in">
           <div className="bg-white rounded-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col">
             <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between z-10">
-              <h3 className="text-lg font-bold text-slate-900">Chi tiết Yêu cầu công bố dữ liệu mở</h3>
+              <div className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-blue-600" />
+                <h3 className="text-lg font-bold text-slate-900">Chi tiết Yêu cầu công bố dữ liệu mở</h3>
+              </div>
               <button
                 onClick={() => setShowDetailModal(false)}
                 className="text-slate-400 hover:text-slate-600 p-1 hover:bg-slate-100 rounded-lg"
@@ -1772,59 +1823,185 @@ export function OpenDataPublishedListPage() {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
-            <div className="p-6 space-y-6 flex-1">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Tên tệp dữ liệu</label>
-                  <div className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-                    <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+
+            <div className="p-6 space-y-5 flex-1 text-[13px]">
+
+              {/* ── Tên tập dữ liệu ── */}
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="col-span-1 md:col-span-2">
+                  <div className="text-[11px] text-black uppercase tracking-wider mb-1">Tên tập dữ liệu</div>
+                  <div className="text-[13px] text-black flex items-center gap-1.5">
+                    <FileSpreadsheet className="w-4 h-4 text-emerald-600 shrink-0" />
                     {selectedData.fileName || 'Không có tên tệp'}
                   </div>
                 </div>
+
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Trạng thái yêu cầu</label>
+                  <div className="text-[11px] text-black uppercase tracking-wider mb-1">Trạng thái</div>
                   <div>{getStatusBadge(selectedData.status)}</div>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Người phê duyệt</label>
-                  <div className="text-sm font-medium text-slate-900">{selectedData.approver}</div>
+                  <div className="text-[11px] text-black uppercase tracking-wider mb-1">Người phê duyệt</div>
+                  <div className="text-[13px] text-black">{selectedData.approver}</div>
                 </div>
-                <div className="col-span-2">
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Mô tả</label>
-                  <div className="text-sm text-slate-955 whitespace-pre-wrap">{selectedData.description}</div>
+
+                <div>
+                  <div className="text-[11px] text-black uppercase tracking-wider mb-1">Người tạo yêu cầu</div>
+                  <div className="text-[13px] text-black">{selectedData.creator}</div>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Danh mục</label>
-                  <div className="text-sm text-slate-900">{selectedData.category}</div>
+                  <div className="text-[11px] text-black uppercase tracking-wider mb-1">Ngày tạo yêu cầu</div>
+                  <div className="text-[13px] text-black">{selectedData.createdDate}</div>
+                </div>
+
+                <div>
+                  <div className="text-[11px] text-black uppercase tracking-wider mb-1">Danh mục dữ liệu mở</div>
+                  <div className="text-[13px] text-black">{selectedData.category}</div>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Đơn vị công bố</label>
-                  <div className="text-sm text-slate-900">{selectedData.publisher}</div>
+                  <div className="text-[11px] text-black uppercase tracking-wider mb-1">Cơ quan công bố</div>
+                  <div className="text-[13px] text-black">{selectedData.publisher}</div>
+                </div>
+
+                <div>
+                  <div className="text-[11px] text-black uppercase tracking-wider mb-1">Giấy phép</div>
+                  <div className="text-[13px] text-black">{selectedData.license}</div>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Người tạo yêu cầu</label>
-                  <div className="text-sm text-slate-900">{selectedData.creator}</div>
+                  <div className="text-[11px] text-black uppercase tracking-wider mb-1">Từ khóa</div>
+                  <div className="text-[13px] text-black">{selectedData.keywords || 'N/A'}</div>
+                </div>
+
+                <div>
+                  <div className="text-[11px] text-black uppercase tracking-wider mb-1">Định dạng chia sẻ</div>
+                  <div className="flex flex-wrap gap-1 mt-0.5">
+                    {(selectedData.format || []).length > 0
+                      ? selectedData.format.map((fmt, i) => (
+                          <span key={i} className="px-1.5 py-0.5 bg-blue-50 text-black border border-blue-100 rounded text-[13px]">{fmt}</span>
+                        ))
+                      : <span className="text-[13px] text-black">—</span>
+                    }
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Ngày tạo yêu cầu</label>
-                  <div className="text-sm text-slate-900">{selectedData.createdDate}</div>
+                  <div className="text-[11px] text-black uppercase tracking-wider mb-1">Tần suất cập nhật</div>
+                  <div className="text-[13px] text-black">{getFrequencyLabel(selectedData.frequency || '') || '—'}</div>
                 </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Giấy phép áp dụng</label>
-                  <div className="text-sm text-slate-900">{selectedData.license}</div>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Từ khóa</label>
-                  <div className="text-sm text-slate-900">{selectedData.keywords || 'N/A'}</div>
+
+                <div className="col-span-1 md:col-span-2">
+                  <div className="text-[11px] text-black uppercase tracking-wider mb-1">Thông tin mô tả</div>
+                  <div className="text-[13px] text-black whitespace-pre-wrap">{selectedData.description || '—'}</div>
                 </div>
               </div>
+
+              {/* ── Ý kiến phê duyệt / Lý do từ chối ── */}
+              {(selectedData.status === 'approved' || selectedData.status === 'rejected') && (
+                <div className={`rounded-xl border p-4 ${selectedData.status === 'approved' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                  <div className="flex items-center gap-2 mb-2">
+                    {selectedData.status === 'approved'
+                      ? <CheckCircle className="w-4 h-4 text-green-600 shrink-0" />
+                      : <XCircle className="w-4 h-4 text-red-500 shrink-0" />
+                    }
+                    <span className={`text-[11px] font-semibold uppercase tracking-wider ${selectedData.status === 'approved' ? 'text-green-700' : 'text-red-600'}`}>
+                      {selectedData.status === 'approved' ? 'Ý kiến phê duyệt' : 'Lý do từ chối'}
+                    </span>
+                  </div>
+                  <p className={`text-[13px] leading-relaxed ${selectedData.status === 'approved' ? 'text-green-900' : 'text-red-900'}`}>
+                    {selectedData.approvalNote || '—'}
+                  </p>
+                </div>
+              )}
+
+              {/* ── Cấu hình nguồn dữ liệu ── */}
+              {(() => {
+                const meta = getRecordMetadataConfig(selectedData);
+                const dbName = WAREHOUSE_DATABASES.find(db => db.id === meta.dbId)?.name || meta.dbId;
+                return (
+                  <section className="bg-slate-50 rounded-xl border border-slate-200 overflow-hidden">
+                    <div className="px-5 py-3 bg-gradient-to-r from-blue-600 to-blue-700 flex items-center gap-2">
+                      <Database className="w-4 h-4 text-white" />
+                      <h4 className="text-[13px] text-white">Cấu hình nguồn dữ liệu</h4>
+                    </div>
+                    <div className="p-4 space-y-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="p-3 bg-white rounded-lg border border-slate-200">
+                          <div className="text-[11px] text-black uppercase tracking-wider mb-1">Kho dữ liệu</div>
+                          <div className="text-[13px] text-black flex items-center gap-1.5">
+                            <Database className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                            {dbName || '—'}
+                          </div>
+                        </div>
+                        <div className="p-3 bg-white rounded-lg border border-slate-200">
+                          <div className="text-[11px] text-black uppercase tracking-wider mb-1">Bảng dữ liệu chính</div>
+                          <div className="text-[13px] text-black font-mono">{meta.mainTable || '—'}</div>
+                        </div>
+                      </div>
+
+                      {meta.joinTables.length > 0 && (
+                        <div>
+                          <div className="text-[11px] text-black uppercase tracking-wider mb-2">Bảng liên kết (Join)</div>
+                          <div className="space-y-1.5">
+                            {meta.joinTables.map((jt, idx) => (
+                              <div key={idx} className="bg-white border border-slate-200 rounded-lg px-3 py-2 flex items-center justify-between text-[13px] text-black">
+                                <span className="font-mono">{jt.tableId} <span className="text-slate-400">({jt.alias})</span></span>
+                                <span className="text-black">{jt.joinType} ON {jt.joinColA} = {jt.joinColB}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {meta.dataFields.length > 0 && (
+                        <div>
+                          <div className="text-[11px] text-black uppercase tracking-wider mb-2">Trường dữ liệu chia sẻ ({meta.dataFields.filter((f: any) => f.shared).length}/{meta.dataFields.length})</div>
+                          <div className="border border-slate-200 rounded-lg overflow-hidden bg-white">
+                            <table className="w-full text-left text-[13px] border-collapse">
+                              <thead>
+                                <tr className="bg-slate-50 text-black border-b border-slate-200">
+                                  <th className="px-3 py-2 text-[13px] uppercase">Trường gốc</th>
+                                  <th className="px-3 py-2 text-[13px] uppercase">Bảng nguồn</th>
+                                  <th className="px-3 py-2 text-[13px] uppercase">Tên trường (API)</th>
+                                  <th className="px-3 py-2 text-[13px] uppercase">Kiểu dữ liệu</th>
+                                  <th className="px-3 py-2 text-[13px] uppercase text-center">Che dấu</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-100 text-black">
+                                {meta.dataFields.filter((f: any) => f.shared).map((df: any, idx: number) => (
+                                  <tr key={idx} className="hover:bg-slate-50">
+                                    <td className="px-3 py-2 font-mono text-[13px]">{df.column}</td>
+                                    <td className="px-3 py-2 text-[13px]">
+                                      <span className="bg-slate-100 px-1.5 py-0.5 rounded text-[13px] font-mono text-slate-600">{df.tableId}</span>
+                                    </td>
+                                    <td className="px-3 py-2 font-mono text-[13px]">{df.apiField}</td>
+                                    <td className="px-3 py-2 text-[13px]">
+                                      <span className={`px-1.5 py-0.5 rounded border text-[13px] ${
+                                        df.dataType === 'date' ? 'bg-purple-50 text-purple-600 border-purple-200' :
+                                        df.dataType === 'number' ? 'bg-blue-50 text-blue-600 border-blue-200' :
+                                        'bg-slate-50 text-slate-600 border-slate-200'
+                                      }`}>{df.dataType}</span>
+                                    </td>
+                                    <td className="px-3 py-2 text-center text-[13px]">
+                                      <span className={`px-1.5 py-0.5 rounded border text-[13px] ${df.masked ? 'bg-red-50 text-red-600 border-red-100' : 'bg-green-50 text-green-600 border-green-100'}`}>
+                                        {df.masked ? 'Có' : 'Không'}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </section>
+                );
+              })()}
             </div>
 
             <div className="sticky bottom-0 bg-slate-50 border-t border-slate-200 px-6 py-4 flex items-center justify-end">
               <button
                 onClick={() => setShowDetailModal(false)}
-                className="px-4 py-2 text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 text-sm font-semibold"
+                className="px-4 py-2 text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 text-[13px]"
               >
                 Đóng
               </button>
@@ -1839,8 +2016,8 @@ export function OpenDataPublishedListPage() {
           <div className="bg-white rounded-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col">
             <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between z-10">
               <div className="flex items-center gap-2">
-                <Send className="w-5 h-5 text-blue-600" />
-                <h3 className="text-lg font-bold text-slate-900">Gửi yêu cầu công bố dữ liệu</h3>
+                {editingItem ? <Edit2 className="w-5 h-5 text-blue-600" /> : <Send className="w-5 h-5 text-blue-600" />}
+                <h3 className="text-lg font-bold text-slate-900">{editingItem ? 'Chỉnh sửa yêu cầu công bố' : 'Gửi yêu cầu công bố dữ liệu'}</h3>
               </div>
               <button
                 onClick={() => setShowRequestModal(false)}
@@ -1853,7 +2030,7 @@ export function OpenDataPublishedListPage() {
             <form onSubmit={handleRequestSubmit} className="p-6 space-y-6 flex-1 text-[13px]">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="col-span-1 md:col-span-2">
-                  <label className="block font-semibold text-slate-700 mb-1">
+                  <label className="block text-slate-700 mb-1">
                     Tên tập dữ liệu <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -1867,7 +2044,7 @@ export function OpenDataPublishedListPage() {
                 </div>
 
                 <div className="col-span-1 md:col-span-2">
-                  <label className="block font-semibold text-slate-700 mb-1">Chọn metadata</label>
+                  <label className="block text-slate-700 mb-1">Chọn metadata</label>
                   <select
                     value={requestMetaFile}
                     onChange={(e) => {
@@ -1934,41 +2111,41 @@ export function OpenDataPublishedListPage() {
                   return (
                     <div className="col-span-1 md:col-span-2 bg-blue-50 border border-blue-200 rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-3">
-                        <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-600 text-white text-[10px] font-bold">M</span>
-                        <span className="font-semibold text-blue-800 text-[13px]">Thông tin metadata đã cấu hình</span>
+                        <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-600 text-white text-[10px]">M</span>
+                        <span className="text-blue-800 text-[13px]">Thông tin metadata đã cấu hình</span>
                       </div>
                       <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-[12px]">
                         <div className="flex gap-1">
                           <span className="text-slate-500 shrink-0">Danh mục:</span>
-                          <span className="font-medium text-slate-800">{metaCfg.categoryName}</span>
+                          <span className="text-slate-800">{metaCfg.categoryName}</span>
                         </div>
                         <div className="flex gap-1">
                           <span className="text-slate-500 shrink-0">Cơ quan công bố:</span>
-                          <span className="font-medium text-slate-800">{metaCfg.publisher}</span>
+                          <span className="text-slate-800">{metaCfg.publisher}</span>
                         </div>
                         <div className="flex gap-1">
                           <span className="text-slate-500 shrink-0">Giấy phép:</span>
-                          <span className="font-medium text-slate-800">{metaCfg.license}</span>
+                          <span className="text-slate-800">{metaCfg.license}</span>
                         </div>
                         <div className="flex gap-1">
                           <span className="text-slate-500 shrink-0">Tần suất cập nhật:</span>
-                          <span className="font-medium text-slate-800">{metaCfg.frequency ? (freqLabel[metaCfg.frequency] || metaCfg.frequency) : '—'}</span>
+                          <span className="text-slate-800">{metaCfg.frequency ? (freqLabel[metaCfg.frequency] || metaCfg.frequency) : '—'}</span>
                         </div>
                         <div className="flex gap-1">
                           <span className="text-slate-500 shrink-0">Bảng chính:</span>
-                          <span className="font-medium text-slate-800 font-mono">{metaCfg.mainTable || '—'}</span>
+                          <span className="text-slate-800 font-mono">{metaCfg.mainTable || '—'}</span>
                         </div>
                         <div className="flex gap-1">
                           <span className="text-slate-500 shrink-0">Bảng join:</span>
-                          <span className="font-medium text-slate-800 font-mono">{metaCfg.joinTableNames && metaCfg.joinTableNames.length > 0 ? metaCfg.joinTableNames.join(', ') : '—'}</span>
+                          <span className="text-slate-800 font-mono">{metaCfg.joinTableNames && metaCfg.joinTableNames.length > 0 ? metaCfg.joinTableNames.join(', ') : '—'}</span>
                         </div>
                         <div className="flex gap-1">
                           <span className="text-slate-500 shrink-0">Định dạng chia sẻ:</span>
-                          <span className="font-medium text-blue-700">{metaCfg.shareFormat ? (shareFormatLabel[metaCfg.shareFormat] || metaCfg.shareFormat) : '—'}</span>
+                          <span className="text-blue-700">{metaCfg.shareFormat ? (shareFormatLabel[metaCfg.shareFormat] || metaCfg.shareFormat) : '—'}</span>
                         </div>
                         <div className="flex gap-1">
                           <span className="text-slate-500 shrink-0">Từ khóa:</span>
-                          <span className="font-medium text-slate-800">{metaCfg.keywords}</span>
+                          <span className="text-slate-800">{metaCfg.keywords}</span>
                         </div>
                       </div>
                     </div>
@@ -1976,7 +2153,7 @@ export function OpenDataPublishedListPage() {
                 })()}
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
+                  <label className="block text-slate-700 mb-1">
                     Danh mục dữ liệu mở <span className="text-red-500">*</span>
                   </label>
                   <select
@@ -2005,7 +2182,7 @@ export function OpenDataPublishedListPage() {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Giấy phép</label>
+                  <label className="block text-slate-700 mb-1">Giấy phép</label>
                   <select
                     value={requestLicense}
                     onChange={(e) => setRequestLicense(e.target.value)}
@@ -2017,7 +2194,7 @@ export function OpenDataPublishedListPage() {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Từ khóa</label>
+                  <label className="block text-slate-700 mb-1">Từ khóa</label>
                   <input
                     type="text"
                     placeholder="Ngăn cách bằng dấu phẩy, vd: luat, tgpl, tro giup"
@@ -2028,7 +2205,7 @@ export function OpenDataPublishedListPage() {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Cơ quan công bố</label>
+                  <label className="block text-slate-700 mb-1">Cơ quan công bố</label>
                   <input
                     type="text"
                     placeholder="Nhập tên cơ quan"
@@ -2039,7 +2216,7 @@ export function OpenDataPublishedListPage() {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-2">Định dạng chia sẻ</label>
+                  <label className="block text-slate-700 mb-2">Định dạng chia sẻ</label>
                   <div className="flex gap-4">
                     {[{ value: 'excel', label: 'File Excel' }, { value: 'api', label: 'API' }].map(opt => (
                       <label key={opt.value} className="flex items-center gap-2 cursor-pointer select-none">
@@ -2062,7 +2239,7 @@ export function OpenDataPublishedListPage() {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Tần suất cập nhật</label>
+                  <label className="block text-slate-700 mb-1">Tần suất cập nhật</label>
                   <select
                     value={requestFrequency}
                     onChange={(e) => setRequestFrequency(e.target.value)}
@@ -2078,7 +2255,7 @@ export function OpenDataPublishedListPage() {
                 </div>
 
                 <div className="col-span-1 md:col-span-2">
-                  <label className="block font-semibold text-slate-700 mb-1">Thông tin mô tả</label>
+                  <label className="block text-slate-700 mb-1">Thông tin mô tả</label>
                   <textarea
                     rows={2}
                     placeholder="Mô tả nội dung tập dữ liệu công bố..."
@@ -2092,7 +2269,7 @@ export function OpenDataPublishedListPage() {
                 <div className="col-span-1 md:col-span-2">
                   <section className="bg-slate-50 rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                     <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-200 bg-gradient-to-r from-blue-600 to-blue-700">
-                      <h4 className="font-bold text-white flex items-center gap-2 text-sm">
+                      <h4 className="text-white flex items-center gap-2 text-[13px]">
                         <Database className="w-4 h-4" />
                         Cấu hình nguồn dữ liệu
                       </h4>
@@ -2100,7 +2277,7 @@ export function OpenDataPublishedListPage() {
                         className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-full border border-white/20 cursor-pointer"
                         onClick={() => setHasJoin(!hasJoin)}
                       >
-                        <span className="text-[10px] font-bold text-white uppercase tracking-tight">Sử dụng liên kết bảng (Join)</span>
+                        <span className="text-[13px] text-white uppercase tracking-tight">Sử dụng liên kết bảng (Join)</span>
                         <div className={`w-9 h-5 rounded-full p-0.5 transition-all duration-300 ${hasJoin ? 'bg-white shadow-[0_0_8px_rgba(255,255,255,0.3)]' : 'bg-white/30'}`}>
                           <div className={`w-4 h-4 rounded-full transition-all duration-300 shadow-sm ${hasJoin ? 'bg-blue-600 translate-x-4' : 'bg-white translate-x-0'}`}></div>
                         </div>
@@ -2109,21 +2286,21 @@ export function OpenDataPublishedListPage() {
 
                     <div className="p-4 space-y-4">
                       {sourceDbId && (
-                        <div className="flex items-center gap-2 text-xs bg-blue-50 px-3 py-2 rounded-lg border border-blue-100">
+                        <div className="flex items-center gap-2 text-[13px] bg-blue-50 px-3 py-2 rounded-lg border border-blue-100">
                           <Database className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                          <span className="font-semibold text-blue-700">Kho dữ liệu:</span>
-                          <span className="text-slate-700">{WAREHOUSE_DATABASES.find(db => db.id === sourceDbId)?.name || sourceDbId}</span>
+                          <span className="text-black">Kho dữ liệu:</span>
+                          <span className="text-black">{WAREHOUSE_DATABASES.find(db => db.id === sourceDbId)?.name || sourceDbId}</span>
                         </div>
                       )}
 
                       {/* Primary Table */}
                       <div className="p-4 bg-white rounded-xl border border-slate-200 hover:border-blue-300 transition-all">
-                        <label className="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex items-center justify-between">
+                        <label className="block text-[13px] text-black uppercase mb-2 flex items-center justify-between">
                           <span>Bảng dữ liệu chính</span>
                           <span className="text-[9px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded italic">Primary Table</span>
                         </label>
                         <select
-                          className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-sm font-bold text-slate-800 outline-none cursor-pointer focus:border-blue-500"
+                          className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-[13px] text-black outline-none cursor-pointer focus:border-blue-500"
                           value={mainTable}
                           onChange={(e) => {
                             const newMain = e.target.value;
@@ -2143,7 +2320,7 @@ export function OpenDataPublishedListPage() {
                       {hasJoin && (
                         <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
                           <div className="flex items-center justify-between border-t border-slate-200 pt-4">
-                            <h5 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                            <h5 className="text-[13px] text-black uppercase tracking-wider flex items-center gap-1.5">
                               <Database className="w-3.5 h-3.5 text-blue-600" />
                               Bảng liên kết bổ sung ({joinTables.length})
                             </h5>
@@ -2154,7 +2331,7 @@ export function OpenDataPublishedListPage() {
                                 const newJt = { id: `join_new_${idx}_${Date.now()}`, tableId: '', alias: `t${idx + 2}`, joinType: 'LEFT JOIN', joinColA: '', joinColB: '' };
                                 setJoinTables([...joinTables, newJt]);
                               }}
-                              className="text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-600 px-3 py-1.5 rounded-lg border border-blue-200 transition-all flex items-center shadow-sm cursor-pointer"
+                              className="text-[13px] bg-blue-50 hover:bg-blue-100 text-black px-3 py-1.5 rounded-lg border border-blue-200 transition-all flex items-center shadow-sm cursor-pointer"
                             >
                               <Plus className="w-3.5 h-3.5 mr-1" /> Thêm bảng liên kết
                             </button>
@@ -2178,17 +2355,17 @@ export function OpenDataPublishedListPage() {
                               </button>
 
                               <div className="flex items-center gap-3">
-                                <span className="text-[10px] font-extrabold bg-blue-50 text-blue-600 border border-blue-100 px-2 py-0.5 rounded">
+                                <span className="text-[10px] bg-blue-50 text-blue-600 border border-blue-100 px-2 py-0.5 rounded">
                                   BẢNG LIÊN KẾT #{idx + 1}
                                 </span>
-                                <span className="text-[10px] font-mono font-bold text-slate-400">Alias: {jt.alias}</span>
+                                <span className="text-[13px] font-mono text-black">Alias: {jt.alias}</span>
                               </div>
 
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Kiểu liên kết</label>
+                                  <label className="block text-[13px] text-black uppercase mb-1">Kiểu liên kết</label>
                                   <select
-                                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:border-blue-500 cursor-pointer"
+                                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[13px] text-black focus:outline-none focus:border-blue-500 cursor-pointer"
                                     value={jt.joinType}
                                     onChange={(e) => setJoinTables(joinTables.map(j => j.id === jt.id ? { ...j, joinType: e.target.value } : j))}
                                   >
@@ -2198,9 +2375,9 @@ export function OpenDataPublishedListPage() {
                                   </select>
                                 </div>
                                 <div>
-                                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Bảng dữ liệu bổ sung</label>
+                                  <label className="block text-[13px] text-black uppercase mb-1">Bảng dữ liệu bổ sung</label>
                                   <select
-                                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:border-blue-500 cursor-pointer"
+                                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[13px] text-black focus:outline-none focus:border-blue-500 cursor-pointer"
                                     value={jt.tableId}
                                     onChange={(e) => {
                                       const newJts = joinTables.map(j => j.id === jt.id ? { ...j, tableId: e.target.value, joinColA: '', joinColB: '' } : j);
@@ -2223,11 +2400,11 @@ export function OpenDataPublishedListPage() {
 
                               {jt.tableId && (
                                 <div className="p-3 bg-blue-50/20 rounded-lg border border-blue-100 border-dashed space-y-2 animate-in fade-in zoom-in-95 duration-200">
-                                  <div className="text-[9px] font-bold text-blue-600 uppercase tracking-tight">Điều kiện liên kết (Join Condition):</div>
+                                  <div className="text-[13px] text-black uppercase tracking-tight">Điều kiện liên kết (Join Condition):</div>
                                   <div className="flex flex-col md:flex-row items-center gap-2">
                                     <div className="flex-1 w-full">
                                       <select
-                                        className="w-full bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-mono text-slate-700 outline-none focus:border-blue-500 cursor-pointer"
+                                        className="w-full bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-[13px] font-mono text-black outline-none focus:border-blue-500 cursor-pointer"
                                         value={jt.joinColA}
                                         onChange={(e) => setJoinTables(joinTables.map(j => j.id === jt.id ? { ...j, joinColA: e.target.value } : j))}
                                       >
@@ -2237,10 +2414,10 @@ export function OpenDataPublishedListPage() {
                                         ))}
                                       </select>
                                     </div>
-                                    <div className="text-blue-600 font-extrabold text-xs px-2.5 py-1 bg-blue-50 rounded border border-blue-100 shadow-sm">=</div>
+                                    <div className="text-blue-600 text-xs px-2.5 py-1 bg-blue-50 rounded border border-blue-100 shadow-sm">=</div>
                                     <div className="flex-1 w-full">
                                       <select
-                                        className="w-full bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-mono text-slate-700 outline-none focus:border-blue-500 cursor-pointer"
+                                        className="w-full bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-[13px] font-mono text-black outline-none focus:border-blue-500 cursor-pointer"
                                         value={jt.joinColB}
                                         onChange={(e) => setJoinTables(joinTables.map(j => j.id === jt.id ? { ...j, joinColB: e.target.value } : j))}
                                       >
@@ -2275,27 +2452,27 @@ export function OpenDataPublishedListPage() {
                   <div className="col-span-1 md:col-span-2">
                     <section className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                       <div className="flex justify-between items-center p-4 border-b border-slate-200 bg-slate-50/50">
-                        <h4 className="font-bold text-slate-800 flex items-center gap-2 text-sm">
+                        <h4 className="text-black flex items-center gap-2 text-[13px]">
                           <FileText className="w-4 h-4 text-blue-600" />
                           Chọn trường dữ liệu chia sẻ
                         </h4>
-                        <span className="text-xs text-slate-500">{dataFields.filter(f => f.shared).length}/{dataFields.length} trường được chọn</span>
+                        <span className="text-[13px] text-black">{dataFields.filter(f => f.shared).length}/{dataFields.length} trường được chọn</span>
                       </div>
                       <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm border-collapse">
+                        <table className="w-full text-left text-[13px] border-collapse">
                           <thead>
-                            <tr className="bg-slate-50 text-slate-500 border-b border-slate-200">
-                              <th className="px-3 py-3 font-bold uppercase text-[10px] text-center w-12">Chia sẻ</th>
-                              <th className="px-3 py-3 font-bold uppercase text-[10px] text-center w-10">PK</th>
-                              <th className="px-3 py-3 font-bold uppercase text-[10px]">Nguồn (Table)</th>
-                              <th className="px-3 py-3 font-bold uppercase text-[10px]">Trường gốc</th>
-                              <th className="px-3 py-3 font-bold uppercase text-[10px]">Tên trường (API)</th>
-                              <th className="px-3 py-3 font-bold uppercase text-[10px]">Kiểu dữ liệu</th>
-                              <th className="px-3 py-3 font-bold uppercase text-[10px] text-center w-16">Che dấu</th>
+                            <tr className="bg-slate-50 text-black border-b border-slate-200">
+                              <th className="px-3 py-3 uppercase text-[13px] text-center w-12">Chia sẻ</th>
+                              <th className="px-3 py-3 uppercase text-[13px] text-center w-10">PK</th>
+                              <th className="px-3 py-3 uppercase text-[13px]">Nguồn (Table)</th>
+                              <th className="px-3 py-3 uppercase text-[13px]">Trường gốc</th>
+                              <th className="px-3 py-3 uppercase text-[13px]">Tên trường (API)</th>
+                              <th className="px-3 py-3 uppercase text-[13px]">Kiểu dữ liệu</th>
+                              <th className="px-3 py-3 uppercase text-[13px] text-center w-16">Che dấu</th>
                               <th className="px-3 py-3 w-12 text-right">Xóa</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-100 text-slate-700">
+                          <tbody className="divide-y divide-slate-100 text-black">
                             {dataFields.map((df) => (
                               <tr key={df.id} className={`hover:bg-slate-50/50 transition-colors ${!df.shared ? 'opacity-50' : ''}`}>
                                 <td className="px-3 py-2 text-center">
@@ -2307,22 +2484,22 @@ export function OpenDataPublishedListPage() {
                                   />
                                 </td>
                                 <td className="px-3 py-2 text-center">
-                                  {df.isPk && <span className="inline-block px-1.5 py-0.5 text-[10px] font-bold bg-amber-50 text-amber-600 border border-amber-200 rounded">PK</span>}
+                                  {df.isPk && <span className="inline-block px-1.5 py-0.5 text-[10px] bg-amber-50 text-amber-600 border border-amber-200 rounded">PK</span>}
                                 </td>
                                 <td className="px-3 py-2">
                                   <span className="text-xs font-mono bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">{df.tableId}</span>
                                 </td>
-                                <td className="px-3 py-2 text-xs font-mono text-slate-700">{df.column}</td>
+                                <td className="px-3 py-2 text-[13px] font-mono text-black">{df.column}</td>
                                 <td className="px-3 py-2">
                                   <input
                                     type="text"
                                     value={df.apiField}
                                     onChange={(e) => setDataFields(dataFields.map(f => f.id === df.id ? { ...f, apiField: e.target.value } : f))}
-                                    className="w-full px-2 py-1 border border-slate-200 rounded text-xs font-mono focus:outline-none focus:border-blue-400 bg-white"
+                                    className="w-full px-2 py-1 border border-slate-200 rounded text-[13px] font-mono text-black focus:outline-none focus:border-blue-400 bg-white"
                                   />
                                 </td>
                                 <td className="px-3 py-2">
-                                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
+                                  <span className={`text-[10px] px-1.5 py-0.5 rounded border ${
                                     df.dataType === 'date' ? 'bg-purple-50 text-purple-600 border-purple-200' :
                                     df.dataType === 'number' ? 'bg-blue-50 text-blue-600 border-blue-200' :
                                     'bg-slate-50 text-slate-600 border-slate-200'
@@ -2360,7 +2537,7 @@ export function OpenDataPublishedListPage() {
                 <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg text-sm flex items-start gap-2 mb-4 animate-fade-in">
                   <AlertTriangle className="w-5 h-5 mt-0.5 shrink-0 text-amber-600" />
                   <div>
-                    <span className="font-semibold">Thông tin chỉnh sửa không hợp lệ so với metadata cho phép:</span>
+                    <span>Thông tin chỉnh sửa không hợp lệ so với metadata cho phép:</span>
                     <p className="mt-1 text-xs text-amber-700">{formValidationError}</p>
                   </div>
                 </div>
@@ -2370,7 +2547,7 @@ export function OpenDataPublishedListPage() {
                 <button
                   type="button"
                   onClick={() => setShowRequestModal(false)}
-                  className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-semibold text-sm transition-colors"
+                  className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 text-sm transition-colors"
                 >
                   Hủy
                 </button>
@@ -2379,7 +2556,7 @@ export function OpenDataPublishedListPage() {
                     type="button"
                     onClick={handleSaveDraft}
                     disabled={!!formValidationError}
-                    className={`px-4 py-2 border rounded-lg font-semibold text-sm flex items-center gap-1.5 transition-colors ${
+                    className={`px-4 py-2 border rounded-lg text-sm flex items-center gap-1.5 transition-colors ${
                       formValidationError
                         ? 'bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed'
                         : 'border-slate-300 text-slate-600 hover:bg-slate-50 cursor-pointer'
@@ -2390,15 +2567,15 @@ export function OpenDataPublishedListPage() {
                   </button>
                   <button
                     type="submit"
-                    disabled={(uploadType === 'file' && !validationSuccess) || !!formValidationError}
-                    className={`px-4 py-2 text-white rounded-lg font-semibold text-sm flex items-center gap-2 shadow-sm transition-all ${
-                      (uploadType === 'api' || validationSuccess) && !formValidationError
+                    disabled={!!formValidationError || (!editingItem && !mainTable && uploadType === 'file' && !validationSuccess)}
+                    className={`px-4 py-2 text-white rounded-lg text-sm flex items-center gap-2 shadow-sm transition-all ${
+                      !formValidationError && (editingItem || mainTable || uploadType === 'api' || validationSuccess)
                         ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
                         : 'bg-slate-300 cursor-not-allowed text-slate-500'
                     }`}
                   >
-                    <Send className="w-4 h-4" />
-                    Gửi yêu cầu
+                    {editingItem ? <Edit2 className="w-4 h-4" /> : <Send className="w-4 h-4" />}
+                    {editingItem ? 'Cập nhật' : 'Gửi yêu cầu'}
                   </button>
                 </div>
               </div>
@@ -2475,6 +2652,24 @@ export function OpenDataPublishedListPage() {
                     <div className="text-[13px] font-semibold text-black uppercase">Thông tin mô tả</div>
                     <div className="text-[13px] text-black font-medium mt-0.5 whitespace-pre-wrap">{selectedApprovalItem.description || 'Không có mô tả'}</div>
                   </div>
+                </div>
+              )}
+
+              {/* ── Ý kiến phê duyệt / Lý do từ chối ── */}
+              {!showApproveForm && !showRejectForm && (selectedApprovalItem.status === 'approved' || selectedApprovalItem.status === 'rejected') && (
+                <div className={`rounded-xl border p-4 ${selectedApprovalItem.status === 'approved' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                  <div className="flex items-center gap-2 mb-2">
+                    {selectedApprovalItem.status === 'approved'
+                      ? <CheckCircle className="w-4 h-4 text-green-600 shrink-0" />
+                      : <XCircle className="w-4 h-4 text-red-500 shrink-0" />
+                    }
+                    <span className={`text-[11px] font-semibold uppercase tracking-wider ${selectedApprovalItem.status === 'approved' ? 'text-green-700' : 'text-red-600'}`}>
+                      {selectedApprovalItem.status === 'approved' ? 'Ý kiến phê duyệt' : 'Lý do từ chối'}
+                    </span>
+                  </div>
+                  <p className={`text-[13px] leading-relaxed ${selectedApprovalItem.status === 'approved' ? 'text-green-900' : 'text-red-900'}`}>
+                    {selectedApprovalItem.approvalNote || '—'}
+                  </p>
                 </div>
               )}
 
@@ -2791,29 +2986,27 @@ export function OpenDataPublishedListPage() {
             >
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
-                  <label className="block font-semibold text-slate-700 mb-1">Tập dữ liệu áp dụng *</label>
+                  <label className="block text-[13px] text-black mb-1">Tập dữ liệu áp dụng <span className="text-red-500">*</span></label>
                   <select
                     disabled={isEditingSchedule}
                     value={scheduleFormData.datasetId}
-                    onChange={(e) => setScheduleFormData({ ...scheduleFormData, datasetId: e.target.value })}
-                    className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white disabled:bg-slate-50 disabled:text-slate-500 ${
-                      getDatasetFormat(scheduleFormData.datasetId) === 'file' ? 'border-red-500 focus:ring-red-500' : 'border-slate-300'
-                    }`}
+                    onChange={(e) => {
+                      const code = e.target.value;
+                      const dbId = CATEGORY_TO_DB[code] || '';
+                      const dbInfo = WAREHOUSE_DATABASES.find(db => db.id === dbId);
+                      setScheduleFormData({ ...scheduleFormData, datasetId: code, dataSource: dbInfo?.name || '' });
+                    }}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white disabled:bg-slate-50 disabled:text-slate-500"
                   >
                     <option value="">-- Chọn tập dữ liệu mở --</option>
                     {APPROVED_CATEGORIES.map(c => (
                       <option key={c.code} value={c.code}>{c.name}</option>
                     ))}
                   </select>
-                  {getDatasetFormat(scheduleFormData.datasetId) === 'file' && (
-                    <div className="text-red-600 font-semibold text-xs mt-1">
-                      Tệp dữ liệu không thể tự động cập nhật từ dữ liệu nguồn
-                    </div>
-                  )}
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Tần suất *</label>
+                  <label className="block text-[13px] text-black mb-1">Tần suất <span className="text-red-500">*</span></label>
                   <select
                     value={scheduleFormData.frequency}
                     onChange={(e) => setScheduleFormData({ ...scheduleFormData, frequency: e.target.value as any })}
@@ -2827,7 +3020,7 @@ export function OpenDataPublishedListPage() {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Giờ chạy tự động *</label>
+                  <label className="block text-[13px] text-black mb-1">Giờ chạy tự động <span className="text-red-500">*</span></label>
                   <input
                     type="time"
                     required
@@ -2839,7 +3032,7 @@ export function OpenDataPublishedListPage() {
 
                 {scheduleFormData.frequency === 'weekly' && (
                   <div className="col-span-2 space-y-1.5">
-                    <label className="block font-semibold text-slate-700">Các thứ trong tuần *</label>
+                    <label className="block text-[13px] text-black">Các thứ trong tuần <span className="text-red-500">*</span></label>
                     <div className="flex flex-wrap gap-2">
                       {['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'].map((day) => {
                         const isSelected = scheduleFormData.weeklyDays?.includes(day);
@@ -2870,7 +3063,7 @@ export function OpenDataPublishedListPage() {
 
                 {scheduleFormData.frequency === 'monthly' && (
                   <div className="col-span-2">
-                    <label className="block font-semibold text-slate-700 mb-1">Ngày trong tháng *</label>
+                    <label className="block text-[13px] text-black mb-1">Ngày trong tháng <span className="text-red-500">*</span></label>
                     <select
                       value={scheduleFormData.monthlyDay || 1}
                       onChange={(e) => setScheduleFormData({ ...scheduleFormData, monthlyDay: parseInt(e.target.value) })}
@@ -2888,7 +3081,7 @@ export function OpenDataPublishedListPage() {
                 {scheduleFormData.frequency === 'quarterly' && (
                   <>
                     <div>
-                      <label className="block font-semibold text-slate-700 mb-1">Tháng thứ mấy trong quý *</label>
+                      <label className="block text-[13px] text-black mb-1">Tháng thứ mấy trong quý <span className="text-red-500">*</span></label>
                       <select
                         value={scheduleFormData.quarterlyMonth || 1}
                         onChange={(e) => setScheduleFormData({ ...scheduleFormData, quarterlyMonth: parseInt(e.target.value) })}
@@ -2900,7 +3093,7 @@ export function OpenDataPublishedListPage() {
                       </select>
                     </div>
                     <div>
-                      <label className="block font-semibold text-slate-700 mb-1">Ngày trong quý (1-30) *</label>
+                      <label className="block text-[13px] text-black mb-1">Ngày trong quý (1-30) <span className="text-red-500">*</span></label>
                       <select
                         value={scheduleFormData.quarterlyDay || 1}
                         onChange={(e) => setScheduleFormData({ ...scheduleFormData, quarterlyDay: parseInt(e.target.value) })}
@@ -2917,7 +3110,7 @@ export function OpenDataPublishedListPage() {
                 )}
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Ngày bắt đầu</label>
+                  <label className="block text-[13px] text-black mb-1">Ngày bắt đầu</label>
                   <input
                     type="date"
                     value={scheduleFormData.startDate}
@@ -2926,56 +3119,50 @@ export function OpenDataPublishedListPage() {
                   />
                 </div>
 
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Ngày kết thúc</label>
-                  <input
-                    type="date"
-                    value={scheduleFormData.endDate}
-                    onChange={(e) => setScheduleFormData({ ...scheduleFormData, endDate: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+<div className="col-span-2">
+                  <label className="block text-[13px] text-black mb-1">Nguồn cơ sở dữ liệu hệ thống <span className="text-red-500">*</span></label>
+                  {scheduleFormData.datasetId ? (() => {
+                    const dbId = CATEGORY_TO_DB[scheduleFormData.datasetId] || '';
+                    const dbInfo = WAREHOUSE_DATABASES.find(db => db.id === dbId);
+                    const metaFile = CONFIGURED_METADATA_FILES.find(f => f.categoryCode === scheduleFormData.datasetId);
+                    const allTableNames = [metaFile?.mainTable, ...(metaFile?.joinTableNames || [])].filter(Boolean) as string[];
+                    const allFields = buildAllDataFields(dbId, metaFile?.mainTable || '', metaFile?.joinTableNames || []);
+                    return (
+                      <div className="w-full px-3 py-2.5 border border-slate-200 rounded-lg bg-slate-50 text-[13px] space-y-1.5">
+                        <div className="flex gap-2">
+                          <span className="text-slate-500 shrink-0 w-28">Cơ sở dữ liệu:</span>
+                          <span className="text-slate-800">{dbInfo?.name || '—'}</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <span className="text-slate-500 shrink-0 w-28">Bảng dữ liệu:</span>
+                          <span className="text-slate-800">{allTableNames.join(', ') || '—'}</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <span className="text-slate-500 shrink-0 w-28">Các trường:</span>
+                          <span className="text-slate-800 break-all">{allFields.map(f => f.column).join(', ') || '—'}</span>
+                        </div>
+                      </div>
+                    );
+                  })() : (
+                    <div className="w-full px-3 py-2.5 border border-slate-200 rounded-lg bg-slate-50 text-[13px] text-slate-400 italic">
+                      Chọn tập dữ liệu để xem thông tin nguồn
+                    </div>
+                  )}
                 </div>
 
-                <div className="col-span-2">
-                  <label className="block font-semibold text-slate-700 mb-1">Nguồn cơ sở dữ liệu hệ thống *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Ví dụ: CSDL Trợ giúp pháp lý - Bảng tổ chức"
-                    value={scheduleFormData.dataSource}
-                    onChange={(e) => setScheduleFormData({ ...scheduleFormData, dataSource: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div className="col-span-2">
-                  <label className="block font-semibold text-slate-700 mb-1">Đối tượng khai thác</label>
-                  <input
-                    type="text"
-                    placeholder="Ví dụ: Người dân, doanh nghiệp, cơ quan nhà nước..."
-                    value={scheduleFormData.targetAudience}
-                    onChange={(e) => setScheduleFormData({ ...scheduleFormData, targetAudience: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
               </div>
 
               <div className="border-t border-slate-200 pt-4 flex justify-end gap-2 bg-white">
                 <button
                   type="button"
                   onClick={() => setShowScheduleModal(false)}
-                  className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 text-sm font-semibold"
+                  className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 text-[13px]"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
-                  disabled={getDatasetFormat(scheduleFormData.datasetId) === 'file'}
-                  className={`px-4 py-2 text-white rounded-lg font-semibold text-sm transition-all ${
-                    getDatasetFormat(scheduleFormData.datasetId) === 'file'
-                      ? 'bg-slate-300 cursor-not-allowed text-slate-500'
-                      : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
-                  }`}
+                  className="px-4 py-2 text-white rounded-lg text-[13px] transition-all bg-blue-600 hover:bg-blue-700 cursor-pointer"
                 >
                   Xác nhận
                 </button>
@@ -3016,22 +3203,80 @@ export function OpenDataPublishedListPage() {
       )}
 
       {/* SUCCESS POPUP */}
-      {showSuccessPopup && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
-          <div className="bg-white rounded-xl w-full max-w-sm p-6 shadow-2xl flex flex-col items-center text-center space-y-3">
-            <div className="w-12 h-12 bg-green-50 text-green-600 rounded-full flex items-center justify-center">
-              <CheckCircle className="w-8 h-8" />
+      {showSuccessPopup && createPortal(
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4" style={{ zIndex: 2147483647 }}>
+          <div className="bg-white rounded-xl w-full max-w-xs shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-green-600" />
+                <h3 className="text-[14px] font-semibold text-slate-900">Thành công</h3>
+              </div>
+              <button
+                onClick={() => setShowSuccessPopup(false)}
+                className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-md transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
-            <h3 className="text-lg font-bold text-slate-950">Thành công</h3>
-            <p className="text-sm text-slate-600 leading-normal">{successPopupMessage}</p>
-            <button
-              onClick={() => setShowSuccessPopup(false)}
-              className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition-colors cursor-pointer mt-2"
-            >
-              Đồng ý
-            </button>
+            <div className="px-5 py-4">
+              <p className="text-[13px] text-slate-600 leading-relaxed">{successPopupMessage}</p>
+            </div>
+            <div className="px-5 py-3 bg-slate-50 border-t border-slate-100 flex justify-end">
+              <button
+                onClick={() => setShowSuccessPopup(false)}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[13px] font-medium transition-colors cursor-pointer"
+              >
+                Đồng ý
+              </button>
+            </div>
           </div>
-        </div>
+        </div>,
+        document.body
+      )}
+
+      {scheduleStatusConfirm && createPortal(
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4" style={{ zIndex: 2147483647 }}>
+          <div className="bg-white rounded-xl w-[380px] max-w-[90vw] shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-blue-600" />
+                <h3 className="text-[14px] font-semibold text-slate-900">
+                  {scheduleStatusConfirm.action === 'pause' ? 'Tạm dừng công bố' : 'Tiếp tục công bố'}
+                </h3>
+              </div>
+              <button onClick={() => setScheduleStatusConfirm(null)} className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-md transition-colors cursor-pointer">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="px-5 py-4">
+              <p className="text-[13px] text-slate-600 leading-relaxed">
+                {scheduleStatusConfirm.action === 'pause'
+                  ? <>Bạn có chắc chắn muốn <span className="font-medium text-blue-600">tạm dừng</span> lịch công bố tự động cho tập dữ liệu <span className="font-medium text-slate-800">"{scheduleStatusConfirm.schedule.datasetName}"</span> không?</>
+                  : <>Bạn có chắc chắn muốn <span className="font-medium text-blue-600">tiếp tục</span> lịch công bố tự động cho tập dữ liệu <span className="font-medium text-slate-800">"{scheduleStatusConfirm.schedule.datasetName}"</span> không?</>
+                }
+              </p>
+            </div>
+            <div className="px-5 py-3 bg-slate-50 border-t border-slate-100 flex justify-end gap-2">
+              <button
+                onClick={() => setScheduleStatusConfirm(null)}
+                className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-100 text-[13px] transition-colors cursor-pointer"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={() => {
+                  const newStatus = scheduleStatusConfirm.action === 'pause' ? 'inactive' : 'active';
+                  setSchedules(schedules.map(s => s.id === scheduleStatusConfirm.schedule.id ? { ...s, status: newStatus } : s));
+                  setScheduleStatusConfirm(null);
+                }}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[13px] transition-colors cursor-pointer"
+              >
+                {scheduleStatusConfirm.action === 'pause' ? 'Tạm dừng' : 'Tiếp tục'}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   );
