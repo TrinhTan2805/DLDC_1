@@ -5525,10 +5525,18 @@ table td [class*='text-slate-'], table td [class*='text-gray-'] {
 }
 
 /* Ghi đè riêng cho bảng Thu thập, tránh rule 14px !important của hệ thống */
-table.collection-table th, 
-table.collection-table thead th, 
-table.collection-table td, 
+table.collection-table th,
+table.collection-table thead th,
+table.collection-table td,
 table.collection-table tbody td {
+  font-size: 13px !important;
+}
+
+/* Ghi đè 13px cho bảng trong 2 modal Lịch sử phiên bản */
+table.version-modal-table th,
+table.version-modal-table thead th,
+table.version-modal-table td,
+table.version-modal-table tbody td {
   font-size: 13px !important;
 }
 

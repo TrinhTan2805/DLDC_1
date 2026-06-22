@@ -17,7 +17,7 @@ export function OpenDataCategoryListPage() {
     <div className="flex gap-6 h-full min-h-[calc(100vh-140px)]">
       <div className="flex-shrink-0 sticky top-0 h-fit self-start">
         <InnerSidebar
-          title="Danh mục dữ liệu"
+          title="Danh mục dữ liệu mở"
           items={CATEGORIES}
           onSelectItem={setSelectedId}
           activeId={selectedId}

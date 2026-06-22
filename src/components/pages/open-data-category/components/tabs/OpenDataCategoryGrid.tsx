@@ -23,12 +23,12 @@ export function OpenDataCategoryGrid({
       <table className="w-full text-left">
         <thead className="bg-[#f8fafc] text-slate-700 border-b border-slate-100">
           <tr>
-            <th className="px-6 py-4 text-[14px] font-semibold text-left w-16">STT</th>
-            <th className="px-6 py-4 text-[14px] font-semibold text-left">Tên tệp dữ liệu</th>
-            <th className="px-6 py-4 text-[14px] font-semibold text-left">Người cập nhật</th>
-            <th className="px-6 py-4 text-[14px] font-semibold text-left">Ngày gửi công bố</th>
-            <th className="px-6 py-4 text-[14px] font-semibold text-left">Trạng thái công bố</th>
-            <th className="px-6 py-4 text-[14px] font-semibold text-center w-40">Thao tác</th>
+            <th className="px-6 py-4 text-[13px] font-semibold text-left w-16">STT</th>
+            <th className="px-6 py-4 text-[13px] font-semibold text-left">Tên tệp dữ liệu</th>
+            <th className="px-6 py-4 text-[13px] font-semibold text-left">Người cập nhật</th>
+            <th className="px-6 py-4 text-[13px] font-semibold text-left">Ngày gửi công bố</th>
+            <th className="px-6 py-4 text-[13px] font-semibold text-left">Trạng thái công bố</th>
+            <th className="px-6 py-4 text-[13px] font-semibold text-center w-40">Thao tác</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100 bg-white">
@@ -43,11 +43,11 @@ export function OpenDataCategoryGrid({
                 <td className="px-4 py-3 text-left text-slate-600 font-medium text-[13px]">{item.createdDate}</td>
                 <td className="px-4 py-3 text-left">
                   {item.publishStatus === 'published' ? (
-                    <span className="px-2 py-1 text-xs bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-full font-medium whitespace-nowrap inline-block">
+                    <span className="px-2 py-1 text-[13px] bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-full font-medium whitespace-nowrap inline-block">
                       Đã công bố
                     </span>
                   ) : (
-                    <span className="px-2 py-1 text-xs bg-slate-100 text-slate-600 border border-slate-200 rounded-full font-medium whitespace-nowrap inline-block">
+                    <span className="px-2 py-1 text-[13px] bg-slate-100 text-slate-600 border border-slate-200 rounded-full font-medium whitespace-nowrap inline-block">
                       Chưa công bố
                     </span>
                   )}

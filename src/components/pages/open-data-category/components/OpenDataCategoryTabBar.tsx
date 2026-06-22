@@ -2,7 +2,7 @@ import React from 'react';
 import { FileText, History as HistoryIcon } from 'lucide-react';
 
 interface OpenDataCategoryTabBarProps {
-  activeTab: 'category' | 'version';
+  activeTab: string;
   setActiveTab: (tab: 'category' | 'version') => void;
 }
 

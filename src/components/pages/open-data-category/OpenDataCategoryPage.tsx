@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, Plus, Edit2, Trash2, Download, Upload, Filter, FileText, Info, Edit, CheckCircle, XCircle, Eye, Clock, FileCheck, Shield, History as HistoryIcon, File, ExternalLink, CheckSquare, ChevronDown, RotateCcw, ArrowLeft, PlusCircle, PauseCircle, PlayCircle, X, Globe, FileSpreadsheet, Database } from 'lucide-react';
 
-import { OpenDataCategoryTabBar } from './components/OpenDataCategoryTabBar';
 import { FilesTab } from './components/tabs/FilesTab';
-import { VersionHistoryTab } from './components/tabs/VersionHistoryTab';
 
 interface OpenDataCategoryPageProps {
   categoryName: string;
@@ -308,7 +306,6 @@ const sampleMetadata: MetadataItem[] = [
 ];
 
 export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCategoryPageProps) {
-  const [activeTab, setActiveTab] = useState<'category' | 'approval' | 'version' | 'schedule'>('category');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [licenseFilter, setLicenseFilter] = useState('all');
@@ -624,7 +621,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
         ? { ...item, approvalStatus: 'pending' as const }
         : item
     ));
-    setShowBulkSubmitApprovalModal(false);
+    setShowBulkApprovalModal(false);
     setSelectedIds(new Set());
   };
 
@@ -1007,52 +1004,35 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
       </div>
     )}
     <div className="space-y-6">
-      {/* Tabs Header */}
-      <OpenDataCategoryTabBar activeTab={activeTab} setActiveTab={setActiveTab} />
-
       {/* Main Tab Content */}
       <div className="p-6">
-        {activeTab === 'category' && (
-          <FilesTab
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            statusFilter={statusFilter}
-            setStatusFilter={setStatusFilter}
-            filteredData={filteredData}
-            paginatedData={paginatedData}
-            totalItems={totalItems}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-            pageSize={pageSize}
-            setPageSize={setPageSize}
-            onViewDetail={(item) => {
-              setSelectedItem(item);
-              setDetailModalTab('general');
-              setShowDetailModal(true);
-            }}
-            onViewVersion={(item) => {
-              setSelectedDatasetForVersionHistory(item);
-              setShowVersionHistoryModal(true);
-            }}
-            activeTab={activeTab}
-
-            startDateFilter={startDateFilter}
-            setStartDateFilter={setStartDateFilter}
-            endDateFilter={endDateFilter}
-            setEndDateFilter={setEndDateFilter}
-          />
-        )}
-
-        {activeTab === 'version' && (
-          <VersionHistoryTab
-            filteredData={filteredData}
-            selectedDatasetForVersion={selectedDatasetForVersion}
-            setSelectedDatasetForVersion={setSelectedDatasetForVersion}
-            sampleVersionHistory={sampleVersionHistory}
-            setSelectedVersionToRestore={setSelectedVersionToRestore}
-            setShowRestoreModal={setShowRestoreModal}
-          />
-        )}
+        <FilesTab
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          filteredData={filteredData}
+          paginatedData={paginatedData}
+          totalItems={totalItems}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          pageSize={pageSize}
+          setPageSize={setPageSize}
+          onViewDetail={(item) => {
+            setSelectedItem(item);
+            setDetailModalTab('general');
+            setShowDetailModal(true);
+          }}
+          onViewVersion={(item) => {
+            setSelectedDatasetForVersionHistory(item);
+            setShowVersionHistoryModal(true);
+          }}
+          activeTab="category"
+          startDateFilter={startDateFilter}
+          setStartDateFilter={setStartDateFilter}
+          endDateFilter={endDateFilter}
+          setEndDateFilter={setEndDateFilter}
+        />
       </div>
 
       {/* Add Modal */}
@@ -1234,7 +1214,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                     setData([...data, newItem]);
                     setSelectedItem(newItem);
                     setShowAddModal(false);
-                    setShowSubmitApprovalModal(true);
+                    setShowApprovalModal(true);
                     setFormData({ code: '', name: '', description: '', status: 'active', keywords: '', licenseId: '', publisher: '', fileName: '' });
                     setUploadStatus('idle');
                   }}
@@ -2304,8 +2284,8 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                   <HistoryIcon className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-[#020817]">Lịch sử phiên bản</h3>
-                  <p className="text-[12px] text-slate-500 font-medium mt-0.5">
+                  <h3 className="text-[18px] font-bold text-[#020817]">Lịch sử phiên bản</h3>
+                  <p className="text-[13px] text-slate-500 font-medium mt-0.5">
                     {selectedDatasetForVersionHistory.uploadType === 'api' ? 'API' : 'Tệp dữ liệu'}: <span className="text-slate-800 font-semibold">{selectedDatasetForVersionHistory.fileName || selectedDatasetForVersionHistory.name}</span>
                   </p>
                 </div>
@@ -2323,9 +2303,9 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
 
             {/* Modal Content */}
             <div className="p-6 overflow-y-auto flex-1">
-              <table className="w-full text-left border-collapse">
+              <table className="w-full text-left border-collapse text-[13px] version-modal-table">
                 <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50/75 text-slate-500 text-[12px] uppercase font-semibold tracking-wider">
+                  <tr className="border-b border-slate-100 bg-slate-50/75 text-slate-500 text-[13px] uppercase font-semibold tracking-wider">
                     <th className="px-6 py-3.5 font-semibold text-left">Tên tệp dữ liệu</th>
                     <th className="px-6 py-3.5 font-semibold text-center w-28">Phiên bản</th>
                     <th className="px-6 py-3.5 font-semibold text-left w-44">Người cập nhật</th>
@@ -2366,7 +2346,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                         {selectedDatasetForVersionHistory.fileName || selectedDatasetForVersionHistory.name}
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <span className="px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-[6px] text-xs font-semibold">
+                        <span className="px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-[6px] text-[13px] font-semibold">
                           {v.version}
                         </span>
                       </td>
@@ -2374,7 +2354,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                       <td className="px-6 py-4 text-slate-500 font-medium">{v.updatedDate}</td>
                       <td className="px-6 py-4 text-slate-600 leading-relaxed font-normal">{v.changes}</td>
                       <td className="px-6 py-4 text-center">
-                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                        <span className={`px-2.5 py-0.5 rounded-full text-[13px] font-semibold ${
                           v.status === 'Kích hoạt'
                             ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
                             : 'bg-slate-100 text-slate-600 border border-slate-200'
@@ -2386,9 +2366,10 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                         <button
                           onClick={() => {
                             setSelectedVersionToCompare(v);
+                            setShowVersionHistoryModal(false);
                             setShowVersionComparisonModal(true);
                           }}
-                          className="px-3 py-1.5 bg-white border border-[#e2e8f0] hover:bg-slate-50 text-[#020817] font-semibold rounded-[6px] text-xs transition-all cursor-pointer active:scale-95 shadow-sm"
+                          className="px-3 py-1.5 bg-white border border-[#e2e8f0] hover:bg-slate-50 text-[#020817] rounded-lg text-[13px] transition-all cursor-pointer active:scale-95 shadow-sm"
                         >
                           Xem chi tiết
                         </button>
@@ -2406,7 +2387,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                   setShowVersionHistoryModal(false);
                   setSelectedDatasetForVersionHistory(null);
                 }}
-                className="px-4 py-2 bg-white border border-[#e2e8f0] text-[#020817] rounded-[6px] text-xs font-semibold hover:bg-slate-50 transition-all active:scale-95 cursor-pointer shadow-sm"
+                className="px-4 py-2 bg-white border border-[#e2e8f0] text-[#020817] rounded-lg text-[13px] hover:bg-slate-50 transition-all active:scale-95 cursor-pointer shadow-sm"
               >
                 Đóng
               </button>
@@ -2417,7 +2398,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
 
       {/* Custom So sánh cấu trúc phiên bản Modal (Ảnh 2) */}
       {showVersionComparisonModal && selectedDatasetForVersionHistory && selectedVersionToCompare && (
-        <div className="fixed inset-0 bg-black/55 flex items-center justify-center z-[60] p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
           <div className="bg-white rounded-2xl w-full max-w-4xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
             {/* Header */}
             <div className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
@@ -2426,12 +2407,12 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                   <HistoryIcon className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-[#020817]">
+                  <h3 className="text-[18px] font-bold text-[#020817]">
                     {selectedDatasetForVersionHistory.uploadType === 'api' 
                       ? 'So sánh cấu trúc phiên bản API' 
                       : 'So sánh cấu trúc phiên bản tệp dữ liệu'}
                   </h3>
-                  <p className="text-[12px] text-slate-500 font-medium mt-0.5">
+                  <p className="text-[13px] text-slate-500 font-medium mt-0.5">
                     {selectedDatasetForVersionHistory.uploadType === 'api' ? 'Dịch vụ' : 'Tệp dữ liệu'}: <span className="text-slate-800 font-semibold">{selectedDatasetForVersionHistory.fileName || selectedDatasetForVersionHistory.name}</span>
                   </p>
                 </div>
@@ -2440,6 +2421,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                 onClick={() => {
                   setShowVersionComparisonModal(false);
                   setSelectedVersionToCompare(null);
+                  setSelectedDatasetForVersionHistory(null);
                 }}
                 className="text-slate-400 hover:text-slate-600 transition-colors p-1.5 hover:bg-slate-100 rounded-lg cursor-pointer"
               >
@@ -2451,44 +2433,44 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
             <div className="p-6 overflow-y-auto flex-1 space-y-6 text-[13px]">
               {/* Compare Card Info */}
               <div className="border border-slate-200 rounded-xl p-4 bg-slate-50/50 flex flex-col items-center justify-center text-center space-y-3">
-                <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-wider">
                   {selectedDatasetForVersionHistory.uploadType === 'api' ? 'API được so sánh' : 'Tệp dữ liệu được so sánh'}
                 </div>
-                <div className="text-sm font-bold text-slate-900">
+                <div className="text-[13px] font-bold text-slate-900">
                   {selectedDatasetForVersionHistory.fileName || selectedDatasetForVersionHistory.name}
                 </div>
                 <div className="flex items-center gap-3 bg-white border border-slate-200 rounded-lg px-4 py-2 shadow-sm font-medium">
                   <div className="flex flex-col items-center">
-                    <span className="text-[10px] text-slate-400 font-bold uppercase">Phiên bản cũ</span>
-                    <span className="text-xs font-bold text-slate-600 mt-0.5">v1.1</span>
+                    <span className="text-[13px] text-slate-400 font-bold uppercase">Phiên bản cũ</span>
+                    <span className="text-[13px] font-bold text-slate-600 mt-0.5">v1.1</span>
                   </div>
                   <span className="text-slate-300 font-light">→</span>
                   <div className="flex flex-col items-center">
-                    <span className="text-[10px] text-slate-400 font-bold uppercase">Phiên bản mới</span>
-                    <span className="text-xs font-bold text-blue-600 mt-0.5">{selectedVersionToCompare.version}</span>
+                    <span className="text-[13px] text-slate-400 font-bold uppercase">Phiên bản mới</span>
+                    <span className="text-[13px] font-bold text-blue-600 mt-0.5">{selectedVersionToCompare.version}</span>
                   </div>
                 </div>
               </div>
 
               {/* Struct Comparison Table */}
               <div className="border border-slate-250 rounded-xl overflow-hidden shadow-sm">
-                <table className="w-full text-left border-collapse">
+                <table className="w-full text-left border-collapse text-[13px] version-modal-table">
                   <thead>
-                    <tr className="border-b border-slate-200 bg-slate-50 text-[12px] font-semibold text-slate-700">
+                    <tr className="border-b border-slate-200 bg-slate-50 text-[13px] font-semibold text-slate-700">
                       <th colSpan={2} className="px-4 py-3 border-r border-slate-200 w-1/2">
                         <div className="flex items-center justify-between">
                           <span className="font-bold text-slate-800">PHIÊN BẢN CŨ (v1.1)</span>
-                          <span className="px-2 py-0.5 bg-slate-100 text-slate-600 border border-slate-200 rounded text-[10px] font-bold">Trước cập nhật</span>
+                          <span className="px-2 py-0.5 bg-slate-100 text-slate-600 border border-slate-200 rounded text-[13px] font-bold">Trước cập nhật</span>
                         </div>
                       </th>
                       <th colSpan={2} className="px-4 py-3 w-1/2">
                         <div className="flex items-center justify-between">
                           <span className="font-bold text-blue-900">PHIÊN BẢN MỚI ({selectedVersionToCompare.version})</span>
-                          <span className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-100 rounded text-[10px] font-bold">Sau cập nhật</span>
+                          <span className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-100 rounded text-[13px] font-bold">Sau cập nhật</span>
                         </div>
                       </th>
                     </tr>
-                    <tr className="border-b border-slate-200 bg-slate-100/50 text-[11px] text-slate-500 font-bold uppercase">
+                    <tr className="border-b border-slate-200 bg-slate-100/50 text-[13px] text-slate-500 font-bold uppercase">
                       <th className="px-4 py-2 border-r border-slate-200">Trường thuộc tính</th>
                       <th className="px-4 py-2 border-r border-slate-250">Kiểu dữ liệu</th>
                       <th className="px-4 py-2 border-r border-slate-200">Trường thuộc tính</th>
@@ -2565,7 +2547,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
               </div>
             </div>
 
-            {/* Footer Actions (Khôi phục, Tải về, Đóng) */}
+            {/* Footer Actions (Khôi phục, Tải về, Quay lại, Đóng) */}
             <div className="bg-slate-50 border-t border-slate-200 px-6 py-4 flex items-center justify-between">
               <div className="flex gap-2">
                 <button
@@ -2573,7 +2555,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                     alert(`Khôi phục dữ liệu về phiên bản ${selectedVersionToCompare.version} thành công!`);
                     setShowVersionComparisonModal(false);
                   }}
-                  className="px-4 py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-[6px] text-xs font-semibold transition-all active:scale-95 shadow-sm cursor-pointer flex items-center gap-1.5"
+                  className="px-4 py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-[13px] transition-all active:scale-95 shadow-sm cursor-pointer flex items-center gap-1.5"
                 >
                   <RotateCcw className="w-4 h-4" />
                   Khôi phục phiên bản
@@ -2582,21 +2564,35 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                   onClick={() => {
                     alert(`Đã tải xuống thành công tệp dữ liệu phiên bản ${selectedVersionToCompare.version}!`);
                   }}
-                  className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-[6px] text-xs font-semibold transition-all active:scale-95 shadow-sm cursor-pointer flex items-center gap-1.5"
+                  className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[13px] transition-all active:scale-95 shadow-sm cursor-pointer flex items-center gap-1.5"
                 >
                   <Download className="w-4 h-4" />
                   Tải về
                 </button>
               </div>
-              <button
-                onClick={() => {
-                  setShowVersionComparisonModal(false);
-                  setSelectedVersionToCompare(null);
-                }}
-                className="px-4 py-2.5 bg-white border border-[#e2e8f0] text-[#020817] hover:bg-slate-50 rounded-[6px] text-xs font-semibold transition-all active:scale-95 shadow-sm cursor-pointer"
-              >
-                Đóng so sánh
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    setShowVersionComparisonModal(false);
+                    setSelectedVersionToCompare(null);
+                    setShowVersionHistoryModal(true);
+                  }}
+                  className="px-4 py-2.5 bg-white border border-[#e2e8f0] text-[#020817] hover:bg-slate-50 rounded-lg text-[13px] transition-all active:scale-95 shadow-sm cursor-pointer flex items-center gap-1.5"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Quay lại
+                </button>
+                <button
+                  onClick={() => {
+                    setShowVersionComparisonModal(false);
+                    setSelectedVersionToCompare(null);
+                    setSelectedDatasetForVersionHistory(null);
+                  }}
+                  className="px-4 py-2.5 bg-white border border-[#e2e8f0] text-[#020817] hover:bg-slate-50 rounded-lg text-[13px] transition-all active:scale-95 shadow-sm cursor-pointer"
+                >
+                  Đóng
+                </button>
+              </div>
             </div>
           </div>
         </div>

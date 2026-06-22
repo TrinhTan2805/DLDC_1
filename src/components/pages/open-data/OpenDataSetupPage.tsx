@@ -549,7 +549,7 @@ interface OpenDataSetupPageProps {
 }
 
 export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
-  const [activeTab, setActiveTab] = useState<'management' | 'approval' | 'history' | 'metadata' | 'license'>('license');
+  const [activeTab, setActiveTab] = useState<'management' | 'approval' | 'metadata' | 'license'>('license');
   const [categories, setCategories] = useState<OpenDataCategory[]>(mockCategories);
   const [updateRules, setUpdateRules] = useState<OpenDataCategory[]>(mockUpdateRules);
   const [approvalList, setApprovalList] = useState<OpenDataCategory[]>(mockApprovalList);
@@ -991,11 +991,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
         addLabel = "Thêm Metadata";
         onAddClick = () => openMetadataModal();
         break;
-      case 'history':
-        placeholder = "Tìm kiếm lịch sử thay đổi...";
-        searchValue = searchTerm;
-        setSearchValue = setSearchTerm;
-        break;
+
     }
 
     return (
@@ -1218,62 +1214,6 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
               </div>
             )}
 
-            {activeTab === 'history' && (
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Từ ngày</label>
-                  <input
-                    type="date"
-                    value={fromDate}
-                    onChange={(e) => setFromDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-xl text-sm outline-none font-medium text-slate-700"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Đến ngày</label>
-                  <input
-                    type="date"
-                    value={toDate}
-                    onChange={(e) => setToDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-xl text-sm outline-none font-medium text-slate-700"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Loại thay đổi</label>
-                  <div className="relative">
-                    <select
-                      value={changeTypeFilter}
-                      onChange={(e) => setChangeTypeFilter(e.target.value)}
-                      className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                    >
-                      <option value="">Tất cả</option>
-                      <option value="create_category">Tạo danh mục</option>
-                      <option value="edit_category">Chỉnh sửa DM</option>
-                      <option value="grant_permission">Cấp quyền</option>
-                      <option value="add_metadata">Thêm metadata</option>
-                      <option value="edit_metadata">Sửa metadata</option>
-                      <option value="add_license">Thêm giấy phép</option>
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Trạng thái</label>
-                  <div className="relative">
-                    <select
-                      value={statusFilter}
-                      onChange={(e) => setStatusFilter(e.target.value)}
-                      className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                    >
-                      <option value="">Tất cả</option>
-                      <option value="applied">Đã áp dụng</option>
-                      <option value="pending">Chờ xử lý</option>
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         )}
       </div>
@@ -1672,16 +1612,6 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
             <FileText className={`w-4 h-4 ${activeTab === 'metadata' ? 'text-blue-600' : 'text-slate-400'}`} />
             Metadata
           </button>
-          <button
-            onClick={() => setActiveTab('history')}
-            className={`flex items-center gap-2 px-6 py-4 text-[13px] font-medium transition-all border-b-2 cursor-pointer ${activeTab === 'history'
-              ? 'border-blue-600 text-blue-600 bg-blue-50/50'
-              : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
-              }`}
-          >
-            <Clock className={`w-4 h-4 ${activeTab === 'history' ? 'text-blue-600' : 'text-slate-400'}`} />
-            Lịch sử thay đổi
-          </button>
         </div>
       </div>
 
@@ -1696,18 +1626,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
               <thead className="bg-[#f8fafc] text-slate-700 border-b border-slate-100">
                 <tr>
                   <th className={`px-6 py-4 text-center whitespace-nowrap w-16 text-[13px] ${activeTab === 'metadata' ? 'font-bold text-slate-500' : 'font-semibold text-slate-700'}`}>STT</th>
-                  {activeTab === 'history' ? (
-                    <>
-                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[13px] w-24">Phiên bản</th>
-                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[13px] w-40">Ngày thay đổi</th>
-                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Người thay đổi</th>
-                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Danh mục</th>
-                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[13px]">Loại thay đổi</th>
-                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Nội dung thay đổi</th>
-                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[13px]">Trạng thái</th>
-                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[13px] w-28">Thao tác</th>
-                    </>
-                  ) : activeTab === 'metadata' ? (
+                  {activeTab === 'metadata' ? (
                     <>
                       <th className="px-6 py-4 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Danh mục</th>
                       <th className="px-6 py-4 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Giấy phép</th>
@@ -1745,89 +1664,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 bg-white">
-                {activeTab === 'history' ? (
-                  paginatedHistory.length > 0 ? (
-                    paginatedHistory.map((record, index) => (
-                      <tr key={record.id} className="hover:bg-slate-50 transition-all group border-b border-slate-100">
-                        <td className="px-4 py-3 text-center text-slate-500 font-medium text-[13px]">{(currentPageNum - 1) * pageSize + index + 1}</td>
-                        <td className="px-4 py-3 text-center">
-                          <span className="px-2.5 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-semibold border border-purple-100">
-                            {record.version}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-center text-slate-600 text-[13px] font-mono">{record.timestamp}</td>
-                        <td className="px-4 py-3 text-left text-slate-600 font-medium text-[13px]">{record.user}</td>
-                        <td className="px-4 py-3 text-left text-[13px]">
-                          <div>
-                            <div className="font-semibold text-slate-900 leading-snug">{record.name}</div>
-                            <div className="text-xs text-slate-500 mt-0.5">{record.code}</div>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-center">
-                          {record.changeType === 'create_category' && (
-                            <span className="px-2.5 py-1 bg-green-50 text-green-700 rounded-full text-xs font-semibold border border-green-100">
-                              Tạo danh mục
-                            </span>
-                          )}
-                          {record.changeType === 'edit_category' && (
-                            <span className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-semibold border border-blue-100">
-                              Chỉnh sửa DM
-                            </span>
-                          )}
-                          {record.changeType === 'grant_permission' && (
-                            <span className="px-2.5 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-semibold border border-purple-100">
-                              Cấp quyền
-                            </span>
-                          )}
-                          {record.changeType === 'add_metadata' && (
-                            <span className="px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-semibold border border-indigo-100">
-                              Thêm metadata
-                            </span>
-                          )}
-                          {record.changeType === 'edit_metadata' && (
-                            <span className="px-2.5 py-1 bg-sky-50 text-sky-700 rounded-full text-xs font-semibold border border-sky-100">
-                              Sửa metadata
-                            </span>
-                          )}
-                          {record.changeType === 'add_license' && (
-                            <span className="px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-semibold border border-amber-100">
-                              Thêm giấy phép
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3 text-left text-slate-600 max-w-xs truncate text-[13px]" title={record.changeContent}>
-                          {record.changeContent}
-                        </td>
-                        <td className="px-4 py-3 text-center">
-                          {record.status === 'applied' ? (
-                            <span className="px-2.5 py-1 bg-green-50 text-green-700 rounded-full text-xs font-semibold border border-green-100">
-                              Đã áp dụng
-                            </span>
-                          ) : (
-                            <span className="px-2.5 py-1 bg-yellow-50 text-yellow-700 rounded-full text-xs font-semibold border border-yellow-100">
-                              Chờ xử lý
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3 text-center">
-                          <div className="flex items-center justify-center gap-1">
-                            <button onClick={() => handleView(record as any)} className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Xem chi tiết">
-                              <Eye className="w-4 h-4" />
-                            </button>
-                            <button onClick={() => alert(`Tải xuống phiên bản ${record.version}`)} className="p-1.5 text-slate-500 hover:text-[#2563eb] hover:bg-blue-50 rounded-lg transition-colors" title="Tải xuống">
-                              <FileText className="w-4 h-4" />
-                            </button>
-                            <button onClick={() => alert(`Khôi phục về phiên bản ${record.version}`)} className="p-1.5 text-slate-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors" title="Khôi phục">
-                              <RefreshCw className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr><td colSpan={9} className="px-4 py-8 text-center text-sm text-slate-500">Không tìm thấy dữ liệu</td></tr>
-                  )
-                ) : activeTab === 'metadata' ? (
+                {activeTab === 'metadata' ? (
                   paginatedMetadata.length > 0 ? (
                     paginatedMetadata.map((item, index) => (
                       <tr key={item.id} className="hover:bg-slate-50 transition-all group border-b border-slate-100">
@@ -2039,7 +1876,6 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
           {activeTab === 'license' && renderPagination(filteredLicenseEntries.length)}
           {activeTab === 'metadata' && renderPagination(filteredMetadataEntries.length)}
           {activeTab === 'management' && renderPagination(filteredCategories.length)}
-          {activeTab === 'history' && renderPagination(filteredHistory.length)}
           {activeTab === 'approval' && renderPagination(filteredApprovalList.length)}
         </div>
       </div>
