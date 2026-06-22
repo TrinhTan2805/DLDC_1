@@ -1247,15 +1247,15 @@ export const menuStructure: MenuItem[] = [
   },
   {
     id: "category",
-    name: "Quản lý danh mục",
+    name: "Quản lý danh mục dùng chung",
     children: [
       {
         id: "category-setup",
-        name: "Thiết lập danh mục",
+        name: "Thiết lập danh mục dùng chung",
         functions: [
           {
             id: "category-setup-func",
-            name: "Thiết lập danh mục",
+            name: "Thiết lập danh mục dùng chung",
             actions: [
               "Xem",
               "Thêm",
@@ -1274,7 +1274,7 @@ export const menuStructure: MenuItem[] = [
       },
       {
         id: "category-list",
-        name: "Danh sách danh mục",
+        name: "Danh sách danh mục dùng chung",
         children: [
           {
             id: "category-moj-units",
@@ -1342,7 +1342,7 @@ export const menuStructure: MenuItem[] = [
       },
       {
         id: "category-report-group",
-        name: "Thống kê danh mục",
+        name: "Thống kê danh mục dùng chung",
         children: [
           {
             id: "category-report",

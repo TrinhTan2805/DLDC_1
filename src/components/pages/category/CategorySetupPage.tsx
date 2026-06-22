@@ -391,9 +391,9 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
 
   return (
     <div className="space-y-6">
-      {/* Tabs Navigation */}
-      <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-        <div className="flex border-b border-slate-200">
+      {/* Tabs Header */}
+      <div className="bg-white border-b border-slate-200">
+        <div className="flex px-6 gap-2">
           {[
             { id: 'setup', label: 'Thiết lập danh sách', icon: Settings },
             { id: 'attributes', label: 'Thiết lập thuộc tính', icon: Sliders },
@@ -402,19 +402,22 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
             { id: 'version-history', label: 'Lịch sử phiên bản', icon: Clock }
           ].map(tab => (
             <button
- key={tab.id}
- onClick={() => setActiveTab(tab.id as TabType)}
- className={`flex items-center gap-2 px-6 py-4 text-[14px] transition-all border-b-2 ${activeTab === tab.id ? 'bg-blue-50/50 text-blue-600 border-blue-600' : 'text-slate-500 border-transparent hover:bg-slate-50'
- }`}
- >
- <tab.icon className="w-4 h-4" />
- {tab.label}
- </button>
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as TabType)}
+              className={`flex items-center gap-2 px-6 py-4 text-[13px] font-medium transition-all border-b-2 cursor-pointer ${activeTab === tab.id
+                ? 'border-blue-600 text-blue-600 bg-blue-50/50'
+                : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
+              }`}
+            >
+              <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-blue-600' : 'text-slate-400'}`} />
+              {tab.label}
+            </button>
           ))}
         </div>
+      </div>
 
-        {/* Tab Content */}
-        <div className="p-6 bg-slate-50/20 min-h-[600px]">
+      {/* Tab Content */}
+      <div className="p-6">
           {activeTab === 'setup' && (
             <SetupTab
               entities={entities} searchTerm={searchTerm} setSearchTerm={setSearchTerm}
@@ -488,7 +491,6 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
             approvalStatusLabels={approvalStatusLabels}
           />}
           {activeTab === 'version-history' && <VersionHistoryTab searchTerm={searchTerm} setSearchTerm={setSearchTerm} onViewDetail={() => { }} />}
-        </div>
       </div>
 
       {/* Modals Container */}

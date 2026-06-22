@@ -121,50 +121,50 @@
 ## 5. PHÂN HỆ DANH MỤC DÙNG CHUNG (DANH MỤC BTP)
 
 ### Trang chính
-- `[ ]` Dashboard danh mục (`category/CategoryDashboardPage.tsx`)
-- `[ ]` Trang danh mục tổng hợp (toàn bộ nghiệp vụ) (`category/CategoryPage.tsx`)
-- `[ ]` Phê duyệt danh mục (`category/CategoryApprovalPage.tsx`)
-- `[ ]` Thiết lập danh mục (`category/CategorySetupPage.tsx`)
-- `[ ]` Thiết lập danh mục (phiên bản mới) (`category/CategorySetupPageNew.tsx`)
-- `[ ]` Đơn vị Bộ Tư pháp (`category/CategoryMojUnitsPage.tsx`)
-- `[ ]` Công bố danh mục (`category/CategoryPublishPage.tsx`)
-- `[ ]` Danh sách đã công bố (`category/CategoryPublishedListPage.tsx`)
-- `[ ]` Báo cáo danh mục (`category/CategoryReportPage.tsx`)
-- `[ ]` Thống kê danh mục (`category/CategoryStatisticsPage.tsx`)
-- `[ ]` Báo cáo thống kê tổng hợp (`category/CategoryStatisticsReportPage.tsx`)
+- `[x]` Dashboard danh mục (`category/CategoryDashboardPage.tsx`)
+- `[x]` Trang danh mục tổng hợp (toàn bộ nghiệp vụ) (`category/CategoryPage.tsx`)
+- `[x]` Phê duyệt danh mục (`category/CategoryApprovalPage.tsx`)
+- `[x]` Thiết lập danh mục (`category/CategorySetupPage.tsx`)
+- `[x]` Thiết lập danh mục (phiên bản mới) (`category/CategorySetupPageNew.tsx`)
+- `[x]` Đơn vị Bộ Tư pháp (`category/CategoryMojUnitsPage.tsx`)
+- `[x]` Công bố danh mục (`category/CategoryPublishPage.tsx`)
+- `[x]` Danh sách đã công bố (`category/CategoryPublishedListPage.tsx`)
+- `[x]` Báo cáo danh mục (`category/CategoryReportPage.tsx`)
+- `[x]` Thống kê danh mục (`category/CategoryStatisticsPage.tsx`)
+- `[x]` Báo cáo thống kê tổng hợp (`category/CategoryStatisticsReportPage.tsx`)
 
 ### Sub-tabs trong trang danh mục
-- `[ ]` Tab Phê duyệt (`category/components/tabs/ApprovalTab.tsx`)
-- `[ ]` Tab Thuộc tính (`category/components/tabs/AttributesTab.tsx`)
-- `[ ]` Tab Quan hệ thực thể (`category/components/tabs/RelationshipsTab.tsx`)
-- `[ ]` Tab Thiết lập (`category/components/tabs/SetupTab.tsx`)
-- `[ ]` Tab Lịch sử phiên bản (`category/components/tabs/VersionHistoryTab.tsx`)
+- `[x]` Tab Phê duyệt (`category/components/tabs/ApprovalTab.tsx`)
+- `[x]` Tab Thuộc tính (`category/components/tabs/AttributesTab.tsx`)
+- `[x]` Tab Quan hệ thực thể (`category/components/tabs/RelationshipsTab.tsx`)
+- `[x]` Tab Thiết lập (`category/components/tabs/SetupTab.tsx`)
+- `[x]` Tab Lịch sử phiên bản (`category/components/tabs/VersionHistoryTab.tsx`)
 
 ### Modals danh mục
-- `[ ]` Modal Wizard tạo danh mục mới (`category/components/modals/CategoryWizardModal.tsx`)
-- `[ ]` Modal Chỉnh sửa danh mục (`category/components/modals/EditCategoryModal.tsx`)
-- `[ ]` Modal Xác nhận xóa (`category/components/modals/DeleteConfirmModal.tsx`)
-- `[ ]` Modal Gửi phê duyệt (`category/components/modals/ApprovalRequestModal.tsx`)
-- `[ ]` Modal Review phê duyệt (`category/components/modals/ReviewApprovalModal.tsx`)
-- `[ ]` Modal Phê duyệt đơn giản (`category/components/modals/SimpleApproveModal.tsx`)
-- `[ ]` Modal Từ chối đơn giản (`category/components/modals/SimpleRejectModal.tsx`)
-- `[ ]` Modal Gửi yêu cầu hết hạn (`category/components/modals/ExpireRequestModal.tsx`)
-- `[ ]` Modal Phê duyệt hết hạn (`category/components/modals/ExpireApproveModal.tsx`)
-- `[ ]` Modal Công bố (`category/components/modals/PublishModal.tsx`)
-- `[ ]` Modal Cấu hình công bố (`category/components/modals/PublishConfigModal.tsx`)
-- `[ ]` Modal Hủy công bố (`category/components/modals/UnpublishModal.tsx`)
-- `[ ]` Modal Tạo phiên bản mới (`category/components/modals/CreateVersionModal.tsx`)
-- `[ ]` Modal Khôi phục phiên bản (`category/components/modals/RestoreVersionModal.tsx`)
-- `[ ]` Modal Lưu trữ bản ghi (`category/components/modals/ArchiveRecordModal.tsx`)
-- `[ ]` Modal Form thuộc tính (`category/components/modals/AttributeFormModal.tsx`)
-- `[ ]` Modal Form bản ghi (`category/components/modals/RecordFormModal.tsx`)
-- `[ ]` Modal Xóa đơn vị BTP (`category/components/modals/MojUnitDeleteConfirmModal.tsx`)
+- `[x]` Modal Wizard tạo danh mục mới (`category/components/modals/CategoryWizardModal.tsx`)
+- `[x]` Modal Chỉnh sửa danh mục (`category/components/modals/EditCategoryModal.tsx`)
+- `[x]` Modal Xác nhận xóa (`category/components/modals/DeleteConfirmModal.tsx`)
+- `[x]` Modal Gửi phê duyệt (`category/components/modals/ApprovalRequestModal.tsx`)
+- `[x]` Modal Review phê duyệt (`category/components/modals/ReviewApprovalModal.tsx`)
+- `[x]` Modal Phê duyệt đơn giản (`category/components/modals/SimpleApproveModal.tsx`)
+- `[x]` Modal Từ chối đơn giản (`category/components/modals/SimpleRejectModal.tsx`)
+- `[x]` Modal Gửi yêu cầu hết hạn (`category/components/modals/ExpireRequestModal.tsx`)
+- `[x]` Modal Phê duyệt hết hạn (`category/components/modals/ExpireApproveModal.tsx`)
+- `[x]` Modal Công bố (`category/components/modals/PublishModal.tsx`)
+- `[x]` Modal Cấu hình công bố (`category/components/modals/PublishConfigModal.tsx`)
+- `[x]` Modal Hủy công bố (`category/components/modals/UnpublishModal.tsx`)
+- `[x]` Modal Tạo phiên bản mới (`category/components/modals/CreateVersionModal.tsx`)
+- `[x]` Modal Khôi phục phiên bản (`category/components/modals/RestoreVersionModal.tsx`)
+- `[x]` Modal Lưu trữ bản ghi (`category/components/modals/ArchiveRecordModal.tsx`)
+- `[x]` Modal Form thuộc tính (`category/components/modals/AttributeFormModal.tsx`)
+- `[x]` Modal Form bản ghi (`category/components/modals/RecordFormModal.tsx`)
+- `[x]` Modal Xóa đơn vị BTP (`category/components/modals/MojUnitDeleteConfirmModal.tsx`)
 
 ### Báo cáo danh mục
-- `[ ]` Báo cáo danh sách (`category/reports/CategoryReportListPage.tsx`)
-- `[ ]` Báo cáo trạng thái (`category/reports/CategoryReportStatusPage.tsx`)
-- `[ ]` Báo cáo khai thác (`category/reports/CategoryReportExploitationPage.tsx`)
-- `[ ]` Báo cáo phiên bản (`category/reports/CategoryReportVersionPage.tsx`)
+- `[x]` Báo cáo danh sách (`category/reports/CategoryReportListPage.tsx`)
+- `[x]` Báo cáo trạng thái (`category/reports/CategoryReportStatusPage.tsx`)
+- `[x]` Báo cáo khai thác (`category/reports/CategoryReportExploitationPage.tsx`)
+- `[x]` Báo cáo phiên bản (`category/reports/CategoryReportVersionPage.tsx`)
 
 ---
 
@@ -333,7 +333,7 @@
 ## 10. PHÂN HỆ DỮ LIỆU MỞ (OPEN DATA)
 
 ### Thiết lập & Quản lý
-- `[x]` Thiết lập danh mục dữ liệu mở (`open-data/OpenDataSetupPage.tsx`)
+- `[ ]` Thiết lập danh mục dữ liệu mở (`open-data/OpenDataSetupPage.tsx`)
   - Tab Quản lý danh mục
   - Tab Metadata
   - Tab Giấy phép
@@ -341,32 +341,32 @@
   - Tab Lịch sử
 
 ### Công bố & Yêu cầu
-- `[x]` Yêu cầu công bố & Danh sách đề xuất (`open-data/OpenDataPublishedListPage.tsx`)
-- `[x]` Phê duyệt dữ liệu mở (`open-data/OpenDataApprovalPage.tsx`)
-- `[x]` Công bố dữ liệu mở (`open-data/OpenDataPublishPage.tsx`)
+- `[ ]` Yêu cầu công bố & Danh sách đề xuất (`open-data/OpenDataPublishedListPage.tsx`)
+- `[ ]` Phê duyệt dữ liệu mở (`open-data/OpenDataApprovalPage.tsx`)
+- `[ ]` Công bố dữ liệu mở (`open-data/OpenDataPublishPage.tsx`)
 
 ### Quy tắc & Thống kê
-- `[x]` Quy tắc cập nhật dữ liệu mở (`open-data/OpenDataUpdateRulesPage.tsx`)
-- `[x]` Thống kê dữ liệu mở (`open-data/OpenDataStatisticsPage.tsx`)
-- `[x]` Báo cáo dữ liệu mở (`open-data/OpenDataReportPage.tsx`)
-- `[x]` Báo cáo dữ liệu mở (chi tiết) (`open-data-report/OpenDataReportPage.tsx`)
+- `[ ]` Quy tắc cập nhật dữ liệu mở (`open-data/OpenDataUpdateRulesPage.tsx`)
+- `[ ]` Thống kê dữ liệu mở (`open-data/OpenDataStatisticsPage.tsx`)
+- `[ ]` Báo cáo dữ liệu mở (`open-data/OpenDataReportPage.tsx`)
+- `[ ]` Báo cáo dữ liệu mở (chi tiết) (`open-data-report/OpenDataReportPage.tsx`)
 
 ### Cổng công khai
-- `[x]` Cổng thông tin dữ liệu mở công khai (`open-data/OpenDataPublicPortal.tsx`)
+- `[ ]` Cổng thông tin dữ liệu mở công khai (`open-data/OpenDataPublicPortal.tsx`)
 
 ### Danh mục dữ liệu mở (open-data-category/)
-- `[x]` Trang danh mục dữ liệu mở công khai (`open-data-category/OpenDataCategoryPage.tsx`)
-- `[x]` Thiết lập danh mục dữ liệu mở (`open-data-category/OpenDataCategorySetupPage.tsx`)
-- `[x]` Danh mục A–J (`open-data-category/OpenDataCategoryAPage.tsx` đến `OpenDataCategoryJPage.tsx`)
+- `[ ]` Trang danh mục dữ liệu mở công khai (`open-data-category/OpenDataCategoryPage.tsx`)
+- `[ ]` Thiết lập danh mục dữ liệu mở (`open-data-category/OpenDataCategorySetupPage.tsx`)
+- `[ ]` Danh mục A–J (`open-data-category/OpenDataCategoryAPage.tsx` đến `OpenDataCategoryJPage.tsx`)
 
 ### Components danh mục mở
-- `[x]` Thanh hành động (`open-data-category/components/OpenDataCategoryActions.tsx`)
-- `[x]` Bộ lọc tìm kiếm (`open-data-category/components/OpenDataCategoryFilters.tsx`)
-- `[x]` Thanh tab (`open-data-category/components/OpenDataCategoryTabBar.tsx`)
-- `[x]` Grid danh mục (`open-data-category/components/tabs/OpenDataCategoryGrid.tsx`)
-- `[x]` Phân trang (`open-data-category/components/tabs/OpenDataCategoryPagination.tsx`)
-- `[x]` Tab Tệp đính kèm (`open-data-category/components/tabs/FilesTab.tsx`)
-- `[x]` Tab Lịch sử phiên bản (`open-data-category/components/tabs/VersionHistoryTab.tsx`)
+- `[ ]` Thanh hành động (`open-data-category/components/OpenDataCategoryActions.tsx`)
+- `[ ]` Bộ lọc tìm kiếm (`open-data-category/components/OpenDataCategoryFilters.tsx`)
+- `[ ]` Thanh tab (`open-data-category/components/OpenDataCategoryTabBar.tsx`)
+- `[ ]` Grid danh mục (`open-data-category/components/tabs/OpenDataCategoryGrid.tsx`)
+- `[ ]` Phân trang (`open-data-category/components/tabs/OpenDataCategoryPagination.tsx`)
+- `[ ]` Tab Tệp đính kèm (`open-data-category/components/tabs/FilesTab.tsx`)
+- `[ ]` Tab Lịch sử phiên bản (`open-data-category/components/tabs/VersionHistoryTab.tsx`)
 
 ---
 

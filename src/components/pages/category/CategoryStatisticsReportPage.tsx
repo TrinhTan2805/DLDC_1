@@ -136,8 +136,8 @@ export function CategoryStatisticsReportPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl text-slate-900">Báo cáo thống kê danh mục</h1>
-          <p className="text-sm text-slate-500 mt-1">Tìm kiếm và xuất báo cáo thống kê danh mục</p>
+          <h1 className="text-2xl text-slate-900">Báo cáo thống kê danh mục dùng chung</h1>
+          <p className="text-sm text-slate-500 mt-1">Tìm kiếm và xuất báo cáo thống kê danh mục dùng chung</p>
         </div>
       </div>
 

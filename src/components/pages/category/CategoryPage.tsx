@@ -605,7 +605,7 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                 ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-600'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               }`}
-            title="Danh sách danh mục"
+            title="Danh sách danh mục dùng chung"
           >
             <List className="w-4 h-4" />
             Danh sách

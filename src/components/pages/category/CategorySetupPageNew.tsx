@@ -73,7 +73,7 @@ export function CategorySetupPageNew() {
   const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
 
   // Mock data
-  const [categories, setCategories] = useState<Category[]>([
+  const [categories] = useState<Category[]>([
     {
       id: '1',
       code: 'CAT001',
@@ -160,7 +160,7 @@ export function CategorySetupPageNew() {
     <div className="space-y-6">
       {/* Header */}
       <div className="bg-white border border-slate-200 rounded-lg p-6">
-        <h2 className="text-xl text-slate-900 mb-2">Thiết lập danh mục</h2>
+        <h2 className="text-xl text-slate-900 mb-2">Thiết lập danh mục dùng chung</h2>
         <p className="text-slate-600 text-sm">
           Quản lý cấu hình và thiết lập các danh mục dữ liệu trong hệ thống
         </p>
@@ -280,7 +280,7 @@ export function CategorySetupPageNew() {
               {/* Header with Add Button */}
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg text-slate-900">Thiết lập danh mục</h3>
+                  <h3 className="text-lg text-slate-900">Thiết lập danh mục dùng chung</h3>
                   <p className="text-sm text-slate-600">Quản lý cấu hình và thiết lập các danh mục dữ liệu trong hệ thống</p>
                 </div>
                 <button
@@ -437,7 +437,7 @@ export function CategorySetupPageNew() {
 
       {/* Add/Edit Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-slate-200 flex items-center justify-between">
               <h3 className="text-lg text-slate-900">Thêm danh mục mới</h3>
@@ -619,7 +619,7 @@ export function CategorySetupPageNew() {
 
       {/* Detail Modal */}
       {showDetailModal && selectedCategory && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-slate-200 flex items-center justify-between">
               <h3 className="text-lg text-slate-900">Chi tiết danh mục: {selectedCategory.name}</h3>
@@ -735,7 +735,7 @@ export function CategorySetupPageNew() {
 
       {/* Add Field Modal */}
       {showAddFieldModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-slate-200 flex items-center justify-between">
               <h3 className="text-lg text-slate-900">Thêm trường dữ liệu mới</h3>
@@ -824,9 +824,9 @@ export function CategorySetupPageNew() {
         </div>
       )}
 
-      {/* Field Form Modal */}
+      {/* Field Form Modal — nested inside Add Modal, requires higher z-index per rule 5.4 */}
       {showFieldFormModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[200] p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-slate-200 flex items-center justify-between">
               <h3 className="text-lg text-slate-900">Thêm trường dữ liệu mới</h3>
