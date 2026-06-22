@@ -7,6 +7,27 @@ interface VersionHistoryModalProps {
 
 const mockVersions = [
   {
+    id: 18,
+    version: 'v2.5.0',
+    date: '22/06/2026',
+    time: '17:00',
+    content: `1. Phân hệ Dữ liệu mở — Công bố & Thiết lập:
+- Xây dựng hoàn thiện luồng thiết lập và công bố dữ liệu mở: thông tin mô tả, phê duyệt, quản lý trạng thái công bố.
+- Bổ sung trang Danh mục dữ liệu mở với inner menu phân cấp, đa tab (Thông tin, Tệp đính kèm, Lịch sử phiên bản), bảng grid danh sách và modal chi tiết.
+- Tích hợp trang danh sách Danh mục dữ liệu mở với tìm kiếm, lọc nâng cao và xem chi tiết.
+
+2. Phân hệ Dữ liệu mở — Thống kê & Báo cáo (OpenDataReportPage):
+- Tab Tìm kiếm và lọc: Bổ sung sắp xếp cột (tăng/giảm) và phân trang cho bảng danh sách dataset.
+- Tab Báo cáo thống kê: Redesign bộ lọc thiết lập báo cáo — nhóm theo chủ đề/cơ quan/giấy phép/khoảng thời gian; MultiSelect đa lựa chọn; logic deferred render (chỉ hiển thị dữ liệu sau khi nhấn Tạo báo cáo); thẻ tổng hợp (4 KPI) luôn hiển thị phía trên bộ lọc; tích hợp ExportDropdown xuất Excel/PDF.
+- Tab Báo cáo phân loại: Redesign đồng bộ với Báo cáo thống kê; hỗ trợ phân loại theo nguồn cung cấp (tên CSDL đích), chủ đề, định dạng chia sẻ (File Excel/API); biểu đồ tròn và biểu đồ cột song song.
+- Tab Thống kê lượt truy cập: Bộ lọc nhóm theo khoảng thời gian (từ tháng/năm — đến tháng/năm), loại người dùng (6 loại), nguồn truy cập (CSDL đích), loại dữ liệu chia sẻ; biểu đồ đồng bộ theo nhóm lọc (LineChart cho thời gian, BarChart cho các dimension khác); bảng Cảnh báo truy cập vượt ngưỡng với cấu hình ngưỡng động và highlight hàng vi phạm.
+- Áp dụng thống nhất pattern apply-on-button-click (applied states) và ExportDropdown cho tất cả 4 tab.
+
+3. Quản lý người dùng & Nhật ký hệ thống:
+- Cập nhật giao diện Quản lý người dùng và Nhật ký hoạt động hệ thống.
+- Sửa lỗi biên dịch tại ConfigChangeLogPage.tsx và AccountManagementLogPage.tsx.`
+  },
+  {
     id: 17,
     version: 'v2.4.8',
     date: '17/06/2026',
