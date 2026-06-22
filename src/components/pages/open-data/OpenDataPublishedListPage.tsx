@@ -26,6 +26,7 @@ interface PublishedData {
   joinTables?: any[];
   dataFields?: any[];
   approvalNote?: string;
+  topic?: string;
 }
 
 const getPreviewFallback = (categoryName: string) => {
@@ -565,6 +566,7 @@ export function OpenDataPublishedListPage() {
   const [formValidationError, setFormValidationError] = useState<string | null>(null);
   const [requestMetaFile, setRequestMetaFile] = useState('');
   const [requestFormat, setRequestFormat] = useState<string[]>([]);
+  const [requestTopic, setRequestTopic] = useState('');
   const [requestFrequency, setRequestFrequency] = useState('');
   const [sourceDbId, setSourceDbId] = useState('');
   const [mainTable, setMainTable] = useState('');
@@ -913,6 +915,7 @@ export function OpenDataPublishedListPage() {
       mainTable: mainTable,
       joinTables: joinTables,
       dataFields: dataFields,
+      topic: requestTopic,
     };
   };
 
@@ -994,6 +997,7 @@ export function OpenDataPublishedListPage() {
     setRequestMetaFile('');
     setRequestFormat([]);
     setRequestFrequency('');
+    setRequestTopic('');
     setSourceDbId('');
     setMainTable('');
     setHasJoin(false);
@@ -1013,6 +1017,7 @@ export function OpenDataPublishedListPage() {
     setRequestPublisher(item.publisher);
     setRequestFormat(item.format || []);
     setRequestFrequency(item.frequency || '');
+    setRequestTopic(item.topic || '');
     setSourceDbId(item.sourceDbId || '');
     setMainTable(item.mainTable || '');
     const jts = item.joinTables || [];
@@ -1888,6 +1893,11 @@ export function OpenDataPublishedListPage() {
                   <div className="text-[13px] text-black">{getFrequencyLabel(selectedData.frequency || '') || '—'}</div>
                 </div>
 
+                <div>
+                  <div className="text-[11px] text-black uppercase tracking-wider mb-1">Chủ đề</div>
+                  <div className="text-[13px] text-black">{selectedData.topic || '—'}</div>
+                </div>
+
                 <div className="col-span-1 md:col-span-2">
                   <div className="text-[11px] text-black uppercase tracking-wider mb-1">Thông tin mô tả</div>
                   <div className="text-[13px] text-black whitespace-pre-wrap">{selectedData.description || '—'}</div>
@@ -2216,6 +2226,44 @@ export function OpenDataPublishedListPage() {
                 </div>
 
                 <div>
+                  <label className="block text-slate-700 mb-1">Chủ đề</label>
+                  <select
+                    value={requestTopic}
+                    onChange={(e) => setRequestTopic(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  >
+                    <option value="">-- Chọn chủ đề --</option>
+                    <option value="Trợ giúp pháp lý">Trợ giúp pháp lý</option>
+                    <option value="Luật sư">Luật sư</option>
+                    <option value="Tư vấn pháp luật">Tư vấn pháp luật</option>
+                    <option value="Công chứng">Công chứng</option>
+                    <option value="Quản lý, thanh lý tài sản, Đấu giá">Quản lý, thanh lý tài sản, Đấu giá</option>
+                    <option value="Giám định">Giám định</option>
+                    <option value="Trọng tài">Trọng tài</option>
+                    <option value="Hòa giải">Hòa giải</option>
+                    <option value="Thống kê ngành Tư pháp">Thống kê ngành Tư pháp</option>
+                    <option value="Tài sản thi hành án">Tài sản thi hành án</option>
+                    <option value="Báo cáo viên pháp luật">Báo cáo viên pháp luật</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-slate-700 mb-1">Tần suất cập nhật</label>
+                  <select
+                    value={requestFrequency}
+                    onChange={(e) => setRequestFrequency(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  >
+                    <option value="">-- Chọn tần suất --</option>
+                    <option value="daily">Theo ngày</option>
+                    <option value="weekly">Theo tuần</option>
+                    <option value="monthly">Theo tháng</option>
+                    <option value="quarterly">Theo quý</option>
+                    <option value="yearly">Theo năm</option>
+                  </select>
+                </div>
+
+                <div>
                   <label className="block text-slate-700 mb-2">Định dạng chia sẻ</label>
                   <div className="flex gap-4">
                     {[{ value: 'excel', label: 'File Excel' }, { value: 'api', label: 'API' }].map(opt => (
@@ -2236,22 +2284,6 @@ export function OpenDataPublishedListPage() {
                       </label>
                     ))}
                   </div>
-                </div>
-
-                <div>
-                  <label className="block text-slate-700 mb-1">Tần suất cập nhật</label>
-                  <select
-                    value={requestFrequency}
-                    onChange={(e) => setRequestFrequency(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                  >
-                    <option value="">-- Chọn tần suất --</option>
-                    <option value="daily">Theo ngày</option>
-                    <option value="weekly">Theo tuần</option>
-                    <option value="monthly">Theo tháng</option>
-                    <option value="quarterly">Theo quý</option>
-                    <option value="yearly">Theo năm</option>
-                  </select>
                 </div>
 
                 <div className="col-span-1 md:col-span-2">
@@ -2637,6 +2669,10 @@ export function OpenDataPublishedListPage() {
                   <div>
                     <div className="text-[13px] font-semibold text-black uppercase">Tần suất cập nhật</div>
                     <div className="text-[13px] text-black font-medium mt-0.5">{getFrequencyLabel(selectedApprovalItem.frequency || 'monthly')}</div>
+                  </div>
+                  <div>
+                    <div className="text-[13px] font-semibold text-black uppercase">Chủ đề</div>
+                    <div className="text-[13px] text-black font-medium mt-0.5">{selectedApprovalItem.topic || '—'}</div>
                   </div>
                   <div className="col-span-1 md:col-span-2">
                     <div className="text-[13px] font-semibold text-black uppercase">Định dạng chia sẻ</div>

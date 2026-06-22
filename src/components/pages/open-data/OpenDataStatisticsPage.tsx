@@ -63,12 +63,12 @@ export function OpenDataStatisticsPage() {
               onChange={e => setSearchFilter({...searchFilter, query: e.target.value})}
             />
           </div>
-          <select className="border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-700">
+          <select className="border border-slate-300 rounded-lg px-3 py-2 text-[13px] text-slate-700">
             <option>Tất cả cơ quan</option>
             <option>Bộ Tư pháp</option>
             <option>Sở Kế hoạch Đầu tư</option>
           </select>
-          <select className="border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-700">
+          <select className="border border-slate-300 rounded-lg px-3 py-2 text-[13px] text-slate-700">
             <option>Tất cả chủ đề</option>
             <option>Văn bản pháp luật</option>
             <option>Hộ tịch</option>
@@ -76,12 +76,12 @@ export function OpenDataStatisticsPage() {
           </select>
         </div>
         <div className="grid grid-cols-4 gap-4 mb-4">
-          <select className="border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-700">
+          <select className="border border-slate-300 rounded-lg px-3 py-2 text-[13px] text-slate-700">
             <option>Tất cả định dạng</option>
             <option>JSON/API</option>
             <option>CSV/Excel</option>
           </select>
-          <select className="border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-700">
+          <select className="border border-slate-300 rounded-lg px-3 py-2 text-[13px] text-slate-700">
             <option>Tất cả giấy phép</option>
             <option>CC-BY 4.0</option>
             <option>Giấy phép mở Việt Nam</option>
@@ -98,13 +98,13 @@ export function OpenDataStatisticsPage() {
       <div className="flex justify-end gap-3 mb-2">
         <button 
           onClick={() => alert("Đang tải xuống báo cáo dạng Excel...")}
-          className="px-4 py-2 bg-white border border-blue-600 text-blue-600 rounded flex items-center gap-2 hover:bg-blue-50 text-sm font-medium"
+          className="px-4 py-2 bg-white border border-blue-600 text-blue-600 rounded flex items-center gap-2 hover:bg-blue-50 text-[13px] font-medium"
         >
           <FileText className="w-4 h-4" /> Xuất Excel
         </button>
         <button 
           onClick={() => alert("Đang tải xuống báo cáo dạng PDF...")}
-          className="px-4 py-2 bg-red-600 text-white rounded flex items-center gap-2 hover:bg-red-700 text-sm font-medium"
+          className="px-4 py-2 bg-red-600 text-white rounded flex items-center gap-2 hover:bg-red-700 text-[13px] font-medium"
         >
           <FileIcon className="w-4 h-4" /> Xuất PDF
         </button>
@@ -112,7 +112,7 @@ export function OpenDataStatisticsPage() {
 
       {/* Bảng kết quả */}
       <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
-        <table className="w-full text-sm text-left">
+        <table className="w-full stats-table text-[13px] text-left">
           <thead className="text-xs text-slate-600 bg-slate-50 uppercase border-b border-slate-200">
             <tr>
               <th className="px-4 py-3">Mã Dataset</th>
@@ -140,7 +140,7 @@ export function OpenDataStatisticsPage() {
                 </td>
                 <td className="px-4 py-3 text-slate-600">{ds.date}</td>
                 <td className="px-4 py-3">
-                  <span className={`px-2 py-1 text-xs rounded-full ${
+                  <span className={`px-2 py-1 text-[13px] rounded-full ${
                     ds.status === 'Đã công bố' ? 'bg-blue-100 text-blue-700' :
                     ds.status === 'Đang cập nhật' ? 'bg-amber-100 text-amber-700' :
                     'bg-red-100 text-red-700'
@@ -160,18 +160,18 @@ export function OpenDataStatisticsPage() {
     <div className="space-y-6">
       <div className="bg-white p-4 rounded-lg border border-slate-200 flex gap-4 items-center">
         <label className="text-sm font-medium text-slate-700 whitespace-nowrap">Tiêu chí phân nhóm:</label>
-        <select className="border border-slate-300 rounded px-3 py-1.5 text-sm">
+        <select className="border border-slate-300 rounded px-3 py-1.5 text-[13px]">
           <option>Theo Chủ đề</option>
           <option>Theo Cơ quan công bố</option>
           <option>Theo Giấy phép</option>
         </select>
-        <select className="border border-slate-300 rounded px-3 py-1.5 text-sm">
+        <select className="border border-slate-300 rounded px-3 py-1.5 text-[13px]">
           <option>Thời gian: 1 Năm qua</option>
           <option>Toàn thời gian</option>
         </select>
-        <button className="px-4 py-1.5 bg-blue-600 text-white rounded text-sm font-medium ml-auto">Tạo Báo Cáo</button>
-        <button onClick={() => alert("Xuất Excel")} className="px-3 py-1.5 bg-slate-100 border border-slate-300 rounded text-sm flex gap-1 items-center hover:bg-slate-200 transition-colors"><FileText className="w-4 h-4"/> Excel</button>
-        <button onClick={() => alert("Xuất PDF")} className="px-3 py-1.5 bg-red-50 text-red-600 border border-red-200 rounded text-sm flex gap-1 items-center hover:bg-red-100 transition-colors"><FileIcon className="w-4 h-4"/> PDF</button>
+        <button className="px-4 py-1.5 bg-blue-600 text-white rounded text-[13px] font-medium ml-auto">Tạo Báo Cáo</button>
+        <button onClick={() => alert("Xuất Excel")} className="px-3 py-1.5 bg-slate-100 border border-slate-300 rounded text-[13px] flex gap-1 items-center hover:bg-slate-200 transition-colors"><FileText className="w-4 h-4"/> Excel</button>
+        <button onClick={() => alert("Xuất PDF")} className="px-3 py-1.5 bg-red-50 text-red-600 border border-red-200 rounded text-[13px] flex gap-1 items-center hover:bg-red-100 transition-colors"><FileIcon className="w-4 h-4"/> PDF</button>
       </div>
 
       <div className="bg-white p-6 rounded-lg border border-slate-200">
@@ -197,13 +197,13 @@ export function OpenDataStatisticsPage() {
     <div className="space-y-6">
       <div className="bg-white p-4 rounded-lg border border-slate-200 flex gap-4 items-center">
         <label className="text-sm font-medium text-slate-700 whitespace-nowrap">Tiêu chí phân loại:</label>
-        <select className="border border-slate-300 rounded px-3 py-1.5 text-sm">
+        <select className="border border-slate-300 rounded px-3 py-1.5 text-[13px]">
           <option>Theo Nguồn cung cấp</option>
           <option>Theo Định dạng dữ liệu</option>
         </select>
-        <button className="px-4 py-1.5 bg-blue-600 text-white rounded text-sm font-medium ml-auto">Xử lý Dữ liệu</button>
-        <button onClick={() => alert("Xuất Excel")} className="px-3 py-1.5 bg-slate-100 border border-slate-300 rounded text-sm flex gap-1 items-center hover:bg-slate-200 transition-colors"><FileText className="w-4 h-4"/> Excel</button>
-        <button onClick={() => alert("Xuất PDF")} className="px-3 py-1.5 bg-red-50 text-red-600 border border-red-200 rounded text-sm flex gap-1 items-center hover:bg-red-100 transition-colors"><FileIcon className="w-4 h-4"/> PDF</button>
+        <button className="px-4 py-1.5 bg-blue-600 text-white rounded text-[13px] font-medium ml-auto">Xử lý Dữ liệu</button>
+        <button onClick={() => alert("Xuất Excel")} className="px-3 py-1.5 bg-slate-100 border border-slate-300 rounded text-[13px] flex gap-1 items-center hover:bg-slate-200 transition-colors"><FileText className="w-4 h-4"/> Excel</button>
+        <button onClick={() => alert("Xuất PDF")} className="px-3 py-1.5 bg-red-50 text-red-600 border border-red-200 rounded text-[13px] flex gap-1 items-center hover:bg-red-100 transition-colors"><FileIcon className="w-4 h-4"/> PDF</button>
       </div>
 
       <div className="grid grid-cols-2 gap-6">
@@ -229,7 +229,7 @@ export function OpenDataStatisticsPage() {
           <div className="p-4 border-b border-slate-200 bg-slate-50 font-semibold text-slate-800">
             Bảng Số liệu chi tiết
           </div>
-          <table className="w-full text-sm text-left">
+          <table className="w-full stats-table text-[13px] text-left">
             <thead className="text-xs text-slate-500 uppercase border-b border-slate-200 bg-slate-50">
               <tr>
                 <th className="px-4 py-3">Nguồn cung cấp / Nhóm</th>
@@ -272,7 +272,7 @@ export function OpenDataStatisticsPage() {
         <div className="flex items-end gap-6">
           <div className="flex-1">
             <label className="text-sm font-medium text-slate-700 block mb-1">Khoảng thời gian</label>
-            <select className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500">
+            <select className="w-full border border-slate-300 rounded-md px-3 py-2 text-[13px] text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500">
               <option>6 tháng gần nhất</option>
               <option>Năm nay</option>
               <option>Tháng này</option>
@@ -280,7 +280,7 @@ export function OpenDataStatisticsPage() {
           </div>
           <div className="flex-1">
             <label className="text-sm font-medium text-slate-700 block mb-1">Chỉ số</label>
-            <select className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500">
+            <select className="w-full border border-slate-300 rounded-md px-3 py-2 text-[13px] text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500">
               <option>Lượt xem và tải</option>
               <option>Người dùng HĐ</option>
             </select>
@@ -360,25 +360,25 @@ export function OpenDataStatisticsPage() {
       <div className="bg-white border border-slate-200 flex items-center justify-start rounded-none sm:rounded-lg shadow-sm border-x-0 sm:border-x px-2 pt-2">
         <button 
           onClick={() => setActiveTab('search')}
-          className={`px-4 py-3 text-[14px] font-medium transition-colors flex items-center gap-2 border-b-2 ${activeTab === 'search' ? 'border-blue-600 text-blue-700 bg-blue-50 rounded-t' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+          className={`px-4 py-3 text-[13px] font-medium transition-colors flex items-center gap-2 border-b-2 ${activeTab === 'search' ? 'border-blue-600 text-blue-700 bg-blue-50 rounded-t' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
         >
           <Search className="w-4 h-4" /> Tìm kiếm và lọc
         </button>
         <button 
           onClick={() => setActiveTab('stats')}
-          className={`px-4 py-3 text-[14px] font-medium transition-colors flex items-center gap-2 border-b-2 ${activeTab === 'stats' ? 'border-blue-600 text-blue-700 bg-blue-50 rounded-t' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+          className={`px-4 py-3 text-[13px] font-medium transition-colors flex items-center gap-2 border-b-2 ${activeTab === 'stats' ? 'border-blue-600 text-blue-700 bg-blue-50 rounded-t' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
         >
           <BarChart3 className="w-4 h-4" /> Báo cáo thống kê
         </button>
         <button 
           onClick={() => setActiveTab('classification')}
-          className={`px-4 py-3 text-[14px] font-medium transition-colors flex items-center gap-2 border-b-2 ${activeTab === 'classification' ? 'border-blue-600 text-blue-700 bg-blue-50 rounded-t' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+          className={`px-4 py-3 text-[13px] font-medium transition-colors flex items-center gap-2 border-b-2 ${activeTab === 'classification' ? 'border-blue-600 text-blue-700 bg-blue-50 rounded-t' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
         >
           <PieChartIcon className="w-4 h-4" /> Báo cáo phân loại
         </button>
         <button 
           onClick={() => setActiveTab('traffic')}
-          className={`px-4 py-3 text-[14px] font-medium transition-colors flex items-center gap-2 border-b-2 ${activeTab === 'traffic' ? 'border-blue-600 text-blue-700 bg-blue-50 rounded-t' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+          className={`px-4 py-3 text-[13px] font-medium transition-colors flex items-center gap-2 border-b-2 ${activeTab === 'traffic' ? 'border-blue-600 text-blue-700 bg-blue-50 rounded-t' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
         >
           <LineChartIcon className="w-4 h-4" /> Thống kê lượt truy cập
         </button>

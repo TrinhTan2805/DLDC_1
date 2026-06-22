@@ -1,5 +1,18 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Phiên bản 2.5.23 (Ngày cập nhật: 22/06/2026)
+
+**Nội dung thay đổi:**
+1. **Loại bỏ văn bản mô tả trong thẻ header tại Thống kê dữ liệu mở**:
+   - Chỉnh sửa file `src/components/pages/open-data-report/OpenDataReportPage.tsx` để loại bỏ các thẻ `div` mô tả dư thừa dưới các chỉ số KPI ở các tab: **Báo cáo thống kê**, **Báo cáo phân loại**, và **Thống kê lượt truy cập** thuộc phân hệ **Thống kê dữ liệu mở**.
+2. **Loại bỏ thẻ Định dạng trong tab Báo cáo thống kê**:
+   - Chỉnh sửa file `src/components/pages/open-data-report/OpenDataReportPage.tsx` để xóa thẻ KPI Định dạng (Format) ở header của tab **Báo cáo thống kê**, đồng thời chuyển layout grid từ 4 cột sang 3 cột (`grid-cols-3`) để 3 thẻ còn lại căn đều và tự động lấp đầy chiều rộng dòng.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/open-data-report/OpenDataReportPage.tsx`
+
+---
+
 ## Phiên bản 2.5.22 (Ngày cập nhật: 20/06/2026)
 
 **Nội dung thay đổi:**

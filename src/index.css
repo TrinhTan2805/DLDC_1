@@ -5540,6 +5540,14 @@ table.version-modal-table tbody td {
   font-size: 13px !important;
 }
 
+/* Ghi đè 13px cho bảng Thống kê dữ liệu mở */
+table.stats-table th,
+table.stats-table thead th,
+table.stats-table td,
+table.stats-table tbody td {
+  font-size: 13px !important;
+}
+
 .collection-pagination,
 .collection-pagination span,
 .collection-pagination select,
