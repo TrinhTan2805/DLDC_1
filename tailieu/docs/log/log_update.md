@@ -1,6 +1,6 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
-## Phiên bản 2.5.24 (Ngày cập nhật: 23/06/2026)
+## Phiên bản 2.5.26 (Ngày cập nhật: 23/06/2026)
 
 > Lưu ý: File `src/components/collection/CollectionDashboard.tsx` thuộc Phân hệ 2 (Thu thập dữ liệu) đang ở trạng thái `[ ]` LOCKED trong `stauts.md`. Thay đổi dưới đây được thực hiện theo **chỉ đạo trực tiếp mở khóa của PM**.
 
@@ -23,6 +23,60 @@
 
 ---
 
+## Phiên bản 2.5.25 (Ngày cập nhật: 22/06/2026)
+
+**Nội dung thay đổi:**
+1. **Áp dụng quy tắc 5.4 Hộp thoại (Dialog/Modal) tại Thiết lập danh mục dùng chung > Thiết lập danh sách**:
+   - Chuẩn hoá backdrop tất cả modal thành `bg-black/50` (50% opacity) đúng quy tắc 5.4.
+   - Chuẩn hoá z-index theo bảng 4.2: standalone modal dùng `z-[100]`, nested modal (FieldFormModal mở từ bên trong AddModal) dùng `z-[200]` để tạo lớp backdrop riêng đè lên modal cha.
+   - Chỉnh sửa `CategorySetupPageNew.tsx`: 4 modal (Add, Detail, AddField, FieldForm) — 3 standalone nâng lên `z-[100]`, FieldFormModal nested nâng lên `z-[200]`.
+   - Chỉnh sửa `SimpleApproveModal.tsx`: `bg-slate-900/40 z-50` → `bg-black/50 z-[100]`.
+   - Chỉnh sửa `SimpleRejectModal.tsx`: `bg-slate-900/40 z-50` → `bg-black/50 z-[100]`.
+   - Chỉnh sửa `ApprovalRequestModal.tsx`: `bg-slate-900/40 z-50` → `bg-black/50 z-[100]`.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/CategorySetupPageNew.tsx`
+- `src/components/pages/category/components/modals/SimpleApproveModal.tsx`
+- `src/components/pages/category/components/modals/SimpleRejectModal.tsx`
+- `src/components/pages/category/components/modals/ApprovalRequestModal.tsx`
+
+---
+
+## Phiên bản 2.5.24 (Ngày cập nhật: 22/06/2026)
+
+**Nội dung thay đổi:**
+1. **Thiết kế lại giao diện mục Thiết lập danh mục dùng chung**:
+   - Chỉnh sửa tệp `src/components/pages/category/CategorySetupPage.tsx` để di chuyển thanh Tab Header ra bên ngoài card bọc chung, đưa tab content trực tiếp vào vùng đệm `p-6` và đồng bộ font chữ các nút Tab thành `text-[13px] font-medium`.
+   - Chỉnh sửa tệp `src/components/pages/category/components/tabs/SetupTab.tsx` để tái cấu trúc giao diện tương tự màn thiết lập dữ liệu mở:
+     - Thiết kế lại 3 statistics card ở đầu trang (Tổng Dataset, Cơ quan công bố, Chủ đề) theo dạng phẳng viền mảnh nền trắng (`bg-white border-slate-200 shadow-sm`) và hiển thị các icon tương ứng (`FileText`, `Building2`, `Tag`).
+     - Tích hợp thanh tìm kiếm và nút toggle Filter thiết kế bo tròn `rounded-xl`, bổ sung bảng lọc nâng cao collapsible cho trạng thái danh mục.
+     - Thiết lập lại Grid Table với khung `rounded-2xl`, tiêu đề cột `text-[13px] font-semibold text-slate-700` và các nút hành động icon inline hover đổi màu mượt mà.
+     - Tích hợp thanh phân trang tùy chỉnh (Pagination) ở cuối bảng gồm chọn kích thước trang (`pageSize`), khoảng bản ghi hiện tại và các nút chuyển trang dạng `rounded-xl`.
+2. **Thiết kế lại giao diện mục Thiết lập thuộc tính**:
+   - Chỉnh sửa tệp `src/components/pages/category/components/tabs/AttributesTab.tsx` để đồng bộ hoàn toàn với thiết kế của tab Thiết lập danh sách:
+     - Bổ sung 3 thẻ thống kê ở đầu trang (Tổng thuộc tính, Thuộc tính bắt buộc, Thuộc tính duy nhất) với kiểu dáng nền trắng viền slate mảnh, chữ số lớn nổi bật và icon trực quan.
+     - Tái cấu trúc bộ chọn thực thể dữ liệu chủ thành dạng thanh trắng tối giản (`bg-white border-slate-200 shadow-sm`).
+     - Đồng bộ thanh tìm kiếm và nút toggle Filter nâng cao, tích hợp panel collapsible cho bộ chọn Trạng thái và Kiểu dữ liệu.
+     - Đồng bộ bảng Grid Table: Bo góc `rounded-2xl`, đổi font header sang `text-[13px] font-semibold text-slate-700`, và đổi các nút bấm cột hành động thành icon inline (`Send`, `Edit2`, `Trash2`).
+     - Bổ sung thanh phân trang (Pagination) ở cuối bảng thuộc tính giúp chọn kích thước hiển thị và điều hướng trang mượt mà.
+3. **Thiết kế lại modal Thiết lập danh mục mới (CategoryWizardModal)**:
+   - Chỉnh sửa tệp `src/components/pages/category/components/modals/CategoryWizardModal.tsx` để đồng bộ hoàn toàn với thiết kế modal thêm mới giấy phép bên Dữ liệu mở:
+     - Sử dụng nền mờ `bg-black/50` cho backdrop và bo góc modal `rounded-2xl`.
+     - Chuyển nền header sang màu trắng trơn, đổi tiêu đề thành chữ thường dạng Title Case `text-[18px] font-semibold text-slate-900` và tinh giản nút đóng X.
+     - Chuyển kích cỡ chữ các bước tab thành `text-[13px] font-medium`.
+     - Loại bỏ card bọc lồng nhau (`bg-white p-8 rounded-2xl...`) trong thân modal để các trường dữ liệu nằm trực tiếp.
+     - Sắp xếp các trường form theo lưới `grid-cols-2 gap-4`, đổi kiểu nhãn label thành `text-[13px] text-slate-700 mb-2 font-medium`.
+     - Cập nhật style nền trắng cho các ô input, select (sử dụng custom chevron overlays) và textarea với bo góc `rounded-lg` (8px).
+     - Đồng bộ hóa footer modal với màu nền `bg-slate-50`, viền trên và các nút điều hướng bo góc `rounded-lg` (8px) cùng kích cỡ chữ `text-[13px] font-medium`.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/CategorySetupPage.tsx`
+- `src/components/pages/category/components/tabs/SetupTab.tsx`
+- `src/components/pages/category/components/tabs/AttributesTab.tsx`
+- `src/components/pages/category/components/modals/CategoryWizardModal.tsx`
+
+---
+
 ## Phiên bản 2.5.23 (Ngày cập nhật: 22/06/2026)
 
 **Nội dung thay đổi:**
@@ -30,9 +84,26 @@
    - Chỉnh sửa file `src/components/pages/open-data-report/OpenDataReportPage.tsx` để loại bỏ các thẻ `div` mô tả dư thừa dưới các chỉ số KPI ở các tab: **Báo cáo thống kê**, **Báo cáo phân loại**, và **Thống kê lượt truy cập** thuộc phân hệ **Thống kê dữ liệu mở**.
 2. **Loại bỏ thẻ Định dạng trong tab Báo cáo thống kê**:
    - Chỉnh sửa file `src/components/pages/open-data-report/OpenDataReportPage.tsx` để xóa thẻ KPI Định dạng (Format) ở header của tab **Báo cáo thống kê**, đồng thời chuyển layout grid từ 4 cột sang 3 cột (`grid-cols-3`) để 3 thẻ còn lại căn đều và tự động lấp đầy chiều rộng dòng.
+3. **Khắc phục lỗi trống biểu đồ tại màn Tổng quan quản lý danh mục**:
+   - Chỉnh sửa file `src/components/pages/category/CategoryDashboardPage.tsx` để sửa lỗi tương thích kiểu dữ liệu của Recharts trên React 18 bằng cách ép kiểu `any` cho các thành phần vẽ biểu đồ (bao gồm cả `CartesianGridAny`).
+   - Khắc phục lỗi chiều cao collapsed của `ResponsiveContainer` bằng việc đổi thuộc tính `height="100%"` sang chiều cao cố định `height={300}` phù hợp với thẻ chứa, qua đó hiển thị chính xác hai biểu đồ *Cơ cấu loại danh mục* và *Tần suất cập nhật & Tạo mới*.
+4. **Điều chỉnh thống nhất tên gọi danh mục dùng chung**:
+   - Cập nhật cấu trúc menu, sidebar, tiêu đề trang và breadcrumb của các trang thuộc phân hệ quản lý danh mục để thống nhất hậu tố "dùng chung" theo yêu cầu:
+     - "Quản lý danh mục" -> "Quản lý danh mục dùng chung"
+     - "Tổng quan danh mục" / "Tổng quan Quản lý Danh mục" -> "Tổng quan danh mục dùng chung"
+     - "Thiết lập danh mục" -> "Thiết lập danh mục dùng chung"
+     - "Danh sách danh mục" / "Biên tập danh mục" -> "Danh sách danh mục dùng chung"
+     - "Thống kê danh mục" -> "Thống kê danh mục dùng chung"
 
 **Các file bị ảnh hưởng:**
 - `src/components/pages/open-data-report/OpenDataReportPage.tsx`
+- `src/components/pages/category/CategoryDashboardPage.tsx`
+- `src/components/pages/category/CategoryPage.tsx`
+- `src/components/pages/category/CategorySetupPageNew.tsx`
+- `src/components/pages/category/CategoryStatisticsReportPage.tsx`
+- `src/components/pages/admin/menuStructure.ts`
+- `src/components/layout/Sidebar.tsx`
+- `src/components/layout/MainLayout.tsx`
 
 ---
 

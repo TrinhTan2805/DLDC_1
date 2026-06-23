@@ -23,11 +23,120 @@ const mockSchema: Record<string, string[]> = {
 };
 const tableNames = Object.keys(mockSchema);
 
+const defaultOpenDataList = [
+  {
+    id: '1',
+    fileName: 'Danh sách tổ chức thực hiện trợ giúp pháp lý Q1-2026.xlsx',
+    category: 'Danh sách tổ chức thực hiện trợ giúp pháp lý',
+    publisher: 'Bộ Tư pháp',
+    status: 'approved',
+    description: 'Dữ liệu tổ chức thực hiện trợ giúp pháp lý bao gồm các trung tâm nhà nước và văn phòng hợp đồng.',
+    previewHeaders: ['Tên tổ chức thực hiện trợ giúp pháp lý', 'Người đại diện', 'Địa chỉ liên hệ'],
+    previewRows: [
+      ['Trung tâm Trợ giúp pháp lý nhà nước Tỉnh A', 'Nguyễn Văn Nam', '123 Hùng Vương, Tỉnh A'],
+      ['Văn phòng Luật sư hợp đồng TGPL B', 'Trần Thị Thu', '456 Lê Lợi, Tỉnh B'],
+      ['Trung tâm Trợ giúp pháp lý nhà nước Tỉnh C', 'Lê Hoàng Long', '789 Nguyễn Huệ, Tỉnh C']
+    ]
+  },
+  {
+    id: '2',
+    fileName: 'Danh sách người thực hiện trợ giúp pháp lý 2026.xlsx',
+    category: 'Danh sách người thực hiện trợ giúp pháp lý',
+    publisher: 'Bộ Tư pháp',
+    status: 'approved',
+    description: 'Dữ liệu danh sách trợ giúp viên pháp luật và luật sư cộng tác viên.',
+    previewHeaders: ['Họ tên', 'Số năm hành nghề', 'Vai trò', 'Tổ chức hành nghề', 'Địa chỉ tổ chức', 'Số điện thoại tổ chức'],
+    previewRows: [
+      ['Nguyễn Văn An', '10', 'Trợ giúp viên pháp luật', 'Trung tâm TGPL Nhà nước Tỉnh X', 'Đường Hùng Vương, Tỉnh X', '0243.123.456'],
+      ['Trần Thị Bình', '5', 'Luật sư thực hiện TGPL', 'Văn phòng Luật sư Bình Minh', 'Đường Trần Hưng Đạo, Tỉnh Y', '0283.987.654']
+    ]
+  },
+  {
+    id: '3_approved',
+    fileName: 'Danh sách Luật sư Việt Nam mới.xlsx',
+    category: 'Danh sách Luật sư Việt Nam',
+    publisher: 'Bộ Tư pháp',
+    status: 'approved',
+    description: 'Dữ liệu danh sách Luật sư Việt Nam cập nhật.',
+    previewHeaders: ['Họ và tên', 'Ngày sinh', 'Giới tính', 'Quốc tịch', 'Số Chứng chỉ hành nghề luật sư', 'Số Thẻ luật sư', 'Nơi làm việc/nơi hành nghề', 'Thành viên Đoàn Luật sư', 'Tình trạng hành nghề'],
+    previewRows: [
+      ['Lê Văn Long', '15/08/1985', 'Nam', 'Việt Nam', 'CC-9988-BTP', 'THE-1234-LS', 'Văn phòng Luật sư Long & Partners', 'Đoàn Luật sư TP. Hà Nội', 'Đang hoạt động'],
+      ['Phạm Thị Hoa', '22/04/1990', 'Nữ', 'Việt Nam', 'CC-5544-BTP', 'THE-5678-LS', 'Công ty Luật TNHH Sen Vàng', 'Đoàn Luật sư TP. HCM', 'Đang hoạt động']
+    ]
+  }
+];
+
+const convertToEnglishSnake = (str: string) => {
+  if (!str) return 'field';
+  return str
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[đĐ]/g, 'd')
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+};
+
+const getOpenDataDetails = (item: any) => {
+  const mainTable = item.mainTable || convertToEnglishSnake(item.category || 'open_data_table');
+  
+  if (item.dataFields && Array.isArray(item.dataFields) && item.dataFields.length > 0) {
+    const sharedFields = item.dataFields.filter((df: any) => df.shared !== false);
+    const fields = (sharedFields.length > 0 ? sharedFields : item.dataFields).map((df: any, idx: number) => ({
+      id: df.id || idx + 1,
+      name: df.apiField || df.column || `field_${idx}`,
+      type: df.dataType?.toLowerCase() === 'number' ? 'number' : df.dataType?.toLowerCase() === 'datetime' ? 'datetime' : 'string',
+      description: `Trường ${df.column} (từ bảng ${df.tableId || mainTable})`,
+      isMasked: !!df.masked,
+      maskRule: df.masked ? 'hide_middle_4' : '',
+      sourceTable: df.tableId || mainTable,
+      sourceColumn: df.column || df.apiField
+    }));
+    return { mainTable, fields };
+  }
+  
+  const headers = item.previewHeaders || [];
+  const fields = headers.map((h: string, idx: number) => {
+    const colName = convertToEnglishSnake(h);
+    return {
+      id: idx + 1,
+      name: colName,
+      type: colName.includes('ngay') || colName.includes('date') ? 'datetime' : colName.includes('so_nam') ? 'number' : 'string',
+      description: h,
+      isMasked: false,
+      maskRule: '',
+      sourceTable: mainTable,
+      sourceColumn: colName
+    };
+  });
+  return { mainTable, fields };
+};
+
 export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, onSubmitApproval, service, mode = 'edit' }: ProvisionServiceModalProps) {
   const isViewMode = mode === 'view';
   const [activeTab, setActiveTab] = useState<TabType>('general');
   const [accessScope, setAccessScope] = useState('all');
   
+  // States for Open Data Sharing
+  const [isOpenDataShared, setIsOpenDataShared] = useState(false);
+  const [selectedOpenDataId, setSelectedOpenDataId] = useState('');
+  const [openDataList, setOpenDataList] = useState<any[]>([]);
+
+  const handleSelectOpenData = (id: string, currentList?: any[]) => {
+    setSelectedOpenDataId(id);
+    if (!id) return;
+    const targetList = currentList || openDataList;
+    const matched = targetList.find(item => item.id === id);
+    if (matched) {
+      const { mainTable: newMainTable, fields: newFields } = getOpenDataDetails(matched);
+      setPrimaryTable(newMainTable);
+      setFields(newFields);
+      setHasJoin(false);
+      setJoinedTables([]);
+      setPacketMode('visual');
+    }
+  };
+
   // General Tab States
   const [serviceName, setServiceName] = useState('');
   const [serviceCode, setServiceCode] = useState('');
@@ -111,6 +220,57 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
           console.error(e);
         }
       }
+
+      // Load open data list and fallback
+      const savedOpenData = localStorage.getItem('open_data_published');
+      let list = [];
+      if (savedOpenData) {
+        try {
+          const parsed = JSON.parse(savedOpenData);
+          if (Array.isArray(parsed)) {
+            list = parsed.filter((item: any) => item.status === 'approved');
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      if (list.length === 0) {
+        list = defaultOpenDataList;
+      }
+      setOpenDataList(list);
+
+      // Load service configuration fields
+      const isShared = !!service?.isOpenDataShared;
+      setIsOpenDataShared(isShared);
+      setSelectedOpenDataId(service?.selectedOpenDataId || '');
+
+      if (service?.primaryTable) {
+        setPrimaryTable(service.primaryTable);
+      } else {
+        setPrimaryTable('ho_tich_ca_nhan');
+      }
+
+      if (service?.fields && Array.isArray(service.fields)) {
+        setFields(service.fields);
+      } else {
+        setFields([
+          { id: 1, name: 'id', type: 'string', description: 'Mã định danh', isMasked: false, maskRule: '', sourceTable: 'ho_tich_ca_nhan', sourceColumn: 'id' },
+          { id: 2, name: 'ho_ten', type: 'string', description: 'Họ và tên', isMasked: false, maskRule: '', sourceTable: 'ho_tich_ca_nhan', sourceColumn: 'ho_ten' },
+          { id: 3, name: 'so_dinh_danh', type: 'string', description: 'Số định danh cá nhân', isMasked: true, maskRule: 'hide_middle_4', sourceTable: 'ho_tich_ca_nhan', sourceColumn: 'so_dinh_danh' }
+        ]);
+      }
+
+      if (service?.joinedTables && Array.isArray(service.joinedTables)) {
+        setJoinedTables(service.joinedTables);
+      } else {
+        setJoinedTables([
+          { id: 1, name: 'dia_chi_thuong_tru', alias: 't2', type: 'LEFT JOIN', joinColA: 't2.id_ho_tich', joinOp: '=', joinColB: 'ho_tich_ca_nhan.id' }
+        ]);
+      }
+
+      setHasJoin(service?.hasJoin ?? false);
+      setPacketMode(service?.packetMode || 'visual');
+      setSqlQuery(service?.sqlQuery || 'SELECT *\nFROM ho_tich_ca_nhan\nWHERE id = :id');
     }
   }, [isOpen, service]);
 
@@ -174,7 +334,15 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
       method: apiMethod,
       contextPath,
       consumerUnit: selectedAgencies.join(', '),
-      desc: description
+      desc: description,
+      isOpenDataShared,
+      selectedOpenDataId,
+      primaryTable,
+      fields,
+      joinedTables,
+      hasJoin,
+      packetMode,
+      sqlQuery
     };
     if (onSubmitApproval) {
       onSubmitApproval(updatedData);
@@ -197,7 +365,15 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
       contextPath,
       consumerUnit: selectedAgencies.join(', '),
       desc: description,
-      status: 'draft'
+      status: 'draft',
+      isOpenDataShared,
+      selectedOpenDataId,
+      primaryTable,
+      fields,
+      joinedTables,
+      hasJoin,
+      packetMode,
+      sqlQuery
     };
     if (onSaveDraft) onSaveDraft(updatedData);
     onClose();
@@ -579,11 +755,58 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                   </button>
                   <button
                     type="button"
+                    disabled={isOpenDataShared}
                     onClick={() => setPacketMode('sql')}
-                    className={`px-6 py-2 text-sm font-bold rounded-lg transition-all ${packetMode === 'sql' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                    className={`px-6 py-2 text-sm font-bold rounded-lg transition-all ${packetMode === 'sql' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'} ${isOpenDataShared ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    title={isOpenDataShared ? "Không thể dùng câu lệnh SQL tự định nghĩa cho gói tin chia sẻ dữ liệu mở" : "Viết câu lệnh (Raw SQL)"}
                   >
                     Viết câu lệnh (Raw SQL)
                   </button>
+                </div>
+
+                {/* Open Data Sharing Configuration */}
+                <div className="p-4 bg-blue-50/30 border border-blue-100 rounded-xl flex flex-col items-start gap-4 justify-start shadow-sm w-full text-left">
+                  <div className="flex items-center gap-2 shrink-0 justify-start text-left">
+                    <input 
+                      type="checkbox" 
+                      id="isOpenDataShared"
+                      checked={isOpenDataShared}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setIsOpenDataShared(checked);
+                        if (!checked) {
+                          setSelectedOpenDataId('');
+                        } else {
+                          if (openDataList.length > 0) {
+                            handleSelectOpenData(openDataList[0].id);
+                          }
+                        }
+                      }}
+                      className="w-4 h-4 text-blue-600 rounded border-slate-350 focus:ring-blue-500 cursor-pointer shrink-0"
+                    />
+                    <label htmlFor="isOpenDataShared" className="text-[13px] font-bold text-slate-800 cursor-pointer select-none whitespace-nowrap text-left">
+                      Thiết lập gói tin chia sẻ dữ liệu mở
+                    </label>
+                  </div>
+                  
+                  {isOpenDataShared && (
+                    <div className="flex items-center gap-2 w-full max-w-2xl justify-start text-left animate-in fade-in slide-in-from-left-2 duration-300">
+                      <span className="text-[12px] font-bold text-slate-500 uppercase tracking-wider shrink-0 text-left">Chọn tệp dữ liệu mở:</span>
+                      <select
+                        aria-label="Chọn tệp dữ liệu mở"
+                        value={selectedOpenDataId}
+                        onChange={(e) => handleSelectOpenData(e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-[13px] font-semibold text-slate-850 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-sm truncate animate-in fade-in text-left"
+                      >
+                        <option value="" className="text-slate-500">-- Chọn tệp dữ liệu mở (Đã công bố) --</option>
+                        {openDataList.map((item) => (
+                          <option key={item.id} value={item.id} className="truncate text-slate-850 text-left">
+                            {item.fileName} ({item.category})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                 </div>
 
                 {packetMode === 'visual' ? (
@@ -600,10 +823,10 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                      <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-sm">
                         <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">Sử dụng liên kết bảng (Join)</span>
                         <div 
-                          onClick={() => setHasJoin(!hasJoin)}
-                          className={`w-9 h-5 rounded-full p-0.5 cursor-pointer transition-all duration-300 ${hasJoin ? 'bg-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.3)]' : 'bg-slate-200'}`}
+                          onClick={() => !isOpenDataShared && setHasJoin(!hasJoin)}
+                          className={`w-9 h-5 rounded-full p-0.5 transition-all duration-300 ${isOpenDataShared ? 'opacity-50 cursor-not-allowed bg-slate-200' : 'cursor-pointer'} ${hasJoin && !isOpenDataShared ? 'bg-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.3)]' : 'bg-slate-200'}`}
                         >
-                          <div className={`w-4 h-4 bg-white rounded-full transition-all duration-300 shadow-sm ${hasJoin ? 'translate-x-4' : 'translate-x-0'}`}></div>
+                          <div className={`w-4 h-4 bg-white rounded-full transition-all duration-300 shadow-sm ${hasJoin && !isOpenDataShared ? 'translate-x-4' : 'translate-x-0'}`}></div>
                         </div>
                      </div>
                    </div>
@@ -617,7 +840,8 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                         </label>
                         <select 
                           title="Chọn bảng chính" 
-                          className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-sm font-bold text-slate-800 outline-none cursor-pointer"
+                          disabled={isOpenDataShared}
+                          className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-sm font-bold text-slate-800 outline-none cursor-pointer disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
                           value={primaryTable}
                           onChange={(e) => setPrimaryTable(e.target.value)}
                         >
@@ -750,26 +974,28 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                         <LayoutTemplate className="w-5 h-5 text-blue-600" />
                         Chọn trường dữ liệu chia sẻ (Field Selection)
                       </h4>
-                      <button
-                        type="button"
-                        onClick={handleAddDataField}
-                        className="text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-600 px-4 py-2 rounded-lg border border-blue-200 transition-all flex items-center shadow-sm cursor-pointer"
-                        title="Thêm trường dữ liệu gốc"
-                      >
-                        <Plus className="w-4 h-4 mr-1.5" /> Thêm trường dữ liệu
-                      </button>
+                      {!isOpenDataShared && (
+                        <button
+                          type="button"
+                          onClick={handleAddDataField}
+                          className="text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-600 px-4 py-2 rounded-lg border border-blue-200 transition-all flex items-center shadow-sm cursor-pointer animate-in fade-in"
+                          title="Thêm trường dữ liệu gốc"
+                        >
+                          <Plus className="w-4 h-4 mr-1.5" /> Thêm trường dữ liệu
+                        </button>
+                      )}
                     </div>
                     
                     <div className="overflow-x-auto">
-                      <table className="w-full text-left text-sm border-collapse">
+                      <table className="w-full text-left text-sm border-collapse table-fixed">
                         <thead>
                           <tr className="bg-slate-50 text-slate-500 border-b border-slate-200">
                             <th className="px-4 py-3 font-bold uppercase text-[10px] text-center w-12">Chia sẻ</th>
                             <th className="px-4 py-3 font-bold uppercase text-[10px] text-center w-12">PK</th>
-                            <th className="px-4 py-3 font-bold uppercase text-[10px] w-[20%]">Nguồn dữ liệu (Table)</th>
-                            <th className="px-4 py-3 font-bold uppercase text-[10px] w-[22%]">Trường gốc (Column)</th>
-                            <th className="px-4 py-3 font-bold uppercase text-[10px] w-[22%]">Tên trường (API Field)</th>
-                            <th className="px-4 py-3 font-bold uppercase text-[10px] w-[14%]">Kiểu dữ liệu</th>
+                            <th className="px-4 py-3 font-bold uppercase text-[10px] w-[21%]">Nguồn dữ liệu (Table)</th>
+                            <th className="px-4 py-3 font-bold uppercase text-[10px] w-[21%]">Trường gốc (Column)</th>
+                            <th className="px-4 py-3 font-bold uppercase text-[10px] w-[21%]">Tên trường (API Field)</th>
+                            <th className="px-4 py-3 font-bold uppercase text-[10px] w-[21%]">Kiểu dữ liệu</th>
                             <th className="px-4 py-3 font-bold uppercase text-[10px] text-center w-[10%]">Che dấu</th>
                             <th className="px-4 py-3 w-16 text-right">Xóa</th>
                           </tr>
@@ -778,15 +1004,22 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                           {fields.map(field => (
                               <tr key={field.id} className="hover:bg-slate-50/50 group transition-colors">
                                 <td className="px-4 py-3 text-center">
-                                  <input type="checkbox" title="Chọn trường" className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 bg-white w-4 h-4 cursor-pointer" defaultChecked />
+                                  <input 
+                                    type="checkbox" 
+                                    title="Chọn trường" 
+                                    disabled={isOpenDataShared}
+                                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 bg-white w-4 h-4 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" 
+                                    defaultChecked 
+                                  />
                                 </td>
                                 <td className="px-4 py-3 text-center">
-                                  <Key className={`w-4 h-4 mx-auto ${field.id === 1 ? 'text-blue-600' : 'text-slate-400 hover:text-blue-500 transition-colors cursor-pointer'}`} />
+                                  <Key className={`w-4 h-4 mx-auto ${isOpenDataShared ? 'text-slate-350 cursor-not-allowed opacity-50' : (field.id === 1 ? 'text-blue-600' : 'text-slate-400 hover:text-blue-500 transition-colors cursor-pointer')}`} />
                                 </td>
                                 <td className="px-4 py-3">
                                   <select 
                                     title="Chọn bảng" 
-                                    className="w-full bg-slate-50 border border-slate-200 px-2 py-1 rounded text-[11px] font-bold text-slate-700 outline-none cursor-pointer focus:border-blue-500 shadow-sm"
+                                    disabled={isOpenDataShared}
+                                    className="w-full bg-slate-50 border border-slate-200 px-2 py-1 rounded text-[11px] font-bold text-slate-700 outline-none cursor-pointer focus:border-blue-500 shadow-sm disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
                                     value={field.sourceTable || primaryTable}
                                     onChange={(e) => handleUpdateFieldProperty(field.id, 'sourceTable', e.target.value)}
                                   >
@@ -794,12 +1027,17 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                                     {hasJoin && joinedTables.map(t => t.name && (
                                       <option key={t.id} value={t.name}>{t.name} (Liên kết)</option>
                                     ))}
+                                    {/* Fallback option for open data source table */}
+                                    {field.sourceTable && field.sourceTable !== primaryTable && !(joinedTables || []).some(t => t.name === field.sourceTable) && (
+                                      <option value={field.sourceTable}>{field.sourceTable} (Mở)</option>
+                                    )}
                                   </select>
                                 </td>
                                 <td className="px-4 py-3">
                                   <select 
                                     title="Chọn cột nguồn" 
-                                    className="w-full bg-slate-50 border border-slate-200 px-2 py-1 rounded text-[11px] font-mono text-slate-600 outline-none cursor-pointer focus:border-blue-500 shadow-sm"
+                                    disabled={isOpenDataShared}
+                                    className="w-full bg-slate-50 border border-slate-200 px-2 py-1 rounded text-[11px] font-mono text-slate-600 outline-none cursor-pointer focus:border-blue-500 shadow-sm disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
                                     value={field.sourceColumn || ''}
                                     onChange={(e) => handleUpdateFieldProperty(field.id, 'sourceColumn', e.target.value)}
                                   >
@@ -807,6 +1045,10 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                                     {mockSchema[field.sourceTable || primaryTable]?.map(col => (
                                       <option key={col} value={col}>{col}</option>
                                     ))}
+                                    {/* Fallback option if the source column is not in mockSchema (e.g., loaded from Open Data) */}
+                                    {field.sourceColumn && !(mockSchema[field.sourceTable || primaryTable] || []).includes(field.sourceColumn) && (
+                                      <option value={field.sourceColumn}>{field.sourceColumn}</option>
+                                    )}
                                   </select>
                                 </td>
                                 <td className="px-4 py-3">
@@ -814,7 +1056,8 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                                     title="Tên trường API" 
                                     aria-label="Tên trường API" 
                                     type="text" 
-                                    className="w-full bg-slate-50 border border-slate-200 focus:border-blue-500 px-2 py-1 rounded outline-none text-xs text-slate-800 font-mono font-bold shadow-sm" 
+                                    disabled={isOpenDataShared}
+                                    className="w-full bg-slate-50 border border-slate-200 focus:border-blue-500 px-2 py-1 rounded outline-none text-xs text-slate-800 font-mono font-bold shadow-sm disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed" 
                                     value={field.name} 
                                     onChange={(e) => handleUpdateFieldProperty(field.id, 'name', e.target.value)}
                                     placeholder="Ví dụ: ho_ten"
@@ -823,7 +1066,8 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                                 <td className="px-4 py-3">
                                   <select 
                                     title="Kiểu" 
-                                    className="w-full bg-slate-50 border border-slate-200 px-2 py-1 rounded text-[10px] font-bold text-slate-500 outline-none uppercase cursor-pointer focus:border-blue-500 shadow-sm"
+                                    disabled={isOpenDataShared}
+                                    className="w-full bg-slate-50 border border-slate-200 px-2 py-1 rounded text-[10px] font-bold text-slate-500 outline-none uppercase cursor-pointer focus:border-blue-500 shadow-sm disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
                                     value={field.type}
                                     onChange={(e) => handleUpdateFieldProperty(field.id, 'type', e.target.value)}
                                   >
@@ -836,20 +1080,23 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                                   <input 
                                     type="checkbox" 
                                     title="Masking" 
-                                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 bg-white w-4 h-4 cursor-pointer" 
+                                    disabled={isOpenDataShared}
+                                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 bg-white w-4 h-4 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" 
                                     checked={field.isMasked || false} 
                                     onChange={(e) => handleUpdateFieldProperty(field.id, 'isMasked', e.target.checked)}
                                   />
                                 </td>
                                 <td className="px-4 py-3 text-right">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleDeleteField(field.id)}
-                                    className="p-1 text-slate-400 hover:text-red-500 opacity-60 group-hover:opacity-100 transition-all cursor-pointer"
-                                    title="Xóa trường"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </button>
+                                  {!isOpenDataShared && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDeleteField(field.id)}
+                                      className="p-1 text-slate-400 hover:text-red-500 opacity-60 group-hover:opacity-100 transition-all cursor-pointer"
+                                      title="Xóa trường"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </button>
+                                  )}
                                 </td>
                               </tr>
                           ))}

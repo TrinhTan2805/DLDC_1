@@ -26,6 +26,19 @@ import {
   Line
 } from 'recharts';
 
+const PieChartAny = PieChart as any;
+const PieAny = Pie as any;
+const CellAny = Cell as any;
+const BarChartAny = BarChart as any;
+const BarAny = Bar as any;
+const XAxisAny = XAxis as any;
+const YAxisAny = YAxis as any;
+const CartesianGridAny = CartesianGrid as any;
+const TooltipAny = Tooltip as any;
+const LegendAny = Legend as any;
+const ResponsiveContainerAny = ResponsiveContainer as any;
+
+
 export function CategoryDashboardPage() {
   // Mock Data cho Dashboard
   const stats = {
@@ -89,7 +102,7 @@ export function CategoryDashboardPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Tổng quan Quản lý Danh mục</h1>
+          <h1 className="text-2xl font-bold text-slate-800">Tổng quan danh mục dùng chung</h1>
           <p className="text-sm text-slate-500 mt-1">
             Giám sát số liệu và hoạt động quản trị danh mục dùng chung
           </p>
@@ -148,9 +161,9 @@ export function CategoryDashboardPage() {
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm lg:col-span-1">
           <h3 className="text-base font-semibold text-slate-800 mb-6">Cơ cấu loại danh mục</h3>
           <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
+            <ResponsiveContainerAny width="100%" height={300}>
+              <PieChartAny>
+                <PieAny
                   data={categoryTypeData}
                   cx="50%"
                   cy="50%"
@@ -160,16 +173,16 @@ export function CategoryDashboardPage() {
                   dataKey="value"
                 >
                   {categoryTypeData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                    <CellAny key={`cell-${index}`} fill={entry.color} />
                   ))}
-                </Pie>
-                <Tooltip 
-                  formatter={(value) => [`${value} danh mục`, 'Số lượng']}
+                </PieAny>
+                <TooltipAny 
+                  formatter={(value: any) => [`${value} danh mục`, 'Số lượng']}
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                 />
-                <Legend verticalAlign="bottom" height={36} iconType="circle" />
-              </PieChart>
-            </ResponsiveContainer>
+                <LegendAny verticalAlign="bottom" height={36} iconType="circle" />
+              </PieChartAny>
+            </ResponsiveContainerAny>
           </div>
         </div>
 
@@ -177,23 +190,23 @@ export function CategoryDashboardPage() {
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm lg:col-span-2">
           <h3 className="text-base font-semibold text-slate-800 mb-6">Tần suất cập nhật & Tạo mới (6 tháng)</h3>
           <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
+            <ResponsiveContainerAny width="100%" height={300}>
+              <BarChartAny
                 data={activityData}
                 margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
               >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill: '#64748b'}} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b'}} />
-                <Tooltip
+                <CartesianGridAny strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                <XAxisAny dataKey="month" axisLine={false} tickLine={false} tick={{fill: '#64748b'}} dy={10} />
+                <YAxisAny axisLine={false} tickLine={false} tick={{fill: '#64748b'}} />
+                <TooltipAny
                   cursor={{fill: '#f8fafc'}}
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                 />
-                <Legend wrapperStyle={{ paddingTop: '20px' }} iconType="circle" />
-                <Bar dataKey="new" name="Tạo mới" stackId="a" fill="#3b82f6" radius={[0, 0, 4, 4]} />
-                <Bar dataKey="updated" name="Cập nhật" stackId="a" fill="#93c5fd" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+                <LegendAny wrapperStyle={{ paddingTop: '20px' }} iconType="circle" />
+                <BarAny dataKey="new" name="Tạo mới" stackId="a" fill="#3b82f6" radius={[0, 0, 4, 4]} />
+                <BarAny dataKey="updated" name="Cập nhật" stackId="a" fill="#93c5fd" radius={[4, 4, 0, 0]} />
+              </BarChartAny>
+            </ResponsiveContainerAny>
           </div>
         </div>
       </div>

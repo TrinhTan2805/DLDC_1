@@ -375,6 +375,26 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
     });
   };
 
+  const handleAddAttributeInline = (data: Partial<MasterDataAttribute>) => {
+    const newAttr: MasterDataAttribute = {
+      id: `a-${Date.now()}`,
+      fieldName: data.fieldName!,
+      displayName: data.displayName!,
+      dataType: data.dataType || 'string',
+      length: data.length,
+      required: data.required ?? false,
+      unique: data.unique ?? false,
+      indexed: data.indexed ?? false,
+      defaultValue: data.defaultValue,
+      validationRules: data.validationRules,
+      description: data.description,
+      createdDate: new Date().toLocaleDateString('vi-VN'),
+      version: 1,
+      status: 'draft',
+    };
+    setAttributes(prev => [...prev, newAttr]);
+  };
+
   const isAnyModalOpen = !!(
     showWizard ||
     genericConfirm?.isOpen ||
@@ -391,30 +411,33 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
 
   return (
     <div className="space-y-6">
-      {/* Tabs Navigation */}
-      <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-        <div className="flex border-b border-slate-200">
+      {/* Tabs Header */}
+      <div className="bg-white border-b border-slate-200">
+        <div className="flex px-6 gap-2">
           {[
             { id: 'setup', label: 'Thiết lập danh sách', icon: Settings },
-            { id: 'attributes', label: 'Thiết lập thuộc tính', icon: Sliders },
+            { id: 'attributes', label: 'Thiết lập cấu trúc', icon: Sliders },
             { id: 'relationships', label: 'Thiết lập quan hệ', icon: Link2 },
             { id: 'approval', label: 'Phê duyệt', icon: CheckSquare },
             { id: 'version-history', label: 'Lịch sử phiên bản', icon: Clock }
           ].map(tab => (
             <button
- key={tab.id}
- onClick={() => setActiveTab(tab.id as TabType)}
- className={`flex items-center gap-2 px-6 py-4 text-[14px] transition-all border-b-2 ${activeTab === tab.id ? 'bg-blue-50/50 text-blue-600 border-blue-600' : 'text-slate-500 border-transparent hover:bg-slate-50'
- }`}
- >
- <tab.icon className="w-4 h-4" />
- {tab.label}
- </button>
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as TabType)}
+              className={`flex items-center gap-2 px-6 py-4 text-[13px] font-medium transition-all border-b-2 cursor-pointer ${activeTab === tab.id
+                ? 'border-blue-600 text-blue-600 bg-blue-50/50'
+                : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
+              }`}
+            >
+              <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-blue-600' : 'text-slate-400'}`} />
+              {tab.label}
+            </button>
           ))}
         </div>
+      </div>
 
-        {/* Tab Content */}
-        <div className="p-6 bg-slate-50/20 min-h-[600px]">
+      {/* Tab Content */}
+      <div className="p-6">
           {activeTab === 'setup' && (
             <SetupTab
               entities={entities} searchTerm={searchTerm} setSearchTerm={setSearchTerm}
@@ -488,7 +511,6 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
             approvalStatusLabels={approvalStatusLabels}
           />}
           {activeTab === 'version-history' && <VersionHistoryTab searchTerm={searchTerm} setSearchTerm={setSearchTerm} onViewDetail={() => { }} />}
-        </div>
       </div>
 
       {/* Modals Container */}
@@ -511,7 +533,8 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
           onSelectAllAttributes={(checked) => setSelectedAttributes(checked ? attributes.map(a => a.id) : [])}
           onAddAttribute={() => { setAttributeFormData(defaultAttribute); setShowAttributeModal(true); }}
           onEditAttribute={(attr) => { setAttributeFormData(attr); setShowAttributeModal(true); }}
-          onDeleteAttribute={() => { }}
+          onDeleteAttribute={(id) => setAttributes(prev => prev.filter(a => a.id !== id))}
+          onAddAttributeInline={handleAddAttributeInline}
           getDataTypeLabel={getDataTypeLabel}
           isViewOnly={isViewMode}
         />

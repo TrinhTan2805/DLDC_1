@@ -5561,12 +5561,7 @@ table.stats-table tbody td {
   font-size: 13px !important;
 }
 
-#root {
-  transition: filter 0.2s ease, brightness 0.2s ease;
-}
-
 #root.modal-open-blur {
-  filter: blur(4px) brightness(0.95);
   pointer-events: none;
 }
 

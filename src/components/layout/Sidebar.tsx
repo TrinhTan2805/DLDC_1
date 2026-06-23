@@ -311,22 +311,22 @@ const menuItems: MenuItem[] = [
   {
     id: "category",
     icon: FolderTree,
-    label: "Quản lý danh mục",
+    label: "Quản lý danh mục dùng chung",
     color: "text-indigo-600",
     subItems: [
       {
         id: "category-dashboard",
-        label: "Tổng quan danh mục",
+        label: "Tổng quan danh mục dùng chung",
         icon: LayoutDashboard,
       },
       {
         id: "category-setup",
-        label: "Thiết lập danh mục",
+        label: "Thiết lập danh mục dùng chung",
         icon: Settings,
       },
       {
         id: "category-list",
-        label: "Danh sách danh mục",
+        label: "Danh sách danh mục dùng chung",
         icon: List,
         subItems: [
           {
@@ -343,7 +343,7 @@ const menuItems: MenuItem[] = [
       },
       {
         id: "category-report-group",
-        label: "Thống kê danh mục",
+        label: "Thống kê danh mục dùng chung",
         icon: BarChart3,
         subItems: [
           {
