@@ -7,6 +7,29 @@ interface VersionHistoryModalProps {
 
 const mockVersions = [
   {
+    id: 19,
+    version: 'v2.5.1',
+    date: '23/06/2026',
+    time: '10:00',
+    content: `1. Phân hệ Thu thập dữ liệu — Dashboard (CollectionDashboard):
+- Thiết kế lại toàn bộ giao diện tổng quan thu thập dữ liệu: bố cục 2 cột tỷ lệ 1/3–2/3.
+- Bổ sung 2 biểu đồ tròn (Donut Chart) thống kê tỷ lệ nguồn dữ liệu và trạng thái đồng bộ.
+- Bổ sung biểu đồ diện tích (Area Chart) theo dõi lượt đồng bộ theo thời gian.
+- Đồng bộ màu sắc thống nhất giữa các biểu đồ và thẻ KPI.
+
+2. Thiết lập danh mục dùng chung — Tab Thiết lập cấu trúc (AttributesTab):
+- Thiết kế lại tab "Thiết lập cấu trúc" với 3 giao diện riêng biệt tùy theo trường Nguồn dữ liệu đã chọn ở bước Thông tin chung.
+- Tự cập nhật trực tiếp: Giữ nguyên form khai báo trường dữ liệu nội tuyến như trước.
+- Đồng bộ kho DLDC: Giao diện chọn cascading — chọn cơ sở dữ liệu → chọn bảng (dạng thẻ grid) → chọn trường (checkbox 2 cột, cuộn max-h-56); nút Chọn tất cả / Bỏ chọn; nút Nhập trường tự động tạo thuộc tính với sourceType: 'reference'.
+- Kết nối API: Form cấu hình API gồm Hệ thống nguồn, Đơn vị quản lý, Endpoint, Phương thức (GET/POST/PUT), Xác thực (Không xác thực / Bearer Token / API Key); trường bổ sung hiển thị có điều kiện theo loại xác thực.
+- Kết nối wizard: wizardConfig prop truyền từ CategorySetupPage → CategoryWizardModal → AttributesTab; callback onWizardConfigChange đồng bộ lựa chọn về formData cấp cha.
+
+3. Dữ liệu mở — Gửi yêu cầu công bố (OpenDataPublishedListPage):
+- Sửa lỗi căn chỉnh cột không đều trong bảng "Chọn trường dữ liệu chia sẻ".
+- Chuyển từ class Tailwind table-fixed sang inline style={{ tableLayout: 'fixed' }} để tránh PurgeCSS loại bỏ lớp.
+- Áp dụng <colgroup> với width inline style (%) cho từng cột; bổ sung min-w-0 trên select/input và overflow-hidden trên td để đảm bảo độ rộng cột cố định và đồng đều.`
+  },
+  {
     id: 18,
     version: 'v2.5.0',
     date: '22/06/2026',
