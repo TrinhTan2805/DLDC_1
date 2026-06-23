@@ -375,6 +375,26 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
     });
   };
 
+  const handleAddAttributeInline = (data: Partial<MasterDataAttribute>) => {
+    const newAttr: MasterDataAttribute = {
+      id: `a-${Date.now()}`,
+      fieldName: data.fieldName!,
+      displayName: data.displayName!,
+      dataType: data.dataType || 'string',
+      length: data.length,
+      required: data.required ?? false,
+      unique: data.unique ?? false,
+      indexed: data.indexed ?? false,
+      defaultValue: data.defaultValue,
+      validationRules: data.validationRules,
+      description: data.description,
+      createdDate: new Date().toLocaleDateString('vi-VN'),
+      version: 1,
+      status: 'draft',
+    };
+    setAttributes(prev => [...prev, newAttr]);
+  };
+
   const isAnyModalOpen = !!(
     showWizard ||
     genericConfirm?.isOpen ||
@@ -396,7 +416,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
         <div className="flex px-6 gap-2">
           {[
             { id: 'setup', label: 'Thiết lập danh sách', icon: Settings },
-            { id: 'attributes', label: 'Thiết lập thuộc tính', icon: Sliders },
+            { id: 'attributes', label: 'Thiết lập cấu trúc', icon: Sliders },
             { id: 'relationships', label: 'Thiết lập quan hệ', icon: Link2 },
             { id: 'approval', label: 'Phê duyệt', icon: CheckSquare },
             { id: 'version-history', label: 'Lịch sử phiên bản', icon: Clock }
@@ -513,7 +533,8 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
           onSelectAllAttributes={(checked) => setSelectedAttributes(checked ? attributes.map(a => a.id) : [])}
           onAddAttribute={() => { setAttributeFormData(defaultAttribute); setShowAttributeModal(true); }}
           onEditAttribute={(attr) => { setAttributeFormData(attr); setShowAttributeModal(true); }}
-          onDeleteAttribute={() => { }}
+          onDeleteAttribute={(id) => setAttributes(prev => prev.filter(a => a.id !== id))}
+          onAddAttributeInline={handleAddAttributeInline}
           getDataTypeLabel={getDataTypeLabel}
           isViewOnly={isViewMode}
         />

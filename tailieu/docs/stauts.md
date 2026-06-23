@@ -284,13 +284,13 @@
 - `[ ]` Tab Nhật ký kiểm toán (`provisioning/tabs/AuditLogsTab.tsx`)
 
 ### Modals cung cấp dữ liệu
-- `[ ]` Modal API cung cấp (thêm/sửa) (`provisioning/modals/ProvisionApiModal.tsx`)
-- `[ ]` Modal Chi tiết API cung cấp (`provisioning/modals/ProvisionApiDetailModal.tsx`)
-- `[ ]` Modal Dịch vụ cung cấp (thêm/sửa) (`provisioning/modals/ProvisionServiceModal.tsx`)
-- `[ ]` Modal Phê duyệt dịch vụ (`provisioning/modals/ProvisionServiceApprovalModal.tsx`)
-- `[ ]` Modal Công bố dịch vụ (`provisioning/modals/ProvisionServicePublishModal.tsx`)
-- `[ ]` Modal Hủy công bố dịch vụ (`provisioning/modals/ProvisionServiceUnpublishModal.tsx`)
-- `[ ]` Modal Chi tiết công bố dịch vụ (`provisioning/modals/ProvisionServicePublicDetailsModal.tsx`)
+- `[x]` Modal API cung cấp (thêm/sửa) (`provisioning/modals/ProvisionApiModal.tsx`)
+- `[x]` Modal Chi tiết API cung cấp (`provisioning/modals/ProvisionApiDetailModal.tsx`)
+- `[x]` Modal Dịch vụ cung cấp (thêm/sửa) (`provisioning/modals/ProvisionServiceModal.tsx`)
+- `[x]` Modal Phê duyệt dịch vụ (`provisioning/modals/ProvisionServiceApprovalModal.tsx`)
+- `[x]` Modal Công bố dịch vụ (`provisioning/modals/ProvisionServicePublishModal.tsx`)
+- `[x]` Modal Hủy công bố dịch vụ (`provisioning/modals/ProvisionServiceUnpublishModal.tsx`)
+- `[x]` Modal Chi tiết công bố dịch vụ (`provisioning/modals/ProvisionServicePublicDetailsModal.tsx`)
 - `[ ]` Modal Yêu cầu dữ liệu (`provisioning/modals/ProvisionDataRequestModal.tsx`)
 - `[ ]` Modal Phê duyệt yêu cầu (`provisioning/modals/ProvisionRequestApprovalModal.tsx`)
 - `[ ]` Modal Xuất khẩu yêu cầu (`provisioning/modals/ProvisionRequestExportModal.tsx`)
@@ -333,7 +333,7 @@
 ## 10. PHÂN HỆ DỮ LIỆU MỞ (OPEN DATA)
 
 ### Thiết lập & Quản lý
-- `[ ]` Thiết lập danh mục dữ liệu mở (`open-data/OpenDataSetupPage.tsx`)
+- `[x]` Thiết lập danh mục dữ liệu mở (`open-data/OpenDataSetupPage.tsx`)
   - Tab Quản lý danh mục
   - Tab Metadata
   - Tab Giấy phép
@@ -341,32 +341,32 @@
   - Tab Lịch sử
 
 ### Công bố & Yêu cầu
-- `[ ]` Yêu cầu công bố & Danh sách đề xuất (`open-data/OpenDataPublishedListPage.tsx`)
-- `[ ]` Phê duyệt dữ liệu mở (`open-data/OpenDataApprovalPage.tsx`)
-- `[ ]` Công bố dữ liệu mở (`open-data/OpenDataPublishPage.tsx`)
+- `[x]` Yêu cầu công bố & Danh sách đề xuất (`open-data/OpenDataPublishedListPage.tsx`)
+- `[x]` Phê duyệt dữ liệu mở (`open-data/OpenDataApprovalPage.tsx`)
+- `[x]` Công bố dữ liệu mở (`open-data/OpenDataPublishPage.tsx`)
 
 ### Quy tắc & Thống kê
-- `[ ]` Quy tắc cập nhật dữ liệu mở (`open-data/OpenDataUpdateRulesPage.tsx`)
-- `[ ]` Thống kê dữ liệu mở (`open-data/OpenDataStatisticsPage.tsx`)
-- `[ ]` Báo cáo dữ liệu mở (`open-data/OpenDataReportPage.tsx`)
-- `[ ]` Báo cáo dữ liệu mở (chi tiết) (`open-data-report/OpenDataReportPage.tsx`)
+- `[x]` Quy tắc cập nhật dữ liệu mở (`open-data/OpenDataUpdateRulesPage.tsx`)
+- `[x]` Thống kê dữ liệu mở (`open-data/OpenDataStatisticsPage.tsx`)
+- `[x]` Báo cáo dữ liệu mở (`open-data/OpenDataReportPage.tsx`)
+- `[x]` Báo cáo dữ liệu mở (chi tiết) (`open-data-report/OpenDataReportPage.tsx`)
 
 ### Cổng công khai
-- `[ ]` Cổng thông tin dữ liệu mở công khai (`open-data/OpenDataPublicPortal.tsx`)
+- `[x]` Cổng thông tin dữ liệu mở công khai (`open-data/OpenDataPublicPortal.tsx`)
 
 ### Danh mục dữ liệu mở (open-data-category/)
-- `[ ]` Trang danh mục dữ liệu mở công khai (`open-data-category/OpenDataCategoryPage.tsx`)
-- `[ ]` Thiết lập danh mục dữ liệu mở (`open-data-category/OpenDataCategorySetupPage.tsx`)
-- `[ ]` Danh mục A–J (`open-data-category/OpenDataCategoryAPage.tsx` đến `OpenDataCategoryJPage.tsx`)
+- `[x]` Trang danh mục dữ liệu mở công khai (`open-data-category/OpenDataCategoryPage.tsx`)
+- `[x]` Thiết lập danh mục dữ liệu mở (`open-data-category/OpenDataCategorySetupPage.tsx`)
+- `[x]` Danh mục A–J (`open-data-category/OpenDataCategoryAPage.tsx` đến `OpenDataCategoryJPage.tsx`)
 
 ### Components danh mục mở
-- `[ ]` Thanh hành động (`open-data-category/components/OpenDataCategoryActions.tsx`)
-- `[ ]` Bộ lọc tìm kiếm (`open-data-category/components/OpenDataCategoryFilters.tsx`)
-- `[ ]` Thanh tab (`open-data-category/components/OpenDataCategoryTabBar.tsx`)
-- `[ ]` Grid danh mục (`open-data-category/components/tabs/OpenDataCategoryGrid.tsx`)
-- `[ ]` Phân trang (`open-data-category/components/tabs/OpenDataCategoryPagination.tsx`)
-- `[ ]` Tab Tệp đính kèm (`open-data-category/components/tabs/FilesTab.tsx`)
-- `[ ]` Tab Lịch sử phiên bản (`open-data-category/components/tabs/VersionHistoryTab.tsx`)
+- `[x]` Thanh hành động (`open-data-category/components/OpenDataCategoryActions.tsx`)
+- `[x]` Bộ lọc tìm kiếm (`open-data-category/components/OpenDataCategoryFilters.tsx`)
+- `[x]` Thanh tab (`open-data-category/components/OpenDataCategoryTabBar.tsx`)
+- `[x]` Grid danh mục (`open-data-category/components/tabs/OpenDataCategoryGrid.tsx`)
+- `[x]` Phân trang (`open-data-category/components/tabs/OpenDataCategoryPagination.tsx`)
+- `[x]` Tab Tệp đính kèm (`open-data-category/components/tabs/FilesTab.tsx`)
+- `[x]` Tab Lịch sử phiên bản (`open-data-category/components/tabs/VersionHistoryTab.tsx`)
 
 ---
 

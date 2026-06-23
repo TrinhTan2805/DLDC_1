@@ -1,8 +1,7 @@
-import React, { ChangeEvent } from 'react';
-import { X, FileText, Sliders, ChevronRight, ChevronLeft, Save, Send, Link2, Clock, ChevronDown } from 'lucide-react';
+import { ChangeEvent } from 'react';
+import { X, FileText, Sliders, ChevronRight, ChevronLeft, Save, Send, Link2, ChevronDown } from 'lucide-react';
 import { AttributesTab } from '../tabs/AttributesTab';
 import { RelationshipsTab } from '../tabs/RelationshipsTab';
-import { VersionHistoryTab } from '../tabs/VersionHistoryTab';
 import { MasterDataEntity, MasterDataAttribute, DataType, ScopeType, FieldDataType } from '../../categoryTypes';
 import { Portal } from '../../../../common/Portal';
 
@@ -25,6 +24,7 @@ interface CategoryWizardModalProps {
   onEditAttribute: (attr: MasterDataAttribute) => void;
   onDeleteAttribute: (id: string) => void;
   getDataTypeLabel: (type: FieldDataType) => string;
+  onAddAttributeInline?: (data: Partial<MasterDataAttribute>) => void;
   isViewOnly?: boolean;
 }
 
@@ -50,6 +50,7 @@ export function CategoryWizardModal({
   onEditAttribute,
   onDeleteAttribute,
   getDataTypeLabel,
+  onAddAttributeInline,
   isViewOnly = false
 }: CategoryWizardModalProps) {
   if (!isOpen) return null;
@@ -71,7 +72,7 @@ export function CategoryWizardModal({
             <div className="flex px-6 bg-white overflow-x-auto border-b border-slate-200">
               {[
                 { s: 1, label: 'Thông tin chung', icon: FileText },
-                { s: 2, label: 'Thiết lập thuộc tính', icon: Sliders },
+                { s: 2, label: 'Thiết lập cấu trúc', icon: Sliders },
                 { s: 3, label: 'Thiết lập quan hệ', icon: Link2 }
               ].map((item) => {
                 const isActive = step === item.s;
@@ -259,10 +260,21 @@ export function CategoryWizardModal({
                   onSelectAttribute={onSelectAttribute}
                   onSelectAll={onSelectAllAttributes}
                   onAddAttribute={onAddAttribute}
+                  onAddAttributeInline={onAddAttributeInline}
                   onEditAttribute={onEditAttribute}
                   onDeleteAttribute={onDeleteAttribute}
                   getDataTypeLabel={getDataTypeLabel}
                   isViewOnly={isViewOnly}
+                  wizardConfig={{
+                    dataSource: formData.dataSource,
+                    dldcTable: formData.dldcTable,
+                    dldcColumns: formData.dldcColumns,
+                    apiEndpoint: formData.apiEndpoint,
+                    apiMethod: formData.apiMethod,
+                    apiSystem: formData.apiSystem,
+                    apiManagingUnit: formData.apiManagingUnit,
+                  }}
+                  onWizardConfigChange={(update) => setFormData({ ...formData, ...update, apiMethod: update.apiMethod as 'GET' | 'POST' | 'PUT' | undefined })}
                 />
               </div>
             )}

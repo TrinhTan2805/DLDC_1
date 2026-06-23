@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Search, FileText, Calendar, User, Download, Eye, Filter, ChevronDown, Globe, CheckCircle, AlertCircle, RefreshCw, XCircle, Send, Upload, X, FileSpreadsheet, Info, Plus, Clock, Database, Trash2, Edit, PlusCircle, PauseCircle, PlayCircle, Edit2, SquarePen, Shield, Menu, Save, AlertTriangle } from 'lucide-react';
+import { Search, FileText, Calendar, User, Download, Eye, Filter, ChevronDown, Globe, CheckCircle, AlertCircle, RefreshCw, XCircle, Send, Upload, X, FileSpreadsheet, Info, Plus, Key, Clock, Database, Trash2, Edit, PlusCircle, PauseCircle, PlayCircle, Edit2, SquarePen, Shield, Menu, Save, AlertTriangle, ArrowRight } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 interface PublishedData {
@@ -525,9 +525,108 @@ const validateHeaders = (categoryCode: string, headers: string[]) => {
   return { isValid: true, missing: [] };
 };
 
+const convertToEnglishSnake = (str: string) => {
+  if (!str) return 'field';
+  return str
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[đĐ]/g, 'd')
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+};
+
+const getOpenDataDetails = (item: any) => {
+  const mainTable = item.mainTable || convertToEnglishSnake(item.category || 'open_data_table');
+  
+  if (item.dataFields && Array.isArray(item.dataFields) && item.dataFields.length > 0) {
+    const sharedFields = item.dataFields.filter((df: any) => df.shared !== false);
+    const fields = (sharedFields.length > 0 ? sharedFields : item.dataFields).map((df: any, idx: number) => ({
+      id: df.id || idx + 1,
+      name: df.apiField || df.column || `field_${idx}`,
+      type: df.dataType?.toLowerCase() === 'number' ? 'number' : df.dataType?.toLowerCase() === 'datetime' ? 'datetime' : 'string',
+      description: `Trường ${df.column} (từ bảng ${df.tableId || mainTable})`,
+      isMasked: !!df.masked,
+      maskRule: df.masked ? 'hide_middle_4' : '',
+      sourceTable: df.tableId || mainTable,
+      sourceColumn: df.column || df.apiField
+    }));
+    return { mainTable, fields };
+  }
+  
+  const headers = item.previewHeaders || [];
+  const fields = headers.map((h: string, idx: number) => {
+    const colName = convertToEnglishSnake(h);
+    return {
+      id: idx + 1,
+      name: colName,
+      type: colName.includes('ngay') || colName.includes('date') ? 'datetime' : colName.includes('so_nam') ? 'number' : 'string',
+      description: h,
+      isMasked: false,
+      maskRule: '',
+      sourceTable: mainTable,
+      sourceColumn: colName
+    };
+  });
+  return { mainTable, fields };
+};
+
 export function OpenDataPublishedListPage() {
   const [activeTab, setActiveTab] = useState<'requests' | 'approval' | 'schedule'>('requests');
-  const [dataList, setDataList] = useState<PublishedData[]>(mockPublishedData);
+  const [dataList, setDataList] = useState<PublishedData[]>(() => {
+    const saved = localStorage.getItem('open_data_published');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {}
+    }
+    return mockPublishedData;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('open_data_published', JSON.stringify(dataList));
+    
+    // Sync to provision_services
+    try {
+      const savedServices = localStorage.getItem('provision_services');
+      if (savedServices) {
+        const services = JSON.parse(savedServices);
+        if (Array.isArray(services)) {
+          let hasChanges = false;
+          const updatedServices = services.map(srv => {
+            if (srv.isOpenDataShared && srv.selectedOpenDataId) {
+              const matchedOpenData = dataList.find(d => d.id === srv.selectedOpenDataId && d.status === 'approved');
+              if (matchedOpenData) {
+                const { mainTable: newMainTable, fields: newFields } = getOpenDataDetails(matchedOpenData);
+                const isTableDiff = srv.primaryTable !== newMainTable;
+                const isFieldsDiff = JSON.stringify(srv.fields) !== JSON.stringify(newFields);
+                
+                if (isTableDiff || isFieldsDiff || srv.hasJoin !== false) {
+                  hasChanges = true;
+                  return {
+                    ...srv,
+                    primaryTable: newMainTable,
+                    fields: newFields,
+                    hasJoin: false,
+                    joinedTables: [],
+                    packetMode: 'visual'
+                  };
+                }
+              }
+            }
+            return srv;
+          });
+          
+          if (hasChanges) {
+            localStorage.setItem('provision_services', JSON.stringify(updatedServices));
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Error syncing open data to provision services', e);
+    }
+  }, [dataList]);
 
   const getDatasetFormat = (datasetId: string) => {
     if (!datasetId) return null;
@@ -551,6 +650,7 @@ export function OpenDataPublishedListPage() {
 
   // Form Request States
   const [showRequestModal, setShowRequestModal] = useState(false);
+  const [requestModalTab, setRequestModalTab] = useState<'general' | 'settings'>('general');
   const [editingItem, setEditingItem] = useState<PublishedData | null>(null);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [successPopupMessage, setSuccessPopupMessage] = useState('Yêu cầu công bố đã được ghi nhận');
@@ -573,6 +673,20 @@ export function OpenDataPublishedListPage() {
   const [hasJoin, setHasJoin] = useState(false);
   const [joinTables, setJoinTables] = useState<{ id: string; tableId: string; alias: string; joinType: string; joinColA: string; joinColB: string }[]>([]);
   const [dataFields, setDataFields] = useState<DataField[]>([]);
+
+  const handleAddDataField = () => {
+    const newField: DataField = {
+      id: `f_new_${Date.now()}`,
+      shared: true,
+      isPk: false,
+      tableId: mainTable || '',
+      column: '',
+      apiField: '',
+      dataType: 'string',
+      masked: false
+    };
+    setDataFields([...dataFields, newField]);
+  };
 
   useEffect(() => {
     if (!requestMetaFile) {
@@ -922,11 +1036,37 @@ export function OpenDataPublishedListPage() {
   const handleRequestSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!requestFileName) {
-      alert("Vui lòng chọn tập dữ liệu trước khi gửi!");
+      alert("Vui lòng nhập tên tập dữ liệu!");
+      setRequestModalTab('general');
+      return;
+    }
+    if (!requestCategory) {
+      alert("Vui lòng chọn danh mục dữ liệu mở!");
+      setRequestModalTab('general');
+      return;
+    }
+    if (!requestPublisher) {
+      alert("Vui lòng nhập cơ quan công bố!");
+      setRequestModalTab('general');
+      return;
+    }
+    if (!requestTopic) {
+      alert("Vui lòng chọn chủ đề!");
+      setRequestModalTab('general');
+      return;
+    }
+    if (requestFormat.length === 0) {
+      alert("Vui lòng chọn ít nhất một định dạng chia sẻ!");
+      setRequestModalTab('general');
+      return;
+    }
+    if (requestModalTab === 'general') {
+      setRequestModalTab('settings');
       return;
     }
     if (!mainTable) {
-      alert("Vui lòng chọn bảng dữ liệu chính!");
+      alert("Vui lòng chọn cấu hình nguồn dữ liệu và bảng dữ liệu chính trong tab Thiết lập dữ liệu!");
+      setRequestModalTab('settings');
       return;
     }
     if (editingItem) {
@@ -974,6 +1114,7 @@ export function OpenDataPublishedListPage() {
 
   const resetRequestForm = () => {
     setEditingItem(null);
+    setRequestModalTab('general');
     setRequestFileName('');
     setRequestDescription('');
     setRequestCategory('');
@@ -1815,7 +1956,7 @@ export function OpenDataPublishedListPage() {
       {/* DETAIL MODAL */}
       {showDetailModal && selectedData && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-white rounded-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col">
+          <div className="bg-white rounded-xl w-full max-w-5xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col">
             <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between z-10">
               <div className="flex items-center gap-2">
                 <FileText className="w-5 h-5 text-blue-600" />
@@ -2023,7 +2164,7 @@ export function OpenDataPublishedListPage() {
       {/* REQUEST MODAL */}
       {showRequestModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col">
+          <div className="bg-white rounded-xl w-full max-w-5xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col">
             <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between z-10">
               <div className="flex items-center gap-2">
                 {editingItem ? <Edit2 className="w-5 h-5 text-blue-600" /> : <Send className="w-5 h-5 text-blue-600" />}
@@ -2037,15 +2178,41 @@ export function OpenDataPublishedListPage() {
               </button>
             </div>
             
+            {/* TAB SELECTOR */}
+            <div className="px-6 border-b border-slate-200 bg-white flex gap-6 z-10 shrink-0">
+              <button
+                type="button"
+                onClick={() => setRequestModalTab('general')}
+                className={`px-4 py-3 text-[13px] font-medium transition-all border-b-2 cursor-pointer ${
+                  requestModalTab === 'general'
+                    ? 'border-blue-600 text-blue-700 font-semibold'
+                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                Thông tin chung
+              </button>
+              <button
+                type="button"
+                onClick={() => setRequestModalTab('settings')}
+                className={`px-4 py-3 text-[13px] font-medium transition-all border-b-2 cursor-pointer ${
+                  requestModalTab === 'settings'
+                    ? 'border-blue-600 text-blue-700 font-semibold'
+                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                Thiết lập dữ liệu
+              </button>
+            </div>
+            
             <form onSubmit={handleRequestSubmit} className="p-6 space-y-6 flex-1 text-[13px]">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {requestModalTab === 'general' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in duration-200">
                 <div className="col-span-1 md:col-span-2">
                   <label className="block text-slate-700 mb-1">
                     Tên tập dữ liệu <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
-                    required
                     placeholder="Nhập tên tập dữ liệu công bố..."
                     value={requestFileName}
                     onChange={(e) => setRequestFileName(e.target.value)}
@@ -2054,9 +2221,56 @@ export function OpenDataPublishedListPage() {
                 </div>
 
                 <div className="col-span-1 md:col-span-2">
+                  <label className="block text-slate-700 mb-1">
+                    Danh mục dữ liệu mở <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={requestCategory}
+                    onChange={(e) => {
+                      const newCat = e.target.value;
+                      setRequestCategory(newCat);
+                      
+                      // Reset selected metadata if it doesn't match the new category
+                      const fileConfig = CONFIGURED_METADATA_FILES.find(f => f.fileName === requestMetaFile);
+                      if (fileConfig && fileConfig.categoryCode !== newCat) {
+                        setRequestMetaFile('');
+                        setRequestLicense('Giấy phép dữ liệu mở công cộng');
+                        setRequestKeywords('');
+                        setRequestPublisher('Bộ Tư pháp');
+                        setRequestDescription('');
+                        setRequestFormat([]);
+                        setRequestFrequency('');
+                        setSourceDbId('');
+                        setMainTable('');
+                        setHasJoin(false);
+                        setJoinTables([]);
+                        setDataFields([]);
+                      }
+
+                      if (uploadedFile) {
+                        if (newCat) {
+                          runValidation(uploadedFile, newCat, false);
+                        } else {
+                          setValidationError('Vui lòng chọn Danh mục dữ liệu mở để kiểm tra cấu trúc metadata của tệp.');
+                          setValidationSuccess(false);
+                          setValidationDetails(null);
+                        }
+                      }
+                    }}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  >
+                    <option value="">-- Chọn danh mục dữ liệu mở --</option>
+                    {APPROVED_CATEGORIES.map(cat => (
+                      <option key={cat.code} value={cat.code}>{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="col-span-1 md:col-span-2">
                   <label className="block text-slate-700 mb-1">Chọn metadata</label>
                   <select
                     value={requestMetaFile}
+                    disabled={!requestCategory}
                     onChange={(e) => {
                       const selectedFile = e.target.value;
                       setRequestMetaFile(selectedFile);
@@ -2102,10 +2316,14 @@ export function OpenDataPublishedListPage() {
                         setDataFields([]);
                       }
                     }}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white ${
+                      !requestCategory ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed' : 'border-slate-300'
+                    }`}
                   >
-                    <option value="">-- Chọn cấu hình metadata --</option>
-                    {CONFIGURED_METADATA_FILES.map(file => (
+                    <option value="">
+                      {!requestCategory ? '-- Vui lòng chọn danh mục dữ liệu mở trước --' : '-- Chọn cấu hình metadata --'}
+                    </option>
+                    {CONFIGURED_METADATA_FILES.filter(file => file.categoryCode === requestCategory).map(file => (
                       <option key={file.fileName} value={file.fileName}>
                         {file.categoryName} ({file.fileName})
                       </option>
@@ -2164,35 +2382,8 @@ export function OpenDataPublishedListPage() {
 
                 <div>
                   <label className="block text-slate-700 mb-1">
-                    Danh mục dữ liệu mở <span className="text-red-500">*</span>
+                    Giấy phép <span className="text-red-500">*</span>
                   </label>
-                  <select
-                    value={requestCategory}
-                    required
-                    onChange={(e) => {
-                      const newCat = e.target.value;
-                      setRequestCategory(newCat);
-                      if (uploadedFile) {
-                        if (newCat) {
-                          runValidation(uploadedFile, newCat, false);
-                        } else {
-                          setValidationError('Vui lòng chọn Danh mục dữ liệu mở để kiểm tra cấu trúc metadata của tệp.');
-                          setValidationSuccess(false);
-                          setValidationDetails(null);
-                        }
-                      }
-                    }}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                  >
-                    <option value="">-- Chọn danh mục dữ liệu mở --</option>
-                    {APPROVED_CATEGORIES.map(cat => (
-                      <option key={cat.code} value={cat.code}>{cat.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-slate-700 mb-1">Giấy phép</label>
                   <select
                     value={requestLicense}
                     onChange={(e) => setRequestLicense(e.target.value)}
@@ -2215,7 +2406,9 @@ export function OpenDataPublishedListPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 mb-1">Cơ quan công bố</label>
+                  <label className="block text-slate-700 mb-1">
+                    Cơ quan công bố <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="text"
                     placeholder="Nhập tên cơ quan"
@@ -2226,7 +2419,9 @@ export function OpenDataPublishedListPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 mb-1">Chủ đề</label>
+                  <label className="block text-slate-700 mb-1">
+                    Chủ đề <span className="text-red-500">*</span>
+                  </label>
                   <select
                     value={requestTopic}
                     onChange={(e) => setRequestTopic(e.target.value)}
@@ -2264,7 +2459,9 @@ export function OpenDataPublishedListPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 mb-2">Định dạng chia sẻ</label>
+                  <label className="block text-slate-700 mb-2">
+                    Định dạng chia sẻ <span className="text-red-500">*</span>
+                  </label>
                   <div className="flex gap-4">
                     {[{ value: 'excel', label: 'File Excel' }, { value: 'api', label: 'API' }].map(opt => (
                       <label key={opt.value} className="flex items-center gap-2 cursor-pointer select-none">
@@ -2296,7 +2493,11 @@ export function OpenDataPublishedListPage() {
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
+              </div>
+            )}
 
+            {requestModalTab === 'settings' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in duration-200">
                 {/* SOURCE CONFIG SECTION */}
                 <div className="col-span-1 md:col-span-2">
                   <section className="bg-slate-50 rounded-xl border border-slate-200 shadow-sm overflow-hidden">
@@ -2332,7 +2533,12 @@ export function OpenDataPublishedListPage() {
                           <span className="text-[9px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded italic">Primary Table</span>
                         </label>
                         <select
-                          className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-[13px] text-black outline-none cursor-pointer focus:border-blue-500"
+                          className={`w-full border rounded-lg px-3 py-1.5 text-[13px] text-black outline-none ${
+                            !requestMetaFile
+                              ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
+                              : 'bg-slate-50 border-slate-200 cursor-pointer focus:border-blue-500'
+                          }`}
+                          disabled={!requestMetaFile}
                           value={mainTable}
                           onChange={(e) => {
                             const newMain = e.target.value;
@@ -2346,6 +2552,12 @@ export function OpenDataPublishedListPage() {
                             <option key={t.name} value={t.name}>{t.name}</option>
                           ))}
                         </select>
+                        {!requestMetaFile && (
+                          <div className="mt-2 text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-[12px] flex items-center gap-1.5 animate-in fade-in duration-200">
+                            <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                            <span>Vui lòng chọn cấu hình metadata tại Thông tin chung</span>
+                          </div>
+                        )}
                       </div>
 
                       {/* Join Tables */}
@@ -2484,75 +2696,126 @@ export function OpenDataPublishedListPage() {
                   <div className="col-span-1 md:col-span-2">
                     <section className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                       <div className="flex justify-between items-center p-4 border-b border-slate-200 bg-slate-50/50">
-                        <h4 className="text-black flex items-center gap-2 text-[13px]">
-                          <FileText className="w-4 h-4 text-blue-600" />
-                          Chọn trường dữ liệu chia sẻ
-                        </h4>
-                        <span className="text-[13px] text-black">{dataFields.filter(f => f.shared).length}/{dataFields.length} trường được chọn</span>
+                        <div className="flex items-center gap-2">
+                          <div className="p-1.5 bg-blue-50 rounded-lg text-blue-600">
+                            <FileText className="w-4 h-4" />
+                          </div>
+                          <h4 className="text-black text-[13px] font-bold">Chọn trường dữ liệu chia sẻ (Field Selection)</h4>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-[13px] text-slate-500 font-medium">{dataFields.filter(f => f.shared).length}/{dataFields.length} trường được chọn</span>
+                          <button
+                            type="button"
+                            onClick={handleAddDataField}
+                            className="text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-600 px-3 py-1.5 rounded-lg border border-blue-200 transition-all flex items-center shadow-sm cursor-pointer"
+                            title="Thêm trường dữ liệu"
+                          >
+                            <Plus className="w-3.5 h-3.5 mr-1" /> Thêm trường dữ liệu
+                          </button>
+                        </div>
                       </div>
                       <div className="overflow-x-auto">
-                        <table className="w-full text-left text-[13px] border-collapse">
+                        <table className="w-full text-left text-sm border-collapse table-fixed">
                           <thead>
-                            <tr className="bg-slate-50 text-black border-b border-slate-200">
-                              <th className="px-3 py-3 uppercase text-[13px] text-center w-12">Chia sẻ</th>
-                              <th className="px-3 py-3 uppercase text-[13px] text-center w-10">PK</th>
-                              <th className="px-3 py-3 uppercase text-[13px]">Nguồn (Table)</th>
-                              <th className="px-3 py-3 uppercase text-[13px]">Trường gốc</th>
-                              <th className="px-3 py-3 uppercase text-[13px]">Tên trường (API)</th>
-                              <th className="px-3 py-3 uppercase text-[13px]">Kiểu dữ liệu</th>
-                              <th className="px-3 py-3 uppercase text-[13px] text-center w-16">Che dấu</th>
-                              <th className="px-3 py-3 w-12 text-right">Xóa</th>
+                            <tr className="bg-slate-50 text-slate-500 border-b border-slate-200">
+                              <th className="px-4 py-3 font-bold uppercase text-[10px] text-center w-12">Chia sẻ</th>
+                              <th className="px-4 py-3 font-bold uppercase text-[10px] text-center w-12">PK</th>
+                              <th className="px-4 py-3 font-bold uppercase text-[10px] w-[21%]">Nguồn dữ liệu (Table)</th>
+                              <th className="px-4 py-3 font-bold uppercase text-[10px] w-[21%]">Trường gốc (Column)</th>
+                              <th className="px-4 py-3 font-bold uppercase text-[10px] w-[21%]">Tên trường (API Field)</th>
+                              <th className="px-4 py-3 font-bold uppercase text-[10px] w-[21%]">Kiểu dữ liệu</th>
+                              <th className="px-4 py-3 font-bold uppercase text-[10px] text-center w-[10%]">Che dấu</th>
+                              <th className="px-4 py-3 w-16 text-right">Xóa</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-100 text-black">
+                          <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
                             {dataFields.map((df) => (
-                              <tr key={df.id} className={`hover:bg-slate-50/50 transition-colors ${!df.shared ? 'opacity-50' : ''}`}>
-                                <td className="px-3 py-2 text-center">
+                              <tr key={df.id} className={`hover:bg-slate-50/50 group transition-colors ${!df.shared ? 'opacity-50' : ''}`}>
+                                <td className="px-4 py-3 text-center">
                                   <input
                                     type="checkbox"
+                                    title="Chọn trường"
                                     checked={df.shared}
                                     onChange={() => setDataFields(dataFields.map(f => f.id === df.id ? { ...f, shared: !f.shared } : f))}
-                                    className="w-4 h-4 rounded accent-blue-600 cursor-pointer"
+                                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 bg-white w-4 h-4 cursor-pointer"
                                   />
                                 </td>
-                                <td className="px-3 py-2 text-center">
-                                  {df.isPk && <span className="inline-block px-1.5 py-0.5 text-[10px] bg-amber-50 text-amber-600 border border-amber-200 rounded">PK</span>}
+                                <td className="px-4 py-3 text-center">
+                                  <Key 
+                                    className={`w-4 h-4 mx-auto cursor-pointer transition-colors ${df.isPk ? 'text-blue-600' : 'text-slate-400 hover:text-blue-500'}`}
+                                    onClick={() => setDataFields(dataFields.map(f => f.id === df.id ? { ...f, isPk: !f.isPk } : f))} 
+                                  />
                                 </td>
-                                <td className="px-3 py-2">
-                                  <span className="text-xs font-mono bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">{df.tableId}</span>
+                                <td className="px-4 py-3">
+                                  <select 
+                                    title="Chọn bảng" 
+                                    className="w-full bg-slate-50 border border-slate-200 px-2 py-1 rounded text-[11px] font-bold text-slate-700 outline-none cursor-pointer focus:border-blue-500 shadow-sm"
+                                    value={df.tableId || mainTable}
+                                    onChange={(e) => setDataFields(dataFields.map(f => f.id === df.id ? { ...f, tableId: e.target.value } : f))}
+                                  >
+                                    <option value={mainTable}>{mainTable} (Gốc)</option>
+                                    {joinTables && joinTables.map((t: any) => t.tableId && (
+                                      <option key={t.id || t.tableId} value={t.tableId}>{t.tableId} (Liên kết)</option>
+                                    ))}
+                                  </select>
                                 </td>
-                                <td className="px-3 py-2 text-[13px] font-mono text-black">{df.column}</td>
-                                <td className="px-3 py-2">
-                                  <input
-                                    type="text"
-                                    value={df.apiField}
+                                <td className="px-4 py-3">
+                                  <select 
+                                    title="Chọn cột nguồn" 
+                                    className="w-full bg-slate-50 border border-slate-200 px-2 py-1 rounded text-[11px] font-mono text-slate-600 outline-none cursor-pointer focus:border-blue-500 shadow-sm"
+                                    value={df.column || ''}
+                                    onChange={(e) => setDataFields(dataFields.map(f => f.id === df.id ? { ...f, column: e.target.value, apiField: e.target.value } : f))}
+                                  >
+                                    <option value="">-- Chọn trường gốc --</option>
+                                    {((SOURCE_DB_TABLES[sourceDbId] || []).find(t => t.name === (df.tableId || mainTable))?.columns || []).map(col => (
+                                      <option key={col} value={col}>{col}</option>
+                                    ))}
+                                    {df.column && !((SOURCE_DB_TABLES[sourceDbId] || []).find(t => t.name === (df.tableId || mainTable))?.columns || []).includes(df.column) && (
+                                      <option value={df.column}>{df.column}</option>
+                                    )}
+                                  </select>
+                                </td>
+                                <td className="px-4 py-3">
+                                  <input 
+                                    title="Tên trường API" 
+                                    aria-label="Tên trường API" 
+                                    type="text" 
+                                    className="w-full bg-slate-50 border border-slate-200 focus:border-blue-500 px-2 py-1 rounded outline-none text-xs text-slate-800 font-mono font-bold shadow-sm" 
+                                    value={df.apiField} 
                                     onChange={(e) => setDataFields(dataFields.map(f => f.id === df.id ? { ...f, apiField: e.target.value } : f))}
-                                    className="w-full px-2 py-1 border border-slate-200 rounded text-[13px] font-mono text-black focus:outline-none focus:border-blue-400 bg-white"
+                                    placeholder="Ví dụ: ho_ten"
                                   />
                                 </td>
-                                <td className="px-3 py-2">
-                                  <span className={`text-[10px] px-1.5 py-0.5 rounded border ${
-                                    df.dataType === 'date' ? 'bg-purple-50 text-purple-600 border-purple-200' :
-                                    df.dataType === 'number' ? 'bg-blue-50 text-blue-600 border-blue-200' :
-                                    'bg-slate-50 text-slate-600 border-slate-200'
-                                  }`}>{df.dataType}</span>
+                                <td className="px-4 py-3">
+                                  <select 
+                                    title="Kiểu" 
+                                    className="w-full bg-slate-50 border border-slate-200 px-2 py-1 rounded text-[10px] font-bold text-slate-500 outline-none uppercase cursor-pointer focus:border-blue-500 shadow-sm"
+                                    value={df.dataType}
+                                    onChange={(e) => setDataFields(dataFields.map(f => f.id === df.id ? { ...f, dataType: e.target.value } : f))}
+                                  >
+                                    <option value="string">string</option>
+                                    <option value="number">number</option>
+                                    <option value="date">date</option>
+                                    <option value="datetime">datetime</option>
+                                  </select>
                                 </td>
-                                <td className="px-3 py-2 text-center">
-                                  <input
-                                    type="checkbox"
-                                    checked={df.masked}
-                                    onChange={() => setDataFields(dataFields.map(f => f.id === df.id ? { ...f, masked: !f.masked } : f))}
-                                    className="w-4 h-4 rounded accent-orange-500 cursor-pointer"
+                                <td className="px-4 py-3 text-center">
+                                  <input 
+                                    type="checkbox" 
+                                    title="Masking" 
+                                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 bg-white w-4 h-4 cursor-pointer" 
+                                    checked={df.masked || false} 
+                                    onChange={(e) => setDataFields(dataFields.map(f => f.id === df.id ? { ...f, masked: e.target.checked } : f))}
                                   />
                                 </td>
-                                <td className="px-3 py-2 text-right">
+                                <td className="px-4 py-3 text-right">
                                   <button
                                     type="button"
                                     onClick={() => setDataFields(dataFields.filter(f => f.id !== df.id))}
                                     className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors cursor-pointer"
                                     title="Xóa trường"
                                   >
-                                    <Trash2 className="w-3.5 h-3.5" />
+                                    <Trash2 className="w-4 h-4" />
                                   </button>
                                 </td>
                               </tr>
@@ -2564,8 +2827,9 @@ export function OpenDataPublishedListPage() {
                   </div>
                 )}
               </div>
+            )}
 
-              {formValidationError && (
+            {formValidationError && (
                 <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg text-sm flex items-start gap-2 mb-4 animate-fade-in">
                   <AlertTriangle className="w-5 h-5 mt-0.5 shrink-0 text-amber-600" />
                   <div>
@@ -2597,18 +2861,53 @@ export function OpenDataPublishedListPage() {
                     <Save className="w-4 h-4" />
                     Lưu nháp
                   </button>
-                  <button
-                    type="submit"
-                    disabled={!!formValidationError || (!editingItem && !mainTable && uploadType === 'file' && !validationSuccess)}
-                    className={`px-4 py-2 text-white rounded-lg text-sm flex items-center gap-2 shadow-sm transition-all ${
-                      !formValidationError && (editingItem || mainTable || uploadType === 'api' || validationSuccess)
-                        ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
-                        : 'bg-slate-300 cursor-not-allowed text-slate-500'
-                    }`}
-                  >
-                    {editingItem ? <Edit2 className="w-4 h-4" /> : <Send className="w-4 h-4" />}
-                    {editingItem ? 'Cập nhật' : 'Gửi yêu cầu'}
-                  </button>
+                  {requestModalTab === 'general' ? (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (!requestFileName) {
+                          alert("Vui lòng nhập tên tập dữ liệu!");
+                          return;
+                        }
+                        if (!requestCategory) {
+                          alert("Vui lòng chọn danh mục dữ liệu mở!");
+                          return;
+                        }
+                        if (!requestPublisher) {
+                          alert("Vui lòng nhập cơ quan công bố!");
+                          return;
+                        }
+                        if (!requestTopic) {
+                          alert("Vui lòng chọn chủ đề!");
+                          return;
+                        }
+                        if (requestFormat.length === 0) {
+                          alert("Vui lòng chọn ít nhất một định dạng chia sẻ!");
+                          return;
+                        }
+                        setRequestModalTab('settings');
+                      }}
+                      className="px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg text-sm flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+                    >
+                      Tiếp tục
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  ) : (
+                    <button
+                      type="submit"
+                      disabled={!!formValidationError || (!editingItem && !mainTable && uploadType === 'file' && !validationSuccess)}
+                      className={`px-4 py-2 text-white rounded-lg text-sm flex items-center gap-2 shadow-sm transition-all ${
+                        !formValidationError && (editingItem || mainTable || uploadType === 'api' || validationSuccess)
+                          ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
+                          : 'bg-slate-300 cursor-not-allowed text-slate-500'
+                      }`}
+                    >
+                      {editingItem ? <Edit2 className="w-4 h-4" /> : <Send className="w-4 h-4" />}
+                      {editingItem ? 'Cập nhật' : 'Gửi yêu cầu'}
+                    </button>
+                  )}
                 </div>
               </div>
             </form>
