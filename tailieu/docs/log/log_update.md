@@ -1,5 +1,28 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Phiên bản 2.5.24 (Ngày cập nhật: 23/06/2026)
+
+> Lưu ý: File `src/components/collection/CollectionDashboard.tsx` thuộc Phân hệ 2 (Thu thập dữ liệu) đang ở trạng thái `[ ]` LOCKED trong `stauts.md`. Thay đổi dưới đây được thực hiện theo **chỉ đạo trực tiếp mở khóa của PM**.
+
+**Nội dung thay đổi (Dashboard thu thập dữ liệu):**
+1. **Biểu đồ "theo phương thức thu thập"** và **"theo kết quả thu thập"**: đổi từ biểu đồ cột sang **biểu đồ tròn dạng donut "Pie with padAngle"** (`innerRadius={55}`, `outerRadius={90}`, `paddingAngle={4}`, `cornerRadius={4}` — có khoảng hở và bo góc giữa các lát), kèm chú thích (Legend) và nhãn phần trăm; **hiển thị "Tổng số" ở chính giữa lỗ donut** (dùng `<Label>` của recharts) và ẩn "Tổng số" ở góc header đối với biểu đồ tròn.
+2. **Biểu đồ "theo nguồn cung cấp dữ liệu"**: dùng **biểu đồ cột dọc**, nhãn trục X **xoay nghiêng -35°**, cắt bớt tên dài kèm dấu "…" và hiển thị đầy đủ khi rê chuột (`<title>`); hiện đủ mọi nhãn (`interval={0}`); cột dùng **một màu đồng nhất** (primary `#2563eb`), `maxBarSize={40}`. Biểu đồ này chiếm **2/3 chiều rộng** khối trên (rộng hơn) để đủ chỗ cho nhiều nguồn.
+3. **Biểu đồ "theo thời gian"**: đổi từ biểu đồ cột sang **biểu đồ vùng/đường (Area)** với đường cong mượt (`type="natural"`), nét bo tròn (`strokeLinecap/strokeLinejoin="round"`) và **nền màu gradient xanh** phía dưới; trục ngang hiển thị theo từng ngày, **khoảng mặc định là các ngày trong tháng hiện tại, giới hạn tối đa ~1 tháng (31 ngày)**. **Bỏ "Tổng số" và đưa bộ lọc Từ ngày/Đến ngày lên góc phải header** (thêm prop `headerRight` cho `ChartCard`).
+4. **Bố cục trang**: khối trên chia theo tỉ lệ 1/3 – 2/3 (`grid-cols-3`) — cột trái (1/3) xếp dọc 2 biểu đồ tròn (mỗi dòng 1 biểu đồ), cột phải (2/3) là biểu đồ nguồn cung cấp; biểu đồ theo thời gian nằm full-width bên dưới. Card biểu đồ nguồn cung cấp dùng `h-full flex flex-col` + vùng biểu đồ `flex-1` (ResponsiveContainer `height="100%"`) để **tự giãn cao bằng đúng cột 2 biểu đồ tròn**, không còn khoảng trắng dư. Donut tối ưu lại (`innerRadius={48}`, `outerRadius={78}`, thêm lề) để hết cắt nhãn % và giảm khoảng trắng.
+5. **Kỹ thuật**: thêm prop `chartType` ('bar' | 'pie' | 'line') vào component dùng chung `ChartCard`; bổ sung import `PieChart, Pie, Cell, Legend` từ `recharts`; tách hằng `PIE_COLORS` và `TOOLTIP_STYLE`.
+6. **Đồng bộ màu sắc theo design system**:
+   - Đổi màu chủ đạo biểu đồ (cột/đường/vùng) từ `#3b82f6` sang primary `#2563eb`.
+   - Pie "kết quả thu thập" dùng màu theo ngữ nghĩa trạng thái: Bản nháp (hổ phách `#f59e0b`), Hoạt động (xanh lá `#16a34a`), Ngưng hoạt động (đỏ `#dc2626`).
+   - Pie "phương thức thu thập" dùng palette trung tính `#2563eb / #0891b2 / #7c3aed`; palette mặc định bỏ màu đỏ để tránh hiểu nhầm "lỗi".
+   - Biểu đồ cột nguồn cung cấp: tô màu **đậm→nhạt theo giá trị** (sắc độ xanh dương) để dễ so sánh thứ hạng.
+   - Thẻ Summary đổi sang bộ 3 màu hài hòa: xanh dương (primary) · xanh ngọc (cyan) · tím (violet).
+
+**Các file bị ảnh hưởng:**
+- `package.json`
+- `src/components/collection/CollectionDashboard.tsx`
+
+---
+
 ## Phiên bản 2.5.23 (Ngày cập nhật: 22/06/2026)
 
 **Nội dung thay đổi:**
