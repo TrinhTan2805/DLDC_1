@@ -2715,23 +2715,33 @@ export function OpenDataPublishedListPage() {
                         </div>
                       </div>
                       <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm border-collapse table-fixed">
+                        <table className="w-full text-left text-sm border-collapse" style={{ tableLayout: 'fixed' }}>
+                          <colgroup>
+                            <col style={{ width: '5%' }} />
+                            <col style={{ width: '5%' }} />
+                            <col style={{ width: '20%' }} />
+                            <col style={{ width: '20%' }} />
+                            <col style={{ width: '20%' }} />
+                            <col style={{ width: '20%' }} />
+                            <col style={{ width: '6%' }} />
+                            <col style={{ width: '4%' }} />
+                          </colgroup>
                           <thead>
                             <tr className="bg-slate-50 text-slate-500 border-b border-slate-200">
-                              <th className="px-4 py-3 font-bold uppercase text-[10px] text-center w-12">Chia sẻ</th>
-                              <th className="px-4 py-3 font-bold uppercase text-[10px] text-center w-12">PK</th>
-                              <th className="px-4 py-3 font-bold uppercase text-[10px] w-[21%]">Nguồn dữ liệu (Table)</th>
-                              <th className="px-4 py-3 font-bold uppercase text-[10px] w-[21%]">Trường gốc (Column)</th>
-                              <th className="px-4 py-3 font-bold uppercase text-[10px] w-[21%]">Tên trường (API Field)</th>
-                              <th className="px-4 py-3 font-bold uppercase text-[10px] w-[21%]">Kiểu dữ liệu</th>
-                              <th className="px-4 py-3 font-bold uppercase text-[10px] text-center w-[10%]">Che dấu</th>
-                              <th className="px-4 py-3 w-16 text-right">Xóa</th>
+                              <th className="px-3 py-3 font-bold uppercase text-[10px] text-center">Chia sẻ</th>
+                              <th className="px-3 py-3 font-bold uppercase text-[10px] text-center">PK</th>
+                              <th className="px-3 py-3 font-bold uppercase text-[10px]">Nguồn dữ liệu (Table)</th>
+                              <th className="px-3 py-3 font-bold uppercase text-[10px]">Trường gốc (Column)</th>
+                              <th className="px-3 py-3 font-bold uppercase text-[10px]">Tên trường (API Field)</th>
+                              <th className="px-3 py-3 font-bold uppercase text-[10px]">Kiểu dữ liệu</th>
+                              <th className="px-3 py-3 font-bold uppercase text-[10px] text-center">Che dấu</th>
+                              <th className="px-3 py-3 text-right">Xóa</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
                             {dataFields.map((df) => (
                               <tr key={df.id} className={`hover:bg-slate-50/50 group transition-colors ${!df.shared ? 'opacity-50' : ''}`}>
-                                <td className="px-4 py-3 text-center">
+                                <td className="px-3 py-3 text-center">
                                   <input
                                     type="checkbox"
                                     title="Chọn trường"
@@ -2740,16 +2750,16 @@ export function OpenDataPublishedListPage() {
                                     className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 bg-white w-4 h-4 cursor-pointer"
                                   />
                                 </td>
-                                <td className="px-4 py-3 text-center">
-                                  <Key 
+                                <td className="px-3 py-3 text-center">
+                                  <Key
                                     className={`w-4 h-4 mx-auto cursor-pointer transition-colors ${df.isPk ? 'text-blue-600' : 'text-slate-400 hover:text-blue-500'}`}
-                                    onClick={() => setDataFields(dataFields.map(f => f.id === df.id ? { ...f, isPk: !f.isPk } : f))} 
+                                    onClick={() => setDataFields(dataFields.map(f => f.id === df.id ? { ...f, isPk: !f.isPk } : f))}
                                   />
                                 </td>
-                                <td className="px-4 py-3">
-                                  <select 
-                                    title="Chọn bảng" 
-                                    className="w-full bg-slate-50 border border-slate-200 px-2 py-1 rounded text-[11px] font-bold text-slate-700 outline-none cursor-pointer focus:border-blue-500 shadow-sm"
+                                <td className="px-3 py-3 overflow-hidden">
+                                  <select
+                                    title="Chọn bảng"
+                                    className="w-full min-w-0 bg-slate-50 border border-slate-200 px-2 py-1 rounded text-[11px] font-bold text-slate-700 outline-none cursor-pointer focus:border-blue-500 shadow-sm"
                                     value={df.tableId || mainTable}
                                     onChange={(e) => setDataFields(dataFields.map(f => f.id === df.id ? { ...f, tableId: e.target.value } : f))}
                                   >
@@ -2759,10 +2769,10 @@ export function OpenDataPublishedListPage() {
                                     ))}
                                   </select>
                                 </td>
-                                <td className="px-4 py-3">
-                                  <select 
-                                    title="Chọn cột nguồn" 
-                                    className="w-full bg-slate-50 border border-slate-200 px-2 py-1 rounded text-[11px] font-mono text-slate-600 outline-none cursor-pointer focus:border-blue-500 shadow-sm"
+                                <td className="px-3 py-3 overflow-hidden">
+                                  <select
+                                    title="Chọn cột nguồn"
+                                    className="w-full min-w-0 bg-slate-50 border border-slate-200 px-2 py-1 rounded text-[11px] font-mono text-slate-600 outline-none cursor-pointer focus:border-blue-500 shadow-sm"
                                     value={df.column || ''}
                                     onChange={(e) => setDataFields(dataFields.map(f => f.id === df.id ? { ...f, column: e.target.value, apiField: e.target.value } : f))}
                                   >
@@ -2775,21 +2785,21 @@ export function OpenDataPublishedListPage() {
                                     )}
                                   </select>
                                 </td>
-                                <td className="px-4 py-3">
-                                  <input 
-                                    title="Tên trường API" 
-                                    aria-label="Tên trường API" 
-                                    type="text" 
-                                    className="w-full bg-slate-50 border border-slate-200 focus:border-blue-500 px-2 py-1 rounded outline-none text-xs text-slate-800 font-mono font-bold shadow-sm" 
-                                    value={df.apiField} 
+                                <td className="px-3 py-3 overflow-hidden">
+                                  <input
+                                    title="Tên trường API"
+                                    aria-label="Tên trường API"
+                                    type="text"
+                                    className="w-full min-w-0 bg-slate-50 border border-slate-200 focus:border-blue-500 px-2 py-1 rounded outline-none text-xs text-slate-800 font-mono font-bold shadow-sm"
+                                    value={df.apiField}
                                     onChange={(e) => setDataFields(dataFields.map(f => f.id === df.id ? { ...f, apiField: e.target.value } : f))}
                                     placeholder="Ví dụ: ho_ten"
                                   />
                                 </td>
-                                <td className="px-4 py-3">
-                                  <select 
-                                    title="Kiểu" 
-                                    className="w-full bg-slate-50 border border-slate-200 px-2 py-1 rounded text-[10px] font-bold text-slate-500 outline-none uppercase cursor-pointer focus:border-blue-500 shadow-sm"
+                                <td className="px-3 py-3 overflow-hidden">
+                                  <select
+                                    title="Kiểu"
+                                    className="w-full min-w-0 bg-slate-50 border border-slate-200 px-2 py-1 rounded text-[10px] font-bold text-slate-500 outline-none uppercase cursor-pointer focus:border-blue-500 shadow-sm"
                                     value={df.dataType}
                                     onChange={(e) => setDataFields(dataFields.map(f => f.id === df.id ? { ...f, dataType: e.target.value } : f))}
                                   >
@@ -2799,16 +2809,16 @@ export function OpenDataPublishedListPage() {
                                     <option value="datetime">datetime</option>
                                   </select>
                                 </td>
-                                <td className="px-4 py-3 text-center">
-                                  <input 
-                                    type="checkbox" 
-                                    title="Masking" 
-                                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 bg-white w-4 h-4 cursor-pointer" 
-                                    checked={df.masked || false} 
+                                <td className="px-3 py-3 text-center">
+                                  <input
+                                    type="checkbox"
+                                    title="Masking"
+                                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 bg-white w-4 h-4 cursor-pointer"
+                                    checked={df.masked || false}
                                     onChange={(e) => setDataFields(dataFields.map(f => f.id === df.id ? { ...f, masked: e.target.checked } : f))}
                                   />
                                 </td>
-                                <td className="px-4 py-3 text-right">
+                                <td className="px-3 py-3 text-right">
                                   <button
                                     type="button"
                                     onClick={() => setDataFields(dataFields.filter(f => f.id !== df.id))}
