@@ -93,6 +93,8 @@ export interface MasterDataEntity {
   createdDate: string;
   updatedDate: string;
   createdBy: string;
+  databaseSystem?: string;
+  canCu?: string;
   // Data source fields
   dataSource?: DataSourceType;
   dldcTable?: string;
@@ -101,6 +103,13 @@ export interface MasterDataEntity {
   apiManagingUnit?: string;
   apiEndpoint?: string;
   apiMethod?: 'GET' | 'POST' | 'PUT';
+  apiAuthType?: 'none' | 'bearer' | 'apikey';
+  apiBearerToken?: string;
+  apiKeyName?: string;
+  apiKeyValue?: string;
+  apiParams?: { key: string; value: string }[];
+  apiHeaders?: { key: string; value: string }[];
+  apiBody?: string;
   updateStrategy?: UpdateStrategyType;
   syncFrequency?: SyncFrequencyType;
   customFields?: CustomField[];

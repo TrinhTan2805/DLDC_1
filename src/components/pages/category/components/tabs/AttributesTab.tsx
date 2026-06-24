@@ -237,6 +237,13 @@ interface AttributesTabProps {
     apiMethod?: string;
     apiSystem?: string;
     apiManagingUnit?: string;
+    apiAuthType?: 'none' | 'bearer' | 'apikey';
+    apiBearerToken?: string;
+    apiKeyName?: string;
+    apiKeyValue?: string;
+    apiParams?: { key: string; value: string }[];
+    apiHeaders?: { key: string; value: string }[];
+    apiBody?: string;
   };
   onWizardConfigChange?: (update: {
     dldcTable?: string;
@@ -245,6 +252,13 @@ interface AttributesTabProps {
     apiMethod?: string;
     apiSystem?: string;
     apiManagingUnit?: string;
+    apiAuthType?: 'none' | 'bearer' | 'apikey';
+    apiBearerToken?: string;
+    apiKeyName?: string;
+    apiKeyValue?: string;
+    apiParams?: { key: string; value: string }[];
+    apiHeaders?: { key: string; value: string }[];
+    apiBody?: string;
   }) => void;
 }
 
@@ -297,14 +311,43 @@ export function AttributesTab({
     }));
   });
 
-  // API wizard state
-  const [apiAuthType, setApiAuthType] = useState<'none' | 'bearer' | 'apikey'>('none');
-  const [apiBearerToken, setApiBearerToken] = useState('');
-  const [apiKeyName, setApiKeyName] = useState('');
-  const [apiKeyValue, setApiKeyValue] = useState('');
-  const [apiParams, setApiParams] = useState<{ key: string; value: string }[]>([{ key: '', value: '' }]);
-  const [apiHeaders, setApiHeaders] = useState<{ key: string; value: string }[]>([{ key: '', value: '' }]);
-  const [apiBody, setApiBody] = useState('');
+  // API wizard state — khởi tạo từ wizardConfig để persist khi đổi tab
+  const [apiAuthType, setApiAuthType] = useState<'none' | 'bearer' | 'apikey'>(
+    () => wizardConfig?.apiAuthType || 'none'
+  );
+  const [apiBearerToken, setApiBearerToken] = useState(() => wizardConfig?.apiBearerToken || '');
+  const [apiKeyName, setApiKeyName] = useState(() => wizardConfig?.apiKeyName || '');
+  const [apiKeyValue, setApiKeyValue] = useState(() => wizardConfig?.apiKeyValue || '');
+  const [apiParams, setApiParams] = useState<{ key: string; value: string }[]>(
+    () => wizardConfig?.apiParams?.length ? wizardConfig.apiParams : [{ key: '', value: '' }]
+  );
+  const [apiHeaders, setApiHeaders] = useState<{ key: string; value: string }[]>(
+    () => wizardConfig?.apiHeaders?.length ? wizardConfig.apiHeaders : [{ key: '', value: '' }]
+  );
+  const [apiBody, setApiBody] = useState(() => wizardConfig?.apiBody || '');
+  const [apiSaved, setApiSaved] = useState(false);
+  const [apiEndpointError, setApiEndpointError] = useState(false);
+
+  const handleApiSave = () => {
+    const endpoint = (wizardConfig?.apiEndpoint || '').trim();
+    if (!endpoint) {
+      setApiEndpointError(true);
+      return;
+    }
+    setApiEndpointError(false);
+    onWizardConfigChange?.({
+      ...wizardConfig,
+      apiAuthType,
+      apiBearerToken,
+      apiKeyName,
+      apiKeyValue,
+      apiParams: apiParams.filter(r => r.key.trim()),
+      apiHeaders: apiHeaders.filter(r => r.key.trim()),
+      apiBody,
+    });
+    setApiSaved(true);
+    setTimeout(() => setApiSaved(false), 2000);
+  };
 
   const dataSource = wizardConfig?.dataSource || 'manual';
 
@@ -998,7 +1041,7 @@ export function AttributesTab({
 
               {/* API Config form */}
               <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
-                <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50">
+                <div className="px-5 py-4 border-b border-slate-100 bg-slate-50">
                   <p className="text-[13px] font-semibold text-slate-700">Thông tin kết nối</p>
                 </div>
                 <div className="p-5 space-y-4">
@@ -1029,10 +1072,20 @@ export function AttributesTab({
                     <input
                       type="url"
                       value={wizardConfig?.apiEndpoint || ''}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => onWizardConfigChange?.({ ...wizardConfig, apiEndpoint: e.target.value })}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                        setApiEndpointError(false);
+                        onWizardConfigChange?.({ ...wizardConfig, apiEndpoint: e.target.value });
+                      }}
                       placeholder="https://api.example.gov.vn/v1/data"
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] font-mono focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
+                      className={`w-full px-3 py-2 border rounded-lg text-[13px] font-mono focus:outline-none focus:ring-2 ${
+                        apiEndpointError
+                          ? 'border-red-400 focus:ring-red-500/20 focus:border-red-500'
+                          : 'border-slate-200 focus:ring-violet-500/20 focus:border-violet-500'
+                      }`}
                     />
+                    {apiEndpointError && (
+                      <p className="text-[13px] text-red-500 mt-1">Vui lòng nhập URL endpoint trước khi lưu.</p>
+                    )}
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1.5">
@@ -1264,11 +1317,15 @@ export function AttributesTab({
                   <div className="flex justify-end pt-1">
                     <button
                       type="button"
-                      onClick={() => onWizardConfigChange?.({ ...wizardConfig })}
-                      className="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 text-[13px] font-medium transition-colors active:scale-95"
+                      onClick={handleApiSave}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-medium transition-colors active:scale-95 ${
+                        apiSaved
+                          ? 'bg-green-600 text-white hover:bg-green-700'
+                          : 'bg-violet-600 text-white hover:bg-violet-700'
+                      }`}
                     >
                       <Check className="w-4 h-4" />
-                      Lưu cấu hình
+                      {apiSaved ? 'Đã lưu ✓' : 'Lưu cấu hình'}
                     </button>
                   </div>
                 </div>
@@ -1281,7 +1338,7 @@ export function AttributesTab({
             <>
               {/* Inline Attribute Form */}
               <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
-                <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50">
+                <div className="px-5 py-4 border-b border-slate-100 bg-slate-50">
                   <p className="text-[13px] font-semibold text-slate-700">Thêm trường dữ liệu mới</p>
                 </div>
             <div className="p-5 space-y-4">
@@ -1358,7 +1415,7 @@ export function AttributesTab({
                     { key: 'unique',   label: 'Duy nhất',  sub: 'Unique' },
                     { key: 'indexed',  label: 'Đánh index', sub: 'Indexed' },
                   ].map(item => (
-                    <label key={item.key} className="flex items-center gap-2.5 p-3 bg-white border border-slate-200 rounded-lg cursor-pointer hover:border-blue-300 transition-colors group">
+                    <label key={item.key} className="flex items-center gap-4 p-3 bg-white border border-slate-200 rounded-lg cursor-pointer hover:border-blue-300 transition-colors group">
                       <input
                         type="checkbox"
                         checked={(inlineForm as any)[item.key] || false}
@@ -1426,7 +1483,7 @@ export function AttributesTab({
 
           {/* Compact list of added attributes */}
           <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
-            <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+            <div className="px-5 py-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
               <p className="text-[13px] font-semibold text-slate-700">Danh sách trường đã thêm</p>
               <span className="text-[13px] text-slate-500">{attributes.length} trường</span>
             </div>
@@ -1440,12 +1497,12 @@ export function AttributesTab({
                     <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Tên hiển thị</th>
                     <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Kiểu DL</th>
                     <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Ràng buộc</th>
-                    <th className="px-4 py-3 w-10"></th>
+                    <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap text-center w-20">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {attributes.map(attr => (
-                    <tr key={attr.id} className="hover:bg-slate-50/50 transition-colors group">
+                    <tr key={attr.id} className="hover:bg-slate-50/50 transition-colors">
                       <td className="px-4 py-3 text-[13px] font-mono text-slate-900">{attr.fieldName}</td>
                       <td className="px-4 py-3 text-[13px] text-slate-700">{attr.displayName}</td>
                       <td className="px-4 py-3 text-[13px] text-slate-600">{getDataTypeLabel(attr.dataType)}</td>
@@ -1456,10 +1513,10 @@ export function AttributesTab({
                           {attr.indexed  && <span className="px-1.5 py-0.5 rounded text-[13px] bg-blue-50 text-blue-600 font-bold border border-blue-100">IDX</span>}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="px-4 py-3 text-center">
                         <button
                           onClick={() => onDeleteAttribute(attr.id)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
+                          className="p-1.5 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors"
                           title="Xóa trường"
                         >
                           <Trash2 className="w-3.5 h-3.5" />

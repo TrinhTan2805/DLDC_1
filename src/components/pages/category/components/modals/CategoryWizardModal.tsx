@@ -2,7 +2,7 @@ import { ChangeEvent } from 'react';
 import { X, FileText, Sliders, ChevronRight, ChevronLeft, Save, Send, Link2, ChevronDown } from 'lucide-react';
 import { AttributesTab } from '../tabs/AttributesTab';
 import { RelationshipsTab } from '../tabs/RelationshipsTab';
-import { MasterDataEntity, MasterDataAttribute, DataType, ScopeType, FieldDataType } from '../../categoryTypes';
+import { MasterDataEntity, MasterDataAttribute, ScopeType, FieldDataType } from '../../categoryTypes';
 import { Portal } from '../../../../common/Portal';
 
 interface CategoryWizardModalProps {
@@ -121,24 +121,18 @@ export function CategoryWizardModal({
                     />
                   </div>
                   <div>
-                    <label className="block text-[13px] text-slate-700 mb-2 font-medium">Loại dữ liệu <span className="text-red-500">*</span></label>
-                    <div className="relative">
-                      <select
-                        title="Loại dữ liệu"
-                        disabled={isViewOnly}
-                        value={formData.dataType || 'standard'}
-                        onChange={(e: ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, dataType: e.target.value as DataType })}
-                        className="w-full pl-3 pr-8 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white font-medium appearance-none cursor-pointer disabled:bg-slate-50 disabled:text-slate-500"
-                      >
-                        <option value="standard">Dữ liệu chuẩn</option>
-                        <option value="reference">Dữ liệu tham chiếu</option>
-                        <option value="transactional">Dữ liệu giao dịch</option>
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                    </div>
+                    <label className="block text-[13px] text-slate-700 mb-2 font-medium">Cơ sở dữ liệu/Hệ thống</label>
+                    <input
+                      type="text"
+                      disabled={isViewOnly}
+                      value={formData.databaseSystem || ''}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, databaseSystem: e.target.value })}
+                      placeholder="VD: Cơ sở dữ liệu quốc gia về dân cư"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none disabled:bg-slate-50 disabled:text-slate-500 font-medium bg-white hover:bg-slate-50/30 transition-all shadow-sm"
+                    />
                   </div>
                   <div>
-                    <label className="block text-[13px] text-slate-700 mb-2 font-medium">Cơ quan quản lý <span className="text-red-500">*</span></label>
+                    <label className="block text-[13px] text-slate-700 mb-2 font-medium">Đơn vị chủ quản <span className="text-red-500">*</span></label>
                     <input
                       type="text"
                       disabled={isViewOnly}
@@ -148,13 +142,24 @@ export function CategoryWizardModal({
                       className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none disabled:bg-slate-50 disabled:text-slate-500 font-medium bg-white hover:bg-slate-50/30 transition-all shadow-sm"
                     />
                   </div>
+                  <div className="col-span-2">
+                    <label className="block text-[13px] text-slate-700 mb-2 font-medium">Căn cứ</label>
+                    <input
+                      type="text"
+                      disabled={isViewOnly}
+                      value={formData.canCu || ''}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, canCu: e.target.value })}
+                      placeholder="VD: Nghị định số 13/2023/NĐ-CP ngày 17/4/2023 của Chính phủ"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none disabled:bg-slate-50 disabled:text-slate-500 font-medium bg-white hover:bg-slate-50/30 transition-all shadow-sm"
+                    />
+                  </div>
                   <div>
                     <label className="block text-[13px] text-slate-700 mb-2 font-medium">Phạm vi vĩ mô <span className="text-red-500">*</span></label>
                     <div className="relative">
                       <select
                         title="Phạm vi"
                         disabled={isViewOnly}
-                        value={formData.scope || 'national'}
+                        value={formData.scope || 'ministry'}
                         onChange={(e: ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, scope: e.target.value as ScopeType })}
                         className="w-full pl-3 pr-8 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white font-medium appearance-none cursor-pointer disabled:bg-slate-50 disabled:text-slate-500"
                       >
@@ -273,8 +278,20 @@ export function CategoryWizardModal({
                     apiMethod: formData.apiMethod,
                     apiSystem: formData.apiSystem,
                     apiManagingUnit: formData.apiManagingUnit,
+                    apiAuthType: formData.apiAuthType,
+                    apiBearerToken: formData.apiBearerToken,
+                    apiKeyName: formData.apiKeyName,
+                    apiKeyValue: formData.apiKeyValue,
+                    apiParams: formData.apiParams,
+                    apiHeaders: formData.apiHeaders,
+                    apiBody: formData.apiBody,
                   }}
-                  onWizardConfigChange={(update) => setFormData({ ...formData, ...update, apiMethod: update.apiMethod as 'GET' | 'POST' | 'PUT' | undefined })}
+                  onWizardConfigChange={(update) => setFormData({
+                    ...formData,
+                    ...update,
+                    apiMethod: update.apiMethod as 'GET' | 'POST' | 'PUT' | undefined,
+                    apiAuthType: update.apiAuthType as 'none' | 'bearer' | 'apikey' | undefined,
+                  })}
                 />
               </div>
             )}
