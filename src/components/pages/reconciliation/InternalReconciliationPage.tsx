@@ -90,6 +90,8 @@ export function InternalReconciliationPage({ databaseName, databaseCode }: Inter
     <ReconciliationTemplate
       title={`Đối soát dữ liệu ${databaseName}`}
       records={records}
+      hideSetupTab={true}
+      hideLogTab={true}
     />
   );
 }

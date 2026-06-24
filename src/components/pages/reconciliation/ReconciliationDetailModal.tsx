@@ -1,4 +1,4 @@
-import { X, Download, CheckCircle, Send, Inbox, AlertTriangle, Calendar, Clock, History as HistoryIcon } from 'lucide-react';
+import { X, Download, CheckCircle, Send, AlertTriangle, RefreshCw, History as HistoryIcon, Server, DownloadCloud } from 'lucide-react';
 
 interface ReconciliationDetailModalProps {
   isOpen: boolean;
@@ -24,22 +24,23 @@ interface ReconciliationDetailModalProps {
   onViewHistory?: () => void;
 }
 
-export function ReconciliationDetailModal({ isOpen, onClose, recordCode, record, onViewHistory }: ReconciliationDetailModalProps) {
+export function ReconciliationDetailModal({ isOpen, onClose, record, onViewHistory }: ReconciliationDetailModalProps) {
   if (!isOpen || !record) return null;
 
-  // Default values
-  const providerCode = 'SYS_HOTICH';
-  const lastReconciliation = record.lastReconcileDate || '2024-12-20 10:30:00';
-  const matchRate = record.matchRate !== undefined ? record.matchRate : 100.0;
+  const received = record.receivedCount ?? record.recordCount; // Kho đếm được
+  const sent = record.sentCount ?? received;                   // Nguồn khai báo
+  const diff = received - sent;
+  const matchRate = record.matchRate !== undefined ? record.matchRate : 100;
+  const isMatched = record.status === 'matched';
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full overflow-hidden flex flex-col">
+      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-slate-200 flex items-start justify-between">
+        <div className="px-6 py-4 border-b border-slate-200 flex items-start justify-between">
           <div>
-            <h2 className="text-lg text-slate-900">Chi tiết bản ghi đối soát</h2>
-            <p className="text-sm text-slate-500 mt-1">{record.datasetCode}</p>
+            <h2 className="text-base font-semibold text-slate-900">Chi tiết đối soát thu thập</h2>
+            <p className="text-[13px] text-slate-500 mt-0.5 font-mono">{record.datasetCode}</p>
           </div>
           <button
             onClick={onClose}
@@ -51,185 +52,122 @@ export function ReconciliationDetailModal({ isOpen, onClose, recordCode, record,
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-200px)]">
-          {/* Info Cards */}
+        <div className="p-6 space-y-5 overflow-y-auto max-h-[calc(90vh-180px)]">
+          {/* 2 cards: Hệ thống nguồn + Thông tin thu thập */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Mã bộ dữ liệu */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm text-blue-600 mb-1">Mã bộ dữ liệu</p>
-              <p className="text-lg text-blue-900">{record.datasetCode}</p>
+            <div className="border border-slate-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 text-[13px] font-medium text-slate-500 mb-2">
+                <Server className="w-4 h-4" /> Hệ thống nguồn
+              </div>
+              <div className="text-[14px] text-slate-900">{record.providerSystem}</div>
             </div>
 
-            {/* Tên bộ dữ liệu */}
-            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-              <p className="text-sm text-purple-600 mb-1">Tên bộ dữ liệu</p>
-              <p className="text-lg text-purple-900">{record.datasetName}</p>
-            </div>
-
-            {/* Hệ thống cung cấp */}
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <p className="text-sm text-green-600 mb-1">Hệ thống cung cấp</p>
-              <p className="text-lg text-green-900 mb-1">{record.providerSystem}</p>
-              <p className="text-xs text-green-600">{providerCode}</p>
-            </div>
-
-            {/* Loại dữ liệu */}
-            <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-              <p className="text-sm text-orange-600 mb-1">Loại dữ liệu</p>
-              <p className="text-lg text-orange-900">{record.dataType}</p>
+            <div className="border border-slate-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 text-[13px] font-medium text-slate-500 mb-2">
+                <DownloadCloud className="w-4 h-4" /> Thông tin thu thập
+              </div>
+              <div className="text-[14px] text-slate-900">{record.datasetName}</div>
+              <div className="text-[12px] text-slate-500 mt-1 font-mono">{record.datasetCode}</div>
             </div>
           </div>
 
-          {/* Thông tin đối soát - Redesigned */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-semibold text-slate-900">Thông tin đối soát chi tiết</h3>
-              <div className="flex items-center gap-4 text-xs text-slate-500">
-                <div className="flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5" />
-                  {record.receiveDate}
-                </div>
-                <div className="flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5" />
-                  {lastReconciliation}
-                </div>
-              </div>
+          {/* Kết quả đối soát */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-[13px] font-semibold text-slate-900 uppercase tracking-tight">Kết quả đối soát</h3>
+              {record.lastReconcileDate && (
+                <span className="text-[12px] text-slate-500">Nguồn gọi: {record.lastReconcileDate}</span>
+              )}
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Sent Card */}
-              <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4 flex flex-col items-center text-center">
-                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mb-3">
-                  <Send className="w-5 h-5 text-blue-600" />
-                </div>
-                <p className="text-sm text-slate-500 mb-1">Số lượng đã gửi</p>
-                <p className="text-2xl font-bold text-blue-700">{(record.sentCount || 0).toLocaleString()}</p>
-                <p className="text-xs text-blue-500 mt-1 italic">Dữ liệu từ hệ thống nguồn</p>
-              </div>
 
-              {/* Received Card */}
-              <div className="bg-indigo-50/50 border border-indigo-100 rounded-xl p-4 flex flex-col items-center text-center">
-                <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center mb-3">
-                  <Inbox className="w-5 h-5 text-indigo-600" />
-                </div>
-                <p className="text-sm text-slate-500 mb-1">Số lượng đã nhận</p>
-                <p className="text-2xl font-bold text-indigo-700">{(record.receivedCount || record.recordCount).toLocaleString()}</p>
-                <p className="text-xs text-indigo-500 mt-1 italic">Dữ liệu tại hệ thống đích</p>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="border border-slate-200 rounded-lg p-3 text-center">
+                <p className="text-[12px] text-slate-500">Số bản ghi (Nguồn)</p>
+                <p className="text-xl font-bold text-slate-900">{sent.toLocaleString()}</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">Nguồn khai báo</p>
               </div>
-
-              {/* Difference Card */}
-              <div className={`rounded-xl p-4 flex flex-col items-center text-center border ${
-                (record.sentCount || 0) - (record.receivedCount || record.recordCount) !== 0 
-                  ? 'bg-rose-50/50 border-rose-100' 
-                  : 'bg-emerald-50/50 border-emerald-100'
-              }`}>
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-3 ${
-                  (record.sentCount || 0) - (record.receivedCount || record.recordCount) !== 0 
-                    ? 'bg-rose-100' 
-                    : 'bg-emerald-100'
-                }`}>
-                  <AlertTriangle className={`w-5 h-5 ${
-                    (record.sentCount || 0) - (record.receivedCount || record.recordCount) !== 0 
-                      ? 'text-rose-600' 
-                      : 'text-emerald-600'
-                  }`} />
-                </div>
-                <p className="text-sm text-slate-500 mb-1">Số lượng sai lệch</p>
-                <p className={`text-2xl font-bold ${
-                  (record.sentCount || 0) - (record.receivedCount || record.recordCount) !== 0 
-                    ? 'text-rose-700' 
-                    : 'text-emerald-700'
-                }`}>
-                  {Math.abs((record.sentCount || 0) - (record.receivedCount || record.recordCount)).toLocaleString()}
-                </p>
-                <p className={`text-xs mt-1 italic ${
-                  (record.sentCount || 0) - (record.receivedCount || record.recordCount) !== 0 
-                    ? 'text-rose-500' 
-                    : 'text-emerald-500'
-                }`}>
-                  {(record.sentCount || 0) - (record.receivedCount || record.recordCount) !== 0 
-                    ? 'Cần kiểm tra lại kết nối' 
-                    : 'Dữ liệu trùng khớp hoàn toàn'}
+              <div className="border border-slate-200 rounded-lg p-3 text-center">
+                <p className="text-[12px] text-slate-500">Số bản ghi (Kho)</p>
+                <p className="text-xl font-bold text-slate-900">{received.toLocaleString()}</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">Kho đếm được</p>
+              </div>
+              <div className={`rounded-lg p-3 text-center border ${diff !== 0 ? 'border-rose-200 bg-rose-50' : 'border-emerald-200 bg-emerald-50'}`}>
+                <p className={`text-[12px] ${diff !== 0 ? 'text-rose-600' : 'text-emerald-600'}`}>Sai lệch</p>
+                <p className={`text-xl font-bold ${diff !== 0 ? 'text-rose-700' : 'text-emerald-700'}`}>{Math.abs(diff).toLocaleString()}</p>
+                <p className={`text-[11px] mt-0.5 ${diff !== 0 ? 'text-rose-500' : 'text-emerald-500'}`}>
+                  {diff !== 0 ? 'Cần đồng bộ lại' : 'Trùng khớp'}
                 </p>
               </div>
             </div>
+          </div>
 
-            {/* Results Section */}
-            <div className="bg-slate-50 rounded-xl p-5 border border-slate-200">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div className="flex-1 space-y-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-medium text-slate-700">Tỷ lệ khớp dữ liệu:</span>
-                    <span className={`text-sm font-bold ${matchRate === 100 ? 'text-emerald-600' : 'text-amber-600'}`}>
-                      {matchRate.toFixed(2)}%
+          {/* Tỷ lệ khớp + trạng thái */}
+          <div className="bg-slate-50 rounded-lg p-4 border border-slate-200 flex items-center gap-4 flex-wrap">
+            <div className="flex-1 min-w-[200px]">
+              <div className="flex justify-between text-[13px] mb-1.5">
+                <span className="text-slate-600">Tỷ lệ khớp dữ liệu</span>
+                <span className={`font-semibold ${matchRate === 100 ? 'text-emerald-600' : 'text-amber-600'}`}>{matchRate.toFixed(2)}%</span>
+              </div>
+              <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ${matchRate === 100 ? 'bg-emerald-500' : 'bg-amber-500'}`}
+                  style={{ width: `${matchRate}%` }}
+                />
+              </div>
+            </div>
+            <div className="flex flex-col gap-2">
+              {isMatched ? (
+                <span className="px-4 py-2 text-[13px] font-semibold rounded-lg border bg-emerald-50 text-emerald-700 border-emerald-200 flex items-center justify-center gap-2">
+                  <CheckCircle className="w-4 h-4" /> Khớp dữ liệu
+                </span>
+              ) : record.status === 'pending' ? (
+                <span className="px-4 py-2 text-[13px] font-semibold rounded-lg border bg-amber-50 text-amber-700 border-amber-200 flex items-center justify-center gap-2">
+                  Đang xử lý
+                </span>
+              ) : (
+                <>
+                  <span className="px-4 py-2 text-[13px] font-semibold rounded-lg border bg-rose-50 text-rose-700 border-rose-200 flex items-center justify-center gap-2">
+                    <AlertTriangle className="w-4 h-4" /> Có sai lệch dữ liệu
+                  </span>
+                  {record.isReportSent && (
+                    <span className="px-4 py-1.5 text-[12px] font-medium rounded-lg border bg-indigo-50 text-indigo-700 border-indigo-200 flex items-center justify-center gap-2">
+                      <Send className="w-3.5 h-3.5" /> Đã gửi báo cáo về nguồn
                     </span>
-                  </div>
-                    <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden shadow-inner flex">
-                      <div 
-                        className={`h-full rounded-full transition-all duration-500 ease-out ${
-                          matchRate === 100 ? 'bg-emerald-500' : 'bg-amber-500'
-                        } w-[${matchRate}%]`}
-                      />
-                    </div>
-                </div>
-
-                <div className="flex flex-col gap-2 min-w-[180px]">
-                  <span className="text-xs text-slate-500 font-medium px-1">Trạng thái xác thực:</span>
-                  <div className="flex items-center">
-                    {record.status === 'matched' && (
-                      <span className="w-full px-4 py-2 text-sm font-semibold rounded-lg border bg-emerald-50 text-emerald-700 border-emerald-200 flex items-center justify-center gap-2">
-                        <CheckCircle className="w-4 h-4" />
-                        Khớp dữ liệu
-                      </span>
-                    )}
-                    {(record.status === 'mismatched' || record.status === 'error') && (
-                      <div className="flex flex-col gap-2 w-full">
-                        <span className="w-full px-4 py-2 text-sm font-semibold rounded-lg border bg-rose-50 text-rose-700 border-rose-200 flex items-center justify-center gap-2 text-center">
-                          <AlertTriangle className="w-4 h-4" />
-                          Có sai lệch dữ liệu
-                        </span>
-                        {record.isReportSent && (
-                          <span className="w-full px-4 py-2 text-xs font-medium rounded-lg border bg-indigo-50 text-indigo-700 border-indigo-200 flex items-center justify-center gap-2">
-                            <Send className="w-3.5 h-3.5" />
-                            Đã gửi báo cáo về hệ thống nguồn
-                          </span>
-                        )}
-                      </div>
-                    )}
-                    {record.status === 'pending' && (
-                      <span className="w-full px-4 py-2 text-sm font-semibold rounded-lg border bg-amber-50 text-amber-700 border-amber-200 flex items-center justify-center gap-2">
-                        Đang xử lý
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-end gap-3">
+        <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex items-center justify-end gap-3 flex-wrap">
           <button
             onClick={onClose}
-            title="Đóng bản ghi"
-            className="px-4 py-2 text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200"
+            className="px-4 py-2 text-[13px] text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50"
           >
             Đóng
           </button>
-          
-          <button 
+          <button
             onClick={onViewHistory}
             title="Xem lịch sử đối soát của bộ dữ liệu này"
-            className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 flex items-center gap-2"
+            className="px-4 py-2 text-[13px] border border-slate-200 text-slate-700 bg-white rounded-lg hover:bg-slate-50 flex items-center gap-2"
           >
             <HistoryIcon className="w-4 h-4" />
-            Xem lịch sử đối soát
+            Xem lịch sử
           </button>
-
-          <button 
+          {!isMatched && (
+            <button
+              title="Đồng bộ lại thu thập này"
+              className="px-4 py-2 text-[13px] border border-slate-200 text-slate-700 bg-white rounded-lg hover:bg-slate-50 flex items-center gap-2"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Đồng bộ lại
+            </button>
+          )}
+          <button
             title="Tải báo cáo đối soát"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+            className="px-4 py-2 text-[13px] bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
           >
             <Download className="w-4 h-4" />
             Xuất báo cáo
