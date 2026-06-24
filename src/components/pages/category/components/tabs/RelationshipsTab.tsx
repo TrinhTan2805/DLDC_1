@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, ReactNode, ChangeEvent, MouseEvent } from 'react';
-import { Plus, Edit, Trash2, X, Save, Network, ArrowRight, Key, Table, Search, AlertCircle, Info, ChevronDown, Send } from 'lucide-react';
+import { Save, Network, ArrowRight, Key, Table, Search, AlertCircle, Info, ChevronDown, Send, Plus, Trash2, CheckCircle2 } from 'lucide-react';
 import { MasterDataEntity, EntityRelationship, RelationshipType, RelationshipStatus } from '../../categoryTypes';
 import { ConfirmModal } from '../../../../common/ConfirmModal';
 import { ApprovalRequestModal } from '../modals/ApprovalRequestModal';
@@ -10,6 +10,9 @@ interface RelationshipsTabProps {
   relationships: EntityRelationship[];
   setRelationships: (relationships: EntityRelationship[]) => void;
   isViewOnly?: boolean;
+  currentEntityId?: string;
+  currentEntityName?: string;
+  currentEntityCode?: string;
 }
 
 const relationTypeLabels: Record<RelationshipType, string> = {
@@ -19,16 +22,13 @@ const relationTypeLabels: Record<RelationshipType, string> = {
   '1-1': '1 - 1 (Một - Một)'
 };
 
-const relationTypeIcons: Record<RelationshipType, string> = {
-  '1-n': '1 → n',
-  'n-1': 'n ← 1',
-  'n-n': 'n ↔ n',
-  '1-1': '1 ↔ 1'
+const relationTypeColors: Record<RelationshipType, string> = {
+  '1-n': 'bg-blue-50 text-blue-700 border-blue-200',
+  'n-1': 'bg-indigo-50 text-indigo-700 border-indigo-200',
+  'n-n': 'bg-purple-50 text-purple-700 border-purple-200',
+  '1-1': 'bg-teal-50 text-teal-700 border-teal-200',
 };
 
-// --- Mock Data & Helpers ---
-
-// Mock base fields every entity has
 const BASE_MOCK_FIELDS = [
   { id: 'f1', name: 'id', displayName: 'ID định danh', type: 'string' },
   { id: 'f2', name: 'code', displayName: 'Mã danh mục', type: 'string' },
@@ -37,16 +37,36 @@ const BASE_MOCK_FIELDS = [
   { id: 'f5', name: 'created_date', displayName: 'Ngày tạo', type: 'date' },
 ];
 
+const emptyForm: Partial<EntityRelationship> = {
+  sourceEntityId: '',
+  targetEntityId: '',
+  relationshipType: '1-n',
+  sourceKey: '',
+  targetKey: '',
+  targetDisplayField: '',
+  mappingTable: '',
+  status: 'active'
+};
+
 export function RelationshipsTab({
   entities,
   relationships,
   setRelationships,
-  isViewOnly = false
+  isViewOnly = false,
+  currentEntityId,
+  currentEntityName = '',
+  currentEntityCode = '',
 }: RelationshipsTabProps) {
-  const [showForm, setShowForm] = useState(false);
-  const [editingRelationship, setEditingRelationship] = useState<EntityRelationship | null>(null);
 
-  // Modal logic cho Trình duyệt
+  // Nếu có currentEntityId (đã lưu draft), tự động điền thực thể nguồn
+  const initialForm: Partial<EntityRelationship> = currentEntityId
+    ? { ...emptyForm, sourceEntityId: currentEntityId }
+    : emptyForm;
+
+  const [formData, setFormData] = useState<Partial<EntityRelationship>>(initialForm);
+  const [pendingList, setPendingList] = useState<EntityRelationship[]>([]);
+  const [formError, setFormError] = useState('');
+
   const [genericConfirm, setGenericConfirm] = useState<{
     isOpen: boolean;
     type: 'success' | 'info' | 'warning' | 'delete';
@@ -61,21 +81,31 @@ export function RelationshipsTab({
   const [approvalRequestData, setApprovalRequestData] = useState<{ id: string; code: string; name: string; type: 'attribute' | 'category' } | null>(null);
   const [approvalRequestForm, setApprovalRequestForm] = useState({ reviewer: '', note: '' });
 
-  const [formData, setFormData] = useState<Partial<EntityRelationship>>({
-    sourceEntityId: '',
-    targetEntityId: '',
-    relationshipType: '1-n',
-    sourceKey: '',
-    targetKey: '',
-    targetDisplayField: '',
-    mappingTable: '',
-    status: 'active'
-  });
+  // Danh sách entities kết hợp: entities có sẵn + entity đang cấu hình (nếu chưa có trong list)
+  const allEntities: MasterDataEntity[] = (() => {
+    if (!currentEntityId) return entities;
+    const alreadyIn = entities.some(e => e.id === currentEntityId);
+    if (alreadyIn) return entities;
+    // Thêm entity hiện tại như một entry tạm
+    const virtual: MasterDataEntity = {
+      id: currentEntityId,
+      code: currentEntityCode,
+      name: currentEntityName,
+      dataType: 'standard',
+      managingAgency: '',
+      scope: 'ministry',
+      description: '',
+      lifecycleStatus: 'draft',
+      createdDate: '',
+      updatedDate: '',
+      createdBy: '',
+    };
+    return [virtual, ...entities];
+  })();
 
-  // Derived state for dropdowns
   const getEntityAttributes = (entityId?: string) => {
     if (!entityId) return [];
-    const entity = entities.find(e => e.id === entityId);
+    const entity = allEntities.find(e => e.id === entityId);
     let attrs = [...BASE_MOCK_FIELDS];
     if (entity) {
       if (entity.code.includes('CITIZEN')) {
@@ -86,605 +116,410 @@ export function RelationshipsTab({
         attrs.push({ id: 'o2', name: 'authority_id', displayName: 'Mã cơ quan', type: 'string' });
         attrs.push({ id: 'o3', name: 'authority_name', displayName: 'Tên cơ quan', type: 'string' });
       }
+      attrs.push({ id: `fk_to_${entityId}`, name: `${entity.code.toLowerCase()}_ref_id`, displayName: `Mã tham chiếu ${entity.name}`, type: 'string' });
     }
-    // Set field specific to relation
-    attrs.push({ id: `fk_to_${entityId}`, name: `${entity?.code.toLowerCase()}_ref_id`, displayName: `Mã tham chiếu ${entity?.name}`, type: 'string' });
     return attrs;
   };
 
   const sourceAttributes = getEntityAttributes(formData.sourceEntityId);
   const targetAttributes = getEntityAttributes(formData.targetEntityId);
 
-  // Helper: Detect Cycle
-  const createsCycle = (newSourceId: string, newTargetId: string, ignoreRelId?: string) => {
-    // We only care about 1-1, 1-n, n-1 direction. Treat n-n as undirected or bidirectional.
-    // For simplicity, let's just make sure there's no directed path from target to source.
+  // Kiểm tra trùng với cả relationships đã lưu lẫn pendingList
+  const allExisting = [...relationships, ...pendingList];
+  const existingRelationsBetween = allExisting.filter(r =>
+    (r.sourceEntityId === formData.sourceEntityId && r.targetEntityId === formData.targetEntityId) ||
+    (r.sourceEntityId === formData.targetEntityId && r.targetEntityId === formData.sourceEntityId)
+  );
+
+  // Cycle detection trên tập relationships + pendingList + 1 cặp mới
+  const createsCycle = (allRels: EntityRelationship[], newSourceId: string, newTargetId: string, newType: RelationshipType) => {
     const adj: Record<string, string[]> = {};
-    relationships.forEach(rel => {
-      if (rel.id === ignoreRelId) return; // Skip the one being edited
-      
-      const src = rel.sourceEntityId;
-      const tgt = rel.targetEntityId;
-      if (!adj[src]) adj[src] = [];
-      adj[src].push(tgt);
-      
-      // If n-n or 1-1, it could imply bidirectional dependency
+    allRels.forEach(rel => {
+      if (!adj[rel.sourceEntityId]) adj[rel.sourceEntityId] = [];
+      adj[rel.sourceEntityId].push(rel.targetEntityId);
       if (rel.relationshipType === 'n-n' || rel.relationshipType === '1-1') {
-        if (!adj[tgt]) adj[tgt] = [];
-        adj[tgt].push(src);
+        if (!adj[rel.targetEntityId]) adj[rel.targetEntityId] = [];
+        adj[rel.targetEntityId].push(rel.sourceEntityId);
       }
     });
-
     if (!adj[newSourceId]) adj[newSourceId] = [];
     adj[newSourceId].push(newTargetId);
-    if (formData.relationshipType === 'n-n' || formData.relationshipType === '1-1') {
-       if (!adj[newTargetId]) adj[newTargetId] = [];
-       adj[newTargetId].push(newSourceId);
+    if (newType === 'n-n' || newType === '1-1') {
+      if (!adj[newTargetId]) adj[newTargetId] = [];
+      adj[newTargetId].push(newSourceId);
     }
-
-    // DFS to find cycle
     const visited: Record<string, boolean> = {};
     const recStack: Record<string, boolean> = {};
-
-    const dfs = (node: string) => {
+    const dfs = (node: string): boolean => {
       if (!visited[node]) {
         visited[node] = true;
         recStack[node] = true;
-        const neighbors = adj[node] || [];
-        for (let i = 0; i < neighbors.length; i++) {
-          const nextNode = neighbors[i];
-          if (!visited[nextNode] && dfs(nextNode)) return true;
-          else if (recStack[nextNode]) return true;
+        for (const next of (adj[node] || [])) {
+          if (!visited[next] && dfs(next)) return true;
+          else if (recStack[next]) return true;
         }
       }
       recStack[node] = false;
       return false;
     };
-
-    for (const node in adj) {
-      if (dfs(node)) return true;
-    }
+    for (const node in adj) { if (dfs(node)) return true; }
     return false;
   };
 
-  const existingRelationsBetween = relationships.filter(r => 
-    r.id !== editingRelationship?.id &&
-    ((r.sourceEntityId === formData.sourceEntityId && r.targetEntityId === formData.targetEntityId) ||
-     (r.sourceEntityId === formData.targetEntityId && r.targetEntityId === formData.sourceEntityId))
-  );
-
-  const handleSubmit = () => {
+  const handleAddToPending = () => {
+    setFormError('');
     if (!formData.sourceEntityId || !formData.targetEntityId) {
-      alert('Vui lòng chọn đầy đủ thực thể nguồn và thực thể đích');
+      setFormError('Vui lòng chọn đầy đủ thực thể nguồn và thực thể đích.');
       return;
     }
-
     if (formData.sourceEntityId === formData.targetEntityId) {
-      alert('Thực thể nguồn và thực thể đích phải khác nhau');
+      setFormError('Thực thể nguồn và thực thể đích phải khác nhau.');
       return;
     }
-
     if (formData.relationshipType === 'n-n') {
       if (!formData.mappingTable || !formData.sourceKey || !formData.targetKey) {
-        alert('Quan hệ n-n cần có đầy đủ: Bảng liên kết, Khóa nguồn, Khóa đích');
+        setFormError('Quan hệ n-n cần có đầy đủ: Bảng liên kết, Khóa nguồn, Khóa đích.');
         return;
       }
     } else {
       if (!formData.sourceKey || !formData.targetKey) {
-        alert('Cần khai báo đầy đủ: Khóa nguồn và Khóa đích');
+        setFormError('Cần khai báo đầy đủ Khóa nguồn và Khóa đích.');
         return;
       }
     }
-
-    // Validation: Check duplicate relation types
-    const hasDuplicateType = existingRelationsBetween.some(r => 
-      r.sourceEntityId === formData.sourceEntityId && 
+    const hasDuplicate = allExisting.some(r =>
+      r.sourceEntityId === formData.sourceEntityId &&
       r.targetEntityId === formData.targetEntityId &&
       r.relationshipType === formData.relationshipType
     );
-    if (hasDuplicateType) {
-      alert('Đã tồn tại cấu hình quan hệ với loại này giữa 2 danh mục!');
+    if (hasDuplicate) {
+      setFormError('Đã tồn tại quan hệ cùng loại giữa 2 danh mục này (bao gồm danh sách đang cấu hình).');
       return;
     }
-
-    // Validation: Cycle Detection
-    if (createsCycle(formData.sourceEntityId, formData.targetEntityId, editingRelationship?.id)) {
-      alert('Không thể lưu! Thiết lập quan hệ này tạo ra vòng lặp (Circular Dependency) giữa các danh mục.');
+    if (createsCycle(allExisting, formData.sourceEntityId!, formData.targetEntityId!, formData.relationshipType!)) {
+      setFormError('Quan hệ này tạo ra vòng lặp (Circular Dependency). Vui lòng kiểm tra lại.');
       return;
     }
+    const sourceEntity = allEntities.find(e => e.id === formData.sourceEntityId);
+    const targetEntity = allEntities.find(e => e.id === formData.targetEntityId);
+    const newItem: EntityRelationship = {
+      id: `pending-${Date.now()}`,
+      sourceEntityId: formData.sourceEntityId!,
+      sourceEntityName: sourceEntity?.name || '',
+      targetEntityId: formData.targetEntityId!,
+      targetEntityName: targetEntity?.name || '',
+      relationshipType: formData.relationshipType!,
+      sourceKey: formData.sourceKey,
+      targetKey: formData.targetKey,
+      targetDisplayField: formData.targetDisplayField,
+      mappingTable: formData.mappingTable,
+      status: 'active',
+      createdDate: '',
+      createdBy: 'Admin (Bạn)'
+    };
+    setPendingList(prev => [...prev, newItem]);
+    setFormData(emptyForm);
+  };
 
+  const handleRemoveFromPending = (id: string) => {
+    setPendingList(prev => prev.filter(r => r.id !== id));
+  };
+
+  const handleSaveAll = () => {
+    if (pendingList.length === 0) return;
     const now = new Date();
     const dateStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-
-    const sourceEntity = entities.find(e => e.id === formData.sourceEntityId);
-    const targetEntity = entities.find(e => e.id === formData.targetEntityId);
-
-    if (editingRelationship) {
-      const updatedRelationships = relationships.map(rel =>
-        rel.id === editingRelationship.id
-          ? {
-              ...rel,
-              ...formData,
-              sourceEntityName: sourceEntity?.name || '',
-              targetEntityName: targetEntity?.name || '',
-              updatedDate: dateStr,
-              updatedBy: 'Admin (Bạn)'
-            } as EntityRelationship
-          : rel
-      );
-      setRelationships(updatedRelationships);
-    } else {
-      const newRelationship: EntityRelationship = {
-        id: `rel-${Date.now()}`,
-        sourceEntityId: formData.sourceEntityId!,
-        sourceEntityName: sourceEntity?.name || '',
-        targetEntityId: formData.targetEntityId!,
-        targetEntityName: targetEntity?.name || '',
-        relationshipType: formData.relationshipType!,
-        sourceKey: formData.sourceKey,
-        targetKey: formData.targetKey,
-        targetDisplayField: formData.targetDisplayField,
-        mappingTable: formData.mappingTable,
-        status: formData.status as RelationshipStatus,
-        createdDate: dateStr,
-        createdBy: 'Admin (Bạn)'
-      };
-      setRelationships([...relationships, newRelationship]);
-    }
-
-    handleCloseForm();
-  };
-
-  const handleEdit = (relationship: EntityRelationship) => {
-    setEditingRelationship(relationship);
-    setFormData(relationship);
-    setShowForm(true);
-  };
-
-  const handleDelete = (id: string) => {
-    if (confirm('Bạn có chắc chắn muốn xóa quan hệ này?')) {
-      setRelationships(relationships.filter(rel => rel.id !== id));
-    }
-  };
-
-  const handleCloseForm = () => {
-    setShowForm(false);
-    setEditingRelationship(null);
-    setFormData({
-      sourceEntityId: '',
-      targetEntityId: '',
-      relationshipType: '1-n',
-      sourceKey: '',
-      targetKey: '',
-      targetDisplayField: '',
-      mappingTable: '',
-      status: 'active'
-    });
-  };
-
-  const getStatusBadge = (status: RelationshipStatus) => {
-    return status === 'active'
-      ? { label: 'Hoạt động', className: 'bg-green-100 text-green-700' }
-      : { label: 'Không hoạt động', className: 'bg-slate-100 text-black' };
+    const toSave = pendingList.map(r => ({ ...r, id: `rel-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, createdDate: dateStr }));
+    setRelationships([...relationships, ...toSave]);
+    setPendingList([]);
   };
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-black font-bold text-lg">Cấu hình quan hệ thực thể</h2>
-          <p className="text-sm text-black mt-1">
-            Định nghĩa liên kết (1-n, n-n) giữa các danh mục dữ liệu chủ
-          </p>
+    <div className="space-y-5">
+      {/* Form cấu hình 1 cặp quan hệ */}
+      <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
+        <div className="px-5 py-4 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
+          <Network className="w-4 h-4 text-blue-600" />
+          <p className="text-[13px] font-semibold text-slate-700">Cấu hình quan hệ</p>
         </div>
+
+        <div className="p-5 space-y-6">
+          {/* 1. Chọn thực thể */}
+          <div className="space-y-4 relative z-20">
+            <h4 className="text-[13px] font-semibold text-slate-700 border-b border-slate-100 pb-2">1. Chọn thực thể liên kết</h4>
+            <div className="grid grid-cols-2 gap-8 relative">
+              <div>
+                <label className="block text-[13px] font-medium text-slate-600 mb-1.5">
+                  Thực thể nguồn <span className="text-red-500">*</span>
+                </label>
+                {currentEntityId ? (
+                  <div className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-[13px] text-slate-700 font-medium flex items-center justify-between">
+                    <span>{currentEntityCode && `${currentEntityCode} - `}{currentEntityName || 'Danh mục hiện tại'}</span>
+                    <span className="text-[12px] text-blue-500 font-normal ml-2 shrink-0">Danh mục hiện tại</span>
+                  </div>
+                ) : (
+                  <SearchableSelect
+                    label=""
+                    options={allEntities.map(e => ({ value: e.id, label: `${e.code} - ${e.name}` }))}
+                    value={formData.sourceEntityId || ''}
+                    onChange={v => { setFormError(''); setFormData({ ...formData, sourceEntityId: v, sourceKey: '' }); }}
+                    placeholder="-- Tìm & chọn danh mục nguồn --"
+                  />
+                )}
+              </div>
+              <SearchableSelect
+                label="Thực thể đích"
+                options={allEntities
+                  .filter(e => e.id !== formData.sourceEntityId)
+                  .map(e => ({ value: e.id, label: `${e.code} - ${e.name}` }))}
+                value={formData.targetEntityId || ''}
+                onChange={v => { setFormError(''); setFormData({ ...formData, targetEntityId: v, targetKey: '', targetDisplayField: '' }); }}
+                placeholder="-- Tìm & chọn danh mục đích --"
+              />
+            </div>
+
+            {formData.sourceEntityId && formData.targetEntityId && existingRelationsBetween.length > 0 && (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex gap-3 text-[13px]">
+                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-amber-900">Lưu ý: Giữa 2 danh mục này đã tồn tại {existingRelationsBetween.length} quan hệ:</p>
+                  <ul className="list-disc pl-5 mt-1 text-amber-800">
+                    {existingRelationsBetween.map(r => (
+                      <li key={r.id}>Loại: <b>{relationTypeLabels[r.relationshipType]}</b> — {r.sourceKey} ↔ {r.targetKey}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+
+            {formData.sourceEntityId && formData.targetEntityId && (
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center justify-center gap-6">
+                <div className="flex flex-col items-center gap-2 flex-1">
+                  <div className="w-9 h-9 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-[13px]">A</div>
+                  <span className="text-[13px] font-semibold text-slate-800 text-center">{allEntities.find(e => e.id === formData.sourceEntityId)?.name}</span>
+                </div>
+                <ArrowRight className="w-5 h-5 text-slate-400 shrink-0" />
+                <div className="flex flex-col items-center gap-2 flex-1">
+                  <div className="w-9 h-9 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center font-bold text-[13px]">B</div>
+                  <span className="text-[13px] font-semibold text-slate-800 text-center">{allEntities.find(e => e.id === formData.targetEntityId)?.name}</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 2. Loại quan hệ */}
+          <div className="space-y-3 relative z-10">
+            <h4 className="text-[13px] font-semibold text-slate-700 border-b border-slate-100 pb-2">2. Loại quan hệ</h4>
+            <select
+              title="Chọn loại quan hệ"
+              value={formData.relationshipType}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, relationshipType: e.target.value as RelationshipType })}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-[13px] bg-white"
+            >
+              {Object.entries(relationTypeLabels).map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* 3. Điều kiện liên kết */}
+          <div className="space-y-3 relative z-0">
+            <h4 className="text-[13px] font-semibold text-slate-700 border-b border-slate-100 pb-2 flex items-center justify-between">
+              <span>3. Điều kiện liên kết</span>
+              {(!formData.sourceEntityId || !formData.targetEntityId) && (
+                <span className="text-[13px] text-orange-600 bg-orange-50 font-normal px-2 py-1 rounded border border-orange-100">
+                  Chọn xong thực thể để tải danh sách trường
+                </span>
+              )}
+            </h4>
+
+            {(formData.sourceEntityId && formData.targetEntityId) ? (
+              formData.relationshipType === 'n-n' ? (
+                <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Table className="w-4 h-4 text-purple-600" />
+                    <span className="text-[13px] font-semibold text-purple-900">Bảng liên kết (Mapping Table)</span>
+                  </div>
+                  <div>
+                    <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Tên bảng liên kết <span className="text-red-500">*</span></label>
+                    <input
+                      type="text"
+                      value={formData.mappingTable || ''}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, mappingTable: e.target.value })}
+                      placeholder="VD: tbl_map_citizen_organization"
+                      className="w-full px-3 py-2 border border-slate-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Khoá ngoại Nguồn <span className="text-red-500">*</span></label>
+                      <input type="text" value={formData.sourceKey || ''} onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, sourceKey: e.target.value })} placeholder="VD: citizen_id" className="w-full px-3 py-2 border border-slate-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500" />
+                      <p className="text-[13px] text-slate-400 mt-1">Trường FK của {allEntities.find(e => e.id === formData.sourceEntityId)?.name}</p>
+                    </div>
+                    <div>
+                      <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Khoá ngoại Đích <span className="text-red-500">*</span></label>
+                      <input type="text" value={formData.targetKey || ''} onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, targetKey: e.target.value })} placeholder="VD: organization_id" className="w-full px-3 py-2 border border-slate-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500" />
+                      <p className="text-[13px] text-slate-400 mt-1">Trường FK của {allEntities.find(e => e.id === formData.targetEntityId)?.name}</p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-blue-50/50 border border-blue-200 rounded-xl p-4 space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Key className="w-4 h-4 text-blue-600" />
+                    <span className="text-[13px] font-semibold text-blue-900">Khóa ngoại (Foreign Key)</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-5">
+                    <div>
+                      <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Khóa nguồn <span className="text-red-500">*</span></label>
+                      <select title="Chọn trường nguồn" value={formData.sourceKey || ''} onChange={(e: ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, sourceKey: e.target.value })} className="w-full px-3 py-2 border border-slate-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-mono">
+                        <option value="">-- Chọn trường Nguồn --</option>
+                        {sourceAttributes.map(attr => <option key={attr.id} value={attr.name}>{attr.name} ({attr.displayName})</option>)}
+                      </select>
+                      <p className="text-[13px] text-slate-400 mt-1">Trường trong danh mục Nguồn</p>
+                    </div>
+                    <div>
+                      <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Khóa đích <span className="text-red-500">*</span></label>
+                      <select title="Chọn trường đích" value={formData.targetKey || ''} onChange={(e: ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, targetKey: e.target.value })} className="w-full px-3 py-2 border border-slate-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-mono">
+                        <option value="">-- Chọn trường Đích --</option>
+                        {targetAttributes.map(attr => <option key={attr.id} value={attr.name}>{attr.name} ({attr.displayName})</option>)}
+                      </select>
+                      <p className="text-[13px] text-slate-400 mt-1">Trường dùng để join (thường là ID/Code)</p>
+                    </div>
+                  </div>
+                  <div className="pt-3 border-t border-blue-100">
+                    <label className="block text-[13px] font-medium text-emerald-700 mb-1.5">
+                      Trường hiển thị (Lookup Display Field) <span className="text-slate-400 font-normal">(Không bắt buộc)</span>
+                    </label>
+                    <div className="flex gap-4 items-start">
+                      <select title="Chọn trường hiển thị" value={formData.targetDisplayField || ''} onChange={(e: ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, targetDisplayField: e.target.value })} className="w-full max-w-xs px-3 py-2 border border-emerald-200 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-mono">
+                        <option value="">-- Không chọn --</option>
+                        {targetAttributes.map(attr => <option key={attr.id} value={attr.name}>{attr.name} ({attr.displayName})</option>)}
+                      </select>
+                      <p className="text-[13px] text-slate-500 flex-1 leading-relaxed">
+                        <Info className="w-3 h-3 inline mr-1 text-slate-400" />
+                        Trường hiển thị thay cho mã khóa ngoại (VD: <b>Tên tổ chức</b> thay vì ID).
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )
+            ) : (
+              <div className="bg-slate-50 border border-dashed border-slate-200 rounded-lg p-6 text-center text-[13px] text-slate-400">
+                Hãy chọn thực thể nguồn và đích ở Bước 1 để cấu hình khóa liên kết
+              </div>
+            )}
+          </div>
+
+          {/* Lỗi validation */}
+          {formError && (
+            <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+              <p className="text-[13px] text-red-600">{formError}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Nút thêm vào danh sách */}
         {!isViewOnly && (
-          <button
-            onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md text-sm active:scale-95"
-          >
-            <Plus className="w-4 h-4" />
-            Thêm quan hệ mới
-          </button>
+          <div className="px-5 py-4 border-t border-slate-100 bg-slate-50 flex justify-end">
+            <button
+              onClick={handleAddToPending}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-[13px] font-medium active:scale-95"
+            >
+              <Plus className="w-4 h-4" />
+              Thêm vào danh sách
+            </button>
+          </div>
         )}
       </div>
 
-      {/* Relationships Table */}
-      <div className="border border-slate-200 rounded-lg bg-white overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-[#f8fafc] text-black border-b border-slate-100">
-              <tr>
-                <th className="text-left px-6 py-4 text-[14px] font-normal">Thực thể nguồn</th>
-                <th className="text-center px-6 py-4 text-[14px] font-normal">Loại quan hệ</th>
-                <th className="text-left px-6 py-4 text-[14px] font-normal">Thực thể đích</th>
-                <th className="text-left px-6 py-4 text-[14px] font-normal">Điều kiện liên kết</th>
-                <th className="text-left px-6 py-4 text-[14px] font-normal">Cập nhật lúc</th>
-                {!isViewOnly && <th className="text-right px-6 py-4 text-[14px] font-normal">Thao tác</th>}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 font-medium">
-              {relationships.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-16 text-center">
-                    <Network className="w-12 h-12 text-blue-200 mx-auto mb-3" />
-                    <p className="text-slate-500 italic">
-                      Chưa có quan hệ nào được thiết lập. Vui lòng thêm mới để bắt đầu.
-                    </p>
-                  </td>
-                </tr>
-              ) : (
-                relationships.map((relationship) => {
-                  return (
-                    <tr key={relationship.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="px-6 py-4 text-sm text-black">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                          {relationship.sourceEntityName}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col items-center gap-1">
-                          <span className="inline-flex items-center px-2 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold rounded border border-indigo-100">
-                            {relationTypeIcons[relationship.relationshipType]}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-black">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                          {relationship.targetEntityName}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        {relationship.relationshipType === 'n-n' ? (
-                          <div className="text-xs">
-                            <div className="flex items-center gap-1 text-purple-600 font-bold mb-1">
-                              <Table className="w-3 h-3" />
-                              <span>Bảng: <code className="bg-purple-100 px-1 py-0.5 rounded">{relationship.mappingTable}</code></span>
-                            </div>
-                            <div className="text-slate-500">
-                              <span className="text-blue-600 font-medium">{relationship.sourceKey}</span> ↔ <span className="text-emerald-600 font-medium">{relationship.targetKey}</span>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="text-xs">
-                            <div className="flex items-center gap-1 text-blue-600 font-bold mb-1">
-                              <Key className="w-3 h-3" />
-                              <span>FK: <code className="bg-blue-100 px-1 py-0.5 rounded">{relationship.sourceKey}</code></span>
-                            </div>
-                            <div className="text-slate-500">
-                              → Chiếu tới bảng <span className="font-medium text-emerald-600">{relationship.targetEntityName}</span> (khoá: {relationship.targetKey})
-                            </div>
-                            {relationship.targetDisplayField && (
-                              <div className="text-teal-700 mt-1 font-medium bg-teal-50 inline-flex px-1.5 py-0.5 rounded border border-teal-100 items-center justify-center">
-                                Cột hiển thị: {relationship.targetDisplayField}
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 text-xs">
-                         <div className="flex flex-col gap-0.5">
-                            <span className="text-slate-700 font-medium">{relationship.updatedDate || relationship.createdDate}</span>
-                            <span className="text-slate-500">{relationship.updatedBy || relationship.createdBy}</span>
-                         </div>
-                      </td>
-                      {!isViewOnly && (
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end gap-1.5 opacity-60 hover:opacity-100 transition-opacity">
-                            <button
-                              onClick={() => {
-                                 setApprovalRequestData({
-                                    id: relationship.id,
-                                    code: relationship.relationshipType,
-                                    name: `${relationship.sourceEntityName} - ${relationship.targetEntityName}`,
-                                    type: 'attribute'
-                                 });
-                                 setApprovalRequestForm({ reviewer: '', note: '' });
-                                 setShowApprovalModal(true);
-                              }}
-                              className="p-1.5 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                              title="Gửi phê duyệt"
-                            >
-                              <Send className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleEdit(relationship)}
-                              className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                              title="Chỉnh sửa"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(relationship.id)}
-                              className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                              title="Xóa"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      )}
-                    </tr>
-                  );
-                })
+      {/* Danh sách quan hệ đang cấu hình (pending) */}
+      {(pendingList.length > 0 || !isViewOnly) && (
+        <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
+          <div className="px-5 py-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className={`w-4 h-4 ${pendingList.length > 0 ? 'text-emerald-500' : 'text-slate-300'}`} />
+              <p className="text-[13px] font-semibold text-slate-700">
+                Danh sách quan hệ đang cấu hình
+              </p>
+              {pendingList.length > 0 && (
+                <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[13px] font-semibold rounded-full">{pendingList.length}</span>
               )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Form Modal */}
-      {showForm && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-[9999]">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-white shadow-sm shrink-0">
-              <h3 className="text-[18px] font-bold text-black flex items-center gap-2">
-                <Network className="w-5 h-5 text-blue-600" />
-                {editingRelationship ? 'Chỉnh sửa quan hệ thực thể' : 'Thêm quan hệ thực thể mới'}
-              </h3>
-              <button title="Đóng" onClick={handleCloseForm} className="p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 rounded-lg transition-colors">
-                <X className="w-5 h-5" />
-              </button>
             </div>
-
-            <div className="p-6 overflow-y-auto space-y-6 custom-scrollbar">
-              {/* Entity Selection */}
-              <div className="space-y-4 relative z-20">
-                <h4 className="text-[15px] font-bold text-black border-b border-slate-100 pb-2">1. Chọn thực thể liên kết</h4>
-                
-                <div className="grid grid-cols-2 gap-6 relative">
-                  <SearchableSelect 
-                    label="Thực thể nguồn"
-                    options={entities.map(e => ({ value: e.id, label: `${e.code} - ${e.name}` }))} 
-                    value={formData.sourceEntityId || ''} 
-                    onChange={v => setFormData({ ...formData, sourceEntityId: v, sourceKey: '' })}
-                    placeholder="-- Tìm & chọn danh mục nguồn --" 
-                  />
-                  <SearchableSelect 
-                    label="Thực thể đích"
-                    options={entities.filter(e => e.id !== formData.sourceEntityId).map(e => ({ value: e.id, label: `${e.code} - ${e.name}` }))} 
-                    value={formData.targetEntityId || ''} 
-                    onChange={v => setFormData({ ...formData, targetEntityId: v, targetKey: '', targetDisplayField: '' })}
-                    placeholder="-- Tìm & chọn danh mục đích --" 
-                  />
-                </div>
-
-                {/* Existing relationships banner */}
-                {formData.sourceEntityId && formData.targetEntityId && existingRelationsBetween.length > 0 && (
-                   <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex gap-3 text-sm mt-2">
-                      <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
-                      <div>
-                         <p className="font-bold text-amber-900">Lưu ý: Giữa 2 danh mục này đã tồn tại {existingRelationsBetween.length} quan hệ:</p>
-                         <ul className="list-disc pl-5 mt-1 text-amber-800">
-                            {existingRelationsBetween.map(r => (
-                               <li key={r.id}>
-                                  Loại: <b>{relationTypeLabels[r.relationshipType]}</b> (Khoá nối: {r.sourceKey} ↔ {r.targetKey})
-                               </li>
-                            ))}
-                         </ul>
-                      </div>
-                   </div>
-                )}
-
-                {/* Visual Representation */}
-                {formData.sourceEntityId && formData.targetEntityId && (
-                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 mt-4 flex items-center justify-center gap-6 relative z-10">
-                    <div className="flex flex-col items-center gap-2 flex-1">
-                      <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold">A</div>
-                      <span className="text-[14px] font-bold text-black text-center">
-                        {entities.find(e => e.id === formData.sourceEntityId)?.name}
-                      </span>
-                    </div>
-                    <ArrowRight className="w-6 h-6 text-slate-400 shrink-0" />
-                    <div className="flex flex-col items-center gap-2 flex-1">
-                      <div className="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center font-bold">B</div>
-                      <span className="text-[14px] font-bold text-black text-center">
-                        {entities.find(e => e.id === formData.targetEntityId)?.name}
-                      </span>
-                    </div>
-                  </div>
-                )}
+            {pendingList.length > 0 && !isViewOnly && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    setApprovalRequestData({ id: `batch-${Date.now()}`, code: 'BATCH', name: `${pendingList.length} quan hệ mới`, type: 'attribute' });
+                    setApprovalRequestForm({ reviewer: '', note: '' });
+                    setShowApprovalModal(true);
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-[13px] font-medium active:scale-95"
+                >
+                  <Send className="w-4 h-4" />
+                  Lưu tất cả & trình duyệt
+                </button>
+                <button
+                  onClick={handleSaveAll}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-[13px] font-medium active:scale-95"
+                >
+                  <Save className="w-4 h-4" />
+                  Lưu tất cả ({pendingList.length})
+                </button>
               </div>
-
-              {/* Relation Type */}
-              <div className="space-y-4 pt-2 relative z-10">
-                <h4 className="text-[15px] font-bold text-black border-b border-slate-100 pb-2">2. Loại quan hệ</h4>
-                
-                <div>
-                  <label className="block text-[14px] font-semibold text-black mb-2">
-                    Chọn loại quan hệ <span className="text-red-600">*</span>
-                  </label>
-                  <select
-                    title="Chọn loại quan hệ"
-                    value={formData.relationshipType}
-                    onChange={(e: any) => setFormData({ ...formData, relationshipType: e.target.value as RelationshipType })}
-                    className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-[14px]"
-                  >
-                    {Object.entries(relationTypeLabels).map(([value, label]) => (
-                      <option key={value} value={value}>{label}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Link Conditions */}
-              <div className="space-y-4 pt-2 relative z-0">
-                <h4 className="text-[15px] font-bold text-black border-b border-slate-100 pb-2 flex items-center justify-between">
-                  <span>3. Điều kiện liên kết</span>
-                  {(!formData.sourceEntityId || !formData.targetEntityId) && (
-                    <span className="text-xs text-orange-600 bg-orange-50 font-normal px-2 py-1 rounded-md border border-orange-100">
-                      Vui lòng chọn xong thực thể để tải danh sách các trường (thuộc tính)
-                    </span>
-                  )}
-                </h4>
-
-                {(formData.sourceEntityId && formData.targetEntityId) ? (
-                  formData.relationshipType === 'n-n' ? (
-                    // Many-to-Many: Mapping Table
-                    <div className="bg-purple-50 border border-purple-200 rounded-xl p-5 space-y-4">
-                      <div className="flex items-center gap-2">
-                        <Table className="w-5 h-5 text-purple-600" />
-                        <span className="text-[14px] font-bold text-purple-900">Bảng liên kết (Mapping Table)</span>
-                      </div>
-                      
-                      <div className="space-y-4">
-                        <div>
-                          <label className="block text-[13px] font-semibold text-black mb-1.5">
-                            Tên bảng liên kết <span className="text-red-600">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            value={formData.mappingTable || ''}
-                            onChange={(e: any) => setFormData({ ...formData, mappingTable: e.target.value })}
-                            placeholder="VD: tbl_map_citizen_organization"
-                            className="w-full px-4 py-2 border border-slate-300 bg-white rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-purple-500"
-                          />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-[13px] font-semibold text-black mb-1.5">
-                              Khoá ngoại đại diện Nguồn <span className="text-red-600">*</span>
-                            </label>
-                            <input
-                              type="text"
-                              value={formData.sourceKey || ''}
-                              onChange={(e: any) => setFormData({ ...formData, sourceKey: e.target.value })}
-                              placeholder="VD: citizen_id"
-                              className="w-full px-4 py-2 border border-slate-300 bg-white rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-purple-500"
-                            />
-                            <p className="text-[11px] text-slate-500 mt-1">Trường khoá ngoại lưu trong bảng Map tương ứng của Danh mục {entities.find(e => e.id === formData.sourceEntityId)?.name}</p>
-                          </div>
-
-                          <div>
-                            <label className="block text-[13px] font-semibold text-black mb-1.5">
-                              Khoá ngoại đại diện Đích <span className="text-red-600">*</span>
-                            </label>
-                            <input
-                              type="text"
-                              value={formData.targetKey || ''}
-                              onChange={(e: any) => setFormData({ ...formData, targetKey: e.target.value })}
-                              placeholder="VD: organization_id"
-                              className="w-full px-4 py-2 border border-slate-300 bg-white rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-purple-500"
-                            />
-                            <p className="text-[11px] text-slate-500 mt-1">Trường khoá ngoại lưu trong bảng Map tương ứng của Danh mục {entities.find(e => e.id === formData.targetEntityId)?.name}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    // One-to-Many or One-to-One: Foreign Key
-                    <div className="bg-blue-50/50 border border-blue-200 rounded-xl p-5 space-y-4">
-                      <div className="flex items-center gap-2">
-                        <Key className="w-5 h-5 text-blue-600" />
-                        <span className="text-[14px] font-bold text-blue-900">Khóa ngoại (Foreign Key)</span>
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-6">
-                        <div>
-                          <label className="block text-[13px] font-semibold text-black mb-1.5">
-                            Khóa nguồn (Source Field) <span className="text-red-600">*</span>
-                          </label>
-                          <select
-                            title="Chọn trường nguồn"
-                            value={formData.sourceKey || ''}
-                            onChange={(e: any) => setFormData({ ...formData, sourceKey: e.target.value })}
-                            className="w-full px-4 py-2 border border-slate-300 bg-white rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono shadow-sm"
-                          >
-                            <option value="">-- Chọn trường thuộc tính Nguồn --</option>
-                            {sourceAttributes.map(attr => (
-                              <option key={attr.id} value={attr.name}>{attr.name} ({attr.displayName} - {attr.type})</option>
-                            ))}
-                          </select>
-                          <p className="text-[11px] text-slate-500 mt-1">Trường nằm trong Danh mục Nguồn</p>
-                        </div>
-
-                        <div>
-                          <label className="block text-[13px] font-semibold text-black mb-1.5">
-                            Khóa đích để đối chiếu (Target Field) <span className="text-red-600">*</span>
-                          </label>
-                          <select
-                            title="Chọn trường đích"
-                            value={formData.targetKey || ''}
-                            onChange={(e: any) => setFormData({ ...formData, targetKey: e.target.value })}
-                            className="w-full px-4 py-2 border border-slate-300 bg-white rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono shadow-sm"
-                          >
-                            <option value="">-- Chọn trường thuộc tính Đích --</option>
-                            {targetAttributes.map(attr => (
-                              <option key={attr.id} value={attr.name}>{attr.name} ({attr.displayName} - {attr.type})</option>
-                            ))}
-                          </select>
-                          <p className="text-[11px] text-slate-500 mt-1">Sẽ dùng trường này để join (Thường là ID hoặc Code)</p>
-                        </div>
-                      </div>
-                      
-                      <div className="pt-2 border-t border-blue-100 mt-2">
-                         <label className="block text-[13px] font-semibold text-emerald-700 mb-1.5">
-                           Trường lấy ra để hiển thị (Lookup Display Field) <span className="text-slate-400 font-normal">(Không bắt buộc)</span>
-                         </label>
-                         <div className="flex gap-4 items-start">
-                           <select
-                             title="Chọn trường hiển thị"
-                             value={formData.targetDisplayField || ''}
-                             onChange={(e: any) => setFormData({ ...formData, targetDisplayField: e.target.value })}
-                             className="w-full max-w-md px-4 py-2 border border-emerald-200 bg-white rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono shadow-sm"
-                           >
-                             <option value="">-- Không chọn --</option>
-                             {targetAttributes.map(attr => (
-                               <option key={attr.id} value={attr.name}>{attr.name} ({attr.displayName})</option>
-                             ))}
-                           </select>
-                           <p className="text-[12px] text-slate-600 flex-1 leading-relaxed bg-white/50 p-2 rounded border border-slate-100">
-                             <Info className="w-3 h-3 inline mr-1 text-slate-400"/>
-                             Là trường (VD: <b>Tên tổ chức</b>) nằm tải từ Danh mục Đích về để hiển thị thay cho chuỗi mã khóa ngoại vô nghĩa trên giao diện người dùng.
-                           </p>
-                         </div>
-                      </div>
-                    </div>
-                  )
-                ) : (
-                  <div className="bg-slate-50 border border-dashed border-slate-300 rounded-lg p-8 text-center text-slate-500">
-                    <p>Hãy chọn thực thể nguồn và đích ở Bước 1 để cấu hình khóa</p>
-                  </div>
-                )}
-              </div>
-
-            </div>
-
-            <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-100 bg-slate-50 shrink-0">
-              <button
- onClick={handleCloseForm}
- className="px-6 py-2.5 text-black bg-white border border-slate-300 hover:bg-slate-50 rounded-lg transition-colors text-[14px]"
- >
-                Hủy
-              </button>
-              <button
- onClick={() => {
- setApprovalRequestData({
- id: editingRelationship?.id || `rel-${Date.now()}`,
- code: formData.relationshipType || '',
- name: `Cấu hình quan hệ mới`,
- type: 'attribute'
- });
- setApprovalRequestForm({ reviewer: '', note: '' });
- setShowApprovalModal(true);
- }}
- className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-200 text-[14px]"
- >
- <Send className="w-4 h-4" />
- Lưu & trình duyệt
- </button>
-              <button
- onClick={handleSubmit}
- className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200 text-[14px]"
- >
-                <Save className="w-4 h-4" />
-                {editingRelationship ? 'Lưu cập nhật' : 'Thêm quan hệ'}
-              </button>
-            </div>
+            )}
           </div>
+
+          {pendingList.length === 0 ? (
+            <div className="px-5 py-8 text-center text-[13px] text-slate-400">
+              Chưa có quan hệ nào trong danh sách. Cấu hình và nhấn <b>Thêm vào danh sách</b> để bắt đầu.
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              {pendingList.map((rel, idx) => {
+                const sourceEntity = allEntities.find(e => e.id === rel.sourceEntityId);
+                const targetEntity = allEntities.find(e => e.id === rel.targetEntityId);
+                return (
+                  <div key={rel.id} className="px-5 py-3.5 flex items-center gap-4 hover:bg-slate-50/50 transition-colors">
+                    {/* Index */}
+                    <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-[13px] font-bold flex items-center justify-center shrink-0">{idx + 1}</span>
+
+                    {/* Entities */}
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <span className="text-[13px] font-semibold text-slate-800 truncate">{sourceEntity?.name || rel.sourceEntityId}</span>
+                      <ArrowRight className="w-4 h-4 text-slate-400 shrink-0" />
+                      <span className="text-[13px] font-semibold text-slate-800 truncate">{targetEntity?.name || rel.targetEntityId}</span>
+                    </div>
+
+                    {/* Relation type badge */}
+                    <span className={`px-2 py-0.5 rounded border text-[13px] font-semibold shrink-0 ${relationTypeColors[rel.relationshipType]}`}>
+                      {rel.relationshipType}
+                    </span>
+
+                    {/* Key info */}
+                    <span className="text-[13px] text-slate-500 font-mono shrink-0">
+                      {rel.relationshipType === 'n-n'
+                        ? rel.mappingTable
+                        : `${rel.sourceKey} ↔ ${rel.targetKey}`
+                      }
+                    </span>
+
+                    {/* Remove */}
+                    {!isViewOnly && (
+                      <button
+                        onClick={() => handleRemoveFromPending(rel.id)}
+                        className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors shrink-0"
+                        title="Xóa khỏi danh sách"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 
@@ -710,19 +545,13 @@ export function RelationshipsTab({
         setForm={setApprovalRequestForm}
         onSubmit={() => {
           if (!approvalRequestForm.reviewer) {
-            setGenericConfirm({
-              isOpen: true, type: 'warning', title: 'Lỗi xác thực', subtitle: 'Thiếu thông tin',
-              message: 'Vui lòng chọn Người phê duyệt!', confirmText: 'Đóng', onConfirm: () => setGenericConfirm(null)
-            });
+            setGenericConfirm({ isOpen: true, type: 'warning', title: 'Lỗi xác thực', subtitle: 'Thiếu thông tin', message: 'Vui lòng chọn Người phê duyệt!', confirmText: 'Đóng', onConfirm: () => setGenericConfirm(null) });
             return;
           }
-
-          handleSubmit(); // Lưu form nếu có
+          handleSaveAll();
           setShowApprovalModal(false);
           setTimeout(() => {
-            setGenericConfirm({
-              isOpen: true, type: 'success', title: 'Thành công', subtitle: '', message: 'Đã gửi yêu cầu trình duyệt thành công!', confirmText: 'Đóng', onConfirm: () => setGenericConfirm(null)
-            });
+            setGenericConfirm({ isOpen: true, type: 'success', title: 'Thành công', subtitle: '', message: 'Đã gửi yêu cầu trình duyệt thành công!', confirmText: 'Đóng', onConfirm: () => setGenericConfirm(null) });
           }, 300);
         }}
       />
@@ -732,7 +561,6 @@ export function RelationshipsTab({
 
 // Custom Component: Searchable Select
 interface SearchableSelectProps {
-
   label: string;
   placeholder?: string;
   options: { value: string; label: string }[];
@@ -751,8 +579,8 @@ function SearchableSelect({ label, placeholder, options, value, onChange }: Sear
         setIsOpen(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const selectedOption = options.find(o => o.value === value);
@@ -760,52 +588,48 @@ function SearchableSelect({ label, placeholder, options, value, onChange }: Sear
 
   return (
     <div className="relative" ref={wrapperRef}>
-      <label className="block text-[14px] font-semibold text-black mb-2">
-        {label} <span className="text-red-600">*</span>
+      <label className="block text-[13px] font-medium text-slate-600 mb-1.5">
+        {label} <span className="text-red-500">*</span>
       </label>
-      
-      <div 
-        className={`w-full px-4 py-2 border rounded-lg flex items-center justify-between cursor-pointer bg-white text-[14px] transition-colors
-          ${isOpen ? 'border-blue-500 ring-2 ring-blue-100' : 'border-slate-300 hover:border-slate-400'}`}
+      <div
+        className={`w-full px-3 py-2 border rounded-lg flex items-center justify-between cursor-pointer bg-white text-[13px] transition-colors
+          ${isOpen ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-slate-300 hover:border-slate-400'}`}
         onClick={() => { setIsOpen(!isOpen); setSearchTerm(''); }}
       >
-        <span className={selectedOption ? 'text-black font-medium' : 'text-slate-400'}>
+        <span className={selectedOption ? 'text-slate-800 font-medium' : 'text-slate-400'}>
           {selectedOption ? selectedOption.label : (placeholder || '-- Chọn --')}
         </span>
-        <ChevronDown className="w-4 h-4 text-slate-400" />
+        <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
       </div>
 
       {isOpen && (
-        <div className="absolute top-[full] left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl z-50 overflow-hidden">
+        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl z-50 overflow-hidden">
           <div className="p-2 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
             <Search className="w-4 h-4 text-slate-400 shrink-0" />
-            <input 
-              type="text" 
-              className="w-full bg-transparent text-sm focus:outline-none placeholder:text-slate-400"
+            <input
+              type="text"
+              className="w-full bg-transparent text-[13px] focus:outline-none placeholder:text-slate-400"
               placeholder="Tìm kiếm..."
               value={searchTerm}
-              onChange={(e: any) => setSearchTerm(e.target.value)}
-              onClick={(e: any) => e.stopPropagation()}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+              onClick={(e: MouseEvent<HTMLInputElement>) => e.stopPropagation()}
               autoFocus
             />
           </div>
-          <div className="max-h-60 overflow-y-auto">
+          <div className="max-h-52 overflow-y-auto">
             {filteredOptions.length > 0 ? (
               filteredOptions.map(option => (
-                <div 
+                <div
                   key={option.value}
-                  className={`px-4 py-2 text-sm cursor-pointer hover:bg-blue-50 transition-colors
-                    ${option.value === value ? 'bg-blue-50 text-blue-700 font-bold border-l-2 border-blue-600' : 'text-slate-700 border-l-2 border-transparent'}`}
-                  onClick={() => {
-                    onChange(option.value);
-                    setIsOpen(false);
-                  }}
+                  className={`px-3 py-2 text-[13px] cursor-pointer hover:bg-blue-50 transition-colors
+                    ${option.value === value ? 'bg-blue-50 text-blue-700 font-semibold border-l-2 border-blue-600' : 'text-slate-700 border-l-2 border-transparent'}`}
+                  onClick={() => { onChange(option.value); setIsOpen(false); }}
                 >
                   {option.label}
                 </div>
               ))
             ) : (
-              <div className="px-4 py-3 text-sm text-slate-500 text-center italic">Không tìm thấy kết quả</div>
+              <div className="px-4 py-3 text-[13px] text-slate-500 text-center italic">Không tìm thấy kết quả</div>
             )}
           </div>
         </div>

@@ -101,20 +101,31 @@
 
 ## 4. PHÂN HỆ ĐỐI SOÁT DỮ LIỆU
 
-- `[ ]` Template đối soát (dùng chung) (`reconciliation/ReconciliationTemplate.tsx`)
-- `[ ]` Đối soát nội bộ (`reconciliation/InternalReconciliationPage.tsx`)
+### Trang chính
+- `[ ]` Trang đối soát tổng hợp — theo dõi lệch từ nguồn → thu thập → xử lý → cung cấp (`pages/DataReconciliationPage.tsx`)
+- `[ ]` Trang thiết lập đối soát tổng (`pages/ReconciliationSetupPage.tsx`)
+
+### Đối soát theo loại dữ liệu
+- `[ ]` Template đối soát (dùng chung cho các trang đối soát) (`reconciliation/ReconciliationTemplate.tsx`)
+- `[ ]` Đối soát dữ liệu nội bộ (`reconciliation/InternalReconciliationPage.tsx`)
 - `[ ]` Đối soát danh mục bên ngoài (`reconciliation/ExternalCategoriesReconciliationPage.tsx`)
-- `[ ]` Đối soát bản án tòa án (`reconciliation/ExternalCourtJudgmentReconciliationPage.tsx`)
-- `[ ]` Trang thiết lập đối soát tổng (`ReconciliationSetupPage.tsx`)
+- `[ ]` Đối soát bản án / quyết định TAND (`reconciliation/ExternalCourtJudgmentReconciliationPage.tsx`)
+
+### Tabs trong trang thiết lập đối soát
 - `[ ]` Tab Thiết lập dịch vụ đối soát (`reconciliation/ReconciliationServiceSetupTab.tsx`)
 - `[ ]` Tab Lịch sử đối soát (`reconciliation/ReconciliationHistoryTab.tsx`)
 - `[ ]` Tab Nhật ký đối soát (`reconciliation/ReconciliationLogTab.tsx`)
-- `[ ]` Modal chi tiết đối soát (`reconciliation/ReconciliationDetailModal.tsx`)
+
+### Modals đối soát
+- `[ ]` Modal chi tiết bản ghi đối soát (`reconciliation/ReconciliationDetailModal.tsx`)
 - `[ ]` Modal tiến trình đồng bộ thủ công (`reconciliation/ManualSyncProgressModal.tsx`)
-- `[ ]` Modal thêm cấu hình dịch vụ (`reconciliation/AddServiceConfigModal.tsx`)
-- `[ ]` Modal xác nhận xóa (`reconciliation/DeleteConfirmModal.tsx`)
-- `[ ]` Modal chi tiết lỗi (`reconciliation/ErrorDetailsModal.tsx`)
-- `[ ]` Đối soát qua API (`orchestration/DataReconciliationAPIPage.tsx`)
+- `[ ]` Modal thêm / sửa cấu hình dịch vụ (`reconciliation/AddServiceConfigModal.tsx`)
+- `[ ]` Modal xác nhận xóa cấu hình (`reconciliation/DeleteConfirmModal.tsx`)
+- `[ ]` Modal chi tiết lỗi đối soát (`reconciliation/ErrorDetailsModal.tsx`)
+- `[ ]` Modal tạo gói đối soát LGSP (`modals/CreateLGSPReconciliationModal.tsx`)
+
+### Đối soát điều phối (Orchestration)
+- `[ ]` Quản lý API đối soát — điều phối dữ liệu qua LGSP/NGSP (`orchestration/DataReconciliationAPIPage.tsx`)
 
 ---
 

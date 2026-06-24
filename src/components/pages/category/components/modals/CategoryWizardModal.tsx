@@ -63,7 +63,7 @@ export function CategoryWizardModal({
           <div className="flex flex-col border-b border-slate-200 bg-white shrink-0">
             <div className="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-white">
               <h3 className="text-[18px] font-semibold text-slate-900">
-                {isViewOnly ? 'Chi tiết danh mục dùng chung' : (entityId ? 'Hiệu chỉnh danh mục dùng chung' : 'Thiết lập danh mục dùng chung mới')}
+                {isViewOnly ? 'Chi tiết danh mục dùng chung' : 'Thiết lập danh mục dùng chung'}
               </h3>
               <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors" aria-label="Đóng" title="Đóng">
                 <X className="w-5 h-5" />
@@ -302,6 +302,9 @@ export function CategoryWizardModal({
                   relationships={[]}
                   setRelationships={() => { }}
                   isViewOnly={isViewOnly}
+                  currentEntityId={entityId || undefined}
+                  currentEntityName={formData.name || ''}
+                  currentEntityCode={formData.code || ''}
                 />
               </div>
             )}
@@ -333,9 +336,10 @@ export function CategoryWizardModal({
               )}
               {step < 3 ? (
                 <button onClick={() => {
-                  if (isViewOnly) setStep(step + 1);
-                  else if (step === 1) onSaveStep1('next');
-                  else setStep(step + 1);
+                  if (isViewOnly) { setStep(step + 1); return; }
+                  if (step === 1) { onSaveStep1('next'); return; }
+                  if (step === 2) { onSaveStep1('draft'); setStep(3); return; }
+                  setStep(step + 1);
                 }} className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[13px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm">
                   Tiếp tục <ChevronRight className="w-4 h-4" />
                 </button>
