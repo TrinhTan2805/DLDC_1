@@ -1,5 +1,16 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Phiên bản 2.5.35 (Ngày cập nhật: 24/06/2026)
+
+**Nội dung thay đổi (Đồng bộ code mới từ remote):**
+1. Thực hiện kéo mã nguồn mới nhất từ remote (`git pull origin main`).
+2. Giải quyết xung đột (merge conflict) trong file `package.json` bằng cách giữ phiên bản hiện tại `2.5.34` (so với `2.5.30` từ nhánh remote).
+
+**Các file bị ảnh hưởng:**
+- [package.json](file:///f:/BTP/DLDC_1/package.json)
+
+---
+
 ## Phiên bản 2.5.30 (Ngày cập nhật: 24/06/2026)
 
 > Lưu ý: File thuộc Phân hệ 4 (Đối soát dữ liệu) đang `[ ]` LOCKED. Thay đổi theo **chỉ đạo trực tiếp của PM**, đã duyệt mockup trước khi code. Áp dụng cho **cả 3 màn đối soát** (template dùng chung).
