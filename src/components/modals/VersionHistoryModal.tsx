@@ -7,6 +7,22 @@ interface VersionHistoryModalProps {
 
 const mockVersions = [
   {
+    id: 20,
+    version: 'v2.5.2',
+    date: '24/06/2026',
+    time: '17:10',
+    content: `1. Đồng bộ và Tích hợp thay đổi từ Git (Phân hệ Đối soát & Cung cấp dữ liệu):
+- Tích hợp thay đổi giao diện Đối soát dữ liệu theo mockup: cập nhật bảng kết quả, cột Nguồn/Kho/Lệch, tính toán tổng hợp, và giao diện 2 card của Modal chi tiết đối soát.
+- Ẩn các tab "Thiết lập dịch vụ" và "Nhật ký đối soát" tại trang Đối soát Bộ trong ngành.
+- Tích hợp thay đổi giao diện Tab Báo cáo của màn hình Kiểm soát & Giám sát cung cấp: 4 loại báo cáo, biểu đồ Area/Line/Bar tương thích theo loại báo cáo, cấu hình ngưỡng phản hồi TB và số liệu tổng hợp cho "Tất cả API".
+
+2. Phân hệ Thiết lập danh mục dùng chung (Các thay đổi hôm nay):
+- Áp dụng cấu hình giao diện linh hoạt dựa trên nguồn dữ liệu của danh mục (Tự cập nhật trực tiếp, Đồng bộ Kho DLDC, Kết nối API).
+- Tùy biến bảng thuộc tính động với các cột phù hợp cho từng nguồn dữ liệu (manual, dldc, ndxp/lgsp).
+- Thiết kế lại hộp thông tin cảnh báo thực thể dạng Alert Box (màu vàng/amber), tăng khoảng đệm (padding) lên p-5, icon cảnh báo AlertCircle (w-6 h-6).
+- Tải động dữ liệu thuộc tính mock (Giới tính - dldc, Dân tộc - manual, Quốc gia - API) tương ứng với từng danh mục được lựa chọn.`
+  },
+  {
     id: 19,
     version: 'v2.5.1',
     date: '23/06/2026',

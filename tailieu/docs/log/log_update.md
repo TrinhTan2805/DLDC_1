@@ -2,12 +2,15 @@
 
 ## Phiên bản 2.5.35 (Ngày cập nhật: 24/06/2026)
 
-**Nội dung thay đổi (Đồng bộ code mới từ remote):**
+**Nội dung thay đổi (Đồng bộ code mới từ remote & Cập nhật Lịch sử triển khai):**
 1. Thực hiện kéo mã nguồn mới nhất từ remote (`git pull origin main`).
 2. Giải quyết xung đột (merge conflict) trong file `package.json` bằng cách giữ phiên bản hiện tại `2.5.34` (so với `2.5.30` từ nhánh remote).
+3. Cập nhật phiên bản mới `v2.5.2` vào Lịch sử triển khai (`VersionHistoryModal.tsx`) tổng hợp các thay đổi mới kéo về từ Git và các thay đổi trong ngày.
 
 **Các file bị ảnh hưởng:**
 - [package.json](file:///f:/BTP/DLDC_1/package.json)
+- [VersionHistoryModal.tsx](file:///f:/BTP/DLDC_1/src/components/modals/VersionHistoryModal.tsx)
+- [log_update.md](file:///f:/BTP/DLDC_1/tailieu/docs/log/log_update.md)
 
 ---
 
