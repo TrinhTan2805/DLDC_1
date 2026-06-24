@@ -1,5 +1,76 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Phiên bản 2.5.30 (Ngày cập nhật: 24/06/2026)
+
+> Lưu ý: File thuộc Phân hệ 4 (Đối soát dữ liệu) đang `[ ]` LOCKED. Thay đổi theo **chỉ đạo trực tiếp của PM**, đã duyệt mockup trước khi code. Áp dụng cho **cả 3 màn đối soát** (template dùng chung).
+
+**Nội dung thay đổi (làm lại UI Đối soát theo mockup):**
+1. **Bảng danh sách đối soát** (`ReconciliationTemplate.tsx`): đổi cột sang mô hình mới — cột "Thu thập" (mã + tên), **Số bản ghi (Nguồn)**, **Số bản ghi (Kho)**, **Lệch**, Trạng thái, **Ngày đối soát**, Thao tác. Bỏ các cột "Loại đối soát", "Số bản ghi đối soát", "Ngày nhận", "Báo cáo sai lệch", "Tiến trình đồng bộ".
+2. **Dòng "Tổng hợp"** cuối bảng: cộng dồn Nguồn/Kho/Lệch của các bản ghi đang lọc.
+3. **Thẻ thống kê**: thêm thẻ **"Tỷ lệ khớp"** (tổng hợp), chuyển lưới 3 → 4 cột.
+4. **Mock nhất quán**: thêm hàm `deriveCounts` tính Nguồn/Kho/Lệch/Tỷ lệ từ cùng một nguồn (matched → lệch 0, mismatched/error → lệch = số lỗi) → hết mâu thuẫn "đã gửi 0 / sai lệch lớn / vẫn khớp". Mở rộng interface `ReconciliationRecord` thêm `sentCount?`, `receivedCount?`.
+5. **Modal chi tiết** (`ReconciliationDetailModal.tsx`): thiết kế lại còn **2 card** (Hệ thống nguồn · Thông tin thu thập gồm tên + mã thu thập), khối **Kết quả đối soát** (Số bản ghi Nguồn/Kho + Sai lệch), tỷ lệ khớp + trạng thái nhất quán; thêm nút **"Đồng bộ lại"** khi lệch; bỏ mã `SYS_HOTICH` hardcode.
+
+**Các file bị ảnh hưởng:**
+- `package.json`
+- `src/components/pages/reconciliation/ReconciliationTemplate.tsx`
+- `src/components/pages/reconciliation/ReconciliationDetailModal.tsx`
+
+---
+
+## Phiên bản 2.5.29 (Ngày cập nhật: 24/06/2026)
+
+> Lưu ý: File thuộc Phân hệ 4 (Đối soát dữ liệu) đang `[ ]` LOCKED. Thay đổi theo **chỉ đạo trực tiếp của PM**.
+
+**Nội dung thay đổi:**
+1. **Ẩn 2 tab "Thiết lập dịch vụ" và "Nhật ký đối soát" ở màn Đối soát Bộ trong ngành** (`InternalReconciliationPage.tsx`) để đồng bộ với các màn Đối soát Bộ ngoài ngành (vốn đã ẩn) — truyền `hideSetupTab={true}` và `hideLogTab={true}` vào `ReconciliationTemplate`. Màn chỉ còn 2 tab: Danh sách đối soát + Lịch sử đối soát.
+
+**Các file bị ảnh hưởng:**
+- `package.json`
+- `src/components/pages/reconciliation/InternalReconciliationPage.tsx`
+
+---
+
+## Phiên bản 2.5.28 (Ngày cập nhật: 24/06/2026)
+
+> Lưu ý: File `src/components/pages/provisioning/DataProvisionMonitoringPage.tsx` (màn Kiểm soát & Giám sát cung cấp) thuộc Phân hệ 9 (Cung cấp dữ liệu) đang `[ ]` LOCKED. Thay đổi thực hiện theo **chỉ đạo trực tiếp mở khóa của PM**, đã duyệt mockup trước khi code.
+
+**Nội dung thay đổi (làm lại UI tab Báo cáo theo UC2):**
+1. **UC2.1 — Chọn loại báo cáo**: thêm bộ chọn 4 loại ngay trên màn (chip): *Lưu lượng dữ liệu · Số lượt truy cập · Thời gian phản hồi · Lỗi kết nối* (bổ sung "Số lượt truy cập" vốn còn thiếu).
+2. **UC2.2 — Biểu đồ trực quan đổi theo loại** (thay biểu đồ cột đơn điệu trước đó):
+   - Lưu lượng → **biểu đồ vùng (Area)** gradient.
+   - Số lượt truy cập → **biểu đồ đường (Line)**.
+   - Thời gian phản hồi → **biểu đồ đường + đường ngưỡng (ReferenceLine)**; **ngưỡng cấu hình được** qua ô nhập inline (mặc định 250ms, state `responseThreshold`), các điểm vượt ngưỡng được tô **đỏ** nổi bật.
+   - Lỗi kết nối → **biểu đồ cột (Bar)** màu đỏ.
+   - Dữ liệu báo cáo theo **ngày trong tháng** (`reportData` 30 ngày, tổng hợp toàn hệ thống).
+3. **Bảng chi tiết** bám theo loại báo cáo đang chọn (Ngày + giá trị, dòng tổng/trung bình), phân trang.
+4. **Đồng bộ thuật ngữ**: đổi *"Độ trễ trung bình"* → **"Thời gian phản hồi TB"** ở thẻ chỉ số; đổi tên tab *"Báo cáo hiệu năng đồ thị"* → **"Báo cáo thống kê"**.
+5. **Kỹ thuật**: import `AreaChart, Area, LineChart, Line, BarChart, Bar, ReferenceLine` từ `recharts` (thay `ComposedChart, Legend`).
+6. Phần **cảnh báo chủ động (UC1.2) tạm gác** theo yêu cầu PM; sơ đồ luồng + nhật ký (UC1.1/1.2) giữ nguyên.
+7. **Thêm lựa chọn "Tất cả API"** (đặt mặc định) ở bộ chọn API: thẻ chỉ số + nhật ký hiển thị **số liệu tổng hợp** toàn bộ API (tổng yêu cầu, tỷ lệ thành công bình quân theo lưu lượng, thời gian phản hồi TB, trạng thái gateway tổng); tab Sơ đồ luồng đổi thành **danh sách API kèm trạng thái kết nối** (bấm "Xem sơ đồ" để xem luồng chi tiết 1 API).
+
+**Các file bị ảnh hưởng:**
+- `package.json`
+- `src/components/pages/provisioning/DataProvisionMonitoringPage.tsx`
+
+---
+
+## Phiên bản 2.5.27 (Ngày cập nhật: 23/06/2026)
+
+> Lưu ý: File `src/components/pages/provisioning/DataProvisionMonitoringPage.tsx` (màn Kiểm soát & Giám sát cung cấp) thuộc Phân hệ 9 (Cung cấp dữ liệu) đang `[ ]` LOCKED trong `stauts.md`. Thay đổi dưới đây thực hiện theo **chỉ đạo trực tiếp mở khóa của PM**.
+
+**Nội dung thay đổi:**
+1. **Bổ sung biểu đồ trực quan cho tab "Báo cáo hiệu năng đồ thị"** (đáp ứng UC2.2 — trước đó tab chỉ có bảng):
+   - Thêm **biểu đồ kết hợp (ComposedChart)** phía trên bảng dữ liệu chi tiết: **cột** thể hiện *Luồng dữ liệu* (trục Y trái), **đường** thể hiện *Lỗi kết nối* (trục Y phải) — dùng 2 trục vì số lỗi nhỏ hơn lưu lượng nhiều lần.
+   - Màu theo design system: cột `#2563eb`, đường lỗi `#dc2626`; có lưới, chú thích (Legend), tooltip.
+   - Bổ sung import `ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer` từ `recharts`.
+
+**Các file bị ảnh hưởng:**
+- `package.json`
+- `src/components/pages/provisioning/DataProvisionMonitoringPage.tsx`
+
+---
+
 ## Phiên bản 2.5.26 (Ngày cập nhật: 23/06/2026)
 
 > Lưu ý: File `src/components/collection/CollectionDashboard.tsx` thuộc Phân hệ 2 (Thu thập dữ liệu) đang ở trạng thái `[ ]` LOCKED trong `stauts.md`. Thay đổi dưới đây được thực hiện theo **chỉ đạo trực tiếp mở khóa của PM**.

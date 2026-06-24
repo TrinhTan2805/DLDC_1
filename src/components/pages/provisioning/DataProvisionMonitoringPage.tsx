@@ -8,6 +8,7 @@ import {
 import { ProvisionExportReportModal } from './modals/ProvisionExportReportModal';
 import { AuditLogsTab } from './tabs/AuditLogsTab';
 import { ScrollText } from 'lucide-react';
+import { AreaChart, Area, LineChart, Line, BarChart, Bar, ReferenceLine, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 // High-fidelity mock stats based on API
 const apiMockStats: Record<string, {
@@ -104,13 +105,31 @@ const apiList = [
 
 const databases = Array.from(new Set(apiList.map(api => api.database)));
 
+// Dữ liệu báo cáo thống kê theo ngày trong tháng (tổng hợp toàn hệ thống — UC2)
+const reportBase = [150, 210, 180, 260, 300, 90, 70, 160, 230, 200, 280, 310, 100, 80, 170, 240, 190, 300, 290, 110, 75, 165, 225, 205, 295, 320, 95, 70, 180, 250];
+const reportData = reportBase.map((v, i) => ({
+  day: `${String(i + 1).padStart(2, '0')}/06`,
+  luuLuong: v,
+  luotTruyCap: Math.round(v * 3.5),
+  thoiGianPhanHoi: Math.round(110 + v * 0.7),
+  loiKetNoi: i % 9 === 0 ? 14 : (i % 5 === 0 ? 6 : 1),
+}));
+
+// Các loại báo cáo (UC2.1) — mỗi loại có kiểu biểu đồ phù hợp (UC2.2)
+const reportTypes: Array<{ key: string; label: string; dataKey: string; unit: string; chart: 'area' | 'line' | 'threshold' | 'bar'; threshold?: number; color: string }> = [
+  { key: 'luuluong', label: 'Lưu lượng dữ liệu', dataKey: 'luuLuong', unit: 'MB', chart: 'area', color: '#2563eb' },
+  { key: 'truycap', label: 'Số lượt truy cập', dataKey: 'luotTruyCap', unit: 'lượt', chart: 'line', color: '#2563eb' },
+  { key: 'phanhoi', label: 'Thời gian phản hồi', dataKey: 'thoiGianPhanHoi', unit: 'ms', chart: 'threshold', threshold: 250, color: '#2563eb' },
+  { key: 'loi', label: 'Lỗi kết nối', dataKey: 'loiKetNoi', unit: 'lỗi', chart: 'bar', color: '#dc2626' },
+];
+
 export function DataProvisionMonitoringPage() {
   const [activeTab, setActiveTab] = useState<'luong_du_lieu' | 'bao_cao' | 'nhat_ky'>('luong_du_lieu');
   const [showExportModal, setShowExportModal] = useState(false);
   
   // API monitoring select state
   const [selectedDatabase, setSelectedDatabase] = useState<string>('');
-  const [selectedApi, setSelectedApi] = useState<string>('Lấy danh sách Hộ tịch');
+  const [selectedApi, setSelectedApi] = useState<string>('');
   
   // Pagination for detailed table
   const [tablePage, setTablePage] = useState(1);
@@ -120,7 +139,7 @@ export function DataProvisionMonitoringPage() {
 
   // Auto-select first API when database changes
   React.useEffect(() => {
-    if (selectedDatabase) {
+    if (selectedDatabase && selectedApi !== '') {
       const isApiInDb = filteredApis.find(a => a.id === selectedApi);
       if (!isApiInDb && filteredApis.length > 0) {
         setSelectedApi(filteredApis[0].id);
@@ -135,11 +154,40 @@ export function DataProvisionMonitoringPage() {
   // Log Detail modal state
   const [selectedLog, setSelectedLog] = useState<any>(null);
 
-  const stats = apiMockStats[selectedApi] || apiMockStats['Lấy danh sách Hộ tịch'];
+  const isAllApi = selectedApi === '';
+  const stats = apiMockStats[selectedApi] || apiMockStats[filteredApis[0]?.id] || apiMockStats['Lấy danh sách Hộ tịch'];
+
+  // Tổng hợp số liệu khi chọn "Tất cả API"
+  const aggregateStats = React.useMemo(() => {
+    const list = filteredApis.map(a => apiMockStats[a.id]).filter(Boolean);
+    const totalRequests = list.reduce((s, x) => s + x.totalRequests, 0);
+    const wSuccess = totalRequests ? list.reduce((s, x) => s + x.totalRequests * parseFloat(x.successRate), 0) / totalRequests : 0;
+    const wLatency = totalRequests ? list.reduce((s, x) => s + x.totalRequests * parseInt(x.avgLatency), 0) / totalRequests : 0;
+    const hasError = list.some(x => x.sourceConnection === 'error' || (x.partners || []).some(p => p.connection === 'error'));
+    const logs = list.flatMap(x => x.logs);
+    return {
+      totalRequests,
+      successRate: wSuccess.toFixed(1) + '%',
+      avgLatency: Math.round(wLatency) + ' ms',
+      gatewayStatus: hasError ? 'Có cảnh báo' : 'Hoạt động tốt',
+      logs,
+    };
+  }, [filteredApis]);
+
+  const view = isAllApi ? aggregateStats : stats;
 
   const paginatedChartData = React.useMemo(() => {
     return stats.chartData.slice((tablePage - 1) * tableItemsPerPage, tablePage * tableItemsPerPage);
   }, [stats.chartData, tablePage, tableItemsPerPage]);
+
+  // Loại báo cáo đang chọn (UC2.1)
+  const [reportType, setReportType] = useState('luuluong');
+  const currentReportType = reportTypes.find(r => r.key === reportType) || reportTypes[0];
+  // Ngưỡng cảnh báo thời gian phản hồi (ms) — cấu hình được
+  const [responseThreshold, setResponseThreshold] = useState(250);
+  const paginatedReport = React.useMemo(() => {
+    return reportData.slice((tablePage - 1) * tableItemsPerPage, tablePage * tableItemsPerPage);
+  }, [tablePage, tableItemsPerPage]);
 
   const renderTablePagination = (totalItems: number) => {
     const totalPages = Math.ceil(totalItems / tableItemsPerPage) || 1;
@@ -251,6 +299,7 @@ export function DataProvisionMonitoringPage() {
                   onChange={(e) => setSelectedApi(e.target.value)}
                   className="text-xs font-semibold text-blue-700 bg-transparent focus:outline-none cursor-pointer max-w-[200px] truncate"
                 >
+                  <option value="">Tất cả API</option>
                   {filteredApis.map(api => (
                     <option key={api.id} value={api.id}>{api.name}</option>
                   ))}
@@ -276,8 +325,8 @@ export function DataProvisionMonitoringPage() {
               <Activity className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <span className="stat-card-title text-[16px] text-slate-500 block">Tổng số yêu cầu (7 ngày)</span>
-              <span className="text-xl font-bold text-slate-800 block">{stats.totalRequests.toLocaleString()}</span>
+              <span className="stat-card-title text-[16px] text-slate-500 block">Tổng số yêu cầu</span>
+              <span className="text-xl font-bold text-slate-800 block">{view.totalRequests.toLocaleString()}</span>
             </div>
           </div>
           <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
@@ -286,7 +335,7 @@ export function DataProvisionMonitoringPage() {
             </div>
             <div>
               <span className="stat-card-title text-[16px] text-slate-500 block">Tỷ lệ thành công</span>
-              <span className="text-xl font-bold text-emerald-600 block">{stats.successRate}</span>
+              <span className="text-xl font-bold text-emerald-600 block">{view.successRate}</span>
             </div>
           </div>
           <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
@@ -294,8 +343,8 @@ export function DataProvisionMonitoringPage() {
               <Clock className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <span className="stat-card-title text-[16px] text-slate-500 block">Độ trễ trung bình</span>
-              <span className="text-xl font-bold text-blue-600 block">{stats.avgLatency}</span>
+              <span className="stat-card-title text-[16px] text-slate-500 block">Thời gian phản hồi TB</span>
+              <span className="text-xl font-bold text-blue-600 block">{view.avgLatency}</span>
             </div>
           </div>
           <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
@@ -305,8 +354,8 @@ export function DataProvisionMonitoringPage() {
             <div>
               <span className="stat-card-title text-[16px] text-slate-500 block">Trạng thái Cổng Gateway</span>
               <span className="text-xl font-bold text-slate-800 block flex items-center gap-1.5">
-                <span className="w-2 h-2 bg-emerald-500 rounded-full inline-block animate-pulse"></span>
-                {stats.gatewayStatus}
+                <span className={`w-2 h-2 rounded-full inline-block animate-pulse ${view.gatewayStatus.includes('cảnh báo') ? 'bg-amber-500' : 'bg-emerald-500'}`}></span>
+                {view.gatewayStatus}
               </span>
             </div>
           </div>
@@ -336,7 +385,7 @@ export function DataProvisionMonitoringPage() {
                 }`}
               >
                 <BarChart3 className="w-4 h-4 mr-2" />
-                Báo cáo hiệu năng đồ thị
+                Báo cáo thống kê
               </button>
               <button
                 onClick={() => setActiveTab('nhat_ky')}
@@ -356,7 +405,8 @@ export function DataProvisionMonitoringPage() {
           {activeTab === 'luong_du_lieu' ? (
             <div className="space-y-6">
               
-              {/* Topology flowchart mapping to select API */}
+              {/* Sơ đồ luồng (1 API) hoặc danh sách API (Tất cả API) */}
+              {!isAllApi ? (
               <div className="bg-slate-50 rounded-xl border border-slate-200 p-8 flex items-center justify-center min-h-[300px] overflow-hidden">
                 <div className="flex w-full max-w-5xl items-center relative">
                   
@@ -471,6 +521,41 @@ export function DataProvisionMonitoringPage() {
 
                 </div>
               </div>
+              ) : (
+                <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                  <div className="px-5 py-3 border-b border-slate-200 bg-slate-50 text-[13px] font-semibold text-slate-600">
+                    Danh sách API đang giám sát ({filteredApis.length})
+                  </div>
+                  <div className="divide-y divide-slate-100">
+                    {filteredApis.map(api => {
+                      const st = apiMockStats[api.id];
+                      const err = !!st && (st.sourceConnection === 'error' || (st.partners || []).some(p => p.connection === 'error'));
+                      return (
+                        <div key={api.id} className="flex items-center justify-between gap-3 px-5 py-3 hover:bg-slate-50/70 transition-colors">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <span className={`w-2 h-2 rounded-full inline-block shrink-0 ${err ? 'bg-rose-500' : 'bg-emerald-500'}`}></span>
+                            <div className="min-w-0">
+                              <p className="text-[13px] font-medium text-slate-800 truncate">{api.name}</p>
+                              <p className="text-[11px] text-slate-400 truncate">{api.database}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3 shrink-0">
+                            <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${err ? 'text-rose-600 bg-rose-50 border-rose-100' : 'text-emerald-600 bg-emerald-50 border-emerald-100'}`}>
+                              {err ? 'Có cảnh báo' : 'Kết nối ổn định'}
+                            </span>
+                            <button
+                              onClick={() => setSelectedApi(api.id)}
+                              className="text-[13px] text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+                            >
+                              Xem sơ đồ <ChevronRight className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Dynamic Connection logs for chosen API */}
               <div>
@@ -480,7 +565,7 @@ export function DataProvisionMonitoringPage() {
                 </h3>
                 
                 <div className="border border-slate-200 rounded-lg overflow-hidden divide-y divide-slate-100 bg-white">
-                  {stats.logs.map((log, idx) => (
+                  {view.logs.map((log, idx) => (
                     <div 
                       key={idx}
                       onClick={() => setSelectedLog(log)}
@@ -522,12 +607,108 @@ export function DataProvisionMonitoringPage() {
           ) : activeTab === 'bao_cao' ? (
             <div className="space-y-6">
 
-              {/* Detailed Data Table */}
-              <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm mt-6">
+              {/* UC2.1 — Chọn loại báo cáo */}
+              <div className="flex flex-wrap gap-2">
+                {reportTypes.map(rt => (
+                  <button
+                    key={rt.key}
+                    onClick={() => { setReportType(rt.key); setTablePage(1); }}
+                    className={`px-4 py-2 rounded-lg text-[13px] font-medium border transition-colors ${
+                      reportType === rt.key
+                        ? 'bg-blue-50 border-blue-200 text-blue-700'
+                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    {rt.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* UC2.2 — Biểu đồ trực quan (đổi theo loại báo cáo) */}
+              <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                <div className="px-5 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                  <h3 className="font-bold text-slate-800 text-sm flex items-center">
+                    <BarChart3 className="w-4 h-4 mr-2 text-blue-600" />
+                    {currentReportType.label} theo ngày (Tháng 06/2026)
+                  </h3>
+                  <div className="flex items-center gap-3">
+                    {currentReportType.key === 'phanhoi' && (
+                      <div className="flex items-center gap-2">
+                        <label className="text-[13px] text-slate-500">Ngưỡng cảnh báo:</label>
+                        <input
+                          type="number"
+                          min={0}
+                          value={responseThreshold}
+                          onChange={(e) => setResponseThreshold(Number(e.target.value))}
+                          className="w-20 px-2 py-1 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                        />
+                        <span className="text-[13px] text-slate-500">ms</span>
+                      </div>
+                    )}
+                    <span className="text-[13px] text-slate-500">Đơn vị: {currentReportType.unit}</span>
+                  </div>
+                </div>
+                <div className="p-5">
+                  <div className="w-full" style={{ height: 320 }}>
+                    <ResponsiveContainer width="100%" height={320}>
+                      {currentReportType.chart === 'area' ? (
+                        <AreaChart data={reportData} margin={{ top: 10, right: 16, left: -10, bottom: 0 }}>
+                          <defs>
+                            <linearGradient id="repArea" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3} />
+                              <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                          <XAxis dataKey="day" interval={0} tickFormatter={(v: any) => String(v).slice(0, 2)} tick={{ fill: '#64748b', fontSize: 10 }} axisLine={{ stroke: '#e2e8f0' }} />
+                          <YAxis tick={{ fill: '#64748b', fontSize: 13 }} axisLine={{ stroke: '#e2e8f0' }} />
+                          <Tooltip contentStyle={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '13px' }} />
+                          <Area type="monotone" dataKey="luuLuong" name="Lưu lượng (MB)" stroke="#2563eb" strokeWidth={2} fill="url(#repArea)" />
+                        </AreaChart>
+                      ) : currentReportType.chart === 'bar' ? (
+                        <BarChart data={reportData} margin={{ top: 10, right: 16, left: -10, bottom: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                          <XAxis dataKey="day" interval={0} tickFormatter={(v: any) => String(v).slice(0, 2)} tick={{ fill: '#64748b', fontSize: 10 }} axisLine={{ stroke: '#e2e8f0' }} />
+                          <YAxis allowDecimals={false} tick={{ fill: '#64748b', fontSize: 13 }} axisLine={{ stroke: '#e2e8f0' }} />
+                          <Tooltip contentStyle={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '13px' }} />
+                          <Bar dataKey="loiKetNoi" name="Lỗi kết nối" fill="#dc2626" radius={[4, 4, 0, 0]} maxBarSize={18} />
+                        </BarChart>
+                      ) : (
+                        <LineChart data={reportData} margin={{ top: 10, right: 16, left: -10, bottom: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                          <XAxis dataKey="day" interval={0} tickFormatter={(v: any) => String(v).slice(0, 2)} tick={{ fill: '#64748b', fontSize: 10 }} axisLine={{ stroke: '#e2e8f0' }} />
+                          <YAxis tick={{ fill: '#64748b', fontSize: 13 }} axisLine={{ stroke: '#e2e8f0' }} />
+                          <Tooltip contentStyle={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '13px' }} />
+                          {currentReportType.key === 'phanhoi' ? (
+                            <ReferenceLine y={responseThreshold} stroke="#dc2626" strokeDasharray="4 3" label={{ value: `Ngưỡng ${responseThreshold}ms`, position: 'insideTopRight', fill: '#dc2626', fontSize: 11 }} />
+                          ) : null}
+                          <Line
+                            type="monotone"
+                            dataKey={currentReportType.dataKey}
+                            name={`${currentReportType.label} (${currentReportType.unit})`}
+                            stroke="#2563eb"
+                            strokeWidth={2}
+                            dot={currentReportType.key === 'phanhoi'
+                              ? ((props: any) => {
+                                  const over = props.payload[currentReportType.dataKey] > responseThreshold;
+                                  return <circle key={props.index} cx={props.cx} cy={props.cy} r={over ? 4 : 0} fill="#dc2626" stroke="#fff" strokeWidth={1} />;
+                                }) as any
+                              : false}
+                            activeDot={{ r: 4 }}
+                          />
+                        </LineChart>
+                      )}
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bảng chi tiết theo ngày (theo loại báo cáo đang chọn) */}
+              <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
                 <div className="px-5 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
                   <h3 className="font-bold text-slate-800 text-sm flex items-center">
                     <Database className="w-4 h-4 mr-2 text-blue-600" />
-                    Dữ liệu chi tiết lưu lượng (7 ngày qua)
+                    Dữ liệu chi tiết theo ngày — {currentReportType.label}
                   </h3>
                 </div>
                 <div className="overflow-x-auto">
@@ -535,54 +716,30 @@ export function DataProvisionMonitoringPage() {
                     <thead className="bg-slate-50 text-[13px] font-semibold text-slate-500 border-b border-slate-200 uppercase tracking-tight">
                       <tr>
                         <th className="px-6 py-3 font-semibold">Ngày</th>
-                        <th className="px-6 py-3 font-semibold text-right">Lưu lượng truy cập</th>
-                        <th className="px-6 py-3 font-semibold text-right">Lỗi kết nối</th>
-                        <th className="px-6 py-3 font-semibold text-right">Tỷ lệ lỗi</th>
+                        <th className="px-6 py-3 font-semibold text-right">{currentReportType.label} ({currentReportType.unit})</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {paginatedChartData.map((row, idx) => {
-                        const total = row['Luồng dữ liệu'] + row['Lỗi kết nối'];
-                        const errorRate = total > 0 ? ((row['Lỗi kết nối'] / total) * 100).toFixed(1) : '0.0';
-                        return (
-                          <tr key={idx} className="hover:bg-slate-50/70 transition-colors">
-                            <td className="px-6 py-3 font-medium text-slate-700">{row.name}</td>
-                            <td className="px-6 py-3 text-right text-slate-700 font-mono">{row['Luồng dữ liệu'].toLocaleString()}</td>
-                            <td className="px-6 py-3 text-right font-mono">
-                              {row['Lỗi kết nối'] > 0 ? (
-                                <span className="text-rose-600 font-bold">{row['Lỗi kết nối'].toLocaleString()}</span>
-                              ) : (
-                                <span className="text-slate-400">0</span>
-                              )}
-                            </td>
-                            <td className="px-6 py-3 text-right">
-                              {row['Lỗi kết nối'] > 0 ? (
-                                <span className="text-rose-600 font-medium">{errorRate}%</span>
-                              ) : (
-                                <span className="text-emerald-600 font-medium">0%</span>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
+                      {paginatedReport.map((row, idx) => (
+                        <tr key={idx} className="hover:bg-slate-50/70 transition-colors">
+                          <td className="px-6 py-3 font-medium text-slate-700">{row.day}</td>
+                          <td className="px-6 py-3 text-right font-mono text-slate-700">{(row as any)[currentReportType.dataKey].toLocaleString()}</td>
+                        </tr>
+                      ))}
                       {/* Summary row */}
                       <tr className="bg-slate-50/50 font-bold text-slate-800">
-                        <td className="px-6 py-3">Tổng cộng</td>
+                        <td className="px-6 py-3">{currentReportType.key === 'phanhoi' ? 'Trung bình' : 'Tổng cộng'}</td>
                         <td className="px-6 py-3 text-right font-mono">
-                          {stats.chartData.reduce((acc, row) => acc + row['Luồng dữ liệu'], 0).toLocaleString()}
-                        </td>
-                        <td className="px-6 py-3 text-right font-mono text-rose-600">
-                          {stats.chartData.reduce((acc, row) => acc + row['Lỗi kết nối'], 0).toLocaleString()}
-                        </td>
-                        <td className="px-6 py-3 text-right">
-                          {((stats.chartData.reduce((acc, row) => acc + row['Lỗi kết nối'], 0) /
-                            (stats.chartData.reduce((acc, row) => acc + row['Luồng dữ liệu'] + row['Lỗi kết nối'], 0) || 1)) * 100).toFixed(1)}%
+                          {currentReportType.key === 'phanhoi'
+                            ? Math.round(reportData.reduce((acc, r) => acc + r.thoiGianPhanHoi, 0) / reportData.length).toLocaleString()
+                            : reportData.reduce((acc, r) => acc + (r as any)[currentReportType.dataKey], 0).toLocaleString()}
+                          {currentReportType.key === 'phanhoi' ? ' ms' : ''}
                         </td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
-                {renderTablePagination(stats.chartData.length)}
+                {renderTablePagination(reportData.length)}
               </div>
 
             </div>
