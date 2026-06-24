@@ -1,5 +1,5 @@
 import { ChangeEvent } from 'react';
-import { X, FileText, Sliders, ChevronRight, ChevronLeft, Save, Send, Link2, ChevronDown } from 'lucide-react';
+import { X, FileText, Sliders, ChevronRight, ChevronLeft, Save, Send, Link2, ChevronDown, Check } from 'lucide-react';
 import { AttributesTab } from '../tabs/AttributesTab';
 import { RelationshipsTab } from '../tabs/RelationshipsTab';
 import { MasterDataEntity, MasterDataAttribute, ScopeType, FieldDataType } from '../../categoryTypes';
@@ -69,27 +69,40 @@ export function CategoryWizardModal({
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="flex px-6 bg-white overflow-x-auto border-b border-slate-200">
-              {[
-                { s: 1, label: 'Thông tin chung', icon: FileText },
-                { s: 2, label: 'Thiết lập cấu trúc', icon: Sliders },
-                { s: 3, label: 'Thiết lập quan hệ', icon: Link2 }
-              ].map((item) => {
-                const isActive = step === item.s;
-                const isLocked = !entityId && item.s > 1;
-                return (
-                  <button
-                    key={item.s}
-                    disabled={isLocked}
-                    onClick={() => setStep(item.s)}
-                    className={`flex items-center gap-2 py-3 px-6 border-b-2 text-[13px] font-medium whitespace-nowrap transition-colors ${isActive ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-blue-600'
-                      } ${isLocked ? 'opacity-40 cursor-not-allowed' : ''}`}
-                  >
-                    <item.icon className="w-4 h-4" />
-                    {item.label}
-                  </button>
-                );
-              })}
+            <div className="px-8 py-5 bg-slate-50 border-b border-slate-200">
+              <div className="flex items-center justify-between w-full max-w-3xl mx-auto">
+                {[
+                  { s: 1, label: 'Thông tin chung', icon: FileText },
+                  { s: 2, label: 'Thiết lập cấu trúc', icon: Sliders },
+                  { s: 3, label: 'Thiết lập quan hệ', icon: Link2 }
+                ].map((item, index, array) => {
+                  const isActive = step === item.s;
+                  const isCompleted = step > item.s;
+                  const isLocked = !entityId && item.s > 1;
+                  return (
+                    <div key={item.s} className="flex items-center flex-1 last:flex-none">
+                      <button
+                        disabled={isLocked}
+                        onClick={() => setStep(item.s)}
+                        className={`flex items-center gap-3 group ${isLocked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                      >
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${isActive ? 'border-blue-600 bg-blue-600 text-white shadow-md' : isCompleted ? 'border-blue-600 bg-white text-blue-600' : 'border-slate-300 bg-white text-slate-400 group-hover:border-blue-400 group-hover:text-blue-500'}`}>
+                          {isCompleted ? <Check className="w-5 h-5" /> : <item.icon className="w-5 h-5" />}
+                        </div>
+                        <div className="flex flex-col text-left hidden sm:flex">
+                          <span className={`text-[11px] font-bold uppercase tracking-wider ${isActive || isCompleted ? 'text-blue-600' : 'text-slate-400'}`}>Bước {item.s}</span>
+                          <span className={`text-[13px] font-bold ${isActive ? 'text-slate-900' : isCompleted ? 'text-slate-700' : 'text-slate-500'}`}>{item.label}</span>
+                        </div>
+                      </button>
+                      {index < array.length - 1 && (
+                        <div className="flex-1 mx-4 sm:mx-6 flex items-center">
+                          <div className={`h-1 w-full rounded-full transition-colors ${isCompleted ? 'bg-blue-600' : 'bg-slate-200'}`} />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
@@ -238,17 +251,7 @@ export function CategoryWizardModal({
                       </div>
                     </div>
                   )}
-                  <div className="col-span-2">
-                    <label className="block text-[13px] text-slate-700 mb-2 font-medium">Mô tả mục đích & vai trò</label>
-                    <textarea
-                      disabled={isViewOnly}
-                      rows={4}
-                      value={formData.description || ''}
-                      onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setFormData({ ...formData, description: e.target.value })}
-                      placeholder="Mô tả chi tiết về cấu trúc dữ liệu và cách thức vận hành..."
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 disabled:bg-slate-50 disabled:text-slate-500 font-medium transition-all resize-none shadow-sm bg-white hover:bg-slate-50/30"
-                    />
-                  </div>
+
                 </div>
               </div>
             )}

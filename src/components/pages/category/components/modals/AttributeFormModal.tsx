@@ -38,28 +38,13 @@ export function AttributeFormModal({
         Hủy
       </button>
       <button 
- type="button"
- onClick={onSave} 
- className="px-6 py-2.5 rounded-xl bg-white border border-blue-200 text-blue-600 hover:bg-blue-50 transition-all active:scale-95 text-sm"
- >
-        Lưu tạm
+        type="button"
+        onClick={onSave} 
+        className="px-8 py-2.5 rounded-xl bg-blue-600 text-white hover:bg-blue-700 flex items-center gap-2 shadow-xl shadow-blue-100 transition-all active:scale-95 text-sm"
+      >
+        <Send className="w-4 h-4"/>
+        Lưu
       </button>
-      <button 
- type="button"
- onClick={() => {
- onSave();
- onSaveAndSubmit({
- id: formData.id || 'new',
- code: formData.fieldName || 'ATTR-001',
- name: formData.displayName || 'Thuộc tính mới',
- type: 'attribute'
- });
- }}
- className="px-8 py-2.5 rounded-xl bg-blue-600 text-white hover:bg-blue-700 flex items-center gap-2 shadow-xl shadow-blue-100 transition-all active:scale-95 text-sm"
- >
- <Send className="w-4 h-4"/>
- Lưu và Trình duyệt
- </button>
     </>
   );
 
@@ -67,7 +52,7 @@ export function AttributeFormModal({
     <BaseModal
       isOpen={isOpen}
       onClose={onClose}
-      title={editingAttribute ? 'Cập nhật thuộc tính' : 'Thêm mới thuộc tính'}
+      title={editingAttribute ? 'Cập nhật trường dữ liệu' : 'Thêm mới trường dữ liệu'}
       subtitle="Định nghĩa cấu trúc chi tiết cho trường dữ liệu"
       footer={footer}
       maxWidth="max-w-2xl"
@@ -182,16 +167,6 @@ export function AttributeFormModal({
             />
           </div>
 
-          <div className="space-y-1.5 md:col-span-2">
-            <label className="block text-xs font-bold uppercase tracking-widest text-slate-500">Mô tả ngắn gọn</label>
-            <textarea
-              rows={3}
-              value={formData.description || ''}
-              onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Mô tả mục đích sử dụng của thuộc tính này..."
-              className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-100/50 transition-all text-sm font-bold text-slate-800"
-            />
-          </div>
         </div>
       </div>
     </BaseModal>

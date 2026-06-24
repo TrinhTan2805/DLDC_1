@@ -423,8 +423,8 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
   const confirmApproveAttribute = (attrId: string) => {
     const attr = attributes.find(a => a.id === attrId);
     setGenericConfirm({
-      isOpen: true, type: 'success', title: 'Phê duyệt thuộc tính', subtitle: 'Hành động duyệt nhanh',
-      message: <p>Duyệt thuộc tính <strong>{attr?.fieldName}</strong>?</p>,
+      isOpen: true, type: 'success', title: 'Phê duyệt trường dữ liệu', subtitle: 'Hành động duyệt nhanh',
+      message: <p>Duyệt trường dữ liệu <strong>{attr?.fieldName}</strong>?</p>,
       confirmText: 'Phê duyệt',
       onConfirm: () => {
         setAttributes(prev => prev.map(a => a.id === attrId ? { ...a, status: 'approved' } : a));
@@ -435,8 +435,8 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
   const confirmRejectAttribute = (attrId: string) => {
     const attr = attributes.find(a => a.id === attrId);
     setGenericConfirm({
-      isOpen: true, type: 'warning', title: 'Từ chối thuộc tính', subtitle: 'Đẩy về bản nháp',
-      message: <p>Từ chối thuộc tính <strong>{attr?.fieldName}</strong>?</p>,
+      isOpen: true, type: 'warning', title: 'Từ chối trường dữ liệu', subtitle: 'Đẩy về bản nháp',
+      message: <p>Từ chối trường dữ liệu <strong>{attr?.fieldName}</strong>?</p>,
       confirmText: 'Từ chối',
       onConfirm: () => {
         setAttributes(prev => prev.map(a => a.id === attrId ? { ...a, status: 'draft' } : a));
@@ -530,6 +530,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
           {activeTab === 'attributes' && (
             <AttributesTab
               entities={entities} attributes={attributes}
+              requests={requests}
               selectedEntityId={selectedEntityId} setSelectedEntityId={setSelectedEntityId}
               selectedAttributes={selectedAttributes}
               onSelectAttribute={(id) => setSelectedAttributes(prev => prev.includes(id) ? prev.filter(sid => sid !== id) : [...prev, id])}
@@ -636,10 +637,10 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
 
         <ConfirmModal
           isOpen={showDeleteAttributeModal} onClose={() => setShowDeleteAttributeModal(false)}
-          title="Xác nhận xóa thuộc tính"
+          title="Xác nhận xóa trường dữ liệu"
           message={
             <div className="space-y-1">
-              <div className="text-slate-500">Tên thuộc tính hiển thị:</div>
+              <div className="text-slate-500">Tên trường dữ liệu hiển thị:</div>
               <div className="font-medium text-slate-800">{attributes.find(a => a.id === attributeToDeleteId)?.displayName}</div>
             </div>
           }

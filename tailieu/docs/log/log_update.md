@@ -1,5 +1,110 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Phiên bản 2.5.43 (Ngày cập nhật: 24/06/2026)
+
+**Nội dung thay đổi:**
+1. **Tinh gọn form Thiết lập danh mục dùng chung:**
+   - Xóa bỏ trường "Mô tả mục đích & vai trò" ở Bước 1 (Thông tin chung) trong Modal thêm/sửa danh mục (`CategoryWizardModal.tsx`) để tối giản giao diện nhập liệu.
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.42 -> 2.5.43)
+- `src/components/pages/category/components/modals/CategoryWizardModal.tsx`
+
+---
+
+## Phiên bản 2.5.42 (Ngày cập nhật: 24/06/2026)
+
+**Nội dung thay đổi:**
+1. **Nâng cấp giao diện Modal Thiết lập danh mục:**
+   - Chuyển đổi giao diện điều hướng từ dạng Tabs (Thẻ chuyển hướng) sang dạng Stepper (Tiến trình từng bước) giúp người dùng dễ dàng theo dõi trình tự các bước thực hiện.
+   - Bổ sung hiệu ứng hình ảnh rõ ràng cho các bước Đã hoàn thành (icon Check), Đang thao tác và Chưa hoàn thành.
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.41 -> 2.5.42)
+- `src/components/pages/category/components/modals/CategoryWizardModal.tsx`
+
+---
+
+## Phiên bản 2.5.41 (Ngày cập nhật: 24/06/2026)
+
+**Nội dung thay đổi:**
+1. **Tinh gọn form Thêm trường dữ liệu:**
+   - Xóa bỏ trường nhập liệu "Mô tả ngắn gọn" trong modal thêm/sửa trường dữ liệu (`AttributeFormModal.tsx`).
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.40 -> 2.5.41)
+- `src/components/pages/category/components/modals/AttributeFormModal.tsx`
+
+---
+
+## Phiên bản 2.5.40 (Ngày cập nhật: 24/06/2026)
+
+**Nội dung thay đổi:**
+1. **Tinh gọn giao diện cấu trúc trường dữ liệu:**
+   - Xóa bỏ cột "Trạng thái" và nút "Trình duyệt" trên từng bản ghi trường dữ liệu trong bảng của `AttributesTab.tsx`.
+   - Cập nhật hàm tính toán cột `getColSpan()` tương ứng.
+   - Xóa bỏ nút "Lưu và Trình duyệt" trong modal Thêm/sửa trường dữ liệu (`AttributeFormModal.tsx`), chỉ giữ lại nút "Lưu".
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.39 -> 2.5.40)
+- `src/components/pages/category/components/tabs/AttributesTab.tsx`
+- `src/components/pages/category/components/modals/AttributeFormModal.tsx`
+
+---
+
+## Phiên bản 2.5.39 (Ngày cập nhật: 24/06/2026)
+
+**Nội dung thay đổi:**
+1. **Thay đổi từ khóa "thuộc tính" sang "trường dữ liệu" (Wording update):**
+   - Cập nhật các nhãn, tiêu đề, placeholder và nút bấm trong tab Thiết lập cấu trúc (`AttributesTab.tsx`), trang cấu hình chính (`CategorySetupPage.tsx`) và modal đi kèm (`AttributeFormModal.tsx`) chuyển toàn bộ từ khóa "thuộc tính" (attribute) sang "trường dữ liệu" (data field) để đồng bộ thuật ngữ nghiệp vụ thống nhất.
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.38 -> 2.5.39)
+- `src/components/pages/category/CategorySetupPage.tsx`
+- `src/components/pages/category/components/tabs/AttributesTab.tsx`
+- `src/components/pages/category/components/modals/AttributeFormModal.tsx`
+
+---
+
+## Phiên bản 2.5.38 (Ngày cập nhật: 24/06/2026)
+
+**Nội dung thay đổi:**
+1. **Thay đổi hiển thị thẻ Trạng thái cấu trúc từ đếm số lượng trường sang trạng thái duy nhất:**
+   - Cập nhật `AttributesTab.tsx` và `CategorySetupPage.tsx` để truyền dữ liệu `requests` duyệt cấu trúc.
+   - Thẻ "Trạng thái cấu trúc" ở header thay vì đếm số lượng trường theo các trạng thái thì nay hiển thị duy nhất một giá trị trạng thái tổng quát của cấu trúc danh mục (Đã duyệt, Chờ duyệt, Từ chối, hoặc Bản nháp) dựa trên yêu cầu duyệt cấu trúc tương ứng của danh mục đang chọn.
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.37 -> 2.5.38)
+- `src/components/pages/category/CategorySetupPage.tsx`
+- `src/components/pages/category/components/tabs/AttributesTab.tsx`
+
+---
+
+## Phiên bản 2.5.37 (Ngày cập nhật: 24/06/2026)
+
+**Nội dung thay đổi:**
+1. **Bổ sung thẻ Trạng thái (Status card) ở phần header của tab Thiết lập cấu trúc (AttributesTab):**
+   - Tính toán số lượng thuộc tính theo các trạng thái phê duyệt (Đã duyệt: `approved`, Chờ duyệt: `pending`, Từ chối: `rejected`).
+   - Mở rộng lưới grid hiển thị từ 3 cột lên 4 cột và thêm thẻ thống kê "Trạng thái thuộc tính" hiển thị giá trị thống kê của 3 trạng thái trên dưới dạng nhãn màu trực quan (green, orange, red).
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.36 -> 2.5.37)
+- `src/components/pages/category/components/tabs/AttributesTab.tsx`
+
+---
+
+## Phiên bản 2.5.36 (Ngày cập nhật: 24/06/2026)
+
+**Nội dung thay đổi:**
+1. **Loại bỏ nút "Lưu & trình duyệt" tại thanh công cụ của tab Thiết lập cấu trúc (AttributesTab):**
+   - Chỉnh sửa `AttributesTab.tsx` để xóa bỏ hoàn toàn nút bấm **Lưu & trình duyệt** màu xanh lá (onClick={onSaveAndSubmit}) khỏi thanh công cụ theo yêu cầu giao diện mới, chỉ giữ lại nút bấm thêm thuộc tính.
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.34 -> 2.5.36)
+- `src/components/pages/category/components/tabs/AttributesTab.tsx`
+
+---
+
 ## Phiên bản 2.5.35 (Ngày cập nhật: 24/06/2026)
 
 **Nội dung thay đổi (Đồng bộ code mới từ remote & Cập nhật Lịch sử triển khai):**

@@ -228,6 +228,7 @@ interface AttributesTabProps {
   onApproveAttribute?: (id: string) => void;
   onRejectAttribute?: (id: string) => void;
   isViewOnly?: boolean;
+  requests?: any[];
   // wizard data source config
   wizardConfig?: {
     dataSource?: string;
@@ -265,6 +266,7 @@ interface AttributesTabProps {
 export function AttributesTab({
   entities,
   attributes,
+  requests,
   selectedEntityId,
   setSelectedEntityId,
   wizardMode = false,
@@ -300,7 +302,6 @@ export function AttributesTab({
     } else {
       baseCols += 6; // jsonPath, fieldName, displayName, dataType, defaultValue, security
     }
-    baseCols += 1; // status
     if (!isViewOnly) baseCols += 1; // actions
     return baseCols;
   };
@@ -429,6 +430,33 @@ export function AttributesTab({
   const requiredAttributes = attributes.filter(a => a.required).length;
   const uniqueAttributes = attributes.filter(a => a.unique).length;
 
+  const getStructureStatusInfo = () => {
+    // Find the latest structure approval request for the current entity
+    const structRequest = requests?.find(r => r.entityId === currentEntityId && r.type === 'structure');
+    const status = structRequest ? structRequest.status : 'draft';
+    
+    switch (status) {
+      case 'approved':
+        return { label: 'Đã duyệt', color: 'bg-green-50 text-green-700 border-green-200' };
+      case 'pending':
+        return { label: 'Chờ duyệt', color: 'bg-orange-50 text-orange-700 border-orange-200' };
+      case 'rejected':
+        return { label: 'Từ chối', color: 'bg-red-50 text-red-700 border-red-200' };
+      case 'partial':
+        return { label: 'Duyệt một phần', color: 'bg-blue-50 text-blue-700 border-blue-200' };
+      case 'draft':
+      default:
+        // Fallback: if all attributes are approved, consider it approved
+        const allApproved = attributes.length > 0 && attributes.every(a => a.status === 'approved');
+        if (allApproved) {
+          return { label: 'Đã duyệt', color: 'bg-green-50 text-green-700 border-green-200' };
+        }
+        return { label: 'Bản nháp', color: 'bg-slate-50 text-slate-700 border-slate-200' };
+    }
+  };
+  
+  const statusInfo = getStructureStatusInfo();
+
   // UI Local States for Filters & Pagination
   const [showFilters, setShowFilters] = useState(false);
   const [currentPageNum, setCurrentPageNum] = useState(1);
@@ -526,10 +554,10 @@ export function AttributesTab({
     <div className="space-y-4">
       {/* Statistics Cards — ẩn trong wizard modal */}
       {!wizardMode && (
-        <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-4 gap-4 mb-6">
           <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[13px] text-slate-500">Tổng thuộc tính</span>
+              <span className="text-[13px] text-slate-500">Tổng trường dữ liệu</span>
               <FileText className="w-5 h-5 text-blue-600" />
             </div>
             <div className="text-2xl font-bold text-slate-900">{totalAttributes}</div>
@@ -537,7 +565,7 @@ export function AttributesTab({
 
           <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[13px] text-slate-500">Thuộc tính bắt buộc</span>
+              <span className="text-[13px] text-slate-500">Trường dữ liệu bắt buộc</span>
               <CheckSquare className="w-5 h-5 text-blue-600" />
             </div>
             <div className="text-2xl font-bold text-slate-900">{requiredAttributes}</div>
@@ -545,10 +573,22 @@ export function AttributesTab({
 
           <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[13px] text-slate-500">Thuộc tính duy nhất</span>
+              <span className="text-[13px] text-slate-500">Trường dữ liệu duy nhất</span>
               <Tag className="w-5 h-5 text-orange-500" />
             </div>
             <div className="text-2xl font-bold text-slate-900">{uniqueAttributes}</div>
+          </div>
+
+          <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[13px] text-slate-500 font-medium">Trạng thái cấu trúc</span>
+              <CheckSquare className="w-5 h-5 text-emerald-600" />
+            </div>
+            <div className="mt-1">
+              <span className={`inline-flex items-center px-3 py-1 rounded-full text-[13px] font-semibold border shadow-sm ${statusInfo.color}`}>
+                {statusInfo.label}
+              </span>
+            </div>
           </div>
         </div>
       )}
@@ -613,24 +653,15 @@ export function AttributesTab({
             </div>
 
             <div className="flex items-center gap-2 w-full md:w-auto">
-              {onSaveAndSubmit && !isViewOnly && (
-                <button
-                  type="button"
-                  onClick={onSaveAndSubmit}
-                  className="flex-1 md:flex-none px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[13px] font-medium flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
-                >
-                  Lưu & trình duyệt
-                </button>
-              )}
               {!isViewOnly && (
                 <button
                   type="button"
                   onClick={onAddAttribute}
                   className="flex-1 md:flex-none px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[13px] font-medium flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
-                  title="Thêm thuộc tính mới"
+                  title="Thêm trường dữ liệu mới"
                 >
                   <Plus className="w-4 h-4" />
-                  Thêm thuộc tính
+                  Thêm trường dữ liệu
                 </button>
               )}
             </div>
@@ -1567,7 +1598,7 @@ export function AttributesTab({
             <AlertCircle className="w-6 h-6 text-amber-600 mt-0.5 flex-shrink-0" />
             <div className="leading-relaxed">
               <span className="font-semibold text-amber-900">Cảnh báo cấu hình:</span>{' '}
-              <span>Đang thực hiện cấu hình cấu trúc thuộc tính cho danh mục </span>
+              <span>Đang thực hiện cấu hình cấu trúc trường dữ liệu cho danh mục </span>
               <strong className="font-bold text-amber-950 underline decoration-amber-500/30 underline-offset-2">
                 {currentEntity?.name || 'Chưa chọn thực thể'}
               </strong>
@@ -1623,7 +1654,7 @@ export function AttributesTab({
                         <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Bảo mật</th>
                       </>
                     )}
-                    <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Trạng thái</th>
+
                     {!isViewOnly && <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-right w-48">Thao tác</th>}
                   </tr>
                 </thead>
@@ -1708,27 +1739,11 @@ export function AttributesTab({
                               </td>
                             </>
                           )}
-                          <td className="px-6 py-4 text-center">
-                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border whitespace-nowrap ${
-                              attr.status === 'approved' ? 'bg-green-50 text-green-700 border-green-100' :
-                              attr.status === 'pending'  ? 'bg-orange-50 text-orange-700 border-orange-100' :
-                              'bg-slate-50 text-slate-700 border-slate-200'
-                            }`}>
-                              {attr.status === 'approved' ? 'Đã duyệt' : attr.status === 'pending' ? 'Chờ duyệt' : 'Bản nháp'}
-                            </span>
-                          </td>
+
                           {!isViewOnly && (
                             <td className="px-6 py-4 text-right">
                               <div className="flex items-center justify-end gap-1 opacity-80 group-hover:opacity-100 transition-all">
-                                <button
-                                  onClick={() => onSubmitAttribute(attr.id)}
-                                  disabled={isLocked}
-                                  className={`p-1.5 rounded-lg transition-colors ${isLocked ? 'text-slate-300 cursor-not-allowed' : 'text-slate-500 hover:text-blue-600 hover:bg-blue-50 cursor-pointer'}`}
-                                  title={attr.status === 'approved' ? 'Đã duyệt' : attr.status === 'pending' ? 'Đang chờ duyệt' : 'Trình duyệt'}
-                                >
-                                  <Send className="w-4 h-4" />
-                                </button>
-                                <div className="w-px h-4 bg-slate-200 mx-1" />
+
                                 <button
                                   onClick={() => onEditAttribute(attr)}
                                   disabled={isLocked}
