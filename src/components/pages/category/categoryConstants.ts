@@ -1,4 +1,4 @@
-import { MasterDataEntity, DataType, ScopeType, LifecycleStatus, ApprovalType, ApprovalStatus } from './categoryTypes';
+import { MasterDataEntity, DataType, ScopeType, LifecycleStatus, ApprovalType, ApprovalStatus, MasterDataAttribute } from './categoryTypes';
 
 export const defaultEntities: MasterDataEntity[] = [
   {
@@ -13,7 +13,8 @@ export const defaultEntities: MasterDataEntity[] = [
     createdDate: '20/12/2024',
     updatedDate: '20/12/2024',
     createdBy: 'Hệ thống',
-    version: 1
+    version: 1,
+    dataSource: 'dldc'
   },
   {
     id: '2',
@@ -27,7 +28,8 @@ export const defaultEntities: MasterDataEntity[] = [
     createdDate: '20/12/2024',
     updatedDate: '20/12/2024',
     createdBy: 'Hệ thống',
-    version: 1
+    version: 1,
+    dataSource: 'manual'
   },
   {
     id: '3',
@@ -41,7 +43,8 @@ export const defaultEntities: MasterDataEntity[] = [
     createdDate: '20/12/2024',
     updatedDate: '20/12/2024',
     createdBy: 'Hệ thống',
-    version: 1
+    version: 1,
+    dataSource: 'lgsp'
   },
   {
     id: '4',
@@ -158,3 +161,182 @@ export const approvers = [
   { id: '3', name: 'Lê Thị E', position: 'Trưởng phòng Pháp chế', department: 'Vụ Pháp luật' },
   { id: '4', name: 'Phạm Văn F', position: 'Cục trưởng', department: 'Cục CNTT' },
 ];
+
+export const mockAttributesByEntity: Record<string, MasterDataAttribute[]> = {
+  '1': [ // DM-GIOITINH - DLDC
+    {
+      id: 'a-gt-1',
+      fieldName: 'ma_gioi_tinh',
+      displayName: 'Mã giới tính',
+      dataType: 'string',
+      required: true,
+      unique: true,
+      indexed: true,
+      length: 10,
+      description: 'Mã giới tính (M, F, U...)',
+      defaultValue: '',
+      version: 1,
+      status: 'approved',
+      createdDate: '01/01/2024',
+      sourceTable: 'tbl_gioi_tinh',
+      sourceField: 'ma_gt',
+      sourceKey: 'PRI',
+      masked: false
+    },
+    {
+      id: 'a-gt-2',
+      fieldName: 'ten_gioi_tinh',
+      displayName: 'Tên giới tính',
+      dataType: 'string',
+      required: true,
+      unique: false,
+      indexed: false,
+      length: 50,
+      description: 'Tên giới tính (Nam, Nữ, Chưa xác định)',
+      defaultValue: '',
+      version: 1,
+      status: 'approved',
+      createdDate: '01/01/2024',
+      sourceTable: 'tbl_gioi_tinh',
+      sourceField: 'ten_gt',
+      sourceKey: '',
+      masked: false
+    },
+    {
+      id: 'a-gt-3',
+      fieldName: 'ghi_chu',
+      displayName: 'Ghi chú',
+      dataType: 'string',
+      required: false,
+      unique: false,
+      indexed: false,
+      length: 255,
+      description: 'Ghi chú bổ sung',
+      defaultValue: '',
+      version: 1,
+      status: 'draft',
+      createdDate: '01/01/2024',
+      sourceTable: 'tbl_gioi_tinh',
+      sourceField: 'mo_ta',
+      sourceKey: '',
+      masked: false
+    }
+  ],
+  '2': [ // DM-DANTOC - Manual
+    {
+      id: 'a-dt-1',
+      fieldName: 'ma_dan_toc',
+      displayName: 'Mã dân tộc',
+      dataType: 'string',
+      required: true,
+      unique: true,
+      indexed: true,
+      length: 10,
+      description: 'Mã dân tộc (Kinh, Tày, Nùng...)',
+      defaultValue: '',
+      version: 1,
+      status: 'approved',
+      createdDate: '01/01/2024'
+    },
+    {
+      id: 'a-dt-2',
+      fieldName: 'ten_dan_toc',
+      displayName: 'Tên dân tộc',
+      dataType: 'string',
+      required: true,
+      unique: false,
+      indexed: false,
+      length: 100,
+      description: 'Tên gọi chính thức của dân tộc',
+      defaultValue: '',
+      version: 1,
+      status: 'approved',
+      createdDate: '01/01/2024'
+    },
+    {
+      id: 'a-dt-3',
+      fieldName: 'ten_goi_khac',
+      displayName: 'Tên gọi khác',
+      dataType: 'string',
+      required: false,
+      unique: false,
+      indexed: false,
+      length: 255,
+      description: 'Các tên gọi khác của dân tộc nếu có',
+      defaultValue: '',
+      version: 1,
+      status: 'draft',
+      createdDate: '01/01/2024'
+    }
+  ],
+  '3': [ // DM-QUOCGIA - API (lgsp/ndxp)
+    {
+      id: 'a-qg-1',
+      fieldName: 'country_code',
+      displayName: 'Mã quốc gia',
+      dataType: 'string',
+      required: true,
+      unique: true,
+      indexed: true,
+      length: 3,
+      description: 'Mã quốc gia theo chuẩn ISO (VN, US, JP...)',
+      defaultValue: '',
+      version: 1,
+      status: 'approved',
+      createdDate: '01/01/2024',
+      jsonPath: 'data.countries[*].code',
+      masked: false
+    },
+    {
+      id: 'a-qg-2',
+      fieldName: 'country_name',
+      displayName: 'Tên quốc gia',
+      dataType: 'string',
+      required: true,
+      unique: false,
+      indexed: true,
+      length: 100,
+      description: 'Tên tiếng Việt của quốc gia',
+      defaultValue: '',
+      version: 1,
+      status: 'approved',
+      createdDate: '01/01/2024',
+      jsonPath: 'data.countries[*].name',
+      masked: false
+    },
+    {
+      id: 'a-qg-3',
+      fieldName: 'phone_code',
+      displayName: 'Mã vùng điện thoại',
+      dataType: 'string',
+      required: false,
+      unique: false,
+      indexed: false,
+      length: 10,
+      description: 'Mã vùng điện thoại quốc tế (+84, +1...)',
+      defaultValue: '',
+      version: 1,
+      status: 'pending',
+      createdDate: '01/01/2024',
+      jsonPath: 'data.countries[*].phoneCode',
+      masked: false
+    },
+    {
+      id: 'a-qg-4',
+      fieldName: 'access_key',
+      displayName: 'Mã truy cập bí mật',
+      dataType: 'string',
+      required: false,
+      unique: false,
+      indexed: false,
+      length: 50,
+      description: 'Mã bảo mật đi kèm bản ghi',
+      defaultValue: '',
+      version: 1,
+      status: 'draft',
+      createdDate: '01/01/2024',
+      jsonPath: 'data.countries[*].secretKey',
+      masked: true
+    }
+  ]
+};

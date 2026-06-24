@@ -289,6 +289,34 @@ export function AttributesTab({
 }: AttributesTabProps) {
   const currentEntityId = wizardMode ? wizardEntityId : selectedEntityId;
   const currentEntity = entities.find(e => e.id === currentEntityId);
+  const entityDataSource = currentEntity?.dataSource || wizardConfig?.dataSource || 'manual';
+
+  const getColSpan = () => {
+    let baseCols = 1; // checkbox
+    if (entityDataSource === 'manual') {
+      baseCols += 7; // fieldName, displayName, dataType, length, required/unique/indexed, defaultValue, description
+    } else if (entityDataSource === 'dldc') {
+      baseCols += 6; // sourceTable, sourceField, fieldName, dataType, PK, security
+    } else {
+      baseCols += 6; // jsonPath, fieldName, displayName, dataType, defaultValue, security
+    }
+    baseCols += 1; // status
+    if (!isViewOnly) baseCols += 1; // actions
+    return baseCols;
+  };
+
+  const getDataSourceLabel = (src?: string) => {
+    switch (src) {
+      case 'dldc':
+        return 'Đồng bộ Kho DLDC';
+      case 'lgsp':
+      case 'ndxp':
+        return 'Kết nối API (NDXP/LGSP)';
+      case 'manual':
+      default:
+        return 'Tự cập nhật trực tiếp';
+    }
+  };
 
   // Inline form state (manual wizardMode)
   const [inlineForm, setInlineForm] = useState<Partial<MasterDataAttribute>>(EMPTY_INLINE_FORM);
@@ -1034,7 +1062,7 @@ export function AttributesTab({
               <div className="flex items-start gap-3 bg-violet-50 border border-violet-200 rounded-xl p-4">
                 <Globe className="w-5 h-5 text-violet-600 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-[13px] font-semibold text-violet-800">Kết nối API {dataSource === 'lgsp' ? '(NGSP/LGSP)' : '(NDXP)'}</p>
+                  <p className="text-[13px] font-semibold text-violet-800">Kết nối API {dataSource === 'lgsp' ? '(NDXP/LGSP)' : '(NDXP)'}</p>
                   <p className="text-[13px] text-violet-600 mt-0.5">Cấu hình endpoint API để đồng bộ dữ liệu tự động vào danh mục.</p>
                 </div>
               </div>
@@ -1535,10 +1563,16 @@ export function AttributesTab({
         /* ── FULL PAGE MODE: entity info + full table ── */
         <>
           {/* Current Managed Entity Info */}
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 flex items-center justify-between text-[13px] text-slate-700">
-            <div>
-              <span>Đang quản lý thuộc tính của thực thể: </span>
-              <span className="font-semibold text-slate-900">{currentEntity?.name || 'Chưa chọn thực thể'}</span>
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 flex items-start gap-4 shadow-sm text-[13px] text-amber-800">
+            <AlertCircle className="w-6 h-6 text-amber-600 mt-0.5 flex-shrink-0" />
+            <div className="leading-relaxed">
+              <span className="font-semibold text-amber-900">Cảnh báo cấu hình:</span>{' '}
+              <span>Đang thực hiện cấu hình cấu trúc thuộc tính cho danh mục </span>
+              <strong className="font-bold text-amber-950 underline decoration-amber-500/30 underline-offset-2">
+                {currentEntity?.name || 'Chưa chọn thực thể'}
+              </strong>
+              <span>. Nguồn dữ liệu danh mục: </span>
+              <span className="font-semibold text-amber-950">{getDataSourceLabel(currentEntity?.dataSource || wizardConfig?.dataSource || 'manual')}</span>
             </div>
           </div>
 
@@ -1558,10 +1592,37 @@ export function AttributesTab({
                         title="Chọn tất cả"
                       />
                     </th>
-                    <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên trường</th>
-                    <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên hiển thị</th>
-                    <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Kiểu dữ liệu</th>
-                    <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Ràng buộc</th>
+                    {entityDataSource === 'manual' && (
+                      <>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên trường</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên hiển thị</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Kiểu dữ liệu</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Độ dài</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Ràng buộc</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Giá trị mặc định</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Mô tả</th>
+                      </>
+                    )}
+                    {entityDataSource === 'dldc' && (
+                      <>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Bảng nguồn</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Cột nguồn</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên trường ánh xạ</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Kiểu dữ liệu</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Khóa chính (PK)</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Bảo mật</th>
+                      </>
+                    )}
+                    {(entityDataSource === 'lgsp' || entityDataSource === 'ndxp') && (
+                      <>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">JSON Path</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên trường ánh xạ</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên hiển thị</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Kiểu dữ liệu</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Giá trị mặc định</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Bảo mật</th>
+                      </>
+                    )}
                     <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Trạng thái</th>
                     {!isViewOnly && <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-right w-48">Thao tác</th>}
                   </tr>
@@ -1582,16 +1643,71 @@ export function AttributesTab({
                               title={`Chọn ${attr.fieldName}`}
                             />
                           </td>
-                          <td className="px-6 py-4 text-[13px] text-slate-900 font-mono">{attr.fieldName}</td>
-                          <td className="px-6 py-4 text-[13px] text-slate-900 font-medium">{attr.displayName}</td>
-                          <td className="px-6 py-4 text-[13px] text-slate-700 font-medium">{getDataTypeLabel(attr.dataType)}</td>
-                          <td className="px-6 py-4">
-                            <div className="flex gap-1.5 flex-wrap">
-                              {attr.required && <span className="px-2 py-0.5 rounded text-[13px] bg-red-50 text-red-600 font-bold border border-red-100">REQ</span>}
-                              {attr.unique   && <span className="px-2 py-0.5 rounded text-[13px] bg-purple-50 text-purple-600 font-bold border border-purple-100">UNI</span>}
-                              {attr.indexed  && <span className="px-2 py-0.5 rounded text-[13px] bg-blue-50 text-blue-600 font-bold border border-blue-100">IDX</span>}
-                            </div>
-                          </td>
+                          {entityDataSource === 'manual' && (
+                            <>
+                              <td className="px-6 py-4 text-[13px] text-slate-900 font-mono">{attr.fieldName}</td>
+                              <td className="px-6 py-4 text-[13px] text-slate-900 font-medium">{attr.displayName}</td>
+                              <td className="px-6 py-4 text-[13px] text-slate-700 font-medium">{getDataTypeLabel(attr.dataType)}</td>
+                              <td className="px-6 py-4 text-[13px] text-slate-600">{attr.length || '-'}</td>
+                              <td className="px-6 py-4">
+                                <div className="flex gap-1.5 flex-wrap">
+                                  {attr.required && <span className="px-2 py-0.5 rounded text-[13px] bg-red-50 text-red-600 font-bold border border-red-100">REQ</span>}
+                                  {attr.unique   && <span className="px-2 py-0.5 rounded text-[13px] bg-purple-50 text-purple-600 font-bold border border-purple-100">UNI</span>}
+                                  {attr.indexed  && <span className="px-2 py-0.5 rounded text-[13px] bg-blue-50 text-blue-600 font-bold border border-blue-100">IDX</span>}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 text-[13px] text-slate-600 text-center">{attr.defaultValue || '-'}</td>
+                              <td className="px-6 py-4 text-[13px] text-slate-500 max-w-[200px] truncate" title={attr.description}>{attr.description || '-'}</td>
+                            </>
+                          )}
+                          {entityDataSource === 'dldc' && (
+                            <>
+                              <td className="px-6 py-4 text-[13px] text-slate-700 font-medium">{attr.sourceTable || '-'}</td>
+                              <td className="px-6 py-4 text-[13px] text-slate-700 font-mono">{attr.sourceField || '-'}</td>
+                              <td className="px-6 py-4 text-[13px] text-slate-900 font-mono">{attr.fieldName}</td>
+                              <td className="px-6 py-4 text-[13px] text-slate-700 font-medium">{getDataTypeLabel(attr.dataType)}</td>
+                              <td className="px-6 py-4 text-center">
+                                {attr.sourceKey ? (
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                    🔑 PK
+                                  </span>
+                                ) : (
+                                  <span className="text-slate-400">-</span>
+                                )}
+                              </td>
+                              <td className="px-6 py-4 text-center">
+                                {attr.masked ? (
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-100">
+                                    🔒 Che giấu
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-50 text-slate-600 border border-slate-200">
+                                    🔓 Không che
+                                  </span>
+                                )}
+                              </td>
+                            </>
+                          )}
+                          {(entityDataSource === 'lgsp' || entityDataSource === 'ndxp') && (
+                            <>
+                              <td className="px-6 py-4 text-[13px] text-slate-700 font-mono max-w-[250px] truncate" title={attr.jsonPath || attr.apiEndpoint}>{attr.jsonPath || attr.apiEndpoint || '-'}</td>
+                              <td className="px-6 py-4 text-[13px] text-slate-900 font-mono">{attr.fieldName}</td>
+                              <td className="px-6 py-4 text-[13px] text-slate-900 font-medium">{attr.displayName}</td>
+                              <td className="px-6 py-4 text-[13px] text-slate-700 font-medium">{getDataTypeLabel(attr.dataType)}</td>
+                              <td className="px-6 py-4 text-[13px] text-slate-600 text-center">{attr.defaultValue || '-'}</td>
+                              <td className="px-6 py-4 text-center">
+                                {attr.masked ? (
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-100">
+                                    🔒 Che giấu
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-50 text-slate-600 border border-slate-200">
+                                    🔓 Không che
+                                  </span>
+                                )}
+                              </td>
+                            </>
+                          )}
                           <td className="px-6 py-4 text-center">
                             <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border whitespace-nowrap ${
                               attr.status === 'approved' ? 'bg-green-50 text-green-700 border-green-100' :
@@ -1637,7 +1753,7 @@ export function AttributesTab({
                     })
                   ) : (
                     <tr>
-                      <td colSpan={isViewOnly ? 6 : 7} className="px-6 py-8 text-center text-[13px] text-slate-500">
+                      <td colSpan={getColSpan()} className="px-6 py-8 text-center text-[13px] text-slate-500">
                         Không tìm thấy dữ liệu
                       </td>
                     </tr>

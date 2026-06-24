@@ -9,7 +9,8 @@ import {
   TabType, LifecycleStatus, DataType, ScopeType, DataSourceType, FieldDataType, ApprovalType, ApprovalStatus
 } from './categoryTypes';
 import {
-  defaultEntities, dataTypeLabels, lifecycleLabels, approvalTypeLabels, approvalStatusLabels, approvers
+  defaultEntities, dataTypeLabels, lifecycleLabels, approvalTypeLabels, approvalStatusLabels, approvers,
+  mockAttributesByEntity
 } from './categoryConstants';
 
 // Components - Tabs
@@ -42,8 +43,66 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
   // Entities & Attributes State
   const [entities, setEntities] = useState<MasterDataEntity[]>(defaultEntities);
   const [attributes, setAttributes] = useState<MasterDataAttribute[]>([
-    { id: 'a1', fieldName: 'citizen_id', displayName: 'Số CCCD', dataType: 'string', required: true, unique: true, indexed: true, length: 12, description: 'Số căn cước công dân 12 số', version: 1, status: 'approved', createdDate: '01/01/2024' },
-    { id: 'a2', fieldName: 'full_name', displayName: 'Họ và tên', dataType: 'string', required: true, unique: false, indexed: true, length: 100, description: 'Họ và tên đầy đủ', version: 1, status: 'approved', createdDate: '01/01/2024' },
+    { 
+      id: 'a1', 
+      fieldName: 'citizen_id', 
+      displayName: 'Số CCCD', 
+      dataType: 'string', 
+      required: true, 
+      unique: true, 
+      indexed: true, 
+      length: 12, 
+      description: 'Số căn cước công dân 12 số', 
+      defaultValue: '', 
+      version: 1, 
+      status: 'approved', 
+      createdDate: '01/01/2024',
+      sourceTable: 'tbl_can_cuoc',
+      sourceField: 'so_cccd',
+      sourceKey: 'PRI',
+      jsonPath: 'data.citizenId',
+      masked: true
+    },
+    { 
+      id: 'a2', 
+      fieldName: 'full_name', 
+      displayName: 'Họ và tên', 
+      dataType: 'string', 
+      required: true, 
+      unique: false, 
+      indexed: true, 
+      length: 100, 
+      description: 'Họ và tên đầy đủ', 
+      defaultValue: 'N/A', 
+      version: 1, 
+      status: 'approved', 
+      createdDate: '01/01/2024',
+      sourceTable: 'tbl_can_cuoc',
+      sourceField: 'ho_ten',
+      sourceKey: '',
+      jsonPath: 'data.fullName',
+      masked: false
+    },
+    { 
+      id: 'a3', 
+      fieldName: 'gender', 
+      displayName: 'Giới tính', 
+      dataType: 'string', 
+      required: false, 
+      unique: false, 
+      indexed: false, 
+      length: 10, 
+      description: 'Giới tính của thực thể', 
+      defaultValue: 'Nam', 
+      version: 1, 
+      status: 'pending', 
+      createdDate: '01/01/2024',
+      sourceTable: 'tbl_can_cuoc',
+      sourceField: 'gioi_tinh',
+      sourceKey: '',
+      jsonPath: 'data.gender',
+      masked: false
+    }
   ]);
   const [relationships, setRelationships] = useState<EntityRelationship[]>([]);
   const [selectedEntityId, setSelectedEntityId] = useState<string>('1');
@@ -54,6 +113,16 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
   const [wizardStep, setWizardStep] = useState(1);
   const [wizardEntityId, setWizardEntityId] = useState<string | null>(null);
   const [editingEntity, setEditingEntity] = useState<MasterDataEntity | null>(null);
+
+  // Load mock attributes when selectedEntityId, wizardEntityId, or showWizard/editingEntity changes
+  useEffect(() => {
+    const activeId = showWizard ? wizardEntityId : selectedEntityId;
+    if (activeId && mockAttributesByEntity[activeId]) {
+      setAttributes(mockAttributesByEntity[activeId]);
+    } else if (showWizard && !wizardEntityId) {
+      setAttributes([]);
+    }
+  }, [selectedEntityId, wizardEntityId, showWizard]);
   const [formData, setFormData] = useState<Partial<MasterDataEntity>>({
     name: '',
     dataType: 'standard',

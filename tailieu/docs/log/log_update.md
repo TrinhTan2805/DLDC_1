@@ -1052,11 +1052,116 @@ Redesign thanh tìm kiếm & bộ lọc tại tab **Kiểm tra & Phê duyệt** 
 - `package.json` (Nâng version từ 2.5.7 -> 2.5.8)
 - `src/components/pages/open-data/OpenDataPublishedListPage.tsx`
 
+## Phiên bản 2.5.27 (Ngày cập nhật: 24/06/2026)
 
+**Nội dung thay đổi:**
+1. **Thiết kế lại thông báo thực thể trong Tab Thiết lập cấu trúc (Danh mục dùng chung):**
+   - Thay đổi ô hiển thị thông tin thực thể đang quản lý ("Đang quản lý thuộc tính của thực thể: ...") từ dạng hộp thông tin cơ bản sang dạng hộp Cảnh báo (Alert Box) với màu sắc chủ đạo màu vàng/amber (`bg-amber-50 border-amber-200 text-amber-800`).
+   - Tích hợp biểu tượng cảnh báo `AlertCircle` từ thư viện `lucide-react` và cập nhật tiêu đề, mô tả thân thiện, rõ ràng nhằm giúp người dùng nhận thức chính xác danh mục đang được cấu hình cấu trúc.
 
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.26 -> 2.5.27)
+- `src/components/pages/category/components/tabs/AttributesTab.tsx`
 
+---
 
+## Phiên bản 2.5.28 (Ngày cập nhật: 24/06/2026)
 
+**Nội dung thay đổi:**
+1. **Tăng kích thước khung cảnh báo thực thể trong Tab Thiết lập cấu trúc (Danh mục dùng chung):**
+   - Tăng khoảng đệm (padding) của khung cảnh báo thực thể đang cấu hình từ `p-3.5` lên `p-5` (20px) và khoảng cách `gap-4` để giao diện thông thoáng, rộng rãi và nổi bật hơn.
+   - Nâng kích thước biểu tượng cảnh báo `AlertCircle` từ `w-5 h-5` lên `w-6 h-6`.
 
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.27 -> 2.5.28)
+- `src/components/pages/category/components/tabs/AttributesTab.tsx`
 
+---
 
+## Phiên bản 2.5.29 (Ngày cập nhật: 24/06/2026)
+
+**Nội dung thay đổi:**
+1. **Cập nhật nội dung cảnh báo thực thể hiển thị thông tin Nguồn dữ liệu (Danh mục dùng chung):**
+   - Loại bỏ câu nhắc nhở "Hãy chắc chắn rằng..." trong cảnh báo cấu hình.
+   - Bổ sung thông tin "Nguồn dữ liệu danh mục: ..." được lấy động từ cấu hình thực thể danh mục (tự động chuyển đổi các giá trị như `dldc`, `lgsp`, `ndxp`, `manual` sang nhãn hiển thị tương ứng bằng tiếng Việt như "Đồng bộ Kho dữ liệu (DLDC)", "Kết nối API (NGSP/LGSP)", v.v.).
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.28 -> 2.5.29)
+- `src/components/pages/category/components/tabs/AttributesTab.tsx`
+
+---
+
+## Phiên bản 2.5.30 (Ngày cập nhật: 24/06/2026)
+
+**Nội dung thay đổi:**
+1. **Đồng bộ hóa tên nhãn hiển thị Nguồn dữ liệu danh mục:**
+   - Thay đổi các giá trị trả về của Nguồn dữ liệu để khớp chính xác với 3 tùy chọn tại màn hình Thông tin chung:
+     * `manual` ➔ **Tự cập nhật trực tiếp**
+     * `dldc` ➔ **Đồng bộ Kho DLDC**
+     * `lgsp` / `ndxp` ➔ **Kết nối API (NGSP/LGSP)**
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.29 -> 2.5.30)
+- `src/components/pages/category/components/tabs/AttributesTab.tsx`
+
+---
+
+## Phiên bản 2.5.31 (Ngày cập nhật: 24/06/2026)
+
+**Nội dung thay đổi:**
+1. **Thay đổi hiển thị từ NGSP/LGSP thành NDXP/LGSP trong thiết lập danh mục dùng chung:**
+   - Cập nhật nhãn hiển thị tại các màn hình và cấu phần của Thiết lập danh mục dùng chung từ `NGSP/LGSP` thành `NDXP/LGSP`.
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.30 -> 2.5.31)
+- `src/components/pages/category/components/tabs/AttributesTab.tsx`
+- `src/components/pages/category/components/modals/CategoryWizardModal.tsx`
+
+---
+
+## Phiên bản 2.5.32 (Ngày cập nhật: 24/06/2026)
+
+**Nội dung thay đổi:**
+1. **Triển khai 3 cấu trúc bảng thuộc tính cố định dựa trên nguồn dữ liệu của danh mục:**
+   - Thay đổi giao diện danh sách thuộc tính của danh mục thành 3 thiết kế riêng biệt, hiển thị đúng các cột dữ liệu liên quan:
+     * **Tự cập nhật trực tiếp (manual):** Hiện các cột Tên trường, Tên hiển thị, Kiểu dữ liệu, Độ dài, Ràng buộc, Giá trị mặc định, Mô tả, Trạng thái, Thao tác.
+     * **Đồng bộ Kho DLDC (dldc):** Hiện các cột Bảng nguồn, Cột nguồn, Tên trường ánh xạ, Kiểu dữ liệu, Khóa chính (PK), Bảo mật (Che giấu), Trạng thái, Thao tác.
+     * **Kết nối API (ndxp/lgsp):** Hiện các cột JSON Path, Tên trường ánh xạ, Tên hiển thị, Kiểu dữ liệu, Giá trị mặc định, Bảo mật (Che giấu), Trạng thái, Thao tác.
+   - Bổ sung các trường `jsonPath?: string` và `masked?: boolean` vào interface `MasterDataAttribute` để hỗ trợ hiển thị.
+   - Tự động hóa tính toán `colSpan` của dòng hiển thị "Không tìm thấy dữ liệu" tương ứng theo số lượng cột của từng giao diện nguồn.
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.31 -> 2.5.32)
+- `src/components/pages/category/categoryTypes.ts`
+- `src/components/pages/category/components/tabs/AttributesTab.tsx`
+
+---
+
+## Phiên bản 2.5.33 (Ngày cập nhật: 24/06/2026)
+
+**Nội dung thay đổi:**
+1. **Mock dữ liệu danh mục cho các nguồn Kho DLDC và API:**
+   - Cấu hình nguồn dữ liệu `dataSource: 'dldc'` cho Danh mục giới tính (ID: 1) và `dataSource: 'lgsp'` (API) cho Danh mục Quốc gia, Quốc tịch (ID: 3).
+   - Bổ sung thông tin CSDL nguồn (`sourceTable`, `sourceField`, `sourceKey`) và API (`jsonPath`, `masked`) vào danh sách thuộc tính mock của hệ thống nhằm kiểm duyệt giao diện hiển thị 3 dạng bảng cấu trúc động.
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.32 -> 2.5.33)
+- `src/components/pages/category/categoryConstants.ts`
+- `src/components/pages/category/CategorySetupPage.tsx`
+
+---
+
+## Phiên bản 2.5.34 (Ngày cập nhật: 24/06/2026)
+
+**Nội dung thay đổi:**
+1. **Tách biệt và tải dữ liệu mock tương ứng cho từng loại danh mục (DLDC & API):**
+   - Định nghĩa `mockAttributesByEntity` trong `categoryConstants.ts` chứa các bộ thuộc tính mock riêng biệt cho:
+     * **Danh mục giới tính (ID: 1 - dldc):** Ánh xạ sang các trường của bảng `tbl_gioi_tinh` (`ma_gt`, `ten_gt`, `mo_ta`).
+     * **Danh mục dân tộc (ID: 2 - manual):** Chứa các trường dân tộc tự cập nhật (`ma_dan_toc`, `ten_dan_toc`, `ten_goi_khac`).
+     * **Danh mục Quốc gia, Quốc tịch (ID: 3 - lgsp API):** Ánh xạ sang JSON Path (`data.countries[*].code`, `data.countries[*].name`, v.v.).
+   - Cập nhật `CategorySetupPage.tsx` bổ sung hook `useEffect` để tự động tải/thay đổi danh sách thuộc tính tương ứng với danh mục được chọn (hỗ trợ chuyển đổi mượt mà giữa danh mục nguồn DLDC và danh mục nguồn API trên giao diện).
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.33 -> 2.5.34)
+- `src/components/pages/category/categoryConstants.ts`
+- `src/components/pages/category/CategorySetupPage.tsx`

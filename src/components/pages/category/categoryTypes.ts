@@ -61,6 +61,8 @@ export interface MasterDataAttribute {
   sourceField?: string;
   sourceKey?: string;
   apiEndpoint?: string;
+  jsonPath?: string;
+  masked?: boolean;
 }
 
 export interface EntityRelationship {

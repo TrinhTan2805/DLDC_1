@@ -183,7 +183,7 @@ export function CategoryWizardModal({
                       >
                         <option value="manual">Tự cập nhật trực tiếp</option>
                         <option value="dldc">Đồng bộ Kho DLDC</option>
-                        <option value="lgsp">Kết nối API (NGSP/LGSP)</option>
+                        <option value="lgsp">Kết nối API (NDXP/LGSP)</option>
                       </select>
                       <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                     </div>
