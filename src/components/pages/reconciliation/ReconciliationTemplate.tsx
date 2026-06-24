@@ -23,6 +23,8 @@ interface ReconciliationRecord {
   matchRate?: number;
   lastReconcileDate?: string;
   isReportSent?: boolean;
+  sentCount?: number;
+  receivedCount?: number;
 }
 
 type TabType = 'list' | 'setup' | 'log' | 'history';
@@ -111,6 +113,23 @@ export function ReconciliationTemplate({
   const matchedCount = records.filter(r => r.status === 'matched').length;
   const mismatchedCount = records.filter(r => r.status === 'mismatched').length;
 
+  // Tính số liệu Nguồn/Kho/Lệch/Tỷ lệ nhất quán từ 1 nguồn (mock nhất quán)
+  const deriveCounts = (r: ReconciliationRecord) => {
+    const received = r.receivedCount ?? r.recordCount; // Kho đếm được
+    let sent: number; // Nguồn khai báo
+    if (r.status === 'mismatched' || r.status === 'error') {
+      sent = r.sentCount ?? (received + (r.errorCount ?? Math.max(1, Math.round(received * 0.001))));
+    } else {
+      sent = r.sentCount ?? received;
+    }
+    const diff = received - sent;
+    const rate = sent > 0 ? (Math.min(received, sent) / sent) * 100 : 100;
+    return { sent, received, diff, rate };
+  };
+
+  const totals = records.reduce((a, r) => { const c = deriveCounts(r); return { s: a.s + c.sent, k: a.k + c.received }; }, { s: 0, k: 0 });
+  const overallRate = totals.s > 0 ? (Math.min(totals.k, totals.s) / totals.s) * 100 : 100;
+
   const tabs = [
     { id: 'list' as TabType, label: 'Danh sách đối soát' },
     ...(!hideSetupTab ? [{ id: 'setup' as TabType, label: 'Thiết lập dịch vụ' }] : []),
@@ -155,7 +174,7 @@ export function ReconciliationTemplate({
       {activeTab === 'list' && (
         <div className="space-y-4 pt-4">
           {/* Statistics */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-4 gap-4">
             <div className="bg-white rounded-lg border border-slate-200 p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-blue-50 rounded-lg">
@@ -188,6 +207,18 @@ export function ReconciliationTemplate({
                 <div>
                   <div className="text-[13px] text-slate-500">Không khớp</div>
                   <div className="text-base font-semibold text-slate-950">{mismatchedCount}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg border border-slate-200 p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-50 rounded-lg">
+                  <CheckCircle className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <div className="text-[13px] text-slate-500">Tỷ lệ khớp</div>
+                  <div className="text-base font-semibold text-slate-950">{overallRate.toFixed(2)}%</div>
                 </div>
               </div>
             </div>
@@ -329,41 +360,37 @@ export function ReconciliationTemplate({
                 <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-[1]">
                   <tr>
                     <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-12 text-[13px]">STT</th>
-                    <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Mã hồ sơ đối soát</th>
-                    <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Hồ sơ dữ liệu cung cấp</th>
-                    <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Loại đối soát</th>
-                    <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Số bản ghi đối soát</th>
-                    <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Ngày nhận</th>
+                    <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Thu thập</th>
+                    <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Số bản ghi (Nguồn)</th>
+                    <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Số bản ghi (Kho)</th>
+                    <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Lệch</th>
                     <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái</th>
-                    <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Báo cáo sai lệch</th>
-                    <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Tiến trình đồng bộ</th>
+                    <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Ngày đối soát</th>
                     <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-24 text-[13px]">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {filteredRecords
                     .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-                    .map((record, index) => (
+                    .map((record, index) => {
+                      const c = deriveCounts(record);
+                      return (
                       <tr key={record.id} className="hover:bg-slate-50 transition-all group border-b border-slate-100">
                         <td className="px-4 py-3 text-center text-slate-500 font-medium text-[13px]">
                           {(currentPage - 1) * itemsPerPage + index + 1}
                         </td>
                         <td className="px-4 py-3 text-left text-[13px]">
                           <div className="font-medium text-slate-950 leading-snug text-[13px]">{record.datasetCode}</div>
-                          <div className="text-slate-500 mt-1 text-[12px]">{record.providerSystem}</div>
+                          <div className="text-slate-500 mt-0.5 text-[12px]">{record.datasetName}</div>
                         </td>
-                        <td className="px-4 py-3 text-left text-[13px]">
-                          <div className="font-medium text-slate-950 leading-snug text-[13px]">{record.datasetName}</div>
-                          <div className="text-slate-500 mt-1 text-[12px]">{record.providerSystem}</div>
-                        </td>
-                        <td className="px-4 py-3 text-center text-slate-600 font-medium text-[13px]">{record.dataType}</td>
                         <td className="px-4 py-3 text-center text-slate-950 font-semibold font-mono text-[13px]">
-                          {record.recordCount.toLocaleString()}
+                          {c.sent.toLocaleString()}
                         </td>
-                        <td className="px-4 py-3 text-center text-slate-500 font-medium font-mono whitespace-nowrap text-[13px]">
-                          {record.receiveDate.split(' ').map((part: string, i: number) => (
-                            <div key={i}>{part}</div>
-                          ))}
+                        <td className="px-4 py-3 text-center text-slate-950 font-semibold font-mono text-[13px]">
+                          {c.received.toLocaleString()}
+                        </td>
+                        <td className={`px-4 py-3 text-center font-mono text-[13px] ${c.diff !== 0 ? 'text-rose-600 font-semibold' : 'text-slate-400'}`}>
+                          {c.diff === 0 ? '0' : c.diff.toLocaleString()}
                         </td>
                         <td className="px-4 py-3 text-center">
                           <StatusTag
@@ -375,66 +402,19 @@ export function ReconciliationTemplate({
                             }
                           />
                         </td>
-                        <td className="px-4 py-3 text-center whitespace-nowrap">
-                          {record.status === 'matched' ? (
-                            <span className="text-[13px] text-slate-400 italic">Không có sai lệch</span>
-                          ) : record.isReportSent ? (
-                            <StatusTag
-                              label="Đã gửi báo cáo"
-                              variant="indigo"
-                              icon={<Send className="w-3 h-3" />}
-                            />
-                          ) : (
-                            <StatusTag
-                              label="Chưa gửi báo cáo"
-                              variant="amber"
-                              icon={<Info className="w-3 h-3" />}
-                            />
-                          )}
-                        </td>
-                        <td className="px-4 py-3 text-center">
-                          {(() => {
-                            const status = syncStatuses[record.id];
-                            if (!status || status === 'idle') return <span className="text-xs text-slate-400">Chưa bắt đầu</span>;
-                            return (
-                              <div className="w-40 mx-auto">
-                                <div className="flex items-center gap-2 mb-1.5 justify-center">
-                                  {status === 'sending' && (
-                                    <span className="text-xs font-medium text-blue-600 flex items-center gap-1.5">
-                                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Đang gửi yêu cầu
-                                    </span>
-                                  )}
-                                  {status === 'sent' && (
-                                    <span className="text-xs font-medium text-amber-600 flex items-center gap-1.5">
-                                      <Clock className="w-3.5 h-3.5 animate-pulse" /> Chờ phản hồi
-                                    </span>
-                                  )}
-                                  {status === 'received' && (
-                                    <span className="text-xs font-medium text-green-600 flex items-center gap-1.5">
-                                      <CheckCircle className="w-3.5 h-3.5" /> Hoàn tất
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden flex">
-                                  <div 
-                                    className={`h-full transition-all duration-1000 ease-in-out rounded-full ${
-                                      status === 'received' ? 'bg-green-500 w-full' : 
-                                      status === 'sent' ? 'bg-amber-500 w-2/3' : 
-                                      status === 'sending' ? 'bg-blue-500 w-1/3' : 'bg-transparent w-0'
-                                    }`}
-                                  ></div>
-                                </div>
-                              </div>
-                            );
-                          })()}
+                        <td className="px-4 py-3 text-center text-slate-500 font-medium font-mono whitespace-nowrap text-[13px]">
+                          {(record.lastReconcileDate || record.receiveDate).split(' ').map((part: string, i: number) => (
+                            <div key={i}>{part}</div>
+                          ))}
                         </td>
                         <td className="px-4 py-3 text-center">
                           <div className="flex items-center justify-center">
                             <button
                               onClick={() => {
+                                const cc = deriveCounts(record);
                                 setSelectedRecordCode(record.datasetCode);
+                                setSelectedRecord({ ...record, sentCount: cc.sent, receivedCount: cc.received, matchRate: cc.rate });
                                 setDetailModalOpen(true);
-                                setSelectedRecord(record);
                               }}
                               className="p-1.5 text-slate-500 hover:text-[#2563eb] hover:bg-blue-50 rounded-[6px] transition-all"
                               title="Xem chi tiết"
@@ -444,10 +424,25 @@ export function ReconciliationTemplate({
                           </div>
                         </td>
                       </tr>
-                    ))}
+                      );
+                    })}
+                  {filteredRecords.length > 0 && (() => {
+                    const t = filteredRecords.reduce((a, r) => { const c = deriveCounts(r); return { s: a.s + c.sent, k: a.k + c.received }; }, { s: 0, k: 0 });
+                    const d = t.k - t.s;
+                    return (
+                      <tr className="bg-slate-50 font-semibold text-slate-800 border-t border-slate-200">
+                        <td></td>
+                        <td className="px-4 py-3 text-left text-[13px]">Tổng hợp ({filteredRecords.length} bộ dữ liệu)</td>
+                        <td className="px-4 py-3 text-center font-mono text-[13px]">{t.s.toLocaleString()}</td>
+                        <td className="px-4 py-3 text-center font-mono text-[13px]">{t.k.toLocaleString()}</td>
+                        <td className={`px-4 py-3 text-center font-mono text-[13px] ${d !== 0 ? 'text-rose-600' : 'text-slate-400'}`}>{d === 0 ? '0' : d.toLocaleString()}</td>
+                        <td colSpan={3}></td>
+                      </tr>
+                    );
+                  })()}
                   {filteredRecords.length === 0 && (
                     <tr>
-                      <td colSpan={10} className="px-4 py-8 text-center text-slate-500">
+                      <td colSpan={8} className="px-4 py-8 text-center text-slate-500">
                         Không tìm thấy dữ liệu
                       </td>
                     </tr>
