@@ -1,4 +1,5 @@
-import { useState, ChangeEvent } from 'react';
+import { useState, ChangeEvent, useEffect } from 'react';
+import { Portal } from '../../common/Portal';
 import {
   Settings,
   CheckCircle2,
@@ -42,6 +43,54 @@ interface CategoryField {
   isForeignKey?: boolean;
   referenceTable?: string;
   referenceField?: string;
+}
+
+interface PortalModalProps {
+  isOpen: boolean;
+  onClose?: () => void;
+  children: React.ReactNode;
+}
+
+function PortalModal({ isOpen, onClose, children }: PortalModalProps) {
+  const [modalIndex, setModalIndex] = useState(1);
+  useEffect(() => {
+    if (!isOpen) return;
+    if (typeof window !== 'undefined') {
+      window.__activeModalsCount = (window.__activeModalsCount || 0) + 1;
+      setModalIndex(window.__activeModalsCount);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.__activeModalsCount = Math.max(0, (window.__activeModalsCount || 0) - 1);
+      }
+    };
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  const currentZIndex = 100 + modalIndex * 10;
+
+  return (
+    <Portal>
+      <div 
+        className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 animate-in fade-in duration-200" 
+        style={{ 
+          zIndex: currentZIndex
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (onClose) onClose();
+        }}
+      >
+        <div 
+          onClick={(e) => e.stopPropagation()} 
+          className="w-full h-full flex items-center justify-center"
+        >
+          {children}
+        </div>
+      </div>
+    </Portal>
+  );
 }
 
 export function CategorySetupPageNew() {
@@ -436,9 +485,8 @@ export function CategorySetupPageNew() {
       </div>
 
       {/* Add/Edit Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <PortalModal isOpen={showAddModal} onClose={() => setShowAddModal(false)}>
+        <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-slate-200 flex items-center justify-between">
               <h3 className="text-lg text-slate-900">Thêm danh mục mới</h3>
               <button
@@ -614,13 +662,11 @@ export function CategorySetupPageNew() {
               </button>
             </div>
           </div>
-        </div>
-      )}
+      </PortalModal>
 
       {/* Detail Modal */}
-      {showDetailModal && selectedCategory && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+      <PortalModal isOpen={showDetailModal && !!selectedCategory} onClose={() => { setShowDetailModal(false); setSelectedCategory(null); }}>
+        <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-slate-200 flex items-center justify-between">
               <h3 className="text-lg text-slate-900">Chi tiết danh mục: {selectedCategory.name}</h3>
               <button
@@ -730,13 +776,11 @@ export function CategorySetupPageNew() {
               </button>
             </div>
           </div>
-        </div>
-      )}
+      </PortalModal>
 
       {/* Add Field Modal */}
-      {showAddFieldModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <PortalModal isOpen={showAddFieldModal} onClose={() => setShowAddFieldModal(false)}>
+        <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-slate-200 flex items-center justify-between">
               <h3 className="text-lg text-slate-900">Thêm trường dữ liệu mới</h3>
               <button
@@ -821,13 +865,11 @@ export function CategorySetupPageNew() {
               </button>
             </div>
           </div>
-        </div>
-      )}
+      </PortalModal>
 
       {/* Field Form Modal — nested inside Add Modal, requires higher z-index per rule 5.4 */}
-      {showFieldFormModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[200] p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <PortalModal isOpen={showFieldFormModal} onClose={() => setShowFieldFormModal(false)}>
+        <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-slate-200 flex items-center justify-between">
               <h3 className="text-lg text-slate-900">Thêm trường dữ liệu mới</h3>
               <button
@@ -1073,8 +1115,7 @@ export function CategorySetupPageNew() {
               </button>
             </div>
           </div>
-        </div>
-      )}
+      </PortalModal>
     </div>
   );
 }

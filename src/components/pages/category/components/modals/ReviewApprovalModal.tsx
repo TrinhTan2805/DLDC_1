@@ -83,12 +83,10 @@ export function ReviewApprovalModal({ isOpen, onClose, requests, entities, attri
 
                 {request.status !== 'pending' ? (
                   <div className={`shrink-0 ml-4 px-4 py-2 rounded-xl text-[13px] font-bold uppercase ${
-                    request.status === 'approved' ? 'bg-green-50 text-green-600 border border-green-200' : 
-                    request.status === 'partial' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
+                    (request.status === 'approved' || request.status === 'partial') ? 'bg-green-50 text-green-600 border border-green-200' : 
                     'bg-red-50 text-red-600 border border-red-200'
                   }`}>
-                    {request.status === 'approved' ? 'Đã phê duyệt' : 
-                     request.status === 'partial' ? 'Duyệt một phần' : 'Đã từ chối'}
+                    {(request.status === 'approved' || request.status === 'partial') ? 'Đã phê duyệt' : 'Đã từ chối'}
                   </div>
                 ) : (
                   <div className="flex gap-2.5 shrink-0 ml-4">

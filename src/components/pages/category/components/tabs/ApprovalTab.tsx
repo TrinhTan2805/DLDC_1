@@ -59,7 +59,6 @@ export function ApprovalTab({
     { key: 'all' as const, label: 'Tất cả', count: totalCount },
     { key: 'pending' as const, label: 'Chờ phê duyệt', count: pendingCount },
     { key: 'approved' as const, label: 'Đã phê duyệt', count: approvedCount },
-    { key: 'partial' as const, label: 'Duyệt một phần', count: partialCount },
     { key: 'rejected' as const, label: 'Từ chối', count: rejectedCount },
   ];
 
@@ -164,11 +163,10 @@ export function ApprovalTab({
                     <div className="flex items-center gap-2 mb-1">
                       <h4 className="text-[15px] font-bold text-slate-800">{req.entityName}</h4>
                       <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${req.status === 'pending' ? 'bg-orange-50 text-orange-600 border-orange-200' :
-                          req.status === 'approved' ? 'bg-green-50 text-green-700 border-green-200' :
-                          req.status === 'partial' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                          (req.status === 'approved' || req.status === 'partial') ? 'bg-green-50 text-green-700 border-green-200' :
                             'bg-red-50 text-red-600 border-red-200'
                         }`}>
-                        {approvalStatusLabels[req.status].label}
+                        {(req.status === 'approved' || req.status === 'partial') ? 'Đã phê duyệt' : approvalStatusLabels[req.status].label}
                       </span>
                     </div>
 

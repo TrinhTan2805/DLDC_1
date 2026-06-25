@@ -104,7 +104,47 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
       masked: false
     }
   ]);
-  const [relationships, setRelationships] = useState<EntityRelationship[]>([]);
+  const [relationships, setRelationships] = useState<EntityRelationship[]>([
+    {
+      id: 'rel-1',
+      sourceEntityId: '7',
+      sourceEntityName: 'Dữ liệu Danh mục và mã mối quan hệ trong gia đình',
+      targetEntityId: '1',
+      targetEntityName: 'Dữ liệu Danh mục giới tính',
+      relationshipType: '1-1',
+      sourceKey: 'gioitinh_id',
+      targetKey: 'id',
+      status: 'active',
+      createdDate: '20/12/2024 14:30',
+      createdBy: 'Hệ thống'
+    },
+    {
+      id: 'rel-2',
+      sourceEntityId: '8',
+      sourceEntityName: 'Dữ liệu Danh mục mã giấy tờ tùy thân',
+      targetEntityId: '1',
+      targetEntityName: 'Dữ liệu Danh mục giới tính',
+      relationshipType: 'n-1',
+      sourceKey: 'gioitinh_id',
+      targetKey: 'id',
+      status: 'active',
+      createdDate: '20/12/2024 15:00',
+      createdBy: 'Hệ thống'
+    },
+    {
+      id: 'rel-3',
+      sourceEntityId: '5',
+      sourceEntityName: 'Dữ liệu Danh mục cơ quan',
+      targetEntityId: '6',
+      targetEntityName: 'Dữ liệu Danh mục đơn vị hành chính',
+      relationshipType: 'n-1',
+      sourceKey: 'tinh_thanh_id',
+      targetKey: 'id',
+      status: 'active',
+      createdDate: '21/12/2024 09:15',
+      createdBy: 'Hệ thống'
+    }
+  ]);
   const [selectedEntityId, setSelectedEntityId] = useState<string>('1');
 
   // Form & Modal States
@@ -700,8 +740,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
             setRequests(requests.map(r => {
               if (ids.includes(r.id)) {
                 const currentLineStatuses = partialStatuses?.[r.id] || {};
-                const hasRejected = Object.values(currentLineStatuses).includes('rejected');
-                const overallStatus = hasRejected ? 'partial' : 'approved';
+                const overallStatus = 'approved';
                 return { ...r, status: overallStatus, reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note, lineStatuses: currentLineStatuses };
               }
               return r;

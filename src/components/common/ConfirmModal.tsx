@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ReactNode } from 'react';
+import { useState, useEffect, ReactNode } from 'react';
 import { Trash2, AlertTriangle, Info, CheckCircle2 } from 'lucide-react';
 import { Portal } from './Portal';
 
@@ -57,21 +57,39 @@ export function ConfirmModal({
   cancelText = 'Hủy',
   type = 'delete'
 }: ConfirmModalProps) {
+  const [modalIndex, setModalIndex] = useState(1);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    if (typeof window !== 'undefined') {
+      window.__activeModalsCount = (window.__activeModalsCount || 0) + 1;
+      setModalIndex(window.__activeModalsCount);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.__activeModalsCount = Math.max(0, (window.__activeModalsCount || 0) - 1);
+      }
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const config = typeConfig[type] || typeConfig.delete;
   const Icon = config.icon;
 
+  const currentZIndex = 200 + modalIndex * 10;
+
   return (
     <Portal>
       <div 
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
+        className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 animate-in fade-in duration-200"
         style={{ 
-          zIndex: 2147483647,
-          backdropFilter: 'blur(4px)', 
-          WebkitBackdropFilter: 'blur(4px)' 
+          zIndex: currentZIndex
         }}
-        onClick={onClose}
+        onClick={(e: React.MouseEvent) => {
+          e.stopPropagation();
+          onClose();
+        }}
       >
         <div 
           className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200"

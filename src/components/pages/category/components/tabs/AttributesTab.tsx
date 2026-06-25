@@ -5,6 +5,7 @@ import {
   AlertCircle, Check
 } from 'lucide-react';
 import { MasterDataEntity, MasterDataAttribute, FieldDataType } from '../../categoryTypes';
+import { BaseModal } from '../../../../common/BaseModal';
 
 const FIELD_DATA_TYPES: { value: FieldDataType; label: string }[] = [
   { value: 'string',   label: 'Chuỗi (String)' },
@@ -431,13 +432,12 @@ export function AttributesTab({
     
     switch (status) {
       case 'approved':
+      case 'partial':
         return { label: 'Đã duyệt', color: 'bg-green-50 text-green-700 border-green-200' };
       case 'pending':
         return { label: 'Chờ duyệt', color: 'bg-orange-50 text-orange-700 border-orange-200' };
       case 'rejected':
         return { label: 'Từ chối', color: 'bg-red-50 text-red-700 border-red-200' };
-      case 'partial':
-        return { label: 'Duyệt một phần', color: 'bg-blue-50 text-blue-700 border-blue-200' };
       case 'draft':
       default:
         // Fallback: if all attributes are approved, consider it approved
@@ -455,6 +455,7 @@ export function AttributesTab({
   const [showFilters, setShowFilters] = useState(false);
   const [currentPageNum, setCurrentPageNum] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [showSourceWarning, setShowSourceWarning] = useState(false);
 
   // Filter States
   const [searchTerm, setSearchTerm] = useState('');
@@ -650,7 +651,13 @@ export function AttributesTab({
               {!isViewOnly && (
                 <button
                   type="button"
-                  onClick={onAddAttribute}
+                  onClick={() => {
+                    if (entityDataSource === 'dldc' || entityDataSource === 'lgsp' || entityDataSource === 'ndxp') {
+                      setShowSourceWarning(true);
+                    } else {
+                      onAddAttribute();
+                    }
+                  }}
                   className="flex-1 md:flex-none px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[13px] font-medium flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
                   title="Thêm trường dữ liệu mới"
                 >
@@ -1588,16 +1595,30 @@ export function AttributesTab({
         /* ── FULL PAGE MODE: entity info + full table ── */
         <>
           {/* Current Managed Entity Info */}
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 flex items-start gap-4 shadow-sm text-[13px] text-amber-800">
-            <AlertCircle className="w-6 h-6 text-amber-600 mt-0.5 flex-shrink-0" />
+          <div className={`border rounded-xl p-5 flex items-start gap-4 shadow-sm text-[13px] ${
+            (entityDataSource === 'dldc' || entityDataSource === 'lgsp' || entityDataSource === 'ndxp')
+              ? 'bg-amber-50 border-amber-200 text-amber-800'
+              : 'bg-blue-50/50 border-blue-200 text-blue-800'
+          }`}>
+            <AlertCircle className={`w-5 h-5 mt-0.5 flex-shrink-0 ${
+              (entityDataSource === 'dldc' || entityDataSource === 'lgsp' || entityDataSource === 'ndxp')
+                ? 'text-amber-600'
+                : 'text-blue-600'
+            }`} />
             <div className="leading-relaxed">
-              <span className="font-semibold text-amber-900">Cảnh báo cấu hình:</span>{' '}
+              <span className="font-semibold">Thông tin cấu hình:</span>{' '}
               <span>Đang thực hiện cấu hình cấu trúc trường dữ liệu cho danh mục </span>
-              <strong className="font-bold text-amber-950 underline decoration-amber-500/30 underline-offset-2">
+              <strong className="font-bold underline underline-offset-2">
                 {currentEntity?.name || 'Chưa chọn thực thể'}
               </strong>
-              <span>. Nguồn dữ liệu danh mục: </span>
-              <span className="font-semibold text-amber-950">{getDataSourceLabel(currentEntity?.dataSource || wizardConfig?.dataSource || 'manual')}</span>
+              <span>. Nguồn dữ liệu: </span>
+              <span className="font-semibold">{getDataSourceLabel(entityDataSource)}</span>
+              {(entityDataSource === 'dldc' || entityDataSource === 'lgsp' || entityDataSource === 'ndxp') && (
+                <div className="mt-1.5 font-semibold text-amber-900 flex items-center gap-1">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-600"></span>
+                  Lưu ý: Không thể thêm mới trường dữ liệu thủ công đối với danh mục có nguồn đồng bộ hoặc kết nối API.
+                </div>
+              )}
             </div>
           </div>
 
@@ -1701,6 +1722,42 @@ export function AttributesTab({
             {renderPagination(filteredAttributes.length)}
           </div>
         </>
+      )}
+      {showSourceWarning && (
+        <BaseModal
+          isOpen={showSourceWarning}
+          onClose={() => setShowSourceWarning(false)}
+          title="Không thể thêm trường dữ liệu"
+          subtitle="Hạn chế thao tác cấu trúc nguồn dữ liệu đồng bộ"
+          footer={
+            <div className="flex justify-end w-full">
+              <button
+                onClick={() => setShowSourceWarning(false)}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[13px] font-semibold transition-colors cursor-pointer animate-all active:scale-95 shadow-sm"
+              >
+                Đã hiểu và đóng
+              </button>
+            </div>
+          }
+        >
+          <div className="space-y-4 text-left">
+            <div className="flex items-center gap-2.5 text-amber-700 bg-amber-50 border border-amber-200 p-3.5 rounded-xl text-[13px] font-semibold">
+              <AlertCircle className="w-5 h-5 shrink-0 text-amber-600" />
+              <span>Nguồn dữ liệu hiện tại: {getDataSourceLabel(entityDataSource)}</span>
+            </div>
+            <div className="space-y-2 leading-relaxed">
+              <p className="text-[13px] text-slate-600">
+                Danh mục này đang được đồng bộ hoặc liên kết trực tiếp qua <b>{getDataSourceLabel(entityDataSource)}</b>. 
+              </p>
+              <p className="text-[13px] text-slate-600">
+                Để bảo đảm tính toàn vẹn dữ liệu và tránh xung đột cấu trúc với nguồn gốc, hệ thống <b>ngăn chặn thao tác thêm mới trường dữ liệu thủ công</b>.
+              </p>
+              <p className="text-[12px] text-slate-500 italic mt-2">
+                * Vui lòng đồng bộ lại cấu trúc mới từ hệ thống gốc hoặc liên hệ quản trị viên để được hỗ trợ.
+              </p>
+            </div>
+          </div>
+        </BaseModal>
       )}
     </div>
   );

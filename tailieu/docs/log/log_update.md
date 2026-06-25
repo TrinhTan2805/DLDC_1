@@ -1,5 +1,53 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Thiết lập quan hệ danh mục (Ngày cập nhật: 25/06/2026)
+
+**Nội dung thay đổi:**
+1. **Tái cấu trúc Tab Thiết lập quan hệ:**
+   - Di chuyển toàn bộ form cấu hình quan hệ trước đây vào modal "Thêm mới quan hệ danh mục" (sử dụng component chuẩn hóa `BaseModal`), đồng thời tối ưu khoảng cách (gap) giữa 2 ô Khóa nguồn và Khóa đích giúp giao diện thoáng đãng, dễ quan sát hơn.
+   - Thiết kế giao diện Grid (bảng dữ liệu) trực quan hiển thị danh sách tất cả các quan hệ liên quan đến một danh mục dữ liệu dùng chung.
+   - Thêm dropdown chọn danh mục dữ liệu dùng chung (`SearchableSelect` cao cấp) ở đầu tab để người dùng chủ động xem và quản lý quan hệ của từng danh mục.
+   - Đồng bộ và chuẩn hóa kích thước font chữ (font size) toàn bộ tab **Thiết lập quan hệ** (các nhãn, mã code, gợi ý, ghi chú, trạng thái liên kết...) và ép cứng tiêu đề bảng (table headers) về kích thước `13px` sử dụng style inline và modifier `!text-[13px]` để đảm bảo hiển thị đồng nhất tuyệt đối.
+   - Cung cấp đầy đủ các thao tác Thêm mới, Chỉnh sửa, và Xóa (sử dụng `ConfirmModal` xác nhận trước khi xóa) trực tiếp trên lưới dữ liệu.
+   - Loại bỏ cột **Trạng thái** trong bảng danh sách quan hệ và trường chọn trạng thái trong modal Thêm mới/Chỉnh sửa để tinh giản giao diện.
+   - Khởi tạo dữ liệu mẫu (mock relationships) ban đầu tại `CategorySetupPage.tsx` giúp giao diện trực quan và sẵn sàng vận hành.
+2. **Hạn chế cấu trúc trường đối với Nguồn đồng bộ (Kho DLDC & API/LGSP) trong Tab Thiết lập cấu trúc:**
+   - Cập nhật banner thông tin cấu hình (`AttributesTab.tsx`) để hiển thị dòng lưu ý chi tiết khi danh mục hiện tại là nguồn đồng bộ.
+   - Khi người dùng nhấn nút **Thêm trường dữ liệu** đối với các danh mục đồng bộ ngoài (`dldc`, `lgsp`, `ndxp`), hệ thống sẽ chặn hành động và hiển thị modal cảnh báo giải thích rõ lý do không được tự ý sửa cấu trúc trường để tránh sai lệch dữ liệu gốc.
+3. **Loại bỏ trạng thái "Duyệt một phần" trong Tab Phê duyệt:**
+   - Ẩn/loại bỏ tùy chọn bộ lọc "Duyệt một phần" trên thanh trạng thái filter ở tab Phê duyệt.
+   - Chuyển đổi logic cập nhật trạng thái khi lãnh đạo phê duyệt (kể cả khi từ chối một số trường dữ liệu con) thì trạng thái tổng thể của yêu cầu vẫn cập nhật thành "Đã phê duyệt" (`approved`).
+   - Cập nhật hiển thị fallback cho các trạng thái cũ/thông tin liên quan từ "Duyệt một phần" thành "Đã phê duyệt" để bảo đảm sự đồng nhất trong hệ thống và giao diện người dùng.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/components/tabs/RelationshipsTab.tsx`
+- `src/components/pages/category/components/tabs/AttributesTab.tsx`
+- `src/components/pages/category/components/tabs/ApprovalTab.tsx`
+- `src/components/pages/category/components/modals/ReviewApprovalModal.tsx`
+- `src/components/pages/category/CategorySetupPage.tsx`
+- `tailieu/docs/log/log_update.md`
+
+---
+
+## Cập nhật chuẩn hóa Hộp thoại (Ngày cập nhật: 25/06/2026)
+
+**Nội dung thay đổi:**
+1. **Áp dụng Quy tắc 5.4 Hộp thoại (Dialog / Modal):**
+   - Cấu hình z-index động (`100 + modalIndex * 10`) dựa trên số lượng modal đang mở (`window.__activeModalsCount`), đảm bảo thứ tự hiển thị chính xác của các modal chồng nhau (nested modals).
+   - Thêm `e.stopPropagation()` vào sự kiện click của lớp Backdrop nhằm ngăn chặn việc lan truyền sự kiện click ra ngoài, triệt tiêu lỗi vô tình đóng Modal 1 khi click ra ngoài Modal 2.
+   - Đồng bộ màu nền Backdrop thành mờ 50% (`bg-black/50` hoặc `rgba(0, 0, 0, 0.5)`) và loại bỏ hiệu ứng làm mờ kính (backdrop filter blur) tương tự như modal "Thêm mới giấy phép" bên phân hệ Dữ liệu mở, đảm bảo giao diện sạch sẽ, trực quan và nhất quán.
+   - Áp dụng các cải tiến trên cho `BaseModal.tsx`, `ConfirmModal.tsx`, `CategoryWizardModal.tsx`, `EditCategoryModal.tsx`, và tái cấu trúc các modal nội tuyến trong `CategorySetupPageNew.tsx` sử dụng component helper `PortalModal`.
+
+**Các file bị ảnh hưởng:**
+- `src/components/common/BaseModal.tsx`
+- `src/components/common/ConfirmModal.tsx`
+- `src/components/pages/category/components/modals/CategoryWizardModal.tsx`
+- `src/components/pages/category/components/modals/EditCategoryModal.tsx`
+- `src/components/pages/category/CategorySetupPageNew.tsx`
+- `tailieu/docs/log/log_update.md`
+
+---
+
 ## Phiên bản 2.5.53 (Ngày cập nhật: 25/06/2026)
 
 **Nội dung thay đổi:**

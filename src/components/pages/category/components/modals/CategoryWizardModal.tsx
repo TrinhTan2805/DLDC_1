@@ -1,4 +1,4 @@
-import { ChangeEvent } from 'react';
+import React, { ChangeEvent, useState, useEffect } from 'react';
 import { X, FileText, Sliders, ChevronRight, ChevronLeft, Save, Send, Link2, ChevronDown, Check } from 'lucide-react';
 import { AttributesTab } from '../tabs/AttributesTab';
 import { RelationshipsTab } from '../tabs/RelationshipsTab';
@@ -53,12 +53,42 @@ export function CategoryWizardModal({
   onAddAttributeInline,
   isViewOnly = false
 }: CategoryWizardModalProps) {
+  const [modalIndex, setModalIndex] = useState(1);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    if (typeof window !== 'undefined') {
+      window.__activeModalsCount = (window.__activeModalsCount || 0) + 1;
+      setModalIndex(window.__activeModalsCount);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.__activeModalsCount = Math.max(0, (window.__activeModalsCount || 0) - 1);
+      }
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
+
+  const currentZIndex = 100 + modalIndex * 10;
 
   return (
     <Portal>
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999] p-4" style={{ zIndex: 99999 }}>
-        <div className={`bg-white rounded-2xl shadow-2xl w-full overflow-hidden animate-in fade-in zoom-in-95 duration-300 flex flex-col max-h-[90vh] ${step === 1 ? 'max-w-3xl' : 'max-w-5xl'}`}>
+      <div 
+        className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 animate-in fade-in duration-200" 
+        style={{ 
+          zIndex: currentZIndex
+        }}
+        onClick={(e: React.MouseEvent) => {
+          e.stopPropagation();
+        }}
+      >
+        <div 
+          className={`bg-white rounded-2xl shadow-2xl w-full overflow-hidden animate-in fade-in zoom-in-95 duration-300 flex flex-col max-h-[90vh] ${step === 1 ? 'max-w-3xl' : 'max-w-5xl'}`}
+          onClick={(e: React.MouseEvent) => {
+            e.stopPropagation();
+          }}
+        >
           {/* Wizard Header */}
           <div className="flex flex-col border-b border-slate-200 bg-white shrink-0">
             <div className="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-white">

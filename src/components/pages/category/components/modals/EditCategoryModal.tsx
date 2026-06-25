@@ -23,10 +23,24 @@ export function EditCategoryModal({
   isViewOnly = false
 }: EditCategoryModalProps) {
   const [formData, setFormData] = useState<Partial<MasterDataEntity>>(data);
+  const [modalIndex, setModalIndex] = useState(1);
 
   useEffect(() => {
     setFormData(data);
   }, [data]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    if (typeof window !== 'undefined') {
+      window.__activeModalsCount = (window.__activeModalsCount || 0) + 1;
+      setModalIndex(window.__activeModalsCount);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.__activeModalsCount = Math.max(0, (window.__activeModalsCount || 0) - 1);
+      }
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -34,9 +48,20 @@ export function EditCategoryModal({
     setFormData({ ...formData, [field]: value });
   };
 
+  const currentZIndex = 100 + modalIndex * 10;
+
   return (
     <Portal>
-      <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] flex items-center justify-center z-[99999] p-4" style={{ zIndex: 99999 }} onClick={onClose}>
+      <div 
+        className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 animate-in fade-in duration-200" 
+        style={{ 
+          zIndex: currentZIndex
+        }} 
+        onClick={(e: React.MouseEvent) => {
+          e.stopPropagation();
+          onClose();
+        }}
+      >
         <div 
           className="bg-white rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
           onClick={(e: any) => e.stopPropagation()}
