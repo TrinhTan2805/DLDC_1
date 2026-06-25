@@ -1,5 +1,114 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Phiên bản 2.5.51 (Ngày cập nhật: 25/06/2026)
+
+**Nội dung thay đổi:**
+1. **Tự động điền thông tin khi chọn tệp dữ liệu mở:**
+   - Tự động điền trường "Tên dịch vụ chia sẻ" theo tên tệp dữ liệu mở đã chọn (loại bỏ phần mở rộng tệp).
+   - Tự động thiết lập "Phân loại dữ liệu" tương ứng theo danh mục của tệp dữ liệu mở đã chọn (đồng thời hiển thị động tùy chọn này trong thẻ `<select>`).
+   - Tự động tạo "Mã định danh API" và "API Context Path" tương thích theo tên danh mục dữ liệu mở được chọn.
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.50 -> 2.5.51)
+- `src/components/pages/provisioning/modals/ProvisionServiceModal.tsx`
+- `tailieu/docs/log/log_update.md`
+
+---
+
+## Phiên bản 2.5.50 (Ngày cập nhật: 25/06/2026)
+
+**Nội dung thay đổi:**
+1. **Di chuyển cấu hình gói tin chia sẻ dữ liệu mở:**
+   - Chuyển phần cấu hình "Thiết lập gói tin chia sẻ dữ liệu mở" (checkbox và dropdown chọn tệp dữ liệu mở) từ tab "Thiết kế cấu trúc gói tin" (Tab 3) sang tab "Thông tin chung" (Tab 1) của Modal Dịch vụ cung cấp (thêm/sửa) (`ProvisionServiceModal.tsx`).
+   - Đặt phần cấu hình này nằm ở phía trên trường "Tên dịch vụ chia sẻ" để tăng tính trực quan khi người dùng khởi tạo dịch vụ.
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.49 -> 2.5.50)
+- `src/components/pages/provisioning/modals/ProvisionServiceModal.tsx`
+- `tailieu/docs/log/log_update.md`
+
+---
+
+## Phiên bản 2.5.49 (Ngày cập nhật: 25/06/2026)
+
+**Nội dung thay đổi:**
+1. **Thay đổi thứ tự hiển thị các mục trên Sidebar trong module Dữ liệu mở:**
+   - Di chuyển mục "Công bố dữ liệu mở" lên phía trên mục "Danh sách danh mục dữ liệu mở" tại menu Dữ liệu mở.
+   - Cập nhật cấu trúc menu tại `Sidebar.tsx`, `menuStructure.ts`, và `extracted_menu.json` để đồng bộ thứ tự hiển thị này.
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.48 -> 2.5.49)
+- `src/components/layout/Sidebar.tsx`
+- `src/components/pages/admin/menuStructure.ts`
+- `src/components/layout/extracted_menu.json`
+- `tailieu/docs/log/log_update.md`
+
+---
+
+## Phiên bản 2.5.48 (Ngày cập nhật: 25/06/2026)
+
+**Nội dung thay đổi:**
+1. **Hiển thị checkbox chỉ đọc cho thuộc tính tự động công bố trong modal Chi tiết và Phê duyệt:**
+   - Thay đổi hiển thị thuộc tính "Công bố dữ liệu ngay sau khi được phê duyệt" thành ô checkbox (disabled) trong modal Chi tiết yêu cầu công bố và tab Chi tiết phê duyệt (`OpenDataPublishedListPage.tsx`).
+   - Cập nhật nhãn "Cơ quan công bố" thành "Đơn vị chủ trì cung cấp" tại tab Chi tiết phê duyệt để đồng bộ toàn diện.
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.47 -> 2.5.48)
+- `src/components/pages/open-data/OpenDataPublishedListPage.tsx`
+
+---
+
+## Phiên bản 2.5.47 (Ngày cập nhật: 25/06/2026)
+
+**Nội dung thay đổi:**
+1. **Thêm hiển thị trạng thái Công bố ngay trong modal chi tiết:**
+   - Hiển thị trường "Công bố dữ liệu ngay sau khi được phê duyệt" (Có/Không) trong modal xem chi tiết yêu cầu công bố và phần thông tin chi tiết phê duyệt trong `OpenDataPublishedListPage.tsx`.
+   - Đồng bộ đổi nhãn "Cơ quan công bố" thành "Đơn vị chủ trì cung cấp" tại các modal xem chi tiết tương ứng.
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.46 -> 2.5.47)
+- `src/components/pages/open-data/OpenDataPublishedListPage.tsx`
+
+---
+
+## Phiên bản 2.5.46 (Ngày cập nhật: 25/06/2026)
+
+**Nội dung thay đổi:**
+1. **Thêm checkbox Công bố dữ liệu ngay sau khi được phê duyệt:**
+   - Thêm checkbox "Công bố dữ liệu ngay sau khi được phê duyệt" dưới trường "Thông tin mô tả" trong tab Thông tin chung của modal Gửi yêu cầu công bố dữ liệu.
+   - Tích hợp lưu/chỉnh sửa trạng thái checkbox vào đối tượng yêu cầu công bố dữ liệu.
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.45 -> 2.5.46)
+- `src/components/pages/open-data/OpenDataPublishedListPage.tsx`
+
+---
+
+## Phiên bản 2.5.45 (Ngày cập nhật: 25/06/2026)
+
+**Nội dung thay đổi:**
+1. **Đổi tên trường trong modal Gửi yêu cầu công bố dữ liệu:**
+   - Thay đổi tên trường "Cơ quan công bố" thành "Đơn vị chủ trì cung cấp" trong modal Gửi yêu cầu công bố dữ liệu.
+   - Cập nhật các thông báo lỗi (validation alerts, metadata format match errors) và phần xem trước metadata liên quan tương ứng.
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.44 -> 2.5.45)
+- `src/components/pages/open-data/OpenDataPublishedListPage.tsx`
+
+---
+
+## Phiên bản 2.5.44 (Ngày cập nhật: 25/06/2026)
+
+**Nội dung thay đổi:**
+1. **Tinh gọn giao diện Thiết lập danh mục dữ liệu mở:**
+   - Loại bỏ trường chọn "Danh mục cha" khỏi các modal Thêm mới, Xem chi tiết và Chỉnh sửa danh mục dữ liệu mở tại trang Thiết lập danh mục dữ liệu mở.
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.43 -> 2.5.44)
+- `src/components/pages/open-data/OpenDataSetupPage.tsx`
+
+---
+
 ## Phiên bản 2.5.43 (Ngày cập nhật: 24/06/2026)
 
 **Nội dung thay đổi:**

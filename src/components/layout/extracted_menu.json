@@ -1118,6 +1118,23 @@
         ]
       },
       {
+        "id": "open-data-published-list",
+        "name": "Công bố dữ liệu mở",
+        "functions": [
+          {
+            "id": "open-data-published-list-func",
+            "name": "Công bố dữ liệu mở",
+            "actions": [
+              "Xem",
+              "Thêm",
+              "Sửa",
+              "Xóa",
+              "Xuất Excel"
+            ]
+          }
+        ]
+      },
+      {
         "id": "open-data-category-list",
         "name": "Danh sách danh mục",
         "children": [
@@ -1174,23 +1191,7 @@
           }
         ]
       },
-      {
-        "id": "open-data-published-list",
-        "name": "Công bố dữ liệu mở",
-        "functions": [
-          {
-            "id": "open-data-published-list-func",
-            "name": "Công bố dữ liệu mở",
-            "actions": [
-              "Xem",
-              "Thêm",
-              "Sửa",
-              "Xóa",
-              "Xuất Excel"
-            ]
-          }
-        ]
-      },
+
       {
         "id": "open-data-report",
         "name": "Thống kê dữ liệu mở",

@@ -134,6 +134,16 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
       setHasJoin(false);
       setJoinedTables([]);
       setPacketMode('visual');
+
+      // Auto-fill fields
+      const cleanFileName = matched.fileName ? matched.fileName.replace(/\.[^/.]+$/, "") : (matched.category || "Dịch vụ chia sẻ dữ liệu mở");
+      setServiceName(cleanFileName);
+      setDataType(matched.category || "Dữ liệu mở");
+
+      // Auto-fill API Code and Context Path
+      const codeName = convertToEnglishSnake(matched.category || cleanFileName);
+      setServiceCode(`api_v1_${codeName}`);
+      setContextPath(`/api/v1/${codeName.replace(/_/g, '-')}`);
     }
   };
 
@@ -574,6 +584,52 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                     Thông tin định danh dịch vụ
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="md:col-span-2 mb-2 animate-in fade-in duration-300">
+                      {/* Open Data Sharing Configuration */}
+                      <div className="p-4 bg-blue-50/30 border border-blue-100 rounded-xl flex flex-col items-start gap-4 justify-start shadow-sm w-full text-left">
+                        <div className="flex items-center gap-2 shrink-0 justify-start text-left">
+                          <input 
+                            type="checkbox" 
+                            id="isOpenDataShared"
+                            checked={isOpenDataShared}
+                            onChange={(e) => {
+                              const checked = e.target.checked;
+                              setIsOpenDataShared(checked);
+                              if (!checked) {
+                                setSelectedOpenDataId('');
+                              } else {
+                                if (openDataList.length > 0) {
+                                  handleSelectOpenData(openDataList[0].id);
+                                }
+                              }
+                            }}
+                            className="w-4 h-4 text-blue-600 rounded border-slate-350 focus:ring-blue-500 cursor-pointer shrink-0"
+                          />
+                          <label htmlFor="isOpenDataShared" className="text-[13px] font-bold text-slate-800 cursor-pointer select-none whitespace-nowrap text-left">
+                            Thiết lập gói tin chia sẻ dữ liệu mở
+                          </label>
+                        </div>
+                        
+                        {isOpenDataShared && (
+                          <div className="flex items-center gap-2 w-full max-w-2xl justify-start text-left animate-in fade-in slide-in-from-left-2 duration-300">
+                            <span className="text-[12px] font-bold text-slate-500 uppercase tracking-wider shrink-0 text-left">Chọn tệp dữ liệu mở:</span>
+                            <select
+                              aria-label="Chọn tệp dữ liệu mở"
+                              value={selectedOpenDataId}
+                              onChange={(e) => handleSelectOpenData(e.target.value)}
+                              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-[13px] font-semibold text-slate-850 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-sm truncate animate-in fade-in text-left"
+                            >
+                              <option value="" className="text-slate-500">-- Chọn tệp dữ liệu mở (Đã công bố) --</option>
+                              {openDataList.map((item) => (
+                                <option key={item.id} value={item.id} className="truncate text-slate-850 text-left">
+                                  {item.fileName} ({item.category})
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                     <div className="md:col-span-2">
                       <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Tên dịch vụ chia sẻ <span className="text-red-500">*</span></label>
                       <input aria-label="Tên dịch vụ" title="Tên dịch vụ"
@@ -641,6 +697,9 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                         <option value="Dữ liệu khai sinh" className="text-slate-800">Dữ liệu khai sinh</option>
                         <option value="Dữ liệu kết hôn" className="text-slate-800">Dữ liệu kết hôn</option>
                         <option value="Dữ liệu khai tử" className="text-slate-800">Dữ liệu khai tử</option>
+                        {isOpenDataShared && dataType && !["Dữ liệu Hộ tịch", "Dữ liệu khai sinh", "Dữ liệu kết hôn", "Dữ liệu khai tử"].includes(dataType) && (
+                          <option value={dataType} className="text-slate-800">{dataType}</option>
+                        )}
                       </select>
                     </div>
                     <div className="md:col-span-2">
@@ -764,50 +823,6 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                   </button>
                 </div>
 
-                {/* Open Data Sharing Configuration */}
-                <div className="p-4 bg-blue-50/30 border border-blue-100 rounded-xl flex flex-col items-start gap-4 justify-start shadow-sm w-full text-left">
-                  <div className="flex items-center gap-2 shrink-0 justify-start text-left">
-                    <input 
-                      type="checkbox" 
-                      id="isOpenDataShared"
-                      checked={isOpenDataShared}
-                      onChange={(e) => {
-                        const checked = e.target.checked;
-                        setIsOpenDataShared(checked);
-                        if (!checked) {
-                          setSelectedOpenDataId('');
-                        } else {
-                          if (openDataList.length > 0) {
-                            handleSelectOpenData(openDataList[0].id);
-                          }
-                        }
-                      }}
-                      className="w-4 h-4 text-blue-600 rounded border-slate-350 focus:ring-blue-500 cursor-pointer shrink-0"
-                    />
-                    <label htmlFor="isOpenDataShared" className="text-[13px] font-bold text-slate-800 cursor-pointer select-none whitespace-nowrap text-left">
-                      Thiết lập gói tin chia sẻ dữ liệu mở
-                    </label>
-                  </div>
-                  
-                  {isOpenDataShared && (
-                    <div className="flex items-center gap-2 w-full max-w-2xl justify-start text-left animate-in fade-in slide-in-from-left-2 duration-300">
-                      <span className="text-[12px] font-bold text-slate-500 uppercase tracking-wider shrink-0 text-left">Chọn tệp dữ liệu mở:</span>
-                      <select
-                        aria-label="Chọn tệp dữ liệu mở"
-                        value={selectedOpenDataId}
-                        onChange={(e) => handleSelectOpenData(e.target.value)}
-                        className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-[13px] font-semibold text-slate-850 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-sm truncate animate-in fade-in text-left"
-                      >
-                        <option value="" className="text-slate-500">-- Chọn tệp dữ liệu mở (Đã công bố) --</option>
-                        {openDataList.map((item) => (
-                          <option key={item.id} value={item.id} className="truncate text-slate-850 text-left">
-                            {item.fileName} ({item.category})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-                </div>
 
                 {packetMode === 'visual' ? (
                   <>

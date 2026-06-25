@@ -25,8 +25,8 @@ interface PublishedData {
   mainTable?: string;
   joinTables?: any[];
   dataFields?: any[];
-  approvalNote?: string;
   topic?: string;
+  publishImmediately?: boolean;
 }
 
 const getPreviewFallback = (categoryName: string) => {
@@ -659,6 +659,7 @@ export function OpenDataPublishedListPage() {
   const [requestDescription, setRequestDescription] = useState('');
   const [requestCategory, setRequestCategory] = useState('');
   const [requestKeywords, setRequestKeywords] = useState('');
+  const [requestPublishImmediately, setRequestPublishImmediately] = useState(false);
   const [requestLicense, setRequestLicense] = useState('Giấy phép dữ liệu mở công cộng');
   const [requestPublisher, setRequestPublisher] = useState('Bộ Tư pháp');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -708,7 +709,7 @@ export function OpenDataPublishedListPage() {
       return;
     }
     if (requestPublisher && requestPublisher.trim().toLowerCase() !== config.publisher.toLowerCase()) {
-      setFormValidationError(`Cơ quan công bố không khớp với cấu hình metadata của tệp (${config.publisher}).`);
+      setFormValidationError(`Đơn vị chủ trì cung cấp không khớp với cấu hình metadata của tệp (${config.publisher}).`);
       return;
     }
     if (requestKeywords) {
@@ -1030,6 +1031,7 @@ export function OpenDataPublishedListPage() {
       joinTables: joinTables,
       dataFields: dataFields,
       topic: requestTopic,
+      publishImmediately: requestPublishImmediately,
     };
   };
 
@@ -1046,7 +1048,7 @@ export function OpenDataPublishedListPage() {
       return;
     }
     if (!requestPublisher) {
-      alert("Vui lòng nhập cơ quan công bố!");
+      alert("Vui lòng nhập đơn vị chủ trì cung cấp!");
       setRequestModalTab('general');
       return;
     }
@@ -1139,6 +1141,7 @@ export function OpenDataPublishedListPage() {
     setRequestFormat([]);
     setRequestFrequency('');
     setRequestTopic('');
+    setRequestPublishImmediately(false);
     setSourceDbId('');
     setMainTable('');
     setHasJoin(false);
@@ -1159,6 +1162,7 @@ export function OpenDataPublishedListPage() {
     setRequestFormat(item.format || []);
     setRequestFrequency(item.frequency || '');
     setRequestTopic(item.topic || '');
+    setRequestPublishImmediately(item.publishImmediately || false);
     setSourceDbId(item.sourceDbId || '');
     setMainTable(item.mainTable || '');
     const jts = item.joinTables || [];
@@ -2005,7 +2009,7 @@ export function OpenDataPublishedListPage() {
                   <div className="text-[13px] text-black">{selectedData.category}</div>
                 </div>
                 <div>
-                  <div className="text-[11px] text-black uppercase tracking-wider mb-1">Cơ quan công bố</div>
+                  <div className="text-[11px] text-black uppercase tracking-wider mb-1">Đơn vị chủ trì cung cấp</div>
                   <div className="text-[13px] text-black">{selectedData.publisher}</div>
                 </div>
 
@@ -2042,6 +2046,19 @@ export function OpenDataPublishedListPage() {
                 <div className="col-span-1 md:col-span-2">
                   <div className="text-[11px] text-black uppercase tracking-wider mb-1">Thông tin mô tả</div>
                   <div className="text-[13px] text-black whitespace-pre-wrap">{selectedData.description || '—'}</div>
+                </div>
+
+                <div className="col-span-1 md:col-span-2 flex items-center gap-2 mt-1">
+                  <input
+                    type="checkbox"
+                    id="detailPublishImmediately"
+                    checked={selectedData.publishImmediately || false}
+                    disabled
+                    className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-not-allowed"
+                  />
+                  <label htmlFor="detailPublishImmediately" className="text-slate-700 select-none cursor-not-allowed">
+                    Công bố dữ liệu ngay sau khi được phê duyệt
+                  </label>
                 </div>
               </div>
 
@@ -2348,7 +2365,7 @@ export function OpenDataPublishedListPage() {
                           <span className="text-slate-800">{metaCfg.categoryName}</span>
                         </div>
                         <div className="flex gap-1">
-                          <span className="text-slate-500 shrink-0">Cơ quan công bố:</span>
+                          <span className="text-slate-500 shrink-0">Đơn vị chủ trì cung cấp:</span>
                           <span className="text-slate-800">{metaCfg.publisher}</span>
                         </div>
                         <div className="flex gap-1">
@@ -2407,11 +2424,11 @@ export function OpenDataPublishedListPage() {
 
                 <div>
                   <label className="block text-slate-700 mb-1">
-                    Cơ quan công bố <span className="text-red-500">*</span>
+                    Đơn vị chủ trì cung cấp <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
-                    placeholder="Nhập tên cơ quan"
+                    placeholder="Nhập tên đơn vị chủ trì cung cấp"
                     value={requestPublisher}
                     onChange={(e) => setRequestPublisher(e.target.value)}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -2492,6 +2509,19 @@ export function OpenDataPublishedListPage() {
                     onChange={(e) => setRequestDescription(e.target.value)}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
+                </div>
+
+                <div className="col-span-1 md:col-span-2 flex items-center gap-2 mt-1">
+                  <input
+                    type="checkbox"
+                    id="requestPublishImmediately"
+                    checked={requestPublishImmediately}
+                    onChange={(e) => setRequestPublishImmediately(e.target.checked)}
+                    className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  />
+                  <label htmlFor="requestPublishImmediately" className="text-slate-700 select-none cursor-pointer">
+                    Công bố dữ liệu ngay sau khi được phê duyệt
+                  </label>
                 </div>
               </div>
             )}
@@ -2886,7 +2916,7 @@ export function OpenDataPublishedListPage() {
                           return;
                         }
                         if (!requestPublisher) {
-                          alert("Vui lòng nhập cơ quan công bố!");
+                          alert("Vui lòng nhập đơn vị chủ trì cung cấp!");
                           return;
                         }
                         if (!requestTopic) {
@@ -2964,7 +2994,7 @@ export function OpenDataPublishedListPage() {
                     <div className="text-[13px] text-black font-medium mt-0.5">{selectedApprovalItem.creator}</div>
                   </div>
                   <div>
-                    <div className="text-[13px] font-semibold text-black uppercase">Cơ quan công bố</div>
+                    <div className="text-[13px] font-semibold text-black uppercase">Đơn vị chủ trì cung cấp</div>
                     <div className="text-[13px] text-black font-medium mt-0.5">{selectedApprovalItem.publisher}</div>
                   </div>
                   <div>
@@ -2996,6 +3026,19 @@ export function OpenDataPublishedListPage() {
                   <div className="col-span-1 md:col-span-2">
                     <div className="text-[13px] font-semibold text-black uppercase">Thông tin mô tả</div>
                     <div className="text-[13px] text-black font-medium mt-0.5 whitespace-pre-wrap">{selectedApprovalItem.description || 'Không có mô tả'}</div>
+                  </div>
+
+                  <div className="col-span-1 md:col-span-2 flex items-center gap-2 mt-1">
+                    <input
+                      type="checkbox"
+                      id="approvalPublishImmediately"
+                      checked={selectedApprovalItem.publishImmediately || false}
+                      disabled
+                      className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-not-allowed"
+                    />
+                    <label htmlFor="approvalPublishImmediately" className="text-slate-700 select-none cursor-not-allowed">
+                      Công bố dữ liệu ngay sau khi được phê duyệt
+                    </label>
                   </div>
                 </div>
               )}

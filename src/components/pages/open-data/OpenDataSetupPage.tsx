@@ -2612,23 +2612,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                 </select>
               </div>
 
-              <div>
-                <label className="block text-[13px] text-slate-700 mb-2">Danh mục cha</label>
-                <select
-                  value={formData.parentId}
-                  onChange={(e) => setFormData({ ...formData, parentId: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-emerald-500 bg-white"
-                  aria-label="Danh mục cha"
-                  title="Danh mục cha"
-                >
-                  <option value="">-- Không có danh mục cha --</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.code} - {cat.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+
 
             </div>
             <div className="sticky bottom-0 bg-slate-50 border-t border-slate-200 px-6 py-4 flex items-center justify-end gap-3">
@@ -2698,17 +2682,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   <label className="block text-[13px] text-slate-600 mb-1">Trạng thái phê duyệt</label>
                   <div>{getApprovalStatusBadge(selectedCategory.approvalStatus)}</div>
                 </div>
-                <div>
-                  <label className="block text-[13px] text-slate-600 mb-1">Danh mục cha</label>
-                  <div className="text-[13px] text-slate-900 font-medium">
-                    {selectedCategory.parentId
-                      ? (() => {
-                        const parent = categories.find(c => c.id === selectedCategory.parentId);
-                        return parent ? `${parent.code} - ${parent.name}` : 'Không xác định';
-                      })()
-                      : 'Không có'}
-                  </div>
-                </div>
+
                 {selectedCategory.approvalStatus === 'approved' && (
                   <div className="col-span-2 bg-green-50 border border-green-200 rounded-lg p-3">
                     <label className="block text-[13px] font-semibold text-green-800 mb-1">Ý kiến người phê duyệt</label>
@@ -2845,25 +2819,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                 </select>
               </div>
 
-              <div>
-                <label className="block text-[13px] text-slate-700 mb-2">Danh mục cha</label>
-                <select
-                  value={formData.parentId}
-                  onChange={(e) => setFormData({ ...formData, parentId: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-emerald-500 bg-white"
-                  aria-label="Danh mục cha"
-                  title="Danh mục cha"
-                >
-                  <option value="">-- Không có danh mục cha --</option>
-                  {categories
-                    .filter(cat => !selectedCategory || cat.id !== selectedCategory.id)
-                    .map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.code} - {cat.name}
-                      </option>
-                    ))}
-                </select>
-              </div>
+
             </div>
             <div className="sticky bottom-0 bg-slate-50 border-t border-slate-200 px-6 py-4 flex items-center justify-end gap-3">
               <button

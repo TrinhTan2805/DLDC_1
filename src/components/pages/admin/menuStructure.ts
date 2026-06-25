@@ -1491,6 +1491,29 @@ export const menuStructure: MenuItem[] = [
         ],
       },
       {
+        id: "open-data-published-list",
+        name: "Công bố dữ liệu mở",
+        functions: [
+          {
+            id: "open-data-published-list-func",
+            name: "Công bố dữ liệu mở",
+            actions: [
+              "Xem",
+              "Thêm",
+              "Sửa",
+              "Xóa",
+              "Xuất Excel",
+              "Trình duyệt",
+              "Duyệt",
+              "Công bố",
+              "Hủy công bố",
+              "Công khai",
+              "Hủy công khai",
+            ],
+          },
+        ],
+      },
+      {
         id: "open-data-category-list",
         name: "Danh sách danh mục dữ liệu mở",
         children: [
@@ -1561,29 +1584,6 @@ export const menuStructure: MenuItem[] = [
                   "Hủy công khai",
                 ],
               },
-            ],
-          },
-        ],
-      },
-      {
-        id: "open-data-published-list",
-        name: "Công bố dữ liệu mở",
-        functions: [
-          {
-            id: "open-data-published-list-func",
-            name: "Công bố dữ liệu mở",
-            actions: [
-              "Xem",
-              "Thêm",
-              "Sửa",
-              "Xóa",
-              "Xuất Excel",
-              "Trình duyệt",
-              "Duyệt",
-              "Công bố",
-              "Hủy công bố",
-              "Công khai",
-              "Hủy công khai",
             ],
           },
         ],

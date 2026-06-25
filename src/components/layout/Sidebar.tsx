@@ -387,14 +387,14 @@ const menuItems: MenuItem[] = [
         icon: Settings,
       },
       {
-        id: "open-data-category-list",
-        label: "Danh sách danh mục dữ liệu mở",
-        icon: List,
-      },
-      {
         id: "open-data-published-list",
         label: "Công bố dữ liệu mở",
         icon: FileText,
+      },
+      {
+        id: "open-data-category-list",
+        label: "Danh sách danh mục dữ liệu mở",
+        icon: List,
       },
       {
         id: "open-data-report",
