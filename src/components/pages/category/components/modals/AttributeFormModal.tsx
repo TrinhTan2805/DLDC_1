@@ -15,7 +15,7 @@ interface AttributeFormModalProps {
 
 /**
  * Standardized Attribute Form Modal using BaseModal.
- * Provides a premium, consistent look for adding and editing attributes.
+ * Refactored to match the inline attribute form style.
  */
 export function AttributeFormModal({
   isOpen,
@@ -23,24 +23,23 @@ export function AttributeFormModal({
   editingAttribute,
   formData,
   setFormData,
-  onSave,
-  onSaveAndSubmit
+  onSave
 }: AttributeFormModalProps) {
   if (!isOpen) return null;
 
   const footer = (
     <>
       <button 
- type="button"
- onClick={onClose} 
- className="px-6 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all active:scale-95 text-sm"
- >
+        type="button"
+        onClick={onClose} 
+        className="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 transition-colors text-[13px] font-medium cursor-pointer"
+      >
         Hủy
       </button>
       <button 
         type="button"
         onClick={onSave} 
-        className="px-8 py-2.5 rounded-xl bg-blue-600 text-white hover:bg-blue-700 flex items-center gap-2 shadow-xl shadow-blue-100 transition-all active:scale-95 text-sm"
+        className="px-5 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 flex items-center gap-2 transition-colors text-[13px] font-medium shadow-sm cursor-pointer"
       >
         <Send className="w-4 h-4"/>
         Lưu
@@ -57,44 +56,47 @@ export function AttributeFormModal({
       footer={footer}
       maxWidth="max-w-2xl"
     >
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-1.5 md:col-span-2">
-            <label className="block text-xs font-bold uppercase tracking-widest text-slate-500">
-              Tên trường <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={formData.fieldName || ''}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, fieldName: e.target.value })}
-              placeholder="VD: citizen_id"
-              className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-100/50 focus:border-blue-500 transition-all text-sm font-mono font-bold text-slate-800"
-            />
-            <p className="text-[11px] text-slate-400 font-medium italic">Tên định danh trong cơ sở dữ liệu (không dấu, chữ thường)</p>
-          </div>
+      <div className="space-y-4 text-left">
+        {/* Tên trường */}
+        <div className="space-y-1.5">
+          <label className="block text-[13px] font-medium text-slate-600">
+            Tên trường <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            value={formData.fieldName || ''}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, fieldName: e.target.value })}
+            placeholder="VD: citizen_id"
+            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] font-mono focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none bg-white text-slate-800"
+          />
+          <p className="text-[13px] text-slate-400 italic">Tên định danh trong cơ sở dữ liệu (không dấu, chữ thường)</p>
+        </div>
 
-          <div className="space-y-1.5 md:col-span-2">
-            <label className="block text-xs font-bold uppercase tracking-widest text-slate-500">
-              Tên hiển thị <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={formData.displayName || ''}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, displayName: e.target.value })}
-              placeholder="VD: Số CCCD"
-              className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-100/50 focus:border-blue-500 transition-all text-sm font-bold text-slate-800"
-            />
-          </div>
+        {/* Tên hiển thị */}
+        <div className="space-y-1.5">
+          <label className="block text-[13px] font-medium text-slate-600">
+            Tên hiển thị <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            value={formData.displayName || ''}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, displayName: e.target.value })}
+            placeholder="VD: Số CCCD"
+            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none bg-white text-slate-800"
+          />
+        </div>
 
+        {/* Kiểu dữ liệu & Độ dài tối đa */}
+        <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className="block text-xs font-bold uppercase tracking-widest text-slate-500">
+            <label className="block text-[13px] font-medium text-slate-600">
               Kiểu dữ liệu <span className="text-red-500">*</span>
             </label>
             <select
               title="Kiểu dữ liệu"
               value={formData.dataType || 'string'}
               onChange={(e: ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, dataType: e.target.value as FieldDataType })}
-              className="w-full px-4 py-3 border border-slate-200 rounded-xl bg-white focus:ring-4 focus:ring-blue-100/50 transition-all text-sm font-bold text-slate-800 h-[48px]"
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-slate-800"
             >
               <option value="string">Chuỗi (String)</option>
               <option value="number">Số (Number)</option>
@@ -109,34 +111,35 @@ export function AttributeFormModal({
           </div>
 
           <div className="space-y-1.5">
-            <label className="block text-xs font-bold uppercase tracking-widest text-slate-500">Độ dài tối đa</label>
+            <label className="block text-[13px] font-medium text-slate-600">Độ dài tối đa</label>
             <input
               type="number"
               value={formData.length || ''}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, length: e.target.value ? parseInt(e.target.value) : undefined })}
               placeholder="VD: 255"
-              className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-100/50 transition-all text-sm font-bold text-slate-800"
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none bg-white text-slate-800"
             />
           </div>
         </div>
 
-        <div className="space-y-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-          <label className="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Cấu hình ràng buộc</label>
+        {/* Cấu hình ràng buộc */}
+        <div className="space-y-3 p-4 bg-slate-50 rounded-xl border border-slate-100">
+          <label className="block text-[13px] font-medium text-slate-600 mb-2">Cấu hình ràng buộc</label>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
               { key: 'required', label: 'Bắt buộc', desc: 'Required' },
               { key: 'unique', label: 'Duy nhất', desc: 'Unique' },
               { key: 'indexed', label: 'Đánh index', desc: 'Indexed' }
             ].map((item) => (
-              <label key={item.key} className="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-blue-300 hover:shadow-sm transition-all group">
+              <label key={item.key} className="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-lg cursor-pointer hover:border-blue-300 hover:shadow-sm transition-all group">
                 <input 
                   type="checkbox" 
                   checked={(formData as any)[item.key] || false} 
                   onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, [item.key]: e.target.checked })} 
-                  className="w-5 h-5 rounded-lg text-blue-600 border-slate-300 focus:ring-blue-500" 
+                  className="w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500" 
                 />
                 <div className="flex flex-col">
-                  <span className="text-sm font-bold text-slate-800 group-hover:text-blue-700 transition-colors">{item.label}</span>
+                  <span className="text-[13px] font-medium text-slate-700 group-hover:text-blue-700 transition-colors">{item.label}</span>
                   <span className="text-[10px] text-slate-400 font-bold uppercase">{item.desc}</span>
                 </div>
               </label>
@@ -144,29 +147,29 @@ export function AttributeFormModal({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Giá trị mặc định & Quy tắc xác thực */}
+        <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className="block text-xs font-bold uppercase tracking-widest text-slate-500">Giá trị mặc định</label>
+            <label className="block text-[13px] font-medium text-slate-600">Giá trị mặc định</label>
             <input
               type="text"
               value={formData.defaultValue || ''}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, defaultValue: e.target.value })}
               placeholder="Để trống nếu không có"
-              className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-100/50 transition-all text-sm font-bold text-slate-800"
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none bg-white text-slate-800"
             />
           </div>
 
           <div className="space-y-1.5">
-            <label className="block text-xs font-bold uppercase tracking-widest text-slate-500">Quy tắc xác thực</label>
+            <label className="block text-[13px] font-medium text-slate-600">Quy tắc xác thực</label>
             <input
               type="text"
               value={formData.validationRules || ''}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, validationRules: e.target.value })}
               placeholder="VD: regex hoặc enum"
-              className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-100/50 transition-all text-sm font-bold text-slate-800"
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none bg-white text-slate-800"
             />
           </div>
-
         </div>
       </div>
     </BaseModal>
