@@ -1,5 +1,19 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Phiên bản 2.5.52 (Ngày cập nhật: 25/06/2026)
+
+**Nội dung thay đổi:**
+1. **Chuẩn hóa cấu trúc Grid thuộc tính danh mục dùng chung:**
+   - Chuẩn hóa các trường hiển thị trong bảng lưới (Grid) của Tab "Thiết lập cấu trúc" thuộc tính danh mục dùng chung (`AttributesTab.tsx`) để đồng nhất hoàn toàn với các trường trong modal "Thêm mới trường dữ liệu" (`AttributeFormModal.tsx`): Tên trường, Tên hiển thị, Kiểu dữ liệu, Độ dài, Ràng buộc, Giá trị mặc định, Quy tắc xác thực.
+   - Thêm logic hiển thị giá trị mặc định `--` đối với các nguồn dữ liệu bên ngoài (như Đồng bộ kho DLDC hoặc API/LGSP) khi không tồn tại giá trị tương ứng, đảm bảo tính nhất quán của giao diện.
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.51 -> 2.5.52)
+- `src/components/pages/category/components/tabs/AttributesTab.tsx`
+- `tailieu/docs/log/log_update.md`
+
+---
+
 ## Phiên bản 2.5.51 (Ngày cập nhật: 25/06/2026)
 
 **Nội dung thay đổi:**

@@ -1,6 +1,6 @@
 {
   "name": "DLDC_1",
-  "version": "2.5.51",
+  "version": "2.5.52",
   "private": true,
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.3",
