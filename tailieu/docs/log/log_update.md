@@ -1,5 +1,18 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Phiên bản 2.5.53 (Ngày cập nhật: 25/06/2026)
+
+**Nội dung thay đổi:**
+1. **Mở khóa chỉnh sửa thuộc tính trong cột Thao tác:**
+   - Cập nhật logic `isLocked = false` trong grid `AttributesTab.tsx` để nút Sửa và Xóa trong cột Thao tác luôn ở trạng thái hoạt động (active), cho phép chỉnh sửa/xóa bất kỳ thuộc tính dữ liệu nào mà không bị khóa dựa trên trạng thái phê duyệt (approved/pending).
+
+**Các file bị ảnh hưởng:**
+- `package.json` (Nâng version từ 2.5.52 -> 2.5.53)
+- `src/components/pages/category/components/tabs/AttributesTab.tsx`
+- `tailieu/docs/log/log_update.md`
+
+---
+
 ## Phiên bản 2.5.52 (Ngày cập nhật: 25/06/2026)
 
 **Nội dung thay đổi:**

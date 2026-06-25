@@ -1631,7 +1631,7 @@ export function AttributesTab({
                 <tbody className="divide-y divide-slate-100 bg-white">
                   {paginatedAttributes.length > 0 ? (
                     paginatedAttributes.map((attr) => {
-                      const isLocked = attr.status === 'approved' || attr.status === 'pending';
+                      const isLocked = false;
                       return (
                         <tr key={attr.id} className="hover:bg-slate-50/50 transition-all group border-b border-slate-100">
                           <td className="px-6 py-4 text-center">
