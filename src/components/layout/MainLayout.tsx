@@ -17,7 +17,7 @@ import { CategoryManagementPage } from '../pages/CategoryManagementPage';
 import { ScreenFlowDiagram } from '../pages/ScreenFlowDiagram';
 import CategorySetupPage from '../pages/category/CategorySetupPage';
 import { CategoryMojUnitsPage } from '../pages/category/CategoryMojUnitsPage';
-import { CategoryAPage } from '../pages/category/CategoryAPage';
+import { CategoryAListPage } from '../pages/category/CategoryAListPage';
 import { CategoryBPage } from '../pages/category/CategoryBPage';
 import { CategoryCPage } from '../pages/category/CategoryCPage';
 import { CategoryDPage } from '../pages/category/CategoryDPage';
@@ -284,6 +284,10 @@ const pageConfig: Record<string, { title: string; description: string }> = {
     title: 'Thiết lập danh mục dùng chung',
     description: 'Thiết lập và quản lý danh mục dữ liệu'
   },
+  'category-list': {
+    title: 'Danh sách danh mục dùng chung',
+    description: 'Biên tập và quản lý các danh mục dùng chung'
+  },
   'collection-setup': {
     title: 'Thiết lập thu thập',
     description: 'Thiết lập thu thập CSDL trong và ngoài ngành'
@@ -497,8 +501,8 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'category' && <CategoryManagementPage />}
             {currentPage === 'category-dashboard' && <CategoryDashboardPage />}
             {currentPage === 'category-setup' && <CategorySetupPage userRole={userRole} />}
+            {currentPage === 'category-list' && <CategoryAListPage />}
             {currentPage === 'category-moj-units' && <CategoryMojUnitsPage />}
-            {currentPage === 'category-a' && <CategoryAPage />}
             {currentPage === 'category-b' && <CategoryBPage />}
             {currentPage === 'category-c' && <CategoryCPage />}
             {currentPage === 'category-d' && <CategoryDPage />}

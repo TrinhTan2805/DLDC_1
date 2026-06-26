@@ -45,8 +45,14 @@ export function UnpublishModal({ isOpen, onClose, onConfirm, recordName, scopes 
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[99999] p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden" >
+    <div 
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999] p-4"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600">

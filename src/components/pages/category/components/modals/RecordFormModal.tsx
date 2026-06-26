@@ -99,8 +99,15 @@ export function RecordFormModal({ isOpen, onClose, onSave, initialData, title }:
 
   return (
     <Portal>
-      <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-[99999] p-4" style={{ zIndex: 99999 }}>
-        <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div 
+        className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999] p-4" 
+        style={{ zIndex: 99999 }}
+        onClick={onClose}
+      >
+        <div 
+          className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50">
             <h3 className="text-xl font-bold text-slate-800">{title}</h3>
             <button

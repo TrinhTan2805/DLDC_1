@@ -17,8 +17,16 @@ export function MojUnitDeleteConfirmModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999] p-4 font-sans backdrop-blur-sm" style={{ zIndex: 99999 }}>
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden border border-slate-200" style={{ fontSize: '13px' }}>
+    <div 
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999] p-4 font-sans" 
+      style={{ zIndex: 99999 }}
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden border border-slate-200" 
+        style={{ fontSize: '13px' }}
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
           <div className="flex items-center gap-2">

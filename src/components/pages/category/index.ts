@@ -4,6 +4,7 @@ export { CategoryPublishPage } from './CategoryPublishPage';
 export { CategoryReportPage } from './CategoryReportPage';
 export { CategoryStatisticsPage } from './CategoryStatisticsPage';
 export { CategoryAPage } from './CategoryAPage';
+export { CategoryAListPage } from './CategoryAListPage';
 export { CategoryBPage } from './CategoryBPage';
 export { CategoryCPage } from './CategoryCPage';
 export { CategoryDPage } from './CategoryDPage';

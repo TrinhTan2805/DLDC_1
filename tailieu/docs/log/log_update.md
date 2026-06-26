@@ -1,5 +1,36 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Đồng bộ màu nền Backdrop và tính năng đóng click-outside cho các Modal Biên tập Danh mục (Ngày cập nhật: 26/06/2026)
+
+**Nội dung thay đổi:**
+Đồng bộ hóa cơ chế hiển thị nền mờ backdrop cho các modal thuộc mục **Biên tập danh mục dùng chung** (`CategoryPage.tsx` và các sub-modal liên quan) giống như phần **Thiết lập danh mục dùng chung** (`CategorySetupPage.tsx` / `BaseModal.tsx`):
+1. **Màu nền Backdrop đồng nhất:** Cập nhật nền backdrop thành `bg-black/50` (hoặc `rgba(0,0,0,0.5)`) và loại bỏ hoàn toàn hiệu ứng làm mờ kính `backdrop-blur-sm` trên tất cả các modal.
+2. **Đóng modal khi click ra ngoài (Click-outside):** Cấu hình sự kiện `onClick` ở thẻ bọc backdrop của các modal để đóng modal khi click ra ngoài.
+3. **Ngăn chặn nổi bọt sự kiện (Propagation stopping):** Thêm sự kiện `onClick={(e) => e.stopPropagation()}` tại thẻ bọc nội dung (content container) của các modal để tránh đóng modal ngoài ý muốn khi tương tác bên trong.
+4. **Tăng z-index lên mức cao nhất:** Cập nhật z-index của toàn bộ 13 inline modal trong `CategoryPage.tsx` lên `z-[99999]` và style inline `style={{ zIndex: 99999 }}` để bảo đảm hiển thị trên Sidebar của layout chính.
+
+**Các file bị ảnh hưởng:**
+- Inline modals trong `src/components/pages/category/CategoryPage.tsx`:
+  - Approval Modal (`showApprovalModal`)
+  - Reject Modal (`showRejectModal`)
+  - Compare Modal (`showCompareModal`)
+  - Version Detail Modal (`showVersionDetailModal`)
+  - Restore Modal (`showRestoreModal`)
+  - Create Version Modal (`showCreateVersionModal`)
+  - Advanced Search Modal (`showAdvancedSearch`)
+- Các component sub-modals độc lập:
+  - `src/components/pages/category/components/modals/ArchiveRecordModal.tsx`
+  - `src/components/pages/category/components/modals/CreateVersionModal.tsx`
+  - `src/components/pages/category/components/modals/DeleteConfirmModal.tsx`
+  - `src/components/pages/category/components/modals/PublishConfigModal.tsx`
+  - `src/components/pages/category/components/modals/PublishModal.tsx`
+  - `src/components/pages/category/components/modals/RecordFormModal.tsx`
+  - `src/components/pages/category/components/modals/RestoreVersionModal.tsx`
+  - `src/components/pages/category/components/modals/UnpublishModal.tsx`
+  - `src/components/pages/category/components/modals/MojUnitDeleteConfirmModal.tsx`
+
+---
+
 ## Xem chi tiết tại Phê duyệt danh mục chỉ hiển thị Thông tin chung (Ngày cập nhật: 26/06/2026)
 
 **Yêu cầu:** Khi nhấn "Xem chi tiết" trong tab Phê duyệt danh mục, chỉ hiển thị **Thông tin chung** (các trường cấu hình tại bước 1 của wizard Thiết lập danh mục dùng chung) thay vì mở toàn bộ `ReviewApprovalModal` với giao diện phê duyệt/từ chối.

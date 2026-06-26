@@ -27,8 +27,15 @@ export function RestoreVersionModal({
   if (!isOpen || !version) return null;
 
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[99999] p-4" style={{ zIndex: 99999 }}>
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[540px] overflow-hidden animate-in zoom-in-95 duration-200">
+    <div 
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999] p-4" 
+      style={{ zIndex: 99999 }}
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-[540px] overflow-hidden animate-in zoom-in-95 duration-200"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between p-5 border-b border-slate-100">
           <h3 className="text-[18px] font-bold text-slate-800">Phục hồi phiên bản</h3>
           <button onClick={onClose} className="p-2 text-slate-400 hover:bg-slate-50 rounded-lg" title="Đóng">

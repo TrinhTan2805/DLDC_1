@@ -328,18 +328,11 @@ const menuItems: MenuItem[] = [
         id: "category-list",
         label: "Danh sách danh mục dùng chung",
         icon: List,
-        subItems: [
-          {
-            id: "category-moj-units",
-            label: "Đơn vị thuộc BTP",
-            icon: FolderOpen,
-          },
-          {
-            id: "category-a",
-            label: "Biên tập danh mục A",
-            icon: FolderOpen,
-          },
-        ],
+      },
+      {
+        id: "category-moj-units",
+        label: "Đơn vị thuộc BTP",
+        icon: FolderOpen,
       },
       {
         id: "category-report-group",

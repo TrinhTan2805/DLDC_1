@@ -11,6 +11,7 @@ import {
   Filter,
   Eye,
   Edit2,
+  SquarePen,
   Trash2,
   X,
   Save,
@@ -40,6 +41,7 @@ import { CreateVersionModal } from './components/modals/CreateVersionModal';
 import { ArchiveRecordModal } from './components/modals/ArchiveRecordModal';
 import { RecordFormModal } from './components/modals/RecordFormModal';
 import { ApprovalRequestModal } from './components/modals/ApprovalRequestModal';
+import { Portal } from '../../common/Portal';
 
 interface CategoryPageProps {
   categoryName: string;
@@ -79,6 +81,9 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
   const [filterStatus, setFilterStatus] = useState('all');
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
   const [sortBy, setSortBy] = useState('newest');
+  const [showFilters, setShowFilters] = useState(false);
+  const [currentPageNum, setCurrentPageNum] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -489,6 +494,52 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
     return dateB - dateA; // newest
   });
 
+  const paginatedCategories = filteredCategories.slice((currentPageNum - 1) * pageSize, currentPageNum * pageSize);
+
+  const renderPagination = (totalCount: number) => {
+    if (totalCount <= 0) return null;
+    const totalPages = Math.ceil(totalCount / pageSize);
+    const startItem = (currentPageNum - 1) * pageSize + 1;
+    const endItem = Math.min(currentPageNum * pageSize, totalCount);
+    return (
+      <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-white text-[13px] font-medium">
+        <div className="flex items-center gap-2">
+          <span className="text-slate-600 font-normal">Hiển thị</span>
+          <select
+            aria-label="Số bản ghi trên trang"
+            value={pageSize}
+            onChange={(e: ChangeEvent<HTMLSelectElement>) => { setPageSize(Number(e.target.value)); setCurrentPageNum(1); }}
+            className="px-2 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 bg-white text-[13px] cursor-pointer font-medium"
+          >
+            <option value={10}>10</option>
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+          </select>
+          <span className="text-slate-600 font-normal">bản ghi/trang</span>
+        </div>
+        <div className="flex items-center gap-4">
+          <span className="text-slate-600 font-normal">{startItem} - {endItem} / {totalCount}</span>
+          <div className="flex items-center gap-1">
+            <button onClick={() => setCurrentPageNum(Math.max(1, currentPageNum - 1))} disabled={currentPageNum === 1}
+              className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer">
+              Trước
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+              <button key={page} onClick={() => setCurrentPageNum(page)}
+                className={`px-3 py-1.5 border rounded-xl font-medium text-[13px] transition-colors cursor-pointer ${currentPageNum === page ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
+                {page}
+              </button>
+            ))}
+            <button onClick={() => setCurrentPageNum(Math.min(Math.ceil(totalCount / pageSize), currentPageNum + 1))} disabled={currentPageNum === Math.ceil(totalCount / pageSize)}
+              className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer">
+              Sau
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const getTypeBadge = (type: string) => {
     switch (type) {
       case 'standard':
@@ -594,162 +645,179 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
     setImportErrors([]);
   };
 
-  return (
-    <div className="space-y-6">
-      {/* Tabs */}
-      <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-        <div className="flex border-b border-slate-200">
-          <button
-            onClick={() => setActiveTab('setup')}
-            className={`flex items-center gap-2 px-6 py-3 text-sm transition-colors ${activeTab === 'setup'
-                ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-600'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-              }`}
-            title="Danh sách danh mục dùng chung"
-          >
-            <List className="w-4 h-4" />
-            Danh sách
-          </button>
-          <button
-            onClick={() => setActiveTab('approval')}
-            className={`flex items-center gap-2 px-6 py-3 text-sm transition-colors ${activeTab === 'approval'
-                ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-600'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-              }`}
-            title="Phê duyệt danh mục"
-          >
-            <CheckCircle2 className="w-4 h-4" />
-            Phê duyệt
-          </button>
-          <button
-            onClick={() => setActiveTab('version-history')}
-            className={`flex items-center gap-2 px-6 py-3 text-sm transition-colors ${activeTab === 'version-history'
-                ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-600'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-              }`}
-            title="Quản lý phiên bản danh mục"
-          >
-            <Clock className="w-4 h-4" />
-            Quản lý phiên bản danh mục
-          </button>
-        </div>
+  const isAnyModalOpen = !!(
+    showArchiveModal || showAddModal || showEditModal || showDetailModal ||
+    showAddFieldModal || showCreateVersionModal || showFieldFormModal ||
+    showImportModal || showApprovalDetailModal || showApprovalRequestModal ||
+    showApprovalModal || showRejectModal || showCompareModal ||
+    showVersionDetailModal || showRestoreModal || showAdvancedSearch
+  );
 
-        {/* Tab Content */}
-        <div className="p-6">
+  return (
+    <div className="space-y-4">
+      {/* Tab bar — matches CategorySetupPage style */}
+      <div className="bg-white border-b border-slate-200">
+        <div className="flex px-6 gap-2">
+          {[
+            { id: 'setup' as const,           label: 'Danh sách',                   icon: List },
+            { id: 'approval' as const,         label: 'Phê duyệt',                   icon: CheckCircle2 },
+            { id: 'version-history' as const,  label: 'Quản lý phiên bản danh mục',  icon: Clock },
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-6 py-4 text-[13px] font-medium transition-all border-b-2 cursor-pointer ${
+                activeTab === tab.id
+                  ? 'border-blue-600 text-blue-600 bg-blue-50/50'
+                  : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
+              }`}
+            >
+              <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-blue-600' : 'text-slate-400'}`} />
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Tab Content */}
+      <div>
           {activeTab === 'setup' && (
-            <div className="space-y-6">
-              {/* Filters */}
-              <div className="bg-white border border-slate-200 rounded-lg p-4">
-                <div className="flex items-center gap-4">
-                  <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <input
-                      type="text"
-                      title="Tìm kiếm danh mục"
-                      placeholder="Tìm kiếm toàn văn (Nhập từ khóa mã danh mục, tên danh mục...)"
-                      value={searchTerm}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
+            <div className="space-y-3">
+
+              {/* Search & Action Bar */}
+              <div className="space-y-3">
+                <div className="flex flex-col md:flex-row items-center gap-3">
+                  <div className="flex-1 w-full flex items-center gap-2">
+                    <div className="flex-1 relative">
+                      <input
+                        type="text"
+                        placeholder="Tìm kiếm theo mã, tên danh mục..."
+                        value={searchTerm}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => { setSearchTerm(e.target.value); setCurrentPageNum(1); }}
+                        className="w-full px-4 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-400 bg-white hover:bg-slate-50/50 font-medium shadow-sm"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowFilters(!showFilters)}
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all border cursor-pointer active:scale-95 ${
+                        showFilters ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-sm' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                      }`}
+                      title={showFilters ? 'Đóng bộ lọc' : 'Bộ lọc nâng cao'}
+                    >
+                      {showFilters ? <X className="w-4 h-4" /> : <Filter className="w-4 h-4" />}
+                    </button>
                   </div>
-                  <button
-                    className="flex items-center gap-2 px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors whitespace-nowrap"
-                  >
-                    <Search className="w-4 h-4" />
-                    Tìm kiếm
-                  </button>
-                  <button
-                    onClick={() => setShowAdvancedSearch(true)}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors whitespace-nowrap"
-                  >
-                    <Filter className="w-4 h-4" />
-                    Tìm kiếm nâng cao
-                  </button>
-                  <button
-                    onClick={() => setShowAddModal(true)}
-                    title="Thêm bản ghi mới"
-                    className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Thêm bản ghi mới
-                  </button>
+                  <div className="flex items-center gap-2 w-full md:w-auto">
+                    <button
+                      type="button"
+                      onClick={() => setShowAddModal(true)}
+                      className="flex-1 md:flex-none px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[13px] font-medium flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Thêm bản ghi mới
+                    </button>
+                  </div>
                 </div>
+
+                {/* Collapsible Filter Panel */}
+                {showFilters && (
+                  <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Loại danh mục</label>
+                        <div className="relative">
+                          <select
+                            value={filterType}
+                            onChange={(e: ChangeEvent<HTMLSelectElement>) => { setFilterType(e.target.value); setCurrentPageNum(1); }}
+                            className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+                          >
+                            <option value="all">Tất cả loại</option>
+                            <option value="standard">Tiêu chuẩn</option>
+                            <option value="reference">Tham chiếu</option>
+                            <option value="system">Hệ thống</option>
+                          </select>
+                          <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Trạng thái</label>
+                        <div className="relative">
+                          <select
+                            value={filterStatus}
+                            onChange={(e: ChangeEvent<HTMLSelectElement>) => { setFilterStatus(e.target.value); setCurrentPageNum(1); }}
+                            className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+                          >
+                            <option value="all">Tất cả trạng thái</option>
+                            <option value="pending">Chờ duyệt</option>
+                            <option value="approved">Đã duyệt</option>
+                            <option value="published">Đã công khai</option>
+                            <option value="unpublished">Ngừng công khai</option>
+                          </select>
+                          <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* Table */}
-              <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+              {/* Grid Table + Pagination */}
+              <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-slate-200 bg-slate-50">
-                        <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">STT</th>
-                        <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Mã danh mục</th>
-                        <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Tên danh mục</th>
-                        <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Loại</th>
-                        <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Phiên bản</th>
-                        <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Ngày tạo</th>
-                        <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Trạng thái</th>
-                        <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Thao tác</th>
+                  <table className="w-full text-left">
+                    <thead className="bg-[#f8fafc] text-slate-700 border-b border-slate-200">
+                      <tr>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap w-14 text-center">STT</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Mã danh mục</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên danh mục</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Loại</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Phiên bản</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Ngày tạo</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Trạng thái</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-32">Thao tác</th>
                       </tr>
                     </thead>
-                    <tbody>
-                      {filteredCategories.map((category, index) => (
-                        <tr key={category.id} className="border-b border-slate-100 hover:bg-slate-50">
-                          <td className="px-6 py-4 text-sm text-slate-900">{index + 1}</td>
-                          <td className="px-6 py-4 text-sm">
-                            <code className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">
+                    <tbody className="divide-y divide-slate-100 bg-white">
+                      {paginatedCategories.length > 0 ? paginatedCategories.map((category, index) => (
+                        <tr key={category.id} className="hover:bg-slate-50/50 transition-all group border-b border-slate-100">
+                          <td className="px-6 py-4 text-[13px] text-slate-500 text-center">{(currentPageNum - 1) * pageSize + index + 1}</td>
+                          <td className="px-6 py-4">
+                            <code className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[13px] border border-blue-100 font-mono">
                               {category.code}
                             </code>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="text-sm text-slate-900">{category.name}</div>
-                            <div className="text-xs text-slate-500">{category.description}</div>
+                            <div className="text-[13px] text-slate-900 font-normal">{category.name}</div>
+                            {category.description && <div className="text-[12px] text-slate-400 mt-0.5">{category.description}</div>}
                           </td>
                           <td className="px-6 py-4">{getTypeBadge(category.type)}</td>
                           <td className="px-6 py-4">
-                            <span className="px-2 py-1 bg-slate-100 text-slate-700 text-xs font-semibold rounded border border-slate-200">
+                            <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[13px] font-semibold rounded border border-slate-200">
                               v{category.version || 1}.0
                             </span>
                           </td>
-                          <td className="px-6 py-4 text-sm text-slate-600">{category.createdDate}</td>
-                          <td className="px-6 py-4">{getStatusBadge(category.status)}</td>
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-2">
+                          <td className="px-6 py-4 text-[13px] text-slate-500 whitespace-nowrap">{category.createdDate}</td>
+                          <td className="px-6 py-4 text-center">{getStatusBadge(category.status)}</td>
+                          <td className="px-6 py-4 text-center">
+                            <div className="flex items-center justify-center gap-1 opacity-80 group-hover:opacity-100 transition-all">
                               <button
-                                onClick={() => {
-                                  setSelectedCategory(category);
-                                  setShowDetailModal(true);
-                                }}
-                                className="p-1 text-blue-600 hover:bg-blue-50 rounded"
+                                onClick={() => { setSelectedCategory(category); setShowDetailModal(true); }}
+                                className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
                                 title="Xem chi tiết"
                               >
                                 <Eye className="w-4 h-4" />
                               </button>
-
                               <button
-                                onClick={() => {
-                                  setSelectedCategory(category);
-                                  setEditedCategoryData({
-                                    code: category.code,
-                                    name: category.name,
-                                    type: category.type,
-                                    status: category.status,
-                                    description: category.description,
-                                    approver: ''
-                                  });
-                                  setShowEditModal(true);
-                                }}
-                                className="p-1 text-orange-600 hover:bg-orange-50 rounded"
-                                title="Chỉnh sửa cấu trúc"
+                                onClick={() => { setSelectedCategory(category); setEditedCategoryData({ code: category.code, name: category.name, type: category.type, status: category.status, description: category.description, approver: '' }); setShowEditModal(true); }}
+                                className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
+                                title="Chỉnh sửa"
                               >
-                                <Edit2 className="w-4 h-4" />
+                                <SquarePen className="w-4 h-4" />
                               </button>
                               <button
-                                onClick={() => {
-                                  setSelectedCategory(category);
-                                  setShowArchiveModal(true);
-                                }}
-                                className="p-1 text-red-600 hover:bg-red-50 rounded"
+                                onClick={() => { setSelectedCategory(category); setShowArchiveModal(true); }}
+                                className="p-1.5 text-slate-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors cursor-pointer"
                                 title="Ngừng áp dụng bản ghi"
                               >
                                 <PowerOff className="w-4 h-4" />
@@ -757,10 +825,15 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                             </div>
                           </td>
                         </tr>
-                      ))}
+                      )) : (
+                        <tr>
+                          <td colSpan={8} className="px-6 py-8 text-center text-[13px] text-slate-400 italic">Không tìm thấy dữ liệu</td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
+                {renderPagination(filteredCategories.length)}
               </div>
             </div>
           )}
@@ -1100,7 +1173,6 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
           )}
 
         </div>
-      </div>
 
       {/* Add/Edit Modal */}
 
@@ -1119,7 +1191,7 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
 
       {/* Archive Modal */}
       {showArchiveModal && selectedCategory && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="bg-white rounded-lg shadow-xl max-w-lg w-full">
             <div className="p-6 border-b border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -1225,7 +1297,7 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
         </div>
       )}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-slate-200 flex items-center justify-between">
               <h3 className="text-lg text-slate-900">Thêm bản ghi mới</h3>
@@ -1531,8 +1603,18 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
 
       {/* Detail Modal */}
       {showDetailModal && selectedCategory && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999] p-4 animate-in fade-in duration-200"
+          style={{ zIndex: 99999 }}
+          onClick={() => {
+            setShowDetailModal(false);
+            setSelectedCategory(null);
+          }}
+        >
+          <div 
+            className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="p-6 border-b border-slate-200 flex items-center justify-between">
               <h3 className="text-lg text-slate-900">Chi tiết danh mục: {selectedCategory.name}</h3>
               <button
@@ -1611,8 +1693,18 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
 
       {/* Edit Modal */}
       {showEditModal && selectedCategory && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999] p-4 animate-in fade-in duration-200"
+          style={{ zIndex: 99999 }}
+          onClick={() => {
+            setShowEditModal(false);
+            setSelectedCategory(null);
+          }}
+        >
+          <div 
+            className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="p-6 border-b border-slate-200 flex items-center justify-between">
               <h3 className="text-lg text-slate-900">Chỉnh sửa danh mục</h3>
               <button
@@ -1770,8 +1862,15 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
 
       {/* Add Field Modal */}
       {showAddFieldModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999] p-4 animate-in fade-in duration-200"
+          style={{ zIndex: 99999 }}
+          onClick={() => setShowAddFieldModal(false)}
+        >
+          <div 
+            className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="p-6 border-b border-slate-200 flex items-center justify-between">
               <h3 className="text-lg text-slate-900">Thêm trường dữ liệu mới</h3>
               <button title="Đóng" aria-label="Đóng"
@@ -1862,8 +1961,15 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
 
       {/* Field Form Modal */}
       {showFieldFormModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999] p-4 animate-in fade-in duration-200"
+          style={{ zIndex: 99999 }}
+          onClick={() => setShowFieldFormModal(false)}
+        >
+          <div 
+            className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="p-6 border-b border-slate-200 flex items-center justify-between">
               <h3 className="text-lg text-slate-900">Thêm trường dữ liệu mới</h3>
               <button title="Đóng" aria-label="Đóng"
@@ -2117,8 +2223,15 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
 
       {/* Import Excel Modal */}
       {showImportModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999] p-4 animate-in fade-in duration-200"
+          style={{ zIndex: 99999 }}
+          onClick={handleCancelImport}
+        >
+          <div 
+            className="bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
@@ -2266,8 +2379,15 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
 
       {/* Approval Detail Modal */}
       {showApprovalDetailModal && selectedApprovalRequest && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999] p-4 animate-in fade-in duration-200"
+          style={{ zIndex: 99999 }}
+          onClick={() => setShowApprovalDetailModal(false)}
+        >
+          <div 
+            className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -2406,8 +2526,19 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
 
       {/* Approval Modal */}
       {showApprovalModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full">
+        <div 
+          className="fixed inset-0 flex items-center justify-center z-[99999] p-4 animate-in fade-in duration-200" 
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 99999 }}
+          onClick={() => {
+            setShowApprovalModal(false);
+            setApprovalComment('');
+            setPendingApprovalIds([]);
+          }}
+        >
+          <div 
+            className="bg-white rounded-lg shadow-xl max-w-lg w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="p-6 border-b border-slate-200">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
@@ -2471,8 +2602,19 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
 
       {/* Reject Modal */}
       {showRejectModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full">
+        <div 
+          className="fixed inset-0 flex items-center justify-center z-[99999] p-4 animate-in fade-in duration-200" 
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 99999 }}
+          onClick={() => {
+            setShowRejectModal(false);
+            setApprovalComment('');
+            setPendingApprovalIds([]);
+          }}
+        >
+          <div 
+            className="bg-white rounded-lg shadow-xl max-w-lg w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="p-6 border-b border-slate-200">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
@@ -2560,8 +2702,15 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
 
       {/* Compare Modal */}
       {showCompareModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div 
+          className="fixed inset-0 flex items-center justify-center z-[99999] p-4 animate-in fade-in duration-200" 
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 99999 }}
+          onClick={() => setShowCompareModal(false)}
+        >
+          <div 
+            className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="p-5 border-b border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-2 text-slate-800">
                  <BarChart3 className="w-5 h-5 text-blue-600"/>
@@ -2648,8 +2797,15 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
 
       {/* Version Detail Modal */}
       {showVersionDetailModal && selectedVersionData && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div 
+          className="fixed inset-0 flex items-center justify-center z-[99999] p-4 animate-in fade-in duration-200" 
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 99999 }}
+          onClick={() => setShowVersionDetailModal(false)}
+        >
+          <div 
+            className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="p-5 border-b border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-2">
                  <Eye className="w-5 h-5 text-blue-600"/>
@@ -2689,8 +2845,15 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
 
       {/* Restore Modal */}
       {showRestoreModal && selectedVersionData && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+        <div 
+          className="fixed inset-0 flex items-center justify-center z-[99999] p-4 animate-in fade-in duration-200" 
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 99999 }}
+          onClick={() => setShowRestoreModal(false)}
+        >
+          <div 
+            className="bg-white rounded-lg shadow-xl max-w-md w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="p-5 border-b border-slate-200">
               <div className="flex flex-col items-center gap-3 text-center">
                  <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
@@ -2723,8 +2886,15 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
 
       {/* Create Version Modal */}
       {showCreateVersionModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full">
+        <div 
+          className="fixed inset-0 flex items-center justify-center z-[99999] p-4 animate-in fade-in duration-200" 
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 99999 }}
+          onClick={() => setShowCreateVersionModal(false)}
+        >
+          <div 
+            className="bg-white rounded-lg shadow-xl max-w-lg w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="p-5 border-b border-slate-200 flex items-center justify-between">
               <h3 className="font-bold text-slate-800 text-[16px]">Tạo phiên bản mới</h3>
               <button title="Đóng" aria-label="Đóng" onClick={() => setShowCreateVersionModal(false)} className="text-slate-400 hover:text-slate-600">
@@ -2768,8 +2938,15 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
 
       {/* Advanced Search Modal */}
       {showAdvancedSearch && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full">
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999] p-4"
+          style={{ zIndex: 99999 }}
+          onClick={() => setShowAdvancedSearch(false)}
+        >
+          <div 
+            className="bg-white rounded-xl shadow-2xl max-w-2xl w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between p-6 border-b border-slate-100">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
