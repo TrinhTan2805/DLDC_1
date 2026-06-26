@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, ReactNode, ChangeEvent, MouseEvent } from 'react';
-import { Network, ArrowRight, Key, Table, Search, AlertCircle, Info, ChevronDown, Plus, Trash2, Edit2, CheckCircle2 } from 'lucide-react';
+import { Network, ArrowRight, Key, Table, Search, AlertCircle, Info, ChevronDown, Plus, Trash2, SquarePen, CheckCircle2 } from 'lucide-react';
 import { MasterDataEntity, EntityRelationship, RelationshipType, RelationshipStatus, FieldDataType } from '../../categoryTypes';
 import { ConfirmModal } from '../../../../common/ConfirmModal';
 import { BaseModal } from '../../../../common/BaseModal';
@@ -349,43 +349,58 @@ export function RelationshipsTab({
   return (
     <div className="space-y-5">
       {/* Category selector & control block */}
-      <div className="bg-white p-5 border border-slate-200 rounded-xl flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div className="flex-1 max-w-md">
-          <label className="block text-[13px] font-semibold text-slate-700 mb-1.5">
-            Chọn danh mục dữ liệu dùng chung:
-          </label>
-          <SearchableSelect
-            label=""
-            options={allEntities.map(e => ({ value: e.id, label: `${e.code} - ${e.name}` }))}
-            value={selectedEntityId}
-            onChange={(val) => {
-              setSelectedEntityId(val);
-              setGridSearchTerm('');
-            }}
-            placeholder="-- Chọn danh mục --"
-          />
-        </div>
-
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="relative w-64">
-            <input
-              type="text"
-              placeholder="Tìm kiếm quan hệ..."
-              value={gridSearchTerm}
-              onChange={(e) => setGridSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-white border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+      <div className="bg-white p-5 border border-slate-200 rounded-xl space-y-2">
+        <label className="block text-[13px] font-semibold text-slate-700">
+          {currentEntityId ? 'Danh mục đang cấu hình:' : 'Chọn danh mục dữ liệu dùng chung:'}
+        </label>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex-1 max-w-md w-full">
+            <SearchableSelect
+              label=""
+              options={allEntities.map(e => ({ value: e.id, label: `${e.code} - ${e.name}` }))}
+              value={selectedEntityId}
+              onChange={(val) => {
+                setSelectedEntityId(val);
+                setGridSearchTerm('');
+              }}
+              placeholder="-- Chọn danh mục --"
+              disabled={!!currentEntityId}
             />
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           </div>
 
-          {!isViewOnly && (
-            <button
-              onClick={handleAddRelationship}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-[13px] font-medium active:scale-95 shadow-sm cursor-pointer"
-            >
-              <Plus className="w-4 h-4" />
-              Thêm mới quan hệ
-            </button>
+          {currentEntityId ? (
+            !isViewOnly && (
+              <button
+                onClick={handleAddRelationship}
+                className="w-full md:w-auto h-10 flex items-center justify-center gap-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-[13px] font-medium active:scale-95 shadow-sm cursor-pointer whitespace-nowrap"
+              >
+                <Plus className="w-4 h-4" />
+                Thêm mới quan hệ
+              </button>
+            )
+          ) : (
+            <div className="flex flex-col md:flex-row md:items-center gap-3 w-full md:w-auto">
+              <div className="w-full md:w-64 relative">
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm quan hệ..."
+                  value={gridSearchTerm}
+                  onChange={(e) => setGridSearchTerm(e.target.value)}
+                  className="w-full h-10 pl-9 pr-3 bg-white border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                />
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              </div>
+
+              {!isViewOnly && (
+                <button
+                  onClick={handleAddRelationship}
+                  className="w-full md:w-auto h-10 flex items-center justify-center gap-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-[13px] font-medium active:scale-95 shadow-sm cursor-pointer whitespace-nowrap"
+                >
+                  <Plus className="w-4 h-4" />
+                  Thêm mới quan hệ
+                </button>
+              )}
+            </div>
           )}
         </div>
       </div>
@@ -410,16 +425,16 @@ export function RelationshipsTab({
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-left text-[13px]">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 !text-[13px]" style={{ fontSize: '13px' }}>
-                  <th className="px-6 py-3 font-semibold text-slate-500 uppercase tracking-tight w-16 text-center !text-[13px]" style={{ fontSize: '13px' }}>STT</th>
-                  <th className="px-6 py-3 font-semibold text-slate-500 uppercase tracking-tight !text-[13px]" style={{ fontSize: '13px' }}>Danh mục Nguồn</th>
-                  <th className="px-6 py-3 font-semibold text-slate-500 uppercase tracking-tight !text-[13px]" style={{ fontSize: '13px' }}>Khóa Nguồn</th>
-                  <th className="px-6 py-3 font-semibold text-slate-500 uppercase tracking-tight text-center w-28 !text-[13px]" style={{ fontSize: '13px' }}>Loại</th>
-                  <th className="px-6 py-3 font-semibold text-slate-500 uppercase tracking-tight !text-[13px]" style={{ fontSize: '13px' }}>Danh mục Đích</th>
-                  <th className="px-6 py-3 font-semibold text-slate-500 uppercase tracking-tight !text-[13px]" style={{ fontSize: '13px' }}>Khóa Đích</th>
-                  <th className="px-6 py-3 font-semibold text-slate-500 uppercase tracking-tight !text-[13px]" style={{ fontSize: '13px' }}>Liên kết chi tiết</th>
+                <tr className="bg-slate-50 border-b border-slate-200">
+                  <th className="px-6 py-3 font-semibold text-slate-500 text-[13px] w-16 text-center">STT</th>
+                  <th className="px-6 py-3 font-semibold text-slate-500 text-[13px]">Danh mục Nguồn</th>
+                  <th className="px-6 py-3 font-semibold text-slate-500 text-[13px]">Khóa Nguồn</th>
+                  <th className="px-6 py-3 font-semibold text-slate-500 text-[13px] text-center w-28">Loại</th>
+                  <th className="px-6 py-3 font-semibold text-slate-500 text-[13px]">Danh mục Đích</th>
+                  <th className="px-6 py-3 font-semibold text-slate-500 text-[13px]">Khóa Đích</th>
+                  <th className="px-6 py-3 font-semibold text-slate-500 text-[13px]">Trường hiển thị</th>
                   {!isViewOnly && (
-                    <th className="px-6 py-3 font-semibold text-slate-500 uppercase tracking-tight text-right w-24 !text-[13px]" style={{ fontSize: '13px' }}>Thao tác</th>
+                    <th className="px-6 py-3 font-semibold text-slate-500 text-[13px] text-center w-24">Thao tác</th>
                   )}
                 </tr>
               </thead>
@@ -433,37 +448,29 @@ export function RelationshipsTab({
                     <tr key={rel.id} className="hover:bg-slate-50/50 transition-colors text-[13px]">
                       <td className="px-6 py-4 text-center text-slate-500 font-medium text-[13px]">{idx + 1}</td>
                       <td className="px-6 py-4 text-[13px]">
-                        <div className={`font-semibold ${isSourceSelected ? 'text-blue-600' : 'text-slate-800'} text-[13px]`}>
+                        <div className={`${isSourceSelected ? 'text-blue-600' : 'text-slate-800'} text-[13px]`}>
                           {sourceEntity?.name || rel.sourceEntityId}
                         </div>
-                        <div className="text-[13px] text-slate-400 font-mono mt-0.5">{sourceEntity?.code}</div>
                       </td>
                       <td className="px-6 py-4 font-mono text-slate-600 text-[13px]">{rel.sourceKey || '--'}</td>
                       <td className="px-6 py-4 text-center text-[13px]">
-                        <span className={`px-2 py-0.5 rounded border text-[13px] font-semibold ${relationTypeColors[rel.relationshipType]}`}>
+                        <span className={`px-2 py-0.5 rounded border text-[13px] font-semibold whitespace-nowrap ${relationTypeColors[rel.relationshipType]}`}>
                           {rel.relationshipType}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-[13px]">
-                        <div className={`font-semibold ${!isSourceSelected ? 'text-blue-600' : 'text-slate-800'} text-[13px]`}>
+                        <div className={`${!isSourceSelected ? 'text-blue-600' : 'text-slate-800'} text-[13px]`}>
                           {targetEntity?.name || rel.targetEntityId}
                         </div>
-                        <div className="text-[13px] text-slate-400 font-mono mt-0.5">{targetEntity?.code}</div>
                       </td>
                       <td className="px-6 py-4 font-mono text-slate-600 text-[13px]">{rel.targetKey || '--'}</td>
                       <td className="px-6 py-4 text-slate-600 text-[13px]">
                         {rel.relationshipType === 'n-n' ? (
-                          <div className="space-y-0.5 text-[13px]">
-                            <div className="text-[13px] font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-100 w-fit">
-                              Bảng: {rel.mappingTable}
-                            </div>
-                          </div>
+                          <code className="text-purple-700 bg-purple-50 px-1 py-0.5 rounded font-mono text-[13px]">{rel.mappingTable || '--'}</code>
                         ) : (
-                          rel.targetDisplayField ? (
-                            <span className="text-slate-500 text-[13px]">
-                              Trường hiển thị: <code className="text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded font-mono text-[13px]">{rel.targetDisplayField}</code>
-                            </span>
-                          ) : '--'
+                          rel.targetDisplayField
+                            ? <code className="text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded font-mono text-[13px]">{rel.targetDisplayField}</code>
+                            : <span className="text-slate-400 text-[13px]">--</span>
                         )}
                       </td>
 
@@ -472,10 +479,10 @@ export function RelationshipsTab({
                           <div className="flex items-center justify-end gap-1.5">
                             <button
                               onClick={() => handleEditRelationship(rel)}
-                              className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                              className="p-1.5 border border-slate-200 bg-white text-slate-500 hover:text-blue-600 hover:border-blue-300 rounded-lg transition-colors cursor-pointer"
                               title="Chỉnh sửa quan hệ"
                             >
-                              <Edit2 className="w-4 h-4" />
+                              <SquarePen className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => handleDeleteRelation(rel)}
@@ -501,18 +508,17 @@ export function RelationshipsTab({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title={editingRelation ? 'Chỉnh sửa quan hệ danh mục' : 'Thêm mới quan hệ danh mục'}
-        subtitle={editingRelation ? 'Cấu hình lại liên kết giữa các danh mục dữ liệu dùng chung' : 'Thiết lập liên kết mới giữa các danh mục dữ liệu dùng chung'}
         footer={
           <div className="flex justify-end gap-3 w-full">
             <button
               onClick={() => setIsModalOpen(false)}
-              className="px-4 py-2 bg-white text-[#020817] border border-[#e2e8f0] hover:bg-slate-50 rounded-lg text-[13px] font-semibold transition-colors cursor-pointer"
+              className="px-4 py-2 bg-white text-[#020817] border border-[#e2e8f0] hover:bg-slate-50 rounded-lg text-[13px] font-medium transition-colors cursor-pointer"
             >
               Hủy bỏ
             </button>
             <button
               onClick={handleSaveRelation}
-              className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg text-[13px] font-semibold transition-colors cursor-pointer"
+              className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg text-[13px] font-medium transition-colors cursor-pointer"
             >
               Lưu lại
             </button>
@@ -534,6 +540,7 @@ export function RelationshipsTab({
                   value={formData.sourceEntityId || ''}
                   onChange={v => { setFormError(''); setFormData({ ...formData, sourceEntityId: v, sourceKey: '' }); }}
                   placeholder="-- Tìm & chọn danh mục nguồn --"
+                  disabled={!!currentEntityId}
                 />
               </div>
               
@@ -710,9 +717,10 @@ interface SearchableSelectProps {
   options: { value: string; label: string }[];
   value: string;
   onChange: (value: string) => void;
+  disabled?: boolean;
 }
 
-function SearchableSelect({ label, placeholder, options, value, onChange }: SearchableSelectProps) {
+function SearchableSelect({ label, placeholder, options, value, onChange, disabled = false }: SearchableSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -738,11 +746,12 @@ function SearchableSelect({ label, placeholder, options, value, onChange }: Sear
         </label>
       )}
       <div
-        className={`w-full px-3 py-2 border rounded-lg flex items-center justify-between cursor-pointer bg-white text-[13px] transition-colors
-          ${isOpen ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-slate-350 hover:border-slate-400'}`}
-        onClick={() => { setIsOpen(!isOpen); setSearchTerm(''); }}
+        className={`w-full h-10 px-3 py-2 border rounded-lg flex items-center justify-between bg-white text-[13px] transition-colors
+          ${disabled ? 'cursor-not-allowed bg-slate-50 border-slate-200 text-slate-400' : 'cursor-pointer hover:border-slate-400'}
+          ${isOpen && !disabled ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-slate-350'}`}
+        onClick={() => { if (!disabled) { setIsOpen(!isOpen); setSearchTerm(''); } }}
       >
-        <span className={selectedOption ? 'text-slate-800 font-semibold' : 'text-slate-400'}>
+        <span className={selectedOption ? 'text-slate-800 font-normal' : 'text-slate-400'}>
           {selectedOption ? selectedOption.label : (placeholder || '-- Chọn --')}
         </span>
         <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />

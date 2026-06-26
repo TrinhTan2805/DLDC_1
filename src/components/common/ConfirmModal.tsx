@@ -77,7 +77,7 @@ export function ConfirmModal({
   const config = typeConfig[type] || typeConfig.delete;
   const Icon = config.icon;
 
-  const currentZIndex = 200 + modalIndex * 10;
+  const currentZIndex = 9100 + modalIndex * 10;
 
   return (
     <Portal>
@@ -104,11 +104,11 @@ export function ConfirmModal({
                 <Icon className="w-6 h-6" strokeWidth={2} />
               </div>
               <div className="pt-1">
-                <h3 className="text-lg font-bold text-slate-800 leading-snug">
+                <h3 className="text-[18px] font-bold text-slate-800 leading-snug">
                   {title}
                 </h3>
                 {subtitle && (
-                  <p className="text-sm text-slate-500 mt-1 font-medium">
+                  <p className="text-[13px] text-slate-500 mt-1 font-medium">
                     {subtitle}
                   </p>
                 )}
@@ -117,7 +117,7 @@ export function ConfirmModal({
 
             {/* Middle Section: Grey Box Details */}
             {message && (
-              <div className="bg-slate-50 rounded-xl p-4 text-sm text-slate-700 leading-relaxed min-h-20 border border-slate-100">
+              <div className="bg-slate-50 rounded-xl p-4 text-[13px] text-slate-700 leading-relaxed min-h-20 border border-slate-100">
                 {message}
               </div>
             )}
@@ -127,7 +127,7 @@ export function ConfirmModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 py-2.5 bg-white text-[#020817] rounded-lg hover:bg-slate-50 transition-colors text-base border border-[#e2e8f0] font-medium shadow-sm"
+                className="flex-1 py-2.5 bg-white text-[#020817] rounded-lg hover:bg-slate-50 transition-colors text-[13px] border border-[#e2e8f0] font-medium shadow-sm"
               >
                 {cancelText}
               </button>
@@ -137,7 +137,7 @@ export function ConfirmModal({
                   onConfirm();
                   onClose();
                 }}
-                className={`flex-1 py-2.5 ${config.confirmBg} text-white rounded-lg transition-colors text-base shadow-sm font-medium`}
+                className={`flex-1 py-2.5 ${config.confirmBg} text-white rounded-lg transition-colors text-[13px] shadow-sm font-medium`}
               >
                 {confirmText}
               </button>

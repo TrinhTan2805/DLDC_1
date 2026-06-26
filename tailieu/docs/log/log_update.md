@@ -1,5 +1,131 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Xem chi tiết tại Phê duyệt danh mục chỉ hiển thị Thông tin chung (Ngày cập nhật: 26/06/2026)
+
+**Yêu cầu:** Khi nhấn "Xem chi tiết" trong tab Phê duyệt danh mục, chỉ hiển thị **Thông tin chung** (các trường cấu hình tại bước 1 của wizard Thiết lập danh mục dùng chung) thay vì mở toàn bộ `ReviewApprovalModal` với giao diện phê duyệt/từ chối.
+
+**Các trường hiển thị (đúng với bước 1 wizard):**
+- Phiên bản danh mục (`version`)
+- Tên danh sách danh mục (`name`)
+- Cơ sở dữ liệu/Hệ thống (`databaseSystem`)
+- Đơn vị chủ quản (`managingAgency`)
+- Căn cứ (`canCu`)
+- Phạm vi vĩ mô (`scope`)
+- Nguồn dữ liệu (`dataSource`)
+
+**Nội dung thay đổi:**
+1. Tạo mới `CategoryInfoViewModal` — modal read-only dùng `BaseModal`, hiển thị 7 trường Thông tin chung dạng lưới 2 cột, footer chỉ có nút "Đóng".
+2. Cập nhật `CategorySetupPage.tsx`:
+   - Thêm import `CategoryInfoViewModal`
+   - Thêm state `showInfoViewModal`, `infoViewEntity`
+   - Cập nhật `onViewDetail` handler: nhánh `else` (non-expire) → tìm entity theo `req.entityId`, mở `CategoryInfoViewModal` thay vì `ReviewApprovalModal`
+   - Thêm `showInfoViewModal` vào `isAnyModalOpen`
+   - Render `<CategoryInfoViewModal>` trong modals container
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/components/modals/CategoryInfoViewModal.tsx` — **FILE MỚI**
+- `src/components/pages/category/CategorySetupPage.tsx` — thêm state/import/render modal
+
+---
+
+## Tăng z-index modal Phê duyệt / Từ chối lên mức cao nhất (Ngày cập nhật: 26/06/2026)
+
+**Vấn đề:** Modal phê duyệt và từ chối hiển thị sau sidebar do z-index chưa đủ cao.
+
+**Nội dung thay đổi:**
+1. Convert `SimpleApproveModal` và `SimpleRejectModal` sang `BaseModal` (đồng bộ với các modal tab Phê duyệt khác đã sửa trước).
+2. Tăng base z-index trong `BaseModal`: `100 + modalIndex*10` → **`9000 + modalIndex*10`** (modal thứ nhất = 9010, thứ hai = 9020, ...).
+3. Tăng base z-index trong `ConfirmModal`: `200 + modalIndex*10` → **`9100 + modalIndex*10`** — đảm bảo `ConfirmModal` luôn hiển thị trên `BaseModal` khi chúng xuất hiện đồng thời.
+
+**Sidebar z-index (tham khảo):** `z-20` (20) cho body, `z-50` (50) cho nút toggle. Tất cả modal giờ đây ở mức 9000+ — hoàn toàn trên mọi thành phần layout.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/components/modals/SimpleApproveModal.tsx` — convert sang BaseModal, bỏ Portal thủ công + z-[100].
+- `src/components/pages/category/components/modals/SimpleRejectModal.tsx` — convert sang BaseModal, bỏ Portal thủ công + z-[100].
+- `src/components/common/BaseModal.tsx` ⚠️ **FILE DÙNG CHUNG** — chỉ thay đổi giá trị base z-index.
+- `src/components/common/ConfirmModal.tsx` ⚠️ **FILE DÙNG CHUNG** — chỉ thay đổi giá trị base z-index.
+
+---
+
+## Áp dụng quy tắc hiển thị hộp thoại BaseModal cho các modal tab Phê duyệt (Ngày cập nhật: 26/06/2026)
+
+**Nội dung thay đổi:**
+Đồng bộ hóa cơ chế hiển thị modal của tab Phê duyệt theo đúng chuẩn của tab Thiết lập danh sách (dùng `BaseModal`).
+
+Trước khi thay đổi, 4 modal của tab Phê duyệt có các vấn đề sau:
+- `ExpireRequestModal`, `ExpireApproveModal`: không dùng `Portal`, hiện thị trực tiếp trong DOM — có thể bị cắt bởi `overflow: hidden` của container cha.
+- Tất cả 4 modal: dùng z-index cứng (`z-[99999]`, `z-[100]`), không tham gia vào hệ thống quản lý z-index tự động (`window.__activeModalsCount`).
+- Không nhất quán: backdrop click, animation, cấu trúc header/body/footer.
+
+Sau khi thay đổi, 4 modal đều dùng `BaseModal` — đảm bảo:
+1. **Portal** — render đúng vào `document.body`, tránh bị clip bởi overflow.
+2. **Auto z-index** — dùng `window.__activeModalsCount`, tự động xếp chồng đúng khi có modal lồng nhau.
+3. **Backdrop click đóng modal** — nhất quán với SetupTab modals.
+4. **Animation chuẩn** — `animate-in fade-in duration-200` + `zoom-in-95 duration-300 ease-out`.
+5. **Cấu trúc nhất quán** — sticky header (có nút X), scrollable body (`max-h-[95vh]`), sticky footer.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/components/modals/ApprovalRequestModal.tsx` — thay Portal thủ công bằng BaseModal; bỏ import Portal, X.
+- `src/components/pages/category/components/modals/ReviewApprovalModal.tsx` — thay Portal + z-[100] bằng BaseModal; icon Send dùng `customHeaderIcon`.
+- `src/components/pages/category/components/modals/ExpireRequestModal.tsx` — thêm Portal qua BaseModal; bỏ z-index inline; icon AlertTriangle dùng `customHeaderIcon`.
+- `src/components/pages/category/components/modals/ExpireApproveModal.tsx` — thêm Portal qua BaseModal; bỏ z-index inline và import X không dùng; icon KeySquare dùng `customHeaderIcon`; footer dùng `justify-between` trong wrapper div.
+
+
+
+## Cập nhật cấu hình khóa và bộ lọc tại Tab Thiết lập cấu trúc (Ngày cập nhật: 26/06/2026)
+
+**Nội dung thay đổi:**
+1. **Bổ sung cột "Cấu hình khóa" ngoài màn hình danh sách (Grid):**
+   - Thêm cột "Cấu hình khóa" (`Cấu hình khóa`) vào trước cột "Ràng buộc" trong bảng danh sách trường dữ liệu ở cả chế độ Toàn trang (Full Page Mode) và danh sách rút gọn trong chế độ Wizard (Wizard Mode).
+   - Tách hiển thị các Badge khóa `PK` (Khóa chính) và `FK` (Khóa ngoại) từ cột Ràng buộc sang cột Cấu hình khóa để giao diện rõ ràng, chuẩn hóa. Cột Ràng buộc chỉ hiển thị các ràng buộc phi khóa (`REQ`, `UNI`, `IDX`).
+   - Cập nhật số lượng cột của bảng (`getColSpan()`) tăng lên 1 cột để căn chỉnh chính xác layout khi bảng trống dữ liệu.
+   - Loại bỏ ô checkbox chọn ở đầu mỗi dòng dòng dữ liệu trường, thay bằng cột **STT** tự động tính theo trang: `(currentPageNum - 1) * pageSize + idx + 1`.
+2. **Nâng cấp bộ lọc tại Tab Thiết lập cấu trúc:**
+   - Thay đổi bộ lọc Trạng thái thành bộ lọc Ràng buộc dạng Dropdown cho phép lựa chọn nhiều giá trị cùng lúc (Multi-select) để đồng bộ trải nghiệm với các màn hình lọc khác.
+   - Thêm bộ lọc "Cấu hình khóa" cho phép lọc nhanh các trường dữ liệu là Khóa chính (PK), Khóa ngoại (FK) hoặc Không thiết lập.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/components/tabs/AttributesTab.tsx`
+- `tailieu/docs/log/log_update.md`
+
+## Cập nhật cấu trúc bảng danh sách thiết lập danh mục (Ngày cập nhật: 26/06/2026)
+
+**Nội dung thay đổi:**
+1. **Thay đổi cấu trúc cột của bảng Grid trong Tab Thiết lập danh sách:**
+   - Thay đổi các cột hiển thị trong bảng danh sách tại `SetupTab.tsx` thành: STT, Tên danh mục, Cơ sở dữ liệu/ Hệ thống, Đơn vị chủ quản, Phạm vi, Nguồn dữ liệu, Trạng thái, và Thao tác.
+   - Thêm cột STT tự động tính theo trang hiện tại: `(currentPageNum - 1) * pageSize + index + 1`.
+   - Hiển thị Tên danh mục (loại bỏ hoàn toàn mã danh mục `code` hiển thị bên dưới).
+   - Hiển thị Cơ sở dữ liệu / Hệ thống (`databaseSystem`) và Đơn vị chủ quản (`managingAgency`).
+   - Hiển thị Phạm vi (`scope`) theo nhãn tương ứng tiếng Việt lấy từ `scopeLabels`.
+   - Hiển thị Nguồn dữ liệu (`dataSource`) dưới dạng text thông thường, không sử dụng Badge.
+   - Giữ lại cột Thao tác ở cuối bảng để người dùng thực hiện các hành động: Xem chi tiết, Trình duyệt, Sửa, Xóa, Hết hiệu lực.
+   - **Đồng bộ hóa kiểu chữ:** Ép cứng kích thước font chữ toàn bộ dữ liệu trong dòng bảng (gồm cả text thông thường, mã định danh, và text trong các badge Nguồn dữ liệu, Trạng thái) về kích thước `13px` (`text-[13px]`) và loại bỏ kiểu chữ đậm (chuyển `font-medium`, `font-semibold` thành `font-normal`).
+   - **Căn giữa cột Trạng thái:** Thêm thẻ bọc flex container (`justify-center`) trong cột Trạng thái để đảm bảo các badge trạng thái luôn được hiển thị căn giữa chính xác.
+   - **Căn giữa cột Thao tác:** Cập nhật tiêu đề cột Thao tác (`th`) thành căn giữa (`text-center`) và căn giữa các icon hành động trong các ô dữ liệu (`td`) bằng flex container (`justify-center`) để đảm bảo cột Thao tác được hiển thị cân đối, căn giữa chính xác.
+   - **Nâng cấp bộ thẻ thống kê (Statistics Cards):** Thay đổi 3 thẻ thống kê cũ (Tổng Dataset, Cơ quan công bố, Chủ đề) thành 4 thẻ mới: **Tổng số danh mục** (tổng số lượng danh mục), **Chờ phê duyệt** (số lượng danh mục đang ở trạng thái `pending_approval`), **Đã phê duyệt** (số lượng danh mục ở trạng thái `active`), và **Từ chối** (số lượng danh mục ở trạng thái `inactive`) để người dùng dễ dàng theo dõi trực quan trạng thái kiểm soát danh mục.
+   - **Đồng bộ màu sắc tiêu đề:** Cập nhật màu nền tiêu đề bảng (`thead`) thành màu xám nhạt (`bg-slate-50`) và đường viền dưới thành màu xám (`border-slate-200`) để đồng bộ giao diện thiết kế giống như màn hình Thiết lập quan hệ.
+   - **Bổ sung bộ lọc nâng cao:** Tích hợp thêm 2 bộ lọc **Phạm vi** (Tất cả, Cấp quốc gia, Cấp bộ, Cấp tỉnh/thành, Sử dụng nội bộ) và **Nguồn dữ liệu** (Tất cả, Tự cập nhật trực tiếp, Đồng bộ Kho DLDC, Kết nối API NDXP/LGSP) vào bảng bộ lọc nâng cao Collapsible Filter Panel, hỗ trợ tìm kiếm và lọc dữ liệu chính xác.
+   - **Đồng bộ hóa màu nền Backdrop của các Modal:** Cập nhật các modal hành động gồm Xóa (`ConfirmModal`), Hết hiệu lực (`ExpireRequestModal`, `ExpireApproveModal`), và Trình duyệt (`ApprovalRequestModal`) sử dụng màu nền mờ 50% (`bg-black/50` kèm hiệu ứng transition `animate-in fade-in duration-200`) và loại bỏ hiệu ứng làm mờ kính (`backdrop-blur-sm`) để thống nhất hoàn toàn với giao diện modal Thêm mới danh mục (`CategoryWizardModal`).
+   - **Đồng bộ hóa kích thước font chữ trong các Modal:** Chuẩn hóa kích thước font chữ trong các modal hành động (Xóa, Hết hiệu lực, Trình duyệt) về chính xác `18px` (`text-[18px]`) cho tiêu đề chính (Header) và `13px` (`text-[13px]`) cho toàn bộ phần văn bản, nội dung chi tiết, các trường thông tin và nút bấm hành động (Button).
+   - **Tăng z-index của modal Trình duyệt:** Thiết lập `z-index` của modal Trình duyệt danh mục (`ApprovalRequestModal`) lên `z-[99999]` tương đương với các modal hành động khác để hiển thị đè lên thanh Sidebar cố định phía bên trái.
+    - **Tinh giản cấu hình Khóa ngoại (FK) khi thiết lập cấu trúc:** Loại bỏ các trường dropdown chọn Bảng tham chiếu và Trường tham chiếu khi người dùng cấu hình ràng buộc loại khóa là Khóa ngoại (FK) tại cả Form thêm nhanh thủ công (bước 2 của Wizard trong `AttributesTab.tsx`) và Modal chỉnh sửa/thêm mới trường dữ liệu (`AttributeFormModal.tsx`), chỉ lưu trữ giá trị loại khóa ngoại (`keyType: 'foreign'`).
+     - **Khóa cứng bộ chọn danh mục khi thiết lập quan hệ trong Wizard:** Tại bước 3 (Thiết lập quan hệ) của Wizard thêm mới danh mục dùng chung, cấu hình khóa cứng dropdown chọn danh mục chủ (`SearchableSelect` đặt `disabled={true}`), mặc định hiển thị và cố định theo danh mục đang được tạo.
+      - **Căn chỉnh thẳng hàng thanh công cụ Thiết lập quan hệ:** Tách nhãn (label) của bộ chọn danh mục lên hàng trên riêng biệt và đổi văn bản thành "Danh mục đang cấu hình:" khi hiển thị trong modal thiết lập. Phần hộp chọn (SearchableSelect) và nút Thêm mới quan hệ (hoặc nhóm tìm kiếm) được đưa vào một dòng flex-row với căn chỉnh items-center. Nhờ chiều cao đồng bộ h-10 (40px), hộp chọn và nút Thêm mới quan hệ luôn căn chỉnh ngang hàng hoàn hảo với nhau.`.
+2. **Cập nhật dữ liệu mẫu (mock data) của các thực thể:**
+   - Bổ sung trường `databaseSystem` và đảm bảo trường `dataSource` đầy đủ cho các danh mục mẫu trong `categoryConstants.ts` để hiển thị trực quan và đồng bộ dữ liệu hệ thống trên bảng lưới.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/components/tabs/SetupTab.tsx`
+- `src/components/pages/category/components/tabs/RelationshipsTab.tsx`
+- `src/components/pages/category/categoryConstants.ts`
+- `src/components/common/ConfirmModal.tsx`
+- `src/components/pages/category/components/modals/ExpireRequestModal.tsx`
+- `src/components/pages/category/components/modals/ExpireApproveModal.tsx`
+- `src/components/pages/category/components/modals/ApprovalRequestModal.tsx`
+- `tailieu/docs/log/log_update.md`
+
+---
+
 ## Thiết lập quan hệ danh mục (Ngày cập nhật: 25/06/2026)
 
 **Nội dung thay đổi:**

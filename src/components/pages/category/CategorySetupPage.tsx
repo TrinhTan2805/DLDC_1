@@ -34,6 +34,10 @@ import { SimpleApproveModal } from './components/modals/SimpleApproveModal';
 import { SimpleRejectModal } from './components/modals/SimpleRejectModal';
 import { ExpireRequestModal } from './components/modals/ExpireRequestModal';
 import { ExpireApproveModal } from './components/modals/ExpireApproveModal';
+import { CategoryInfoViewModal } from './components/modals/CategoryInfoViewModal';
+import { CategoryStructureViewModal } from './components/modals/CategoryStructureViewModal';
+import { CategoryVersionChangeModal } from './components/modals/CategoryVersionChangeModal';
+import { EntityVersionHistoryModal } from './components/modals/EntityVersionHistoryModal';
 import { Portal } from '../../common/Portal';
 
 export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }) => {
@@ -241,7 +245,57 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
       id: '11', type: 'version', entityId: '1', entityCode: 'DM-GIOITINH',
       entityName: 'Dữ liệu Danh mục giới tính', requestedBy: 'Lý Quốc K',
       requestedDate: '01/12/2024 10:10', status: 'pending',
-      changes: { prevVersion: 1, currentVersion: 2, impactCount: 3 }
+      changes: {
+        prevVersion: 1,
+        currentVersion: 2,
+        generalChanges: [
+          { field: 'managingAgency', label: 'Đơn vị chủ quản', oldValue: 'Bộ Nội vụ', newValue: 'Bộ Tư pháp' },
+          { field: 'dataSource', label: 'Nguồn dữ liệu', oldValue: 'Tự cập nhật trực tiếp', newValue: 'Đồng bộ Kho DLDC' },
+          { field: 'description', label: 'Mô tả', oldValue: 'Danh mục giới tính', newValue: 'Danh mục giới tính chuẩn quốc gia theo ISO 5218' },
+        ],
+        structureChanges: [
+          {
+            changeType: 'added',
+            fieldName: 'phone_code',
+            displayName: 'Mã điện thoại',
+            dataType: 'Chuỗi (String)',
+          },
+          {
+            changeType: 'modified',
+            fieldName: 'gender_code',
+            displayName: 'Mã giới tính',
+            dataType: 'Chuỗi (String)',
+            changedProps: [
+              { label: 'Độ dài tối đa', oldValue: '2', newValue: '10' },
+              { label: 'Bắt buộc', oldValue: 'Không', newValue: 'Có' },
+            ],
+          },
+          {
+            changeType: 'removed',
+            fieldName: 'note',
+            displayName: 'Ghi chú',
+            dataType: 'Văn bản dài (Text)',
+          },
+        ],
+        relationshipChanges: [
+          {
+            changeType: 'added',
+            sourceEntityName: 'Dữ liệu Danh mục giới tính',
+            targetEntityName: 'Dữ liệu Danh mục dân tộc',
+            relationshipType: '1-n',
+          },
+          {
+            changeType: 'modified',
+            sourceEntityName: 'Dữ liệu Danh mục giới tính',
+            targetEntityName: 'Dữ liệu Danh mục quốc gia',
+            relationshipType: '1-1',
+            changedProps: [
+              { label: 'Khóa nguồn', oldValue: 'id', newValue: 'gender_code' },
+              { label: 'Trường hiển thị', oldValue: '', newValue: 'country_name' },
+            ],
+          },
+        ],
+      }
     },
     {
       id: '12', type: 'relationship', entityId: '7', entityCode: 'DM-QUANHEGD',
@@ -299,6 +353,25 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
   const [showExpireRequestModal, setShowExpireRequestModal] = useState(false);
   const [expireEntity, setExpireEntity] = useState<MasterDataEntity | null>(null);
   const [showExpireApproveModal, setShowExpireApproveModal] = useState(false);
+
+  // State cho Xem chi tiết thông tin chung
+  const [showInfoViewModal, setShowInfoViewModal] = useState(false);
+  const [infoViewEntity, setInfoViewEntity] = useState<MasterDataEntity | null>(null);
+  const [infoViewRequestId, setInfoViewRequestId] = useState<string | null>(null);
+
+  // State cho Xem chi tiết cấu trúc & quan hệ
+  const [showStructureViewModal, setShowStructureViewModal] = useState(false);
+  const [structureViewEntity, setStructureViewEntity] = useState<MasterDataEntity | null>(null);
+  const [structureViewRequestId, setStructureViewRequestId] = useState<string | null>(null);
+
+  // State cho Lịch sử phiên bản theo entity (từ SetupTab)
+  const [showEntityHistoryModal, setShowEntityHistoryModal] = useState(false);
+  const [historyEntity, setHistoryEntity] = useState<MasterDataEntity | null>(null);
+
+  // State cho Xem chi tiết thay đổi phiên bản
+  const [showVersionChangeModal, setShowVersionChangeModal] = useState(false);
+  const [versionChangeEntity, setVersionChangeEntity] = useState<MasterDataEntity | null>(null);
+  const [versionChangeRequest, setVersionChangeRequest] = useState<ApprovalRequest | null>(null);
 
   // Generic Confirm Modal for Submits & Quick Actions
   const [genericConfirm, setGenericConfirm] = useState<{
@@ -558,7 +631,11 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
     showReviewModal ||
     showExpireRequestModal ||
     showExpireApproveModal ||
-    showApprovalModal
+    showInfoViewModal ||
+    showStructureViewModal ||
+    showVersionChangeModal ||
+    showApprovalModal ||
+    showEntityHistoryModal
   );
 
   return (
@@ -607,6 +684,10 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
                 setExpireEntity(e);
                 setShowExpireRequestModal(true);
               }}
+              onViewHistory={(e) => {
+                setHistoryEntity(e);
+                setShowEntityHistoryModal(true);
+              }}
             />
           )}
 
@@ -652,9 +733,21 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
                  const entity = entities.find(e => e.id === req.entityId) || null;
                  setExpireEntity(entity);
                  setShowExpireApproveModal(true);
+              } else if (req.type === 'structure') {
+                 const entity = entities.find(e => e.id === req.entityId) || null;
+                 setStructureViewEntity(entity);
+                 setStructureViewRequestId(req.id);
+                 setShowStructureViewModal(true);
+              } else if (req.type === 'version') {
+                 const entity = entities.find(e => e.id === req.entityId) || null;
+                 setVersionChangeEntity(entity);
+                 setVersionChangeRequest(req);
+                 setShowVersionChangeModal(true);
               } else {
-                 setPendingApprovalData([req]); 
-                 setShowReviewModal(true);
+                 const entity = entities.find(e => e.id === req.entityId) || null;
+                 setInfoViewEntity(entity);
+                 setInfoViewRequestId(req.id);
+                 setShowInfoViewModal(true);
               }
             }}
             onApproveClick={(req) => { setPendingApprovalData(req); setShowSimpleApproveModal(true); }}
@@ -843,6 +936,68 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
               }
               setShowExpireApproveModal(false);
            }}
+        />
+
+        <EntityVersionHistoryModal
+          isOpen={showEntityHistoryModal}
+          onClose={() => setShowEntityHistoryModal(false)}
+          entity={historyEntity}
+        />
+
+        <CategoryVersionChangeModal
+          isOpen={showVersionChangeModal}
+          onClose={() => setShowVersionChangeModal(false)}
+          entity={versionChangeEntity}
+          request={versionChangeRequest}
+          onApprove={(note) => {
+            setRequests(requests.map(r => r.id === versionChangeRequest?.id ? { ...r, status: 'approved', reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note } : r));
+            setShowVersionChangeModal(false);
+          }}
+          onReject={(note) => {
+            setRequests(requests.map(r => r.id === versionChangeRequest?.id ? { ...r, status: 'rejected', reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note } : r));
+            setShowVersionChangeModal(false);
+          }}
+        />
+
+        <CategoryStructureViewModal
+          isOpen={showStructureViewModal}
+          onClose={() => setShowStructureViewModal(false)}
+          entity={structureViewEntity}
+          attributes={attributes}
+          relationships={relationships}
+          requestStatus={requests.find(r => r.id === structureViewRequestId)?.status}
+          onApprove={(note) => {
+            setRequests(requests.map(r => r.id === structureViewRequestId ? { ...r, status: 'approved', reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note } : r));
+            if (structureViewEntity) {
+              setEntities(entities.map(e => e.id === structureViewEntity.id ? { ...e, lifecycleStatus: 'active' } as MasterDataEntity : e));
+            }
+            setShowStructureViewModal(false);
+          }}
+          onReject={(note) => {
+            setRequests(requests.map(r => r.id === structureViewRequestId ? { ...r, status: 'rejected', reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note } : r));
+            setShowStructureViewModal(false);
+          }}
+        />
+
+        <CategoryInfoViewModal
+          isOpen={showInfoViewModal}
+          onClose={() => setShowInfoViewModal(false)}
+          entity={infoViewEntity}
+          requestStatus={requests.find(r => r.id === infoViewRequestId)?.status}
+          onApprove={(note) => {
+            setRequests(requests.map(r => r.id === infoViewRequestId ? { ...r, status: 'approved', reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note } : r));
+            if (infoViewEntity) {
+              setEntities(entities.map(e => e.id === infoViewEntity.id ? { ...e, lifecycleStatus: 'active' } as MasterDataEntity : e));
+            }
+            setShowInfoViewModal(false);
+          }}
+          onReject={(note) => {
+            setRequests(requests.map(r => r.id === infoViewRequestId ? { ...r, status: 'rejected', reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note } : r));
+            if (infoViewEntity) {
+              setEntities(entities.map(e => e.id === infoViewEntity.id ? { ...e, lifecycleStatus: 'draft' } as MasterDataEntity : e));
+            }
+            setShowInfoViewModal(false);
+          }}
         />
 
         <ApprovalRequestModal

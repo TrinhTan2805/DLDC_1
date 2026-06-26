@@ -1,11 +1,24 @@
 import React, { ChangeEvent } from 'react';
-import { 
-  Settings, CheckSquare, XCircle, Search, Filter, Plus, Globe, 
-  X, ChevronDown, Eye, Edit2, Trash2, Send, PowerOff,
-  FileText, Building2, Tag
+import {
+  Settings, CheckSquare, XCircle, Search, Filter, Plus, Globe,
+  X, ChevronDown, Eye, SquarePen, Trash2, Send, PowerOff,
+  FileText, Building2, Tag, Clock, History
 } from 'lucide-react';
 import { MasterDataEntity, LifecycleStatus } from '../../categoryTypes';
-import { dataTypeLabels, lifecycleLabels } from '../../categoryConstants';
+import { dataTypeLabels, lifecycleLabels, scopeLabels } from '../../categoryConstants';
+
+const getDataSourceLabel = (src?: string) => {
+  switch (src) {
+    case 'dldc':
+      return 'Đồng bộ Kho DLDC';
+    case 'lgsp':
+    case 'ndxp':
+      return 'Kết nối API (NDXP/LGSP)';
+    case 'manual':
+    default:
+      return 'Tự cập nhật trực tiếp';
+  }
+};
 
 interface SetupTabProps {
   entities: MasterDataEntity[];
@@ -25,6 +38,7 @@ interface SetupTabProps {
   onApproveClick: (entity: MasterDataEntity) => void;
   onRejectClick: (entity: MasterDataEntity) => void;
   onExpireClick: (entity: MasterDataEntity) => void;
+  onViewHistory?: (entity: MasterDataEntity) => void;
 }
 
 export function SetupTab({
@@ -44,23 +58,28 @@ export function SetupTab({
   onUnpublish,
   onApproveClick,
   onRejectClick,
-  onExpireClick
+  onExpireClick,
+  onViewHistory
 }: SetupTabProps) {
   // Local UI States for Filters & Pagination
   const [showFilters, setShowFilters] = React.useState(false);
   const [currentPageNum, setCurrentPageNum] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(10);
+  const [filterScope, setFilterScope] = React.useState<string>('all');
+  const [filterDataSource, setFilterDataSource] = React.useState<string>('all');
 
   // Reset pagination to page 1 on filter or search query change
   React.useEffect(() => {
     setCurrentPageNum(1);
-  }, [searchTerm, filterStatus]);
+  }, [searchTerm, filterStatus, filterScope, filterDataSource]);
 
   const filteredEntities = entities.filter(e => {
     const matchesSearch = e.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       e.code.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterStatus === 'all' || e.lifecycleStatus === filterStatus;
-    return matchesSearch && matchesFilter;
+    const matchesScope = filterScope === 'all' || e.scope === filterScope;
+    const matchesDataSource = filterDataSource === 'all' || (e.dataSource || 'manual') === filterDataSource;
+    return matchesSearch && matchesFilter && matchesScope && matchesDataSource;
   });
 
   const paginatedEntities = filteredEntities.slice((currentPageNum - 1) * pageSize, currentPageNum * pageSize);
@@ -132,35 +151,45 @@ export function SetupTab({
     );
   };
 
-  const uniqueAgencies = new Set(entities.map(e => e.managingAgency).filter(Boolean)).size;
-  const uniqueSubjects = new Set(entities.map(e => e.scope).filter(Boolean)).size;
+  const totalCount = entities.length;
+  const pendingCount = entities.filter(e => e.lifecycleStatus === 'pending_approval').length;
+  const approvedCount = entities.filter(e => e.lifecycleStatus === 'active').length;
+  const rejectedCount = entities.filter(e => e.lifecycleStatus === 'inactive').length;
 
   return (
     <div className="space-y-4">
       {/* Statistics Cards */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-4 gap-4 mb-6">
         <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[13px] text-slate-500">Tổng Dataset</span>
+            <span className="text-[13px] text-slate-500">Tổng số danh mục</span>
             <FileText className="w-5 h-5 text-blue-600" />
           </div>
-          <div className="text-2xl font-bold text-slate-900">{entities.length}</div>
+          <div className="text-2xl font-bold text-slate-900">{totalCount}</div>
         </div>
 
         <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[13px] text-slate-500">Cơ quan công bố</span>
-            <Building2 className="w-5 h-5 text-blue-600" />
+            <span className="text-[13px] text-slate-500">Chờ phê duyệt</span>
+            <Clock className="w-5 h-5 text-orange-500" />
           </div>
-          <div className="text-2xl font-bold text-slate-900">{uniqueAgencies}</div>
+          <div className="text-2xl font-bold text-slate-900">{pendingCount}</div>
         </div>
 
         <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[13px] text-slate-500">Chủ đề</span>
-            <Tag className="w-5 h-5 text-orange-500" />
+            <span className="text-[13px] text-slate-500">Đã phê duyệt</span>
+            <CheckSquare className="w-5 h-5 text-green-600" />
           </div>
-          <div className="text-2xl font-bold text-slate-900">{uniqueSubjects}</div>
+          <div className="text-2xl font-bold text-slate-900">{approvedCount}</div>
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[13px] text-slate-500">Từ chối</span>
+            <XCircle className="w-5 h-5 text-red-600" />
+          </div>
+          <div className="text-2xl font-bold text-slate-900">{rejectedCount}</div>
         </div>
       </div>
 
@@ -232,6 +261,41 @@ export function SetupTab({
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                 </div>
               </div>
+
+              <div>
+                <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Phạm vi</label>
+                <div className="relative">
+                  <select
+                    value={filterScope}
+                    onChange={(e: ChangeEvent<HTMLSelectElement>) => setFilterScope(e.target.value)}
+                    className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+                  >
+                    <option value="all">Tất cả phạm vi</option>
+                    <option value="national">Cấp quốc gia</option>
+                    <option value="ministry">Cấp bộ</option>
+                    <option value="provincial">Cấp tỉnh/thành</option>
+                    <option value="internal">Sử dụng nội bộ</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Nguồn dữ liệu</label>
+                <div className="relative">
+                  <select
+                    value={filterDataSource}
+                    onChange={(e: ChangeEvent<HTMLSelectElement>) => setFilterDataSource(e.target.value)}
+                    className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+                  >
+                    <option value="all">Tất cả nguồn dữ liệu</option>
+                    <option value="manual">Tự cập nhật trực tiếp</option>
+                    <option value="dldc">Đồng bộ Kho DLDC</option>
+                    <option value="lgsp">Kết nối API (NDXP/LGSP)</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -241,62 +305,51 @@ export function SetupTab({
       <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="bg-[#f8fafc] text-slate-700 border-b border-slate-100">
+            <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
               <tr>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Mã</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên dữ liệu chủ</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Loại</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Cơ quan quản lý</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">STT</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên danh mục</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Cơ sở dữ liệu/ Hệ thống</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Đơn vị chủ quản</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Phạm vi</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Nguồn dữ liệu</th>
                 <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Trạng thái</th>
-                {userRole === 'leader' && (
-                  <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Công khai</th>
-                )}
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-right w-48">Thao tác</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-48">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">
               {paginatedEntities.length > 0 ? (
-                paginatedEntities.map((entity) => {
+                paginatedEntities.map((entity, index) => {
                   const isPublished = publishedEntities.includes(entity.id);
                   return (
                     <tr key={entity.id} className="hover:bg-slate-50/50 transition-all group border-b border-slate-100">
-                      <td className="px-6 py-4 font-mono text-blue-600 text-[13px]">{entity.code}</td>
-                      <td className="px-6 py-4 text-slate-900 text-[13px] font-semibold">{entity.name}</td>
-                      <td className="px-6 py-4 text-slate-700 text-[13px] font-medium">{dataTypeLabels[entity.dataType]}</td>
-                      <td className="px-6 py-4 text-slate-700 text-[13px] font-medium">{entity.managingAgency}</td>
-                      <td className="px-6 py-4 text-center">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border whitespace-nowrap ${
-                          entity.lifecycleStatus === 'active'
-                            ? 'bg-green-50 text-green-700 border-green-100'
-                            : entity.lifecycleStatus === 'pending_approval'
-                              ? 'bg-purple-50 text-purple-700 border-purple-100'
-                              : entity.lifecycleStatus === 'draft'
-                                ? 'bg-slate-50 text-slate-700 border-slate-200'
-                                : 'bg-orange-50 text-orange-700 border-orange-100'
-                        }`}>
-                          {lifecycleLabels[entity.lifecycleStatus].label}
-                        </span>
+                      <td className="px-6 py-4 text-slate-500 text-[13px] font-normal">{(currentPageNum - 1) * pageSize + index + 1}</td>
+                      <td className="px-6 py-4 text-slate-900 text-[13px] font-normal hover:text-blue-600 transition-colors">
+                        {entity.name}
                       </td>
-                      {userRole === 'leader' && (
-                        <td className="px-6 py-4 text-center">
-                          {entity.lifecycleStatus === 'active' ? (
-                            isPublished ? (
-                              <span className="inline-flex items-center px-2.5 py-1 text-xs bg-green-50 text-green-700 border border-green-100 rounded-full font-medium whitespace-nowrap">
-                                <Globe className="w-3.5 h-3.5 mr-1" />
-                                Đã công khai
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center px-2.5 py-1 text-xs bg-slate-50 text-slate-700 border border-slate-200 rounded-full font-medium whitespace-nowrap">
-                                Chưa công khai
-                              </span>
-                            )
-                          ) : (
-                            <span className="text-xs text-slate-400">-</span>
-                          )}
-                        </td>
-                      )}
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-1 opacity-80 group-hover:opacity-100 transition-all">
+                      <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{entity.databaseSystem || '--'}</td>
+                      <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{entity.managingAgency || '--'}</td>
+                      <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{scopeLabels[entity.scope] || entity.scope || '--'}</td>
+                      <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">
+                        {getDataSourceLabel(entity.dataSource)}
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <div className="flex justify-center">
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[13px] font-normal border whitespace-nowrap ${
+                            entity.lifecycleStatus === 'active'
+                              ? 'bg-green-50 text-green-700 border-green-100'
+                              : entity.lifecycleStatus === 'pending_approval'
+                                ? 'bg-purple-50 text-purple-700 border-purple-100'
+                                : entity.lifecycleStatus === 'draft'
+                                  ? 'bg-slate-50 text-slate-700 border-slate-200'
+                                  : 'bg-orange-50 text-orange-700 border-orange-100'
+                          }`}>
+                            {lifecycleLabels[entity.lifecycleStatus].label}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <div className="flex items-center justify-center gap-1 opacity-80 group-hover:opacity-100 transition-all">
                           {onView && (
                             <button
                               onClick={() => onView(entity)}
@@ -304,6 +357,15 @@ export function SetupTab({
                               title="Xem chi tiết"
                             >
                               <Eye className="w-4 h-4" />
+                            </button>
+                          )}
+                          {onViewHistory && (
+                            <button
+                              onClick={() => onViewHistory(entity)}
+                              className="p-1.5 text-slate-500 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors cursor-pointer"
+                              title="Lịch sử phiên bản"
+                            >
+                              <History className="w-4 h-4" />
                             </button>
                           )}
                           <button
@@ -331,7 +393,7 @@ export function SetupTab({
                             }`}
                             title="Sửa"
                           >
-                            <Edit2 className="w-4 h-4" />
+                            <SquarePen className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => onDelete(entity.id)}
@@ -367,7 +429,7 @@ export function SetupTab({
                 })
               ) : (
                 <tr>
-                  <td colSpan={userRole === 'leader' ? 7 : 6} className="px-6 py-8 text-center text-[13px] text-slate-500">
+                  <td colSpan={8} className="px-6 py-8 text-center text-[13px] text-slate-500">
                     Không tìm thấy dữ liệu
                   </td>
                 </tr>

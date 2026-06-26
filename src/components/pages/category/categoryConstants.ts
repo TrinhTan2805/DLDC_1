@@ -14,7 +14,8 @@ export const defaultEntities: MasterDataEntity[] = [
     updatedDate: '20/12/2024',
     createdBy: 'Hệ thống',
     version: 1,
-    dataSource: 'dldc'
+    dataSource: 'dldc',
+    databaseSystem: 'Cơ sở dữ liệu Hộ tịch'
   },
   {
     id: '2',
@@ -29,7 +30,8 @@ export const defaultEntities: MasterDataEntity[] = [
     updatedDate: '20/12/2024',
     createdBy: 'Hệ thống',
     version: 1,
-    dataSource: 'manual'
+    dataSource: 'manual',
+    databaseSystem: 'Hệ thống Quản lý thông tin Dân tộc'
   },
   {
     id: '3',
@@ -44,7 +46,8 @@ export const defaultEntities: MasterDataEntity[] = [
     updatedDate: '20/12/2024',
     createdBy: 'Hệ thống',
     version: 1,
-    dataSource: 'lgsp'
+    dataSource: 'lgsp',
+    databaseSystem: 'Cơ sở dữ liệu Quốc tịch / Hộ tịch'
   },
   {
     id: '4',
@@ -58,7 +61,9 @@ export const defaultEntities: MasterDataEntity[] = [
     createdDate: '20/12/2024',
     updatedDate: '20/12/2024',
     createdBy: 'Hệ thống',
-    version: 1
+    version: 1,
+    dataSource: 'manual',
+    databaseSystem: 'Hệ thống Quản lý Tôn giáo'
   },
   {
     id: '5',
@@ -72,7 +77,9 @@ export const defaultEntities: MasterDataEntity[] = [
     createdDate: '20/12/2024',
     updatedDate: '20/12/2024',
     createdBy: 'Hệ thống',
-    version: 1
+    version: 1,
+    dataSource: 'manual',
+    databaseSystem: 'Hệ thống Quản lý Cơ quan hành chính'
   },
   {
     id: '6',
@@ -86,7 +93,9 @@ export const defaultEntities: MasterDataEntity[] = [
     createdDate: '20/12/2024',
     updatedDate: '20/12/2024',
     createdBy: 'Hệ thống',
-    version: 1
+    version: 1,
+    dataSource: 'manual',
+    databaseSystem: 'Cơ sở dữ liệu Đơn vị hành chính'
   },
   {
     id: '7',
@@ -100,7 +109,9 @@ export const defaultEntities: MasterDataEntity[] = [
     createdDate: '20/12/2024',
     updatedDate: '20/12/2024',
     createdBy: 'Hệ thống',
-    version: 1
+    version: 1,
+    dataSource: 'manual',
+    databaseSystem: 'Cơ sở dữ liệu Hộ tịch điện tử'
   },
   {
     id: '8',
@@ -114,7 +125,9 @@ export const defaultEntities: MasterDataEntity[] = [
     createdDate: '20/12/2024',
     updatedDate: '20/12/2024',
     createdBy: 'Hệ thống',
-    version: 1
+    version: 1,
+    dataSource: 'manual',
+    databaseSystem: 'Cơ sở dữ liệu Quốc gia về Dân cư'
   }
 ];
 

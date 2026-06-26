@@ -143,7 +143,7 @@ export function AttributeFormModal({
                 />
                 <div className="flex flex-col">
                   <span className="text-[13px] font-medium text-slate-700 group-hover:text-blue-700 transition-colors">{item.label}</span>
-                  <span className="text-[10px] text-slate-400 font-bold uppercase">{item.desc}</span>
+                  <span className="text-[13px] text-slate-400 font-bold uppercase">{item.desc}</span>
                 </div>
               </label>
             ))}
@@ -181,50 +181,6 @@ export function AttributeFormModal({
               );
             })}
           </div>
-
-          {formData.keyType === 'foreign' && (
-            <div className="grid grid-cols-2 gap-4 mt-3 pt-3 border-t border-slate-200/60">
-              <div className="space-y-1.5 text-left">
-                <label className="block text-[13px] font-medium text-slate-600">
-                  Bảng tham chiếu <span className="text-red-500">*</span>
-                </label>
-                <select
-                  title="Bảng tham chiếu"
-                  value={formData.foreignTable || ''}
-                  onChange={(e) => {
-                    const tableId = e.target.value;
-                    const fields = mockAttributesByEntity[tableId] || [];
-                    const defaultField = fields[0]?.fieldName || 'id';
-                    setFormData({ ...formData, foreignTable: tableId, foreignField: defaultField });
-                  }}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-slate-800"
-                >
-                  <option value="">-- Chọn danh mục --</option>
-                  {(entities || []).map(e => (
-                    <option key={e.id} value={e.id}>{e.name} ({e.code})</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-1.5 text-left">
-                <label className="block text-[13px] font-medium text-slate-600">
-                  Trường tham chiếu <span className="text-red-500">*</span>
-                </label>
-                <select
-                  title="Trường tham chiếu"
-                  value={formData.foreignField || ''}
-                  onChange={(e) => setFormData({ ...formData, foreignField: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-slate-800"
-                  disabled={!formData.foreignTable}
-                >
-                  <option value="">-- Chọn trường --</option>
-                  {(formData.foreignTable ? (mockAttributesByEntity[formData.foreignTable] || [{ fieldName: 'id', displayName: 'ID' }]) : []).map(attr => (
-                    <option key={attr.fieldName} value={attr.fieldName}>{attr.displayName} ({attr.fieldName})</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Giá trị mặc định & Quy tắc xác thực */}

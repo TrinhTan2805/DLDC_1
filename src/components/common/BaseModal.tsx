@@ -51,7 +51,7 @@ export function BaseModal({
 
   if (!isOpen) return null;
 
-  const currentZIndex = 100 + modalIndex * 10;
+  const currentZIndex = 9000 + modalIndex * 10;
 
   return (
     <Portal>
@@ -75,7 +75,7 @@ export function BaseModal({
             <div className="flex items-center">
               {customHeaderIcon}
               <div>
-                <h3 className="font-bold text-slate-800 leading-tight" style={{ fontSize: '20px' }}>{title}</h3>
+                <h3 className="font-bold text-slate-800 leading-tight" style={{ fontSize: '18px' }}>{title}</h3>
                 {subtitle && <p className="text-[12px] text-slate-500 mt-1 font-medium">{subtitle}</p>}
               </div>
             </div>

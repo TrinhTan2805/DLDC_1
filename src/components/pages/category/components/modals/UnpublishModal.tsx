@@ -52,7 +52,7 @@ export function UnpublishModal({ isOpen, onClose, onConfirm, recordName, scopes 
             <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600">
               <AlertTriangle className="w-5 h-5" />
             </div>
-            <h3 className="text-xl font-bold text-slate-800">Hủy công khai danh mục</h3>
+            <h3 className="text-[18px] font-bold text-slate-800">Hủy công khai danh mục</h3>
           </div>
           <button
             onClick={onClose}
@@ -69,7 +69,7 @@ export function UnpublishModal({ isOpen, onClose, onConfirm, recordName, scopes 
           </p>
 
           <div>
-             <div className="text-sm font-medium text-slate-700 mb-2">Chọn phạm vi để hủy công khai:</div>
+             <div className="text-[13px] font-medium text-slate-700 mb-2">Chọn phạm vi để hủy công khai:</div>
              <div className="space-y-3">
                 {scopes.includes('internal') && (
                   <label 
@@ -134,20 +134,20 @@ export function UnpublishModal({ isOpen, onClose, onConfirm, recordName, scopes 
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Lý do hủy công khai *</label>
+            <label className="block text-[13px] font-medium text-slate-700 mb-1">Lý do hủy công khai *</label>
             <textarea title="Mô tả"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               disabled={isScanning}
               rows={3}
-              className="w-full px-4 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500 resize-none disabled:bg-slate-50"
+              className="w-full px-4 py-2 border border-slate-300 rounded-xl text-[13px] focus:outline-none focus:ring-2 focus:ring-red-500 resize-none disabled:bg-slate-50"
               placeholder="Nhập lý do chi tiết..."
             />
           </div>
 
           {isScanning && (
             <div className="space-y-2 mt-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
-              <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center justify-between text-[13px]">
                 <span className="text-slate-700 flex items-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
                   Đang quét hệ thống khai thác...

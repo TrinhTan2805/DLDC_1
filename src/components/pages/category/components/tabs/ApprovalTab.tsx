@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import { Clock, CheckSquare, XCircle, Eye, Ban, Check } from 'lucide-react';
 import { ApprovalRequest, ApprovalType, ApprovalStatus, MasterDataEntity } from '../../categoryTypes';
 
@@ -31,8 +30,6 @@ export function ApprovalTab({
   approvalTypeLabels,
   approvalStatusLabels
 }: ApprovalTabProps) {
-  const [expandedHistory, setExpandedHistory] = useState<string[]>([]);
-
   const typeFilteredRequests = requests.filter(r => r.type === approvalTab);
 
   const pendingCount = typeFilteredRequests.filter(r => r.status === 'pending').length;
@@ -52,8 +49,7 @@ export function ApprovalTab({
     { key: 'expire' as ApprovalType, label: 'Phê duyệt hết hiệu lực', icon: Ban }
   ];
 
-  const toggleHistory = (id: string) =>
-    setExpandedHistory(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+
 
   const tabList = [
     { key: 'all' as const, label: 'Tất cả', count: totalCount },
@@ -66,7 +62,7 @@ export function ApprovalTab({
     <div className="space-y-5">
       {/* Page Header */}
       <div>
-        <h2 className="text-[17px] font-bold text-slate-800">{approvalTypeLabels[approvalTab] || 'Phê duyệt danh mục'}</h2>
+        <h2 className="text-[18px] font-bold text-slate-800">{approvalTypeLabels[approvalTab] || 'Phê duyệt danh mục'}</h2>
         <p className="text-[13px] text-slate-500 mt-0.5">Lãnh đạo nghiệp vụ xem xét và phê duyệt các yêu cầu thay đổi dữ liệu chủ</p>
       </div>
 
@@ -98,22 +94,22 @@ export function ApprovalTab({
       <div className="grid grid-cols-3 gap-4">
         <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 flex justify-between items-center">
           <div>
-            <div className="text-[13px] text-orange-700 font-medium mb-0.5">Chờ phê duyệt</div>
-            <div className="text-3xl font-black text-orange-600">{pendingCount}</div>
+            <div className="text-[16px] text-orange-700 font-medium mb-0.5">Chờ phê duyệt</div>
+            <div className="text-[16px] font-black text-orange-600">{pendingCount}</div>
           </div>
           <Clock className="w-9 h-9 text-orange-400 stroke-2" />
         </div>
         <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex justify-between items-center">
           <div>
-            <div className="text-[13px] text-green-700 font-medium mb-0.5">Đã phê duyệt</div>
-            <div className="text-3xl font-black text-green-600">{approvedCount}</div>
+            <div className="text-[16px] text-green-700 font-medium mb-0.5">Đã phê duyệt</div>
+            <div className="text-[16px] font-black text-green-600">{approvedCount}</div>
           </div>
           <CheckSquare className="w-9 h-9 text-green-400 stroke-2" />
         </div>
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex justify-between items-center">
           <div>
-            <div className="text-[13px] text-red-700 font-medium mb-0.5">Từ chối</div>
-            <div className="text-3xl font-black text-red-600">{rejectedCount}</div>
+            <div className="text-[16px] text-red-700 font-medium mb-0.5">Từ chối</div>
+            <div className="text-[16px] font-black text-red-600">{rejectedCount}</div>
           </div>
           <XCircle className="w-9 h-9 text-red-400 stroke-2" />
         </div>
@@ -150,8 +146,12 @@ export function ApprovalTab({
         ) : (
           filteredRequests.map(req => {
             const entity = entities.find((e: any) => e.id === req.entityId);
-            const isPending = req.status === 'pending';
-            const historyOpen = expandedHistory.includes(req.id);
+            const dataSourceLabel: Record<string, string> = {
+              manual: 'Tự cập nhật trực tiếp',
+              dldc: 'Đồng bộ Kho DLDC',
+              lgsp: 'Kết nối API (NDXP/LGSP)',
+              ndxp: 'Kết nối API (NDXP/LGSP)',
+            };
 
             return (
               <div key={req.id} className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
@@ -162,7 +162,7 @@ export function ApprovalTab({
                     {/* Title + Status Badge */}
                     <div className="flex items-center gap-2 mb-1">
                       <h4 className="text-[15px] font-bold text-slate-800">{req.entityName}</h4>
-                      <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${req.status === 'pending' ? 'bg-orange-50 text-orange-600 border-orange-200' :
+                      <span className={`px-2.5 py-0.5 rounded-full text-[13px] border ${req.status === 'pending' ? 'bg-orange-50 text-orange-600 border-orange-200' :
                           (req.status === 'approved' || req.status === 'partial') ? 'bg-green-50 text-green-700 border-green-200' :
                             'bg-red-50 text-red-600 border-red-200'
                         }`}>
@@ -170,55 +170,46 @@ export function ApprovalTab({
                       </span>
                     </div>
 
-                    {/* Code */}
-                    <div className="text-[13px] font-bold text-amber-600 mb-3">
-                      Mã: {req.entityCode}
-                    </div>
+                    {/* Info Grid 2 cols — chỉ hiện ở tab category */}
+                    {approvalTab !== 'structure' && (
+                      <div className="grid grid-cols-2 gap-x-10 gap-y-1.5 mb-4 text-[13px] mt-1">
+                        <div>
+                          <span className="text-slate-500">Đơn vị chủ quản: </span>
+                          <span className="text-slate-800 font-semibold">
+                            {entity?.managingAgency || 'Cục Hộ tịch - Quốc tịch - Chứng thực'}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-slate-500">Nguồn dữ liệu: </span>
+                          <span className="text-slate-800 font-semibold">
+                            {entity?.dataSource ? dataSourceLabel[entity.dataSource] : 'Tự cập nhật trực tiếp'}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-slate-500">Ngày gửi: </span>
+                          <span className="text-slate-800 font-semibold">{req.requestedDate}</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-500">Người gửi: </span>
+                          <span className="text-slate-800 font-semibold">{req.requestedBy}</span>
+                        </div>
+                      </div>
+                    )}
 
-                    {/* Info Grid 2 cols */}
-                    <div className="grid grid-cols-2 gap-x-10 gap-y-1.5 mb-4 text-[13px]">
-                      <div>
-                        <span className="text-slate-500">Cơ quan quản lý: </span>
-                        <span className="text-slate-800 font-semibold">
-                          {entity?.managingAgency || 'Cục Hộ tịch - Quốc tịch - Chứng thực'}
+                    {/* Tags row — chỉ hiện ở tab structure */}
+                    {approvalTab === 'structure' && (
+                      <div className="flex items-center gap-3 text-[13px] text-slate-600 flex-wrap mt-1">
+                        <span className="flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-400 inline-block"></span>
+                          3 trường dữ liệu
+                        </span>
+                        <span className="text-slate-300">•</span>
+                        <span className="flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-400 inline-block"></span>
+                          2 quan hệ
                         </span>
                       </div>
-                      <div>
-                        <span className="text-slate-500">Loại dữ liệu: </span>
-                        <span className="text-slate-800 font-semibold">Dữ liệu chuẩn</span>
-                      </div>
-                      <div>
-                        <span className="text-slate-500">Ngày gửi: </span>
-                        <span className="text-slate-800 font-semibold">{req.requestedDate}</span>
-                      </div>
-                      <div>
-                        <span className="text-slate-500">Người gửi: </span>
-                        <span className="text-slate-800 font-semibold">{req.requestedBy}</span>
-                      </div>
-                    </div>
-
-                    {/* Tags row */}
-                    <div className="flex items-center gap-3 text-[12px] text-slate-600 flex-wrap">
-                      <span className="flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-slate-400 inline-block"></span>
-                        15 thuộc tính
-                      </span>
-                      <span className="text-slate-300">•</span>
-                      <span className="flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-slate-400 inline-block"></span>
-                        3 quy tắc hợp nhất
-                      </span>
-                      <span className="text-slate-300">•</span>
-                      <span className="flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-slate-400 inline-block"></span>
-                        2 quan hệ
-                      </span>
-                      <span className="text-slate-300">•</span>
-                      <span className="flex items-center gap-1 text-green-600 font-semibold">
-                        <Check className="w-3 h-3" />
-                        Có đính danh
-                      </span>
-                    </div>
+                    )}
                   </div>
 
                   {/* Right — vertical action buttons */}
@@ -251,25 +242,6 @@ export function ApprovalTab({
                   </div>
                 </div>
 
-                {/* Collapsible History */}
-                <div className="border-t border-slate-100">
-                  <button
-                    onClick={() => toggleHistory(req.id)}
-                    className="w-full flex items-center gap-2 px-5 py-2.5 text-[12px] text-slate-500 hover:bg-slate-50 transition-colors"
-                  >
-                    <Clock className="w-3.5 h-3.5" />
-                    Lịch sử cập nhật (1) {historyOpen ? '▲' : '▼'}
-                  </button>
-                  {historyOpen && (
-                    <div className="px-5 pb-4 text-[13px] text-slate-600 bg-slate-50/50 border-t border-slate-100">
-                      <div className="py-2 flex gap-3">
-                        <span className="text-slate-400">{req.requestedDate}</span>
-                        <span>—</span>
-                        <span>{req.requestedBy} đã gửi yêu cầu phê duyệt</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
               </div>
             );
           })

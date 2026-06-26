@@ -1,6 +1,6 @@
 import React, { ChangeEvent, useState } from 'react';
 import {
-  Plus, Search, Filter, X, ChevronDown, Edit2, Trash2, Send,
+  Plus, Search, Filter, X, ChevronDown, SquarePen, Trash2, Send,
   FileText, CheckSquare, Tag, Database, Globe, Lock,
   AlertCircle, Check
 } from 'lucide-react';
@@ -297,7 +297,7 @@ export function AttributesTab({
 
   const getColSpan = () => {
     let baseCols = 1; // checkbox
-    baseCols += 7; // fieldName, displayName, dataType, length, required/unique/indexed, defaultValue, validationRules
+    baseCols += 8; // fieldName, displayName, dataType, length, required/unique/indexed, keyType, defaultValue, validationRules
     if (!isViewOnly) baseCols += 1; // actions
     return baseCols;
   };
@@ -460,21 +460,40 @@ export function AttributesTab({
 
   // Filter States
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterConstraints, setFilterConstraints] = useState<string[]>([]);
+  const [filterKeyType, setFilterKeyType] = useState('all');
   const [filterDataType, setFilterDataType] = useState('all');
+
+  const toggleConstraint = (val: string) => {
+    setFilterConstraints(prev =>
+      prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val]
+    );
+  };
+
+  const [showConstraintDropdown, setShowConstraintDropdown] = useState(false);
 
   // Reset page number on search or filter change
   React.useEffect(() => {
     setCurrentPageNum(1);
-  }, [searchTerm, filterStatus, filterDataType]);
+  }, [searchTerm, filterConstraints, filterKeyType, filterDataType]);
 
   // Filter Logic
   const filteredAttributes = attributes.filter(attr => {
     const matchesSearch = attr.fieldName.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           attr.displayName.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === 'all' || attr.status === filterStatus;
+    const matchesConstraint = filterConstraints.length === 0
+      || filterConstraints.some(c =>
+          (c === 'required' && attr.required) ||
+          (c === 'unique' && attr.unique) ||
+          (c === 'index' && (attr as any).indexed) ||
+          (c === 'none' && !attr.required && !attr.unique)
+        );
+    const matchesKeyType = filterKeyType === 'all'
+      || (filterKeyType === 'primary' && attr.keyType === 'primary')
+      || (filterKeyType === 'foreign' && attr.keyType === 'foreign')
+      || (filterKeyType === 'none' && (!attr.keyType || attr.keyType === 'none'));
     const matchesDataType = filterDataType === 'all' || attr.dataType === filterDataType;
-    return matchesSearch && matchesStatus && matchesDataType;
+    return matchesSearch && matchesConstraint && matchesKeyType && matchesDataType;
   });
 
   const paginatedAttributes = filteredAttributes.slice((currentPageNum - 1) * pageSize, currentPageNum * pageSize);
@@ -672,19 +691,72 @@ export function AttributesTab({
           {/* Collapsible Filter Panel */}
           {showFilters && (
             <div className="relative p-4 bg-white border border-slate-200 rounded-xl shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] before:content-[''] before:absolute before:-top-[7px] before:right-[208px] md:before:right-[auto] md:before:left-[calc(100%-100px)] lg:before:left-[calc(100%-242px)] before:w-3 before:h-3 before:bg-white before:rotate-45 before:border-l before:border-t before:border-slate-200">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="relative">
+                  <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Ràng buộc</label>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setShowConstraintDropdown(v => !v)}
+                      className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-left font-medium"
+                    >
+                      {filterConstraints.length === 0 ? (
+                        <span className="text-slate-700">Tất cả ràng buộc</span>
+                      ) : (
+                        <span className="text-blue-600">{filterConstraints.length} đã chọn</span>
+                      )}
+                    </button>
+                    <ChevronDown className={`absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none transition-transform ${showConstraintDropdown ? 'rotate-180' : ''}`} />
+
+                    {showConstraintDropdown && (
+                      <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden">
+                        {[
+                          { value: 'required', label: 'Bắt buộc (REQ)' },
+                          { value: 'unique', label: 'Duy nhất (UNI)' },
+                          { value: 'index', label: 'Chỉ mục (IDX)' },
+                          { value: 'none', label: 'Không ràng buộc' },
+                        ].map(opt => (
+                          <label
+                            key={opt.value}
+                            className="flex items-center gap-2.5 px-3 py-2.5 hover:bg-slate-50 cursor-pointer text-[13px] text-slate-700"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={filterConstraints.includes(opt.value)}
+                              onChange={() => toggleConstraint(opt.value)}
+                              className="w-4 h-4 rounded border-slate-300 text-blue-600 accent-blue-600 cursor-pointer"
+                            />
+                            {opt.label}
+                          </label>
+                        ))}
+                        {filterConstraints.length > 0 && (
+                          <div className="border-t border-slate-100 px-3 py-2">
+                            <button
+                              type="button"
+                              onClick={() => { setFilterConstraints([]); setShowConstraintDropdown(false); }}
+                              className="text-[13px] text-red-500 hover:text-red-700 font-medium cursor-pointer"
+                            >
+                              Xóa lựa chọn
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <div>
-                  <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Trạng thái</label>
+                  <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Cấu hình khóa</label>
                   <div className="relative">
                     <select
-                      value={filterStatus}
-                      onChange={(e: ChangeEvent<HTMLSelectElement>) => setFilterStatus(e.target.value)}
+                      value={filterKeyType}
+                      onChange={(e: ChangeEvent<HTMLSelectElement>) => setFilterKeyType(e.target.value)}
                       className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
                     >
-                      <option value="all">Tất cả trạng thái</option>
-                      <option value="approved">Đã duyệt</option>
-                      <option value="pending">Chờ duyệt</option>
-                      <option value="draft">Bản nháp</option>
+                      <option value="all">Tất cả loại khóa</option>
+                      <option value="primary">Khóa chính (PK)</option>
+                      <option value="foreign">Khóa ngoại (FK)</option>
+                      <option value="none">Không thiết lập</option>
                     </select>
                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                   </div>
@@ -1523,50 +1595,6 @@ export function AttributesTab({
                     );
                   })}
                 </div>
-
-                {inlineForm.keyType === 'foreign' && (
-                  <div className="grid grid-cols-2 gap-4 mt-3 pt-3 border-t border-slate-200/60">
-                    <div className="space-y-1.5 text-left">
-                      <label className="block text-[13px] font-medium text-slate-600">
-                        Bảng tham chiếu <span className="text-red-500">*</span>
-                      </label>
-                      <select
-                        title="Bảng tham chiếu"
-                        value={inlineForm.foreignTable || ''}
-                        onChange={(e) => {
-                          const tableId = e.target.value;
-                          const fields = mockAttributesByEntity[tableId] || [];
-                          const defaultField = fields[0]?.fieldName || 'id';
-                          setInlineForm({ ...inlineForm, foreignTable: tableId, foreignField: defaultField });
-                        }}
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-slate-800"
-                      >
-                        <option value="">-- Chọn danh mục --</option>
-                        {(entities || []).map(e => (
-                          <option key={e.id} value={e.id}>{e.name} ({e.code})</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="space-y-1.5 text-left">
-                      <label className="block text-[13px] font-medium text-slate-600">
-                        Trường tham chiếu <span className="text-red-500">*</span>
-                      </label>
-                      <select
-                        title="Trường tham chiếu"
-                        value={inlineForm.foreignField || ''}
-                        onChange={(e) => setInlineForm({ ...inlineForm, foreignField: e.target.value })}
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-slate-800"
-                        disabled={!inlineForm.foreignTable}
-                      >
-                        <option value="">-- Chọn trường --</option>
-                        {(inlineForm.foreignTable ? (mockAttributesByEntity[inlineForm.foreignTable] || [{ fieldName: 'id', displayName: 'ID' }]) : []).map(attr => (
-                          <option key={attr.fieldName} value={attr.fieldName}>{attr.displayName} ({attr.fieldName})</option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                )}
               </div>
 
               {/* Row 5: Giá trị mặc định + Quy tắc xác thực */}
@@ -1634,6 +1662,7 @@ export function AttributesTab({
                     <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Tên trường</th>
                     <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Tên hiển thị</th>
                     <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Kiểu DL</th>
+                    <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Cấu hình khóa</th>
                     <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Ràng buộc</th>
                     <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap text-center w-20">Thao tác</th>
                   </tr>
@@ -1645,15 +1674,27 @@ export function AttributesTab({
                       <td className="px-4 py-3 text-[13px] text-slate-700">{attr.displayName}</td>
                       <td className="px-4 py-3 text-[13px] text-slate-600">{getDataTypeLabel(attr.dataType)}</td>
                       <td className="px-4 py-3">
-                        <div className="flex gap-1 flex-wrap">
-                          {attr.keyType === 'primary' && <span className="px-1.5 py-0.5 rounded text-[13px] bg-amber-50 text-amber-700 font-bold border border-amber-200" title="Khóa chính (Primary Key)">PK</span>}
-                          {attr.keyType === 'foreign' && (
-                            <span className="px-1.5 py-0.5 rounded text-[13px] bg-teal-50 text-teal-700 font-bold border border-teal-200" title={`Khóa ngoại (Foreign Key) liên kết với danh mục ID: ${attr.foreignTable}, trường: ${attr.foreignField}`}>FK</span>
-                          )}
-                          {attr.required && <span className="px-1.5 py-0.5 rounded text-[13px] bg-red-50 text-red-600 font-bold border border-red-100">REQ</span>}
-                          {attr.unique   && <span className="px-1.5 py-0.5 rounded text-[13px] bg-purple-50 text-purple-600 font-bold border border-purple-100">UNI</span>}
-                          {attr.indexed  && <span className="px-1.5 py-0.5 rounded text-[13px] bg-blue-50 text-blue-600 font-bold border border-blue-100">IDX</span>}
-                        </div>
+                        {attr.keyType === 'primary' || attr.keyType === 'foreign' ? (
+                          <div className="flex gap-1 flex-wrap">
+                            {attr.keyType === 'primary' && <span className="px-1.5 py-0.5 rounded text-[13px] bg-amber-50 text-amber-700 font-bold border border-amber-200" title="Khóa chính (Primary Key)">PK</span>}
+                            {attr.keyType === 'foreign' && (
+                              <span className="px-1.5 py-0.5 rounded text-[13px] bg-teal-50 text-teal-700 font-bold border border-teal-200" title={`Khóa ngoại (Foreign Key) liên kết với danh mục ID: ${attr.foreignTable}, trường: ${attr.foreignField}`}>FK</span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-slate-400">--</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        {attr.required || attr.unique || attr.indexed ? (
+                          <div className="flex gap-1 flex-wrap">
+                            {attr.required && <span className="px-1.5 py-0.5 rounded text-[13px] bg-red-50 text-red-600 font-bold border border-red-100">REQ</span>}
+                            {attr.unique   && <span className="px-1.5 py-0.5 rounded text-[13px] bg-purple-50 text-purple-600 font-bold border border-purple-100">UNI</span>}
+                            {attr.indexed  && <span className="px-1.5 py-0.5 rounded text-[13px] bg-blue-50 text-blue-600 font-bold border border-blue-100">IDX</span>}
+                          </div>
+                        ) : (
+                          <span className="text-slate-400">--</span>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-center">
                         <button
@@ -1710,20 +1751,12 @@ export function AttributesTab({
               <table className="w-full text-left">
                 <thead className="bg-[#f8fafc] text-slate-700 border-b border-slate-100">
                   <tr>
-                    <th className="w-12 px-6 py-4 text-center">
-                      <input
-                        type="checkbox"
-                        disabled={isViewOnly}
-                        onChange={(e: any) => onSelectAll(e.target.checked)}
-                        checked={attributes.length > 0 && selectedAttributes.length === attributes.length}
-                        className={`rounded border-slate-300 ${isViewOnly ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
-                        title="Chọn tất cả"
-                      />
-                    </th>
+                    <th className="w-12 px-6 py-4 text-[13px] font-semibold text-slate-700 text-center">STT</th>
                     <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên trường</th>
                     <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên hiển thị</th>
                     <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Kiểu dữ liệu</th>
                     <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Độ dài</th>
+                    <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Cấu hình khóa</th>
                     <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Ràng buộc</th>
                     <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Giá trị mặc định</th>
                     <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Quy tắc xác thực</th>
@@ -1733,31 +1766,32 @@ export function AttributesTab({
                 </thead>
                 <tbody className="divide-y divide-slate-100 bg-white">
                   {paginatedAttributes.length > 0 ? (
-                    paginatedAttributes.map((attr) => {
+                    paginatedAttributes.map((attr, idx) => {
                       const isLocked = false;
                       return (
                         <tr key={attr.id} className="hover:bg-slate-50/50 transition-all group border-b border-slate-100">
-                          <td className="px-6 py-4 text-center">
-                            <input
-                              type="checkbox"
-                              disabled={isViewOnly}
-                              checked={selectedAttributes.includes(attr.id)}
-                              onChange={() => onSelectAttribute(attr.id)}
-                              className={`rounded border-slate-300 ${isViewOnly ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
-                              title={`Chọn ${attr.fieldName}`}
-                            />
+                          <td className="px-6 py-4 text-center text-[13px] text-slate-600 font-medium">
+                            {(currentPageNum - 1) * pageSize + idx + 1}
                           </td>
                           <td className="px-6 py-4 text-[13px] text-slate-900 font-mono">{attr.fieldName || '--'}</td>
                           <td className="px-6 py-4 text-[13px] text-slate-900 font-medium">{attr.displayName || '--'}</td>
                           <td className="px-6 py-4 text-[13px] text-slate-700 font-medium">{attr.dataType ? getDataTypeLabel(attr.dataType) : '--'}</td>
                           <td className="px-6 py-4 text-[13px] text-slate-600">{attr.length ?? '--'}</td>
                           <td className="px-6 py-4">
-                            {attr.required || attr.unique || attr.indexed || attr.keyType === 'primary' || attr.keyType === 'foreign' ? (
+                            {attr.keyType === 'primary' || attr.keyType === 'foreign' ? (
                               <div className="flex gap-1.5 flex-wrap">
                                 {attr.keyType === 'primary' && <span className="px-2 py-0.5 rounded text-[13px] bg-amber-50 text-amber-700 font-bold border border-amber-200" title="Khóa chính (Primary Key)">PK</span>}
                                 {attr.keyType === 'foreign' && (
                                   <span className="px-2 py-0.5 rounded text-[13px] bg-teal-50 text-teal-700 font-bold border border-teal-200" title={`Khóa ngoại (Foreign Key) liên kết với danh mục ID: ${attr.foreignTable}, trường: ${attr.foreignField}`}>FK</span>
                                 )}
+                              </div>
+                            ) : (
+                              <span className="text-slate-400">--</span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4">
+                            {attr.required || attr.unique || attr.indexed ? (
+                              <div className="flex gap-1.5 flex-wrap">
                                 {attr.required && <span className="px-2 py-0.5 rounded text-[13px] bg-red-50 text-red-600 font-bold border border-red-100">REQ</span>}
                                 {attr.unique   && <span className="px-2 py-0.5 rounded text-[13px] bg-purple-50 text-purple-600 font-bold border border-purple-100">UNI</span>}
                                 {attr.indexed  && <span className="px-2 py-0.5 rounded text-[13px] bg-blue-50 text-blue-600 font-bold border border-blue-100">IDX</span>}
@@ -1779,7 +1813,7 @@ export function AttributesTab({
                                   className={`p-1.5 rounded-lg transition-colors ${isLocked ? 'text-slate-300 cursor-not-allowed' : 'text-slate-500 hover:text-amber-600 hover:bg-amber-50 cursor-pointer'}`}
                                   title="Sửa"
                                 >
-                                  <Edit2 className="w-4 h-4" />
+                                  <SquarePen className="w-4 h-4" />
                                 </button>
                                 <button
                                   onClick={() => onDeleteAttribute(attr.id)}

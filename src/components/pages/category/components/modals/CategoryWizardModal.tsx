@@ -120,7 +120,7 @@ export function CategoryWizardModal({
                           {isCompleted ? <Check className="w-5 h-5" /> : <item.icon className="w-5 h-5" />}
                         </div>
                         <div className="flex flex-col text-left hidden sm:flex">
-                          <span className={`text-[11px] font-bold uppercase tracking-wider ${isActive || isCompleted ? 'text-blue-600' : 'text-slate-400'}`}>Bước {item.s}</span>
+                          <span className={`text-[13px] font-bold uppercase tracking-wider ${isActive || isCompleted ? 'text-blue-600' : 'text-slate-400'}`}>Bước {item.s}</span>
                           <span className={`text-[13px] font-bold ${isActive ? 'text-slate-900' : isCompleted ? 'text-slate-700' : 'text-slate-500'}`}>{item.label}</span>
                         </div>
                       </button>
