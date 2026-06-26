@@ -63,6 +63,9 @@ export interface MasterDataAttribute {
   apiEndpoint?: string;
   jsonPath?: string;
   masked?: boolean;
+  keyType?: 'primary' | 'foreign' | 'none';
+  foreignTable?: string;
+  foreignField?: string;
 }
 
 export interface EntityRelationship {

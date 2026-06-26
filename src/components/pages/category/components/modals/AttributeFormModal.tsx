@@ -1,7 +1,8 @@
 import React, { ChangeEvent } from 'react';
 import { Send } from 'lucide-react';
-import { MasterDataAttribute, FieldDataType } from '../../categoryTypes';
+import { MasterDataAttribute, FieldDataType, MasterDataEntity } from '../../categoryTypes';
 import { BaseModal } from '../../../../common/BaseModal';
+import { mockAttributesByEntity } from '../../categoryConstants';
 
 interface AttributeFormModalProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface AttributeFormModalProps {
   setFormData: (data: Partial<MasterDataAttribute>) => void;
   onSave: () => void;
   onSaveAndSubmit: (data: { id: string; code: string; name: string; type: 'attribute' | 'category' }) => void;
+  entities?: MasterDataEntity[];
 }
 
 /**
@@ -23,7 +25,8 @@ export function AttributeFormModal({
   editingAttribute,
   formData,
   setFormData,
-  onSave
+  onSave,
+  entities = []
 }: AttributeFormModalProps) {
   if (!isOpen) return null;
 
@@ -145,6 +148,83 @@ export function AttributeFormModal({
               </label>
             ))}
           </div>
+        </div>
+
+        {/* Cấu hình khóa (Khóa chính / Khóa ngoại) */}
+        <div className="space-y-3 p-4 bg-slate-50 rounded-xl border border-slate-100">
+          <label className="block text-[13px] font-medium text-slate-600">Cấu hình khóa</label>
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { value: 'none', label: 'Không thiết lập' },
+              { value: 'primary', label: 'Khóa chính (PK)' },
+              { value: 'foreign', label: 'Khóa ngoại (FK)' }
+            ].map((option) => {
+              const isSelected = (formData.keyType || 'none') === option.value;
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setFormData({ 
+                    ...formData, 
+                    keyType: option.value as any,
+                    ...(option.value === 'primary' ? { required: true, unique: true } : {}),
+                    ...(option.value !== 'foreign' ? { foreignTable: undefined, foreignField: undefined } : {})
+                  })}
+                  className={`px-3 py-2.5 rounded-lg border text-[13px] font-medium text-center transition-all cursor-pointer ${
+                    isSelected
+                      ? 'bg-blue-50 border-blue-500 text-blue-700 font-semibold shadow-sm'
+                      : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {formData.keyType === 'foreign' && (
+            <div className="grid grid-cols-2 gap-4 mt-3 pt-3 border-t border-slate-200/60">
+              <div className="space-y-1.5 text-left">
+                <label className="block text-[13px] font-medium text-slate-600">
+                  Bảng tham chiếu <span className="text-red-500">*</span>
+                </label>
+                <select
+                  title="Bảng tham chiếu"
+                  value={formData.foreignTable || ''}
+                  onChange={(e) => {
+                    const tableId = e.target.value;
+                    const fields = mockAttributesByEntity[tableId] || [];
+                    const defaultField = fields[0]?.fieldName || 'id';
+                    setFormData({ ...formData, foreignTable: tableId, foreignField: defaultField });
+                  }}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-slate-800"
+                >
+                  <option value="">-- Chọn danh mục --</option>
+                  {(entities || []).map(e => (
+                    <option key={e.id} value={e.id}>{e.name} ({e.code})</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-1.5 text-left">
+                <label className="block text-[13px] font-medium text-slate-600">
+                  Trường tham chiếu <span className="text-red-500">*</span>
+                </label>
+                <select
+                  title="Trường tham chiếu"
+                  value={formData.foreignField || ''}
+                  onChange={(e) => setFormData({ ...formData, foreignField: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-slate-800"
+                  disabled={!formData.foreignTable}
+                >
+                  <option value="">-- Chọn trường --</option>
+                  {(formData.foreignTable ? (mockAttributesByEntity[formData.foreignTable] || [{ fieldName: 'id', displayName: 'ID' }]) : []).map(attr => (
+                    <option key={attr.fieldName} value={attr.fieldName}>{attr.displayName} ({attr.fieldName})</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Giá trị mặc định & Quy tắc xác thực */}

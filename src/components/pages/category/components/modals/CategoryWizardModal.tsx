@@ -13,7 +13,7 @@ interface CategoryWizardModalProps {
   entityId: string | null;
   formData: Partial<MasterDataEntity>;
   setFormData: (data: Partial<MasterDataEntity>) => void;
-  onSaveStep1: (action: 'draft' | 'submit' | 'next') => void;
+  onSaveStep1: (action: 'draft' | 'submit' | 'next' | 'next3') => void;
   // AttributesTab props
   entities: MasterDataEntity[];
   attributes: MasterDataAttribute[];
@@ -371,7 +371,7 @@ export function CategoryWizardModal({
                 <button onClick={() => {
                   if (isViewOnly) { setStep(step + 1); return; }
                   if (step === 1) { onSaveStep1('next'); return; }
-                  if (step === 2) { onSaveStep1('draft'); setStep(3); return; }
+                  if (step === 2) { onSaveStep1('next3'); return; }
                   setStep(step + 1);
                 }} className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[13px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm">
                   Tiếp tục <ChevronRight className="w-4 h-4" />

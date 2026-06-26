@@ -146,13 +146,13 @@
 
 ### Sub-tabs trong trang danh mục
 - `[x]` Tab Phê duyệt (`category/components/tabs/ApprovalTab.tsx`)
-- `[ ]` Tab Thuộc tính (`category/components/tabs/AttributesTab.tsx`)
+- `[x]` Tab Thuộc tính (`category/components/tabs/AttributesTab.tsx`)
 - `[ ]` Tab Quan hệ thực thể (`category/components/tabs/RelationshipsTab.tsx`)
 - `[ ]` Tab Thiết lập (`category/components/tabs/SetupTab.tsx`)
 - `[ ]` Tab Lịch sử phiên bản (`category/components/tabs/VersionHistoryTab.tsx`)
 
 ### Modals danh mục
-- `[ ]` Modal Wizard tạo danh mục mới (`category/components/modals/CategoryWizardModal.tsx`)
+- `[x]` Modal Wizard tạo danh mục mới (`category/components/modals/CategoryWizardModal.tsx`)
 - `[ ]` Modal Chỉnh sửa danh mục (`category/components/modals/EditCategoryModal.tsx`)
 - `[ ]` Modal Xác nhận xóa (`category/components/modals/DeleteConfirmModal.tsx`)
 - `[ ]` Modal Gửi phê duyệt (`category/components/modals/ApprovalRequestModal.tsx`)
@@ -167,7 +167,7 @@
 - `[ ]` Modal Tạo phiên bản mới (`category/components/modals/CreateVersionModal.tsx`)
 - `[ ]` Modal Khôi phục phiên bản (`category/components/modals/RestoreVersionModal.tsx`)
 - `[ ]` Modal Lưu trữ bản ghi (`category/components/modals/ArchiveRecordModal.tsx`)
-- `[ ]` Modal Form thuộc tính (`category/components/modals/AttributeFormModal.tsx`)
+- `[x]` Modal Form thuộc tính (`category/components/modals/AttributeFormModal.tsx`)
 - `[ ]` Modal Form bản ghi (`category/components/modals/RecordFormModal.tsx`)
 - `[ ]` Modal Xóa đơn vị BTP (`category/components/modals/MojUnitDeleteConfirmModal.tsx`)
 

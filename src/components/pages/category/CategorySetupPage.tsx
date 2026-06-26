@@ -368,7 +368,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
     setShowWizard(true);
   };
 
-  const handleSaveStep1 = (action: 'draft' | 'submit' | 'next') => {
+  const handleSaveStep1 = (action: 'draft' | 'submit' | 'next' | 'next3') => {
     if (!formData.name) {
       alert('Vui lòng nhập tên danh mục!');
       return;
@@ -405,6 +405,8 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
       // Gửi phê duyệt
     } else if (action === 'next') {
       setWizardStep(2);
+    } else if (action === 'next3') {
+      setWizardStep(3);
     } else {
       setShowWizard(false);
     }
@@ -500,8 +502,49 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
       createdDate: new Date().toLocaleDateString('vi-VN'),
       version: 1,
       status: 'draft',
+      keyType: data.keyType || 'none',
+      foreignTable: data.foreignTable,
+      foreignField: data.foreignField,
     };
     setAttributes(prev => [...prev, newAttr]);
+  };
+
+  const handleSaveAttribute = () => {
+    if (!attributeFormData.fieldName || !attributeFormData.displayName) {
+      alert('Vui lòng nhập đầy đủ Tên trường và Tên hiển thị!');
+      return;
+    }
+
+    if (editingAttribute) {
+      // Edit Mode
+      setAttributes(prev => prev.map(a => a.id === editingAttribute.id ? {
+        ...a,
+        ...attributeFormData
+      } as MasterDataAttribute : a));
+    } else {
+      // Add Mode
+      const newAttr: MasterDataAttribute = {
+        id: `a-${Date.now()}`,
+        fieldName: attributeFormData.fieldName!,
+        displayName: attributeFormData.displayName!,
+        dataType: attributeFormData.dataType || 'string',
+        length: attributeFormData.length,
+        required: attributeFormData.required ?? false,
+        unique: attributeFormData.unique ?? false,
+        indexed: attributeFormData.indexed ?? false,
+        defaultValue: attributeFormData.defaultValue,
+        validationRules: attributeFormData.validationRules,
+        description: attributeFormData.description,
+        createdDate: new Date().toLocaleDateString('vi-VN'),
+        version: 1,
+        status: 'draft',
+        keyType: attributeFormData.keyType || 'none',
+        foreignTable: attributeFormData.foreignTable,
+        foreignField: attributeFormData.foreignField,
+      };
+      setAttributes(prev => [...prev, newAttr]);
+    }
+    setShowAttributeModal(false);
   };
 
   const isAnyModalOpen = !!(
@@ -696,7 +739,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
         />
 
         {/* Các modal khác giữ nguyên ẩn khi không dùng */}
-        <AttributeFormModal isOpen={showAttributeModal} onClose={() => setShowAttributeModal(false)} editingAttribute={editingAttribute} formData={attributeFormData} setFormData={setAttributeFormData} onSave={() => setShowAttributeModal(false)} onSaveAndSubmit={() => { }} />
+        <AttributeFormModal isOpen={showAttributeModal} onClose={() => setShowAttributeModal(false)} editingAttribute={editingAttribute} formData={attributeFormData} setFormData={setAttributeFormData} onSave={handleSaveAttribute} onSaveAndSubmit={() => { }} entities={entities} />
 
         <SimpleApproveModal
           isOpen={showSimpleApproveModal}

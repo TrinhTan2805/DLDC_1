@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { MasterDataEntity, MasterDataAttribute, FieldDataType } from '../../categoryTypes';
 import { BaseModal } from '../../../../common/BaseModal';
+import { mockAttributesByEntity } from '../../categoryConstants';
 
 const FIELD_DATA_TYPES: { value: FieldDataType; label: string }[] = [
   { value: 'string',   label: 'Chuỗi (String)' },
@@ -1491,6 +1492,83 @@ export function AttributesTab({
                 </div>
               </div>
 
+              {/* Row 4.5: Cấu hình khóa (Khóa chính / Khóa ngoại) */}
+              <div className="space-y-2 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                <label className="block text-[13px] font-medium text-slate-600 mb-1">Cấu hình khóa</label>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { value: 'none', label: 'Không thiết lập' },
+                    { value: 'primary', label: 'Khóa chính (PK)' },
+                    { value: 'foreign', label: 'Khóa ngoại (FK)' }
+                  ].map((option) => {
+                    const isSelected = (inlineForm.keyType || 'none') === option.value;
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => setInlineForm({ 
+                          ...inlineForm, 
+                          keyType: option.value as any,
+                          ...(option.value === 'primary' ? { required: true, unique: true } : {}),
+                          ...(option.value !== 'foreign' ? { foreignTable: undefined, foreignField: undefined } : {})
+                        })}
+                        className={`px-3 py-2 rounded-lg border text-[13px] font-medium text-center transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-blue-50 border-blue-500 text-blue-700 font-semibold shadow-sm'
+                            : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {inlineForm.keyType === 'foreign' && (
+                  <div className="grid grid-cols-2 gap-4 mt-3 pt-3 border-t border-slate-200/60">
+                    <div className="space-y-1.5 text-left">
+                      <label className="block text-[13px] font-medium text-slate-600">
+                        Bảng tham chiếu <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        title="Bảng tham chiếu"
+                        value={inlineForm.foreignTable || ''}
+                        onChange={(e) => {
+                          const tableId = e.target.value;
+                          const fields = mockAttributesByEntity[tableId] || [];
+                          const defaultField = fields[0]?.fieldName || 'id';
+                          setInlineForm({ ...inlineForm, foreignTable: tableId, foreignField: defaultField });
+                        }}
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-slate-800"
+                      >
+                        <option value="">-- Chọn danh mục --</option>
+                        {(entities || []).map(e => (
+                          <option key={e.id} value={e.id}>{e.name} ({e.code})</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="space-y-1.5 text-left">
+                      <label className="block text-[13px] font-medium text-slate-600">
+                        Trường tham chiếu <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        title="Trường tham chiếu"
+                        value={inlineForm.foreignField || ''}
+                        onChange={(e) => setInlineForm({ ...inlineForm, foreignField: e.target.value })}
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-slate-800"
+                        disabled={!inlineForm.foreignTable}
+                      >
+                        <option value="">-- Chọn trường --</option>
+                        {(inlineForm.foreignTable ? (mockAttributesByEntity[inlineForm.foreignTable] || [{ fieldName: 'id', displayName: 'ID' }]) : []).map(attr => (
+                          <option key={attr.fieldName} value={attr.fieldName}>{attr.displayName} ({attr.fieldName})</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Row 5: Giá trị mặc định + Quy tắc xác thực */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
@@ -1568,6 +1646,10 @@ export function AttributesTab({
                       <td className="px-4 py-3 text-[13px] text-slate-600">{getDataTypeLabel(attr.dataType)}</td>
                       <td className="px-4 py-3">
                         <div className="flex gap-1 flex-wrap">
+                          {attr.keyType === 'primary' && <span className="px-1.5 py-0.5 rounded text-[13px] bg-amber-50 text-amber-700 font-bold border border-amber-200" title="Khóa chính (Primary Key)">PK</span>}
+                          {attr.keyType === 'foreign' && (
+                            <span className="px-1.5 py-0.5 rounded text-[13px] bg-teal-50 text-teal-700 font-bold border border-teal-200" title={`Khóa ngoại (Foreign Key) liên kết với danh mục ID: ${attr.foreignTable}, trường: ${attr.foreignField}`}>FK</span>
+                          )}
                           {attr.required && <span className="px-1.5 py-0.5 rounded text-[13px] bg-red-50 text-red-600 font-bold border border-red-100">REQ</span>}
                           {attr.unique   && <span className="px-1.5 py-0.5 rounded text-[13px] bg-purple-50 text-purple-600 font-bold border border-purple-100">UNI</span>}
                           {attr.indexed  && <span className="px-1.5 py-0.5 rounded text-[13px] bg-blue-50 text-blue-600 font-bold border border-blue-100">IDX</span>}
@@ -1670,8 +1752,12 @@ export function AttributesTab({
                           <td className="px-6 py-4 text-[13px] text-slate-700 font-medium">{attr.dataType ? getDataTypeLabel(attr.dataType) : '--'}</td>
                           <td className="px-6 py-4 text-[13px] text-slate-600">{attr.length ?? '--'}</td>
                           <td className="px-6 py-4">
-                            {attr.required || attr.unique || attr.indexed ? (
+                            {attr.required || attr.unique || attr.indexed || attr.keyType === 'primary' || attr.keyType === 'foreign' ? (
                               <div className="flex gap-1.5 flex-wrap">
+                                {attr.keyType === 'primary' && <span className="px-2 py-0.5 rounded text-[13px] bg-amber-50 text-amber-700 font-bold border border-amber-200" title="Khóa chính (Primary Key)">PK</span>}
+                                {attr.keyType === 'foreign' && (
+                                  <span className="px-2 py-0.5 rounded text-[13px] bg-teal-50 text-teal-700 font-bold border border-teal-200" title={`Khóa ngoại (Foreign Key) liên kết với danh mục ID: ${attr.foreignTable}, trường: ${attr.foreignField}`}>FK</span>
+                                )}
                                 {attr.required && <span className="px-2 py-0.5 rounded text-[13px] bg-red-50 text-red-600 font-bold border border-red-100">REQ</span>}
                                 {attr.unique   && <span className="px-2 py-0.5 rounded text-[13px] bg-purple-50 text-purple-600 font-bold border border-purple-100">UNI</span>}
                                 {attr.indexed  && <span className="px-2 py-0.5 rounded text-[13px] bg-blue-50 text-blue-600 font-bold border border-blue-100">IDX</span>}

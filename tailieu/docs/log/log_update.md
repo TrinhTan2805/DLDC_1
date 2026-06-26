@@ -18,13 +18,26 @@
    - Ẩn/loại bỏ tùy chọn bộ lọc "Duyệt một phần" trên thanh trạng thái filter ở tab Phê duyệt.
    - Chuyển đổi logic cập nhật trạng thái khi lãnh đạo phê duyệt (kể cả khi từ chối một số trường dữ liệu con) thì trạng thái tổng thể của yêu cầu vẫn cập nhật thành "Đã phê duyệt" (`approved`).
    - Cập nhật hiển thị fallback cho các trạng thái cũ/thông tin liên quan từ "Duyệt một phần" thành "Đã phê duyệt" để bảo đảm sự đồng nhất trong hệ thống và giao diện người dùng.
+4. **Bổ sung cấu hình Khóa chính (PK) và Khóa ngoại (FK) cho Trường dữ liệu:**
+   - Thêm trường lựa chọn cấu hình loại khóa ("Không thiết lập", "Khóa chính (PK)", "Khóa ngoại (FK)") trong modal Thêm mới/Chỉnh sửa trường dữ liệu (`AttributeFormModal.tsx`).
+   - Khi chọn "Khóa ngoại", hệ thống hiển thị động thêm 2 trường cấu hình: Bảng tham chiếu (dropdown danh sách Danh mục dùng chung) và Trường tham chiếu (dropdown danh sách các trường tương ứng của danh mục được chọn).
+   - Khi chọn "Khóa chính", hệ thống tự động tích hợp các ràng buộc liên quan (Bắt buộc, Duy nhất) để tối ưu trải nghiệm người dùng.
+   - Bổ sung hiển thị trực quan các tag PK (màu vàng) và FK (màu xanh lá kèm tooltip chi tiết bảng/trường tham chiếu) trong cột Ràng buộc của bảng danh sách cấu trúc trường dữ liệu (`AttributesTab.tsx`).
+5. **Sửa lỗi nút "Tiếp tục" tại Bước 2 (Thiết lập cấu trúc) của Wizard:**
+   - Khắc phục sự cố đóng modal khi nhấn "Tiếp tục" ở bước 2. Thêm action `'next3'` để lưu lại thay đổi cấu hình nguồn dữ liệu/trường dữ liệu và chuyển tiếp mượt mà sang bước 3 (Thiết lập quan hệ) mà không làm đóng Wizard.
+6. **Bổ sung cấu hình Khóa (PK/FK) cho Form thêm nhanh thủ công (Inline Form):**
+   - Tích hợp cụm tính năng cấu hình loại khóa (Không thiết lập, Khóa chính, Khóa ngoại) vào Form thêm nhanh trường dữ liệu thủ công (`AttributesTab.tsx` tại bước 2 Wizard khi nguồn dữ liệu là Tự cập nhật thủ công).
+   - Tự động đồng bộ trường Bảng tham chiếu (dropdown danh mục dùng chung) và Trường tham chiếu khi chọn Khóa ngoại, đồng thời tự động tích hợp ràng buộc Bắt buộc & Duy nhất khi chọn Khóa chính.
 
 **Các file bị ảnh hưởng:**
 - `src/components/pages/category/components/tabs/RelationshipsTab.tsx`
 - `src/components/pages/category/components/tabs/AttributesTab.tsx`
 - `src/components/pages/category/components/tabs/ApprovalTab.tsx`
 - `src/components/pages/category/components/modals/ReviewApprovalModal.tsx`
+- `src/components/pages/category/components/modals/AttributeFormModal.tsx`
+- `src/components/pages/category/components/modals/CategoryWizardModal.tsx`
 - `src/components/pages/category/CategorySetupPage.tsx`
+- `src/components/pages/category/categoryTypes.ts`
 - `tailieu/docs/log/log_update.md`
 
 ---
