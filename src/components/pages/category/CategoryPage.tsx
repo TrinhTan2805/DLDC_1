@@ -74,6 +74,50 @@ interface CategoryField {
   referenceField?: string;
 }
 
+const MOCK_RECORDS_BY_CATEGORY: Record<string, Category[]> = {
+  'category-a-1': [
+    { id: '1', code: 'MALE', name: 'Nam', description: 'Giới tính Nam', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '2', code: 'FEMALE', name: 'Nữ', description: 'Giới tính Nữ', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '3', code: 'OTHER', name: 'Khác', description: 'Giới tính khác/chưa xác định', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] }
+  ],
+  'category-a-2': [
+    { id: '1', code: 'KINH', name: 'Kinh', description: 'Dân tộc Kinh', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '2', code: 'TAY', name: 'Tày', description: 'Dân tộc Tày', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '3', code: 'THAI', name: 'Thái', description: 'Dân tộc Thái', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '4', code: 'MUONG', name: 'Mường', description: 'Dân tộc Mường', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '5', code: 'KHOME', name: 'Khơ Me', description: 'Dân tộc Khơ Me', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] }
+  ],
+  'category-a-3': [
+    { id: '1', code: 'VN', name: 'Việt Nam', description: 'Cộng hòa Xã hội Chủ nghĩa Việt Nam', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '2', code: 'US', name: 'Mỹ', description: 'Hợp chủng quốc Hoa Kỳ', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '3', code: 'JP', name: 'Nhật Bản', description: 'Nhật Bản', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '4', code: 'KR', name: 'Hàn Quốc', description: 'Đại Hàn Dân Quốc', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] }
+  ],
+  'category-a-4': [
+    { id: '1', code: 'PG', name: 'Phật giáo', description: 'Đạo Phật', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '2', code: 'CG', name: 'Công giáo', description: 'Đạo Thiên Chúa', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '3', code: 'TL', name: 'Tin lành', description: 'Đạo Tin lành', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '4', code: 'HH', name: 'Hòa Hảo', description: 'Phật giáo Hòa Hảo', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '5', code: 'K', name: 'Không', description: 'Không theo tôn giáo nào', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] }
+  ],
+  'category-a-5': [
+    { id: '1', code: 'BTP', name: 'Bộ Tư Pháp', description: 'Cơ quan ngang bộ trực thuộc Chính phủ', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '2', code: 'CHT', name: 'Cục Hộ tịch, quốc tịch, chứng thực', description: 'Đơn vị trực thuộc Bộ Tư pháp', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '3', code: 'STP_HN', name: 'Sở Tư pháp Hà Nội', description: 'Cơ quan chuyên môn thuộc UBND TP Hà Nội', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] }
+  ],
+  'category-a-6': [
+    { id: '1', code: 'HN', name: 'Thành phố Hà Nội', description: 'Đơn vị hành chính cấp tỉnh', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '2', code: 'HCM', name: 'Thành phố Hồ Chí Minh', description: 'Đơn vị hành chính cấp tỉnh', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '3', code: 'DN', name: 'Thành phố Đà Nẵng', description: 'Đơn vị hành chính cấp tỉnh', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] }
+  ],
+  'category-a-7': [
+    { id: '1', code: 'CH', name: 'Chủ hộ', description: 'Chủ hộ gia đình', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '2', code: 'VC', name: 'Vợ/Chồng', description: 'Quan hệ vợ chồng với chủ hộ', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '3', code: 'CC', name: 'Con đẻ', description: 'Con ruột của chủ hộ', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '4', code: 'BC', name: 'Bố/Mẹ', description: 'Bố mẹ đẻ của chủ hộ', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] }
+  ]
+};
+
 export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
   const [activeTab, setActiveTab] = useState<'setup' | 'approval' | 'stats' | 'version-history'>('setup');
   const [searchTerm, setSearchTerm] = useState('');
@@ -103,6 +147,53 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
   const [newCategoryFields, setNewCategoryFields] = useState<CategoryField[]>([]);
   const [showSuccessNotification, setShowSuccessNotification] = useState(false);
   const [successNotificationMessage, setSuccessNotificationMessage] = useState('');
+
+  // Inline edit & add states
+  const [editingRowId, setEditingRowId] = useState<string | null>(null);
+  const [inlineEditData, setInlineEditData] = useState({ code: '', name: '', description: '' });
+  const [addingRow, setAddingRow] = useState<boolean>(false);
+  const [inlineAddData, setInlineAddData] = useState({ code: '', name: '', description: '' });
+
+  const handleSaveInlineEdit = (id: string) => {
+    if (!inlineEditData.code.trim() || !inlineEditData.name.trim()) {
+      alert('Mã và Tên giá trị không được để trống');
+      return;
+    }
+    setCategories(prev =>
+      prev.map(c =>
+        c.id === id ? { ...c, code: inlineEditData.code, name: inlineEditData.name, description: inlineEditData.description } : c
+      )
+    );
+    setEditingRowId(null);
+    setSuccessNotificationMessage('Đã lưu thay đổi thành công!');
+    setShowSuccessNotification(true);
+    setTimeout(() => setShowSuccessNotification(false), 3000);
+  };
+
+  const handleSaveInlineAdd = () => {
+    if (!inlineAddData.code.trim() || !inlineAddData.name.trim()) {
+      alert('Mã và Tên giá trị không được để trống');
+      return;
+    }
+    const newId = (categories.length + 1).toString();
+    const currentDate = new Date().toLocaleDateString('vi-VN');
+    const newCat: Category = {
+      id: newId,
+      code: inlineAddData.code,
+      name: inlineAddData.name,
+      description: inlineAddData.description,
+      type: 'standard',
+      status: 'published',
+      createdDate: currentDate,
+      version: 1,
+      fields: []
+    };
+    setCategories(prev => [...prev, newCat]);
+    setAddingRow(false);
+    setSuccessNotificationMessage('Đã thêm bản ghi mới thành công!');
+    setShowSuccessNotification(true);
+    setTimeout(() => setShowSuccessNotification(false), 3000);
+  };
   const [editedCategoryData, setEditedCategoryData] = useState({
     code: '',
     name: '',
@@ -399,6 +490,12 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
     }
   };
 
+  // Update categories when categoryId changes
+  React.useEffect(() => {
+    const mockRecords = MOCK_RECORDS_BY_CATEGORY[categoryId] || MOCK_RECORDS_BY_CATEGORY['category-a-1'] || [];
+    setCategories(mockRecords);
+  }, [categoryId]);
+
   // Mock data - Danh sách tỉnh thành Việt Nam
   const [categories, setCategories] = useState<Category[]>([
     { id: '1', code: 'VN01', name: 'Hà Nội', description: 'Thành phố trực thuộc Trung ương', type: 'standard', status: 'pending', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
@@ -557,13 +654,13 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
     const normalizedStatus = status === 'active' ? 'published' : (status === 'inactive' ? 'unpublished' : status);
     switch (normalizedStatus) {
       case 'pending':
-        return <span className="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full">Trình duyệt</span>;
+        return <span className="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full whitespace-nowrap">Trình duyệt</span>;
       case 'approved':
-        return <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">Đã phê duyệt</span>;
+        return <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs rounded-full whitespace-nowrap">Đã phê duyệt</span>;
       case 'published':
-        return <span className="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full">Công khai</span>;
+        return <span className="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full whitespace-nowrap">Công khai</span>;
       case 'unpublished':
-        return <span className="px-3 py-1 bg-slate-200 text-slate-700 text-xs rounded-full">Hủy công khai</span>;
+        return <span className="px-3 py-1 bg-slate-200 text-slate-700 text-xs rounded-full whitespace-nowrap">Hủy công khai</span>;
       default:
         return null;
     }
@@ -711,7 +808,11 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                   <div className="flex items-center gap-2 w-full md:w-auto">
                     <button
                       type="button"
-                      onClick={() => setShowAddModal(true)}
+                      onClick={() => {
+                        setAddingRow(true);
+                        setInlineAddData({ code: '', name: '', description: '' });
+                        setEditingRowId(null);
+                      }}
                       className="flex-1 md:flex-none px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[13px] font-medium flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
                     >
                       <Plus className="w-4 h-4" />
@@ -769,65 +870,165 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                     <thead className="bg-[#f8fafc] text-slate-700 border-b border-slate-200">
                       <tr>
                         <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap w-14 text-center">STT</th>
-                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Mã danh mục</th>
-                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên danh mục</th>
-                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Loại</th>
-                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Phiên bản</th>
-                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Ngày tạo</th>
-                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Trạng thái</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Mã</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên giá trị</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Mô tả</th>
                         <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-32">Thao tác</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 bg-white">
-                      {paginatedCategories.length > 0 ? paginatedCategories.map((category, index) => (
-                        <tr key={category.id} className="hover:bg-slate-50/50 transition-all group border-b border-slate-100">
-                          <td className="px-6 py-4 text-[13px] text-slate-500 text-center">{(currentPageNum - 1) * pageSize + index + 1}</td>
-                          <td className="px-6 py-4">
-                            <code className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[13px] border border-blue-100 font-mono">
-                              {category.code}
-                            </code>
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="text-[13px] text-slate-900 font-normal">{category.name}</div>
-                            {category.description && <div className="text-[12px] text-slate-400 mt-0.5">{category.description}</div>}
-                          </td>
-                          <td className="px-6 py-4">{getTypeBadge(category.type)}</td>
-                          <td className="px-6 py-4">
-                            <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[13px] font-semibold rounded border border-slate-200">
-                              v{category.version || 1}.0
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-[13px] text-slate-500 whitespace-nowrap">{category.createdDate}</td>
-                          <td className="px-6 py-4 text-center">{getStatusBadge(category.status)}</td>
-                          <td className="px-6 py-4 text-center">
-                            <div className="flex items-center justify-center gap-1 opacity-80 group-hover:opacity-100 transition-all">
-                              <button
-                                onClick={() => { setSelectedCategory(category); setShowDetailModal(true); }}
-                                className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
-                                title="Xem chi tiết"
-                              >
-                                <Eye className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => { setSelectedCategory(category); setEditedCategoryData({ code: category.code, name: category.name, type: category.type, status: category.status, description: category.description, approver: '' }); setShowEditModal(true); }}
-                                className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
-                                title="Chỉnh sửa"
-                              >
-                                <SquarePen className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => { setSelectedCategory(category); setShowArchiveModal(true); }}
-                                className="p-1.5 text-slate-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors cursor-pointer"
-                                title="Ngừng áp dụng bản ghi"
-                              >
-                                <PowerOff className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      )) : (
+                      {paginatedCategories.length > 0 || addingRow ? (
+                        <>
+                          {paginatedCategories.map((category, index) => {
+                            const isEditing = editingRowId === category.id;
+                            return (
+                              <tr key={category.id} className={`hover:bg-slate-50/50 transition-all group border-b border-slate-100 ${isEditing ? 'bg-blue-50/10' : ''}`}>
+                                <td className="px-6 py-4 text-[13px] text-slate-500 text-center">{(currentPageNum - 1) * pageSize + index + 1}</td>
+                                <td className="px-6 py-4">
+                                  {isEditing ? (
+                                    <input
+                                      type="text"
+                                      title="Mã"
+                                      value={inlineEditData.code}
+                                      onChange={(e) => setInlineEditData({ ...inlineEditData, code: e.target.value })}
+                                      className="w-full px-2 py-1 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white font-mono"
+                                      placeholder="Nhập mã"
+                                    />
+                                  ) : (
+                                    <code className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[13px] border border-blue-100 font-mono">
+                                      {category.code}
+                                    </code>
+                                  )}
+                                </td>
+                                <td className="px-6 py-4">
+                                  {isEditing ? (
+                                    <input
+                                      type="text"
+                                      title="Tên giá trị"
+                                      value={inlineEditData.name}
+                                      onChange={(e) => setInlineEditData({ ...inlineEditData, name: e.target.value })}
+                                      className="w-full px-2 py-1 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                                      placeholder="Nhập tên giá trị"
+                                    />
+                                  ) : (
+                                    <div className="text-[13px] text-slate-900 font-normal">{category.name}</div>
+                                  )}
+                                </td>
+                                <td className="px-6 py-4 text-[13px] text-slate-600 font-normal">
+                                  {isEditing ? (
+                                    <input
+                                      type="text"
+                                      title="Mô tả"
+                                      value={inlineEditData.description}
+                                      onChange={(e) => setInlineEditData({ ...inlineEditData, description: e.target.value })}
+                                      className="w-full px-2 py-1 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                                      placeholder="Nhập mô tả"
+                                    />
+                                  ) : (
+                                    category.description
+                                  )}
+                                </td>
+                                <td className="px-6 py-4 text-center">
+                                  {isEditing ? (
+                                    <div className="flex items-center justify-center gap-1.5">
+                                      <button
+                                        onClick={() => handleSaveInlineEdit(category.id)}
+                                        className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+                                        title="Lưu"
+                                      >
+                                        <Check className="w-4 h-4" />
+                                      </button>
+                                      <button
+                                        onClick={() => setEditingRowId(null)}
+                                        className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                                        title="Hủy"
+                                      >
+                                        <X className="w-4 h-4" />
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center justify-center gap-1 opacity-80 group-hover:opacity-100 transition-all">
+                                      <button
+                                        onClick={() => {
+                                          setEditingRowId(category.id);
+                                          setInlineEditData({ code: category.code, name: category.name, description: category.description || '' });
+                                          setAddingRow(false);
+                                        }}
+                                        className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
+                                        title="Chỉnh sửa"
+                                      >
+                                        <SquarePen className="w-4 h-4" />
+                                      </button>
+                                      <button
+                                        onClick={() => { setSelectedCategory(category); setShowArchiveModal(true); }}
+                                        className="p-1.5 text-slate-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors cursor-pointer"
+                                        title="Ngừng áp dụng bản ghi"
+                                      >
+                                        <PowerOff className="w-4 h-4" />
+                                      </button>
+                                    </div>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                          {addingRow && (
+                            <tr className="bg-blue-50/20 border-b border-slate-100">
+                              <td className="px-6 py-4 text-[13px] text-slate-500 text-center">{(currentPageNum - 1) * pageSize + paginatedCategories.length + 1}</td>
+                              <td className="px-6 py-4">
+                                <input
+                                  type="text"
+                                  title="Mã"
+                                  value={inlineAddData.code}
+                                  onChange={(e) => setInlineAddData({ ...inlineAddData, code: e.target.value })}
+                                  className="w-full px-2 py-1 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white font-mono"
+                                  placeholder="Mã *"
+                                />
+                              </td>
+                              <td className="px-6 py-4">
+                                <input
+                                  type="text"
+                                  title="Tên giá trị"
+                                  value={inlineAddData.name}
+                                  onChange={(e) => setInlineAddData({ ...inlineAddData, name: e.target.value })}
+                                  className="w-full px-2 py-1 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                                  placeholder="Tên giá trị *"
+                                />
+                              </td>
+                              <td className="px-6 py-4">
+                                <input
+                                  type="text"
+                                  title="Mô tả"
+                                  value={inlineAddData.description}
+                                  onChange={(e) => setInlineAddData({ ...inlineAddData, description: e.target.value })}
+                                  className="w-full px-2 py-1 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                                  placeholder="Mô tả"
+                                />
+                              </td>
+                              <td className="px-6 py-4 text-center">
+                                <div className="flex items-center justify-center gap-1.5">
+                                  <button
+                                    onClick={handleSaveInlineAdd}
+                                    className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+                                    title="Lưu"
+                                  >
+                                    <Check className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    onClick={() => setAddingRow(false)}
+                                    className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                                    title="Hủy"
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </>
+                      ) : (
                         <tr>
-                          <td colSpan={8} className="px-6 py-8 text-center text-[13px] text-slate-400 italic">Không tìm thấy dữ liệu</td>
+                          <td colSpan={5} className="px-6 py-8 text-center text-[13px] text-slate-400 italic">Không tìm thấy dữ liệu</td>
                         </tr>
                       )}
                     </tbody>
@@ -1296,71 +1497,6 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
           </div>
         </div>
       )}
-      {showAddModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-slate-200 flex items-center justify-between">
-              <h3 className="text-lg text-slate-900">Thêm bản ghi mới</h3>
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="text-slate-400 hover:text-slate-600"
-                title="Đóng"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm text-slate-700 mb-1">Mã danh mục *</label>
-                  <input title="Dữ liệu"
-                    type="text"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Nhập mã danh mục"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-slate-700 mb-1">Tên danh mục *</label>
-                  <input title="Dữ liệu"
-                    type="text"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Nhập tên danh mục"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm text-slate-700 mb-1">Mô tả</label>
-                <textarea title="Trường dữ liệu"
-                  rows={3}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Nhập mô tả về danh mục..."
-                />
-              </div>
-            </div>
-
-            <div className="p-6 border-t border-slate-200 flex justify-end gap-3">
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium"
-              >
-                Hủy
-              </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                <Save className="w-4 h-4" />
-                Lưu
-              </button>
-              <button 
-                onClick={() => setShowApprovalRequestModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium">
-                <Send className="w-4 h-4" />
-                Trình duyệt
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {showApprovalRequestModal && (
         <ApprovalRequestModal
@@ -1601,264 +1737,8 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
         </div>
       )}
 
-      {/* Detail Modal */}
-      {showDetailModal && selectedCategory && (
-        <div 
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999] p-4 animate-in fade-in duration-200"
-          style={{ zIndex: 99999 }}
-          onClick={() => {
-            setShowDetailModal(false);
-            setSelectedCategory(null);
-          }}
-        >
-          <div 
-            className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-6 border-b border-slate-200 flex items-center justify-between">
-              <h3 className="text-lg text-slate-900">Chi tiết danh mục: {selectedCategory.name}</h3>
-              <button
-                onClick={() => {
-                  setShowDetailModal(false);
-                  setSelectedCategory(null);
-                }}
-                className="text-slate-400 hover:text-slate-600"
-                title="Đóng"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
 
-            <div className="p-6 space-y-6">
-              {/* Basic Info */}
-              <div>
-                <h4 className="text-sm text-slate-900 mb-3">Thông tin cơ bản</h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs text-slate-600 mb-1">Mã danh mục</label>
-                    <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded text-sm text-slate-900">
-                      {selectedCategory.code}
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs text-slate-600 mb-1">Tên danh mục</label>
-                    <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded text-sm text-slate-900">
-                      {selectedCategory.name}
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs text-slate-600 mb-1">Loại</label>
-                    <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded text-sm">
-                      {getTypeBadge(selectedCategory.type)}
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs text-slate-600 mb-1">Trạng thái</label>
-                    <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded text-sm">
-                      {getStatusBadge(selectedCategory.status)}
-                    </div>
-                  </div>
-                  <div className="col-span-2">
-                    <label className="block text-xs text-slate-600 mb-1">Mô tả</label>
-                    <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded text-sm text-slate-900">
-                      {selectedCategory.description}
-                    </div>
-                  </div>
-                </div>
-              </div>
 
-              {/* Fields Structure */}
-              <div>
-                <h4 className="text-sm text-slate-900 mb-3">Ngày tạo</h4>
-                <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded text-sm text-slate-900">
-                  {selectedCategory.createdDate}
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 border-t border-slate-200 flex justify-end gap-3">
-              <button
-                onClick={() => {
-                  setShowDetailModal(false);
-                  setSelectedCategory(null);
-                }}
-                className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
-              >
-                Đóng
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Modal */}
-      {showEditModal && selectedCategory && (
-        <div 
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999] p-4 animate-in fade-in duration-200"
-          style={{ zIndex: 99999 }}
-          onClick={() => {
-            setShowEditModal(false);
-            setSelectedCategory(null);
-          }}
-        >
-          <div 
-            className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-6 border-b border-slate-200 flex items-center justify-between">
-              <h3 className="text-lg text-slate-900">Chỉnh sửa danh mục</h3>
-              <button
-                onClick={() => {
-                  setShowEditModal(false);
-                  setSelectedCategory(null);
-                }}
-                className="text-slate-400 hover:text-slate-600"
-                title="Đóng"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm text-slate-700 mb-1">Mã danh mục *</label>
-                  <input
-                    type="text"
-                    title="Mã danh mục"
-                    value={editedCategoryData.code}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditedCategoryData({ ...editedCategoryData, code: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Nhập mã danh mục"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-slate-700 mb-1">Tên danh mục *</label>
-                  <input
-                    type="text"
-                    title="Tên danh mục"
-                    value={editedCategoryData.name}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditedCategoryData({ ...editedCategoryData, name: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Nhập tên danh mục"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-slate-700 mb-1">Loại danh mục *</label>
-                  <select
-                    title="Loại danh mục"
-                    value={editedCategoryData.type}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setEditedCategoryData({ ...editedCategoryData, type: e.target.value as 'standard' | 'reference' | 'system' })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="standard">Tiêu chuẩn</option>
-                    <option value="reference">Tham chiếu</option>
-                    <option value="system">Hệ thống</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm text-slate-700 mb-1">Trạng thái *</label>
-                  <select
-                    title="Trạng thái"
-                    value={editedCategoryData.status}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setEditedCategoryData({ ...editedCategoryData, status: e.target.value as 'active' | 'inactive' })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="active">Hoạt động</option>
-                    <option value="inactive">Ngừng hoạt động</option>
-                  </select>
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-sm text-slate-700 mb-1">Mô tả</label>
-                  <textarea
-                    title="Mô tả"
-                    value={editedCategoryData.description}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setEditedCategoryData({ ...editedCategoryData, description: e.target.value })}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Nhập mô tả"
-                  />
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-sm text-slate-700 mb-1">
-                    Người phê duyệt *
-                    <span className="text-slate-500 text-xs ml-1">(Bắt buộc khi gửi phê duyệt)</span>
-                  </label>
-                  <select
-                    title="Người phê duyệt"
-                    value={editedCategoryData.approver}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setEditedCategoryData({ ...editedCategoryData, approver: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">Chọn người phê duyệt</option>
-                    {approvers.map((approver) => (
-                      <option key={approver.id} value={approver.id}>
-                        {approver.name} - {approver.role}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 border-t border-slate-200 flex justify-between">
-              <button
-                onClick={() => {
-                  setShowEditModal(false);
-                  setSelectedCategory(null);
-                }}
-                className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
-              >
-                Hủy
-              </button>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => {
-                    // Update category with new data and increment version
-                    setCategories(categories.map(c => 
-                      c.id === selectedCategory.id 
-                        ? { ...c, ...editedCategoryData, version: (c.version || 1) + 1 }
-                        : c
-                    ));
-                    setSuccessNotificationMessage('Đã lưu thay đổi thành công! Phiên bản tự động được nâng lên.');
-                    setShowSuccessNotification(true);
-                    setTimeout(() => setShowSuccessNotification(false), 3000);
-                    setShowEditModal(false);
-                    setSelectedCategory(null);
-                  }}
-                  title="Lưu thay đổi"
-                  className="flex items-center gap-2 px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
-                >
-                  <Save className="w-4 h-4" />
-                  Lưu thay đổi
-                </button>
-                <button
-                  onClick={() => {
-                    // Validate approver selection
-                    if (!editedCategoryData.approver) {
-                      alert('Vui lòng chọn người phê duyệt trước khi gửi yêu cầu');
-                      return;
-                    }
-                    // Create approval request
-                    const selectedApprover = approvers.find(a => a.id === editedCategoryData.approver);
-                    setSuccessNotificationMessage(
-                      `Yêu cầu chỉnh sửa danh mục đã được gửi đến ${selectedApprover?.name} (${selectedApprover?.role})`
-                    );
-                    setShowEditModal(false);
-                    setSelectedCategory(null);
-                    setShowSuccessNotification(true);
-                    setTimeout(() => setShowSuccessNotification(false), 3000);
-                  }}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <Send className="w-4 h-4" />
-                  Gửi phê duyệt
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Add Field Modal */}
       {showAddFieldModal && (

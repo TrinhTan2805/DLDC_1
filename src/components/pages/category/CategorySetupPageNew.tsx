@@ -209,7 +209,7 @@ export function CategorySetupPageNew() {
     <div className="space-y-6">
       {/* Header */}
       <div className="bg-white border border-slate-200 rounded-lg p-6">
-        <h2 className="text-xl text-slate-900 mb-2">Thiết lập danh mục dùng chung</h2>
+        <h2 className="text-xl text-slate-900 mb-2">Thiết lập danh mục</h2>
         <p className="text-slate-600 text-sm">
           Quản lý cấu hình và thiết lập các danh mục dữ liệu trong hệ thống
         </p>
@@ -329,7 +329,7 @@ export function CategorySetupPageNew() {
               {/* Header with Add Button */}
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg text-slate-900">Thiết lập danh mục dùng chung</h3>
+                  <h3 className="text-lg text-slate-900">Thiết lập danh mục</h3>
                   <p className="text-sm text-slate-600">Quản lý cấu hình và thiết lập các danh mục dữ liệu trong hệ thống</p>
                 </div>
                 <button

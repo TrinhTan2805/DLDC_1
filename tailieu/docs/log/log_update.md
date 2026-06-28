@@ -1,5 +1,103 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Phiên bản 2.5.57 (Ngày cập nhật: 28/06/2026)
+
+**Nội dung thay đổi:**
+1. **Chuyển đổi sang chỉnh sửa trực tiếp trên dòng (Inline Editing):**
+   - Khi nhấn nút "Chỉnh sửa" (SquarePen) trên một dòng bản ghi, các ô giá trị (Mã, Tên giá trị, Mô tả) chuyển sang chế độ nhập liệu trực tiếp trên bảng.
+   - Thêm các nút "Lưu" (Check) và "Hủy" (X) trực tiếp tại cột Thao tác của dòng đó để lưu/hủy chỉnh sửa nhanh.
+   - Loại bỏ hoàn toàn Modal Chỉnh sửa (`showEditModal`) và các logic liên quan.
+2. **Chuyển đổi sang thêm bản ghi trực tiếp trên dòng (Inline Adding):**
+   - Khi nhấn nút "Thêm bản ghi mới" ở thanh công cụ phía trên, một dòng trống mới sẽ được chèn trực tiếp vào vị trí cuối cùng của trang bảng hiện tại.
+   - Người dùng tự nhập các trường giá trị (Mã, Tên giá trị, Mô tả) và thực hiện "Lưu" hoặc "Hủy" trực tiếp trên dòng này.
+   - Loại bỏ hoàn toàn Modal Thêm mới (`showAddModal`) và các logic liên quan.
+
+**Các file bị ảnh hưởng:**
+- `package.json`
+- `src/components/pages/category/CategoryPage.tsx`
+
+---
+
+## Phiên bản 2.5.56 (Ngày cập nhật: 28/06/2026)
+
+**Nội dung thay đổi:**
+1. **Loại bỏ tính năng Xem chi tiết bản ghi:**
+   - Xóa nút "Xem chi tiết" (icon con mắt) khỏi cột Thao tác của từng dòng giá trị trong bảng dữ liệu tại màn hình Danh sách danh mục (`CategoryPage.tsx`).
+   - Xóa bỏ hoàn toàn code giao diện Modal Xem chi tiết (`showDetailModal`) khỏi mã nguồn.
+
+**Các file bị ảnh hưởng:**
+- `package.json`
+- `src/components/pages/category/CategoryPage.tsx`
+
+---
+
+## Phiên bản 2.5.55 (Ngày cập nhật: 28/06/2026)
+
+**Nội dung thay đổi:**
+1. **Đồng bộ hóa Modal chi tiết và chỉnh sửa:** Điều chỉnh các Modal:
+   - **Modal xem chi tiết (`showDetailModal`):** Chỉ hiển thị các trường "Mã", "Tên giá trị", và "Mô tả" tương ứng với các cột hiển thị trong danh sách bảng. Loại bỏ các trường "Loại", "Trạng thái", và "Ngày tạo".
+   - **Modal chỉnh sửa (`showEditModal`):** Chỉ cho phép chỉnh sửa các trường "Mã", "Tên giá trị", và "Mô tả". Loại bỏ các trường nhập liệu "Trạng thái" và "Người phê duyệt".
+   - **Modal thêm mới (`showAddModal`):** Cập nhật nhãn và placeholder của các trường nhập liệu thành "Mã", "Tên giá trị", và "Mô tả" để đồng bộ giao diện.
+2. **Căn chỉnh cấu trúc & thiết kế:** Áp dụng hệ thống thiết kế `rounded-2xl` cho bo góc các Modal và cỡ chữ tiêu chuẩn `13px` cho các form nhãn, nâng cao tính thẩm mỹ đồng bộ.
+
+**Các file bị ảnh hưởng:**
+- `package.json`
+- `src/components/pages/category/CategoryPage.tsx`
+
+---
+
+## Phiên bản 2.5.54 (Ngày cập nhật: 28/06/2026)
+
+**Nội dung thay đổi:**
+1. **Loại bỏ cột hiển thị tại Danh sách danh mục:** Loại bỏ các cột "Phiên bản" (Version), "Ngày tạo" (Created Date), và "Trạng thái" (Status) khỏi bảng hiển thị giá trị các trường trong màn hình Danh sách danh mục (`CategoryPage.tsx`).
+2. **Căn chỉnh cấu trúc bảng:** Thay đổi `colSpan` của dòng thông báo khi không tìm thấy dữ liệu từ 8 cột xuống 5 cột tương thích với cấu trúc cột mới.
+
+**Các file bị ảnh hưởng:**
+- `package.json`
+- `src/components/pages/category/CategoryPage.tsx`
+
+---
+
+## Cập nhật bảng dữ liệu giá trị của các trường trong Danh sách danh mục (Ngày cập nhật: 27/06/2026)
+
+**Nội dung thay đổi:**
+1. **Chuyển đổi bảng hiển thị:** Sửa đổi bảng grid tại trang "Danh sách danh mục" (khi chọn từ menu Biên tập & Công khai) từ việc hiển thị danh sách các danh mục dùng chung (tỉnh/thành) thành hiển thị giá trị các bản ghi dữ liệu cụ thể tương ứng với danh mục được chọn ở thanh Sidebar bên trái (ví dụ: hiển thị Nam/Nữ/Khác khi chọn "Danh mục giới tính", danh sách dân tộc khi chọn "Danh mục dân tộc Việt Nam", v.v.).
+2. **Cập nhật cột & thông tin bảng:**
+   - Đổi cột "Mã danh mục" thành "Mã" (Mã giá trị bản ghi).
+   - Đổi cột "Tên danh mục" thành "Tên giá trị".
+   - Đổi cột "Loại" thành "Mô tả" (Mô tả chi tiết của giá trị bản ghi).
+3. **Đồng bộ hóa dữ liệu mô phỏng:** Thiết lập bản đồ dữ liệu `MOCK_RECORDS_BY_CATEGORY` và sử dụng hook `useEffect` để tự động chuyển đổi danh sách bản ghi hiển thị khi người dùng click chọn danh mục tương ứng bên menu trái, đảm bảo các chức năng tìm kiếm, phân trang và thao tác vẫn hoạt động bình thường.
+4. **Sửa lỗi hiển thị cột trạng thái:** Thêm class `whitespace-nowrap` cho cả phần tử `span` chứa nhãn và thẻ `td` bọc ngoài trong hàm `getStatusBadge` để ngăn nhãn trạng thái (ví dụ: "Công khai") bị ngắt dòng xuống thành 2 dòng.
+5. **Cấu hình Modal Chỉnh Sửa:** Sửa đổi modal chỉnh sửa (khi click nút "Sửa" trên từng dòng bản ghi) để hỗ trợ chỉnh sửa các trường của giá trị bản ghi: Mã, Tên giá trị, Trạng thái (Trình duyệt, Đã phê duyệt, Công khai, Hủy công khai), Người phê duyệt, và Mô tả, thay vì chỉnh sửa cấu hình siêu dữ liệu (metadata) của danh mục.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/CategoryPage.tsx`
+
+---
+
+## Cập nhật cấu trúc menu Sidebar - Thêm module cha Biên tập & Công khai & Loại bỏ cụm từ "dùng chung" (Ngày cập nhật: 26/06/2026)
+
+**Nội dung thay đổi:**
+1. **Thêm module cha "Biên tập & Công khai":** Tạo module cha mới tên là "Biên tập & Công khai" (`category-edit-publish`) trong menu quản lý danh mục dùng chung.
+2. **Cấu hình các module con đồng cấp:** Chuyển hai mục "Danh sách danh mục dùng chung" (`category-list`) và "Đơn vị thuộc BTP" (`category-moj-units`) thành hai module con đồng cấp trực thuộc module "Biên tập & Công khai".
+3. **Cập nhật Breadcrumbs:** Cấu hình lại luồng điều hướng và breadcrumbs hiển thị tương ứng tại `MainLayout.tsx` để khớp với cấu trúc phân mục mới.
+4. **Cập nhật menuStructure:** Đồng bộ cấu trúc logic menu mới trong file định nghĩa menu hệ thống `menuStructure.ts`.
+5. **Loại bỏ cụm từ "dùng chung" tại các danh mục:** Thay đổi tên hiển thị của các module:
+   - "Tổng quan danh mục dùng chung" thành **"Tổng quan danh mục"**
+   - "Thiết lập danh mục dùng chung" thành **"Thiết lập danh mục"**
+   - "Danh sách danh mục dùng chung" thành **"Danh sách danh mục"**
+   - "Thống kê danh mục dùng chung" thành **"Thống kê danh mục"**
+   Thực hiện đồng bộ tại Sidebar, Breadcrumbs, logical Menu Structure và tiêu đề trang trong các component.
+
+**Các file bị ảnh hưởng:**
+- `src/components/layout/Sidebar.tsx`
+- `src/components/layout/MainLayout.tsx`
+- `src/components/pages/admin/menuStructure.ts`
+- `src/components/pages/category/CategoryDashboardPage.tsx`
+- `src/components/pages/category/CategorySetupPageNew.tsx`
+
+---
+
 ## Đồng bộ màu nền Backdrop và tính năng đóng click-outside cho các Modal Biên tập Danh mục (Ngày cập nhật: 26/06/2026)
 
 **Nội dung thay đổi:**

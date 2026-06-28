@@ -316,27 +316,34 @@ const menuItems: MenuItem[] = [
     subItems: [
       {
         id: "category-dashboard",
-        label: "Tổng quan danh mục dùng chung",
+        label: "Tổng quan danh mục",
         icon: LayoutDashboard,
       },
       {
         id: "category-setup",
-        label: "Thiết lập danh mục dùng chung",
+        label: "Thiết lập danh mục",
         icon: Settings,
       },
       {
-        id: "category-list",
-        label: "Danh sách danh mục dùng chung",
-        icon: List,
-      },
-      {
-        id: "category-moj-units",
-        label: "Đơn vị thuộc BTP",
-        icon: FolderOpen,
+        id: "category-edit-publish",
+        label: "Biên tập & Công khai",
+        icon: BookOpen,
+        subItems: [
+          {
+            id: "category-list",
+            label: "Danh sách danh mục",
+            icon: List,
+          },
+          {
+            id: "category-moj-units",
+            label: "Đơn vị thuộc BTP",
+            icon: FolderOpen,
+          },
+        ],
       },
       {
         id: "category-report-group",
-        label: "Thống kê danh mục dùng chung",
+        label: "Thống kê danh mục",
         icon: BarChart3,
         subItems: [
           {

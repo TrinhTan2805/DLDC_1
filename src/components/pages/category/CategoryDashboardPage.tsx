@@ -102,9 +102,9 @@ export function CategoryDashboardPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Tổng quan danh mục dùng chung</h1>
+          <h1 className="text-2xl font-bold text-slate-800">Tổng quan danh mục</h1>
           <p className="text-sm text-slate-500 mt-1">
-            Giám sát số liệu và hoạt động quản trị danh mục dùng chung
+            Giám sát số liệu và hoạt động quản trị danh mục
           </p>
         </div>
       </div>

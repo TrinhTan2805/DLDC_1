@@ -1055,17 +1055,17 @@ const getBreadcrumbPath = (pageId: string, search: string = ''): string[] => {
     'processing-external-children-group': ['Xử lý dữ liệu', 'CSDL Ngoài ngành', 'Trẻ em'],
 
     // Category
-    'category-setup': ['Quản lý danh mục dùng chung', 'Thiết lập danh mục dùng chung'],
-    'category-list': ['Quản lý danh mục dùng chung', 'Danh sách danh mục dùng chung'],
-    'category-moj-units': ['Quản lý danh mục dùng chung', 'Danh sách danh mục dùng chung', 'Đơn vị thuộc BTP'],
-    'category-a': ['Quản lý danh mục dùng chung', 'Danh sách danh mục dùng chung', 'Biên tập danh mục A'],
+    'category-setup': ['Quản lý danh mục dùng chung', 'Thiết lập danh mục'],
+    'category-list': ['Quản lý danh mục dùng chung', 'Biên tập & Công khai', 'Danh sách danh mục'],
+    'category-moj-units': ['Quản lý danh mục dùng chung', 'Biên tập & Công khai', 'Đơn vị thuộc BTP'],
+    'category-a': ['Quản lý danh mục dùng chung', 'Biên tập & Công khai', 'Danh sách danh mục', 'Biên tập danh mục A'],
     'category-published-list': ['Quản lý danh mục dùng chung', 'Công khai danh mục'],
-    'category-report-group': ['Quản lý danh mục dùng chung', 'Thống kê danh mục dùng chung'],
-    'category-report': ['Quản lý danh mục dùng chung', 'Thống kê danh mục dùng chung', 'Khai thác báo cáo'],
-    'category-report-list': ['Quản lý danh mục dùng chung', 'Thống kê danh mục dùng chung', 'Báo cáo thống kê danh sách danh mục'],
-    'category-report-exploitation': ['Quản lý danh mục dùng chung', 'Thống kê danh mục dùng chung', 'Báo cáo tình trạng khai thác danh mục'],
-    'category-report-status': ['Quản lý danh mục dùng chung', 'Thống kê danh mục dùng chung', 'Báo cáo trạng thái danh mục'],
-    'category-report-version': ['Quản lý danh mục dùng chung', 'Thống kê danh mục dùng chung', 'Báo cáo phiên bản danh mục'],
+    'category-report-group': ['Quản lý danh mục dùng chung', 'Thống kê danh mục'],
+    'category-report': ['Quản lý danh mục dùng chung', 'Thống kê danh mục', 'Khai thác báo cáo'],
+    'category-report-list': ['Quản lý danh mục dùng chung', 'Thống kê danh mục', 'Báo cáo thống kê danh sách danh mục'],
+    'category-report-exploitation': ['Quản lý danh mục dùng chung', 'Thống kê danh mục', 'Báo cáo tình trạng khai thác danh mục'],
+    'category-report-status': ['Quản lý danh mục dùng chung', 'Thống kê danh mục', 'Báo cáo trạng thái danh mục'],
+    'category-report-version': ['Quản lý danh mục dùng chung', 'Thống kê danh mục', 'Báo cáo phiên bản danh mục'],
 
     // Open Data
     'open-data-setup': ['Dữ liệu mở', 'Quản lý danh mục'],

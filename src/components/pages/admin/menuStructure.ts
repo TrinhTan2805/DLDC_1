@@ -1251,11 +1251,11 @@ export const menuStructure: MenuItem[] = [
     children: [
       {
         id: "category-setup",
-        name: "Thiết lập danh mục dùng chung",
+        name: "Thiết lập danh mục",
         functions: [
           {
             id: "category-setup-func",
-            name: "Thiết lập danh mục dùng chung",
+            name: "Thiết lập danh mục",
             actions: [
               "Xem",
               "Thêm",
@@ -1273,9 +1273,38 @@ export const menuStructure: MenuItem[] = [
         ],
       },
       {
-        id: "category-list",
-        name: "Danh sách danh mục dùng chung",
+        id: "category-edit-publish",
+        name: "Biên tập & Công khai",
         children: [
+          {
+            id: "category-list",
+            name: "Danh sách danh mục",
+            children: [
+              {
+                id: "category-a",
+                name: "Biên tập danh mục A",
+                functions: [
+                  {
+                    id: "category-a-func",
+                    name: "Biên tập danh mục A",
+                    actions: [
+                      "Xem",
+                      "Thêm",
+                      "Sửa",
+                      "Xóa",
+                      "Xuất Excel",
+                      "Trình duyệt",
+                      "Duyệt",
+                      "Công bố",
+                      "Hủy công bố",
+                      "Công khai",
+                      "Hủy công khai",
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
           {
             id: "category-moj-units",
             name: "Danh mục đơn vị thuộc Bộ Tư Pháp",
@@ -1288,29 +1317,6 @@ export const menuStructure: MenuItem[] = [
                   "Thêm",
                   "Sửa",
                   "Xóa",
-                ],
-              },
-            ],
-          },
-          {
-            id: "category-a",
-            name: "Biên tập danh mục A",
-            functions: [
-              {
-                id: "category-a-func",
-                name: "Biên tập danh mục A",
-                actions: [
-                  "Xem",
-                  "Thêm",
-                  "Sửa",
-                  "Xóa",
-                  "Xuất Excel",
-                  "Trình duyệt",
-                  "Duyệt",
-                  "Công bố",
-                  "Hủy công bố",
-                  "Công khai",
-                  "Hủy công khai",
                 ],
               },
             ],
@@ -1342,7 +1348,7 @@ export const menuStructure: MenuItem[] = [
       },
       {
         id: "category-report-group",
-        name: "Thống kê danh mục dùng chung",
+        name: "Thống kê danh mục",
         children: [
           {
             id: "category-report",
