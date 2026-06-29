@@ -34,7 +34,11 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Send,
-  Upload
+  Upload,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  ChevronDown
 } from 'lucide-react';
 import { PowerOff } from 'lucide-react';
 import { CreateVersionModal } from './components/modals/CreateVersionModal';
@@ -56,6 +60,9 @@ interface Category {
   type: 'standard' | 'reference' | 'system';
   status: 'pending' | 'approved' | 'published' | 'unpublished' | 'active' | 'inactive';
   createdDate: string;
+  createdBy?: string;
+  updatedDate?: string;
+  updatedBy?: string;
   version?: number;
   fields: CategoryField[];
 }
@@ -76,56 +83,152 @@ interface CategoryField {
 
 const MOCK_RECORDS_BY_CATEGORY: Record<string, Category[]> = {
   'category-a-1': [
-    { id: '1', code: 'MALE', name: 'Nam', description: 'Giới tính Nam', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
-    { id: '2', code: 'FEMALE', name: 'Nữ', description: 'Giới tính Nữ', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
-    { id: '3', code: 'OTHER', name: 'Khác', description: 'Giới tính khác/chưa xác định', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] }
+    { id: '1', code: 'MALE', name: 'Nam', description: 'Giới tính Nam', type: 'standard', status: 'approved', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '2', code: 'FEMALE', name: 'Nữ', description: 'Giới tính Nữ', type: 'standard', status: 'approved', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '3', code: 'OTHER', name: 'Khác', description: 'Giới tính khác/chưa xác định', type: 'standard', status: 'approved', createdDate: '01/01/2024', version: 1, fields: [] }
   ],
   'category-a-2': [
-    { id: '1', code: 'KINH', name: 'Kinh', description: 'Dân tộc Kinh', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
-    { id: '2', code: 'TAY', name: 'Tày', description: 'Dân tộc Tày', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
-    { id: '3', code: 'THAI', name: 'Thái', description: 'Dân tộc Thái', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
-    { id: '4', code: 'MUONG', name: 'Mường', description: 'Dân tộc Mường', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
-    { id: '5', code: 'KHOME', name: 'Khơ Me', description: 'Dân tộc Khơ Me', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] }
+    { id: '1', code: 'KINH', name: 'Kinh', description: 'Dân tộc Kinh', type: 'standard', status: 'approved', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '2', code: 'TAY', name: 'Tày', description: 'Dân tộc Tày', type: 'standard', status: 'approved', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '3', code: 'THAI', name: 'Thái', description: 'Dân tộc Thái', type: 'standard', status: 'approved', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '4', code: 'MUONG', name: 'Mường', description: 'Dân tộc Mường', type: 'standard', status: 'approved', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '5', code: 'KHOME', name: 'Khơ Me', description: 'Dân tộc Khơ Me', type: 'standard', status: 'approved', createdDate: '01/01/2024', version: 1, fields: [] }
   ],
   'category-a-3': [
-    { id: '1', code: 'VN', name: 'Việt Nam', description: 'Cộng hòa Xã hội Chủ nghĩa Việt Nam', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
-    { id: '2', code: 'US', name: 'Mỹ', description: 'Hợp chủng quốc Hoa Kỳ', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
-    { id: '3', code: 'JP', name: 'Nhật Bản', description: 'Nhật Bản', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
-    { id: '4', code: 'KR', name: 'Hàn Quốc', description: 'Đại Hàn Dân Quốc', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] }
+    { id: '1', code: 'VN', name: 'Việt Nam', description: 'Cộng hòa Xã hội Chủ nghĩa Việt Nam', type: 'standard', status: 'approved', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '2', code: 'US', name: 'Mỹ', description: 'Hợp chủng quốc Hoa Kỳ', type: 'standard', status: 'approved', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '3', code: 'JP', name: 'Nhật Bản', description: 'Nhật Bản', type: 'standard', status: 'approved', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '4', code: 'KR', name: 'Hàn Quốc', description: 'Đại Hàn Dân Quốc', type: 'standard', status: 'approved', createdDate: '01/01/2024', version: 1, fields: [] }
   ],
   'category-a-4': [
-    { id: '1', code: 'PG', name: 'Phật giáo', description: 'Đạo Phật', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
-    { id: '2', code: 'CG', name: 'Công giáo', description: 'Đạo Thiên Chúa', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
-    { id: '3', code: 'TL', name: 'Tin lành', description: 'Đạo Tin lành', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
-    { id: '4', code: 'HH', name: 'Hòa Hảo', description: 'Phật giáo Hòa Hảo', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
-    { id: '5', code: 'K', name: 'Không', description: 'Không theo tôn giáo nào', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] }
+    { id: '1', code: 'PG', name: 'Phật giáo', description: 'Đạo Phật', type: 'standard', status: 'approved', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '2', code: 'CG', name: 'Công giáo', description: 'Đạo Thiên Chúa', type: 'standard', status: 'approved', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '3', code: 'TL', name: 'Tin lành', description: 'Đạo Tin lành', type: 'standard', status: 'approved', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '4', code: 'HH', name: 'Hòa Hảo', description: 'Phật giáo Hòa Hảo', type: 'standard', status: 'approved', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '5', code: 'K', name: 'Không', description: 'Không theo tôn giáo nào', type: 'standard', status: 'approved', createdDate: '01/01/2024', version: 1, fields: [] }
   ],
   'category-a-5': [
-    { id: '1', code: 'BTP', name: 'Bộ Tư Pháp', description: 'Cơ quan ngang bộ trực thuộc Chính phủ', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
-    { id: '2', code: 'CHT', name: 'Cục Hộ tịch, quốc tịch, chứng thực', description: 'Đơn vị trực thuộc Bộ Tư pháp', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
-    { id: '3', code: 'STP_HN', name: 'Sở Tư pháp Hà Nội', description: 'Cơ quan chuyên môn thuộc UBND TP Hà Nội', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] }
+    { id: '1', code: 'BTP', name: 'Bộ Tư Pháp', description: 'Cơ quan ngang bộ trực thuộc Chính phủ', type: 'standard', status: 'approved', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '2', code: 'CHT', name: 'Cục Hộ tịch, quốc tịch, chứng thực', description: 'Đơn vị trực thuộc Bộ Tư pháp', type: 'standard', status: 'approved', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '3', code: 'STP_HN', name: 'Sở Tư pháp Hà Nội', description: 'Cơ quan chuyên môn thuộc UBND TP Hà Nội', type: 'standard', status: 'approved', createdDate: '01/01/2024', version: 1, fields: [] }
   ],
   'category-a-6': [
-    { id: '1', code: 'HN', name: 'Thành phố Hà Nội', description: 'Đơn vị hành chính cấp tỉnh', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
-    { id: '2', code: 'HCM', name: 'Thành phố Hồ Chí Minh', description: 'Đơn vị hành chính cấp tỉnh', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
-    { id: '3', code: 'DN', name: 'Thành phố Đà Nẵng', description: 'Đơn vị hành chính cấp tỉnh', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] }
+    { id: '1', code: 'HN', name: 'Thành phố Hà Nội', description: 'Đơn vị hành chính cấp tỉnh', type: 'standard', status: 'approved', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '2', code: 'HCM', name: 'Thành phố Hồ Chí Minh', description: 'Đơn vị hành chính cấp tỉnh', type: 'standard', status: 'approved', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '3', code: 'DN', name: 'Thành phố Đà Nẵng', description: 'Đơn vị hành chính cấp tỉnh', type: 'standard', status: 'approved', createdDate: '01/01/2024', version: 1, fields: [] }
   ],
   'category-a-7': [
-    { id: '1', code: 'CH', name: 'Chủ hộ', description: 'Chủ hộ gia đình', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
-    { id: '2', code: 'VC', name: 'Vợ/Chồng', description: 'Quan hệ vợ chồng với chủ hộ', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
-    { id: '3', code: 'CC', name: 'Con đẻ', description: 'Con ruột của chủ hộ', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] },
-    { id: '4', code: 'BC', name: 'Bố/Mẹ', description: 'Bố mẹ đẻ của chủ hộ', type: 'standard', status: 'published', createdDate: '01/01/2024', version: 1, fields: [] }
+    { id: '1', code: 'CH', name: 'Chủ hộ', description: 'Chủ hộ gia đình', type: 'standard', status: 'approved', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '2', code: 'VC', name: 'Vợ/Chồng', description: 'Quan hệ vợ chồng với chủ hộ', type: 'standard', status: 'approved', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '3', code: 'CC', name: 'Con đẻ', description: 'Con ruột của chủ hộ', type: 'standard', status: 'approved', createdDate: '01/01/2024', version: 1, fields: [] },
+    { id: '4', code: 'BC', name: 'Bố/Mẹ', description: 'Bố mẹ đẻ của chủ hộ', type: 'standard', status: 'approved', createdDate: '01/01/2024', version: 1, fields: [] }
   ]
 };
 
 export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
-  const [activeTab, setActiveTab] = useState<'setup' | 'approval' | 'stats' | 'version-history'>('setup');
+  const [activeTab, setActiveTab] = useState<'setup' | 'approval' | 'publish' | 'stats' | 'version-history'>('setup');
+
+  // Mock data - Danh sách tỉnh thành Việt Nam
+  const [categories, setCategories] = useState<Category[]>(() => [
+    { id: '1', code: 'VN01', name: 'Hà Nội', description: 'Thành phố trực thuộc Trung ương', type: 'standard', status: 'pending', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '2', code: 'VN02', name: 'Hồ Chí Minh', description: 'Thành phố trực thuộc Trung ương', type: 'standard', status: 'approved', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '3', code: 'VN03', name: 'Đà Nẵng', description: 'Thành phố trực thuộc Trung ương', type: 'standard', status: 'published', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '4', code: 'VN04', name: 'Hải Phòng', description: 'Thành phố trực thuộc Trung ương', type: 'standard', status: 'unpublished', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '5', code: 'VN05', name: 'Cần Thơ', description: 'Thành phố trực thuộc Trung ương', type: 'standard', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '6', code: 'VN06', name: 'An Giang', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '7', code: 'VN07', name: 'Bà Rịa - Vũng Tàu', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '8', code: 'VN08', name: 'Bắc Giang', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '9', code: 'VN09', name: 'Bắc Kạn', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '10', code: 'VN10', name: 'Bạc Liêu', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '11', code: 'VN11', name: 'Bắc Ninh', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '12', code: 'VN12', name: 'Bến Tre', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '13', code: 'VN13', name: 'Bình Định', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '14', code: 'VN14', name: 'Bình Dương', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '15', code: 'VN15', name: 'Bình Phước', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '16', code: 'VN16', name: 'Bình Thuận', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '17', code: 'VN17', name: 'Cà Mau', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '18', code: 'VN18', name: 'Cao Bằng', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '19', code: 'VN19', name: 'Đắk Lắk', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '20', code: 'VN20', name: 'Đắk Nông', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '21', code: 'VN21', name: 'Điện Biên', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '22', code: 'VN22', name: 'Đồng Nai', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '23', code: 'VN23', name: 'Đồng Tháp', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '24', code: 'VN24', name: 'Gia Lai', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '25', code: 'VN25', name: 'Hà Giang', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '26', code: 'VN26', name: 'Hà Nam', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '27', code: 'VN27', name: 'Hà Tĩnh', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '28', code: 'VN28', name: 'Hải Dương', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '29', code: 'VN29', name: 'Hậu Giang', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '30', code: 'VN30', name: 'Hòa Bình', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '31', code: 'VN31', name: 'Hưng Yên', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '32', code: 'VN32', name: 'Khánh Hòa', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '33', code: 'VN33', name: 'Kiên Giang', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '34', code: 'VN34', name: 'Kon Tum', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '35', code: 'VN35', name: 'Lai Châu', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '36', code: 'VN36', name: 'Lâm Đồng', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '37', code: 'VN37', name: 'Lạng Sơn', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '38', code: 'VN38', name: 'Lào Cai', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '39', code: 'VN39', name: 'Long An', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '40', code: 'VN40', name: 'Nam Định', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '41', code: 'VN41', name: 'Nghệ An', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '42', code: 'VN42', name: 'Ninh Bình', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '43', code: 'VN43', name: 'Ninh Thuận', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '44', code: 'VN44', name: 'Phú Thọ', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '45', code: 'VN45', name: 'Phú Yên', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '46', code: 'VN46', name: 'Quảng Bình', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '47', code: 'VN47', name: 'Quảng Nam', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '48', code: 'VN48', name: 'Quảng Ngãi', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '49', code: 'VN49', name: 'Quảng Ninh', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '50', code: 'VN50', name: 'Quảng Trị', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '51', code: 'VN51', name: 'Sóc Trăng', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '52', code: 'VN52', name: 'Sơn La', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '53', code: 'VN53', name: 'Tây Ninh', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '54', code: 'VN54', name: 'Thái Bình', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '55', code: 'VN55', name: 'Thái Nguyên', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '56', code: 'VN56', name: 'Thanh Hóa', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '57', code: 'VN57', name: 'Thừa Thiên Huế', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '58', code: 'VN58', name: 'Tiền Giang', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '59', code: 'VN59', name: 'Trà Vinh', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '60', code: 'VN60', name: 'Tuyên Quang', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '61', code: 'VN61', name: 'Vĩnh Long', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '62', code: 'VN62', name: 'Vĩnh Phúc', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
+    { id: '63', code: 'VN63', name: 'Yên Bái', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] }
+  ].map(c => ({
+    ...c,
+    status: 'approved',
+    createdBy: 'Hệ thống',
+    updatedDate: '15/01/2026',
+    updatedBy: 'Nguyễn Văn A'
+  })));
+
+  // Update categories when categoryId changes
+  React.useEffect(() => {
+    const mockRecords = MOCK_RECORDS_BY_CATEGORY[categoryId] || MOCK_RECORDS_BY_CATEGORY['category-a-1'] || [];
+    setCategories(mockRecords.map(r => ({
+      ...r,
+      createdBy: r.createdBy || 'Hệ thống',
+      updatedDate: r.updatedDate || '15/01/2026',
+      updatedBy: r.updatedBy || 'Nguyễn Văn A'
+    })));
+  }, [categoryId]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState('all');
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
   const [sortBy, setSortBy] = useState('newest');
   const [showFilters, setShowFilters] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+
+  const handleExportFile = (format: string) => {
+    setShowExportMenu(false);
+    alert(`Xuất dữ liệu ra ${format}`);
+  };
+
+  // Filter conditions (like TargetDatabaseDetailPage)
+  interface FilterCondition { id: string; field: string; operator: string; value: string; logic: 'AND' | 'OR'; }
+  const [filterConditions, setFilterConditions] = useState<FilterCondition[]>([]);
+
+  // Sort panel state (like TargetDatabaseDetailPage)
+  interface SortCondition { id: string; field: 'name' | 'code' | 'createdDate' | 'updatedDate'; order: 'ASC' | 'DESC'; }
+  const [showSortPanel, setShowSortPanel] = useState(false);
+  const [sortConditions, setSortConditions] = useState<SortCondition[]>([]);
   const [currentPageNum, setCurrentPageNum] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -154,14 +257,31 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
   const [addingRow, setAddingRow] = useState<boolean>(false);
   const [inlineAddData, setInlineAddData] = useState({ code: '', name: '', description: '' });
 
+  // Publish states
+  const [publishStatus, setPublishStatus] = useState<'unpublished' | 'published' | 'stopped'>('unpublished');
+  const [shareScope, setShareScope] = useState<'internal' | 'extended' | 'public'>('internal');
+  const [unpublishReason, setUnpublishReason] = useState<string>('');
+  const [publishActionInfo, setPublishActionInfo] = useState<{ user: string; date: string; reason?: string }>({ user: '', date: '' });
+  const [showPublishModal, setShowPublishModal] = useState<boolean>(false);
+  const [showUnpublishModal, setShowUnpublishModal] = useState<boolean>(false);
+
   const handleSaveInlineEdit = (id: string) => {
     if (!inlineEditData.code.trim() || !inlineEditData.name.trim()) {
       alert('Mã và Tên giá trị không được để trống');
       return;
     }
+    const currentDate = new Date().toLocaleDateString('vi-VN');
     setCategories(prev =>
       prev.map(c =>
-        c.id === id ? { ...c, code: inlineEditData.code, name: inlineEditData.name, description: inlineEditData.description } : c
+        c.id === id ? { 
+          ...c, 
+          code: inlineEditData.code, 
+          name: inlineEditData.name, 
+          description: inlineEditData.description, 
+          status: 'pending',
+          updatedDate: currentDate,
+          updatedBy: 'Nguyễn Văn A'
+        } : c
       )
     );
     setEditingRowId(null);
@@ -183,8 +303,11 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
       name: inlineAddData.name,
       description: inlineAddData.description,
       type: 'standard',
-      status: 'published',
+      status: 'pending',
       createdDate: currentDate,
+      createdBy: 'Nguyễn Văn A',
+      updatedDate: currentDate,
+      updatedBy: 'Nguyễn Văn A',
       version: 1,
       fields: []
     };
@@ -248,82 +371,31 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
   ];
 
   // Mock approval data - Value change requests
-  const approvalRequests = [
-    {
-      id: 1,
-      recordCode: 'REC001',
-      recordName: 'Hà Nội',
-      changedFields: ['Tên đầy đủ', 'Mã bưu chính'],
+  const approvalRequests = categories.map(c => {
+    let requestStatus = 'approved';
+    if (c.status === 'pending') requestStatus = 'pending';
+    else if (c.status === 'rejected') requestStatus = 'rejected';
+
+    const changedFields = (c.status === 'pending' || c.status === 'rejected') ? ['Thông tin chung'] : ['—'];
+
+    return {
+      id: Number(c.id),
+      recordCode: c.code,
+      recordName: c.name,
+      description: c.description,
+      changedFields: changedFields,
       changes: {
-        'Tên đầy đủ': { old: 'Thành phố Hà Nội', new: 'Thủ đô Hà Nội' },
-        'Mã bưu chính': { old: '100000', new: '100001' }
+        'Thông tin chung': { old: '—', new: c.name }
       },
-      changedBy: 'Nguyễn Văn A',
-      changedDate: '15/01/2026 14:30',
-      approvedDate: null,
-      approvedBy: null,
-      status: 'pending'
-    },
-    {
-      id: 2,
-      recordCode: 'REC002',
-      recordName: 'TP. Hồ Chí Minh',
-      changedFields: ['Dân số', 'Diện tích'],
-      changes: {
-        'Dân số': { old: '8.993.082', new: '9.123.456' },
-        'Diện tích': { old: '2.061,4 km²', new: '2.095,5 km²' }
-      },
-      changedBy: 'Trần Thị B',
-      changedDate: '15/01/2026 10:15',
-      approvedDate: null,
-      approvedBy: null,
-      status: 'pending'
-    },
-    {
-      id: 3,
-      recordCode: 'REC003',
-      recordName: 'Đà Nẵng',
-      changedFields: ['Số điện thoại', 'Email liên hệ'],
-      changes: {
-        'Số điện thoại': { old: '0236.3821.234', new: '0236.3821.999' },
-        'Email liên hệ': { old: 'contact@danang.gov.vn', new: 'info@danang.gov.vn' }
-      },
-      changedBy: 'Phạm Văn C',
-      changedDate: '14/01/2026 16:45',
-      approvedDate: null,
-      approvedBy: null,
-      status: 'pending'
-    },
-    {
-      id: 4,
-      recordCode: 'REC004',
-      recordName: 'Cần Thơ',
-      changedFields: ['Website'],
-      changes: {
-        'Website': { old: 'http://cantho.gov.vn', new: 'https://cantho.gov.vn' }
-      },
-      changedBy: 'Lê Thị D',
-      changedDate: '14/01/2026 09:20',
-      approvedDate: '15/01/2026 11:30',
-      approvedBy: 'Hoàng Văn E',
-      status: 'approved'
-    },
-    {
-      id: 5,
-      recordCode: 'REC005',
-      recordName: 'Hải Phòng',
-      changedFields: ['Tên đầy đủ'],
-      changes: {
-        'Tên đầy đủ': { old: 'Thành phố Hải Phòng', new: 'TP Hải Phòng' }
-      },
-      changedBy: 'Đỗ Văn F',
-      changedDate: '13/01/2026 15:00',
-      approvedDate: '14/01/2026 10:15',
-      approvedBy: 'Hoàng Văn E',
-      status: 'rejected',
-      rejectionReason: 'Tên không phù hợp với quy chuẩn đặt tên hành chính'
-    }
-  ];
+      createdBy: c.createdBy || 'Hệ thống',
+      createdDate: c.createdDate || '15/01/2026',
+      changedBy: c.updatedBy || c.createdBy || 'Nguyễn Văn A',
+      changedDate: c.updatedDate || c.createdDate || '15/01/2026',
+      approvedDate: c.status === 'approved' ? (c.updatedDate || '15/01/2026') : null,
+      approvedBy: c.status === 'approved' ? 'Hoàng Văn E' : null,
+      status: requestStatus
+    };
+  });
 
   // Mock approval data - Unpublish requests
   const unpublishRequests = [
@@ -418,6 +490,14 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
   const confirmApproval = () => {
     // In production, this would call an API
     console.log('Phê duyệt:', pendingApprovalIds, 'Nội dung:', approvalComment);
+    
+    // Sync with categories status
+    setCategories(prev =>
+      prev.map(c =>
+        pendingApprovalIds.includes(Number(c.id)) ? { ...c, status: 'approved', updatedDate: new Date().toLocaleDateString('vi-VN'), updatedBy: 'Hoàng Văn E' } : c
+      )
+    );
+
     setShowApprovalModal(false);
     setSelectedApprovalIds([]);
     setApprovalComment('');
@@ -436,6 +516,14 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
     }
     // In production, this would call an API
     console.log('Từ chối:', pendingApprovalIds, 'Lý do:', approvalComment);
+    
+    // Sync with categories status
+    setCategories(prev =>
+      prev.map(c =>
+        pendingApprovalIds.includes(Number(c.id)) ? { ...c, status: 'rejected', updatedDate: new Date().toLocaleDateString('vi-VN'), updatedBy: 'Nguyễn Văn A' } : c
+      )
+    );
+
     setShowRejectModal(false);
     setSelectedApprovalIds([]);
     setApprovalComment('');
@@ -477,92 +565,6 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
     }
   };
 
-  const getApprovalStatusBadge = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return <span className="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full">Chờ duyệt</span>;
-      case 'approved':
-        return <span className="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full">Đã duyệt</span>;
-      case 'rejected':
-        return <span className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-full">Từ chối</span>;
-      default:
-        return null;
-    }
-  };
-
-  // Update categories when categoryId changes
-  React.useEffect(() => {
-    const mockRecords = MOCK_RECORDS_BY_CATEGORY[categoryId] || MOCK_RECORDS_BY_CATEGORY['category-a-1'] || [];
-    setCategories(mockRecords);
-  }, [categoryId]);
-
-  // Mock data - Danh sách tỉnh thành Việt Nam
-  const [categories, setCategories] = useState<Category[]>([
-    { id: '1', code: 'VN01', name: 'Hà Nội', description: 'Thành phố trực thuộc Trung ương', type: 'standard', status: 'pending', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '2', code: 'VN02', name: 'Hồ Chí Minh', description: 'Thành phố trực thuộc Trung ương', type: 'standard', status: 'approved', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '3', code: 'VN03', name: 'Đà Nẵng', description: 'Thành phố trực thuộc Trung ương', type: 'standard', status: 'published', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '4', code: 'VN04', name: 'Hải Phòng', description: 'Thành phố trực thuộc Trung ương', type: 'standard', status: 'unpublished', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '5', code: 'VN05', name: 'Cần Thơ', description: 'Thành phố trực thuộc Trung ương', type: 'standard', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '6', code: 'VN06', name: 'An Giang', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '7', code: 'VN07', name: 'Bà Rịa - Vũng Tàu', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '8', code: 'VN08', name: 'Bắc Giang', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '9', code: 'VN09', name: 'Bắc Kạn', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '10', code: 'VN10', name: 'Bạc Liêu', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '11', code: 'VN11', name: 'Bắc Ninh', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '12', code: 'VN12', name: 'Bến Tre', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '13', code: 'VN13', name: 'Bình Định', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '14', code: 'VN14', name: 'Bình Dương', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '15', code: 'VN15', name: 'Bình Phước', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '16', code: 'VN16', name: 'Bình Thuận', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '17', code: 'VN17', name: 'Cà Mau', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '18', code: 'VN18', name: 'Cao Bằng', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '19', code: 'VN19', name: 'Đắk Lắk', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '20', code: 'VN20', name: 'Đắk Nông', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '21', code: 'VN21', name: 'Điện Biên', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '22', code: 'VN22', name: 'Đồng Nai', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '23', code: 'VN23', name: 'Đồng Tháp', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '24', code: 'VN24', name: 'Gia Lai', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '25', code: 'VN25', name: 'Hà Giang', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '26', code: 'VN26', name: 'Hà Nam', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '27', code: 'VN27', name: 'Hà Tĩnh', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '28', code: 'VN28', name: 'Hải Dương', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '29', code: 'VN29', name: 'Hậu Giang', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '30', code: 'VN30', name: 'Hòa Bình', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '31', code: 'VN31', name: 'Hưng Yên', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '32', code: 'VN32', name: 'Khánh Hòa', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '33', code: 'VN33', name: 'Kiên Giang', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '34', code: 'VN34', name: 'Kon Tum', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '35', code: 'VN35', name: 'Lai Châu', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '36', code: 'VN36', name: 'Lâm Đ��ng', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '37', code: 'VN37', name: 'Lạng Sơn', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '38', code: 'VN38', name: 'Lào Cai', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '39', code: 'VN39', name: 'Long An', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '40', code: 'VN40', name: 'Nam Định', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '41', code: 'VN41', name: 'Nghệ An', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '42', code: 'VN42', name: 'Ninh Bình', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '43', code: 'VN43', name: 'Ninh Thuận', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '44', code: 'VN44', name: 'Phú Thọ', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '45', code: 'VN45', name: 'Phú Yên', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '46', code: 'VN46', name: 'Quảng Bình', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '47', code: 'VN47', name: 'Quảng Nam', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '48', code: 'VN48', name: 'Quảng Ngãi', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '49', code: 'VN49', name: 'Quảng Ninh', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '50', code: 'VN50', name: 'Quảng Trị', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '51', code: 'VN51', name: 'Sóc Trăng', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '52', code: 'VN52', name: 'Sơn La', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '53', code: 'VN53', name: 'Tây Ninh', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '54', code: 'VN54', name: 'Thái Bình', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '55', code: 'VN55', name: 'Thái Nguyên', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '56', code: 'VN56', name: 'Thanh Hóa', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '57', code: 'VN57', name: 'Thừa Thiên Huế', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '58', code: 'VN58', name: 'Tiền Giang', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '59', code: 'VN59', name: 'Trà Vinh', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '60', code: 'VN60', name: 'Tuyên Quang', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '61', code: 'VN61', name: 'Vĩnh Long', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '62', code: 'VN62', name: 'Vĩnh Phúc', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] },
-    { id: '63', code: 'VN63', name: 'Yên Bái', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] }
-  ]);
-
   const stats = {
     total: categories.length,
     published: categories.filter(c => c.status === 'active' || c.status === 'published').length,
@@ -571,24 +573,78 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
   };
 
   const filteredCategories = categories.filter(cat => {
-    const matchesSearch = cat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    // Search term filter (always applied)
+    const matchesSearch = !searchTerm ||
+      cat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       cat.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
       cat.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = filterType === 'all' || cat.type === filterType;
-    
-    const catStatus = cat.status === 'active' ? 'published' : (cat.status === 'inactive' ? 'unpublished' : cat.status);
-    const matchesStatus = filterStatus === 'all' || catStatus === filterStatus;
-    
-    return matchesSearch && matchesType && matchesStatus;
+    if (!matchesSearch) return false;
+
+    // Dynamic filter conditions
+    if (filterConditions.length === 0) return true;
+
+    const getFieldValue = (c: typeof cat, field: string): string => {
+      switch (field) {
+        case 'code': return c.code;
+        case 'name': return c.name;
+        case 'description': return c.description;
+        case 'status': return c.status === 'active' ? 'published' : (c.status === 'inactive' ? 'unpublished' : c.status);
+        case 'createdDate': return c.createdDate;
+        case 'createdBy': return c.createdBy || '';
+        case 'updatedDate': return c.updatedDate || '';
+        case 'updatedBy': return c.updatedBy || '';
+        default: return '';
+      }
+    };
+
+    const evaluateCondition = (fc: FilterCondition): boolean => {
+      const val = getFieldValue(cat, fc.field).toLowerCase();
+      const fval = fc.value.toLowerCase();
+      switch (fc.operator) {
+        case '=':    return val === fval;
+        case '!=':   return val !== fval;
+        case 'LIKE': return val.includes(fval);
+        case '>':    return val > fval;
+        case '<':    return val < fval;
+        default:     return true;
+      }
+    };
+
+    // Evaluate all conditions with AND/OR logic
+    let result = evaluateCondition(filterConditions[0]);
+    for (let i = 1; i < filterConditions.length; i++) {
+      const fc = filterConditions[i];
+      if (fc.logic === 'AND') result = result && evaluateCondition(fc);
+      else result = result || evaluateCondition(fc);
+    }
+    return result;
   }).sort((a, b) => {
+    // If custom sortConditions are set, apply them in order
+    if (sortConditions.length > 0) {
+      for (const sc of sortConditions) {
+        let cmp = 0;
+        if (sc.field === 'name') cmp = a.name.localeCompare(b.name);
+        else if (sc.field === 'code') cmp = a.code.localeCompare(b.code);
+        else if (sc.field === 'createdDate') {
+          const dA = new Date(a.createdDate.split('/').reverse().join('-')).getTime();
+          const dB = new Date(b.createdDate.split('/').reverse().join('-')).getTime();
+          cmp = dA - dB;
+        } else if (sc.field === 'updatedDate') {
+          const dA = new Date((a.updatedDate || a.createdDate).split('/').reverse().join('-')).getTime();
+          const dB = new Date((b.updatedDate || b.createdDate).split('/').reverse().join('-')).getTime();
+          cmp = dA - dB;
+        }
+        if (cmp !== 0) return sc.order === 'ASC' ? cmp : -cmp;
+      }
+      return 0;
+    }
+    // Fallback to old sortBy logic
     if (sortBy === 'name-asc') return a.name.localeCompare(b.name);
     if (sortBy === 'name-desc') return b.name.localeCompare(a.name);
-    
     const dateA = new Date(a.createdDate.split('/').reverse().join('-')).getTime();
     const dateB = new Date(b.createdDate.split('/').reverse().join('-')).getTime();
-    
     if (sortBy === 'oldest') return dateA - dateB;
-    return dateB - dateA; // newest
+    return dateB - dateA;
   });
 
   const paginatedCategories = filteredCategories.slice((currentPageNum - 1) * pageSize, currentPageNum * pageSize);
@@ -651,16 +707,27 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
   };
 
   const getStatusBadge = (status: string) => {
-    const normalizedStatus = status === 'active' ? 'published' : (status === 'inactive' ? 'unpublished' : status);
+    const normalizedStatus = status === 'active' || status === 'published' ? 'approved' : (status === 'inactive' ? 'unpublished' : status);
     switch (normalizedStatus) {
       case 'pending':
-        return <span className="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full whitespace-nowrap">Trình duyệt</span>;
+        return <span className="px-3 py-1 bg-yellow-50 text-yellow-700 border border-yellow-200 text-xs rounded-full whitespace-nowrap">Chờ phê duyệt</span>;
       case 'approved':
-        return <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs rounded-full whitespace-nowrap">Đã phê duyệt</span>;
-      case 'published':
-        return <span className="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full whitespace-nowrap">Công khai</span>;
+        return <span className="px-3 py-1 bg-green-50 text-green-700 border border-green-200 text-xs rounded-full whitespace-nowrap">Đã phê duyệt</span>;
       case 'unpublished':
         return <span className="px-3 py-1 bg-slate-200 text-slate-700 text-xs rounded-full whitespace-nowrap">Hủy công khai</span>;
+      default:
+        return null;
+    }
+  };
+
+  const getApprovalStatusBadge = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return <span className="px-3 py-1 bg-yellow-50 text-yellow-700 border border-yellow-200 text-xs rounded-full whitespace-nowrap">Chờ phê duyệt</span>;
+      case 'approved':
+        return <span className="px-3 py-1 bg-green-50 text-green-700 border border-green-200 text-xs rounded-full whitespace-nowrap">Đã phê duyệt</span>;
+      case 'rejected':
+        return <span className="px-3 py-1 bg-red-50 text-red-700 border border-red-200 text-xs rounded-full whitespace-nowrap">Từ chối</span>;
       default:
         return null;
     }
@@ -747,7 +814,8 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
     showAddFieldModal || showCreateVersionModal || showFieldFormModal ||
     showImportModal || showApprovalDetailModal || showApprovalRequestModal ||
     showApprovalModal || showRejectModal || showCompareModal ||
-    showVersionDetailModal || showRestoreModal || showAdvancedSearch
+    showVersionDetailModal || showRestoreModal ||
+    showPublishModal || showUnpublishModal
   );
 
   return (
@@ -758,6 +826,7 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
           {[
             { id: 'setup' as const,           label: 'Danh sách',                   icon: List },
             { id: 'approval' as const,         label: 'Phê duyệt',                   icon: CheckCircle2 },
+            { id: 'publish' as const,          label: 'Công khai',                   icon: Globe },
             { id: 'version-history' as const,  label: 'Quản lý phiên bản danh mục',  icon: Clock },
           ].map(tab => (
             <button
@@ -794,18 +863,31 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                         className="w-full px-4 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-400 bg-white hover:bg-slate-50/50 font-medium shadow-sm"
                       />
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setShowFilters(!showFilters)}
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all border cursor-pointer active:scale-95 ${
-                        showFilters ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-sm' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                      }`}
-                      title={showFilters ? 'Đóng bộ lọc' : 'Bộ lọc nâng cao'}
-                    >
-                      {showFilters ? <X className="w-4 h-4" /> : <Filter className="w-4 h-4" />}
-                    </button>
                   </div>
                   <div className="flex items-center gap-2 w-full md:w-auto">
+                    {/* Lọc button */}
+                    <button
+                      type="button"
+                      onClick={() => { setShowFilters(!showFilters); setShowSortPanel(false); }}
+                      className={`flex items-center gap-1.5 px-3 py-2.5 text-[13px] font-medium border rounded-xl transition-all cursor-pointer active:scale-95 ${
+                        showFilters ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      <Filter className="w-4 h-4" />
+                      Lọc{filterConditions.length > 0 && !showFilters ? <span className="ml-1 w-2 h-2 rounded-full bg-blue-500 inline-block" /> : null}
+                    </button>
+                    {/* Sắp xếp button */}
+                    <button
+                      type="button"
+                      onClick={() => { setShowSortPanel(!showSortPanel); setShowFilters(false); }}
+                      className={`flex items-center gap-1.5 px-3 py-2.5 text-[13px] font-medium border rounded-xl transition-all cursor-pointer active:scale-95 ${
+                        showSortPanel ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      <ArrowUpDown className="w-4 h-4" />
+                      Sắp xếp{sortConditions.length > 0 && !showSortPanel ? <span className="ml-1 w-2 h-2 rounded-full bg-blue-500 inline-block" /> : null}
+                    </button>
+                    {/* Thêm bản ghi mới */}
                     <button
                       type="button"
                       onClick={() => {
@@ -818,46 +900,199 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                       <Plus className="w-4 h-4" />
                       Thêm bản ghi mới
                     </button>
+                    {/* Xuất File */}
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setShowExportMenu(prev => !prev)}
+                        className="flex items-center gap-1.5 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[13px] font-medium transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
+                      >
+                        <Download className="w-4 h-4" />
+                        Xuất File
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
+                      {showExportMenu && (
+                        <div className="absolute right-0 top-full mt-1.5 w-40 rounded-xl border border-slate-200 bg-white shadow-xl z-20 overflow-hidden">
+                          {['Excel', 'PDF', 'CSV'].map(fmt => (
+                            <button
+                              key={fmt}
+                              type="button"
+                              onClick={() => handleExportFile(fmt)}
+                              className="w-full text-left px-4 py-2.5 hover:bg-slate-50 text-[13px] text-slate-700 transition-colors"
+                            >
+                              {fmt}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 
-                {/* Collapsible Filter Panel */}
+                {/* Collapsible Filter Panel — condition-based like CSDL đích */}
                 {showFilters && (
                   <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-sm">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Loại danh mục</label>
-                        <div className="relative">
+                    <div className="flex flex-col gap-3">
+                      {filterConditions.map((fc, i) => (
+                        <div key={fc.id} className="flex items-center gap-3">
+                          {i > 0 && (
+                            <select
+                              value={fc.logic}
+                              onChange={e => {
+                                const updated = [...filterConditions];
+                                updated[i] = { ...updated[i], logic: e.target.value as 'AND' | 'OR' };
+                                setFilterConditions(updated);
+                              }}
+                              className="px-3 py-1.5 border border-slate-300 rounded text-[13px] w-24 focus:outline-none focus:border-blue-500 bg-white"
+                            >
+                              <option value="AND">AND</option>
+                              <option value="OR">OR</option>
+                            </select>
+                          )}
                           <select
-                            value={filterType}
-                            onChange={(e: ChangeEvent<HTMLSelectElement>) => { setFilterType(e.target.value); setCurrentPageNum(1); }}
-                            className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+                            value={fc.field}
+                            onChange={e => {
+                              const updated = [...filterConditions];
+                              updated[i] = { ...updated[i], field: e.target.value };
+                              setFilterConditions(updated);
+                            }}
+                            className={`px-3 py-1.5 border border-slate-300 rounded text-[13px] focus:outline-none focus:border-blue-500 bg-white ${i === 0 ? 'flex-1 max-w-xs' : 'flex-1 max-w-[210px]'}`}
                           >
-                            <option value="all">Tất cả loại</option>
-                            <option value="standard">Tiêu chuẩn</option>
-                            <option value="reference">Tham chiếu</option>
-                            <option value="system">Hệ thống</option>
+                            <option value="code">Mã</option>
+                            <option value="name">Tên giá trị</option>
+                            <option value="description">Mô tả</option>
+                            <option value="status">Trạng thái</option>
+                            <option value="createdDate">Ngày tạo</option>
+                            <option value="createdBy">Người tạo</option>
+                            <option value="updatedDate">Ngày cập nhật</option>
+                            <option value="updatedBy">Người cập nhật</option>
                           </select>
-                          <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Trạng thái</label>
-                        <div className="relative">
                           <select
-                            value={filterStatus}
-                            onChange={(e: ChangeEvent<HTMLSelectElement>) => { setFilterStatus(e.target.value); setCurrentPageNum(1); }}
-                            className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+                            value={fc.operator}
+                            onChange={e => {
+                              const updated = [...filterConditions];
+                              updated[i] = { ...updated[i], operator: e.target.value };
+                              setFilterConditions(updated);
+                            }}
+                            className="px-3 py-1.5 border border-slate-300 rounded text-[13px] w-40 focus:outline-none focus:border-blue-500 bg-white"
                           >
-                            <option value="all">Tất cả trạng thái</option>
-                            <option value="pending">Chờ duyệt</option>
-                            <option value="approved">Đã duyệt</option>
-                            <option value="published">Đã công khai</option>
-                            <option value="unpublished">Ngừng công khai</option>
+                            <option value="=">Bằng (=)</option>
+                            <option value="!=">Khác (!=)</option>
+                            <option value="LIKE">Chứa</option>
+                            <option value=">">Lớn hơn (&gt;)</option>
+                            <option value="<">Nhỏ hơn (&lt;)</option>
                           </select>
-                          <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                          <div className="flex-1 relative">
+                            <input
+                              type="text"
+                              value={fc.value}
+                              onChange={e => {
+                                const updated = [...filterConditions];
+                                updated[i] = { ...updated[i], value: e.target.value };
+                                setFilterConditions(updated);
+                                setCurrentPageNum(1);
+                              }}
+                              placeholder="&lt;?&gt;"
+                              className="w-full px-3 py-1.5 border border-slate-300 rounded text-[13px] focus:outline-none focus:border-blue-500"
+                            />
+                          </div>
+                          <button
+                            onClick={() => {
+                              const newF = filterConditions.filter(item => item.id !== fc.id);
+                              setFilterConditions(newF);
+                              setCurrentPageNum(1);
+                            }}
+                            className="p-1.5 border border-red-200 bg-red-50 text-red-500 rounded hover:bg-red-100 transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
+                      ))}
+                      <div className="flex items-center gap-2 mt-1">
+                        <button
+                          onClick={() => { setFilterConditions(prev => [...prev, { id: Date.now().toString(), field: 'code', operator: '=', value: '', logic: 'AND' }]); setCurrentPageNum(1); }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-200 text-blue-600 rounded text-[13px] font-medium hover:bg-blue-50 bg-white transition-colors"
+                        >
+                          <Plus className="w-3.5 h-3.5" /> Thêm điều kiện
+                        </button>
+                        <button
+                          onClick={() => { setFilterConditions([]); setCurrentPageNum(1); }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 border border-slate-200 text-slate-600 rounded text-[13px] font-medium hover:bg-slate-50 bg-white transition-colors"
+                        >
+                          <X className="w-3.5 h-3.5" /> Xóa bộ lọc
+                        </button>
                       </div>
+                      {filterConditions.length === 0 && (
+                        <p className="text-[13px] text-slate-400 italic">Chưa có điều kiện lọc. Nhấn "Thêm điều kiện" để bắt đầu.</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Sort Panel */}
+                {showSortPanel && (
+                  <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-sm">
+                    <div className="flex flex-col gap-3">
+                      {sortConditions.map((sc, i) => (
+                        <div key={sc.id} className="flex items-center gap-3">
+                          {i > 0 && (
+                            <span className="text-[12px] text-slate-400 font-medium w-8 text-right shrink-0">rồi</span>
+                          )}
+                          {i === 0 && (
+                            <span className="text-[12px] text-slate-500 font-semibold w-8 text-right shrink-0">Theo</span>
+                          )}
+                          <select
+                            value={sc.field}
+                            onChange={e => {
+                              const updated = [...sortConditions];
+                              updated[i] = { ...updated[i], field: e.target.value as SortCondition['field'] };
+                              setSortConditions(updated);
+                            }}
+                            className="flex-1 max-w-xs px-3 py-1.5 border border-slate-300 rounded text-[13px] focus:outline-none focus:border-blue-500 bg-white"
+                          >
+                            <option value="name">Tên giá trị</option>
+                            <option value="code">Mã</option>
+                            <option value="createdDate">Ngày tạo</option>
+                            <option value="updatedDate">Ngày cập nhật</option>
+                          </select>
+                          <select
+                            value={sc.order}
+                            onChange={e => {
+                              const updated = [...sortConditions];
+                              updated[i] = { ...updated[i], order: e.target.value as 'ASC' | 'DESC' };
+                              setSortConditions(updated);
+                            }}
+                            className="px-3 py-1.5 border border-slate-300 rounded text-[13px] w-44 focus:outline-none focus:border-blue-500 bg-white"
+                          >
+                            <option value="ASC">Tăng dần (A → Z)</option>
+                            <option value="DESC">Giảm dần (Z → A)</option>
+                          </select>
+                          <button
+                            onClick={() => setSortConditions(prev => prev.filter(s => s.id !== sc.id))}
+                            className="p-1.5 border border-red-200 bg-red-50 text-red-500 rounded hover:bg-red-100 transition-colors"
+                            title="Xóa điều kiện"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                      <div className="flex items-center gap-2 mt-1">
+                        <button
+                          onClick={() => setSortConditions(prev => [...prev, { id: Date.now().toString(), field: 'name', order: 'ASC' }])}
+                          className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-200 text-blue-600 rounded text-[13px] font-medium hover:bg-blue-50 bg-white transition-colors"
+                        >
+                          <Plus className="w-3.5 h-3.5" /> Thêm điều kiện
+                        </button>
+                        <button
+                          onClick={() => setSortConditions([])}
+                          className="flex items-center gap-1.5 px-3 py-1.5 border border-slate-200 text-slate-600 rounded text-[13px] font-medium hover:bg-slate-50 bg-white transition-colors"
+                        >
+                          <X className="w-3.5 h-3.5" /> Xóa bộ lọc
+                        </button>
+                      </div>
+                      {sortConditions.length === 0 && (
+                        <p className="text-[13px] text-slate-400 italic">Chưa có điều kiện sắp xếp. Nhấn "Thêm điều kiện" để bắt đầu.</p>
+                      )}
                     </div>
                   </div>
                 )}
@@ -873,6 +1108,11 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                         <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Mã</th>
                         <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên giá trị</th>
                         <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Mô tả</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Trạng thái</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Ngày tạo</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Người tạo</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Ngày cập nhật</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Người cập nhật</th>
                         <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-32">Thao tác</th>
                       </tr>
                     </thead>
@@ -927,6 +1167,21 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                                   ) : (
                                     category.description
                                   )}
+                                </td>
+                                <td className="px-6 py-4 text-center">
+                                  {getStatusBadge(category.status)}
+                                </td>
+                                <td className="px-6 py-4 text-[13px] text-slate-600 font-normal">
+                                  {category.createdDate}
+                                </td>
+                                <td className="px-6 py-4 text-[13px] text-slate-600 font-normal">
+                                  {category.createdBy || '—'}
+                                </td>
+                                <td className="px-6 py-4 text-[13px] text-slate-600 font-normal">
+                                  {category.updatedDate || '—'}
+                                </td>
+                                <td className="px-6 py-4 text-[13px] text-slate-600 font-normal">
+                                  {category.updatedBy || '—'}
                                 </td>
                                 <td className="px-6 py-4 text-center">
                                   {isEditing ? (
@@ -1006,6 +1261,21 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                                 />
                               </td>
                               <td className="px-6 py-4 text-center">
+                                <span className="px-3 py-1 bg-yellow-50 text-yellow-700 border border-yellow-200 text-xs rounded-full whitespace-nowrap">Chờ phê duyệt</span>
+                              </td>
+                              <td className="px-6 py-4 text-[13px] text-slate-400 italic">
+                                Tự động
+                              </td>
+                              <td className="px-6 py-4 text-[13px] text-slate-400 italic">
+                                Nguyễn Văn A
+                              </td>
+                              <td className="px-6 py-4 text-[13px] text-slate-400 italic">
+                                Tự động
+                              </td>
+                              <td className="px-6 py-4 text-[13px] text-slate-400 italic">
+                                Nguyễn Văn A
+                              </td>
+                              <td className="px-6 py-4 text-center">
                                 <div className="flex items-center justify-center gap-1.5">
                                   <button
                                     onClick={handleSaveInlineAdd}
@@ -1028,7 +1298,7 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                         </>
                       ) : (
                         <tr>
-                          <td colSpan={5} className="px-6 py-8 text-center text-[13px] text-slate-400 italic">Không tìm thấy dữ liệu</td>
+                          <td colSpan={10} className="px-6 py-8 text-center text-[13px] text-slate-400 italic">Không tìm thấy dữ liệu</td>
                         </tr>
                       )}
                     </tbody>
@@ -1196,10 +1466,11 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                         <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">STT</th>
                         <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Mã bản ghi</th>
                         <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Tên bản ghi</th>
-                        <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Các trường thay đổi</th>
-                        <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Người thay đổi</th>
-                        <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Thời gian thay đổi</th>
-                        <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Thời gian duyệt</th>
+                        <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Mô tả</th>
+                        <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Ngày tạo</th>
+                        <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Người tạo</th>
+                        <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Người cập nhật</th>
+                        <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Ngày cập nhật</th>
                         <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Trạng thái</th>
                         <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Thao tác</th>
                       </tr>
@@ -1227,55 +1498,47 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                           <td className="px-6 py-4">
                             <div className="text-sm text-slate-900">{request.recordName}</div>
                           </td>
-                          <td className="px-6 py-4">
-                            <div className="flex flex-wrap gap-1">
-                              {request.changedFields.map((field: string, idx: number) => (
-                                <span key={idx} className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded">
-                                  {field}
-                                </span>
-                              ))}
-                            </div>
+                          <td className="px-6 py-4 text-sm text-slate-600">
+                            {request.description || '—'}
                           </td>
+                          <td className="px-6 py-4 text-sm text-slate-600">{request.createdDate}</td>
+                          <td className="px-6 py-4 text-sm text-slate-600">{request.createdBy}</td>
                           <td className="px-6 py-4 text-sm text-slate-600">{request.changedBy}</td>
                           <td className="px-6 py-4 text-sm text-slate-600">{request.changedDate}</td>
-                          <td className="px-6 py-4 text-sm text-slate-600">
-                            {request.approvedDate ? (
-                              <div>
-                                <div>{request.approvedDate}</div>
-                                <div className="text-xs text-slate-500">bởi {request.approvedBy}</div>
-                              </div>
-                            ) : (
-                              <span className="text-slate-400">—</span>
-                            )}
-                          </td>
-                          <td className="px-6 py-4">{getApprovalStatusBadge(request.status)}</td>
+                          <td className="px-6 py-4 whitespace-nowrap">{getApprovalStatusBadge(request.status)}</td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={() => handleViewApprovalDetail(request)}
-                                className="p-1 text-blue-600 hover:bg-blue-50 rounded"
+                                className="p-1 text-blue-600 hover:bg-blue-50 rounded cursor-pointer transition-colors"
                                 title="Xem chi tiết"
                               >
                                 <Eye className="w-4 h-4" />
                               </button>
-                              {request.status === 'pending' && (
-                                <>
-                                  <button
-                                    onClick={() => handleApprove(request.id)}
-                                    className="p-1 text-green-600 hover:bg-green-50 rounded"
-                                    title="Phê duyệt"
-                                  >
-                                    <CheckCircle2 className="w-4 h-4" />
-                                  </button>
-                                  <button
-                                    onClick={() => handleReject(request.id)}
-                                    className="p-1 text-red-600 hover:bg-red-50 rounded"
-                                    title="Từ chối"
-                                  >
-                                    <XCircle className="w-4 h-4" />
-                                  </button>
-                                </>
-                              )}
+                              <button
+                                onClick={() => request.status === 'pending' && handleApprove(request.id)}
+                                disabled={request.status !== 'pending'}
+                                className={`p-1 rounded transition-colors ${
+                                  request.status === 'pending'
+                                    ? 'text-green-600 hover:bg-green-50 cursor-pointer'
+                                    : 'text-slate-300 cursor-not-allowed'
+                                }`}
+                                title={request.status === 'pending' ? "Phê duyệt" : "Đã xử lý"}
+                              >
+                                <CheckCircle2 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => request.status === 'pending' && handleReject(request.id)}
+                                disabled={request.status !== 'pending'}
+                                className={`p-1 rounded transition-colors ${
+                                  request.status === 'pending'
+                                    ? 'text-red-600 hover:bg-red-50 cursor-pointer'
+                                    : 'text-slate-300 cursor-not-allowed'
+                                }`}
+                                title={request.status === 'pending' ? "Từ chối" : "Đã xử lý"}
+                              >
+                                <XCircle className="w-4 h-4" />
+                              </button>
                             </div>
                           </td>
                         </tr>
@@ -1373,6 +1636,117 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
             </div>
           )}
 
+      {activeTab === 'publish' && (
+        <div className="space-y-6">
+          {/* Banner trạng thái công khai */}
+          <div className={`p-6 rounded-xl border flex items-center justify-between shadow-sm transition-all ${
+            publishStatus === 'published'
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+              : publishStatus === 'stopped'
+              ? 'bg-red-50 border-red-200 text-red-950'
+              : 'bg-slate-50 border-slate-200 text-slate-900'
+          }`}>
+            <div className="flex items-center gap-4">
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                publishStatus === 'published' ? 'bg-emerald-500 text-white' : publishStatus === 'stopped' ? 'bg-red-500 text-white' : 'bg-slate-300 text-slate-600'
+              }`}>
+                {publishStatus === 'published' ? <Globe className="w-6 h-6" /> : <Lock className="w-6 h-6" />}
+              </div>
+              <div>
+                <h4 className="font-bold text-[14px]">
+                  Trạng thái: {publishStatus === 'published' ? 'ĐÃ CÔNG KHAI' : publishStatus === 'stopped' ? 'NGỪNG CÔNG KHAI' : 'CHƯA CÔNG KHAI'}
+                </h4>
+                <p className="text-[13px] text-slate-500 mt-1">
+                  {publishStatus === 'published' && (
+                    <>
+                      Phạm vi chia sẻ: <strong>{shareScope === 'internal' ? 'Nội bộ' : shareScope === 'extended' ? 'Mở rộng' : 'Toàn dân'}</strong> | Người thực hiện: <strong>{publishActionInfo.user}</strong> | Ngày thực hiện: <strong>{publishActionInfo.date}</strong>
+                    </>
+                  )}
+                  {publishStatus === 'stopped' && (
+                    <>
+                      Người thực hiện: <strong>{publishActionInfo.user}</strong> | Ngày thực hiện: <strong>{publishActionInfo.date}</strong> | Lý do: <span className="italic text-red-700 font-medium">"{publishActionInfo.reason || '—'}"</span>
+                    </>
+                  )}
+                  {publishStatus === 'unpublished' && (
+                    'Danh mục này hiện chưa được công khai ra ngoài hệ thống.'
+                  )}
+                </p>
+              </div>
+            </div>
+            <div>
+              {publishStatus === 'published' ? (
+                <button
+                  onClick={() => setShowUnpublishModal(true)}
+                  className="px-4 py-2 border border-red-200 bg-white text-red-600 rounded-lg hover:bg-red-50 font-medium text-[13px] transition-colors cursor-pointer active:scale-95 flex items-center gap-2"
+                >
+                  <XCircle className="w-4 h-4" />
+                  Hủy công khai
+                </button>
+              ) : (
+                <button
+                  onClick={() => setShowPublishModal(true)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-[13px] transition-colors cursor-pointer active:scale-95 flex items-center gap-2"
+                >
+                  <Globe className="w-4 h-4" />
+                  Công khai
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Tiêu đề phần danh sách */}
+          <div>
+            <h3 className="text-lg text-slate-900 font-semibold">Các trường dữ liệu của danh mục</h3>
+            <p className="text-sm text-slate-500 mt-1">Danh sách giá trị dữ liệu hiện có trong danh mục hệ thống</p>
+          </div>
+
+          {/* Table hiển thị dữ liệu không cần cột thao tác */}
+          <div className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-slate-200 bg-slate-50">
+                    <th className="px-6 py-4 text-left text-[13px] font-semibold text-slate-700 whitespace-nowrap">STT</th>
+                    <th className="px-6 py-4 text-left text-[13px] font-semibold text-slate-700 whitespace-nowrap">Mã</th>
+                    <th className="px-6 py-4 text-left text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên giá trị</th>
+                    <th className="px-6 py-4 text-left text-[13px] font-semibold text-slate-700 whitespace-nowrap">Mô tả</th>
+                    <th className="px-6 py-4 text-left text-[13px] font-semibold text-slate-700 whitespace-nowrap">Trạng thái</th>
+                    <th className="px-6 py-4 text-left text-[13px] font-semibold text-slate-700 whitespace-nowrap">Ngày tạo</th>
+                    <th className="px-6 py-4 text-left text-[13px] font-semibold text-slate-700 whitespace-nowrap">Người tạo</th>
+                    <th className="px-6 py-4 text-left text-[13px] font-semibold text-slate-700 whitespace-nowrap">Ngày cập nhật</th>
+                    <th className="px-6 py-4 text-left text-[13px] font-semibold text-slate-700 whitespace-nowrap">Người cập nhật</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {categories.map((cat, idx) => (
+                    <tr key={cat.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-6 py-4 text-sm text-slate-900">{idx + 1}</td>
+                      <td className="px-6 py-4 text-sm">
+                        <code className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">
+                          {cat.code}
+                        </code>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-slate-900 font-medium">{cat.name}</td>
+                      <td className="px-6 py-4 text-sm text-slate-600">{cat.description || '—'}</td>
+                      <td className="px-6 py-4 text-sm whitespace-nowrap">{getStatusBadge(cat.status)}</td>
+                      <td className="px-6 py-4 text-sm text-slate-600">{cat.createdDate}</td>
+                      <td className="px-6 py-4 text-sm text-slate-600">{cat.createdBy || '—'}</td>
+                      <td className="px-6 py-4 text-sm text-slate-600">{cat.updatedDate || '—'}</td>
+                      <td className="px-6 py-4 text-sm text-slate-600">{cat.updatedBy || '—'}</td>
+                    </tr>
+                  ))}
+                  {categories.length === 0 && (
+                    <tr>
+                      <td colSpan={9} className="px-6 py-8 text-center text-[13px] text-slate-400 italic">Không tìm thấy dữ liệu</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
         </div>
 
       {/* Add/Edit Modal */}
@@ -1389,6 +1763,172 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
           setTimeout(() => setShowSuccessNotification(false), 3000);
         }}
       />
+
+      {showPublishModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-md overflow-hidden transform scale-100 transition-all">
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                <Globe className="w-5 h-5 text-blue-600" />
+                Công khai danh mục
+              </h3>
+              <button
+                onClick={() => setShowPublishModal(false)}
+                className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                title="Đóng"
+              >
+                <XCircle className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4 text-[13px]">
+              <p className="text-slate-600 font-medium leading-relaxed">
+                Vui lòng lựa chọn phạm vi chia sẻ (phân quyền công khai) cho danh mục <strong>{categoryName}</strong>:
+              </p>
+              <div className="space-y-3">
+                <label className="flex items-start gap-3 p-3 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
+                  <input
+                    type="radio"
+                    name="shareScope"
+                    checked={shareScope === 'internal'}
+                    onChange={() => setShareScope('internal')}
+                    className="mt-0.5 w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"
+                  />
+                  <div>
+                    <strong className="block text-slate-800">Nội bộ</strong>
+                    <span className="text-slate-500 text-[12px] mt-0.5 block">Dữ liệu chỉ được chia sẻ và sử dụng trong nội bộ đơn vị, cơ quan.</span>
+                  </div>
+                </label>
+                
+                <label className="flex items-start gap-3 p-3 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
+                  <input
+                    type="radio"
+                    name="shareScope"
+                    checked={shareScope === 'extended'}
+                    onChange={() => setShareScope('extended')}
+                    className="mt-0.5 w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"
+                  />
+                  <div>
+                    <strong className="block text-slate-800">Mở rộng</strong>
+                    <span className="text-slate-500 text-[12px] mt-0.5 block">Chia sẻ cho các đơn vị liên kết, cơ quan thuộc Bộ Tư pháp.</span>
+                  </div>
+                </label>
+                
+                <label className="flex items-start gap-3 p-3 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
+                  <input
+                    type="radio"
+                    name="shareScope"
+                    checked={shareScope === 'public'}
+                    onChange={() => setShareScope('public')}
+                    className="mt-0.5 w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"
+                  />
+                  <div>
+                    <strong className="block text-slate-800">Toàn dân</strong>
+                    <span className="text-slate-500 text-[12px] mt-0.5 block">Dữ liệu mở, cho phép mọi người dân và doanh nghiệp khai thác tự do.</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
+              <button
+                onClick={() => setShowPublishModal(false)}
+                className="px-4 py-2 border border-slate-300 text-slate-700 bg-white rounded-lg hover:bg-slate-50 font-medium text-[13px] transition-colors cursor-pointer active:scale-95"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                onClick={() => {
+                  setPublishStatus('published');
+                  setPublishActionInfo({
+                    user: 'Nguyễn Văn A',
+                    date: new Date().toLocaleDateString('vi-VN')
+                  });
+                  setShowPublishModal(false);
+                  setSuccessNotificationMessage(`Công khai danh mục thành công với phạm vi: ${shareScope === 'internal' ? 'Nội bộ' : shareScope === 'extended' ? 'Mở rộng' : 'Toàn dân'}`);
+                  setShowSuccessNotification(true);
+                  setTimeout(() => setShowSuccessNotification(false), 3000);
+                }}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-[13px] transition-colors cursor-pointer active:scale-95 flex items-center gap-1.5"
+              >
+                <Check className="w-4 h-4" />
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showUnpublishModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-md overflow-hidden transform scale-100 transition-all">
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+              <h3 className="text-sm font-bold text-red-700 uppercase tracking-wider flex items-center gap-2">
+                <XCircle className="w-5 h-5 text-red-600" />
+                Hủy công khai danh mục
+              </h3>
+              <button
+                onClick={() => {
+                  setShowUnpublishModal(false);
+                  setUnpublishReason('');
+                }}
+                className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                title="Đóng"
+              >
+                <XCircle className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4 text-[13px]">
+              <p className="text-slate-600 font-medium leading-relaxed">
+                Bạn có chắc chắn muốn hủy công khai danh mục <strong>{categoryName}</strong>? Vui lòng nhập lý do hủy công khai:
+              </p>
+              <div>
+                <label className="block text-slate-700 font-semibold mb-2">Lý do hủy công khai <span className="text-red-500">*</span></label>
+                <textarea
+                  title="Lý do hủy công khai"
+                  value={unpublishReason}
+                  onChange={(e) => setUnpublishReason(e.target.value)}
+                  rows={4}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  placeholder="Nhập lý do chi tiết..."
+                />
+              </div>
+            </div>
+            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowUnpublishModal(false);
+                  setUnpublishReason('');
+                }}
+                className="px-4 py-2 border border-slate-300 text-slate-700 bg-white rounded-lg hover:bg-slate-50 font-medium text-[13px] transition-colors cursor-pointer active:scale-95"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                onClick={() => {
+                  if (!unpublishReason.trim()) {
+                    alert('Vui lòng nhập lý do hủy công khai!');
+                    return;
+                  }
+                  setPublishStatus('stopped');
+                  setPublishActionInfo({
+                    user: 'Nguyễn Văn A',
+                    date: new Date().toLocaleDateString('vi-VN'),
+                    reason: unpublishReason
+                  });
+                  setShowUnpublishModal(false);
+                  setSuccessNotificationMessage(`Đã hủy công khai danh mục thành công!`);
+                  setShowSuccessNotification(true);
+                  setTimeout(() => setShowSuccessNotification(false), 3000);
+                  setUnpublishReason('');
+                }}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium text-[13px] transition-colors cursor-pointer active:scale-95 flex items-center gap-1.5"
+              >
+                <Check className="w-4 h-4" />
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Archive Modal */}
       {showArchiveModal && selectedCategory && (
@@ -2811,112 +3351,6 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
  }} className="px-5 py-2.5 bg-blue-600 rounded-xl text-sm text-white hover:bg-blue-700 flex items-center gap-2">
  <Save className="w-4 h-4"/> Lưu phiên bản
  </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Advanced Search Modal */}
-      {showAdvancedSearch && (
-        <div 
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999] p-4"
-          style={{ zIndex: 99999 }}
-          onClick={() => setShowAdvancedSearch(false)}
-        >
-          <div 
-            className="bg-white rounded-xl shadow-2xl max-w-2xl w-full"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between p-6 border-b border-slate-100">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
-                  <Filter className="w-5 h-5 text-green-600" />
-                </div>
-                <h3 className="text-lg font-semibold text-slate-800">Tìm kiếm nâng cao</h3>
-              </div>
-              <button
-                title="Đóng"
-                onClick={() => setShowAdvancedSearch(false)}
-                className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded-lg transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-6">
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Chủ đề (Loại danh mục)
-                  </label>
-                  <select
-                    title="Loại danh mục"
-                    value={filterType}
-                    onChange={(e) => setFilterType(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                  >
-                    <option value="all">Tất cả</option>
-                    <option value="standard">Tiêu chuẩn</option>
-                    <option value="reference">Tham chiếu</option>
-                    <option value="system">Hệ thống</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Sắp xếp theo
-                  </label>
-                  <select
-                    title="Sắp xếp theo"
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                  >
-                    <option value="newest">Ngày tạo mới nhất</option>
-                    <option value="oldest">Ngày tạo cũ nhất</option>
-                    <option value="name-asc">Tên A-Z</option>
-                    <option value="name-desc">Tên Z-A</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Trạng thái
-                  </label>
-                  <select
-                    title="Trạng thái"
-                    value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                  >
-                    <option value="all">Tất cả trạng thái</option>
-                    <option value="pending">Trình duyệt</option>
-                    <option value="approved">Đã phê duyệt</option>
-                    <option value="published">Công khai</option>
-                    <option value="unpublished">Hủy công khai</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 border-t border-slate-100 bg-slate-50 rounded-b-xl flex justify-end gap-3">
-              <button
-                onClick={() => {
-                  setFilterType('all');
-                  setFilterStatus('all');
-                  setSortBy('newest');
-                }}
-                className="px-6 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium text-sm"
-              >
-                Đặt lại
-              </button>
-              <button
-                onClick={() => setShowAdvancedSearch(false)}
-                className="px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm flex items-center gap-2"
-              >
-                <Filter className="w-4 h-4" />
-                Áp dụng bộ lọc
-              </button>
             </div>
           </div>
         </div>

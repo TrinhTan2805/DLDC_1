@@ -433,7 +433,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
 
   // Hành động Thêm mới: Sử dụng Wizard
   const handleAdd = () => {
-    setFormData({ name: '', dataType: 'standard', managingAgency: '', scope: 'national', description: '' });
+    setFormData({ code: '', name: '', dataType: 'standard', managingAgency: '', scope: 'national', description: '' });
     setEditingEntity(null);
     setWizardEntityId(null);
     setWizardStep(1);
@@ -442,7 +442,11 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
   };
 
   const handleSaveStep1 = (action: 'draft' | 'submit' | 'next' | 'next3') => {
-    if (!formData.name) {
+    if (!formData.code?.trim()) {
+      alert('Vui lòng nhập mã danh mục!');
+      return;
+    }
+    if (!formData.name?.trim()) {
       alert('Vui lòng nhập tên danh mục!');
       return;
     }
@@ -461,7 +465,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
       const newEntity: MasterDataEntity = {
         ...(formData as MasterDataEntity),
         id: newId,
-        code: `MD-NEW-${newId.padStart(3, '0')}`,
+        code: formData.code.trim(),
         createdDate: new Date().toLocaleDateString('vi-VN'),
         updatedDate: new Date().toLocaleDateString('vi-VN'),
         createdBy: 'Admin',

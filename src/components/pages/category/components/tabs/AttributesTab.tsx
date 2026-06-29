@@ -306,9 +306,6 @@ export function AttributesTab({
     switch (src) {
       case 'dldc':
         return 'Đồng bộ Kho DLDC';
-      case 'lgsp':
-      case 'ndxp':
-        return 'Kết nối API (NDXP/LGSP)';
       case 'manual':
       default:
         return 'Tự cập nhật trực tiếp';
@@ -671,13 +668,7 @@ export function AttributesTab({
               {!isViewOnly && (
                 <button
                   type="button"
-                  onClick={() => {
-                    if (entityDataSource === 'dldc' || entityDataSource === 'lgsp' || entityDataSource === 'ndxp') {
-                      setShowSourceWarning(true);
-                    } else {
-                      onAddAttribute();
-                    }
-                  }}
+                  onClick={onAddAttribute}
                   className="flex-1 md:flex-none px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[13px] font-medium flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
                   title="Thêm trường dữ liệu mới"
                 >
@@ -1160,311 +1151,6 @@ export function AttributesTab({
             </div>
           )}
 
-          {/* ── Mode: API Connection ── */}
-          {(dataSource === 'lgsp' || dataSource === 'ndxp') && (
-            <div className="space-y-4">
-              {/* Banner */}
-              <div className="flex items-start gap-3 bg-violet-50 border border-violet-200 rounded-xl p-4">
-                <Globe className="w-5 h-5 text-violet-600 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-[13px] font-semibold text-violet-800">Kết nối API {dataSource === 'lgsp' ? '(NDXP/LGSP)' : '(NDXP)'}</p>
-                  <p className="text-[13px] text-violet-600 mt-0.5">Cấu hình endpoint API để đồng bộ dữ liệu tự động vào danh mục.</p>
-                </div>
-              </div>
-
-              {/* API Config form */}
-              <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
-                <div className="px-5 py-4 border-b border-slate-100 bg-slate-50">
-                  <p className="text-[13px] font-semibold text-slate-700">Thông tin kết nối</p>
-                </div>
-                <div className="p-5 space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="block text-[13px] font-medium text-slate-600">Hệ thống cung cấp</label>
-                      <input
-                        type="text"
-                        value={wizardConfig?.apiSystem || ''}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => onWizardConfigChange?.({ ...wizardConfig, apiSystem: e.target.value })}
-                        placeholder="VD: Cổng DVC Quốc gia"
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="block text-[13px] font-medium text-slate-600">Đơn vị quản lý API</label>
-                      <input
-                        type="text"
-                        value={wizardConfig?.apiManagingUnit || ''}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => onWizardConfigChange?.({ ...wizardConfig, apiManagingUnit: e.target.value })}
-                        placeholder="VD: Bộ Tư pháp"
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="block text-[13px] font-medium text-slate-600">API Endpoint URL <span className="text-red-500">*</span></label>
-                    <input
-                      type="url"
-                      value={wizardConfig?.apiEndpoint || ''}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                        setApiEndpointError(false);
-                        onWizardConfigChange?.({ ...wizardConfig, apiEndpoint: e.target.value });
-                      }}
-                      placeholder="https://api.example.gov.vn/v1/data"
-                      className={`w-full px-3 py-2 border rounded-lg text-[13px] font-mono focus:outline-none focus:ring-2 ${
-                        apiEndpointError
-                          ? 'border-red-400 focus:ring-red-500/20 focus:border-red-500'
-                          : 'border-slate-200 focus:ring-violet-500/20 focus:border-violet-500'
-                      }`}
-                    />
-                    {apiEndpointError && (
-                      <p className="text-[13px] text-red-500 mt-1">Vui lòng nhập URL endpoint trước khi lưu.</p>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="block text-[13px] font-medium text-slate-600">Phương thức HTTP</label>
-                      <div className="relative">
-                        <select
-                          title="Phương thức HTTP"
-                          value={wizardConfig?.apiMethod || 'GET'}
-                          onChange={(e: ChangeEvent<HTMLSelectElement>) => onWizardConfigChange?.({ ...wizardConfig, apiMethod: e.target.value })}
-                          className="w-full pl-3 pr-8 py-2 border border-slate-200 rounded-lg text-[13px] bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
-                        >
-                          <option value="GET">GET</option>
-                          <option value="POST">POST</option>
-                          <option value="PUT">PUT</option>
-                        </select>
-                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                      </div>
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="block text-[13px] font-medium text-slate-600">Loại xác thực</label>
-                      <div className="relative">
-                        <select
-                          title="Loại xác thực"
-                          value={apiAuthType}
-                          onChange={(e: ChangeEvent<HTMLSelectElement>) => setApiAuthType(e.target.value as any)}
-                          className="w-full pl-3 pr-8 py-2 border border-slate-200 rounded-lg text-[13px] bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
-                        >
-                          <option value="none">Không xác thực</option>
-                          <option value="bearer">Bearer Token</option>
-                          <option value="apikey">API Key</option>
-                        </select>
-                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Auth credentials */}
-                  {apiAuthType === 'bearer' && (
-                    <div className="space-y-1.5 p-4 bg-violet-50/50 rounded-xl border border-violet-100">
-                      <label className="flex items-center gap-1.5 text-[13px] font-medium text-slate-600">
-                        <Lock className="w-3.5 h-3.5" /> Bearer Token
-                      </label>
-                      <input
-                        type="password"
-                        value={apiBearerToken}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => setApiBearerToken(e.target.value)}
-                        placeholder="eyJhbGci..."
-                        className="w-full px-3 py-2 border border-violet-200 rounded-lg text-[13px] font-mono focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 bg-white"
-                      />
-                    </div>
-                  )}
-                  {apiAuthType === 'apikey' && (
-                    <div className="grid grid-cols-2 gap-3 p-4 bg-violet-50/50 rounded-xl border border-violet-100">
-                      <div className="space-y-1.5">
-                        <label className="flex items-center gap-1.5 text-[13px] font-medium text-slate-600">
-                          <Lock className="w-3.5 h-3.5" /> Tên tham số
-                        </label>
-                        <input
-                          type="text"
-                          value={apiKeyName}
-                          onChange={(e: ChangeEvent<HTMLInputElement>) => setApiKeyName(e.target.value)}
-                          placeholder="X-API-Key"
-                          className="w-full px-3 py-2 border border-violet-200 rounded-lg text-[13px] font-mono focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 bg-white"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="block text-[13px] font-medium text-slate-600">Giá trị</label>
-                        <input
-                          type="password"
-                          value={apiKeyValue}
-                          onChange={(e: ChangeEvent<HTMLInputElement>) => setApiKeyValue(e.target.value)}
-                          placeholder="••••••••"
-                          className="w-full px-3 py-2 border border-violet-200 rounded-lg text-[13px] font-mono focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 bg-white"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Params API */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <label className="block text-[13px] font-medium text-slate-600">Params API</label>
-                      <button
-                        type="button"
-                        onClick={() => setApiParams(prev => [...prev, { key: '', value: '' }])}
-                        className="flex items-center gap-1 px-2.5 py-1 border border-slate-200 text-slate-600 text-[13px] rounded-lg hover:bg-slate-50 transition-colors"
-                      >
-                        <Plus className="w-3.5 h-3.5" /> Thêm tham số
-                      </button>
-                    </div>
-                    <div className="border border-slate-200 rounded-lg overflow-hidden">
-                      <table className="w-full text-[13px]" style={{ tableLayout: 'fixed' }}>
-                        <colgroup>
-                          <col style={{ width: '44%' }} />
-                          <col style={{ width: '50%' }} />
-                          <col style={{ width: '6%' }} />
-                        </colgroup>
-                        <thead className="bg-slate-50 border-b border-slate-200">
-                          <tr>
-                            <th className="px-3 py-2 text-left text-[13px] font-medium text-slate-500">Key</th>
-                            <th className="px-3 py-2 text-left text-[13px] font-medium text-slate-500">Value</th>
-                            <th className="px-3 py-2" />
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                          {apiParams.map((p, i) => (
-                            <tr key={i} className="hover:bg-slate-50/50">
-                              <td className="px-3 py-2">
-                                <input
-                                  type="text"
-                                  value={p.key}
-                                  onChange={(e: ChangeEvent<HTMLInputElement>) => setApiParams(prev => prev.map((r, idx) => idx === i ? { ...r, key: e.target.value } : r))}
-                                  placeholder="param_name"
-                                  className="w-full min-w-0 px-2 py-1.5 border border-slate-200 rounded-lg text-[13px] font-mono focus:outline-none focus:ring-1 focus:ring-violet-400/40 focus:border-violet-400"
-                                />
-                              </td>
-                              <td className="px-3 py-2">
-                                <input
-                                  type="text"
-                                  value={p.value}
-                                  onChange={(e: ChangeEvent<HTMLInputElement>) => setApiParams(prev => prev.map((r, idx) => idx === i ? { ...r, value: e.target.value } : r))}
-                                  placeholder="value"
-                                  className="w-full min-w-0 px-2 py-1.5 border border-slate-200 rounded-lg text-[13px] font-mono focus:outline-none focus:ring-1 focus:ring-violet-400/40 focus:border-violet-400"
-                                />
-                              </td>
-                              <td className="px-3 py-2 text-center">
-                                <button
-                                  type="button"
-                                  onClick={() => setApiParams(prev => prev.length === 1 ? [{ key: '', value: '' }] : prev.filter((_, idx) => idx !== i))}
-                                  className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
-                                >
-                                  <X className="w-3.5 h-3.5" />
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-
-                  {/* Headers API */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <label className="block text-[13px] font-medium text-slate-600">Headers API</label>
-                      <button
-                        type="button"
-                        onClick={() => setApiHeaders(prev => [...prev, { key: '', value: '' }])}
-                        className="flex items-center gap-1 px-2.5 py-1 border border-slate-200 text-slate-600 text-[13px] rounded-lg hover:bg-slate-50 transition-colors"
-                      >
-                        <Plus className="w-3.5 h-3.5" /> Thêm header
-                      </button>
-                    </div>
-                    <div className="border border-slate-200 rounded-lg overflow-hidden">
-                      <table className="w-full text-[13px]" style={{ tableLayout: 'fixed' }}>
-                        <colgroup>
-                          <col style={{ width: '44%' }} />
-                          <col style={{ width: '50%' }} />
-                          <col style={{ width: '6%' }} />
-                        </colgroup>
-                        <thead className="bg-slate-50 border-b border-slate-200">
-                          <tr>
-                            <th className="px-3 py-2 text-left text-[13px] font-medium text-slate-500">Key</th>
-                            <th className="px-3 py-2 text-left text-[13px] font-medium text-slate-500">Value</th>
-                            <th className="px-3 py-2" />
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                          {apiHeaders.map((h, i) => (
-                            <tr key={i} className="hover:bg-slate-50/50">
-                              <td className="px-3 py-2">
-                                <input
-                                  type="text"
-                                  value={h.key}
-                                  onChange={(e: ChangeEvent<HTMLInputElement>) => setApiHeaders(prev => prev.map((r, idx) => idx === i ? { ...r, key: e.target.value } : r))}
-                                  placeholder="Header-Name"
-                                  className="w-full min-w-0 px-2 py-1.5 border border-slate-200 rounded-lg text-[13px] font-mono focus:outline-none focus:ring-1 focus:ring-violet-400/40 focus:border-violet-400"
-                                />
-                              </td>
-                              <td className="px-3 py-2">
-                                <input
-                                  type="text"
-                                  value={h.value}
-                                  onChange={(e: ChangeEvent<HTMLInputElement>) => setApiHeaders(prev => prev.map((r, idx) => idx === i ? { ...r, value: e.target.value } : r))}
-                                  placeholder="value"
-                                  className="w-full min-w-0 px-2 py-1.5 border border-slate-200 rounded-lg text-[13px] font-mono focus:outline-none focus:ring-1 focus:ring-violet-400/40 focus:border-violet-400"
-                                />
-                              </td>
-                              <td className="px-3 py-2 text-center">
-                                <button
-                                  type="button"
-                                  onClick={() => setApiHeaders(prev => prev.length === 1 ? [{ key: '', value: '' }] : prev.filter((_, idx) => idx !== i))}
-                                  className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
-                                >
-                                  <X className="w-3.5 h-3.5" />
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-
-                  {/* Body JSON — chỉ hiện với POST/PUT */}
-                  {(wizardConfig?.apiMethod === 'POST' || wizardConfig?.apiMethod === 'PUT') && (
-                    <div className="space-y-1.5">
-                      <label className="block text-[13px] font-medium text-slate-600">
-                        Body (JSON)
-                        <span className="ml-2 text-[13px] text-slate-400 font-normal">— áp dụng cho {wizardConfig.apiMethod}</span>
-                      </label>
-                      <textarea
-                        rows={5}
-                        value={apiBody}
-                        onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setApiBody(e.target.value)}
-                        placeholder={'{\n  "key": "value"\n}'}
-                        spellCheck={false}
-                        className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] font-mono focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 resize-y bg-slate-50"
-                      />
-                    </div>
-                  )}
-
-                  {/* Info note */}
-                  <div className="flex items-start gap-2 p-3.5 bg-amber-50 border border-amber-200 rounded-xl">
-                    <AlertCircle className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
-                    <p className="text-[13px] text-amber-700">Cấu trúc trường dữ liệu sẽ được tự động ánh xạ từ schema của API sau khi kết nối thành công.</p>
-                  </div>
-
-                  <div className="flex justify-end pt-1">
-                    <button
-                      type="button"
-                      onClick={handleApiSave}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-medium transition-colors active:scale-95 ${
-                        apiSaved
-                          ? 'bg-green-600 text-white hover:bg-green-700'
-                          : 'bg-violet-600 text-white hover:bg-violet-700'
-                      }`}
-                    >
-                      <Check className="w-4 h-4" />
-                      {apiSaved ? 'Đã lưu ✓' : 'Lưu cấu hình'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* ── Mode: Manual (direct update) ── */}
           {dataSource === 'manual' && (
@@ -1719,12 +1405,12 @@ export function AttributesTab({
         <>
           {/* Current Managed Entity Info */}
           <div className={`border rounded-xl p-5 flex items-start gap-4 shadow-sm text-[13px] ${
-            (entityDataSource === 'dldc' || entityDataSource === 'lgsp' || entityDataSource === 'ndxp')
+            (entityDataSource === 'dldc')
               ? 'bg-amber-50 border-amber-200 text-amber-800'
               : 'bg-blue-50/50 border-blue-200 text-blue-800'
           }`}>
             <AlertCircle className={`w-5 h-5 mt-0.5 flex-shrink-0 ${
-              (entityDataSource === 'dldc' || entityDataSource === 'lgsp' || entityDataSource === 'ndxp')
+              (entityDataSource === 'dldc')
                 ? 'text-amber-600'
                 : 'text-blue-600'
             }`} />
@@ -1736,12 +1422,6 @@ export function AttributesTab({
               </strong>
               <span>. Nguồn dữ liệu: </span>
               <span className="font-semibold">{getDataSourceLabel(entityDataSource)}</span>
-              {(entityDataSource === 'dldc' || entityDataSource === 'lgsp' || entityDataSource === 'ndxp') && (
-                <div className="mt-1.5 font-semibold text-amber-900 flex items-center gap-1">
-                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-600"></span>
-                  Lưu ý: Không thể thêm mới trường dữ liệu thủ công đối với danh mục có nguồn đồng bộ hoặc kết nối API.
-                </div>
-              )}
             </div>
           </div>
 

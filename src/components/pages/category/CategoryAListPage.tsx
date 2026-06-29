@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { InnerSidebar } from '../collection/InnerSidebar';
 import { CategoryPage } from './CategoryPage';
 
@@ -13,7 +14,23 @@ const CATEGORIES = [
 ];
 
 export function CategoryAListPage() {
-  const [selectedId, setSelectedId] = useState(CATEGORIES[0].id);
+  const [searchParams] = useSearchParams();
+  const categoryParam = searchParams.get('category');
+
+  const getInitialId = () => {
+    if (categoryParam && CATEGORIES.some(c => c.id === categoryParam)) {
+      return categoryParam;
+    }
+    return CATEGORIES[0].id;
+  };
+
+  const [selectedId, setSelectedId] = useState(getInitialId());
+
+  useEffect(() => {
+    if (categoryParam && CATEGORIES.some(c => c.id === categoryParam)) {
+      setSelectedId(categoryParam);
+    }
+  }, [categoryParam]);
 
   const selected = CATEGORIES.find(c => c.id === selectedId) || CATEGORIES[0];
 

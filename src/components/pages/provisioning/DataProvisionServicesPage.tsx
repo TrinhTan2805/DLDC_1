@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Search, Server, Clock, ShieldCheck, Activity, Code, Database, FileText, Sliders, Play, Square, Check, X, Filter } from 'lucide-react';
+import { Search, Server, Clock, ShieldCheck, Activity, Code, Database, Sliders, Play, Square, Check, X, Filter } from 'lucide-react';
 import { provisionServicesData, ProvisionService } from '../../../data/provisionServicesData';
-import { ServiceDataTable } from './components/ServiceDataTable';
 import { SharedFieldsConfigModal } from './modals/SharedFieldsConfigModal';
 
 interface DataProvisionServicesPageProps {
@@ -13,43 +11,11 @@ interface DataProvisionServicesPageProps {
 }
 
 export function DataProvisionServicesPage({ category, group, title, description }: DataProvisionServicesPageProps) {
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  const getInitialTab = () => {
-    const params = new URLSearchParams(window.location.search);
-    const tab = params.get('tab');
-    if (tab === 'du_lieu' || tab === 'api') {
-      return tab as 'du_lieu' | 'api';
-    }
-    return 'du_lieu';
-  };
-
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedService, setSelectedService] = useState<ProvisionService | null>(null);
-  
+
   // State for showing API details
   const [selectedApi, setSelectedApi] = useState<any>(null);
-
-  // Tab State for Civil Registry
-  const [activeDetailTab, setActiveDetailTab] = useState<'du_lieu' | 'api'>(getInitialTab);
-
-  const handleTabChange = (tab: 'du_lieu' | 'api') => {
-    setActiveDetailTab(tab);
-    const params = new URLSearchParams(location.search);
-    params.set('tab', tab);
-    navigate(`${location.pathname}?${params.toString()}`, { replace: true });
-  };
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const tab = params.get('tab');
-    if (tab === 'du_lieu' || tab === 'api') {
-      if (tab !== activeDetailTab) {
-        setActiveDetailTab(tab);
-      }
-    }
-  }, [location.search, activeDetailTab]);
 
   // Search and Filter State
   const [searchRightText, setSearchRightText] = useState('');
@@ -237,31 +203,6 @@ export function DataProvisionServicesPage({ category, group, title, description 
                 </p>
               </div>
               
-              {/* Tabs */}
-              <div className="flex px-6 border-t border-slate-100 bg-slate-50/50">
-                <button
-                  onClick={() => handleTabChange('du_lieu')}
-                  className={`flex items-center gap-2 px-4 py-3 text-[13px] font-semibold border-b-2 transition-all cursor-pointer ${
-                    activeDetailTab === 'du_lieu'
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
-                  }`}
-                >
-                  <FileText className="w-4 h-4" />
-                  Dữ liệu cung cấp
-                </button>
-                <button
-                  onClick={() => handleTabChange('api')}
-                  className={`flex items-center gap-2 px-4 py-3 text-[13px] font-semibold border-b-2 transition-all cursor-pointer ${
-                    activeDetailTab === 'api'
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
-                  }`}
-                >
-                  <Sliders className="w-4 h-4" />
-                  Quản lý API đang lấy dữ liệu
-                </button>
-              </div>
             </div>
             
             <div className="flex-1 overflow-y-auto p-6 bg-slate-50/50">
@@ -327,12 +268,8 @@ export function DataProvisionServicesPage({ category, group, title, description 
                       </div>
                     )}
 
-                    {activeDetailTab === 'du_lieu' ? (
-                      /* Tab 1: Dữ liệu cung cấp */
-                      <ServiceDataTable service={selectedService} />
-                    ) : (
-                      /* Tab 2: Quản lý API đang lấy dữ liệu */
-                      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm animate-in fade-in duration-200">
+                    {/* Quản lý API đang lấy dữ liệu */}
+                      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
                         <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/50 flex justify-between items-center">
                           <h3 className="font-bold text-slate-800 text-base">Danh sách các API chia sẻ dữ liệu "{selectedService.name}"</h3>
                           <span className="text-xs font-semibold text-slate-500">Tìm thấy {filteredConsumerApis.length} API đang kết nối</span>
@@ -417,7 +354,6 @@ export function DataProvisionServicesPage({ category, group, title, description 
                           </table>
                         </div>
                       </div>
-                    )}
               </div>
             </div>
           </>

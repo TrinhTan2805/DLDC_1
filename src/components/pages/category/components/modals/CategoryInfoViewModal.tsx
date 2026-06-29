@@ -22,8 +22,6 @@ const scopeLabels: Record<ScopeType, string> = {
 const dataSourceLabels: Record<DataSourceType, string> = {
   manual: 'Tự cập nhật trực tiếp',
   dldc: 'Đồng bộ Kho DLDC',
-  lgsp: 'Kết nối API (NDXP/LGSP)',
-  ndxp: 'Kết nối API (NDXP/LGSP)',
 };
 
 function Field({ label, value, colSpan = 1 }: { label: string; value?: string | number | null; colSpan?: number }) {

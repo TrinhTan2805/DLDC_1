@@ -46,7 +46,7 @@ export const defaultEntities: MasterDataEntity[] = [
     updatedDate: '20/12/2024',
     createdBy: 'Hệ thống',
     version: 1,
-    dataSource: 'lgsp',
+    dataSource: 'dldc',
     databaseSystem: 'Cơ sở dữ liệu Quốc tịch / Hộ tịch'
   },
   {

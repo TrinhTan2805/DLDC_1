@@ -1,5 +1,159 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Phiên bản 2.5.66 (Ngày cập nhật: 29/06/2026)
+
+**Nội dung thay đổi:**
+1. **Thiết lập lại màn hình Báo cáo phiên bản danh mục:**
+   - Thay thế hoàn toàn giao diện xem trước biên bản (A4 paper style) cũ trong [CategoryReportVersionPage.tsx](file:///f:/BTP/DLDC_1/src/components/pages/category/reports/CategoryReportVersionPage.tsx) bằng bảng danh sách danh mục và phiên bản mới nhất có hiệu lực.
+   - Đồng bộ hóa thiết kế (toolbar tìm kiếm, phân trang, bảng grid) theo chuẩn của mục "Thiết lập danh mục > Thiết lập danh sách".
+   - Cấu trúc bảng grid hiển thị: STT, tên danh mục, Phiên bản, người tạo, ngày tạo, người cập nhật, ngày cập nhật.
+   - Tích hợp nút thao tác "Xem chi tiết" (icon Eye) liên kết trực tiếp để mở modal Lịch sử phiên bản ([EntityVersionHistoryModal.tsx](file:///f:/BTP/DLDC_1/src/components/pages/category/components/modals/EntityVersionHistoryModal.tsx)) theo đúng luồng yêu cầu.
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/reports/CategoryReportVersionPage.tsx`
+
+---
+
+## Phiên bản 2.5.65 (Ngày cập nhật: 29/06/2026)
+
+**Nội dung thay đổi:**
+1. **Cho phép thêm mới trường dữ liệu với nguồn dữ liệu Kho DLDC:**
+   - Loại bỏ kiểm tra điều kiện nguồn dữ liệu là `dldc` khi click nút "+ Thêm trường dữ liệu" trên giao diện Thiết lập cấu trúc ([AttributesTab.tsx](file:///f:/BTP/DLDC_1/src/components/pages/category/components/tabs/AttributesTab.tsx)).
+   - Cho phép mở form popup thêm mới trường dữ liệu thủ công bình thường đối với tất cả các nguồn dữ liệu bao gồm cả nguồn đồng bộ.
+   - Loại bỏ banner thông báo cảnh báo màu vàng (*Lưu ý: Không thể thêm mới trường dữ liệu thủ công đối với danh mục có nguồn đồng bộ*) trên giao diện để tránh gây hiểu nhầm cho người sử dụng.
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/components/tabs/AttributesTab.tsx`
+
+---
+
+## Phiên bản 2.5.64 (Ngày cập nhật: 29/06/2026)
+
+**Nội dung thay đổi:**
+1. **Loại bỏ nguồn dữ liệu "Kết nối API (NDXP/LGSP)":**
+   - Loại bỏ hoàn toàn nguồn dữ liệu `Kết nối API (NDXP/LGSP)` (`lgsp`/`ndxp`) trong form tạo mới/chỉnh sửa danh mục (`CategoryWizardModal.tsx`), xem chi tiết danh mục (`CategoryInfoViewModal.tsx`), và tab quản lý chung (`SetupTab.tsx`).
+   - Xóa bỏ giao diện cấu hình kết nối API ở Bước 2 (Thiết lập cấu trúc) của Wizard khi chọn nguồn dữ liệu.
+   - Cập nhật các mock data và dropdown filter ở trang Danh mục (`categoryConstants.ts`) và Khai thác báo cáo (`CategoryReportPage.tsx`) để chuyển đổi nguồn dữ liệu cũ sang `Đồng bộ Kho DLDC` (`dldc`) hoặc loại bỏ option chọn API nhằm bảo đảm tính nhất quán của hệ thống.
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/categoryTypes.ts`
+- `src/components/pages/category/categoryConstants.ts`
+- `src/components/pages/category/CategoryReportPage.tsx`
+- `src/components/pages/category/components/modals/CategoryWizardModal.tsx`
+- `src/components/pages/category/components/modals/CategoryInfoViewModal.tsx`
+- `src/components/pages/category/components/tabs/SetupTab.tsx`
+- `src/components/pages/category/components/tabs/AttributesTab.tsx`
+
+---
+
+## Phiên bản 2.5.63 (Ngày cập nhật: 29/06/2026)
+
+**Nội dung thay đổi:**
+1. **Thay thế logic lọc cũ bằng bộ lọc điều kiện động (giống màn hình CSDL đích):**
+   - Loại bỏ hoàn toàn 2 dropdown cũ: Loại danh mục và Trạng thái (kèm state `filterType`, `filterStatus`).
+   - Thay bằng mô hình lọc điều kiện động: mỗi điều kiện gồm **Trường** + **Toán tử** + **Giá trị** + logic **AND/OR** liên kết các điều kiện.
+   - Các trường có thể lọc: Mã, Tên giá trị, Mô tả, Trạng thái, Ngày tạo, Người tạo, Ngày cập nhật, Người cập nhật.
+   - Các toán tử: `Bằng (=)` / `Khác (!=)` / `Chứa` / `Lớn hơn (>)` / `Nhỏ hơn (<)`.
+   - Hỗ trợ nhiều điều kiện đồng thời — áp dụng tuần tự theo AND/OR.
+   - Nút **+ Thêm điều kiện** và **Xóa bộ lọc** để quản lý danh sách điều kiện.
+   - Kết quả lọc cập nhật realtime theo từng ký tự nhập vào giá trị.
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/CategoryPage.tsx`
+
+---
+
+## Phiên bản 2.5.62 (Ngày cập nhật: 29/06/2026)
+
+**Nội dung thay đổi:**
+1. **Thêm button Lọc và Sắp xếp vào màn hình Danh sách danh mục:**
+   - Thay thế icon lọc nhỏ bằng 2 button có text: **Lọc** (icon Filter) và **Sắp xếp** (icon ArrowUpDown), đặt cạnh button **Thêm bản ghi mới** theo đúng thiết kế chuẩn.
+   - Button **Lọc**: mở/đóng panel lọc theo Loại danh mục và Trạng thái (tái sử dụng logic lọc hiện có). Có chấm xanh nhỏ khi đang áp dụng bộ lọc.
+   - Button **Sắp xếp**: mở/đóng **Sort Panel** mới tham khảo giao diện CSDL đích. Hỗ trợ:
+     - Thêm nhiều điều kiện sắp xếp (có nút "+ Thêm điều kiện").
+     - Mỗi điều kiện gồm: chọn trường (Tên giá trị / Mã / Ngày tạo / Ngày cập nhật) và thứ tự (Tăng dần / Giảm dần).
+     - Xóa từng điều kiện hoặc xóa toàn bộ.
+     - Hiển thị thứ tự ưu tiên "Theo ... rồi ..."
+   - Logic sắp xếp: áp dụng `sortConditions` theo thứ tự ưu tiên; fallback về `sortBy` cũ khi không có điều kiện.
+   - Hai panel **Lọc** và **Sắp xếp** chỉ hiện một lần tại một thời điểm (toggle lẫn nhau).
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/CategoryPage.tsx`
+
+---
+
+## Phiên bản 2.5.61 (Ngày cập nhật: 29/06/2026)
+
+**Nội dung thay đổi:**
+1. **Thêm cột Thao tác (Xem chi tiết) vào màn hình Khai thác báo cáo:**
+   - Bổ sung cột **Thao tác** với nút **Xem chi tiết** (icon Eye, màu `blue-50/blue-600`) vào cuối bảng danh sách báo cáo.
+   - Khi click nút Xem chi tiết, hệ thống điều hướng sang màn hình **Danh sách danh mục** (`/category-list?category={id}`) và tự động chọn đúng danh mục tương ứng thông qua URL query parameter `category`.
+2. **Cập nhật Mock data theo danh mục hiện có:**
+   - Thay thế dữ liệu mock cũ (DS001–DS004) bằng 7 bản ghi tương ứng với các danh mục thực có trong hệ thống: `category-a-1` đến `category-a-7` (Danh mục giới tính, Dân tộc Việt Nam, Quốc gia/Quốc tịch, Tôn giáo, Cơ quan, Đơn vị hành chính, Quan hệ gia đình).
+   - Mỗi bản ghi được gán đầy đủ thông tin: tên, đơn vị chủ quản, phạm vi, nguồn dữ liệu, số lượng trường/liên kết, phiên bản, ngày công bố, trạng thái phê duyệt và công bố.
+3. **Cập nhật CategoryAListPage để hỗ trợ điều hướng có tham số:**
+   - Đọc query parameter `?category=...` từ URL (`useSearchParams`).
+   - Nếu `category` param hợp lệ, tự động kích hoạt và hiển thị danh mục tương ứng trong sidebar.
+4. **Kiểm tra biên dịch & Đóng gói:**
+   - Chạy lệnh đóng gói `npm run build` thành công, kiểm tra không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/CategoryReportPage.tsx`
+- `src/components/pages/category/CategoryAListPage.tsx`
+
+---
+
+## Phiên bản 2.5.60 (Ngày cập nhật: 29/06/2026)
+
+**Nội dung thay đổi:**
+1. **Cập nhật trường thông tin trên màn hình Khai thác báo cáo:**
+   - Bảng Grid: Thêm 3 cột: *Đơn vị chủ quản*, *Phạm vi*, *Nguồn dữ liệu* (được hiển thị dưới dạng Badge có border HSL bắt mắt); loại bỏ 4 cột không cần thiết: *Hiệu lực*, *Tình trạng khai thác*, *Lượt xem*, *Lượt tải*.
+   - Bộ lọc nâng cao: Loại bỏ bộ lọc *Hiệu lực*, bổ sung 2 bộ lọc *Phạm vi* và *Nguồn dữ liệu*, đổi cấu trúc lưới bộ lọc nâng cao từ 3 cột sang 4 cột (`md:grid-cols-4`).
+   - Cập nhật logic lọc theo Phạm vi (`scopeFilter`) và Nguồn dữ liệu (`dataSourceFilter`).
+2. **Kiểm tra biên dịch & Đóng gói:**
+   - Chạy lệnh đóng gói `npm run build` thành công, kiểm tra không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/CategoryReportPage.tsx`
+
+---
+
+## Phiên bản 2.5.59 (Ngày cập nhật: 29/06/2026)
+
+**Nội dung thay đổi:**
+1. **Bỏ tab "Dữ liệu cung cấp" khỏi trang Dịch vụ chia sẻ:**
+   - Xóa nút tab "Dữ liệu cung cấp" (icon FileText) khỏi thanh tab trong header của `DataProvisionServicesPage`.
+   - Xóa toàn bộ logic điều hướng tab: `getInitialTab`, `activeDetailTab` state, `handleTabChange`, `useEffect` đồng bộ URL param.
+   - Xóa ternary render — nội dung tab "Quản lý API đang lấy dữ liệu" hiển thị trực tiếp mà không cần điều kiện.
+   - Xóa các import không còn dùng: `useLocation`, `useNavigate` (react-router-dom), `FileText` (lucide), `ServiceDataTable`.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/provisioning/DataProvisionServicesPage.tsx`
+
+---
+
+## Phiên bản 2.5.58 (Ngày cập nhật: 29/06/2026)
+
+**Nội dung thay đổi:**
+1. **Redesign trang Khai thác báo cáo theo chuẩn thiết kế Thiết lập danh mục:**
+   - Thanh tìm kiếm: áp dụng style `rounded-xl`, `focus:ring-blue-500/20`, `focus:border-blue-500` đồng nhất với SetupTab.
+   - Nút "Tìm kiếm": đổi từ `emerald-600` sang `blue-600`.
+   - Nút "Tìm kiếm nâng cao": giữ nguyên text, chuyển từ modal popup sang panel inline collapsible (có indicator `!` khi filter đang active), style đồng nhất với filter toggle của SetupTab.
+   - Bộ lọc nâng cao: chuyển từ modal sang panel inline, 4 cột (Chủ đề, Hiệu lực, Trạng thái công bố, Trạng thái phê duyệt), có nút "Đặt lại" và "Áp dụng bộ lọc" màu xanh dương.
+   - Bảng grid: container `rounded-2xl shadow-sm`, header `font-semibold text-[13px]`, row `hover:bg-slate-50/50 transition-all`, badge có `border` bao quanh, padding `px-6 py-4` đồng nhất với SetupTab.
+   - Thêm thanh phân trang (pagination) ở cuối bảng: chọn số bản ghi/trang, thông tin vị trí, nút Trước/Sau và page numbers, active page màu `blue-600`.
+   - Màu chủ đạo toàn trang đổi từ emerald sang blue.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/CategoryReportPage.tsx`
+
+---
+
 ## Phiên bản 2.5.57 (Ngày cập nhật: 28/06/2026)
 
 **Nội dung thay đổi:**
@@ -1806,4 +1960,207 @@ Redesign thanh tìm kiếm & bộ lọc tại tab **Kiểm tra & Phê duyệt** 
 **Các file bị ảnh hưởng:**
 - `package.json` (Nâng version từ 2.5.33 -> 2.5.34)
 - `src/components/pages/category/categoryConstants.ts`
+- `src/components/pages/category/CategorySetupPage.tsx`
+
+---
+
+## Thêm cột Trạng thái và cập nhật logic chờ phê duyệt tại màn Biên tập danh mục (Ngày cập nhật: 29/06/2026)
+
+**Nội dung thay đổi:**
+1. **Bổ sung cột Trạng thái vào bảng bản ghi danh mục:**
+   - Thêm tiêu đề cột "Trạng thái" vào bảng danh sách bản ghi tại tab "Danh sách" trong `CategoryPage.tsx`.
+   - Hiển thị badge trạng thái của từng bản ghi bằng hàm `getStatusBadge`.
+   - Cập nhật z-index/colSpan của dòng khi danh sách rỗng từ `5` lên `6`.
+2. **Khởi tạo trạng thái mặc định:**
+   - Cập nhật toàn bộ `status` của các bản ghi mẫu trong `MOCK_RECORDS_BY_CATEGORY` sang `'approved'`.
+   - Tự động thiết lập trạng thái `'approved'` cho tất cả các bản ghi khởi tạo của state `categories` thông qua hàm map.
+3. **Cập nhật hàm `getStatusBadge`:**
+   - Ánh xạ `'pending'` thành "Chờ phê duyệt" với màu sắc cảnh báo (`bg-yellow-50 text-yellow-700 border border-yellow-200`).
+   - Ánh xạ `'approved'`, `'published'`, và `'active'` thành "Đã phê duyệt" với màu sắc thành công (`bg-green-50 text-green-700 border border-green-200`).
+4. **Cập nhật logic thêm mới và chỉnh sửa bản ghi:**
+   - Trong `handleSaveInlineEdit`, thay đổi trạng thái của bản ghi sau khi sửa đổi thành `'pending'` (Chờ phê duyệt).
+   - Trong `handleSaveInlineAdd`, thay đổi trạng thái khởi tạo của bản ghi được thêm mới từ `'published'` sang `'pending'` (Chờ phê duyệt).
+   - Hiển thị nhãn "Chờ phê duyệt" trên dòng thêm mới inline (`addingRow`) để đồng bộ giao diện.
+5. **Cập nhật bộ lọc trạng thái (Filter panel):**
+   - Đổi nhãn lựa chọn bộ lọc từ "Chờ duyệt" thành "Chờ phê duyệt", và "Đã duyệt" thành "Đã phê duyệt" cho đồng bộ thuật ngữ.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/CategoryPage.tsx`
+
+---
+
+## Bổ sung các thông tin ngày tạo, người tạo, ngày cập nhật, người cập nhật tại màn Biên tập danh mục (Ngày cập nhật: 29/06/2026)
+
+**Nội dung thay đổi:**
+1. **Mở rộng interface Category:**
+   - Thêm các thuộc tính tùy chọn `createdBy`, `updatedDate`, `updatedBy` vào interface `Category`.
+2. **Khởi tạo dữ liệu siêu dữ liệu (Metadata) mặc định:**
+   - Trong `useEffect` khi load danh mục, tự động gán các giá trị mặc định cho dữ liệu mock: `createdBy` là `'Hệ thống'`, `updatedDate` là `'15/01/2026'`, và `updatedBy` là `'Nguyễn Văn A'`.
+   - Trong state `categories` khởi tạo ban đầu, map các giá trị mặc định tương ứng.
+3. **Cập nhật giao diện bảng (Grid Table UI):**
+   - Thêm 4 cột: "Ngày tạo", "Người tạo", "Ngày cập nhật", "Người cập nhật" vào tiêu đề bảng (`thead`).
+   - Hiển thị giá trị của 4 trường siêu dữ liệu này ở mỗi dòng dữ liệu bản ghi.
+   - Thêm 4 ô hiển thị tương ứng vào hàng thêm mới inline (`addingRow`) với thông tin tự động để đồng bộ cột.
+   - Thay đổi `colSpan` của dòng khi danh sách rỗng từ `6` lên `10` để tránh lệch cột.
+4. **Cập nhật logic Lưu (Inline Edit & Add):**
+   - Trong `handleSaveInlineEdit`, tự động gán `updatedDate` bằng ngày hiện tại (`toLocaleDateString`) và `updatedBy` bằng `'Nguyễn Văn A'`.
+   - Trong `handleSaveInlineAdd`, tự động gán `createdDate`/`updatedDate` bằng ngày hiện tại và `createdBy`/`updatedBy` bằng `'Nguyễn Văn A'`.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/CategoryPage.tsx`
+
+---
+
+## Đồng bộ dữ liệu yêu cầu phê duyệt thay đổi theo danh sách danh mục (Ngày cập nhật: 29/06/2026)
+
+**Nội dung thay đổi:**
+1. **Đồng bộ hóa danh sách yêu cầu phê duyệt:**
+   - Thay thế mảng dữ liệu tĩnh `approvalRequests` bằng cách map động từ mảng dữ liệu `categories` của danh mục được chọn hiện tại.
+   - Các yêu cầu được tạo ra với trạng thái tương ứng: bản ghi `status === 'pending'` ánh xạ thành yêu cầu có trạng thái `'pending'`, `status === 'approved'` thành `'approved'`, và `status === 'rejected'` thành `'rejected'`.
+2. **Cập nhật logic phê duyệt và từ chối đồng bộ:**
+   - Cập nhật `confirmApproval` để khi duyệt yêu cầu thành công, tìm các bản ghi tương ứng trong state `categories` và chuyển trạng thái của chúng sang `'approved'`, đồng thời cập nhật `updatedDate` và `updatedBy: 'Hoàng Văn E'`.
+   - Cập nhật `confirmReject` để khi từ chối yêu cầu thành công, tìm các bản ghi tương ứng trong state `categories` và chuyển trạng thái của chúng sang `'rejected'`, đồng thời cập nhật `updatedDate` và `updatedBy: 'Nguyễn Văn A'`.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/CategoryPage.tsx`
+
+---
+
+## Khắc phục lỗi ReferenceError: Cannot access 'categories' before initialization (Ngày cập nhật: 29/06/2026)
+
+**Nội dung thay đổi:**
+1. **Khắc phục lỗi Temporal Dead Zone (TDZ):**
+   - Di chuyển việc khởi tạo state `categories` (useState) và hook đồng bộ `useEffect` lên đầu component `CategoryPage` (ngay sau tab state `activeTab`).
+   - Việc di chuyển này đảm bảo `categories` đã được khởi tạo và sẵn sàng trước khi mảng `approvalRequests` thực hiện map dữ liệu từ `categories` trong quá trình render, loại bỏ hoàn toàn lỗi runtime `ReferenceError`.
+2. **Sửa lỗi cú pháp do căn chỉnh code:**
+   - Đảm bảo hàm `getRequestTypeBadge` kết thúc chính xác bằng `};`.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/CategoryPage.tsx`
+
+---
+
+## Khắc phục lỗi ReferenceError: getApprovalStatusBadge is not defined (Ngày cập nhật: 29/06/2026)
+
+**Nội dung thay đổi:**
+1. **Phục hồi hàm getApprovalStatusBadge:**
+   - Định nghĩa lại hàm `getApprovalStatusBadge` để bọc hiển thị badge trạng thái của các yêu cầu phê duyệt (Chờ duyệt, Đã duyệt, Từ chối). Hàm này đã bị xóa nhầm trong quá trình di chuyển code để fix lỗi khởi tạo trước đó.
+2. **Kiểm tra đóng gói (Production Build Check):**
+   - Chạy lệnh `npm run build` thành công, kiểm tra biên dịch TS và đóng gói dự án Vite không xảy ra bất kỳ lỗi runtime hay compile-time nào khác.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/CategoryPage.tsx`
+
+---
+
+## Đồng bộ tất cả các cột thông tin sang bảng Phê duyệt (Ngày cập nhật: 29/06/2026)
+
+**Nội dung thay đổi:**
+1. **Đồng bộ hóa thuộc tính trong mảng approvalRequests:**
+   - Cập nhật hàm map của `approvalRequests` từ `categories` để truyền đầy đủ các thuộc tính của danh mục: `description`, `createdBy`, `createdDate`, `changedBy` (map từ `updatedBy`), và `changedDate` (map từ `updatedDate`).
+2. **Cập nhật Giao diện Bảng Phê duyệt:**
+   - Thêm các cột tương ứng vào Table Header: "Mô tả", "Ngày tạo", "Người tạo", "Người cập nhật", "Ngày cập nhật".
+   - Hiển thị giá trị của các trường này tương ứng trong Table Body cho từng dòng yêu cầu phê duyệt.
+   - Điều chỉnh tên các cột metadata (đổi "Người thay đổi" thành "Người cập nhật" và "Thời gian thay đổi" thành "Ngày cập nhật") để đồng bộ thuật ngữ nhất quán giữa Tab Danh sách và Tab Phê duyệt.
+3. **Đóng gói & Kiểm thử:**
+   - Chạy `npm run build` thành công hoàn toàn không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/CategoryPage.tsx`
+
+---
+
+## Loại bỏ cột "Các trường thay đổi" ở bảng Phê duyệt (Ngày cập nhật: 29/06/2026)
+
+**Nội dung thay đổi:**
+1. **Giao diện bảng Phê duyệt:**
+   - Loại bỏ cột "Các trường thay đổi" (`changedFields`) khỏi Table Header và Table Body ở tab Phê duyệt để tối giản giao diện, giúp bảng hiển thị gọn gàng và đồng bộ hoàn toàn với cấu trúc hiển thị thông tin của tab Danh sách.
+2. **Đóng gói & Kiểm thử:**
+   - Chạy kiểm tra TypeScript (`tsc`) và đóng gói dự án (`npm run build`) thành công, không gặp lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/CategoryPage.tsx`
+
+---
+
+## Luôn hiển thị và tự động disable các nút Phê duyệt / Từ chối (Ngày cập nhật: 29/06/2026)
+
+**Nội dung thay đổi:**
+1. **Thay đổi nút Thao tác ở bảng Phê duyệt:**
+   - Cấu hình luôn hiển thị cả 3 nút thao tác: Xem chi tiết (Eye), Phê duyệt (CheckCircle2), và Từ chối (XCircle) trên mỗi bản ghi của bảng Phê duyệt.
+   - Thêm điều kiện `disabled` và class CSS để biến các nút Phê duyệt, Từ chối thành màu xám nhạt (`text-slate-300`) kèm con trỏ cấm (`cursor-not-allowed`) khi bản ghi đã ở trạng thái đã phê duyệt (`approved`) hoặc từ chối (`rejected`), ngăn chặn chọn lại.
+2. **Đóng gói & Kiểm thử:**
+   - Chạy kiểm tra TypeScript (`tsc`) và đóng gói dự án (`npm run build`) thành công, không gặp lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/CategoryPage.tsx`
+
+---
+
+## Loại bỏ cột "Thời gian duyệt" và chống xuống dòng cột "Trạng thái" (Ngày cập nhật: 29/06/2026)
+
+**Nội dung thay đổi:**
+1. **Giao diện bảng Phê duyệt:**
+   - Loại bỏ hoàn toàn cột "Thời gian duyệt" (`approvedDate`) ở cả Table Header và Table Body.
+   - Thêm class `whitespace-nowrap` vào ô `<td>` và nội dung Badge trạng thái (`getApprovalStatusBadge`) để đảm bảo các chuỗi trạng thái như "Chờ phê duyệt", "Đã phê duyệt" không bị xuống dòng nửa chừng trên giao diện.
+2. **Đóng gói & Kiểm thử:**
+   - Chạy lệnh `npm run build` thành công, kiểm tra biên dịch TS và đóng gói dự án Vite hoàn tất không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/CategoryPage.tsx`
+
+---
+
+## Bổ sung tab Công khai và quản lý trạng thái công khai danh mục (Ngày cập nhật: 29/06/2026)
+
+**Nội dung thay đổi:**
+1. **Thêm tab "Công khai" mới:**
+   - Đăng ký tab `publish` ("Công khai") vào thanh tab bar của component `CategoryPage`, xếp cạnh tab Phê duyệt.
+   - Khi kích hoạt, hiển thị bảng danh sách các giá trị dữ liệu (STT, Mã, Tên, Mô tả, Trạng thái, Ngày tạo, Ngày cập nhật...) và loại bỏ cột Thao tác.
+2. **Cấu hình Trạng thái Công khai & Nút hành động:**
+   - Thiết kế Banner thể hiện trạng thái động: Đang công khai (Màu xanh lá, có thông tin phạm vi chia sẻ) / Chưa công khai (Màu xám, thông báo chưa công khai).
+   - Tự động thay đổi nút hành động dựa trên trạng thái hiện tại: Chưa công khai hiển thị nút **Công khai**; Đã công khai hiển thị nút **Hủy công khai**.
+3. **Các Modal Cấu hình mới:**
+   - **Modal Công khai:** Hiển thị form cho chọn phạm vi chia sẻ (Nội bộ, Mở rộng, Toàn dân) bằng nút Radio. Click Xác nhận sẽ cập nhật trạng thái danh mục sang Đã công khai.
+   - **Modal Hủy công khai:** Hiển thị trường nhập lý do hủy công khai. Click Xác nhận sẽ cập nhật trạng thái danh mục sang Chưa công khai.
+4. **Kiểm tra biên dịch & Đóng gói:**
+   - Thực hiện đóng gói dự án (`npm run build`) thành công, kiểm tra không phát sinh lỗi biên dịch hay runtime.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/CategoryPage.tsx`
+
+---
+
+## Cập nhật trạng thái "Ngừng công khai" cùng thông tin người thực hiện, ngày thực hiện (Ngày cập nhật: 29/06/2026)
+
+**Nội dung thay đổi:**
+1. **Quản lý trạng thái Công khai:**
+   - Thay đổi state `isCategoryPublished` (boolean) thành state `publishStatus` để hỗ trợ 3 trạng thái: `unpublished` (Chưa công khai), `published` (Đã công khai), và `stopped` (Ngừng công khai).
+   - Khi chọn Hủy công khai từ modal, thay đổi trạng thái sang `stopped` (Ngừng công khai).
+2. **Bổ sung thông tin Người thực hiện & Ngày thực hiện:**
+   - Khi công khai hoặc ngừng công khai, hệ thống sẽ tự động ghi lại thông tin người thực hiện (`Nguyễn Văn A`) và ngày thực hiện (ngày hiện tại).
+   - Khi trạng thái là "Ngừng công khai" (`stopped`), banner sẽ hiển thị chi tiết: Người thực hiện, Ngày thực hiện, và Lý do ngừng công khai (được nhập từ modal).
+3. **Kiểm tra biên dịch & Đóng gói:**
+   - Thực hiện đóng gói dự án (`npm run build`) thành công không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/CategoryPage.tsx`
+
+---
+
+## Bổ sung trường "Mã danh mục" khi thiết lập/chỉnh sửa danh mục dùng chung (Ngày cập nhật: 29/06/2026)
+
+**Nội dung thay đổi:**
+1. **Bổ sung trường nhập mã danh mục:**
+   - Tại `CategoryWizardModal.tsx`, thêm trường nhập **Mã danh mục \*** vào Bước 1 (Thông tin chung) nằm song song (chia 2 cột) với trường **Tên danh sách danh mục \***.
+   - Thêm điều kiện `disabled={isViewOnly || !!entityId}` giúp người dùng chỉ được điền mã danh mục khi thêm mới, và bị khóa (disable) khi sửa hoặc xem chi tiết.
+2. **Cập nhật logic lưu trữ & xác thực:**
+   - Tại `CategorySetupPage.tsx`, khởi tạo giá trị rỗng cho `code` khi click Thêm mới (`handleAdd`).
+   - Cập nhật hàm `handleSaveStep1` để kiểm tra bắt buộc nhập Mã danh mục (`formData.code`).
+   - Sử dụng mã danh mục do người dùng điền để lưu trực tiếp vào cơ sở dữ liệu thay vì sinh mã tự động theo mẫu mặc định.
+3. **Kiểm tra biên dịch & Đóng gói:**
+   - Thực hiện đóng gói dự án (`npm run build`) thành công, không phát sinh lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/components/modals/CategoryWizardModal.tsx`
 - `src/components/pages/category/CategorySetupPage.tsx`

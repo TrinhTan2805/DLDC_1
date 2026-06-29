@@ -149,8 +149,6 @@ export function ApprovalTab({
             const dataSourceLabel: Record<string, string> = {
               manual: 'Tự cập nhật trực tiếp',
               dldc: 'Đồng bộ Kho DLDC',
-              lgsp: 'Kết nối API (NDXP/LGSP)',
-              ndxp: 'Kết nối API (NDXP/LGSP)',
             };
 
             return (

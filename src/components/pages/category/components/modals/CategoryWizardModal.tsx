@@ -152,7 +152,18 @@ export function CategoryWizardModal({
                       />
                     </div>
                   )}
-                  <div className="col-span-2">
+                  <div className="col-span-2 sm:col-span-1">
+                    <label className="block text-[13px] text-slate-700 mb-2 font-medium">Mã danh mục <span className="text-red-500">*</span></label>
+                    <input
+                      type="text"
+                      disabled={isViewOnly || !!entityId}
+                      value={formData.code || ''}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, code: e.target.value })}
+                      placeholder="VD: DM_GIOITINH"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none disabled:bg-slate-50 disabled:text-slate-500 font-medium bg-white hover:bg-slate-50/30 transition-all shadow-sm"
+                    />
+                  </div>
+                  <div className="col-span-2 sm:col-span-1">
                     <label className="block text-[13px] text-slate-700 mb-2 font-medium font-sans">Tên danh sách danh mục <span className="text-red-500">*</span></label>
                     <input
                       type="text"
@@ -226,7 +237,6 @@ export function CategoryWizardModal({
                       >
                         <option value="manual">Tự cập nhật trực tiếp</option>
                         <option value="dldc">Đồng bộ Kho DLDC</option>
-                        <option value="lgsp">Kết nối API (NDXP/LGSP)</option>
                       </select>
                       <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                     </div>
