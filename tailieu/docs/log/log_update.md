@@ -1,5 +1,104 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Phiên bản 2.5.73 (Ngày cập nhật: 29/06/2026)
+
+**Nội dung thay đổi:**
+1. **Loại bỏ phần So sánh phiên bản:**
+   - Xóa bỏ hoàn toàn section **So sánh phiên bản** ở phía dưới bảng danh sách phiên bản tại [CategoryPage.tsx](file:///f:/BTP/DLDC_1/src/components/pages/category/CategoryPage.tsx) theo yêu cầu thiết kế giao diện tinh gọn hơn.
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/CategoryPage.tsx`
+
+---
+
+## Phiên bản 2.5.72 (Ngày cập nhật: 29/06/2026)
+
+**Nội dung thay đổi:**
+1. **Loại bỏ nút Gửi duyệt và thay thế luồng Khôi phục bằng Đặt làm phiên bản chính:**
+   - Xóa bỏ hoàn toàn nút Gửi duyệt (Send) ở dòng danh sách phiên bản của [CategoryPage.tsx](file:///f:/BTP/DLDC_1/src/components/pages/category/CategoryPage.tsx).
+   - Thay thế nút hành động Khôi phục (Clock) thành nút **Đặt làm phiên bản chính** với tooltip/title tương ứng.
+   - Cập nhật modal Xác nhận Đặt làm phiên bản chính: Khi người dùng chọn xác nhận, phiên bản được chọn sẽ chuyển đổi trạng thái sang **Chờ duyệt** (Chờ phê duyệt), trong khi phiên bản đang dùng hiện tại (Đang dùng / Hiệu lực) vẫn được giữ nguyên trạng thái hoạt động bình thường mà không bị ảnh hưởng.
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/CategoryPage.tsx`
+
+---
+
+## Phiên bản 2.5.71 (Ngày cập nhật: 29/06/2026)
+
+**Nội dung thay đổi:**
+1. **Thiết lập hiển thị đầy đủ các icon hành động trong cột Thao tác:**
+   - Cập nhật cột Thao tác của bảng danh sách phiên bản tại [CategoryPage.tsx](file:///f:/BTP/DLDC_1/src/components/pages/category/CategoryPage.tsx) để luôn hiển thị đầy đủ 5 icon hành động bao gồm: Xem chi tiết (Eye), Khôi phục (Clock), Khóa (Lock), Tải xuống (Download), Chỉnh sửa thông tin và cấu trúc (Edit2) một cách vô điều kiện.
+   - Giữ lại nút Gửi duyệt (Send) chỉ hiển thị khi phiên bản ở trạng thái Bản nháp để người dùng có thể gửi trình duyệt bình thường.
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/CategoryPage.tsx`
+
+---
+
+## Phiên bản 2.5.70 (Ngày cập nhật: 29/06/2026)
+
+**Nội dung thay đổi:**
+1. **Cập nhật modal xem chi tiết phiên bản:**
+   - Điều chỉnh cấu trúc hiển thị trong modal xem chi tiết phiên bản (`showVersionDetailModal` tại [CategoryPage.tsx](file:///f:/BTP/DLDC_1/src/components/pages/category/CategoryPage.tsx)) tương ứng với các trường mới của danh sách phiên bản.
+   - Hiển thị đầy đủ: Người thực hiện (user), Ngày thay đổi (date), Ngày hiệu lực (effectiveDate), Trạng thái (status: Đang dùng / Bản nháp / Chờ duyệt / Hết hiệu lực), và Nội dung thay đổi chi tiết (changes).
+   - Loại bỏ trường Loại thay đổi cũ để đảm bảo tính đồng bộ dữ liệu.
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/CategoryPage.tsx`
+
+---
+
+## Phiên bản 2.5.69 (Ngày cập nhật: 29/06/2026)
+
+**Nội dung thay đổi:**
+1. **Tinh chỉnh các cột trong bảng danh sách phiên bản:**
+   - Loại bỏ hoàn toàn cột `Loại thay đổi` (changeType) trong bảng danh sách phiên bản của [CategoryPage.tsx](file:///f:/BTP/DLDC_1/src/components/pages/category/CategoryPage.tsx).
+   - Thêm cột `Ngày hiệu lực` (effectiveDate) kế tiếp cột `Ngày thay đổi` để làm rõ thời điểm bắt đầu áp dụng phiên bản.
+   - Cập nhật lại logic map dữ liệu và logic lưu thông tin của bản nháp mới tạo với `effectiveDate` tương ứng từ form.
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/CategoryPage.tsx`
+
+---
+
+## Phiên bản 2.5.68 (Ngày cập nhật: 29/06/2026)
+
+**Nội dung thay đổi:**
+1. **Bổ sung tính năng Tạo phiên bản mới trong Danh sách danh mục (tab Quản lý phiên bản danh mục):**
+   - Thêm nút **Tạo phiên bản mới** tại phần đầu trang tab Quản lý phiên bản danh mục của [CategoryPage.tsx](file:///f:/BTP/DLDC_1/src/components/pages/category/CategoryPage.tsx).
+   - Khi click nút này, mở modal Tạo phiên bản mới, cho phép nhập: Tên phiên bản, Ngày hiệu lực, Mô tả thay đổi.
+   - Quản lý danh sách phiên bản bằng local state `versionHistoryList`. Khi chọn tạo mới, thêm một phiên bản mới có trạng thái là **Bản nháp** (kế thừa thông tin chung, cấu trúc, quan hệ làm bản sao của phiên bản cũ).
+   - Tối ưu hóa các thao tác cho Bản nháp: người dùng có thể nhấn icon **Chỉnh sửa** (Edit2) để sửa đổi thông tin/cấu trúc, và nhấn icon **Gửi duyệt** (Send) để gửi duyệt chuyển trạng thái sang **Chờ duyệt**.
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/CategoryPage.tsx`
+
+---
+
+## Phiên bản 2.5.67 (Ngày cập nhật: 29/06/2026)
+
+**Nội dung thay đổi:**
+1. **Redesign modal Quản lý phiên bản danh mục:**
+   - Đổi tên tiêu đề modal từ "Lịch sử phiên bản" thành "Quản lý phiên bản danh mục" tại [EntityVersionHistoryModal.tsx](file:///f:/BTP/DLDC_1/src/components/pages/category/components/modals/EntityVersionHistoryModal.tsx).
+   - Tối ưu hóa cột thao tác: chuyển button "Xem chi tiết" dài thành icon Eye gọn gàng.
+   - Thêm icon "Thêm mới phiên bản" (PlusCircle) ở từng dòng để người dùng có thể tạo một phiên bản kế tiếp sao chép trực tiếp từ phiên bản được chọn, đồng thời bố trí thêm button "+ Thêm mới phiên bản" chính ở đầu bảng của modal.
+   - Tích hợp form nhập liệu cho phiên bản mới bao gồm các trường: Tên phiên bản, Ngày hiệu lực, Mô tả thay đổi.
+   - Khi tạo mới, phiên bản đó được xếp vào trạng thái **Bản nháp** (Draft), kế thừa toàn bộ cấu trúc, thông tin chung và quan hệ của phiên bản được chọn làm gốc.
+   - Cho phép người dùng chỉnh sửa thông tin bản nháp (icon Edit2) và gửi duyệt (icon Send) để chuyển đổi trạng thái sang **Chờ duyệt** (Chờ phê duyệt).
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/components/modals/EntityVersionHistoryModal.tsx`
+
+---
+
 ## Phiên bản 2.5.66 (Ngày cập nhật: 29/06/2026)
 
 **Nội dung thay đổi:**
