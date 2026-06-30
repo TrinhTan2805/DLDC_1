@@ -7,6 +7,31 @@ interface VersionHistoryModalProps {
 
 const mockVersions = [
   {
+    id: 21,
+    version: 'v2.6.0',
+    date: '30/06/2026',
+    time: '09:00',
+    content: `1. Phân hệ Dữ liệu mở (Open Data):
+- Loại bỏ liên kết trên cột Tên danh mục tại tab Quản lý danh mục (hiển thị dạng text tĩnh).
+- Thêm icon Xóa và hộp thoại xác nhận xóa giấy phép (showDeleteLicenseModal, z-index 999999).
+- Chuyển Lịch sử đối soát sang dạng Modal Popup (historyModalOpen), ẩn bộ lọc/tìm kiếm bên trong, tự động sinh dữ liệu khớp với mã thu thập được click.
+- Cập nhật backdrop modal Chi tiết đối soát: bg-black/50 backdrop-blur-sm z-[999999].
+
+2. Đồng bộ hóa giao diện Đối soát cung cấp & Dịch vụ cung cấp:
+- Đối soát cung cấp: Bỏ hộp trắng bọc ngoài, redesign bảng grid (13px, badge 12px, bỏ cột Ghi chú), thay icon Eye cho nút chi tiết, bỏ 2 nút Cấu hình/Đối soát ngay, chuẩn hóa modal chi tiết (font 13px, z-index 999999).
+- Cung cấp dữ liệu: Di chuyển tiêu đề vào vùng cuộn, đồng bộ thanh tìm kiếm, bộ lọc nâng cao và bảng grid (13px, phân trang, icon Sliders).
+
+3. Sửa lỗi & Bổ sung tính năng Danh sách danh mục:
+- Sửa lỗi ReferenceError: Khai báo bổ sung state filterType và filterStatus bị thiếu trong CategoryPage.tsx.
+- Thêm nút Xuất File (Download + dropdown Excel/PDF/CSV) vào thanh công cụ tab Danh sách danh mục.
+
+4. Redesign 3 màn Báo cáo thống kê danh mục:
+- Xóa toàn bộ wrapper A4 paper khỏi cả 3 màn báo cáo (Danh sách, Khai thác, Trạng thái).
+- Áp dụng mô hình đồng nhất: multi-select dropdown có checkbox, backdrop trong suốt đóng khi click ngoài, lazy rendering (biểu đồ + bảng chỉ hiện sau khi nhấn Truy xuất dữ liệu), nút Xuất File.
+- Báo cáo khai thác: Biểu đồ đường đa tuyến động — số đường tương ứng số hệ thống được chọn, mỗi hệ thống một màu riêng.
+- Báo cáo trạng thái: Giữ PieChart + 4 thẻ tóm tắt; thêm bảng chi tiết chuyển trạng thái theo UC (Mã DM, Tên DM, Trạng thái, Thời gian chuyển TT, Người duyệt, Lý do).`
+  },
+  {
     id: 20,
     version: 'v2.5.2',
     date: '24/06/2026',
