@@ -318,7 +318,6 @@ export function ProvisionReconciliationPage({ processId }: { processId?: string 
                   <th className="py-3 px-4 font-semibold text-slate-500 text-[13px] text-right" style={{ fontSize: '13px' }}>Khớp nối</th>
                   <th className="py-3 px-4 font-semibold text-slate-500 text-[13px] text-right" style={{ fontSize: '13px' }}>Chênh lệch</th>
                 <th className="py-3 px-4 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Trạng thái</th>
-                <th className="py-3 px-4 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Ghi chú</th>
                 <th className="py-3 px-4 font-semibold text-slate-500 text-[13px] text-center" style={{ fontSize: '13px' }}>Chi tiết</th>
               </tr>
             </thead>
@@ -342,9 +341,6 @@ export function ProvisionReconciliationPage({ processId }: { processId?: string 
                       {entry.status}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-slate-500 max-w-[200px] truncate text-[13px]" style={{ fontSize: '13px' }} title={entry.note}>
-                    {entry.note || '-'}
-                  </td>
                   <td className="py-3 px-4 text-center text-[13px]" style={{ fontSize: '13px' }}>
                     <button 
                       onClick={() => { setSelectedEntry(entry as ReconciliationHistoryEntry); setIsDetailsModalOpen(true); }}
@@ -357,7 +353,7 @@ export function ProvisionReconciliationPage({ processId }: { processId?: string 
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan={8} className="py-8 text-center text-slate-500">
+                  <td colSpan={7} className="py-8 text-center text-slate-500">
                     Không tìm thấy bản ghi lịch sử phù hợp.
                   </td>
                 </tr>

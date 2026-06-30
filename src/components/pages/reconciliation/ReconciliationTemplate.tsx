@@ -57,6 +57,7 @@ export function ReconciliationTemplate({
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [historySearchTerm, setHistorySearchTerm] = useState('');
+  const [historyModalOpen, setHistoryModalOpen] = useState(false);
 
   // Pagination and collapsible filters states
   const [currentPage, setCurrentPage] = useState(1);
@@ -66,7 +67,7 @@ export function ReconciliationTemplate({
   const handleViewHistory = () => {
     if (selectedRecordCode) {
       setHistorySearchTerm(selectedRecordCode);
-      setActiveTab('history');
+      setHistoryModalOpen(true);
       setDetailModalOpen(false);
     }
   };
@@ -133,7 +134,6 @@ export function ReconciliationTemplate({
   const tabs = [
     { id: 'list' as TabType, label: 'Danh sách đối soát' },
     ...(!hideSetupTab ? [{ id: 'setup' as TabType, label: 'Thiết lập dịch vụ' }] : []),
-    { id: 'history' as TabType, label: 'Lịch sử đối soát' },
     ...(!hideLogTab ? [{ id: 'log' as TabType, label: 'Nhật ký đối soát' }] : []),
   ];
 
@@ -408,7 +408,7 @@ export function ReconciliationTemplate({
                           ))}
                         </td>
                         <td className="px-4 py-3 text-center">
-                          <div className="flex items-center justify-center">
+                          <div className="flex items-center justify-center gap-1.5">
                             <button
                               onClick={() => {
                                 const cc = deriveCounts(record);
@@ -416,10 +416,20 @@ export function ReconciliationTemplate({
                                 setSelectedRecord({ ...record, sentCount: cc.sent, receivedCount: cc.received, matchRate: cc.rate });
                                 setDetailModalOpen(true);
                               }}
-                              className="p-1.5 text-slate-500 hover:text-[#2563eb] hover:bg-blue-50 rounded-[6px] transition-all"
+                              className="p-1.5 text-slate-500 hover:text-[#2563eb] hover:bg-blue-50 rounded-[6px] transition-all cursor-pointer"
                               title="Xem chi tiết"
                             >
                               <Eye className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => {
+                                setHistorySearchTerm(record.datasetCode);
+                                setHistoryModalOpen(true);
+                              }}
+                              className="p-1.5 text-slate-500 hover:text-[#2563eb] hover:bg-blue-50 rounded-[6px] transition-all cursor-pointer"
+                              title="Xem lịch sử đối soát"
+                            >
+                              <History className="w-4 h-4" />
                             </button>
                           </div>
                         </td>
@@ -520,7 +530,6 @@ export function ReconciliationTemplate({
 
       {activeTab === 'setup' && <ReconciliationServiceSetupTab />}
       {activeTab === 'log' && <ReconciliationLogTab />}
-      {activeTab === 'history' && <ReconciliationHistoryTab initialSearchTerm={historySearchTerm} />}
       
       {/* Reconciliation Detail Modal */}
       <ReconciliationDetailModal
@@ -530,6 +539,44 @@ export function ReconciliationTemplate({
         record={selectedRecord}
         onViewHistory={handleViewHistory}
       />
+
+      {/* Reconciliation History Modal */}
+      {historyModalOpen && (
+        <div style={{ zIndex: 999999 }} className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-xl shadow-2xl max-w-5xl w-full overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200" style={{ fontSize: '13px' }}>
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+              <div>
+                <h2 className="text-[18px] font-bold text-slate-800" style={{ fontSize: '18px' }}>Lịch sử đối soát thu thập</h2>
+                <p className="text-[13px] text-slate-500 mt-0.5" style={{ fontSize: '13px' }}>Bộ dữ liệu: <span className="font-mono font-semibold text-slate-700">{historySearchTerm}</span></p>
+              </div>
+              <button
+                onClick={() => setHistoryModalOpen(false)}
+                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
+                title="Đóng"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            {/* Body */}
+            <div className="p-6 overflow-y-auto flex-1 bg-white">
+              <ReconciliationHistoryTab initialSearchTerm={historySearchTerm} hideSearchAndFilters={true} />
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end">
+              <button
+                onClick={() => setHistoryModalOpen(false)}
+                className="px-5 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 font-medium transition-colors shadow-sm cursor-pointer text-[13px]"
+                style={{ fontSize: '13px' }}
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

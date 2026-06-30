@@ -1,5 +1,76 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Phiên bản 2.5.96 (Ngày cập nhật: 30/06/2026)
+
+**Nội dung thay đổi:**
+1. **Thiết kế lại lớp backdrop cho Modal Chi tiết đối soát thu thập:**
+   - Cập nhật component [ReconciliationDetailModal.tsx](file:///f:/BTP/DLDC_1/src/components/pages/reconciliation/ReconciliationDetailModal.tsx).
+   - Thiết lập lại lớp phủ nền thành `bg-black/50 backdrop-blur-sm z-[999999] style={{ zIndex: 999999 }}` đồng bộ với các hộp thoại popup khác trong hệ thống để đè lên thanh menu sidebar.
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/reconciliation/ReconciliationDetailModal.tsx`
+
+---
+
+## Phiên bản 2.5.95 (Ngày cập nhật: 30/06/2026)
+
+**Nội dung thay đổi:**
+1. **Tinh chỉnh modal Lịch sử đối soát thu thập (Ẩn bộ lọc và mock data tương thích):**
+   - Cập nhật component [ReconciliationHistoryTab.tsx](file:///f:/BTP/DLDC_1/src/components/pages/reconciliation/ReconciliationHistoryTab.tsx).
+   - Thêm thuộc tính `hideSearchAndFilters` để ẩn hoàn toàn bộ lọc nâng cao và ô nhập tìm kiếm khi hiển thị lịch sử đối soát bên trong dạng modal popup.
+   - Thêm hàm `getDatasetName` để phân giải mã thu thập (`initialSearchTerm`) thành tên tiếng Việt dễ đọc (Ví dụ: `DM-GIOITINH-2024-12` phân giải thành *"Danh mục giới tính"*).
+   - Tự động tạo mock data lịch sử chạy (`histories`) tương thích theo từng mã thu thập được chọn để hiển thị thông tin thực tế, nhất quán.
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/reconciliation/ReconciliationHistoryTab.tsx`
+- `src/components/pages/reconciliation/ReconciliationTemplate.tsx`
+
+---
+
+## Phiên bản 2.5.94 (Ngày cập nhật: 30/06/2026)
+
+**Nội dung thay đổi:**
+1. **Chuyển đổi Lịch sử đối soát từ Tab sang Modal Popup:**
+   - Cập nhật template dùng chung [ReconciliationTemplate.tsx](file:///f:/BTP/DLDC_1/src/components/pages/reconciliation/ReconciliationTemplate.tsx).
+   - Loại bỏ tab *"Lịch sử đối soát"* khỏi danh sách Tab chính ở phía trên trang để tinh gọn giao diện.
+   - Thêm modal popup *"Lịch sử đối soát thu thập"* (`historyModalOpen`).
+   - Khi bấm vào nút *"Xem lịch sử đối soát"* (icon đồng hồ xoay ở danh sách dòng) hoặc bấm nút *"Xem lịch sử"* ở chân Modal Chi tiết đối soát, hệ thống sẽ mở ra modal popup hiển thị toàn bộ nhật ký chạy của thu thập đó với kích thước chữ nội dung chuẩn `13px` và tiêu đề `18px`, z-index `999999` hiển thị đè trên sidebar.
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/reconciliation/ReconciliationTemplate.tsx`
+
+---
+
+## Phiên bản 2.5.93 (Ngày cập nhật: 30/06/2026)
+
+**Nội dung thay đổi:**
+1. **Thêm nút Xem lịch sử đối soát cho các bộ dữ liệu ngoài ngành/nội bộ:**
+   - Cập nhật template dùng chung [ReconciliationTemplate.tsx](file:///f:/BTP/DLDC_1/src/components/pages/reconciliation/ReconciliationTemplate.tsx).
+   - Thêm icon tác vụ *"Xem lịch sử đối soát"* (sử dụng icon `History`) vào cột Thao tác của bảng danh sách đối soát.
+   - Khi click vào icon này, hệ thống sẽ tự động chuyển sang tab *"Lịch sử đối soát"* đồng thời lọc dữ liệu lịch sử theo mã thu thập (`datasetCode`) của bộ dữ liệu tương ứng.
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/reconciliation/ReconciliationTemplate.tsx`
+
+---
+
+## Phiên bản 2.5.92 (Ngày cập nhật: 30/06/2026)
+
+**Nội dung thay đổi:**
+1. **Lược bỏ cột Ghi chú trong bảng đối soát:**
+   - Loại bỏ cột *"Ghi chú"* khỏi cả phần tiêu đề cột (`<th>`) lẫn nội dung dòng dữ liệu (`<td>`) trong bảng lịch sử đối soát tại [DataReconciliationPage.tsx](file:///f:/BTP/DLDC_1/src/components/pages/provisioning/DataReconciliationPage.tsx).
+   - Điều chỉnh giá trị `colSpan` của dòng thông báo rỗng xuống còn `7` để khớp chính xác với số lượng cột mới của bảng.
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/provisioning/DataReconciliationPage.tsx`
+
+---
+
 ## Phiên bản 2.5.91 (Ngày cập nhật: 30/06/2026)
 
 **Nội dung thay đổi:**

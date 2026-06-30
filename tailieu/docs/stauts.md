@@ -112,20 +112,20 @@
 - `[ ]` Đối soát bản án / quyết định TAND (`reconciliation/ExternalCourtJudgmentReconciliationPage.tsx`)
 
 ### Tabs trong trang thiết lập đối soát
-- `[ ]` Tab Thiết lập dịch vụ đối soát (`reconciliation/ReconciliationServiceSetupTab.tsx`)
-- `[ ]` Tab Lịch sử đối soát (`reconciliation/ReconciliationHistoryTab.tsx`)
-- `[ ]` Tab Nhật ký đối soát (`reconciliation/ReconciliationLogTab.tsx`)
+- `[x]` Tab Thiết lập dịch vụ đối soát (`reconciliation/ReconciliationServiceSetupTab.tsx`)
+- `[x]` Tab Lịch sử đối soát (`reconciliation/ReconciliationHistoryTab.tsx`)
+- `[x]` Tab Nhật ký đối soát (`reconciliation/ReconciliationLogTab.tsx`)
 
 ### Modals đối soát
-- `[ ]` Modal chi tiết bản ghi đối soát (`reconciliation/ReconciliationDetailModal.tsx`)
-- `[ ]` Modal tiến trình đồng bộ thủ công (`reconciliation/ManualSyncProgressModal.tsx`)
-- `[ ]` Modal thêm / sửa cấu hình dịch vụ (`reconciliation/AddServiceConfigModal.tsx`)
-- `[ ]` Modal xác nhận xóa cấu hình (`reconciliation/DeleteConfirmModal.tsx`)
-- `[ ]` Modal chi tiết lỗi đối soát (`reconciliation/ErrorDetailsModal.tsx`)
-- `[ ]` Modal tạo gói đối soát LGSP (`modals/CreateLGSPReconciliationModal.tsx`)
+- `[x]` Modal chi tiết bản ghi đối soát (`reconciliation/ReconciliationDetailModal.tsx`)
+- `[x]` Modal tiến trình đồng bộ thủ công (`reconciliation/ManualSyncProgressModal.tsx`)
+- `[x]` Modal thêm / sửa cấu hình dịch vụ (`reconciliation/AddServiceConfigModal.tsx`)
+- `[x]` Modal xác nhận xóa cấu hình (`reconciliation/DeleteConfirmModal.tsx`)
+- `[x]` Modal chi tiết lỗi đối soát (`reconciliation/ErrorDetailsModal.tsx`)
+- `[x]` Modal tạo gói đối soát LGSP (`modals/CreateLGSPReconciliationModal.tsx`)
 
 ### Đối soát điều phối (Orchestration)
-- `[ ]` Quản lý API đối soát — điều phối dữ liệu qua LGSP/NGSP (`orchestration/DataReconciliationAPIPage.tsx`)
+- `[x]` Quản lý API đối soát — điều phối dữ liệu qua LGSP/NGSP (`orchestration/DataReconciliationAPIPage.tsx`)
 
 ---
 

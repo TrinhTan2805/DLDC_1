@@ -34,8 +34,8 @@ export function ReconciliationDetailModal({ isOpen, onClose, record, onViewHisto
   const isMatched = record.status === 'matched';
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full overflow-hidden flex flex-col">
+    <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-200 flex items-start justify-between">
           <div>

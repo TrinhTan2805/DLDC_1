@@ -20,9 +20,24 @@ interface ReconciliationHistory {
 
 interface ReconciliationHistoryTabProps {
   initialSearchTerm?: string;
+  hideSearchAndFilters?: boolean;
 }
 
-export function ReconciliationHistoryTab({ initialSearchTerm = '' }: ReconciliationHistoryTabProps) {
+const getDatasetName = (code: string) => {
+  const map: Record<string, string> = {
+    'DM-GIOITINH-2024-12': 'Danh mục giới tính',
+    'DM-DANTOC-2024-12': 'Danh mục dân tộc',
+    'DM-QUOCGIA-2024-12': 'Danh mục quốc gia, quốc tịch',
+    'DM-TONGIAO-2024-12': 'Danh mục tôn giáo',
+    'DM-COQUAN-2024-12': 'Danh mục cơ quan',
+    'DM-DVHC-2024-12': 'Danh mục đơn vị hành chính',
+    'DM-MQHGD-2024-12': 'Danh mục mối quan hệ gia đình',
+    'DM-GTTT-2024-12': 'Danh mục giấy tờ tùy thân',
+  };
+  return map[code] || code;
+};
+
+export function ReconciliationHistoryTab({ initialSearchTerm = '', hideSearchAndFilters = false }: ReconciliationHistoryTabProps) {
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [showFilters, setShowFilters] = useState(false);
   const [filterStatus, setFilterStatus] = useState<'all' | 'success' | 'failed'>('all');
@@ -40,7 +55,36 @@ export function ReconciliationHistoryTab({ initialSearchTerm = '' }: Reconciliat
     }
   }, [initialSearchTerm]);
 
-  const histories: ReconciliationHistory[] = [
+  const histories: ReconciliationHistory[] = initialSearchTerm ? [
+    {
+      id: 'HIST-001',
+      timestamp: '2024-12-20 10:15:00',
+      packageName: `Gói tin đối soát ${getDatasetName(initialSearchTerm)} - Lần chạy 1`,
+      packageCode: 'PKG-RUN-001',
+      systemName: 'Trung tâm dữ liệu Quốc gia',
+      action: 'Hoàn tất đối soát',
+      recordsSent: 850000,
+      dataSizeSent: '2.3 GB',
+      status: 'success',
+      statusText: 'Thành công',
+      statusColor: 'bg-green-100 text-green-700 border-green-200',
+      details: 'Đã nhận đủ bản ghi'
+    },
+    {
+      id: 'HIST-002',
+      timestamp: '2024-12-19 15:30:00',
+      packageName: `Gói tin đối soát ${getDatasetName(initialSearchTerm)} - Lần chạy 2`,
+      packageCode: 'PKG-RUN-002',
+      systemName: 'Trung tâm dữ liệu Quốc gia',
+      action: 'Hoàn tất đối soát',
+      recordsSent: 125000,
+      dataSizeSent: '1.8 GB',
+      status: 'success',
+      statusText: 'Thành công',
+      statusColor: 'bg-green-100 text-green-700 border-green-200',
+      details: 'Đã nhận đủ bản ghi'
+    }
+  ] : [
     {
       id: 'HIST-001',
       timestamp: '2024-12-20 10:15:00',
@@ -114,7 +158,8 @@ export function ReconciliationHistoryTab({ initialSearchTerm = '' }: Reconciliat
   ];
 
   const filteredHistories = histories.filter(history => {
-    const matchesSearch = searchTerm === '' ||
+    // If search term is activeTab target, don't perform strict text matching inside packages
+    const matchesSearch = initialSearchTerm || searchTerm === '' ||
       history.packageName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       history.packageCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
       history.systemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -138,7 +183,8 @@ export function ReconciliationHistoryTab({ initialSearchTerm = '' }: Reconciliat
   return (
     <div className="space-y-4 pt-4">
       {/* Filters and Actions */}
-      <div className="mb-6">
+      {!hideSearchAndFilters && (
+        <div className="mb-6">
         {/* Row 1: Search and Buttons */}
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 flex items-center gap-3">
@@ -243,6 +289,7 @@ export function ReconciliationHistoryTab({ initialSearchTerm = '' }: Reconciliat
           </div>
         )}
       </div>
+      )}
 
       {/* History Table */}
       <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
