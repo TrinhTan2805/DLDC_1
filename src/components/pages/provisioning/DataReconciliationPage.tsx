@@ -2,10 +2,31 @@ import React, { useState } from 'react';
 import { Settings, Search, Filter, Play, GitCompare, Calendar, History, CheckCircle2, AlertTriangle, XCircle, ArrowRight, Eye, X } from 'lucide-react';
 import { reconciliationData, reconciliationHistoryData, ReconciliationHistoryEntry } from '../../../data/provisionReconciliationData';
 import { ProvisionReconciliationDetailsModal } from './modals/ProvisionReconciliationDetailsModal';
+import { ProvisionReconciliationHistoryModal } from './modals/ProvisionReconciliationHistoryModal';
 export function ProvisionReconciliationPage({ processId }: { processId?: string }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedEntry, setSelectedEntry] = useState<ReconciliationHistoryEntry | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+
+  const getApiName = (id: string) => {
+    switch (id) {
+      case '662': return 'API cung cấp dữ liệu danh mục';
+      case '663': return 'API cung cấp dữ liệu Hộ tịch điện tử';
+      case '664': return 'API cung cấp dữ liệu hồ sơ quốc tịch';
+      case '665': return 'API cung cấp dữ liệu thi hành án dân sự';
+      case '666': return 'API cung cấp dữ liệu về biện pháp bảo đảm';
+      case '667': return 'API cung cấp dữ liệu quốc gia về pháp luật';
+      case '668': return 'API cung cấp dữ liệu tương trợ tư pháp về dân sự';
+      case '669': return 'API cung cấp dữ liệu thông tin trợ giúp pháp lý';
+      case '670': return 'API cung cấp dữ liệu phổ biến, giáo dục pháp luật';
+      case '671': return 'API cung cấp dữ liệu quản lý đấu giá tài sản';
+      case '672': return 'API cung cấp dữ liệu Hợp tác quốc tế';
+      case '673': return 'API cung cấp dữ liệu mở';
+      case '674': return 'API cung cấp dữ liệu chủ';
+      default: return 'API cung cấp dữ liệu';
+    }
+  };
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -312,7 +333,9 @@ export function ProvisionReconciliationPage({ processId }: { processId?: string 
             <table className="w-full text-left border-collapse table-auto" style={{ fontSize: '13px' }}>
               <thead>
                 <tr className="bg-slate-50 text-slate-500 border-b border-slate-200 uppercase tracking-tight" style={{ fontSize: '13px' }}>
-                  <th className="py-3 px-4 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Thời gian chạy</th>
+                  <th className="py-3 px-4 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Tên tiến trình đối soát</th>
+                  <th className="py-3 px-4 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Tên API</th>
+                  <th className="py-3 px-4 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Thời gian chạy gần nhất</th>
                   <th className="py-3 px-4 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Loại chạy</th>
                   <th className="py-3 px-4 font-semibold text-slate-500 text-[13px] text-right" style={{ fontSize: '13px' }}>Tổng số gửi đi</th>
                   <th className="py-3 px-4 font-semibold text-slate-500 text-[13px] text-right" style={{ fontSize: '13px' }}>Khớp nối</th>
@@ -324,6 +347,12 @@ export function ProvisionReconciliationPage({ processId }: { processId?: string 
             <tbody className="divide-y divide-slate-100 text-slate-700" style={{ fontSize: '13px' }}>
               {paginatedHistory.length > 0 ? paginatedHistory.map((entry) => (
                 <tr key={entry.id} className="hover:bg-slate-50/50 transition-colors" style={{ fontSize: '13px' }}>
+                  <td className="py-3 px-4 text-slate-600 text-[13px]" style={{ fontSize: '13px' }}>
+                    {process.name}
+                  </td>
+                  <td className="py-3 px-4 text-slate-600 text-[13px]" style={{ fontSize: '13px' }}>
+                    {getApiName(process.id)}
+                  </td>
                   <td className="py-3 px-4 font-medium text-slate-700 text-[13px]" style={{ fontSize: '13px' }}>{entry.runDate}</td>
                   <td className="py-3 px-4 text-[13px]" style={{ fontSize: '13px' }}>
                     <span className="inline-flex px-2.5 py-0.5 bg-slate-100 text-slate-700 rounded-full text-[12px] font-normal border border-slate-200 whitespace-nowrap" style={{ fontSize: '12px' }}>
@@ -342,18 +371,27 @@ export function ProvisionReconciliationPage({ processId }: { processId?: string 
                     </span>
                   </td>
                   <td className="py-3 px-4 text-center text-[13px]" style={{ fontSize: '13px' }}>
-                    <button 
-                      onClick={() => { setSelectedEntry(entry as ReconciliationHistoryEntry); setIsDetailsModalOpen(true); }}
-                      className="p-1.5 text-black hover:text-slate-700 hover:bg-slate-100 rounded-[6px] transition-colors inline-flex items-center justify-center cursor-pointer" 
-                      title="Xem chi tiết"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center justify-center gap-1.5">
+                      <button 
+                        onClick={() => { setIsHistoryModalOpen(true); }}
+                        className="p-1.5 text-black hover:text-slate-700 hover:bg-slate-100 rounded-[6px] transition-colors inline-flex items-center justify-center cursor-pointer" 
+                        title="Xem lịch sử"
+                      >
+                        <History className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => { setSelectedEntry(entry as ReconciliationHistoryEntry); setIsDetailsModalOpen(true); }}
+                        className="p-1.5 text-black hover:text-slate-700 hover:bg-slate-100 rounded-[6px] transition-colors inline-flex items-center justify-center cursor-pointer" 
+                        title="Xem chi tiết"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-slate-500">
+                  <td colSpan={9} className="py-8 text-center text-slate-500">
                     Không tìm thấy bản ghi lịch sử phù hợp.
                   </td>
                 </tr>
@@ -369,6 +407,13 @@ export function ProvisionReconciliationPage({ processId }: { processId?: string 
         isOpen={isDetailsModalOpen}
         onClose={() => setIsDetailsModalOpen(false)}
         entry={selectedEntry}
+      />
+
+      <ProvisionReconciliationHistoryModal
+        isOpen={isHistoryModalOpen}
+        onClose={() => setIsHistoryModalOpen(false)}
+        process={process}
+        historyData={history}
       />
     </div>
   );

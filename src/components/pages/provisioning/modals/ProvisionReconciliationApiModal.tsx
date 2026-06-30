@@ -38,7 +38,7 @@ export function ProvisionReconciliationApiModal({ isOpen, onClose, apiData, onSa
         
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-          <h2 className="text-xl font-bold text-slate-800">
+          <h2 className="text-[18px] font-bold text-slate-800" style={{ fontSize: '18px' }}>
             {apiData ? 'Cập nhật API Đối soát' : 'Thêm mới API Đối soát'}
           </h2>
           <button 
@@ -57,40 +57,40 @@ export function ProvisionReconciliationApiModal({ isOpen, onClose, apiData, onSa
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               
               <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                <label className="block text-[13px] font-semibold text-slate-700 mb-1">
                   Tên tiến trình đối soát <span className="text-red-500">*</span>
                 </label>
                 <input
                   name="name"
                   type="text"
                   required
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm font-medium"
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-[13px] font-medium"
                   placeholder="Nhập tên tiến trình đối soát..."
                   defaultValue={apiData ? apiData.name : ''}
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                <label className="block text-[13px] font-semibold text-slate-700 mb-1">
                   Hệ thống đối tác đối soát <span className="text-red-500">*</span>
                 </label>
                 <input
                   name="targetSystem"
                   type="text"
                   required
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm"
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-[13px]"
                   placeholder="Ví dụ: Hệ thống Bộ Tư pháp, Bộ Tài chính..."
                   defaultValue={apiData ? apiData.targetSystem : ''}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                <label className="block text-[13px] font-semibold text-slate-700 mb-1">
                   Lịch trình chạy đối soát <span className="text-red-500">*</span>
                 </label>
                 <select
                   name="schedule"
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm"
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-[13px]"
                   defaultValue={apiData ? apiData.schedule : 'Định kỳ (Hàng ngày) / Theo yêu cầu'}
                 >
                   <option value="Định kỳ (Hàng ngày) / Theo yêu cầu">Định kỳ (Hàng ngày) / Theo yêu cầu</option>
@@ -101,12 +101,12 @@ export function ProvisionReconciliationApiModal({ isOpen, onClose, apiData, onSa
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                <label className="block text-[13px] font-semibold text-slate-700 mb-1">
                   Trạng thái hoạt động <span className="text-red-500">*</span>
                 </label>
                 <select
                   name="status"
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm font-medium"
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-[13px] font-medium"
                   defaultValue={apiData ? apiData.status : 'active'}
                 >
                   <option value="active">Kích hoạt (Hoạt động)</option>
@@ -115,12 +115,12 @@ export function ProvisionReconciliationApiModal({ isOpen, onClose, apiData, onSa
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                <label className="block text-[13px] font-semibold text-slate-700 mb-1">
                   API Cung cấp dữ liệu liên kết đối soát
                 </label>
                 <select
                   name="linkedApi"
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm"
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-[13px]"
                   defaultValue={apiData ? apiData.linkedApi : 'Lấy danh sách Hộ tịch'}
                 >
                   <option value="Lấy danh sách Hộ tịch">Lấy danh sách Hộ tịch (/api/v1/hotich/list)</option>
@@ -138,13 +138,13 @@ export function ProvisionReconciliationApiModal({ isOpen, onClose, apiData, onSa
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors font-medium text-sm"
+              className="px-4 py-2 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors font-medium text-[13px]"
             >
               Hủy bỏ
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg flex items-center transition-colors font-medium text-sm"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center transition-colors font-medium text-[13px]"
             >
               <Check className="w-4 h-4 mr-2" />
               {apiData ? 'Lưu thay đổi' : 'Tạo mới'}

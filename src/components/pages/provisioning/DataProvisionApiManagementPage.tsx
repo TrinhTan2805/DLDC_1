@@ -820,7 +820,6 @@ export function DataProvisionApiManagementPage() {
                       <tr className="bg-slate-50 text-[13px] font-semibold text-slate-500 border-b border-slate-200 uppercase tracking-tight">
                         <th className="py-3 px-4 text-left font-semibold">Mã đối soát</th>
                         <th className="py-3 px-4 text-left font-semibold">Tên tiến trình đối soát</th>
-                        <th className="py-3 px-4 text-center font-semibold">Phiên bản</th>
                         <th className="py-3 px-4 text-left font-semibold">Hệ thống đối tác</th>
                         <th className="py-3 px-4 text-left font-semibold">Tần suất đối soát</th>
                         <th className="py-3 px-4 text-left font-semibold">API liên kết</th>
@@ -832,7 +831,7 @@ export function DataProvisionApiManagementPage() {
                     <tbody className="divide-y divide-slate-100 text-slate-700 text-[13px]">
                       {paginatedRecons.length === 0 ? (
                         <tr>
-                          <td colSpan={9} className="py-8 text-center text-slate-500 font-medium">
+                          <td colSpan={8} className="py-8 text-center text-slate-500 font-medium">
                             Không tìm thấy API đối soát dữ liệu nào.
                           </td>
                         </tr>
@@ -841,16 +840,8 @@ export function DataProvisionApiManagementPage() {
                           <tr key={recon.id} className="hover:bg-slate-50/50 transition-all border-b border-slate-100 group">
                             <td className="py-3 px-4 text-left font-mono text-slate-500">UC-{recon.id}</td>
                             <td className="py-3 px-4 text-left font-semibold text-slate-800">{recon.name}</td>
-                            <td className="py-3 px-4 text-center">
-                              <span className="font-mono text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded border border-blue-200">{recon.version || 'v1.0'}</span>
-                            </td>
                             <td className="py-3 px-4 text-left text-slate-600 text-xs">{recon.targetSystem}</td>
-                            <td className="py-3 px-4 text-left text-slate-500 text-xs">
-                              <div className="flex items-center gap-1.5">
-                                <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                                <span>{recon.schedule}</span>
-                              </div>
-                            </td>
+                            <td className="py-3 px-4 text-left text-slate-500 text-xs">{recon.schedule}</td>
                             <td className="py-3 px-4 text-left text-indigo-600 font-medium text-xs">{recon.linkedApi}</td>
                             <td className="py-3 px-4 text-left">
                               <button
@@ -876,13 +867,6 @@ export function DataProvisionApiManagementPage() {
                                   title="Sửa thông tin đối soát"
                                 >
                                   <Edit className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                                </button>
-                                <button
-                                  onClick={() => { setSelectedApiForHistory({ ...recon, code: `UC-${recon.id}` }); setShowHistoryModal(true); }}
-                                  className="p-1.5 text-slate-500 hover:text-sky-600 hover:bg-sky-50 rounded-[6px] transition-all inline-flex items-center justify-center group cursor-pointer"
-                                  title="Xem lịch sử phiên bản"
-                                >
-                                  <History className="w-4 h-4 group-hover:scale-110 transition-transform" />
                                 </button>
                                 <button
                                   onClick={() => handleToggleReconStatus(recon.id, recon.status, recon.name)}
@@ -1247,16 +1231,16 @@ export function DataProvisionApiManagementPage() {
       {statusConfirmData && createPortal(
         <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200">
-            <div className={`px-6 py-4 border-b border-slate-200 flex items-center gap-3 ${statusConfirmData.action === 'kích hoạt' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center gap-3 bg-blue-50 text-blue-700">
               <AlertTriangle className="w-5 h-5 shrink-0" />
-              <h3 className="font-bold text-[15px] uppercase">
+              <h3 className="font-bold text-[18px] uppercase" style={{ fontSize: '18px' }}>
                 Xác nhận {statusConfirmData.action} {statusConfirmData.type === 'api' ? 'API' : 'tiến trình đối soát'}
               </h3>
             </div>
             <div className="p-6">
               <div className="text-slate-600 text-[13px] leading-relaxed">
                 Bạn có chắc chắn muốn <span className="font-semibold text-slate-900">{statusConfirmData.action}</span> {statusConfirmData.type === 'api' ? 'API cung cấp' : 'tiến trình đối soát'}:
-                <span className="font-bold text-blue-600 block mt-2 text-sm">{statusConfirmData.name}</span>
+                <span className="font-bold text-blue-600 block mt-2 text-[13px]" style={{ fontSize: '13px' }}>{statusConfirmData.name}</span>
                 <div className="mt-4">
                   {statusConfirmData.action === 'tạm ngưng' ? (
                     <span className="text-red-500 font-medium">Lưu ý: Hệ thống đối tác sẽ không thể kết nối hoặc đối soát thông tin qua dịch vụ này cho đến khi được kích hoạt lại.</span>
@@ -1289,9 +1273,7 @@ export function DataProvisionApiManagementPage() {
                   }
                   setStatusConfirmData(null);
                 }}
-                className={`px-4 py-2 text-[13px] font-medium text-white rounded-lg shadow-sm transition-colors cursor-pointer ${
-                  statusConfirmData.action === 'kích hoạt' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-amber-600 hover:bg-amber-700'
-                }`}
+                className="px-4 py-2 text-[13px] font-medium text-white rounded-lg shadow-sm transition-colors cursor-pointer bg-blue-600 hover:bg-blue-700"
               >
                 Xác nhận
               </button>

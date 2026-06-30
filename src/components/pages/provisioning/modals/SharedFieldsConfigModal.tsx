@@ -108,17 +108,17 @@ export function SharedFieldsConfigModal({
   return (
     <Portal>
       <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/50 p-4">
-        <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[85vh] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
+        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200" style={{ fontSize: '13px', maxHeight: '90vh' }}>
           
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50/50">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50">
             <div>
-              <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+              <h3 className="text-[18px] font-bold text-slate-800 flex items-center gap-2" style={{ fontSize: '18px' }}>
                 <ShieldCheck className="w-5 h-5 text-blue-600" />
                 Điều chỉnh các trường dữ liệu chia sẻ
               </h3>
-              <p className="text-xs text-slate-500 mt-1">
-                Cấu hình gói tin cho API: <strong className="text-slate-700">{apiName} ({apiCode})</strong> | Đơn vị sử dụng: <strong className="text-slate-700">{consumerUnit}</strong>
+              <p className="text-[13px] text-slate-500 mt-1" style={{ fontSize: '13px' }}>
+                Cấu hình gói tin cho API: <strong className="text-slate-700 font-semibold">{apiName} ({apiCode})</strong> | Đơn vị sử dụng: <strong className="text-slate-700 font-semibold">{consumerUnit}</strong>
               </p>
             </div>
             <button
@@ -136,8 +136,8 @@ export function SharedFieldsConfigModal({
             {/* Table side (8 cols) */}
             <div className="lg:col-span-7 bg-white rounded-xl border border-slate-200 overflow-hidden flex flex-col shadow-sm">
               <div className="p-4 border-b border-slate-100 bg-slate-50/30 flex justify-between items-center">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Cấu trúc các trường</span>
-                <span className="text-[13px] font-medium text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100">
+                <span className="text-[13px] font-bold text-slate-500 uppercase tracking-wider" style={{ fontSize: '13px' }}>Cấu trúc các trường</span>
+                <span className="text-[13px] font-medium text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100" style={{ fontSize: '13px' }}>
                   Đang chia sẻ: {fields.filter(f => f.shared).length} / {fields.length} trường
                 </span>
               </div>
@@ -195,13 +195,13 @@ export function SharedFieldsConfigModal({
             </div>
 
             {/* JSON Preview side (5 cols) */}
-            <div className="lg:col-span-5 bg-slate-950 rounded-xl border border-slate-800 flex flex-col shadow-xl overflow-hidden min-h-[300px]">
+            <div className="lg:col-span-5 bg-slate-950 rounded-xl border border-slate-800 flex flex-col shadow-xl overflow-hidden min-h-[300px]" style={{ fontSize: '13px' }}>
               <div className="px-4 py-3 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-400 font-mono flex items-center gap-1.5">
+                <span className="text-[13px] font-bold text-slate-400 font-mono flex items-center gap-1.5" style={{ fontSize: '13px' }}>
                   <Database className="w-3.5 h-3.5 text-blue-500" />
                   API Response Payload (Preview)
                 </span>
-                <span className="text-[11px] bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded border border-blue-500/20 font-bold uppercase">
+                <span className="text-[13px] bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded border border-blue-500/20 font-bold uppercase" style={{ fontSize: '13px' }}>
                   JSON format
                 </span>
               </div>
