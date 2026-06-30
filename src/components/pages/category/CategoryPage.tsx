@@ -234,6 +234,7 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<Category | null>(null);
   const [showAddFieldModal, setShowAddFieldModal] = useState(false);
   const [showArchiveModal, setShowArchiveModal] = useState(false);
   const [showCreateVersionModal, setShowCreateVersionModal] = useState(false);
@@ -242,6 +243,9 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
   const [showApprovalDetailModal, setShowApprovalDetailModal] = useState(false);
   const [showApprovalRequestModal, setShowApprovalRequestModal] = useState(false);
   const [approvalForm, setApprovalForm] = useState({ reviewer: '', note: '' });
+  const [selectedRecordIds, setSelectedRecordIds] = useState<string[]>([]);
+  const [showBulkApproval, setShowBulkApproval] = useState(false);
+  const [bulkApprovalForm, setBulkApprovalForm] = useState({ reviewer: '', note: '' });
   const [selectedApprovalRequest, setSelectedApprovalRequest] = useState<any>(null);
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importPreviewData, setImportPreviewData] = useState<any[]>([]);
@@ -933,14 +937,24 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                       <ArrowUpDown className="w-4 h-4" />
                       Sắp xếp{sortConditions.length > 0 && !showSortPanel ? <span className="ml-1 w-2 h-2 rounded-full bg-blue-500 inline-block" /> : null}
                     </button>
+                    {/* Gửi duyệt hàng loạt */}
+                    <button
+                      type="button"
+                      onClick={() => setShowBulkApproval(true)}
+                      disabled={selectedRecordIds.length === 0}
+                      className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-[13px] font-medium transition-all active:scale-95 whitespace-nowrap ${
+                        selectedRecordIds.length > 0
+                          ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-sm cursor-pointer'
+                          : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                      }`}
+                    >
+                      <Send className="w-4 h-4" />
+                      Gửi duyệt{selectedRecordIds.length > 0 ? ` (${selectedRecordIds.length})` : ''}
+                    </button>
                     {/* Thêm bản ghi mới */}
                     <button
                       type="button"
-                      onClick={() => {
-                        setAddingRow(true);
-                        setInlineAddData({ code: '', name: '', description: '' });
-                        setEditingRowId(null);
-                      }}
+                      onClick={() => { setEditingRecord(null); setShowAddModal(true); }}
                       className="flex-1 md:flex-none px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[13px] font-medium flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
                     >
                       <Plus className="w-4 h-4" />
@@ -1150,6 +1164,25 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                   <table className="w-full text-left">
                     <thead className="bg-[#f8fafc] text-slate-700 border-b border-slate-200">
                       <tr>
+                        <th className="px-4 py-4 w-10 text-center">
+                          <input
+                            type="checkbox"
+                            title="Chọn tất cả bản ghi chờ duyệt"
+                            checked={
+                              paginatedCategories.filter(c => c.status === 'pending').length > 0 &&
+                              paginatedCategories.filter(c => c.status === 'pending').every(c => selectedRecordIds.includes(c.id))
+                            }
+                            onChange={(e) => {
+                              const pendingIds = paginatedCategories.filter(c => c.status === 'pending').map(c => c.id);
+                              if (e.target.checked) {
+                                setSelectedRecordIds(prev => [...new Set([...prev, ...pendingIds])]);
+                              } else {
+                                setSelectedRecordIds(prev => prev.filter(id => !pendingIds.includes(id)));
+                              }
+                            }}
+                            className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                          />
+                        </th>
                         <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap w-14 text-center">STT</th>
                         <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Mã</th>
                         <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên giá trị</th>
@@ -1168,7 +1201,21 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                           {paginatedCategories.map((category, index) => {
                             const isEditing = editingRowId === category.id;
                             return (
-                              <tr key={category.id} className={`hover:bg-slate-50/50 transition-all group border-b border-slate-100 ${isEditing ? 'bg-blue-50/10' : ''}`}>
+                              <tr key={category.id} className={`hover:bg-slate-50/50 transition-all group border-b border-slate-100 ${isEditing ? 'bg-blue-50/10' : ''} ${selectedRecordIds.includes(category.id) ? 'bg-blue-50/30' : ''}`}>
+                                <td className="px-4 py-4 text-center">
+                                  {category.status === 'pending' ? (
+                                    <input
+                                      type="checkbox"
+                                      title="Chọn bản ghi"
+                                      checked={selectedRecordIds.includes(category.id)}
+                                      onChange={(e) => {
+                                        if (e.target.checked) setSelectedRecordIds(prev => [...prev, category.id]);
+                                        else setSelectedRecordIds(prev => prev.filter(id => id !== category.id));
+                                      }}
+                                      className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                                    />
+                                  ) : <span className="w-4 h-4 inline-block" />}
+                                </td>
                                 <td className="px-6 py-4 text-[13px] text-slate-500 text-center">{(currentPageNum - 1) * pageSize + index + 1}</td>
                                 <td className="px-6 py-4">
                                   {isEditing ? (
@@ -1250,11 +1297,7 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                                   ) : (
                                     <div className="flex items-center justify-center gap-1 opacity-80 group-hover:opacity-100 transition-all">
                                       <button
-                                        onClick={() => {
-                                          setEditingRowId(category.id);
-                                          setInlineEditData({ code: category.code, name: category.name, description: category.description || '' });
-                                          setAddingRow(false);
-                                        }}
+                                        onClick={() => { setEditingRecord(category); setShowEditModal(true); }}
                                         className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
                                         title="Chỉnh sửa"
                                       >
@@ -1275,6 +1318,7 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                           })}
                           {addingRow && (
                             <tr className="bg-blue-50/20 border-b border-slate-100">
+                              <td className="px-4 py-4" />
                               <td className="px-6 py-4 text-[13px] text-slate-500 text-center">{(currentPageNum - 1) * pageSize + paginatedCategories.length + 1}</td>
                               <td className="px-6 py-4">
                                 <input
@@ -2084,6 +2128,52 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
         </div>
       )}
 
+      <RecordFormModal
+        isOpen={showAddModal && !editingRecord}
+        onClose={() => setShowAddModal(false)}
+        title="Thêm mới bản ghi"
+        entityName={categoryName}
+        entityCode={categoryId}
+        onSave={(data) => {
+          const newCat: Category = {
+            id: `cat-${Date.now()}`,
+            code: data.code,
+            name: data.name,
+            description: data.description,
+            type: 'standard',
+            status: 'pending',
+            createdDate: new Date().toLocaleDateString('vi-VN'),
+            createdBy: 'Nguyễn Văn A',
+          };
+          setCategories(prev => [...prev, newCat]);
+          setShowAddModal(false);
+          setSuccessNotificationMessage('Đã gửi bản ghi mới chờ phê duyệt thành công!');
+          setShowSuccessNotification(true);
+          setTimeout(() => setShowSuccessNotification(false), 3000);
+        }}
+      />
+
+      <RecordFormModal
+        isOpen={showEditModal && !!editingRecord}
+        onClose={() => { setShowEditModal(false); setEditingRecord(null); }}
+        title="Chỉnh sửa bản ghi"
+        initialData={editingRecord}
+        entityName={categoryName}
+        entityCode={categoryId}
+        onSave={(data) => {
+          setCategories(prev => prev.map(c =>
+            c.id === editingRecord?.id
+              ? { ...c, code: data.code, name: data.name, description: data.description, status: 'pending' as const, updatedDate: new Date().toLocaleDateString('vi-VN'), updatedBy: 'Nguyễn Văn A' }
+              : c
+          ));
+          setShowEditModal(false);
+          setEditingRecord(null);
+          setSuccessNotificationMessage('Đã gửi yêu cầu chỉnh sửa chờ phê duyệt thành công!');
+          setShowSuccessNotification(true);
+          setTimeout(() => setShowSuccessNotification(false), 3000);
+        }}
+      />
+
       {showApprovalRequestModal && (
         <ApprovalRequestModal
           isOpen={showApprovalRequestModal}
@@ -2102,6 +2192,31 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
           }}
         />
       )}
+
+      <ApprovalRequestModal
+        isOpen={showBulkApproval}
+        onClose={() => setShowBulkApproval(false)}
+        data={{ id: '', code: categoryId, name: `${selectedRecordIds.length} bản ghi đã chọn`, type: 'category' }}
+        approvers={[
+          { id: '1', name: 'Nguyễn Văn A', position: 'Trưởng phòng', department: 'Phòng Quản lý dữ liệu' },
+          { id: '2', name: 'Trần Thị B', position: 'Phó Giám đốc', department: 'Trung tâm CNTT' },
+          { id: '3', name: 'Lê Minh C', position: 'Trưởng phòng Pháp chế', department: 'Vụ Pháp luật' },
+          { id: '4', name: 'Phạm Văn D', position: 'Cục trưởng', department: 'Cục CNTT' }
+        ]}
+        form={bulkApprovalForm}
+        setForm={setBulkApprovalForm}
+        onSubmit={() => {
+          setCategories(prev => prev.map(c =>
+            selectedRecordIds.includes(c.id) ? { ...c, status: 'approved' as const } : c
+          ));
+          setSuccessNotificationMessage(`Đã gửi ${selectedRecordIds.length} bản ghi đến người phê duyệt thành công!`);
+          setShowSuccessNotification(true);
+          setTimeout(() => setShowSuccessNotification(false), 3000);
+          setShowBulkApproval(false);
+          setSelectedRecordIds([]);
+          setBulkApprovalForm({ reviewer: '', note: '' });
+        }}
+      />
 
       {activeTab === 'version-history' && (
         <div className="space-y-4">

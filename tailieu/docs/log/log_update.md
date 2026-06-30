@@ -37,7 +37,23 @@
    - Giữ nguyên **biểu đồ tròn PieChart** — hiển thị phân bổ theo trạng thái đã lọc, mỗi trạng thái một màu riêng; kèm 4 thẻ tóm tắt (count + tỷ trọng %).
    - Thêm **bảng chi tiết chuyển trạng thái** đáp ứng UC (UC1: truy vấn theo trạng thái, UC2: xem thời gian/người duyệt/lý do) với các cột: STT / Mã danh mục / Tên danh mục / Trạng thái (badge màu) / Thời gian chuyển TT / Người duyệt / Lý do.
    - Nút **Xuất File** (Excel/PDF/CSV) tích hợp vào control panel.
-8. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công cho mọi thay đổi, hoạt động ổn định.
+8. **Cập nhật màn hình Thiết lập cấu trúc (AttributesTab) đối với nguồn dữ liệu từ kho DLDC**:
+   - **Vô hiệu hóa tác vụ**: Khi danh mục có nguồn dữ liệu là *"Đồng bộ Kho DLDC"*, các nút Sửa/Xóa trong cột Thao tác của bảng grid thuộc tính sẽ bị disable (`isLocked = true`) và đổi sang trạng thái cursor-not-allowed.
+   - **Cấu hình thêm mới trường**: Khi click vào nút *"Thêm trường dữ liệu"*, thay vì mở form nhập liệu thủ công, hệ thống hiển thị Modal popup (`showDldcModal`). Tại modal này, **Cơ sở dữ liệu** và **Bảng dữ liệu chính** được thiết lập mặc định theo cấu hình của danh mục hiện tại và bị khóa không cho phép chỉnh sửa. Người dùng có thể tùy ý cấu hình **bảng liên kết bổ sung (Join)**, thêm/xóa trường và lựa chọn các trường chia sẻ (`modalDldcFieldRows`) để áp dụng cấu trúc tự động.
+   - **Lược bỏ cột dữ liệu**: Tại bảng chọn trường dữ liệu chia sẻ (Field Selection) cả trong modal và trong wizard cấu hình DLDC, loại bỏ cột *"Che dấu"*; đồng thời thêm lại cột **"Tên hiển thị"** (fill sẵn giá trị bằng tên trường gốc nhưng cho phép người dùng tự do chỉnh sửa).
+9. **Cập nhật trường đơn vị chủ quản**: Trong form thông tin chung danh mục (Bước 1), chuyển trường *"Đơn vị chủ quản"* từ dạng ô nhập text tự do sang hộp chọn dropdown cho phép chọn trực tiếp các đơn vị thuộc Bộ Tư pháp (BTP).
+10. **Thay đổi dạng hiển thị Cấu hình khóa**: Tại giao diện thiết lập cấu trúc thuộc tính (cả form thêm mới inline và Modal popup thêm mới trường dữ liệu), chuyển đổi nút chọn "Cấu hình khóa" thành dạng **Radio button** cùng nằm trên một dòng ngang với nhãn tiêu đề, cho phép chọn giữa 2 tùy chọn chính: **Khóa chính (PK)** và **Khóa ngoại (FK)** (click lại vào radio đang chọn để bỏ chọn nếu muốn).
+11. **Tinh giản Cấu hình ràng buộc**: Tại form thêm mới thuộc tính (inline & modal), loại bỏ hẳn phần nhãn và khung bọc "Cấu hình ràng buộc", chuyển thành một checkbox đơn giản ghi rõ: **"Là trường bắt buộc"** (tương ứng với cấu hình `required`).
+12. **Lược bỏ các trường không cần thiết**: Loại bỏ 2 ô nhập liệu **"Quy tắc xác thực"** và **"Mô tả ngắn gọn"** khỏi giao diện thêm mới thuộc tính để tối giản form nhập liệu.
+13. **Ẩn nút Gửi trình duyệt ở Bước 1 & Bước 2**: Cấu hình ẩn nút bấm *"Gửi trình duyệt"* ở phần chân trang (footer) của wizard thiết lập danh mục khi người dùng đang ở bước 1 (Thông tin chung) hoặc bước 2 (Thiết lập cấu trúc), chỉ hiển thị nút này khi đã tới bước 3 (Thiết lập quan hệ) hoặc khi hoàn tất.
+14. **Gọi Modal trình duyệt danh mục tại Bước 3**: Khi nhấn nút *"Gửi trình duyệt"* ở Bước 3 của wizard thiết lập, hệ thống sẽ mở trực tiếp modal **Trình duyệt danh mục** (`ApprovalRequestModal`) để người dùng điền thông tin người duyệt và nội dung yêu cầu thay vì chỉ lưu nháp thông thường.
+15. **Thay đổi nhãn Chọn thực thể**: Tại tab Thiết lập cấu trúc thuộc tính, đổi nhãn tiêu đề trường chọn thực thể dữ liệu chủ từ *"Chọn thực thể dữ liệu chủ"* thành *"Chọn danh mục dữ liệu dùng chung"*.
+16. **Đồng bộ cột của bảng danh sách thuộc tính**: Cập nhật lại các cột hiển thị của bảng grid thuộc tính ở cả chế độ thông thường (Full Page Mode) và chế độ thu gọn (Compact Wizard Mode) để đồng bộ hoàn toàn với form thêm mới: loại bỏ cột *"Quy tắc xác thực"*, thay thế cột *"Ràng buộc"* (đang hiển thị REQ, UNI, IDX) bằng cột *"Bắt buộc"* đơn giản.
+17. **Cấu trúc cột cho nguồn dữ liệu đồng bộ DLDC**: Nếu danh mục sử dụng nguồn dữ liệu là *"Đồng bộ Kho DLDC"*, bảng grid danh sách trường sẽ hiển thị cấu trúc cột đặc thù gồm: **Tên CSDL**, **Nguồn dữ liệu** (tên bảng), **Trường gốc** (tên cột), **Tên hiển thị**, **Kiểu dữ liệu**, và **PK** (Khóa chính).
+18. **Loại bỏ thẻ thống kê trên cùng**: Loại bỏ hoàn toàn hàng thẻ thống kê số liệu trường ở trên cùng (bao gồm: Tổng trường dữ liệu, Trường dữ liệu bắt buộc, Trường dữ liệu duy nhất) theo yêu cầu giao diện tối giản.
+19. **Tách riêng Trạng thái cấu trúc và bộ chọn danh mục**: Tách phần **Chọn danh mục dữ liệu dùng chung** và **Trạng thái cấu trúc** thành 2 thẻ (card) độc lập nằm song song cạnh nhau trên một dòng (grid-cols-2).
+20. **Loại bỏ bộ lọc thuộc tính**: Gỡ bỏ hoàn toàn nút bấm bộ lọc nâng cao và khung bộ lọc collapsible (bao gồm các bộ lọc Ràng buộc, Cấu hình khóa, Kiểu dữ liệu) để tối giản hóa trải nghiệm người dùng.
+21. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công cho mọi thay đổi, hoạt động ổn định.
 
 **Các file bị ảnh hưởng:**
 - `src/components/pages/open-data/OpenDataSetupPage.tsx`
@@ -51,6 +67,10 @@
 - `src/components/pages/category/reports/CategoryReportListPage.tsx`
 - `src/components/pages/category/reports/CategoryReportExploitationPage.tsx`
 - `src/components/pages/category/reports/CategoryReportStatusPage.tsx`
+- `src/components/pages/category/CategorySetupPage.tsx`
+- `src/components/pages/category/components/tabs/AttributesTab.tsx`
+- `src/components/pages/category/components/modals/CategoryWizardModal.tsx`
+- `src/components/pages/category/components/modals/AttributeFormModal.tsx`
 
 ---
 

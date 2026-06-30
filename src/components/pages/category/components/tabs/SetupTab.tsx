@@ -2,7 +2,7 @@ import React, { ChangeEvent } from 'react';
 import {
   Settings, CheckSquare, XCircle, Search, Filter, Plus, Globe,
   X, ChevronDown, Eye, SquarePen, Trash2, Send, PowerOff,
-  FileText, Building2, Tag, Clock, History
+  FileText, Building2, Tag, Clock, Database
 } from 'lucide-react';
 import { MasterDataEntity, LifecycleStatus } from '../../categoryTypes';
 import { dataTypeLabels, lifecycleLabels, scopeLabels } from '../../categoryConstants';
@@ -35,7 +35,7 @@ interface SetupTabProps {
   onApproveClick: (entity: MasterDataEntity) => void;
   onRejectClick: (entity: MasterDataEntity) => void;
   onExpireClick: (entity: MasterDataEntity) => void;
-  onViewHistory?: (entity: MasterDataEntity) => void;
+  onViewData?: (entity: MasterDataEntity) => void;
 }
 
 export function SetupTab({
@@ -56,7 +56,7 @@ export function SetupTab({
   onApproveClick,
   onRejectClick,
   onExpireClick,
-  onViewHistory
+  onViewData
 }: SetupTabProps) {
   // Local UI States for Filters & Pagination
   const [showFilters, setShowFilters] = React.useState(false);
@@ -304,6 +304,7 @@ export function SetupTab({
             <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
               <tr>
                 <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">STT</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Mã danh mục</th>
                 <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên danh mục</th>
                 <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Cơ sở dữ liệu/ Hệ thống</th>
                 <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Đơn vị chủ quản</th>
@@ -320,6 +321,7 @@ export function SetupTab({
                   return (
                     <tr key={entity.id} className="hover:bg-slate-50/50 transition-all group border-b border-slate-100">
                       <td className="px-6 py-4 text-slate-500 text-[13px] font-normal">{(currentPageNum - 1) * pageSize + index + 1}</td>
+                      <td className="px-6 py-4 text-slate-900 text-[13px] font-mono font-semibold">{entity.code}</td>
                       <td className="px-6 py-4 text-slate-900 text-[13px] font-normal hover:text-blue-600 transition-colors">
                         {entity.name}
                       </td>
@@ -355,13 +357,13 @@ export function SetupTab({
                               <Eye className="w-4 h-4" />
                             </button>
                           )}
-                          {onViewHistory && (
+                          {onViewData && (
                             <button
-                              onClick={() => onViewHistory(entity)}
-                              className="p-1.5 text-slate-500 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors cursor-pointer"
-                              title="Lịch sử phiên bản"
+                              onClick={() => onViewData(entity)}
+                              className="p-1.5 text-slate-500 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors cursor-pointer"
+                              title="Xem dữ liệu"
                             >
-                              <History className="w-4 h-4" />
+                              <Database className="w-4 h-4" />
                             </button>
                           )}
                           <button

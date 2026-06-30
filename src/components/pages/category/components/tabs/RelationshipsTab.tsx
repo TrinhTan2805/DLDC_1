@@ -1,8 +1,11 @@
 import React, { useState, useRef, useEffect, ReactNode, ChangeEvent, MouseEvent } from 'react';
-import { Network, ArrowRight, Key, Table, Search, AlertCircle, Info, ChevronDown, Plus, Trash2, SquarePen, CheckCircle2 } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { Network, ArrowRight, Key, Table, Search, AlertCircle, Info, ChevronDown, Plus, Trash2, SquarePen, CheckCircle2, Send } from 'lucide-react';
 import { MasterDataEntity, EntityRelationship, RelationshipType, RelationshipStatus, FieldDataType } from '../../categoryTypes';
 import { ConfirmModal } from '../../../../common/ConfirmModal';
 import { BaseModal } from '../../../../common/BaseModal';
+import { approvers } from '../../categoryConstants';
+import { ApprovalRequestModal } from '../modals/ApprovalRequestModal';
 
 interface RelationshipsTabProps {
   entities: MasterDataEntity[];
@@ -69,6 +72,8 @@ export function RelationshipsTab({
   const [formData, setFormData] = useState<Partial<EntityRelationship>>(emptyForm);
   const [formError, setFormError] = useState('');
   const [gridSearchTerm, setGridSearchTerm] = useState('');
+  const [showRelApproval, setShowRelApproval] = useState(false);
+  const [relApprovalForm, setRelApprovalForm] = useState({ reviewer: '', note: '' });
 
   const [genericConfirm, setGenericConfirm] = useState<{
     isOpen: boolean;
@@ -300,6 +305,21 @@ export function RelationshipsTab({
     }, 200);
   };
 
+  const handleValidateAndOpenApproval = () => {
+    setFormError('');
+    if (!formData.sourceEntityId || !formData.targetEntityId) { setFormError('Vui lòng chọn đầy đủ thực thể nguồn và thực thể đích.'); return; }
+    if (formData.sourceEntityId === formData.targetEntityId) { setFormError('Thực thể nguồn và thực thể đích phải khác nhau.'); return; }
+    if (formData.relationshipType === 'n-n') {
+      if (!formData.mappingTable || !formData.sourceKey || !formData.targetKey) { setFormError('Quan hệ n-n cần có đầy đủ: Bảng liên kết, Khóa ngoại nguồn, Khóa ngoại đích.'); return; }
+    } else {
+      if (!formData.sourceKey || !formData.targetKey) { setFormError('Cần khai báo đầy đủ Khóa nguồn và Khóa đích.'); return; }
+    }
+    const hasDuplicate = localRelationships.some(r => r.id !== (editingRelation?.id || '') && r.sourceEntityId === formData.sourceEntityId && r.targetEntityId === formData.targetEntityId && r.relationshipType === formData.relationshipType);
+    if (hasDuplicate) { setFormError('Đã tồn tại quan hệ cùng loại giữa 2 danh mục này.'); return; }
+    if (createsCycle(localRelationships.filter(r => r.id !== (editingRelation?.id || '')), formData.sourceEntityId!, formData.targetEntityId!, formData.relationshipType!)) { setFormError('Quan hệ này tạo ra vòng lặp (Circular Dependency). Vui lòng kiểm tra lại.'); return; }
+    setShowRelApproval(true);
+  };
+
   // Delete relationship trigger
   const handleDeleteRelation = (rel: EntityRelationship) => {
     setGenericConfirm({
@@ -347,6 +367,7 @@ export function RelationshipsTab({
   });
 
   return (
+    <>
     <div className="space-y-5">
       {/* Category selector & control block */}
       <div className="bg-white p-5 border border-slate-200 rounded-xl space-y-2">
@@ -517,10 +538,11 @@ export function RelationshipsTab({
               Hủy bỏ
             </button>
             <button
-              onClick={handleSaveRelation}
-              className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg text-[13px] font-medium transition-colors cursor-pointer"
+              onClick={handleValidateAndOpenApproval}
+              className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg text-[13px] font-medium transition-colors cursor-pointer flex items-center gap-2"
             >
-              Lưu lại
+              <Send className="w-4 h-4" />
+              Gửi duyệt cấu trúc
             </button>
           </div>
         }
@@ -707,6 +729,24 @@ export function RelationshipsTab({
         />
       )}
     </div>
+
+    {createPortal(
+      <ApprovalRequestModal
+        isOpen={showRelApproval}
+        onClose={() => setShowRelApproval(false)}
+        data={{ id: '', code: currentEntityCode || '', name: currentEntityName || '', type: 'category' }}
+        approvers={approvers}
+        form={relApprovalForm}
+        setForm={setRelApprovalForm}
+        onSubmit={() => {
+          handleSaveRelation();
+          setShowRelApproval(false);
+          setRelApprovalForm({ reviewer: '', note: '' });
+        }}
+      />,
+      document.body
+    )}
+    </>
   );
 }
 
@@ -723,7 +763,7 @@ interface SearchableSelectProps {
 function SearchableSelect({ label, placeholder, options, value, onChange, disabled = false }: SearchableSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const wrapperRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     function handleClickOutside(event: any) {

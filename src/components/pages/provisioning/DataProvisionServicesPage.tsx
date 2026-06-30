@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Server, Clock, ShieldCheck, Activity, Code, Database, Sliders, Play, Square, Check, X, Filter } from 'lucide-react';
+import { Search, Sliders, Check, X, Filter } from 'lucide-react';
 import { provisionServicesData, ProvisionService } from '../../../data/provisionServicesData';
 import { SharedFieldsConfigModal } from './modals/SharedFieldsConfigModal';
 
@@ -10,12 +10,8 @@ interface DataProvisionServicesPageProps {
   description: string;
 }
 
-export function DataProvisionServicesPage({ category, group, title, description }: DataProvisionServicesPageProps) {
-  const [searchTerm, setSearchTerm] = useState('');
+export function DataProvisionServicesPage({ category, group, description }: DataProvisionServicesPageProps) {
   const [selectedService, setSelectedService] = useState<ProvisionService | null>(null);
-
-  // State for showing API details
-  const [selectedApi, setSelectedApi] = useState<any>(null);
 
   // Search and Filter State
   const [searchRightText, setSearchRightText] = useState('');
@@ -49,15 +45,11 @@ export function DataProvisionServicesPage({ category, group, title, description 
     return matchesCategory && matchesGroup;
   });
 
-  const filteredInnerList = groupData.filter(item => 
-    item.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   useEffect(() => {
-    if (filteredInnerList.length > 0 && !selectedService) {
-      setSelectedService(filteredInnerList[0]);
+    if (groupData.length > 0 && !selectedService) {
+      setSelectedService(groupData[0]);
     }
-  }, [group, category, filteredInnerList, selectedService]);
+  }, [group, category]);
 
   // Helper to get initial fields config for mock APIs
   const getInitialFields = (sharedCount: number) => [
@@ -242,60 +234,22 @@ export function DataProvisionServicesPage({ category, group, title, description 
   };
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative">
-      
+    <div className="space-y-4 relative">
+
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="absolute top-4 right-4 z-[9999] bg-slate-900 text-white px-4 py-3 rounded-lg shadow-xl flex items-center gap-2 animate-in fade-in slide-in-from-top-4 duration-300 font-medium text-sm">
+        <div className="fixed top-4 right-4 z-[9999] bg-slate-900 text-white px-4 py-3 rounded-lg shadow-xl flex items-center gap-2 animate-in fade-in slide-in-from-top-4 duration-300 font-medium text-sm">
           <Check className="w-4 h-4 text-emerald-400" />
           {toastMessage}
         </div>
       )}
 
-      {/* Left Sidebar */}
-      <div className="w-80 border-r border-slate-200 flex flex-col bg-slate-50 flex-shrink-0">
-        <div className="p-4 border-b border-slate-200 bg-white">
-          <h3 className="font-semibold text-slate-800 text-lg mb-4">{group || title}</h3>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Tìm kiếm dữ liệu..."
-              className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-        </div>
-        <div className="flex-1 overflow-y-auto p-2 space-y-1">
-          {filteredInnerList.map(item => (
-            <button
-              key={item.id}
-              onClick={() => { setSelectedService(item); setSelectedApi(null); }}
-              className={`w-full text-left px-3 py-3 rounded-lg text-[13px] transition-colors ${
-                selectedService?.id === item.id
-                  ? 'bg-blue-50 border border-blue-200 text-blue-700 font-medium'
-                  : 'hover:bg-slate-100 text-slate-600 border border-transparent'
-              }`}
-              style={{ fontSize: '13px' }}
-            >
-              {item.name}
-            </button>
-          ))}
-          {filteredInnerList.length === 0 && (
-            <div className="p-4 text-center text-sm text-slate-500">
-              Không tìm thấy dữ liệu phù hợp
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Right Content */}
-      <div className="flex-1 flex flex-col bg-white overflow-hidden">
+      {/* Content */}
+      <div>
         {selectedService ? (
           <>
-            <div className="flex-1 overflow-y-auto p-6 bg-slate-50/50">
-              <div className="max-w-6xl mx-auto space-y-6">
+            <div className="space-y-4">
+              <div className="space-y-4">
                 
                 {/* Header Title */}
                 <div className="pb-2">
@@ -308,7 +262,7 @@ export function DataProvisionServicesPage({ category, group, title, description 
                 {/* Tabbed Content */}
                     {/* General Search Toolbar directly below tabs container */}
                     {/* General Search Toolbar & Advanced Filters in a single white container */}
-                    <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm space-y-4 mb-4">
+                    <div className="space-y-4 mb-4">
                       {/* Row 1: Search input + Blue Search Button + Filter Toggle Button */}
                       <div className="flex items-center gap-3">
                         <div className="relative flex-1">
@@ -397,7 +351,7 @@ export function DataProvisionServicesPage({ category, group, title, description 
                                 <th className="px-4 py-3 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Đơn vị sử dụng</th>
                                 <th className="px-4 py-3 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Đầu mối tiếp nhận</th>
                                 <th className="px-4 py-3 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Cổng Endpoint / Giao thức</th>
-                                <th className="px-4 py-3 text-center font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Số trường chia sẻ</th>
+
                                 <th className="px-4 py-3 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Thời gian cập nhật</th>
                                 <th className="px-4 py-3 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Trạng thái</th>
                                 <th className="px-4 py-3 text-center font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Thao tác</th>
@@ -424,11 +378,7 @@ export function DataProvisionServicesPage({ category, group, title, description 
                                       <span className="font-mono text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>{api.endpoint}</span>
                                     </div>
                                   </td>
-                                  <td className="px-4 py-3 text-center font-semibold text-slate-800 text-[13px]" style={{ fontSize: '13px' }}>
-                                    <span className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full border border-slate-200 font-mono text-[11px] whitespace-nowrap">
-                                      {api.sharedCount}/7
-                                    </span>
-                                  </td>
+
                                   <td className="px-4 py-3 text-slate-500 font-mono text-[13px]" style={{ fontSize: '13px' }}>
                                     {api.time}
                                   </td>
@@ -472,14 +422,7 @@ export function DataProvisionServicesPage({ category, group, title, description 
               </div>
             </div>
           </>
-        ) : (
-          <div className="flex-1 flex items-center justify-center text-slate-400 bg-slate-50">
-            <div className="text-center">
-              <Database className="w-12 h-12 mx-auto mb-3 opacity-20" />
-              <p>Vui lòng chọn một dữ liệu để xem chi tiết</p>
-            </div>
-          </div>
-        )}
+        ) : null}
       </div>
 
       {/* Shared Fields Config Modal */}

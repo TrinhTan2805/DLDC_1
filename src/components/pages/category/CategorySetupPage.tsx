@@ -1,4 +1,5 @@
 import React, { useState, useEffect, ChangeEvent, ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Settings, Sliders, Link2, CheckSquare, Clock
 } from 'lucide-react';
@@ -37,10 +38,11 @@ import { ExpireApproveModal } from './components/modals/ExpireApproveModal';
 import { CategoryInfoViewModal } from './components/modals/CategoryInfoViewModal';
 import { CategoryStructureViewModal } from './components/modals/CategoryStructureViewModal';
 import { CategoryVersionChangeModal } from './components/modals/CategoryVersionChangeModal';
-import { EntityVersionHistoryModal } from './components/modals/EntityVersionHistoryModal';
 import { Portal } from '../../common/Portal';
 
 export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }) => {
+  const navigate = useNavigate();
+
   // Navigation State
   const [activeTab, setActiveTab] = useState<TabType>('setup');
 
@@ -364,9 +366,6 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
   const [structureViewEntity, setStructureViewEntity] = useState<MasterDataEntity | null>(null);
   const [structureViewRequestId, setStructureViewRequestId] = useState<string | null>(null);
 
-  // State cho Lịch sử phiên bản theo entity (từ SetupTab)
-  const [showEntityHistoryModal, setShowEntityHistoryModal] = useState(false);
-  const [historyEntity, setHistoryEntity] = useState<MasterDataEntity | null>(null);
 
   // State cho Xem chi tiết thay đổi phiên bản
   const [showVersionChangeModal, setShowVersionChangeModal] = useState(false);
@@ -480,6 +479,10 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
     if (action === 'submit') {
       setShowWizard(false);
       // Gửi phê duyệt
+      const entity = entities.find(e => e.id === savedId) || { id: savedId, code: formData.code || '', name: formData.name || '' };
+      setApprovalRequestData({ id: entity.id, code: entity.code, name: entity.name, type: 'category' });
+      setApprovalRequestForm({ reviewer: '', note: '' });
+      setShowApprovalModal(true);
     } else if (action === 'next') {
       setWizardStep(2);
     } else if (action === 'next3') {
@@ -638,8 +641,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
     showInfoViewModal ||
     showStructureViewModal ||
     showVersionChangeModal ||
-    showApprovalModal ||
-    showEntityHistoryModal
+    showApprovalModal
   );
 
   return (
@@ -688,9 +690,8 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
                 setExpireEntity(e);
                 setShowExpireRequestModal(true);
               }}
-              onViewHistory={(e) => {
-                setHistoryEntity(e);
-                setShowEntityHistoryModal(true);
+              onViewData={(e) => {
+                navigate(`/category-list?category=category-a-${e.id}`);
               }}
             />
           )}
@@ -704,6 +705,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
               onSelectAttribute={(id) => setSelectedAttributes(prev => prev.includes(id) ? prev.filter(sid => sid !== id) : [...prev, id])}
               onSelectAll={(checked) => setSelectedAttributes(checked ? attributes.map(a => a.id) : [])}
               onAddAttribute={() => setShowAttributeModal(true)}
+              onAddAttributeInline={handleAddAttributeInline}
               onEditAttribute={(attr) => { setEditingAttribute(attr); setAttributeFormData(attr); setShowAttributeModal(true); }}
               onDeleteAttribute={(id) => { setAttributeToDeleteId(id); setShowDeleteAttributeModal(true); }}
               getDataTypeLabel={getDataTypeLabel}
@@ -836,7 +838,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
         />
 
         {/* Các modal khác giữ nguyên ẩn khi không dùng */}
-        <AttributeFormModal isOpen={showAttributeModal} onClose={() => setShowAttributeModal(false)} editingAttribute={editingAttribute} formData={attributeFormData} setFormData={setAttributeFormData} onSave={handleSaveAttribute} onSaveAndSubmit={() => { }} entities={entities} />
+        <AttributeFormModal isOpen={showAttributeModal} onClose={() => setShowAttributeModal(false)} editingAttribute={editingAttribute} formData={attributeFormData} setFormData={setAttributeFormData} onSave={handleSaveAttribute} onSaveAndSubmit={() => { }} entities={entities} entityName={entities.find(e => e.id === selectedEntityId)?.name || ''} entityCode={entities.find(e => e.id === selectedEntityId)?.code || ''} />
 
         <SimpleApproveModal
           isOpen={showSimpleApproveModal}
@@ -942,11 +944,6 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
            }}
         />
 
-        <EntityVersionHistoryModal
-          isOpen={showEntityHistoryModal}
-          onClose={() => setShowEntityHistoryModal(false)}
-          entity={historyEntity}
-        />
 
         <CategoryVersionChangeModal
           isOpen={showVersionChangeModal}

@@ -1,8 +1,10 @@
-import React, { ChangeEvent } from 'react';
+import React, { ChangeEvent, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Send } from 'lucide-react';
 import { MasterDataAttribute, FieldDataType, MasterDataEntity } from '../../categoryTypes';
 import { BaseModal } from '../../../../common/BaseModal';
-import { mockAttributesByEntity } from '../../categoryConstants';
+import { approvers } from '../../categoryConstants';
+import { ApprovalRequestModal } from './ApprovalRequestModal';
 
 interface AttributeFormModalProps {
   isOpen: boolean;
@@ -13,12 +15,10 @@ interface AttributeFormModalProps {
   onSave: () => void;
   onSaveAndSubmit: (data: { id: string; code: string; name: string; type: 'attribute' | 'category' }) => void;
   entities?: MasterDataEntity[];
+  entityName?: string;
+  entityCode?: string;
 }
 
-/**
- * Standardized Attribute Form Modal using BaseModal.
- * Refactored to match the inline attribute form style.
- */
 export function AttributeFormModal({
   isOpen,
   onClose,
@@ -26,31 +26,43 @@ export function AttributeFormModal({
   formData,
   setFormData,
   onSave,
-  entities = []
+  entities = [],
+  entityName = '',
+  entityCode = ''
 }: AttributeFormModalProps) {
+  const [showApproval, setShowApproval] = useState(false);
+  const [approvalForm, setApprovalForm] = useState({ reviewer: '', note: '' });
+
   if (!isOpen) return null;
+
+  const handleApprovalSubmit = () => {
+    onSave();
+    setShowApproval(false);
+    setApprovalForm({ reviewer: '', note: '' });
+  };
 
   const footer = (
     <>
-      <button 
+      <button
         type="button"
-        onClick={onClose} 
+        onClick={onClose}
         className="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 transition-colors text-[13px] font-medium cursor-pointer"
       >
         Hủy
       </button>
-      <button 
+      <button
         type="button"
-        onClick={onSave} 
+        onClick={() => setShowApproval(true)}
         className="px-5 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 flex items-center gap-2 transition-colors text-[13px] font-medium shadow-sm cursor-pointer"
       >
         <Send className="w-4 h-4"/>
-        Lưu
+        Gửi duyệt cấu trúc
       </button>
     </>
   );
 
   return (
+    <>
     <BaseModal
       isOpen={isOpen}
       onClose={onClose}
@@ -125,89 +137,88 @@ export function AttributeFormModal({
           </div>
         </div>
 
-        {/* Cấu hình ràng buộc */}
-        <div className="space-y-3 p-4 bg-slate-50 rounded-xl border border-slate-100">
-          <label className="block text-[13px] font-medium text-slate-600 mb-2">Cấu hình ràng buộc</label>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {[
-              { key: 'required', label: 'Bắt buộc', desc: 'Required' },
-              { key: 'unique', label: 'Duy nhất', desc: 'Unique' },
-              { key: 'indexed', label: 'Đánh index', desc: 'Indexed' }
-            ].map((item) => (
-              <label key={item.key} className="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-lg cursor-pointer hover:border-blue-300 hover:shadow-sm transition-all group">
-                <input 
-                  type="checkbox" 
-                  checked={(formData as any)[item.key] || false} 
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, [item.key]: e.target.checked })} 
-                  className="w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500" 
-                />
-                <div className="flex flex-col">
-                  <span className="text-[13px] font-medium text-slate-700 group-hover:text-blue-700 transition-colors">{item.label}</span>
-                  <span className="text-[13px] text-slate-400 font-bold uppercase">{item.desc}</span>
-                </div>
-              </label>
-            ))}
-          </div>
+        {/* Là trường bắt buộc checkbox */}
+        <div className="flex items-center p-4 bg-slate-50 rounded-xl border border-slate-100">
+          <label className="flex items-center gap-2 cursor-pointer font-sans text-[13px] text-slate-700">
+            <input 
+              type="checkbox" 
+              checked={formData.required || false} 
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, required: e.target.checked })} 
+              className="w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500 cursor-pointer" 
+            />
+            <span className="font-medium text-slate-800">Là trường bắt buộc</span>
+          </label>
         </div>
 
         {/* Cấu hình khóa (Khóa chính / Khóa ngoại) */}
-        <div className="space-y-3 p-4 bg-slate-50 rounded-xl border border-slate-100">
-          <label className="block text-[13px] font-medium text-slate-600">Cấu hình khóa</label>
-          <div className="grid grid-cols-3 gap-3">
+        <div className="flex items-center gap-6 p-4 bg-slate-50 rounded-xl border border-slate-100">
+          <label className="text-[13px] font-medium text-slate-600 shrink-0">Cấu hình khóa:</label>
+          <div className="flex items-center gap-6">
             {[
-              { value: 'none', label: 'Không thiết lập' },
               { value: 'primary', label: 'Khóa chính (PK)' },
               { value: 'foreign', label: 'Khóa ngoại (FK)' }
             ].map((option) => {
-              const isSelected = (formData.keyType || 'none') === option.value;
+              const isSelected = formData.keyType === option.value;
               return (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => setFormData({ 
-                    ...formData, 
-                    keyType: option.value as any,
-                    ...(option.value === 'primary' ? { required: true, unique: true } : {}),
-                    ...(option.value !== 'foreign' ? { foreignTable: undefined, foreignField: undefined } : {})
-                  })}
-                  className={`px-3 py-2.5 rounded-lg border text-[13px] font-medium text-center transition-all cursor-pointer ${
-                    isSelected
-                      ? 'bg-blue-50 border-blue-500 text-blue-700 font-semibold shadow-sm'
-                      : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
-                  }`}
-                >
-                  {option.label}
-                </button>
+                <label key={option.value} className="flex items-center gap-2 cursor-pointer font-sans text-[13px] text-slate-700">
+                  <input
+                    type="radio"
+                    name="modalKeyType"
+                    value={option.value}
+                    checked={isSelected}
+                    onChange={() => {
+                      setFormData({ 
+                        ...formData, 
+                        keyType: option.value as any,
+                        ...(option.value === 'primary' ? { required: true, unique: true } : {}),
+                        ...(option.value !== 'foreign' ? { foreignTable: undefined, foreignField: undefined } : {})
+                      });
+                    }}
+                    onClick={() => {
+                      if (isSelected) {
+                        setFormData({ 
+                          ...formData, 
+                          keyType: 'none',
+                          foreignTable: undefined,
+                          foreignField: undefined
+                        });
+                      }
+                    }}
+                    className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500 cursor-pointer"
+                  />
+                  <span>{option.label}</span>
+                </label>
               );
             })}
           </div>
         </div>
 
-        {/* Giá trị mặc định & Quy tắc xác thực */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="block text-[13px] font-medium text-slate-600">Giá trị mặc định</label>
-            <input
-              type="text"
-              value={formData.defaultValue || ''}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, defaultValue: e.target.value })}
-              placeholder="Để trống nếu không có"
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none bg-white text-slate-800"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="block text-[13px] font-medium text-slate-600">Quy tắc xác thực</label>
-            <input
-              type="text"
-              value={formData.validationRules || ''}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, validationRules: e.target.value })}
-              placeholder="VD: regex hoặc enum"
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none bg-white text-slate-800"
-            />
-          </div>
+        {/* Giá trị mặc định */}
+        <div className="space-y-1.5">
+          <label className="block text-[13px] font-medium text-slate-600">Giá trị mặc định</label>
+          <input
+            type="text"
+            value={formData.defaultValue || ''}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, defaultValue: e.target.value })}
+            placeholder="Để trống nếu không có"
+            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none bg-white text-slate-800"
+          />
         </div>
       </div>
     </BaseModal>
+
+    {createPortal(
+      <ApprovalRequestModal
+        isOpen={showApproval}
+        onClose={() => setShowApproval(false)}
+        data={{ id: '', code: entityCode, name: entityName, type: 'category' }}
+        approvers={approvers}
+        form={approvalForm}
+        setForm={setApprovalForm}
+        onSubmit={handleApprovalSubmit}
+      />,
+      document.body
+    )}
+    </>
   );
 }

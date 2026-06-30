@@ -430,6 +430,13 @@ const sampleCategoryData: CategoryItem[] = [
   }
 ];
 
+const approvers = [
+  { id: 'app1', name: 'Nguyễn Văn Hùng', position: 'Cục trưởng Cục CNTT' },
+  { id: 'app2', name: 'Trần Thị Lan', position: 'Phó Cục trưởng Cục CNTT' },
+  { id: 'app3', name: 'Lê Minh Tuấn', position: 'Trưởng phòng Dữ liệu mở' },
+  { id: 'app4', name: 'Phạm Quốc Bảo', position: 'Phó Vụ trưởng Vụ CNTT' },
+];
+
 const mockSchedules: ScheduleItem[] = [
   {
     id: 1,
@@ -813,6 +820,12 @@ export function OpenDataPublishedListPage() {
     quarterlyMonth: 1
   });
   const [isEditingSchedule, setIsEditingSchedule] = useState(false);
+
+  // Send Approval Modal States
+  const [showSendApprovalModal, setShowSendApprovalModal] = useState(false);
+  const [sendApprovalItem, setSendApprovalItem] = useState<PublishedData | null>(null);
+  const [sendApprovalApprover, setSendApprovalApprover] = useState('');
+  const [sendApprovalNote, setSendApprovalNote] = useState('');
 
   // Schedule Tab Filter States
   const [selectedScheduleFrequency, setSelectedScheduleFrequency] = useState<string>('all');
@@ -1210,6 +1223,29 @@ export function OpenDataPublishedListPage() {
   };
 
 
+  const handleOpenSendApproval = (item: PublishedData) => {
+    setSendApprovalItem(item);
+    setSendApprovalApprover('');
+    setSendApprovalNote('');
+    setShowSendApprovalModal(true);
+  };
+
+  const handleConfirmSendApproval = () => {
+    if (!sendApprovalItem || !sendApprovalApprover) return;
+    const approverName = approvers.find(a => a.id === sendApprovalApprover)?.name || '';
+    setDataList(dataList.map(d => d.id === sendApprovalItem.id
+      ? { ...d, status: 'pending', approver: approverName }
+      : d
+    ));
+    setShowSendApprovalModal(false);
+    setSendApprovalItem(null);
+    setSendApprovalApprover('');
+    setSendApprovalNote('');
+    setSuccessPopupMessage('Yêu cầu công bố đã được gửi đi phê duyệt thành công!');
+    setShowSuccessPopup(true);
+    setTimeout(() => setShowSuccessPopup(false), 3000);
+  };
+
   const renderPagination = (total: number) => {
     if (total <= 0) return null;
     const totalPages = Math.ceil(total / pageSize);
@@ -1496,6 +1532,18 @@ export function OpenDataPublishedListPage() {
                                 title="Chỉnh sửa"
                               >
                                 <SquarePen className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => item.status === 'draft' ? handleOpenSendApproval(item) : undefined}
+                                disabled={item.status !== 'draft'}
+                                className={`p-1.5 rounded-lg transition-colors ${
+                                  item.status === 'draft'
+                                    ? 'text-slate-500 hover:text-purple-600 hover:bg-purple-50 cursor-pointer'
+                                    : 'text-slate-300 cursor-not-allowed'
+                                }`}
+                                title="Gửi duyệt"
+                              >
+                                <Send className="w-4 h-4" />
                               </button>
                             </div>
                           </td>
@@ -3588,6 +3636,91 @@ export function OpenDataPublishedListPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* SEND APPROVAL MODAL */}
+      {showSendApprovalModal && sendApprovalItem && createPortal(
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4" style={{ zIndex: 2147483647 }}>
+          <div className="bg-white rounded-xl w-full max-w-lg shadow-2xl overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-purple-100 rounded-lg flex items-center justify-center shrink-0">
+                  <Send className="w-4 h-4 text-purple-600" />
+                </div>
+                <h3 className="text-[18px] font-semibold text-slate-900">Gửi duyệt yêu cầu công bố</h3>
+              </div>
+              <button
+                onClick={() => setShowSendApprovalModal(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-6 space-y-4">
+              {/* Thông tin yêu cầu */}
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-1">
+                <div className="text-[12px] text-slate-500 uppercase tracking-wide font-medium">Yêu cầu công bố</div>
+                <div className="text-[13px] font-semibold text-slate-900">{sendApprovalItem.fileName}</div>
+                <div className="text-[13px] text-slate-500">{sendApprovalItem.category}</div>
+                <div className="text-[12px] text-slate-400">Người tạo: {sendApprovalItem.creator} · {sendApprovalItem.createdDate}</div>
+              </div>
+
+              {/* Người phê duyệt */}
+              <div>
+                <label className="block text-[13px] font-medium text-slate-700 mb-2">
+                  Người phê duyệt <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={sendApprovalApprover}
+                  onChange={(e) => setSendApprovalApprover(e.target.value)}
+                  className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-purple-500/20 focus:border-purple-400 outline-none transition-colors bg-white"
+                  title="Chọn người phê duyệt"
+                >
+                  <option value="">-- Chọn người phê duyệt --</option>
+                  {approvers.map(approver => (
+                    <option key={approver.id} value={approver.id}>
+                      {approver.name} - {approver.position}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Nội dung trình duyệt */}
+              <div>
+                <label className="block text-[13px] font-medium text-slate-700 mb-2">Nội dung trình duyệt</label>
+                <textarea
+                  value={sendApprovalNote}
+                  onChange={(e) => setSendApprovalNote(e.target.value)}
+                  className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-purple-500/20 focus:border-purple-400 outline-none transition-colors resize-none"
+                  rows={4}
+                  placeholder={`Nhập nội dung trình duyệt...\nVí dụ: Đề nghị Lãnh đạo xem xét phê duyệt yêu cầu công bố dữ liệu mở theo Nghị định 47/2020/NĐ-CP`}
+                />
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="bg-slate-50 border-t border-slate-200 px-6 py-4 flex items-center justify-end gap-3">
+              <button
+                onClick={() => setShowSendApprovalModal(false)}
+                className="px-4 py-2 text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-100 text-[13px] font-medium transition-colors cursor-pointer"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleConfirmSendApproval}
+                disabled={!sendApprovalApprover}
+                className="px-4 py-2 text-white bg-purple-600 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-[13px] font-medium transition-colors cursor-pointer"
+              >
+                <Send className="w-4 h-4" />
+                Gửi phê duyệt
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
 
       {/* SUCCESS POPUP */}

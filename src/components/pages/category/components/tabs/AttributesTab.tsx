@@ -1,4 +1,5 @@
 import React, { ChangeEvent, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Plus, Search, Filter, X, ChevronDown, SquarePen, Trash2, Send,
   FileText, CheckSquare, Tag, Database, Globe, Lock,
@@ -6,7 +7,8 @@ import {
 } from 'lucide-react';
 import { MasterDataEntity, MasterDataAttribute, FieldDataType } from '../../categoryTypes';
 import { BaseModal } from '../../../../common/BaseModal';
-import { mockAttributesByEntity } from '../../categoryConstants';
+import { mockAttributesByEntity, approvers } from '../../categoryConstants';
+import { ApprovalRequestModal } from '../modals/ApprovalRequestModal';
 
 const FIELD_DATA_TYPES: { value: FieldDataType; label: string }[] = [
   { value: 'string',   label: 'Chuỗi (String)' },
@@ -41,6 +43,7 @@ const DLDC_TABLES: Record<string, { id: string; displayName: string }[]> = {
     { id: 'tbl_kethon',   displayName: 'Kết hôn' },
     { id: 'tbl_ly_hon',   displayName: 'Ly hôn' },
     { id: 'tbl_khai_tu',  displayName: 'Khai tử' },
+    { id: 'tbl_gioi_tinh', displayName: 'Danh mục giới tính' },
   ],
   cccd: [
     { id: 'tbl_can_cuoc', displayName: 'Căn cước công dân' },
@@ -63,6 +66,11 @@ const DLDC_TABLES: Record<string, { id: string; displayName: string }[]> = {
 };
 
 const DLDC_FIELDS: Record<string, { fieldName: string; displayName: string; dataType: FieldDataType }[]> = {
+  tbl_gioi_tinh: [
+    { fieldName: 'ma_gioi_tinh', displayName: 'Mã giới tính', dataType: 'string' },
+    { fieldName: 'ten_gioi_tinh', displayName: 'Tên giới tính', dataType: 'string' },
+    { fieldName: 'ghi_chu', displayName: 'Ghi chú', dataType: 'string' },
+  ],
   tbl_khaisinh: [
     { fieldName: 'ma_khai_sinh', displayName: 'Mã khai sinh', dataType: 'string' },
     { fieldName: 'ho_ten',       displayName: 'Họ và tên',    dataType: 'string' },
@@ -296,8 +304,12 @@ export function AttributesTab({
   const entityDataSource = currentEntity?.dataSource || wizardConfig?.dataSource || 'manual';
 
   const getColSpan = () => {
-    let baseCols = 1; // checkbox
-    baseCols += 8; // fieldName, displayName, dataType, length, required/unique/indexed, keyType, defaultValue, validationRules
+    let baseCols = 1; // STT
+    if (entityDataSource === 'dldc') {
+      baseCols += 6; // Tên CSDL, Nguồn dữ liệu, Trường gốc, Tên hiển thị, Kiểu dữ liệu, PK
+    } else {
+      baseCols += 7; // fieldName, displayName, dataType, length, keyType, required, defaultValue
+    }
     if (!isViewOnly) baseCols += 1; // actions
     return baseCols;
   };
@@ -454,6 +466,14 @@ export function AttributesTab({
   const [currentPageNum, setCurrentPageNum] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [showSourceWarning, setShowSourceWarning] = useState(false);
+  const [showDldcModal, setShowDldcModal] = useState(false);
+  const [modalDldcDatabase, setModalDldcDatabase] = useState<string>('');
+  const [modalDldcTable, setModalDldcTable] = useState<string>('');
+  const [modalDldcFieldRows, setModalDldcFieldRows] = useState<DldcFieldRow[]>([]);
+  const [modalUseJoin, setModalUseJoin] = useState(false);
+  const [modalDldcJoins, setModalDldcJoins] = useState<DldcJoin[]>([]);
+  const [showDldcApproval, setShowDldcApproval] = useState(false);
+  const [dldcApprovalForm, setDldcApprovalForm] = useState({ reviewer: '', note: '' });
 
   // Filter States
   const [searchTerm, setSearchTerm] = useState('');
@@ -473,6 +493,30 @@ export function AttributesTab({
   React.useEffect(() => {
     setCurrentPageNum(1);
   }, [searchTerm, filterConstraints, filterKeyType, filterDataType]);
+
+  React.useEffect(() => {
+    if (showDldcModal) {
+      const defaultTable = currentEntity?.dldcTable || attributes.find(a => a.sourceTable)?.sourceTable || 'tbl_doanhnghiep';
+      const defaultDb = getDatabaseForTable(defaultTable) || 'dkkd';
+      setModalDldcDatabase(defaultDb);
+      setModalDldcTable(defaultTable);
+      setModalUseJoin(false);
+      setModalDldcJoins([]);
+      
+      const fields = DLDC_FIELDS[defaultTable] || [];
+      setModalDldcFieldRows(fields.map((f, i) => ({
+        id: `fr-modal-${i}`,
+        shared: true,
+        isPK: i === 0 || f.fieldName.includes('id') || f.fieldName.includes('ma_'),
+        tableId: defaultTable,
+        sourceJoinId: null,
+        columnName: f.fieldName,
+        apiFieldName: f.fieldName,
+        dataType: f.dataType,
+        masked: false,
+      })));
+    }
+  }, [showDldcModal, currentEntity, attributes]);
 
   // Filter Logic
   const filteredAttributes = attributes.filter(attr => {
@@ -562,69 +606,119 @@ export function AttributesTab({
     );
   };
 
+  const handleModalJoinTableChange = (joinId: string, newTableId: string) => {
+    const oldJoin = modalDldcJoins.find(j => j.id === joinId);
+    const oldTableId = oldJoin?.tableId || '';
+    
+    setModalDldcJoins(prev => prev.map(j => 
+      j.id === joinId ? { ...j, tableId: newTableId, leftField: '', rightField: '' } : j
+    ));
+
+    setModalDldcFieldRows(prev => {
+      const filtered = prev.filter(r => r.tableId !== oldTableId);
+      if (newTableId) {
+        const fields = DLDC_FIELDS[newTableId] || [];
+        const newRows = fields.map((f, i) => ({
+          id: `fr-modal-join-${joinId}-${i}`,
+          shared: true,
+          isPK: false,
+          tableId: newTableId,
+          sourceJoinId: joinId,
+          columnName: f.fieldName,
+          apiFieldName: f.fieldName,
+          dataType: f.dataType,
+          masked: false,
+        }));
+        return [...filtered, ...newRows];
+      }
+      return filtered;
+    });
+  };
+
+  const handleModalAddJoin = () => {
+    const nextAliasNum = modalDldcJoins.length + 2;
+    const newJoin: DldcJoin = {
+      id: `join-${Date.now()}`,
+      joinType: 'LEFT JOIN',
+      tableId: '',
+      alias: `t${nextAliasNum}`,
+      leftField: '',
+      rightField: '',
+    };
+    setModalDldcJoins(prev => [...prev, newJoin]);
+  };
+
+  const handleModalRemoveJoin = (joinId: string) => {
+    const joinToRemove = modalDldcJoins.find(j => j.id === joinId);
+    const tableIdToRemove = joinToRemove?.tableId || '';
+    
+    setModalDldcJoins(prev => prev.filter(j => j.id !== joinId));
+    setModalDldcFieldRows(prev => prev.filter(r => r.tableId !== tableIdToRemove));
+  };
+
+  const handleModalDldcApply = () => {
+    modalDldcFieldRows.filter(r => r.shared && r.columnName).forEach(row => {
+      onAddAttributeInline?.({
+        fieldName: row.apiFieldName || row.columnName,
+        displayName: row.apiFieldName || row.columnName,
+        dataType: row.dataType,
+        required: row.isPK,
+        unique: row.isPK,
+        indexed: row.isPK,
+        sourceType: 'reference',
+        sourceTable: row.tableId,
+        sourceField: row.columnName,
+      });
+    });
+    setShowDldcModal(false);
+    setModalDldcDatabase('');
+    setModalDldcTable('');
+    setModalDldcFieldRows([]);
+    setModalUseJoin(false);
+    setModalDldcJoins([]);
+  };
+
+  const dldcEntity = entities.find(e => e.id === selectedEntityId);
+
   return (
+    <>
     <div className="space-y-4">
-      {/* Statistics Cards — ẩn trong wizard modal */}
+
+      {/* Entity Selector & Structure Status Card (Only if not in wizard) */}
       {!wizardMode && (
-        <div className="grid grid-cols-4 gap-4 mb-6">
-          <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[13px] text-slate-500">Tổng trường dữ liệu</span>
-              <FileText className="w-5 h-5 text-blue-600" />
+        <div className="grid grid-cols-2 gap-4">
+          {/* Card 1: Chọn danh mục dùng chung */}
+          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1.5">
+            <label className="block text-[13px] text-slate-700 font-medium">
+              Chọn danh mục dữ liệu dùng chung <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <select
+                title="Chọn thực thể"
+                value={selectedEntityId}
+                onChange={(e: ChangeEvent<HTMLSelectElement>) => setSelectedEntityId(e.target.value)}
+                className="w-full pl-3 pr-8 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-[13px] bg-white font-medium appearance-none cursor-pointer"
+              >
+                {entities.map(entity => (
+                  <option key={entity.id} value={entity.id}>
+                    {entity.code} - {entity.name}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
             </div>
-            <div className="text-2xl font-bold text-slate-900">{totalAttributes}</div>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[13px] text-slate-500">Trường dữ liệu bắt buộc</span>
-              <CheckSquare className="w-5 h-5 text-blue-600" />
-            </div>
-            <div className="text-2xl font-bold text-slate-900">{requiredAttributes}</div>
-          </div>
-
-          <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[13px] text-slate-500">Trường dữ liệu duy nhất</span>
-              <Tag className="w-5 h-5 text-orange-500" />
-            </div>
-            <div className="text-2xl font-bold text-slate-900">{uniqueAttributes}</div>
-          </div>
-
-          <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[13px] text-slate-500 font-medium">Trạng thái cấu trúc</span>
-              <CheckSquare className="w-5 h-5 text-emerald-600" />
-            </div>
-            <div className="mt-1">
+          {/* Card 2: Trạng thái cấu trúc */}
+          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+            <label className="block text-[13px] text-slate-700 font-medium">
+              Trạng thái cấu trúc
+            </label>
+            <div className="flex items-center h-[38px] pb-1">
               <span className={`inline-flex items-center px-3 py-1 rounded-full text-[13px] font-semibold border shadow-sm ${statusInfo.color}`}>
                 {statusInfo.label}
               </span>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Entity Selector (Only if not in wizard) */}
-      {!wizardMode && (
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <label className="block text-[13px] text-slate-700 mb-1.5 font-medium">
-            Chọn thực thể dữ liệu chủ <span className="text-red-500">*</span>
-          </label>
-          <div className="relative">
-            <select
-              title="Chọn thực thể"
-              value={selectedEntityId}
-              onChange={(e: ChangeEvent<HTMLSelectElement>) => setSelectedEntityId(e.target.value)}
-              className="w-full pl-3 pr-8 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-[13px] bg-white font-medium appearance-none cursor-pointer"
-            >
-              {entities.map(entity => (
-                <option key={entity.id} value={entity.id}>
-                  {entity.code} - {entity.name}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
           </div>
         </div>
       )}
@@ -650,25 +744,19 @@ export function AttributesTab({
               >
                 <Search className="w-4 h-4" />
               </button>
-              <button
-                type="button"
-                onClick={() => setShowFilters(!showFilters)}
-                className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all border cursor-pointer active:scale-95 ${
-                  showFilters
-                    ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-sm'
-                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                }`}
-                title={showFilters ? "Đóng bộ lọc" : "Bộ lọc nâng cao"}
-              >
-                {showFilters ? <X className="w-4.5 h-4.5" /> : <Filter className="w-4 h-4" />}
-              </button>
             </div>
 
             <div className="flex items-center gap-2 w-full md:w-auto">
               {!isViewOnly && (
                 <button
                   type="button"
-                  onClick={onAddAttribute}
+                  onClick={() => {
+                    if (entityDataSource === 'dldc') {
+                      setShowDldcModal(true);
+                    } else {
+                      onAddAttribute();
+                    }
+                  }}
                   className="flex-1 md:flex-none px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[13px] font-medium flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
                   title="Thêm trường dữ liệu mới"
                 >
@@ -678,101 +766,6 @@ export function AttributesTab({
               )}
             </div>
           </div>
-
-          {/* Collapsible Filter Panel */}
-          {showFilters && (
-            <div className="relative p-4 bg-white border border-slate-200 rounded-xl shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] before:content-[''] before:absolute before:-top-[7px] before:right-[208px] md:before:right-[auto] md:before:left-[calc(100%-100px)] lg:before:left-[calc(100%-242px)] before:w-3 before:h-3 before:bg-white before:rotate-45 before:border-l before:border-t before:border-slate-200">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="relative">
-                  <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Ràng buộc</label>
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setShowConstraintDropdown(v => !v)}
-                      className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-left font-medium"
-                    >
-                      {filterConstraints.length === 0 ? (
-                        <span className="text-slate-700">Tất cả ràng buộc</span>
-                      ) : (
-                        <span className="text-blue-600">{filterConstraints.length} đã chọn</span>
-                      )}
-                    </button>
-                    <ChevronDown className={`absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none transition-transform ${showConstraintDropdown ? 'rotate-180' : ''}`} />
-
-                    {showConstraintDropdown && (
-                      <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden">
-                        {[
-                          { value: 'required', label: 'Bắt buộc (REQ)' },
-                          { value: 'unique', label: 'Duy nhất (UNI)' },
-                          { value: 'index', label: 'Chỉ mục (IDX)' },
-                          { value: 'none', label: 'Không ràng buộc' },
-                        ].map(opt => (
-                          <label
-                            key={opt.value}
-                            className="flex items-center gap-2.5 px-3 py-2.5 hover:bg-slate-50 cursor-pointer text-[13px] text-slate-700"
-                          >
-                            <input
-                              type="checkbox"
-                              checked={filterConstraints.includes(opt.value)}
-                              onChange={() => toggleConstraint(opt.value)}
-                              className="w-4 h-4 rounded border-slate-300 text-blue-600 accent-blue-600 cursor-pointer"
-                            />
-                            {opt.label}
-                          </label>
-                        ))}
-                        {filterConstraints.length > 0 && (
-                          <div className="border-t border-slate-100 px-3 py-2">
-                            <button
-                              type="button"
-                              onClick={() => { setFilterConstraints([]); setShowConstraintDropdown(false); }}
-                              className="text-[13px] text-red-500 hover:text-red-700 font-medium cursor-pointer"
-                            >
-                              Xóa lựa chọn
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Cấu hình khóa</label>
-                  <div className="relative">
-                    <select
-                      value={filterKeyType}
-                      onChange={(e: ChangeEvent<HTMLSelectElement>) => setFilterKeyType(e.target.value)}
-                      className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                    >
-                      <option value="all">Tất cả loại khóa</option>
-                      <option value="primary">Khóa chính (PK)</option>
-                      <option value="foreign">Khóa ngoại (FK)</option>
-                      <option value="none">Không thiết lập</option>
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Kiểu dữ liệu</label>
-                  <div className="relative">
-                    <select
-                      value={filterDataType}
-                      onChange={(e: ChangeEvent<HTMLSelectElement>) => setFilterDataType(e.target.value)}
-                      className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                    >
-                      <option value="all">Tất cả kiểu dữ liệu</option>
-                      <option value="string">Chuỗi</option>
-                      <option value="number">Số</option>
-                      <option value="date">Ngày tháng</option>
-                      <option value="boolean">Logic</option>
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       )}
 
@@ -1031,13 +1024,12 @@ export function AttributesTab({
                     <table className="w-full text-left text-[13px]" style={{ tableLayout: 'fixed' }}>
                       <colgroup>
                         <col style={{ width: '6%' }} />
-                        <col style={{ width: '5%' }} />
-                        <col style={{ width: '19%' }} />
-                        <col style={{ width: '19%' }} />
-                        <col style={{ width: '22%' }} />
-                        <col style={{ width: '16%' }} />
-                        <col style={{ width: '7%' }} />
                         <col style={{ width: '6%' }} />
+                        <col style={{ width: '22%' }} />
+                        <col style={{ width: '22%' }} />
+                        <col style={{ width: '24%' }} />
+                        <col style={{ width: '15%' }} />
+                        <col style={{ width: '5%' }} />
                       </colgroup>
                       <thead className="bg-slate-50 border-b border-slate-100">
                         <tr>
@@ -1045,16 +1037,15 @@ export function AttributesTab({
                           <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center">PK</th>
                           <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Nguồn dữ liệu (Table)</th>
                           <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Trường gốc (Column)</th>
-                          <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Tên trường (API Field)</th>
+                          <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Tên hiển thị</th>
                           <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Kiểu dữ liệu</th>
-                          <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center">Che dấu</th>
                           <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center">Xóa</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100">
+                      <tbody className="divide-y divide-slate-100 bg-white">
                         {dldcFieldRows.length === 0 ? (
                           <tr>
-                            <td colSpan={8} className="px-5 py-8 text-center text-[13px] text-slate-400">
+                            <td colSpan={7} className="px-5 py-8 text-center text-[13px] text-slate-400">
                               Chọn bảng dữ liệu để tải danh sách trường
                             </td>
                           </tr>
@@ -1063,7 +1054,7 @@ export function AttributesTab({
                             const allTablesForDb = dldcDatabase ? (DLDC_TABLES[dldcDatabase] || []) : [];
                             const tableFieldsForRow = DLDC_FIELDS[row.tableId] || [];
                             return (
-                              <tr key={row.id} className="hover:bg-slate-50/50 transition-colors">
+                              <tr key={row.id} className="hover:bg-slate-50/50 transition-colors border-b border-slate-100">
                                 <td className="px-3 py-2.5 text-center overflow-hidden">
                                   <input type="checkbox" checked={row.shared}
                                     onChange={() => setDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, shared: !r.shared } : r))}
@@ -1079,7 +1070,7 @@ export function AttributesTab({
                                     onChange={(e: ChangeEvent<HTMLSelectElement>) =>
                                       setDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, tableId: e.target.value, columnName: '', apiFieldName: '' } : r))
                                     }
-                                    className="w-full min-w-0 px-2 py-1.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-1 focus:ring-blue-400/40 focus:border-blue-400"
+                                    className="w-full min-w-0 px-2 py-1.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-1 focus:ring-blue-400/40 focus:border-blue-400 font-medium cursor-pointer"
                                   >
                                     <option value="">--</option>
                                     {allTablesForDb.map(t => <option key={t.id} value={t.id}>{t.id}</option>)}
@@ -1091,7 +1082,7 @@ export function AttributesTab({
                                       const fd = tableFieldsForRow.find(f => f.fieldName === e.target.value);
                                       setDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, columnName: e.target.value, apiFieldName: e.target.value, dataType: fd?.dataType || r.dataType } : r));
                                     }}
-                                    className="w-full min-w-0 px-2 py-1.5 border border-slate-200 rounded-lg text-[13px] bg-white font-mono focus:outline-none focus:ring-1 focus:ring-blue-400/40 focus:border-blue-400"
+                                    className="w-full min-w-0 px-2 py-1.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-1 focus:ring-blue-400/40 focus:border-blue-400 font-medium cursor-pointer"
                                   >
                                     <option value="">--</option>
                                     {tableFieldsForRow.map(f => <option key={f.fieldName} value={f.fieldName}>{f.fieldName}</option>)}
@@ -1116,14 +1107,9 @@ export function AttributesTab({
                                   </select>
                                 </td>
                                 <td className="px-3 py-2.5 text-center overflow-hidden">
-                                  <input type="checkbox" checked={row.masked}
-                                    onChange={() => setDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, masked: !r.masked } : r))}
-                                    className="w-4 h-4 rounded text-orange-500 border-slate-300 cursor-pointer" />
-                                </td>
-                                <td className="px-3 py-2.5 text-center overflow-hidden">
                                   <button type="button"
                                     onClick={() => setDldcFieldRows(prev => prev.filter(r => r.id !== row.id))}
-                                    className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                                    className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors cursor-pointer"
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
                                   </button>
@@ -1225,97 +1211,71 @@ export function AttributesTab({
                 </div>
               </div>
 
-              {/* Row 4: Ràng buộc checkboxes */}
-              <div className="space-y-2 p-4 bg-slate-50 rounded-xl border border-slate-100">
-                <label className="block text-[13px] font-medium text-slate-600 mb-1">Cấu hình ràng buộc</label>
-                <div className="grid grid-cols-3 gap-3">
-                  {[
-                    { key: 'required', label: 'Bắt buộc', sub: 'Required' },
-                    { key: 'unique',   label: 'Duy nhất',  sub: 'Unique' },
-                    { key: 'indexed',  label: 'Đánh index', sub: 'Indexed' },
-                  ].map(item => (
-                    <label key={item.key} className="flex items-center gap-4 p-3 bg-white border border-slate-200 rounded-lg cursor-pointer hover:border-blue-300 transition-colors group">
-                      <input
-                        type="checkbox"
-                        checked={(inlineForm as any)[item.key] || false}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => setInlineForm({ ...inlineForm, [item.key]: e.target.checked })}
-                        className="w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500"
-                      />
-                      <div>
-                        <p className="text-[13px] font-medium text-slate-800 group-hover:text-blue-700 transition-colors">{item.label}</p>
-                        <p className="text-[13px] text-slate-400 font-medium">{item.sub}</p>
-                      </div>
-                    </label>
-                  ))}
-                </div>
+              {/* Row 4: Là trường bắt buộc checkbox */}
+              <div className="flex items-center p-4 bg-slate-50 rounded-xl border border-slate-100">
+                <label className="flex items-center gap-2 cursor-pointer font-sans text-[13px] text-slate-700">
+                  <input
+                    type="checkbox"
+                    checked={inlineForm.required || false}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setInlineForm({ ...inlineForm, required: e.target.checked })}
+                    className="w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500 cursor-pointer"
+                  />
+                  <span className="font-medium text-slate-800">Là trường bắt buộc</span>
+                </label>
               </div>
 
               {/* Row 4.5: Cấu hình khóa (Khóa chính / Khóa ngoại) */}
-              <div className="space-y-2 p-4 bg-slate-50 rounded-xl border border-slate-100">
-                <label className="block text-[13px] font-medium text-slate-600 mb-1">Cấu hình khóa</label>
-                <div className="grid grid-cols-3 gap-3">
+              <div className="flex items-center gap-6 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                <label className="text-[13px] font-medium text-slate-600 shrink-0">Cấu hình khóa:</label>
+                <div className="flex items-center gap-6">
                   {[
-                    { value: 'none', label: 'Không thiết lập' },
                     { value: 'primary', label: 'Khóa chính (PK)' },
                     { value: 'foreign', label: 'Khóa ngoại (FK)' }
                   ].map((option) => {
-                    const isSelected = (inlineForm.keyType || 'none') === option.value;
+                    const isSelected = inlineForm.keyType === option.value;
                     return (
-                      <button
-                        key={option.value}
-                        type="button"
-                        onClick={() => setInlineForm({ 
-                          ...inlineForm, 
-                          keyType: option.value as any,
-                          ...(option.value === 'primary' ? { required: true, unique: true } : {}),
-                          ...(option.value !== 'foreign' ? { foreignTable: undefined, foreignField: undefined } : {})
-                        })}
-                        className={`px-3 py-2 rounded-lg border text-[13px] font-medium text-center transition-all cursor-pointer ${
-                          isSelected
-                            ? 'bg-blue-50 border-blue-500 text-blue-700 font-semibold shadow-sm'
-                            : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
-                        }`}
-                      >
-                        {option.label}
-                      </button>
+                      <label key={option.value} className="flex items-center gap-2 cursor-pointer font-sans text-[13px] text-slate-700">
+                        <input
+                          type="radio"
+                          name="inlineKeyType"
+                          value={option.value}
+                          checked={isSelected}
+                          onChange={() => {
+                            setInlineForm({ 
+                              ...inlineForm, 
+                              keyType: option.value as any,
+                              ...(option.value === 'primary' ? { required: true, unique: true } : {}),
+                              ...(option.value !== 'foreign' ? { foreignTable: undefined, foreignField: undefined } : {})
+                            });
+                          }}
+                          onClick={() => {
+                            if (isSelected) {
+                              setInlineForm({ 
+                                ...inlineForm, 
+                                keyType: 'none',
+                                foreignTable: undefined,
+                                foreignField: undefined
+                              });
+                            }
+                          }}
+                          className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span>{option.label}</span>
+                      </label>
                     );
                   })}
                 </div>
               </div>
 
-              {/* Row 5: Giá trị mặc định + Quy tắc xác thực */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="block text-[13px] font-medium text-slate-600">Giá trị mặc định</label>
-                  <input
-                    type="text"
-                    value={inlineForm.defaultValue || ''}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => setInlineForm({ ...inlineForm, defaultValue: e.target.value })}
-                    placeholder="Để trống nếu không có"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="block text-[13px] font-medium text-slate-600">Quy tắc xác thực</label>
-                  <input
-                    type="text"
-                    value={inlineForm.validationRules || ''}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => setInlineForm({ ...inlineForm, validationRules: e.target.value })}
-                    placeholder="VD: regex hoặc enum"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                  />
-                </div>
-              </div>
-
-              {/* Row 6: Mô tả */}
+              {/* Row 5: Giá trị mặc định */}
               <div className="space-y-1.5">
-                <label className="block text-[13px] font-medium text-slate-600">Mô tả ngắn gọn</label>
-                <textarea
-                  rows={2}
-                  value={inlineForm.description || ''}
-                  onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setInlineForm({ ...inlineForm, description: e.target.value })}
-                  placeholder="Mô tả mục đích sử dụng của trường này..."
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none"
+                <label className="block text-[13px] font-medium text-slate-600">Giá trị mặc định</label>
+                <input
+                  type="text"
+                  value={inlineForm.defaultValue || ''}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setInlineForm({ ...inlineForm, defaultValue: e.target.value })}
+                  placeholder="Để trống nếu không có"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                 />
               </div>
 
@@ -1349,7 +1309,7 @@ export function AttributesTab({
                     <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Tên hiển thị</th>
                     <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Kiểu DL</th>
                     <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Cấu hình khóa</th>
-                    <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Ràng buộc</th>
+                    <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Bắt buộc</th>
                     <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap text-center w-20">Thao tác</th>
                   </tr>
                 </thead>
@@ -1372,12 +1332,8 @@ export function AttributesTab({
                         )}
                       </td>
                       <td className="px-4 py-3">
-                        {attr.required || attr.unique || attr.indexed ? (
-                          <div className="flex gap-1 flex-wrap">
-                            {attr.required && <span className="px-1.5 py-0.5 rounded text-[13px] bg-red-50 text-red-600 font-bold border border-red-100">REQ</span>}
-                            {attr.unique   && <span className="px-1.5 py-0.5 rounded text-[13px] bg-purple-50 text-purple-600 font-bold border border-purple-100">UNI</span>}
-                            {attr.indexed  && <span className="px-1.5 py-0.5 rounded text-[13px] bg-blue-50 text-blue-600 font-bold border border-blue-100">IDX</span>}
-                          </div>
+                        {attr.required ? (
+                          <span className="px-1.5 py-0.5 rounded text-[13px] bg-red-50 text-red-600 font-bold border border-red-100">Bắt buộc</span>
                         ) : (
                           <span className="text-slate-400">--</span>
                         )}
@@ -1430,63 +1386,90 @@ export function AttributesTab({
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead className="bg-[#f8fafc] text-slate-700 border-b border-slate-100">
-                  <tr>
-                    <th className="w-12 px-6 py-4 text-[13px] font-semibold text-slate-700 text-center">STT</th>
-                    <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên trường</th>
-                    <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên hiển thị</th>
-                    <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Kiểu dữ liệu</th>
-                    <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Độ dài</th>
-                    <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Cấu hình khóa</th>
-                    <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Ràng buộc</th>
-                    <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Giá trị mặc định</th>
-                    <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Quy tắc xác thực</th>
-
-                    {!isViewOnly && <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-right w-48">Thao tác</th>}
-                  </tr>
+                  {entityDataSource === 'dldc' ? (
+                    <tr>
+                      <th className="w-12 px-6 py-4 text-[13px] font-semibold text-slate-700 text-center">STT</th>
+                      <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên CSDL</th>
+                      <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Nguồn dữ liệu</th>
+                      <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Trường gốc</th>
+                      <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên hiển thị</th>
+                      <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Kiểu dữ liệu</th>
+                      <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">PK</th>
+                      {!isViewOnly && <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-right w-48">Thao tác</th>}
+                    </tr>
+                  ) : (
+                    <tr>
+                      <th className="w-12 px-6 py-4 text-[13px] font-semibold text-slate-700 text-center">STT</th>
+                      <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên trường</th>
+                      <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên hiển thị</th>
+                      <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Kiểu dữ liệu</th>
+                      <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Độ dài</th>
+                      <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Cấu hình khóa</th>
+                      <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Bắt buộc</th>
+                      <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Giá trị mặc định</th>
+                      {!isViewOnly && <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-right w-48">Thao tác</th>}
+                    </tr>
+                  )}
                 </thead>
                 <tbody className="divide-y divide-slate-100 bg-white">
                   {paginatedAttributes.length > 0 ? (
                     paginatedAttributes.map((attr, idx) => {
-                      const isLocked = false;
+                      const isLocked = entityDataSource === 'dldc';
+                      const dbId = getDatabaseForTable(attr.sourceTable || '');
+                      const dbLabel = DLDC_DATABASES.find(d => d.id === dbId)?.label || dbId || '--';
+
                       return (
                         <tr key={attr.id} className="hover:bg-slate-50/50 transition-all group border-b border-slate-100">
                           <td className="px-6 py-4 text-center text-[13px] text-slate-600 font-medium">
                             {(currentPageNum - 1) * pageSize + idx + 1}
                           </td>
-                          <td className="px-6 py-4 text-[13px] text-slate-900 font-mono">{attr.fieldName || '--'}</td>
-                          <td className="px-6 py-4 text-[13px] text-slate-900 font-medium">{attr.displayName || '--'}</td>
-                          <td className="px-6 py-4 text-[13px] text-slate-700 font-medium">{attr.dataType ? getDataTypeLabel(attr.dataType) : '--'}</td>
-                          <td className="px-6 py-4 text-[13px] text-slate-600">{attr.length ?? '--'}</td>
-                          <td className="px-6 py-4">
-                            {attr.keyType === 'primary' || attr.keyType === 'foreign' ? (
-                              <div className="flex gap-1.5 flex-wrap">
-                                {attr.keyType === 'primary' && <span className="px-2 py-0.5 rounded text-[13px] bg-amber-50 text-amber-700 font-bold border border-amber-200" title="Khóa chính (Primary Key)">PK</span>}
-                                {attr.keyType === 'foreign' && (
-                                  <span className="px-2 py-0.5 rounded text-[13px] bg-teal-50 text-teal-700 font-bold border border-teal-200" title={`Khóa ngoại (Foreign Key) liên kết với danh mục ID: ${attr.foreignTable}, trường: ${attr.foreignField}`}>FK</span>
+                          {entityDataSource === 'dldc' ? (
+                            <>
+                              <td className="px-6 py-4 text-[13px] text-slate-900 font-medium">{dbLabel}</td>
+                              <td className="px-6 py-4 text-[13px] text-slate-900 font-mono">{attr.sourceTable || '--'}</td>
+                              <td className="px-6 py-4 text-[13px] text-slate-900 font-mono">{attr.sourceField || '--'}</td>
+                              <td className="px-6 py-4 text-[13px] text-slate-900 font-medium">{attr.displayName || attr.fieldName || '--'}</td>
+                              <td className="px-6 py-4 text-[13px] text-slate-700 font-medium">{attr.dataType ? getDataTypeLabel(attr.dataType) : '--'}</td>
+                              <td className="px-6 py-4 text-center">
+                                {attr.keyType === 'primary' ? (
+                                  <span className="px-2 py-0.5 rounded text-[13px] bg-amber-50 text-amber-700 font-bold border border-amber-200" title="Khóa chính (Primary Key)">PK</span>
+                                ) : (
+                                  <span className="text-slate-400">--</span>
                                 )}
-                              </div>
-                            ) : (
-                              <span className="text-slate-400">--</span>
-                            )}
-                          </td>
-                          <td className="px-6 py-4">
-                            {attr.required || attr.unique || attr.indexed ? (
-                              <div className="flex gap-1.5 flex-wrap">
-                                {attr.required && <span className="px-2 py-0.5 rounded text-[13px] bg-red-50 text-red-600 font-bold border border-red-100">REQ</span>}
-                                {attr.unique   && <span className="px-2 py-0.5 rounded text-[13px] bg-purple-50 text-purple-600 font-bold border border-purple-100">UNI</span>}
-                                {attr.indexed  && <span className="px-2 py-0.5 rounded text-[13px] bg-blue-50 text-blue-600 font-bold border border-blue-100">IDX</span>}
-                              </div>
-                            ) : (
-                              <span className="text-slate-400">--</span>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 text-[13px] text-slate-600 text-center">{attr.defaultValue || '--'}</td>
-                          <td className="px-6 py-4 text-[13px] text-slate-500 max-w-[200px] truncate" title={attr.validationRules}>{attr.validationRules || '--'}</td>
+                              </td>
+                            </>
+                          ) : (
+                            <>
+                              <td className="px-6 py-4 text-[13px] text-slate-900 font-mono">{attr.fieldName || '--'}</td>
+                              <td className="px-6 py-4 text-[13px] text-slate-900 font-medium">{attr.displayName || '--'}</td>
+                              <td className="px-6 py-4 text-[13px] text-slate-700 font-medium">{attr.dataType ? getDataTypeLabel(attr.dataType) : '--'}</td>
+                              <td className="px-6 py-4 text-[13px] text-slate-600">{attr.length ?? '--'}</td>
+                              <td className="px-6 py-4">
+                                {attr.keyType === 'primary' || attr.keyType === 'foreign' ? (
+                                  <div className="flex gap-1.5 flex-wrap">
+                                    {attr.keyType === 'primary' && <span className="px-2 py-0.5 rounded text-[13px] bg-amber-50 text-amber-700 font-bold border border-amber-200" title="Khóa chính (Primary Key)">PK</span>}
+                                    {attr.keyType === 'foreign' && (
+                                      <span className="px-2 py-0.5 rounded text-[13px] bg-teal-50 text-teal-700 font-bold border border-teal-200" title={`Khóa ngoại (Foreign Key) liên kết với danh mục ID: ${attr.foreignTable}, trường: ${attr.foreignField}`}>FK</span>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <span className="text-slate-400">--</span>
+                                )}
+                              </td>
+                              <td className="px-6 py-4">
+                                {attr.required ? (
+                                  <span className="px-2 py-0.5 rounded text-[13px] bg-red-50 text-red-600 font-bold border border-red-100">Bắt buộc</span>
+                                ) : (
+                                  <span className="text-slate-400">--</span>
+                                )}
+                              </td>
+                              <td className="px-6 py-4 text-[13px] text-slate-600 text-center">{attr.defaultValue || '--'}</td>
+                            </>
+                          )}
 
                           {!isViewOnly && (
                             <td className="px-6 py-4 text-right">
                               <div className="flex items-center justify-end gap-1 opacity-80 group-hover:opacity-100 transition-all">
-
                                 <button
                                   onClick={() => onEditAttribute(attr)}
                                   disabled={isLocked}
@@ -1559,6 +1542,420 @@ export function AttributesTab({
           </div>
         </BaseModal>
       )}
+
+      {/* DLDC Field Configuration Modal */}
+      {showDldcModal && (
+        <BaseModal
+          isOpen={showDldcModal}
+          onClose={() => {
+            setShowDldcModal(false);
+            setModalDldcDatabase('');
+            setModalDldcTable('');
+            setModalDldcFieldRows([]);
+            setModalUseJoin(false);
+            setModalDldcJoins([]);
+          }}
+          title="Cấu hình nguồn dữ liệu"
+          subtitle="Kho dữ liệu từ nguồn đồng bộ và cấu hình các trường"
+          maxWidth="max-w-5xl"
+        >
+          <div className="space-y-4 text-left">
+            {/* Blue Header Style Card */}
+            <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
+              {/* Blue Header Bar */}
+              <div className="px-5 py-3.5 bg-blue-600 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Database className="w-4 h-4 text-white" />
+                  <p className="text-[13px] font-semibold text-white">Cấu hình nguồn dữ liệu</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setModalUseJoin(v => !v)}
+                  className="flex items-center gap-2 text-white text-[12px] cursor-pointer"
+                >
+                  <span>Sử dụng liên kết bảng (Join)</span>
+                  <div className={`relative inline-flex h-5 w-9 items-center rounded-full border border-white/40 transition-colors ${modalUseJoin ? 'bg-white/30' : 'bg-blue-500'}`}>
+                    <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${modalUseJoin ? 'translate-x-4' : 'translate-x-0.5'}`} />
+                  </div>
+                </button>
+              </div>
+
+              {/* Sub Info Bar */}
+              <div className="px-5 py-2.5 bg-blue-50 border-b border-blue-100 flex items-center gap-2">
+                <Database className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
+                <p className="text-[13px] text-blue-700 font-sans">
+                  Kho dữ liệu:{' '}
+                  <span className="font-semibold">
+                    {DLDC_DATABASES.find(d => d.id === modalDldcDatabase)?.label || '--'}
+                  </span>
+                  {' — '}
+                  <span className="font-semibold">
+                    {DLDC_TABLES[modalDldcDatabase]?.find(t => t.id === modalDldcTable)?.displayName || '--'}
+                  </span>
+                </p>
+              </div>
+
+              {/* Form Content */}
+              <div className="p-5 space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  {/* CSDL Selector (disabled) */}
+                  <div className="space-y-1.5">
+                    <label className="block text-[13px] font-medium text-slate-600">Cơ sở dữ liệu</label>
+                    <div className="relative">
+                      <select
+                        title="Chọn cơ sở dữ liệu"
+                        disabled
+                        value={modalDldcDatabase}
+                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-slate-50 text-slate-500 appearance-none focus:outline-none cursor-not-allowed font-medium"
+                      >
+                        <option value="">-- Chọn cơ sở dữ liệu --</option>
+                        {DLDC_DATABASES.map(db => (
+                          <option key={db.id} value={db.id}>{db.label}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                    </div>
+                  </div>
+
+                  {/* Primary table (disabled) */}
+                  <div className="space-y-1.5">
+                    <label className="block text-[13px] font-medium text-slate-600">Bảng dữ liệu chính</label>
+                    <div className="relative">
+                      <select
+                        title="Chọn bảng dữ liệu chính"
+                        disabled
+                        value={modalDldcTable}
+                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-slate-50 text-slate-500 appearance-none focus:outline-none cursor-not-allowed font-medium"
+                      >
+                        <option value="">-- Chọn bảng dữ liệu --</option>
+                        {modalDldcDatabase && (DLDC_TABLES[modalDldcDatabase] || []).map(t => (
+                          <option key={t.id} value={t.id}>{t.displayName} ({t.id})</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Join tables — shown when modalUseJoin toggled */}
+                {modalUseJoin && (
+                  <div className="space-y-3 pt-2 border-t border-slate-100">
+                    <div className="flex items-center justify-between">
+                      <p className="text-[13px] font-semibold text-slate-700">
+                        Bảng liên kết bổ sung ({modalDldcJoins.length})
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleModalAddJoin}
+                        className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-200 text-blue-600 text-[13px] font-medium rounded-lg hover:bg-blue-50 transition-colors cursor-pointer"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        Thêm bảng liên kết
+                      </button>
+                    </div>
+
+                    {modalDldcJoins.map((join) => {
+                      const joinTableFields = DLDC_FIELDS[join.tableId] || [];
+                      const primaryFields = DLDC_FIELDS[modalDldcTable] || [];
+
+                      return (
+                        <div key={join.id} className="p-4 border border-slate-200 rounded-xl bg-slate-50/50 space-y-4 relative animate-in fade-in zoom-in-95 duration-200">
+                          <button
+                            type="button"
+                            onClick={() => handleModalRemoveJoin(join.id)}
+                            className="absolute top-3 right-3 p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors cursor-pointer"
+                            title="Xóa liên kết"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="space-y-1.5">
+                              <label className="block text-[13px] font-medium text-slate-600">Loại liên kết (Join Type)</label>
+                              <div className="relative">
+                                <select
+                                  title="Loại liên kết"
+                                  value={join.joinType}
+                                  onChange={(e) =>
+                                    setModalDldcJoins(prev => prev.map(j => j.id === join.id ? { ...j, joinType: e.target.value as any } : j))
+                                  }
+                                  className="w-full pl-3 pr-8 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium cursor-pointer"
+                                >
+                                  <option value="LEFT JOIN">LEFT JOIN</option>
+                                  <option value="INNER JOIN">INNER JOIN</option>
+                                  <option value="RIGHT JOIN">RIGHT JOIN</option>
+                                </select>
+                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                              </div>
+                            </div>
+                            <div className="space-y-1.5">
+                              <label className="block text-[13px] font-medium text-slate-600">Bảng liên kết (Table)</label>
+                              <div className="relative">
+                                <select
+                                  title="Bảng liên kết"
+                                  value={join.tableId}
+                                  onChange={(e) => handleModalJoinTableChange(join.id, e.target.value)}
+                                  className="w-full pl-3 pr-8 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium cursor-pointer"
+                                >
+                                  <option value="">-- Chọn bảng --</option>
+                                  {modalDldcDatabase && (DLDC_TABLES[modalDldcDatabase] || [])
+                                    .filter(t => t.id !== modalDldcTable)
+                                    .map(t => <option key={t.id} value={t.id}>{t.displayName} ({t.id})</option>)}
+                                </select>
+                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                              </div>
+                            </div>
+                            <div className="space-y-1.5">
+                              <label className="block text-[13px] font-medium text-slate-600">Bảng phụ danh định (Alias)</label>
+                              <input
+                                type="text"
+                                disabled
+                                value={join.alias}
+                                className="w-full px-3 py-2.5 border border-slate-200 bg-slate-50 text-slate-500 rounded-lg text-[13px] font-mono outline-none cursor-not-allowed font-medium"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <label className="block text-[13px] font-medium text-slate-600">Điều kiện liên kết (Join Condition)</label>
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1 relative">
+                                <select
+                                  title="Trường bảng liên kết"
+                                  value={join.leftField}
+                                  onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                                    setModalDldcJoins(prev => prev.map(j => j.id === join.id ? { ...j, leftField: e.target.value } : j))
+                                  }
+                                  className="w-full pl-3 pr-8 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium cursor-pointer"
+                                >
+                                  <option value="">-- {join.alias}.field --</option>
+                                  {joinTableFields.map(f => (
+                                    <option key={f.fieldName} value={`${join.alias}.${f.fieldName}`}>{join.alias}.{f.fieldName}</option>
+                                  ))}
+                                </select>
+                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                              </div>
+                              <div className="w-8 h-9 flex items-center justify-center bg-slate-100 rounded-lg border border-slate-200 text-slate-600 font-bold text-[13px] flex-shrink-0">=</div>
+                              <div className="flex-1 relative">
+                                <select
+                                  title="Trường bảng chính"
+                                  value={join.rightField}
+                                  onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                                    setModalDldcJoins(prev => prev.map(j => j.id === join.id ? { ...j, rightField: e.target.value } : j))
+                                  }
+                                  className="w-full pl-3 pr-8 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium cursor-pointer"
+                                >
+                                  <option value="">-- {modalDldcTable}.field --</option>
+                                  {primaryFields.map(f => (
+                                    <option key={f.fieldName} value={`${modalDldcTable}.${f.fieldName}`}>{modalDldcTable}.{f.fieldName}</option>
+                                  ))}
+                                </select>
+                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Field Selection table */}
+            {modalDldcTable && (
+              <div className="border border-slate-200 rounded-xl bg-white overflow-hidden mt-4 shadow-sm">
+                <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-slate-500" />
+                    <p className="text-[13px] font-semibold text-slate-700 font-sans">Chọn trường dữ liệu chia sẻ (Field Selection)</p>
+                    <span className="text-[13px] px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">
+                      {modalDldcFieldRows.filter(r => r.shared).length}/{modalDldcFieldRows.length} trường được chọn
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setModalDldcFieldRows(prev => [...prev, {
+                        id: `fr-modal-manual-${prev.length}-${Date.now()}`, shared: true, isPK: false,
+                        tableId: modalDldcTable, sourceJoinId: null,
+                        columnName: '', apiFieldName: '', dataType: 'string', masked: false,
+                      }]);
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-200 text-blue-600 text-[13px] font-medium rounded-lg hover:bg-blue-50 transition-colors cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    Thêm trường dữ liệu
+                  </button>
+                </div>
+                <div className="overflow-x-auto max-h-[350px]">
+                  <table className="w-full text-left text-[13px]" style={{ tableLayout: 'fixed' }}>
+                    <colgroup>
+                      <col style={{ width: '6%' }} />
+                      <col style={{ width: '6%' }} />
+                      <col style={{ width: '22%' }} />
+                      <col style={{ width: '22%' }} />
+                      <col style={{ width: '24%' }} />
+                      <col style={{ width: '15%' }} />
+                      <col style={{ width: '5%' }} />
+                    </colgroup>
+                    <thead className="bg-slate-50 border-b border-slate-100 sticky top-0 z-[2]">
+                      <tr>
+                        <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center">Chia sẻ</th>
+                        <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center">PK</th>
+                        <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Nguồn dữ liệu (Table)</th>
+                        <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Trường gốc (Column)</th>
+                        <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Tên hiển thị</th>
+                        <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Kiểu dữ liệu</th>
+                        <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center">Xóa</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 bg-white">
+                      {modalDldcFieldRows.map(row => {
+                        const tableFieldsForRow = DLDC_FIELDS[row.tableId] || [];
+                        return (
+                          <tr key={row.id} className="hover:bg-slate-50/50 transition-colors border-b border-slate-100">
+                            {/* Chia sẻ */}
+                            <td className="px-3 py-2.5 text-center overflow-hidden">
+                              <input
+                                type="checkbox"
+                                checked={row.shared}
+                                onChange={() => setModalDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, shared: !r.shared } : r))}
+                                className="w-4 h-4 rounded text-blue-600 border-slate-300 cursor-pointer"
+                              />
+                            </td>
+                            {/* PK */}
+                            <td className="px-3 py-2.5 text-center overflow-hidden">
+                              <input
+                                type="checkbox"
+                                checked={row.isPK}
+                                onChange={() => setModalDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, isPK: !r.isPK } : r))}
+                                className="w-4 h-4 rounded text-amber-500 border-slate-300 cursor-pointer"
+                              />
+                            </td>
+                            {/* Nguồn dữ liệu (Table) */}
+                            <td className="px-3 py-2.5 overflow-hidden">
+                              <select
+                                title="Nguồn dữ liệu"
+                                value={row.tableId}
+                                onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                                  setModalDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, tableId: e.target.value, columnName: '', apiFieldName: '' } : r))
+                                }
+                                className="w-full min-w-0 px-2 py-1.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-1 focus:ring-blue-400/40 focus:border-blue-400 font-medium cursor-pointer font-sans"
+                              >
+                                <option value="">--</option>
+                                <option value={modalDldcTable}>{modalDldcTable}</option>
+                                {modalDldcJoins.filter(j => j.tableId).map(j => (
+                                  <option key={j.id} value={j.tableId}>{j.tableId} ({j.alias})</option>
+                                ))}
+                              </select>
+                            </td>
+                            {/* Trường gốc (Column) */}
+                            <td className="px-3 py-2.5 overflow-hidden">
+                              <select
+                                title="Trường gốc"
+                                value={row.columnName}
+                                onChange={(e: ChangeEvent<HTMLSelectElement>) => {
+                                  const colName = e.target.value;
+                                  const matchingField = tableFieldsForRow.find(f => f.fieldName === colName);
+                                  setModalDldcFieldRows(prev => prev.map(r => r.id === row.id ? {
+                                    ...r,
+                                    columnName: colName,
+                                    apiFieldName: colName,
+                                    dataType: matchingField?.dataType || r.dataType
+                                  } : r));
+                                }}
+                                className="w-full min-w-0 px-2 py-1.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-1 focus:ring-blue-400/40 focus:border-blue-400 font-medium cursor-pointer font-sans"
+                              >
+                                <option value="">--</option>
+                                {tableFieldsForRow.map(f => (
+                                  <option key={f.fieldName} value={f.fieldName}>{f.fieldName}</option>
+                                ))}
+                              </select>
+                            </td>
+                            {/* Tên hiển thị */}
+                            <td className="px-3 py-2.5 overflow-hidden">
+                              <input
+                                type="text"
+                                value={row.apiFieldName}
+                                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                  setModalDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, apiFieldName: e.target.value } : r))
+                                }
+                                className="w-full min-w-0 px-2 py-1.5 border border-slate-200 rounded-lg text-[13px] font-mono bg-white focus:outline-none focus:ring-1 focus:ring-blue-400/40 focus:border-blue-400"
+                              />
+                            </td>
+                            {/* Kiểu dữ liệu */}
+                            <td className="px-3 py-2.5 overflow-hidden">
+                              <select
+                                title="Kiểu dữ liệu"
+                                value={row.dataType}
+                                onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                                  setModalDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, dataType: e.target.value as FieldDataType } : r))
+                                }
+                                className="w-full min-w-0 px-2 py-1.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none font-sans"
+                              >
+                                {FIELD_DATA_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                              </select>
+                            </td>
+                            {/* Xóa */}
+                            <td className="px-3 py-2.5 text-center overflow-hidden">
+                              <button
+                                type="button"
+                                onClick={() => setModalDldcFieldRows(prev => prev.filter(r => r.id !== row.id))}
+                                className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors cursor-pointer"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 mt-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowDldcModal(false);
+                  setModalDldcDatabase('');
+                  setModalDldcTable('');
+                  setModalDldcFieldRows([]);
+                }}
+                className="px-4 py-2 border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 rounded-lg text-[13px] font-medium transition-colors cursor-pointer"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="button"
+                disabled={!modalDldcTable || modalDldcFieldRows.filter(r => r.shared && r.columnName).length === 0}
+                onClick={() => setShowDldcApproval(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-[13px] font-medium transition-colors active:scale-95 cursor-pointer shadow-sm"
+              >
+                <Send className="w-4 h-4" />
+                Gửi duyệt cấu trúc
+              </button>
+            </div>
+          </div>
+        </BaseModal>
+      )}
     </div>
+
+    {createPortal(
+      <ApprovalRequestModal
+        isOpen={showDldcApproval}
+        onClose={() => setShowDldcApproval(false)}
+        data={{ id: '', code: dldcEntity?.code || '', name: dldcEntity?.name || '', type: 'category' }}
+        approvers={approvers}
+        form={dldcApprovalForm}
+        setForm={setDldcApprovalForm}
+        onSubmit={() => { handleModalDldcApply(); setShowDldcApproval(false); setShowDldcModal(false); setDldcApprovalForm({ reviewer: '', note: '' }); }}
+      />,
+      document.body
+    )}
+    </>
   );
 }
