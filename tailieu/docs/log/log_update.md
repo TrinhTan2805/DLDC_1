@@ -1,5 +1,34 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Phiên bản 2.5.98 (Ngày cập nhật: 30/06/2026)
+
+**Nội dung thay đổi:**
+1. **Bổ sung tính năng Xóa giấy phép & Popup cảnh báo sử dụng:**
+   - Cập nhật file [OpenDataSetupPage.tsx](file:///f:/BTP/DLDC_1/src/components/pages/open-data/OpenDataSetupPage.tsx) ở tab *"Giấy phép"*.
+   - Thêm nút tác vụ *"Xóa"* (icon `Trash2`) vào danh sách các hành động trong cột Thao tác của bảng danh sách giấy phép.
+   - Thêm hộp thoại popup cảnh báo xác nhận xóa giấy phép (`showDeleteLicenseModal`), hiển thị chi tiết cảnh báo khi giấy phép đang được liên kết sử dụng khai báo/thống kê tệp dữ liệu mở.
+   - Thiết lập z-index của popup cảnh báo lên mức `999999` đi kèm độ mờ và làm mờ nền chuẩn (`bg-black/50 backdrop-blur-sm`).
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/open-data/OpenDataSetupPage.tsx`
+
+---
+
+## Phiên bản 2.5.97 (Ngày cập nhật: 30/06/2026)
+
+**Nội dung thay đổi:**
+1. **Lược bỏ liên kết click trên tên danh mục tại Thiết lập danh mục dữ liệu mở:**
+   - Cập nhật file [OpenDataSetupPage.tsx](file:///f:/BTP/DLDC_1/src/components/pages/open-data/OpenDataSetupPage.tsx) trong tab *"Quản lý danh mục"*.
+   - Loại bỏ thẻ `<button>` liên kết sự kiện `handleCategoryClick` có kiểu chữ màu xanh và gạch chân (`text-blue-600 hover:text-blue-700 hover:underline cursor-pointer`) trên cột Tên danh mục.
+   - Chuyển thành dạng chữ thường màu đen (`text-slate-950`) tĩnh không chứa liên kết để tăng tính rõ ràng cho giao diện danh sách quản lý.
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/open-data/OpenDataSetupPage.tsx`
+
+---
+
 ## Phiên bản 2.5.96 (Ngày cập nhật: 30/06/2026)
 
 **Nội dung thay đổi:**

@@ -722,6 +722,22 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
     setShowLicenseModal(false);
   };
 
+  const [showDeleteLicenseModal, setShowDeleteLicenseModal] = useState(false);
+  const [selectedLicenseToDelete, setSelectedLicenseToDelete] = useState<LicenseItem | null>(null);
+
+  const handleDeleteLicenseClick = (license: LicenseItem) => {
+    setSelectedLicenseToDelete(license);
+    setShowDeleteLicenseModal(true);
+  };
+
+  const confirmDeleteLicense = () => {
+    if (selectedLicenseToDelete) {
+      setLicenseEntries(licenseEntries.filter(l => l.id !== selectedLicenseToDelete.id));
+      setShowDeleteLicenseModal(false);
+      setSelectedLicenseToDelete(null);
+    }
+  };
+
   // Modals
   const [showAddModal, setShowAddModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
@@ -1755,6 +1771,13 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                             >
                               <Edit className="w-4 h-4" />
                             </button>
+                            <button
+                              onClick={() => handleDeleteLicenseClick(item)}
+                              className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded transition-colors cursor-pointer"
+                              title="Xóa"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -1818,17 +1841,9 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                           <code className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-xs border border-slate-200">{category.code}</code>
                         </td>
                         <td className="px-4 py-3 text-left text-[13px]">
-                          {activeTab === 'management' ? (
-                            <button onClick={() => handleCategoryClick(category)} className="text-left w-full hover:bg-transparent p-0">
-                              <div className="font-semibold text-blue-600 hover:text-blue-700 hover:underline cursor-pointer">
-                                {category.name}
-                              </div>
-                            </button>
-                          ) : (
-                            <div>
-                              <div className="font-semibold text-slate-950 leading-snug">{category.name}</div>
-                            </div>
-                          )}
+                          <div>
+                            <div className="font-semibold text-slate-950 leading-snug">{category.name}</div>
+                          </div>
                         </td>
                         <td className="px-4 py-3 text-left text-slate-600 font-medium text-[13px]">{category.dataField}</td>
                         <td className="px-4 py-3 text-center text-[13px]">{getApprovalStatusBadge(category.approvalStatus)}</td>
@@ -3122,6 +3137,39 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
         </div>
       )}
 
+      {/* Delete License Warning Modal */}
+      {showDeleteLicenseModal && selectedLicenseToDelete && (
+        <div style={{ zIndex: 999999 }} className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden flex flex-col p-6 animate-in fade-in zoom-in-95 duration-200" style={{ fontSize: '13px' }}>
+            <div className="flex items-center gap-3 text-red-600 mb-4">
+              <AlertCircle className="w-6 h-6 shrink-0" />
+              <h3 className="text-[18px] font-bold text-slate-900" style={{ fontSize: '18px' }}>Cảnh báo xóa giấy phép</h3>
+            </div>
+            <p className="text-[13px] text-slate-600 mb-6 leading-relaxed">
+              Giấy phép <strong>{selectedLicenseToDelete.name} ({selectedLicenseToDelete.shortName})</strong> đang được sử dụng để khai báo và thống kê tệp dữ liệu mở. Bạn có chắc chắn muốn xóa không?
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowDeleteLicenseModal(false);
+                  setSelectedLicenseToDelete(null);
+                }}
+                className="px-4 py-2 border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 rounded-lg text-[13px] font-medium transition-colors cursor-pointer"
+                style={{ fontSize: '13px' }}
+              >
+                Hủy
+              </button>
+              <button
+                onClick={confirmDeleteLicense}
+                className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded-lg text-[13px] font-medium transition-colors cursor-pointer"
+                style={{ fontSize: '13px' }}
+              >
+                Xóa
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
