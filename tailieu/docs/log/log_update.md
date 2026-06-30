@@ -1,5 +1,252 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Phiên bản 2.5.91 (Ngày cập nhật: 30/06/2026)
+
+**Nội dung thay đổi:**
+1. **Tinh chỉnh gắn kết phân trang và loại bỏ hộp bọc thanh tìm kiếm ở danh sách đối soát:**
+   - Cập nhật file [DataReconciliationPage.tsx](file:///f:/BTP/DLDC_1/src/components/pages/provisioning/DataReconciliationPage.tsx).
+   - Loại bỏ hộp bọc màu trắng (`bg-white rounded-xl border border-slate-200 p-4 shadow-sm`) xung quanh thanh tìm kiếm chính để nó hiển thị trực tiếp trên nền xám của layout. Khung nâng cao khi bấm nút Bộ lọc vẫn hiển thị dạng card trắng sang trọng.
+   - Loại bỏ viền đệm (`border border-slate-100 rounded-lg`) của phân vùng cuộn bảng dữ liệu (`overflow-x-auto`).
+   - Đưa cấu trúc phân trang (`renderPagination`) vào chung khối hộp chứa bảng grid đối soát (`bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm`), giúp phần phân trang liên kết liền mạch và không còn khe hở trắng với bảng dữ liệu.
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/provisioning/DataReconciliationPage.tsx`
+
+---
+
+## Phiên bản 2.5.90 (Ngày cập nhật: 30/06/2026)
+
+**Nội dung thay đổi:**
+1. **Tăng Z-index hiển thị modal Xem chi tiết đối soát:**
+   - Điều chỉnh cấu hình z-index của modal [ProvisionReconciliationDetailsModal.tsx](file:///f:/BTP/DLDC_1/src/components/pages/provisioning/modals/ProvisionReconciliationDetailsModal.tsx) lên mức `999999` (sử dụng class `z-[999999]` và inline style `style={{ zIndex: 999999 }}`).
+   - Đảm bảo hộp thoại chi tiết đối soát luôn hiển thị đè lên trên tất cả các thành phần giao diện khác bao gồm cả thanh điều hướng sidebar bên trái.
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/provisioning/modals/ProvisionReconciliationDetailsModal.tsx`
+
+---
+
+## Phiên bản 2.5.89 (Ngày cập nhật: 30/06/2026)
+
+**Nội dung thay đổi:**
+1. **Áp dụng tiêu chuẩn hộp thoại 5.4 cho modal Xem chi tiết đối soát:**
+   - Thay đổi lớp phủ backdrop của modal [ProvisionReconciliationDetailsModal.tsx](file:///f:/BTP/DLDC_1/src/components/pages/provisioning/modals/ProvisionReconciliationDetailsModal.tsx) thành `bg-black/50` tuân thủ đúng quy tắc hệ thống component chung tại `docs/compomennt.md`.
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/provisioning/modals/ProvisionReconciliationDetailsModal.tsx`
+
+---
+
+## Phiên bản 2.5.88 (Ngày cập nhật: 30/06/2026)
+
+**Nội dung thay đổi:**
+1. **Thiết kế lại modal xem chi tiết kết quả đối soát:**
+   - Cấu hình lại độ mờ nền của modal [ProvisionReconciliationDetailsModal.tsx](file:///f:/BTP/DLDC_1/src/components/pages/provisioning/modals/ProvisionReconciliationDetailsModal.tsx) thành `bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200` giống hệt modal xem chi tiết tại trang Thiết lập điều phối dữ liệu.
+   - Sửa kích cỡ chữ tiêu đề chính trong modal lên `18px` (`text-[18px]` kèm inline style).
+   - Thiết lập đồng bộ toàn bộ phần văn bản nội dung, nhãn, dữ liệu bảng và nút bấm trong modal về kích thước `13px` (`text-[13px]`/inline style), tạo cấu trúc hiển thị cân đối và rõ ràng.
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/provisioning/modals/ProvisionReconciliationDetailsModal.tsx`
+
+---
+
+## Phiên bản 2.5.87 (Ngày cập nhật: 30/06/2026)
+
+**Nội dung thay đổi:**
+1. **Lược bỏ nút tác vụ ở header và tăng font chữ tiêu đề bảng đối soát:**
+   - Loại bỏ 2 nút tác vụ *"Cấu hình"* và *"Đối soát ngay"* ở phía trên góc phải của trang chi tiết [DataReconciliationPage.tsx](file:///f:/BTP/DLDC_1/src/components/pages/provisioning/DataReconciliationPage.tsx).
+   - Tăng cỡ chữ của tiêu đề *"Lịch sử đối soát"* lên `18px` (`text-[18px]` kèm inline style) để đảm bảo trực quan và cân đối với bố cục mới.
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/provisioning/DataReconciliationPage.tsx`
+
+---
+
+## Phiên bản 2.5.86 (Ngày cập nhật: 30/06/2026)
+
+**Nội dung thay đổi:**
+1. **Thiết kế lại vùng lọc và tìm kiếm Dịch vụ chia sẻ & Đối soát cung cấp:**
+   - Cập nhật cả 2 file [DataProvisionServicesPage.tsx](file:///f:/BTP/DLDC_1/src/components/pages/provisioning/DataProvisionServicesPage.tsx) và [DataReconciliationPage.tsx](file:///f:/BTP/DLDC_1/src/components/pages/provisioning/DataReconciliationPage.tsx).
+   - Đóng gói toàn bộ thanh tìm kiếm và bảng bộ lọc nâng cao bên trong **một khối thẻ duy nhất** có viền (`bg-white rounded-xl border border-slate-200 p-4 shadow-sm space-y-4 mb-4`) khớp chính xác với thiết kế mockup dữ liệu chủ.
+   - Chuyển đổi nền bộ lọc khi mở từ màu xám (`bg-slate-50`) sang màu trắng (`bg-white`) đồng điệu với nền thẻ cha.
+   - Định dạng lại nút tìm kiếm màu xanh đi liền và nút bộ lọc có icon đổi trạng thái (X/Filter) chuẩn xác.
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/provisioning/DataProvisionServicesPage.tsx`
+- `src/components/pages/provisioning/DataReconciliationPage.tsx`
+
+---
+
+## Phiên bản 2.5.85 (Ngày cập nhật: 30/06/2026)
+
+**Nội dung thay đổi:**
+1. **Thiết kế lại thanh tìm kiếm, bộ lọc nâng cao và nhãn tiêu đề lịch sử đối soát:**
+   - Chuyển nhãn tiêu đề *"Lịch sử đối soát"* lên phía trên thanh tìm kiếm (thiết lập font-size `14px` và in đậm `font-bold`) trong [DataReconciliationPage.tsx](file:///f:/BTP/DLDC_1/src/components/pages/provisioning/DataReconciliationPage.tsx).
+   - Thiết kế lại thanh tìm kiếm kéo dài toàn bộ bề ngang (`w-full`), nền trắng (`bg-white`) và border mỏng xám tinh tế.
+   - Thay thế nút lọc cũ bằng nút lọc hình vuông thông minh có khả năng đổi màu sắc khi kích hoạt (`showFilters` hoạt động).
+   - Tích hợp thêm khung bộ lọc nâng cao sụp/mở (bao gồm Trạng thái: Thành công/Cảnh báo/Lỗi, lọc theo thời gian từ ngày/đến ngày, nút "Thiết lập lại") tương đồng hoàn toàn với thiết kế của Dịch vụ chia sẻ.
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/provisioning/DataReconciliationPage.tsx`
+
+---
+
+## Phiên bản 2.5.84 (Ngày cập nhật: 30/06/2026)
+
+**Nội dung thay đổi:**
+1. **Đồng bộ hóa giao diện trang Đối soát cung cấp (Quy trình đối soát dữ liệu):**
+   - Thiết kế lại cấu trúc bảng grid hiển thị lịch sử đối soát trong [DataReconciliationPage.tsx](file:///f:/BTP/DLDC_1/src/components/pages/provisioning/DataReconciliationPage.tsx) đồng bộ với thiết kế danh sách API chia sẻ dữ liệu.
+   - Giữ nguyên cấu trúc các header cũ (mã UC và process group), đồng thời điều chỉnh kích cỡ chữ tiêu đề chính xuống `18px` (`text-[18px]` kèm inline style).
+   - Thiết lập kích cỡ chữ của bảng grid mặc định là `13px` cho các dòng giá trị / tiêu đề và `12px` cho các badge (Loại chạy, Trạng thái) kèm thuộc tính không ngắt dòng `whitespace-nowrap`.
+   - Thu nhỏ kích thước icon chỉ báo trạng thái xuống `w-3.5 h-3.5` để cân đối với badge 12px.
+   - Thay thế nút hành động xem chi tiết (ArrowRight) bằng **icon con mắt màu đen (Eye)** không viền, không nền xám (`text-black hover:bg-slate-100 hover:text-slate-700`).
+   - Tích hợp thêm cấu trúc phân trang hoàn thiện (Pagination) ở bên dưới bảng lịch sử đối soát.
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/provisioning/DataReconciliationPage.tsx`
+
+---
+
+## Phiên bản 2.5.83 (Ngày cập nhật: 30/06/2026)
+
+**Nội dung thay đổi:**
+1. **Loại bỏ vùng hộp màu trắng ở đầu header chi tiết:**
+   - Di chuyển khối tiêu đề bộ dữ liệu (`h2` + subtitle) vào bên trong phân vùng cuộn trang chính (`overflow-y-auto p-6 bg-slate-50/50`) của file [DataProvisionServicesPage.tsx](file:///f:/BTP/DLDC_1/src/components/pages/provisioning/DataProvisionServicesPage.tsx).
+   - Xóa bỏ thẻ div wrapper có viền dưới và bóng đổ màu trắng (`bg-white border-b border-slate-200 shadow-sm`), giúp tiêu đề nằm trực tiếp trên nền xám của khu vực nội dung chính một cách đồng điệu.
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/provisioning/DataProvisionServicesPage.tsx`
+
+---
+
+## Phiên bản 2.5.82 (Ngày cập nhật: 30/06/2026)
+
+**Nội dung thay đổi:**
+1. **Điều chỉnh kích cỡ chữ tiêu đề và menu nội bộ:**
+   - **Tiêu đề Bộ dữ liệu**: Sửa đổi kích thước header tiêu đề Bộ dữ liệu (`<h2>` tại [DataProvisionServicesPage.tsx](file:///f:/BTP/DLDC_1/src/components/pages/provisioning/DataProvisionServicesPage.tsx)) xuống còn `18px` bằng CSS inline `style={{ fontSize: '18px' }}` và class `text-[18px]`.
+   - **Menu nội bộ (Left Sidebar)**: Chuyển đổi kích thước chữ hiển thị tên Bộ dữ liệu trong menu bên trái từ `text-sm` (14px) xuống còn `13px` (`text-[13px]`) kèm theo CSS inline `style={{ fontSize: '13px' }}`.
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/provisioning/DataProvisionServicesPage.tsx`
+
+---
+
+## Phiên bản 2.5.81 (Ngày cập nhật: 30/06/2026)
+
+**Nội dung thay đổi:**
+1. **Loại bỏ nhãn loại dữ liệu khỏi subtitle:**
+   - Loại bỏ phần thông tin loại dữ liệu phụ (*"| Dữ liệu Dùng chung"*, *"| Dữ liệu Danh mục nội ngành"*, v.v.) trong phần subtitle của trang chi tiết [DataProvisionServicesPage.tsx](file:///f:/BTP/DLDC_1/src/components/pages/provisioning/DataProvisionServicesPage.tsx) theo yêu cầu thiết kế giao diện tinh giản.
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/provisioning/DataProvisionServicesPage.tsx`
+
+---
+
+## Phiên bản 2.5.80 (Ngày cập nhật: 30/06/2026)
+
+**Nội dung thay đổi:**
+1. **Tinh chỉnh hiển thị nhãn trạng thái:**
+   - Bổ sung class `whitespace-nowrap` vào nhãn badge trạng thái ("Hoạt động" / "Tạm ngưng") trong [DataProvisionServicesPage.tsx](file:///f:/BTP/DLDC_1/src/components/pages/provisioning/DataProvisionServicesPage.tsx) để ngăn chặn hoàn toàn hiện tượng nhãn chữ bị tự động ngắt dòng xuống dưới khi thu nhỏ cửa sổ trình duyệt.
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/provisioning/DataProvisionServicesPage.tsx`
+
+---
+
+## Phiên bản 2.5.79 (Ngày cập nhật: 30/06/2026)
+
+**Nội dung thay đổi:**
+1. **Tinh chỉnh giao diện badge trạng thái và nút hành động:**
+   - **Trạng thái**: Ép cứng cỡ chữ của badge trạng thái về `12px` bằng style inline `style={{ fontSize: '12px' }}` trong [DataProvisionServicesPage.tsx](file:///f:/BTP/DLDC_1/src/components/pages/provisioning/DataProvisionServicesPage.tsx).
+   - **Thao tác**: Thiết kế lại icon cấu hình trường (icon `Sliders`) thành màu đen (`text-black`), loại bỏ viền và ô vuông bọc màu nền bên ngoài (sử dụng hover nền xám nhạt `hover:bg-slate-100` không viền), tạo cảm giác thanh lịch, tối giản.
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/provisioning/DataProvisionServicesPage.tsx`
+
+---
+
+## Phiên bản 2.5.78 (Ngày cập nhật: 30/06/2026)
+
+**Nội dung thay đổi:**
+1. **Cập nhật định dạng hiển thị cột trong bảng Grid:**
+   - **Số trường chia sẻ**: Sửa lại giá trị hiển thị thành dạng `7/7`, `5/7` thay thế cho kiểu cũ có chữ "trường", đồng thời thêm `whitespace-nowrap` để bảo đảm hiển thị trên cùng một dòng.
+   - **Trạng thái**: Chuyển đổi cỡ chữ nhãn trạng thái về `12px` (`text-[12px]`) và loại bỏ kiểu in đậm (`font-normal`).
+   - **Thao tác**: Chuyển nút hành động cấu hình trường thành dạng icon nút tròn thu nhỏ (chứa icon `Sliders` trên nền xanh nhạt), loại bỏ chữ "Cấu hình trường" và thêm thuộc tính `title="Cấu hình trường"` để hiển thị tên khi hover vào icon.
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/provisioning/DataProvisionServicesPage.tsx`
+
+---
+
+## Phiên bản 2.5.77 (Ngày cập nhật: 30/06/2026)
+
+**Nội dung thay đổi:**
+1. **Ép kích thước font chữ bảng grid về 13px:**
+   - Cấu hình style CSS inline `style={{ fontSize: '13px' }}` trực tiếp trên các thẻ `<table>`, `<thead>`, `<tbody>`, `<tr>`, `<th>`, và `<td>` của bảng danh sách API trong [DataProvisionServicesPage.tsx](file:///f:/BTP/DLDC_1/src/components/pages/provisioning/DataProvisionServicesPage.tsx).
+   - Đảm bảo font chữ luôn cố định là `13px` khi người dùng inspect phần tử, loại bỏ hoàn toàn việc bị ảnh hưởng bởi font-size của layout cha (`14px`/`text-sm`).
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/provisioning/DataProvisionServicesPage.tsx`
+
+---
+
+## Phiên bản 2.5.76 (Ngày cập nhật: 30/06/2026)
+
+**Nội dung thay đổi:**
+1. **Cập nhật giao diện bảng Grid hiển thị danh sách API:**
+   - Loại bỏ tiêu đề phụ bên trên bảng (*"Danh sách các API chia sẻ dữ liệu..."* và *"Tìm thấy X API đang kết nối"*) trong [DataProvisionServicesPage.tsx](file:///f:/BTP/DLDC_1/src/components/pages/provisioning/DataProvisionServicesPage.tsx), giúp bảng trực tiếp hiển thị phần header cột để tối ưu không gian màn hình.
+   - Thiết lập kích cỡ chữ thống nhất `text-[13px]` cho cả tiêu đề cột (`<thead>/<th>`) và nội dung giá trị trong bảng (`<tbody>/<td>`).
+   - Căn chỉnh lại khoảng cách đệm (padding) của các dòng giá trị trong bảng về mức `py-3` (thay vì `py-4`) giúp hiển thị dữ liệu cô đọng và dễ quan sát.
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/provisioning/DataProvisionServicesPage.tsx`
+
+---
+
+## Phiên bản 2.5.75 (Ngày cập nhật: 30/06/2026)
+
+**Nội dung thay đổi:**
+1. **Tinh chỉnh giao diện thanh tìm kiếm & bộ lọc:**
+   - Loại bỏ vùng bọc thẻ màu trắng (`bg-white p-4 rounded-xl border border-slate-200 shadow-sm`) bên ngoài thanh tìm kiếm trong [DataProvisionServicesPage.tsx](file:///f:/BTP/DLDC_1/src/components/pages/provisioning/DataProvisionServicesPage.tsx).
+   - Loại bỏ giới hạn chiều rộng `max-w-xl` của input tìm kiếm để nó kéo dài toàn bộ bề ngang của vùng làm việc (Right Content).
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/provisioning/DataProvisionServicesPage.tsx`
+
+---
+
+## Phiên bản 2.5.74 (Ngày cập nhật: 30/06/2026)
+
+**Nội dung thay đổi:**
+1. **Đồng bộ hóa giao diện trang Danh sách dịch vụ cung cấp:**
+   - Cập nhật thiết kế trang Danh sách dịch vụ cung cấp tại [DataProvisionServicesPage.tsx](file:///f:/BTP/DLDC_1/src/components/pages/provisioning/DataProvisionServicesPage.tsx) tương đồng với trang Quản lý API cung cấp & đối soát.
+   - Thiết kế lại **Thanh tìm kiếm** (input + nút Search) và **Bộ lọc nâng cao** (Từ ngày, Đến ngày, Trạng thái xử lý / kết nối, nút Thiết lập lại).
+   - Định dạng lại **Bảng Grid hiển thị danh sách API** (Header table có background xám nhạt, font chữ in hoa nhỏ).
+   - Tích hợp thêm **Thanh phân trang (Pagination)** ở phía dưới bảng (Hiển thị số bản ghi trên trang, phân trang Trước/Sau và số trang).
+2. **Kiểm tra biên dịch & Đóng gói:** `npm run build` thành công, không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/provisioning/DataProvisionServicesPage.tsx`
+
+---
+
 ## Phiên bản 2.5.73 (Ngày cập nhật: 29/06/2026)
 
 **Nội dung thay đổi:**

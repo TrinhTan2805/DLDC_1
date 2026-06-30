@@ -20,6 +20,13 @@ export function DataProvisionServicesPage({ category, group, title, description 
   // Search and Filter State
   const [searchRightText, setSearchRightText] = useState('');
   const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
+  const [filterStartDate, setFilterStartDate] = useState('');
+  const [filterEndDate, setFilterEndDate] = useState('');
+  const [filterStatus, setFilterStatus] = useState('All');
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Fields Config Modal State
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
@@ -136,11 +143,103 @@ export function DataProvisionServicesPage({ category, group, title, description 
     }
   };
 
-  const filteredConsumerApis = consumerApis.filter(api => 
-    api.unit.toLowerCase().includes(searchRightText.toLowerCase()) ||
-    api.code.toLowerCase().includes(searchRightText.toLowerCase()) ||
-    api.receiver.toLowerCase().includes(searchRightText.toLowerCase())
+  const filteredConsumerApis = consumerApis.filter(api => {
+    const matchesSearch = 
+      api.unit.toLowerCase().includes(searchRightText.toLowerCase()) ||
+      api.code.toLowerCase().includes(searchRightText.toLowerCase()) ||
+      api.receiver.toLowerCase().includes(searchRightText.toLowerCase()) ||
+      api.name.toLowerCase().includes(searchRightText.toLowerCase());
+
+    const matchesStatus = filterStatus === 'All' || api.status === filterStatus;
+
+    let matchesDate = true;
+    if (filterStartDate || filterEndDate) {
+      const datePart = api.time.split(' ')[0];
+      const dateParts = datePart.split('/');
+      if (dateParts.length === 3) {
+        const apiDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
+        if (filterStartDate) {
+          const startDate = new Date(filterStartDate);
+          if (apiDate < startDate) matchesDate = false;
+        }
+        if (filterEndDate) {
+          const endDate = new Date(filterEndDate);
+          if (apiDate > endDate) matchesDate = false;
+        }
+      }
+    }
+
+    return matchesSearch && matchesStatus && matchesDate;
+  });
+
+  const paginatedConsumerApis = filteredConsumerApis.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
   );
+
+  const renderPagination = (totalItems: number) => {
+    const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+    return (
+      <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white sm:px-6 collection-pagination text-[13px]">
+        <div className="flex items-center gap-2">
+          <span className="text-slate-600">Hiển thị</span>
+          <select aria-label="Select record count" 
+            value={itemsPerPage}
+            onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
+            className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px] cursor-pointer"
+            title="Số bản ghi trên trang"
+          >
+            <option value={10}>10</option>
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+          </select>
+          <span className="text-slate-600">bản ghi/trang</span>
+        </div>
+        
+        <div className="flex items-center gap-4">
+          <span className="text-slate-600">
+            {totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, totalItems)} / {totalItems}
+          </span>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : currentPage)}
+              disabled={currentPage === 1}
+              className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
+            >
+              Trước
+            </button>
+            
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`px-3 py-1.5 border rounded-lg font-medium text-[13px] transition-colors cursor-pointer ${
+                  currentPage === page
+                    ? 'bg-blue-600 border-blue-600 text-white'
+                    : 'border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+
+            <button
+              onClick={() => {
+                if (currentPage < totalPages) {
+                  setCurrentPage(currentPage + 1);
+                }
+              }}
+              disabled={currentPage === totalPages || totalItems === 0}
+              className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
+            >
+              Sau
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="flex h-[calc(100vh-8rem)] bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative">
@@ -173,11 +272,12 @@ export function DataProvisionServicesPage({ category, group, title, description 
             <button
               key={item.id}
               onClick={() => { setSelectedService(item); setSelectedApi(null); }}
-              className={`w-full text-left px-3 py-3 rounded-lg text-sm transition-colors ${
+              className={`w-full text-left px-3 py-3 rounded-lg text-[13px] transition-colors ${
                 selectedService?.id === item.id
                   ? 'bg-blue-50 border border-blue-200 text-blue-700 font-medium'
                   : 'hover:bg-slate-100 text-slate-600 border border-transparent'
               }`}
+              style={{ fontSize: '13px' }}
             >
               {item.name}
             </button>
@@ -194,156 +294,170 @@ export function DataProvisionServicesPage({ category, group, title, description 
       <div className="flex-1 flex flex-col bg-white overflow-hidden">
         {selectedService ? (
           <>
-            {/* Header / Tab navigation for all Provisioning pages */}
-            <div className="bg-white border-b border-slate-200 shadow-sm z-10 flex flex-col">
-              <div className="px-6 pt-5 pb-3">
-                <h2 className="text-xl font-bold text-slate-800 mb-1">{selectedService.name}</h2>
-                <p className="text-xs text-slate-400">
-                  Nguồn dữ liệu: <strong className="text-slate-600">{selectedService.group || selectedService.category}</strong> | Dữ liệu <strong className="text-slate-600">{selectedService.category === 'internal' ? 'Danh mục nội ngành' : (selectedService.category === 'shared' ? 'Dùng chung' : (selectedService.category === 'master' ? 'Dữ liệu chủ' : 'Dữ liệu mở'))}</strong>
-                </p>
-              </div>
-              
-            </div>
-            
             <div className="flex-1 overflow-y-auto p-6 bg-slate-50/50">
               <div className="max-w-6xl mx-auto space-y-6">
                 
+                {/* Header Title */}
+                <div className="pb-2">
+                  <h2 className="text-[18px] font-bold text-slate-800 mb-1" style={{ fontSize: '18px' }}>{selectedService.name}</h2>
+                  <p className="text-xs text-slate-400">
+                    Nguồn dữ liệu: <strong className="text-slate-600">{selectedService.group || selectedService.category}</strong>
+                  </p>
+                </div>
+                
                 {/* Tabbed Content */}
                     {/* General Search Toolbar directly below tabs container */}
-                    <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between gap-4">
-                      <div className="relative flex-1 max-w-xl">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                        <input
-                          type="text"
-                          placeholder="Tìm theo mã YC, cơ quan, loại dữ liệu..."
-                          className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                          value={searchRightText}
-                          onChange={(e) => setSearchRightText(e.target.value)}
-                        />
+                    {/* General Search Toolbar & Advanced Filters in a single white container */}
+                    <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm space-y-4 mb-4">
+                      {/* Row 1: Search input + Blue Search Button + Filter Toggle Button */}
+                      <div className="flex items-center gap-3">
+                        <div className="relative flex-1">
+                          <input
+                            type="text"
+                            placeholder="Tìm theo mã YC, cơ quan, loại dữ liệu..."
+                            className="w-full px-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                            value={searchRightText}
+                            onChange={(e) => { setSearchRightText(e.target.value); setCurrentPage(1); }}
+                          />
+                        </div>
+                        <button className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center cursor-pointer">
+                          <Search className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() => setShowAdvancedFilter(!showAdvancedFilter)}
+                          className={`p-2 rounded-lg transition-colors flex items-center justify-center border cursor-pointer ${
+                            showAdvancedFilter 
+                              ? 'bg-blue-50 border-blue-200 text-blue-700' 
+                              : 'bg-white border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
+                          }`}
+                          title="Bộ lọc"
+                        >
+                          {showAdvancedFilter ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
+                        </button>
                       </div>
-                      <button 
-                        onClick={() => setShowAdvancedFilter(!showAdvancedFilter)}
-                        className={`flex items-center gap-2 px-4 py-2 border rounded-lg text-[13px] font-semibold transition-colors shadow-sm cursor-pointer ${showAdvancedFilter ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'}`}
-                      >
-                        <Filter className={`w-4 h-4 ${showAdvancedFilter ? 'text-blue-500' : 'text-slate-500'}`} />
-                        Bộ lọc nâng cao
-                      </button>
-                    </div>
 
-                    {/* Advanced Filter Panel */}
-                    {showAdvancedFilter && (
-                      <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm animate-in slide-in-from-top-2 duration-200 mb-6 -mt-2">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                      {/* Row 2: Advanced Filter Panel */}
+                      {showAdvancedFilter && (
+                        <div className="grid grid-cols-4 gap-4 pt-4 border-t border-slate-100 animate-in slide-in-from-top-2 duration-200">
                           <div>
-                            <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Khoảng thời gian (Từ ngày)</label>
-                            <input type="date" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-700" />
+                            <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">Khoảng thời gian (Từ ngày)</label>
+                            <input
+                              type="date"
+                              value={filterStartDate}
+                              onChange={(e) => { setFilterStartDate(e.target.value); setCurrentPage(1); }}
+                              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
+                            />
                           </div>
                           <div>
-                            <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Khoảng thời gian (Đến ngày)</label>
-                            <input type="date" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-700" />
+                            <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">Khoảng thời gian (Đến ngày)</label>
+                            <input
+                              type="date"
+                              value={filterEndDate}
+                              onChange={(e) => { setFilterEndDate(e.target.value); setCurrentPage(1); }}
+                              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
+                            />
                           </div>
                           <div>
-                            <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Trạng thái xử lý</label>
-                            <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-700">
-                              <option value="">-- Tất cả trạng thái --</option>
-                              <option value="success">Thành công</option>
-                              <option value="pending">Đang chờ xử lý</option>
-                              <option value="error">Bị lỗi / Từ chối</option>
+                            <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">Trạng thái xử lý / kết nối</label>
+                            <select
+                              value={filterStatus}
+                              onChange={(e) => { setFilterStatus(e.target.value); setCurrentPage(1); }}
+                              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
+                            >
+                              <option value="All">-- Tất cả trạng thái --</option>
+                              <option value="Hoạt động">Hoạt động</option>
+                              <option value="Tạm ngưng">Tạm ngưng</option>
                             </select>
                           </div>
+                          <div className="flex items-end">
+                            <button
+                              onClick={() => {
+                                setFilterStartDate('');
+                                setFilterEndDate('');
+                                setFilterStatus('All');
+                                setSearchRightText('');
+                                setCurrentPage(1);
+                              }}
+                              className="w-full px-4 py-2 border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 rounded-lg text-[13px] font-medium transition-colors cursor-pointer shadow-sm text-center"
+                            >
+                              Thiết lập lại
+                            </button>
+                          </div>
                         </div>
-                        <div className="flex justify-end gap-3 mt-5 pt-4 border-t border-slate-100">
-                          <button 
-                            onClick={() => setShowAdvancedFilter(false)}
-                            className="bg-white text-[#020817] border border-[#e2e8f0] hover:bg-slate-50 rounded-lg px-4 py-2 font-medium text-[13px] transition-colors shadow-sm cursor-pointer"
-                          >
-                            Hủy bỏ
-                          </button>
-                          <button 
-                            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[13px] font-medium shadow-sm transition-colors cursor-pointer"
-                          >
-                            Áp dụng bộ lọc
-                          </button>
-                        </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
 
                     {/* Quản lý API đang lấy dữ liệu */}
                       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-                        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/50 flex justify-between items-center">
-                          <h3 className="font-bold text-slate-800 text-base">Danh sách các API chia sẻ dữ liệu "{selectedService.name}"</h3>
-                          <span className="text-xs font-semibold text-slate-500">Tìm thấy {filteredConsumerApis.length} API đang kết nối</span>
-                        </div>
-
                         <div className="overflow-x-auto">
-                          <table className="w-full text-xs text-left whitespace-nowrap">
-                            <thead className="bg-slate-50 border-b border-slate-200 text-slate-700 font-bold uppercase tracking-wider">
-                              <tr>
-                                <th className="px-4 py-3.5">Mã / Tên API</th>
-                                <th className="px-4 py-3.5">Đơn vị sử dụng</th>
-                                <th className="px-4 py-3.5">Đầu mối tiếp nhận</th>
-                                <th className="px-4 py-3.5">Cổng Endpoint / Giao thức</th>
-                                <th className="px-4 py-3.5 text-center">Số trường chia sẻ</th>
-                                <th className="px-4 py-3.5">Thời gian cập nhật</th>
-                                <th className="px-4 py-3.5">Trạng thái</th>
-                                <th className="px-4 py-3.5 text-center">Thao tác</th>
+                          <table className="w-full text-left border-collapse table-auto" style={{ fontSize: '13px' }}>
+                            <thead>
+                              <tr className="bg-slate-50 text-slate-500 border-b border-slate-200 uppercase tracking-tight" style={{ fontSize: '13px' }}>
+                                <th className="px-4 py-3 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Mã / Tên API</th>
+                                <th className="px-4 py-3 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Đơn vị sử dụng</th>
+                                <th className="px-4 py-3 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Đầu mối tiếp nhận</th>
+                                <th className="px-4 py-3 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Cổng Endpoint / Giao thức</th>
+                                <th className="px-4 py-3 text-center font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Số trường chia sẻ</th>
+                                <th className="px-4 py-3 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Thời gian cập nhật</th>
+                                <th className="px-4 py-3 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Trạng thái</th>
+                                <th className="px-4 py-3 text-center font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Thao tác</th>
                               </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100 text-slate-700">
-                              {filteredConsumerApis.map(api => (
-                                <tr key={api.id} className="hover:bg-slate-50/50 transition-colors">
-                                  <td className="px-4 py-4">
-                                    <div className="font-bold text-slate-800 text-sm">{api.name}</div>
+                            <tbody className="divide-y divide-slate-100 text-slate-700" style={{ fontSize: '13px' }}>
+                              {paginatedConsumerApis.map(api => (
+                                <tr key={api.id} className="hover:bg-slate-50/50 transition-colors" style={{ fontSize: '13px' }}>
+                                  <td className="px-4 py-3 text-slate-900 text-[13px]" style={{ fontSize: '13px' }}>
+                                    <div className="font-bold text-slate-800 text-[13px]" style={{ fontSize: '13px' }}>{api.name}</div>
                                     <div className="font-mono text-[10px] text-slate-400 mt-0.5">{api.code}</div>
                                   </td>
-                                  <td className="px-4 py-4 font-semibold text-slate-800">
+                                  <td className="px-4 py-3 font-semibold text-slate-800 text-[13px]" style={{ fontSize: '13px' }}>
                                     {api.unit}
                                   </td>
-                                  <td className="px-4 py-4 text-slate-600">
+                                  <td className="px-4 py-3 text-slate-600 text-[13px]" style={{ fontSize: '13px' }}>
                                     {api.receiver}
                                   </td>
-                                  <td className="px-4 py-4">
-                                    <div className="flex items-center gap-1.5">
+                                  <td className="px-4 py-3 text-[13px]" style={{ fontSize: '13px' }}>
+                                    <div className="flex items-center gap-1.5 text-[13px]" style={{ fontSize: '13px' }}>
                                       <span className="font-mono text-[10px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded font-bold border border-blue-100">
                                         {api.method}
                                       </span>
-                                      <span className="font-mono text-slate-500">{api.endpoint}</span>
+                                      <span className="font-mono text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>{api.endpoint}</span>
                                     </div>
                                   </td>
-                                  <td className="px-4 py-4 text-center font-semibold text-slate-800">
-                                    <span className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full border border-slate-200 font-mono text-[11px]">
-                                      {api.sharedCount} / 7 trường
+                                  <td className="px-4 py-3 text-center font-semibold text-slate-800 text-[13px]" style={{ fontSize: '13px' }}>
+                                    <span className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full border border-slate-200 font-mono text-[11px] whitespace-nowrap">
+                                      {api.sharedCount}/7
                                     </span>
                                   </td>
-                                  <td className="px-4 py-4 text-slate-500 font-mono">
+                                  <td className="px-4 py-3 text-slate-500 font-mono text-[13px]" style={{ fontSize: '13px' }}>
                                     {api.time}
                                   </td>
-                                  <td className="px-4 py-4">
+                                  <td className="px-4 py-3 text-[13px]" style={{ fontSize: '13px' }}>
                                     {api.status === 'Hoạt động' ? (
-                                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[12px] font-normal bg-emerald-50 text-emerald-700 border border-emerald-100 whitespace-nowrap" style={{ fontSize: '12px' }}>
                                         <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
                                         Hoạt động
                                       </span>
                                     ) : (
-                                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-100">
+                                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[12px] font-normal bg-amber-50 text-amber-700 border border-amber-100 whitespace-nowrap" style={{ fontSize: '12px' }}>
                                         <span className="w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
                                         Tạm ngưng
                                       </span>
                                     )}
                                   </td>
-                                  <td className="px-4 py-4 text-center">
+                                  <td className="px-4 py-3 text-center text-[13px]" style={{ fontSize: '13px' }}>
                                     <button
                                       onClick={() => handleOpenFieldsConfig(api)}
-                                      className="p-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg border border-blue-200 transition-colors shadow-sm inline-flex items-center gap-1 cursor-pointer font-semibold"
-                                      title="Điều chỉnh các trường dữ liệu chia sẻ"
+                                      className="p-1.5 text-black hover:text-slate-700 hover:bg-slate-100 rounded-[6px] transition-colors inline-flex items-center justify-center cursor-pointer"
+                                      title="Cấu hình trường"
                                     >
-                                      <Sliders className="w-3.5 h-3.5" />
-                                      Cấu hình trường
+                                      <Sliders className="w-4 h-4" />
                                     </button>
                                   </td>
+
                                 </tr>
                               ))}
-                              {filteredConsumerApis.length === 0 && (
+                              {paginatedConsumerApis.length === 0 && (
                                 <tr>
                                   <td colSpan={8} className="text-center py-8 text-slate-400">
                                     Không tìm thấy API nào phù hợp với từ khóa tìm kiếm
@@ -353,6 +467,7 @@ export function DataProvisionServicesPage({ category, group, title, description 
                             </tbody>
                           </table>
                         </div>
+                        {renderPagination(filteredConsumerApis.length)}
                       </div>
               </div>
             </div>

@@ -1,26 +1,135 @@
 import React, { useState } from 'react';
-import { Settings, Search, Filter, Play, GitCompare, Calendar, History, CheckCircle2, AlertTriangle, XCircle, ArrowRight } from 'lucide-react';
+import { Settings, Search, Filter, Play, GitCompare, Calendar, History, CheckCircle2, AlertTriangle, XCircle, ArrowRight, Eye, X } from 'lucide-react';
 import { reconciliationData, reconciliationHistoryData, ReconciliationHistoryEntry } from '../../../data/provisionReconciliationData';
 import { ProvisionReconciliationDetailsModal } from './modals/ProvisionReconciliationDetailsModal';
 export function ProvisionReconciliationPage({ processId }: { processId?: string }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedEntry, setSelectedEntry] = useState<ReconciliationHistoryEntry | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  // Filters State
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterStartDate, setFilterStartDate] = useState('');
+  const [filterEndDate, setFilterEndDate] = useState('');
+
+  const handleResetFilters = () => {
+    setFilterStatus('all');
+    setFilterStartDate('');
+    setFilterEndDate('');
+    setCurrentPage(1);
+  };
   
   // Find the specific process
   const process = reconciliationData.find(p => p.id === processId);
   const history = processId && reconciliationHistoryData[processId] ? reconciliationHistoryData[processId] : [];
   const filteredHistory = history.filter((entry) => {
-    if (!searchTerm.trim()) return true;
-    const term = searchTerm.toLowerCase();
-    return (
-      entry.runDate.toLowerCase().includes(term) ||
-      entry.runType.toLowerCase().includes(term) ||
-      entry.targetSystem.toLowerCase().includes(term) ||
-      entry.status.toLowerCase().includes(term) ||
-      (entry.note || '').toLowerCase().includes(term)
-    );
+    let matchesSearch = true;
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      matchesSearch = (
+        entry.runDate.toLowerCase().includes(term) ||
+        entry.runType.toLowerCase().includes(term) ||
+        entry.targetSystem.toLowerCase().includes(term) ||
+        entry.status.toLowerCase().includes(term) ||
+        (entry.note || '').toLowerCase().includes(term)
+      );
+    }
+
+    let matchesStatus = true;
+    if (filterStatus !== 'all') {
+      matchesStatus = entry.status === filterStatus;
+    }
+
+    let matchesDate = true;
+    if (filterStartDate || filterEndDate) {
+      const datePart = entry.runDate.split(' ')[0];
+      const entryDate = new Date(datePart);
+      if (filterStartDate) {
+        const startDate = new Date(filterStartDate);
+        if (entryDate < startDate) matchesDate = false;
+      }
+      if (filterEndDate) {
+        const endDate = new Date(filterEndDate);
+        if (entryDate > endDate) matchesDate = false;
+      }
+    }
+
+    return matchesSearch && matchesStatus && matchesDate;
   });
+
+  const paginatedHistory = filteredHistory.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const renderPagination = (totalItems: number) => {
+    const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+    return (
+      <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white sm:px-6 collection-pagination text-[13px]">
+        <div className="flex items-center gap-2">
+          <span className="text-slate-600">Hiển thị</span>
+          <select aria-label="Select record count" 
+            value={itemsPerPage}
+            onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
+            className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px] cursor-pointer"
+            title="Số bản ghi trên trang"
+          >
+            <option value={10}>10</option>
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+          </select>
+          <span className="text-slate-600">bản ghi/trang</span>
+        </div>
+        
+        <div className="flex items-center gap-4">
+          <span className="text-slate-600">
+            {totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, totalItems)} / {totalItems}
+          </span>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : currentPage)}
+              disabled={currentPage === 1}
+              className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
+            >
+              Trước
+            </button>
+            
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`px-3 py-1.5 border rounded-lg font-medium text-[13px] transition-colors cursor-pointer ${
+                  currentPage === page
+                    ? 'bg-blue-600 border-blue-600 text-white'
+                    : 'border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+
+            <button
+              onClick={() => {
+                if (currentPage < totalPages) {
+                  setCurrentPage(currentPage + 1);
+                }
+              }}
+              disabled={currentPage === totalPages || totalItems === 0}
+              className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
+            >
+              Sau
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   if (!process) {
     return (
@@ -34,9 +143,9 @@ export function ProvisionReconciliationPage({ processId }: { processId?: string 
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'Thành công': return <CheckCircle2 className="w-4 h-4 text-emerald-500" />;
-      case 'Cảnh báo': return <AlertTriangle className="w-4 h-4 text-amber-500" />;
-      case 'Lỗi': return <XCircle className="w-4 h-4 text-rose-500" />;
+      case 'Thành công': return <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />;
+      case 'Cảnh báo': return <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />;
+      case 'Lỗi': return <XCircle className="w-3.5 h-3.5 text-rose-500" />;
       default: return null;
     }
   };
@@ -62,22 +171,12 @@ export function ProvisionReconciliationPage({ processId }: { processId?: string 
               {process.group}
             </span>
           </div>
-          <h2 className="text-2xl font-bold text-slate-800 mt-2">{process.name}</h2>
+          <h2 className="text-[18px] font-bold text-slate-800 mt-2" style={{ fontSize: '18px' }}>{process.name}</h2>
           <p className="text-slate-500 mt-1 flex items-center gap-2">
             Hệ thống đích: <span className="font-medium text-slate-700">{process.targetSystem}</span>
             <span className="text-slate-300">•</span>
             Lịch trình: <span className="font-medium text-slate-700">{process.schedule}</span>
           </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <button className="group flex items-center px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg shadow-sm hover:bg-slate-50 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all font-medium duration-200">
-            <Settings className="w-4 h-4 mr-2 text-slate-500 group-hover:text-slate-700 group-hover:rotate-45 transition-all duration-300" />
-            Cấu hình
-          </button>
-          <button className="group flex items-center px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg shadow-sm hover:shadow-md hover:shadow-amber-500/20 hover:-translate-y-0.5 active:translate-y-0 transition-all font-medium duration-200">
-            <Play className="w-4 h-4 mr-2 fill-current group-hover:scale-110 transition-transform duration-300" />
-            Đối soát ngay
-          </button>
         </div>
       </div>
 
@@ -128,73 +227,131 @@ export function ProvisionReconciliationPage({ processId }: { processId?: string 
       </div>
 
       {/* History Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200">
-        <div className="p-6 border-b border-slate-200">
-          <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
-            <h3 className="text-lg font-bold text-slate-800">Lịch sử đối soát</h3>
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm..."
-                  className="pl-9 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 w-64"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <button className="flex items-center px-3 py-2 border border-slate-200 text-slate-600 text-sm rounded-lg hover:bg-slate-50 transition-colors">
-                <Filter className="w-4 h-4 mr-2" />
-                Bộ lọc
-              </button>
-            </div>
-          </div>
+      <div className="space-y-4">
+        <div>
+          <h3 className="text-[18px] font-bold text-slate-800" style={{ fontSize: '18px' }}>Lịch sử đối soát</h3>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50 text-slate-500 text-sm border-b border-slate-200">
-                <th className="py-3 px-4 font-medium">Thời gian chạy</th>
-                <th className="py-3 px-4 font-medium">Loại chạy</th>
-                <th className="py-3 px-4 font-medium text-right">Tổng số gửi đi</th>
-                <th className="py-3 px-4 font-medium text-right">Khớp nối</th>
-                <th className="py-3 px-4 font-medium text-right">Chênh lệch</th>
-                <th className="py-3 px-4 font-medium">Trạng thái</th>
-                <th className="py-3 px-4 font-medium">Ghi chú</th>
-                <th className="py-3 px-4 font-medium text-center">Chi tiết</th>
+        {/* General Search Toolbar & Advanced Filters directly on background */}
+        <div className="space-y-4 mb-4">
+          {/* Row 1: Search input + Blue Search Button + Filter Toggle Button */}
+          <div className="flex items-center gap-3">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                placeholder="Tìm theo lịch sử..."
+                className="w-full px-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                value={searchTerm}
+                onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+              />
+            </div>
+            <button className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center cursor-pointer">
+              <Search className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`p-2 rounded-lg transition-colors flex items-center justify-center border cursor-pointer ${
+                showFilters 
+                  ? 'bg-blue-50 border-blue-200 text-blue-700' 
+                  : 'bg-white border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
+              }`}
+              title="Bộ lọc"
+            >
+              {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
+            </button>
+          </div>
+
+          {/* Row 2: Advanced Filter Panel */}
+          {showFilters && (
+            <div className="grid grid-cols-4 gap-4 p-4 bg-white rounded-xl border border-slate-200 shadow-sm animate-in slide-in-from-top-2 duration-200">
+              <div>
+                <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">Khoảng thời gian (Từ ngày)</label>
+                <input
+                  type="date"
+                  value={filterStartDate}
+                  onChange={(e) => { setFilterStartDate(e.target.value); setCurrentPage(1); }}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
+                />
+              </div>
+              <div>
+                <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">Khoảng thời gian (Đến ngày)</label>
+                <input
+                  type="date"
+                  value={filterEndDate}
+                  onChange={(e) => { setFilterEndDate(e.target.value); setCurrentPage(1); }}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
+                />
+              </div>
+              <div>
+                <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">Trạng thái xử lý / kết nối</label>
+                <select
+                  value={filterStatus}
+                  onChange={(e) => { setFilterStatus(e.target.value); setCurrentPage(1); }}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
+                >
+                  <option value="all">Tất cả trạng thái</option>
+                  <option value="Thành công">Thành công</option>
+                  <option value="Cảnh báo">Cảnh báo</option>
+                  <option value="Lỗi">Lỗi</option>
+                </select>
+              </div>
+              <div className="flex items-end">
+                <button
+                  onClick={handleResetFilters}
+                  className="w-full px-4 py-2 border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 rounded-lg text-[13px] font-medium transition-colors cursor-pointer shadow-sm text-center"
+                >
+                  Thiết lập lại
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse table-auto" style={{ fontSize: '13px' }}>
+              <thead>
+                <tr className="bg-slate-50 text-slate-500 border-b border-slate-200 uppercase tracking-tight" style={{ fontSize: '13px' }}>
+                  <th className="py-3 px-4 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Thời gian chạy</th>
+                  <th className="py-3 px-4 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Loại chạy</th>
+                  <th className="py-3 px-4 font-semibold text-slate-500 text-[13px] text-right" style={{ fontSize: '13px' }}>Tổng số gửi đi</th>
+                  <th className="py-3 px-4 font-semibold text-slate-500 text-[13px] text-right" style={{ fontSize: '13px' }}>Khớp nối</th>
+                  <th className="py-3 px-4 font-semibold text-slate-500 text-[13px] text-right" style={{ fontSize: '13px' }}>Chênh lệch</th>
+                <th className="py-3 px-4 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Trạng thái</th>
+                <th className="py-3 px-4 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Ghi chú</th>
+                <th className="py-3 px-4 font-semibold text-slate-500 text-[13px] text-center" style={{ fontSize: '13px' }}>Chi tiết</th>
               </tr>
             </thead>
-            <tbody className="text-sm divide-y divide-slate-100">
-              {filteredHistory.length > 0 ? filteredHistory.map((entry) => (
-                <tr key={entry.id} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="py-3 px-4 font-medium text-slate-700">{entry.runDate}</td>
-                  <td className="py-3 px-4">
-                    <span className="inline-flex px-2 py-1 bg-slate-100 text-slate-700 rounded text-xs font-medium border border-slate-200">
+            <tbody className="divide-y divide-slate-100 text-slate-700" style={{ fontSize: '13px' }}>
+              {paginatedHistory.length > 0 ? paginatedHistory.map((entry) => (
+                <tr key={entry.id} className="hover:bg-slate-50/50 transition-colors" style={{ fontSize: '13px' }}>
+                  <td className="py-3 px-4 font-medium text-slate-700 text-[13px]" style={{ fontSize: '13px' }}>{entry.runDate}</td>
+                  <td className="py-3 px-4 text-[13px]" style={{ fontSize: '13px' }}>
+                    <span className="inline-flex px-2.5 py-0.5 bg-slate-100 text-slate-700 rounded-full text-[12px] font-normal border border-slate-200 whitespace-nowrap" style={{ fontSize: '12px' }}>
                       {entry.runType}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-right font-medium">{entry.totalSent.toLocaleString()}</td>
-                  <td className="py-3 px-4 text-right font-medium text-emerald-600">{entry.totalMatched.toLocaleString()}</td>
-                  <td className={`py-3 px-4 text-right font-bold ${entry.discrepancies > 0 ? 'text-amber-600' : 'text-slate-400'}`}>
+                  <td className="py-3 px-4 text-right font-medium text-[13px]" style={{ fontSize: '13px' }}>{entry.totalSent.toLocaleString()}</td>
+                  <td className="py-3 px-4 text-right font-medium text-emerald-600 text-[13px]" style={{ fontSize: '13px' }}>{entry.totalMatched.toLocaleString()}</td>
+                  <td className={`py-3 px-4 text-right font-bold text-[13px] ${entry.discrepancies > 0 ? 'text-amber-600' : 'text-slate-400'}`} style={{ fontSize: '13px' }}>
                     {entry.discrepancies.toLocaleString()}
                   </td>
-                  <td className="py-3 px-4">
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusClass(entry.status)}`}>
+                  <td className="py-3 px-4 text-[13px]" style={{ fontSize: '13px' }}>
+                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[12px] font-normal border whitespace-nowrap ${getStatusClass(entry.status)}`} style={{ fontSize: '12px' }}>
                       {getStatusIcon(entry.status)}
                       {entry.status}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-slate-500 max-w-[200px] truncate" title={entry.note}>
+                  <td className="py-3 px-4 text-slate-500 max-w-[200px] truncate text-[13px]" style={{ fontSize: '13px' }} title={entry.note}>
                     {entry.note || '-'}
                   </td>
-                  <td className="py-3 px-4 text-center">
+                  <td className="py-3 px-4 text-center text-[13px]" style={{ fontSize: '13px' }}>
                     <button 
                       onClick={() => { setSelectedEntry(entry as ReconciliationHistoryEntry); setIsDetailsModalOpen(true); }}
-                      className="group inline-flex items-center justify-center p-2 text-blue-600 bg-blue-50/50 hover:bg-blue-100 rounded-lg transition-all duration-200 hover:shadow-sm" 
+                      className="p-1.5 text-black hover:text-slate-700 hover:bg-slate-100 rounded-[6px] transition-colors inline-flex items-center justify-center cursor-pointer" 
                       title="Xem chi tiết"
                     >
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
+                      <Eye className="w-4 h-4" />
                     </button>
                   </td>
                 </tr>
@@ -208,18 +365,9 @@ export function ProvisionReconciliationPage({ processId }: { processId?: string 
             </tbody>
           </table>
         </div>
-        
-        {filteredHistory.length > 0 && (
-          <div className="p-4 border-t border-slate-200 flex justify-between items-center text-sm text-slate-500">
-            <div>Hiển thị {filteredHistory.length} bản ghi</div>
-            <div className="flex gap-1">
-              <button className="px-3 py-1 border border-slate-200 rounded hover:bg-slate-50 disabled:opacity-50">Trước</button>
-              <button className="px-3 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded font-medium">1</button>
-              <button className="px-3 py-1 border border-slate-200 rounded hover:bg-slate-50 disabled:opacity-50">Sau</button>
-            </div>
-          </div>
-        )}
+        {renderPagination(filteredHistory.length)}
       </div>
+    </div>
       
       <ProvisionReconciliationDetailsModal 
         isOpen={isDetailsModalOpen}
