@@ -1,5 +1,19 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Phiên bản 2.6.01 (Ngày cập nhật: 30/06/2026)
+
+**Nội dung thay đổi:**
+1. **Chuẩn hóa luồng Trình duyệt phiên bản danh mục:**
+   - **Đổi tên Modal**: Đổi tên modal từ *"Trình duyệt danh mục"* thành **"Trình duyệt phiên bản danh mục"** (`ApprovalRequestModal`).
+   - **Bổ sung các trường mới**: Tích hợp các trường thông tin bắt buộc bao gồm **Tên phiên bản** (`versionName`), **Hiệu lực** (`effectiveDate`), và **Mô tả thay đổi** (`changeDescription`), đồng thời loại bỏ trường nhập liệu *"Nội dung trình duyệt"* (`note`).
+   - **Thêm Banner lưu ý**: Thêm một khung thông tin lưu ý màu xanh dương nổi bật, hướng dẫn người dùng biết hệ thống sẽ tự động tạo một bản sao phiên bản mới cho danh mục với trạng thái **Chờ phê duyệt**.
+   - **Cấu hình Validation**: Tích hợp xác thực dữ liệu (client-side validation) trực tiếp trong modal trước khi thực hiện hành động gửi trình duyệt.
+   - **Căn chỉnh phong cách thiết kế**: Nâng cấp kích thước chiều rộng tối đa lên `max-w-2xl` và áp dụng bo góc `rounded-2xl` cùng font chữ `13px` cho các form nhãn, nút bấm, mang lại giao diện premium đồng bộ.
+2. **Kiểm tra biên dịch & Đóng gói:** Chạy `npm run build` thành công hoàn hảo.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/components/modals/ApprovalRequestModal.tsx`
+
 ## Phiên bản 2.6.00 (Ngày cập nhật: 30/06/2026)
 
 **Nội dung thay đổi:**
