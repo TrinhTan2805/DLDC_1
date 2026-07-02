@@ -7,6 +7,23 @@ interface VersionHistoryModalProps {
 
 const mockVersions = [
   {
+    id: 22,
+    version: 'v2.6.1',
+    date: '02/07/2026',
+    time: '13:40',
+    content: `1. Phân hệ Danh mục dùng chung (Category Setup):
+- Tách biệt hai loại modal trình duyệt độc lập: Trình duyệt danh mục (dành cho Gửi duyệt khi thêm mới và gửi duyệt tại Thiết lập danh sách) và Trình duyệt phiên bản (dành cho chỉnh sửa/thêm mới tại Thiết lập quan hệ, Thiết lập cấu trúc, chỉnh sửa tại Thiết lập danh sách).
+- Điều chỉnh logic trạng thái: Khi tạo mới thiết lập danh mục mà chưa được phê duyệt, hệ thống không cho phép thực hiện bước 2, 3 (Thiết lập cấu trúc và Thiết lập quan hệ), hiển thị thông báo yêu cầu phê duyệt thông tin chung trước. Trạng thái sau phê duyệt chuyển từ 'draft' sang 'approved'.
+- Loại bỏ tùy chọn liên kết 1-n (Một - Nhiều) khỏi danh sách loại liên kết khi tạo quan hệ danh mục.
+
+2. Phân hệ Dữ liệu chủ (Master Data):
+- Thiết kế lại trang Mô hình dữ liệu chủ (đồng bộ hoàn toàn theo style Thiết lập danh mục dùng chung), tích hợp stats card, bộ lọc collapsible, bảng grid bo góc HSL, và phân trang.
+- Bọc tất cả Form Modal (Thêm/Sửa nhanh thực thể) và Wizard Modal trong component Portal để loại bỏ hoàn toàn viền trắng hay khung trắng bị thừa do overflow/border thẻ cha.
+- Đổi tên hiển thị menu phân hệ trên Sidebar từ "Quản lý dữ liệu chủ" thành "Dữ liệu chủ", và trang "Quản lý quy mô dữ liệu chủ" thành "Mô hình dữ liệu chủ".
+- Đổi tên Tab "Thiết lập DL chủ" thành "Thiết lập thực thể" tại trang Mô hình dữ liệu chủ.
+- Loại bỏ tùy chọn liên kết 1-n (Một - Nhiều) khỏi danh sách loại liên kết khi tạo quan hệ thực thể.`
+  },
+  {
     id: 21,
     version: 'v2.6.0',
     date: '30/06/2026',

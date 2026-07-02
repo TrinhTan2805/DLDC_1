@@ -1,7 +1,7 @@
 import React, { useState, useEffect, ChangeEvent, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Settings, Sliders, Link2, CheckSquare, Clock
+  Settings, Sliders, Link2, CheckSquare
 } from 'lucide-react';
 
 // Types & Constants
@@ -19,7 +19,7 @@ import { SetupTab } from './components/tabs/SetupTab';
 import { AttributesTab } from './components/tabs/AttributesTab';
 import { RelationshipsTab } from './components/tabs/RelationshipsTab';
 import { ApprovalTab } from './components/tabs/ApprovalTab';
-import { VersionHistoryTab } from './components/tabs/VersionHistoryTab';
+import { VersionHistoryTab, VersionRecord } from './components/tabs/VersionHistoryTab';
 
 // Components - Modals
 import { CategoryWizardModal } from './components/modals/CategoryWizardModal';
@@ -156,9 +156,34 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
   // Form & Modal States
   const [showWizard, setShowWizard] = useState(false);
   const [isViewMode, setIsViewMode] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [wizardStep, setWizardStep] = useState(1);
   const [wizardEntityId, setWizardEntityId] = useState<string | null>(null);
   const [editingEntity, setEditingEntity] = useState<MasterDataEntity | null>(null);
+
+  // Tự động chuyển trạng thái sang Hiệu lực khi đến ngày hiệu lực được chọn
+  useEffect(() => {
+    const checkEffectiveDates = () => {
+      const today = new Date().toISOString().split('T')[0];
+      setEntities(prev => {
+        const hasAny = prev.some(e =>
+          e.lifecycleStatus === 'approved' &&
+          e.effectiveImmediate === false &&
+          e.effectiveDate &&
+          e.effectiveDate <= today
+        );
+        if (!hasAny) return prev;
+        return prev.map(e =>
+          e.lifecycleStatus === 'approved' && e.effectiveImmediate === false && e.effectiveDate && e.effectiveDate <= today
+            ? { ...e, lifecycleStatus: 'active' as const }
+            : e
+        );
+      });
+    };
+    checkEffectiveDates();
+    const interval = setInterval(checkEffectiveDates, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Load mock attributes when selectedEntityId, wizardEntityId, or showWizard/editingEntity changes
   useEffect(() => {
@@ -306,29 +331,32 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
       changes: { targetEntity: 'Dữ liệu Danh mục giới tính', relationshipType: '1-1', sourceKey: 'id', targetKey: 'gioitinh_id' }
     },
     {
-      id: '13', type: 'expire', entityId: '3', entityCode: 'DM-QUOCGIA',
+      id: '13', type: 'expire', actionType: 'expire', entityId: '3', entityCode: 'DM-QUOCGIA',
       entityName: 'Dữ liệu Danh mục và mã Quốc gia, Quốc tịch', requestedBy: 'Trần Văn X',
       requestedDate: '25/12/2024 08:30', status: 'pending',
+      changes: { expireDate: '2025-01-01', reason: 'Tích hợp vào danh mục khác', approver: 'Giám đốc Nguyễn A', note: 'Theo kế hoạch hợp nhất danh mục quý I/2025' },
       comments: 'Ngừng sử dụng từ 01/01/2025. Lý do: Tích hợp vào danh mục khác.'
     },
     {
-      id: '14', type: 'expire', entityId: '5', entityCode: 'DM-COQUAN',
+      id: '14', type: 'expire', actionType: 'expire', entityId: '5', entityCode: 'DM-COQUAN',
       entityName: 'Dữ liệu Danh mục cơ quan', requestedBy: 'Lê Thị Y',
       requestedDate: '20/12/2024 14:00', status: 'approved',
       reviewedBy: 'Giám đốc Nguyễn Z', reviewedDate: '21/12/2024',
+      changes: { expireDate: '2025-02-01', reason: 'Dữ liệu lỗi, cấu trúc cũ', approver: 'Giám đốc Nguyễn Z', note: '' },
       comments: 'Đồng ý ngừng sử dụng, đã kiểm tra không còn ràng buộc khóa ngoại.'
     },
     {
-      id: '15', type: 'expire', entityId: '4', entityCode: 'DM-TONGIAO',
+      id: '15', type: 'expire', actionType: 'expire', entityId: '4', entityCode: 'DM-TONGIAO',
       entityName: 'Dữ liệu Danh mục và mã các Tôn giáo', requestedBy: 'Phạm Minh T',
       requestedDate: '18/12/2024 10:15', status: 'rejected',
       reviewedBy: 'Phó Giám đốc Trần B', reviewedDate: '19/12/2024',
+      changes: { expireDate: '2024-12-31', reason: 'Quy định pháp luật thay đổi', approver: 'Phó Giám đốc Trần B', note: 'Theo công văn số 123/BTP/2024' },
       comments: 'Từ chối do danh mục vẫn đang được sử dụng ở 2 hệ thống vệ tinh.'
     }
   ]);
   const [statusFilter, setStatusFilter] = useState<ApprovalStatus | 'all'>('all');
   const [showApprovalModal, setShowApprovalModal] = useState(false);
-  const [approvalRequestData, setApprovalRequestData] = useState<{ id: string; code: string; name: string; type: 'category' | 'structure' | 'attribute' | 'relationship' | 'expire' } | null>(null);
+  const [approvalRequestData, setApprovalRequestData] = useState<{ id: string; code: string; name: string; type: 'category' | 'structure' | 'version' | 'attribute' | 'relationship' | 'expire'; currentVersion?: number } | null>(null);
   const [pendingApprovalData, setPendingApprovalData] = useState<any>(null);
   const [approvalRequestForm, setApprovalRequestForm] = useState({ reviewer: '', note: '' });
   const [showReviewModal, setShowReviewModal] = useState(false);
@@ -367,6 +395,9 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
   const [structureViewRequestId, setStructureViewRequestId] = useState<string | null>(null);
 
 
+  // Lịch sử phiên bản danh mục
+  const [versions, setVersions] = useState<VersionRecord[]>([]);
+
   // State cho Xem chi tiết thay đổi phiên bản
   const [showVersionChangeModal, setShowVersionChangeModal] = useState(false);
   const [versionChangeEntity, setVersionChangeEntity] = useState<MasterDataEntity | null>(null);
@@ -394,6 +425,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
     setWizardEntityId(entity.id);
     setWizardStep(1);
     setIsViewMode(true);
+    setIsEditMode(false);
     setShowWizard(true);
   };
 
@@ -404,6 +436,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
     setWizardEntityId(entity.id);
     setWizardStep(1);
     setIsViewMode(false);
+    setIsEditMode(true);
     setShowWizard(true);
   };
 
@@ -432,11 +465,12 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
 
   // Hành động Thêm mới: Sử dụng Wizard
   const handleAdd = () => {
-    setFormData({ code: '', name: '', dataType: 'standard', managingAgency: '', scope: 'national', description: '' });
+    setFormData({ code: '', name: '', dataType: 'standard', managingAgency: '', scope: 'national', description: '', lifecycleStatus: 'draft' });
     setEditingEntity(null);
     setWizardEntityId(null);
     setWizardStep(1);
     setIsViewMode(false);
+    setIsEditMode(false);
     setShowWizard(true);
   };
 
@@ -455,7 +489,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
       const updated = entities.map(e => e.id === editingEntity.id ? { 
         ...e, 
         ...formData,
-        version: (e.version || 1) + 1 // Tự động tăng phiên bản
+        version: action === 'submit' ? (e.version || 1) + 1 : (e.version || 1)
       } as MasterDataEntity : e);
       setEntities(updated);
       savedId = editingEntity.id;
@@ -479,8 +513,17 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
     if (action === 'submit') {
       setShowWizard(false);
       // Gửi phê duyệt
-      const entity = entities.find(e => e.id === savedId) || { id: savedId, code: formData.code || '', name: formData.name || '' };
-      setApprovalRequestData({ id: entity.id, code: entity.code, name: entity.name, type: 'category' });
+      const entity = entities.find(e => e.id === savedId) || { id: savedId, code: formData.code || '', name: formData.name || '', lifecycleStatus: 'draft' };
+
+      let submitType: 'category' | 'structure' | 'version' = 'category';
+      if (isEditMode && editingEntity) {
+        submitType = 'version';
+      } else if (wizardStep === 2 && (entity.lifecycleStatus === 'approved' || entity.lifecycleStatus === 'active')) {
+        submitType = 'structure';
+      }
+
+      const entityVersion = entities.find(e => e.id === entity.id)?.version || 1;
+      setApprovalRequestData({ id: entity.id, code: entity.code, name: entity.name, type: submitType, currentVersion: entityVersion });
       setApprovalRequestForm({ reviewer: '', note: '' });
       setShowApprovalModal(true);
     } else if (action === 'next') {
@@ -650,11 +693,10 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
       <div className="bg-white border-b border-slate-200">
         <div className="flex px-6 gap-2">
           {[
-            { id: 'setup', label: 'Thiết lập danh sách', icon: Settings },
+            { id: 'setup', label: 'Thiết lập danh mục', icon: Settings },
             { id: 'attributes', label: 'Thiết lập cấu trúc', icon: Sliders },
             { id: 'relationships', label: 'Thiết lập quan hệ', icon: Link2 },
-            { id: 'approval', label: 'Phê duyệt', icon: CheckSquare },
-            { id: 'version-history', label: 'Lịch sử phiên bản', icon: Clock }
+            { id: 'approval', label: 'Phê duyệt', icon: CheckSquare }
           ].map(tab => (
             <button
               key={tab.id}
@@ -762,7 +804,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
             approvalTypeLabels={approvalTypeLabels}
             approvalStatusLabels={approvalStatusLabels}
           />}
-          {activeTab === 'version-history' && <VersionHistoryTab searchTerm={searchTerm} setSearchTerm={setSearchTerm} onViewDetail={() => { }} />}
+          {activeTab === 'version-history' && <VersionHistoryTab searchTerm={searchTerm} setSearchTerm={setSearchTerm} onViewDetail={() => { }} versions={versions} />}
       </div>
 
       {/* Modals Container */}
@@ -789,6 +831,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
           onAddAttributeInline={handleAddAttributeInline}
           getDataTypeLabel={getDataTypeLabel}
           isViewOnly={isViewMode}
+          isEditMode={isEditMode}
         />
 
         {genericConfirm && (
@@ -848,9 +891,22 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
             setRequests(requests.map(r => r.id === pendingApprovalData?.id ? { ...r, status: 'approved', reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note } : r));
             // Cập nhật lifecycle status của entity nếu approved
             if (pendingApprovalData?.type === 'category') {
-              setEntities(entities.map(e => e.id === pendingApprovalData.entityId ? { ...e, lifecycleStatus: 'active' } as MasterDataEntity : e));
+              const ent = entities.find(e => e.id === pendingApprovalData.entityId);
+              const goLive = ent?.effectiveImmediate !== false;
+              setEntities(entities.map(e => e.id === pendingApprovalData.entityId
+                ? { ...e, lifecycleStatus: goLive ? 'active' : 'approved' } as MasterDataEntity : e));
             } else if (pendingApprovalData?.type === 'expire') {
               setEntities(entities.map(e => e.id === pendingApprovalData.entityId ? { ...e, lifecycleStatus: 'inactive' } as MasterDataEntity : e));
+            }
+            // Cập nhật trạng thái phiên bản: phiên bản được duyệt → Hiệu lực, các phiên bản active cũ → Đã lưu trữ
+            if (pendingApprovalData?.id) {
+              setVersions(prev => prev.map(v => {
+                if (v.entityId === pendingApprovalData.entityId) {
+                  if (v.requestId === pendingApprovalData.id) return { ...v, status: 'active' as const };
+                  if (v.status === 'active') return { ...v, status: 'archived' as const };
+                }
+                return v;
+              }));
             }
             setShowSimpleApproveModal(false);
           }}
@@ -864,9 +920,9 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
             setRequests(requests.map(r => r.id === pendingApprovalData?.id ? { ...r, status: 'rejected', reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note } : r));
             // Cập nhật lifecycle status của entity nếu rejected
             if (pendingApprovalData?.type === 'category') {
-              setEntities(entities.map(e => e.id === pendingApprovalData.entityId ? { ...e, lifecycleStatus: 'draft' } as MasterDataEntity : e));
+              setEntities(entities.map(e => e.id === pendingApprovalData.entityId ? { ...e, lifecycleStatus: 'rejected' } as MasterDataEntity : e));
             } else if (pendingApprovalData?.type === 'expire') {
-              setEntities(entities.map(e => e.id === pendingApprovalData.entityId ? { ...e, lifecycleStatus: 'active' } as MasterDataEntity : e));
+              setEntities(entities.map(e => e.id === pendingApprovalData.entityId ? { ...e, lifecycleStatus: 'approved' } as MasterDataEntity : e));
             }
             setShowSimpleRejectModal(false);
           }}
@@ -879,13 +935,31 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
           entities={entities}
           attributes={attributes}
           onApprove={(ids, note, partialStatuses) => {
+            const approvedEntityIdsForCategory: string[] = [];
             setRequests(requests.map(r => {
               if (ids.includes(r.id)) {
                 const currentLineStatuses = partialStatuses?.[r.id] || {};
-                const overallStatus = 'approved';
-                return { ...r, status: overallStatus, reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note, lineStatuses: currentLineStatuses };
+                if (r.type === 'category') approvedEntityIdsForCategory.push(r.entityId);
+                return { ...r, status: 'approved', reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note, lineStatuses: currentLineStatuses };
               }
               return r;
+            }));
+            let updatedEntities = [...entities];
+            if (approvedEntityIdsForCategory.length > 0) {
+              updatedEntities = updatedEntities.map(e => {
+                if (!approvedEntityIdsForCategory.includes(e.id)) return e;
+                const goLive = e.effectiveImmediate !== false;
+                return { ...e, lifecycleStatus: goLive ? 'active' : 'approved' } as MasterDataEntity;
+              });
+            }
+            setEntities(updatedEntities);
+            // Cập nhật trạng thái phiên bản cho batch approve
+            setVersions(prev => prev.map(v => {
+              if (ids.includes(v.requestId || '')) return { ...v, status: 'active' as const };
+              if (v.status === 'active' && approvedEntityIdsForCategory.includes(v.entityId || '')) {
+                return { ...v, status: 'archived' as const };
+              }
+              return v;
             }));
             setShowReviewModal(false);
           }}
@@ -912,6 +986,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
                  requestedBy: 'Nguyễn Văn A',
                  requestedDate: new Date().toLocaleDateString('vi-VN'),
                  status: 'pending',
+                 changes: { expireDate: data.expireDate, reason: data.reason, approver: data.approver, note: data.note },
                  comments: `Ngừng sử dụng từ ${data.expireDate}. Lý do: ${data.reason}. Lãnh đạo trình duyệt: ${data.approver}. ${data.note}`
               }, ...requests]);
               
@@ -928,6 +1003,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
            isOpen={showExpireApproveModal}
            onClose={() => setShowExpireApproveModal(false)}
            entity={expireEntity}
+           request={pendingApprovalData}
            onApprove={(note) => {
               setRequests(requests.map(r => r.id === pendingApprovalData?.id ? { ...r, status: 'approved', reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note } : r));
               if (expireEntity) {
@@ -988,7 +1064,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
           onApprove={(note) => {
             setRequests(requests.map(r => r.id === infoViewRequestId ? { ...r, status: 'approved', reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note } : r));
             if (infoViewEntity) {
-              setEntities(entities.map(e => e.id === infoViewEntity.id ? { ...e, lifecycleStatus: 'active' } as MasterDataEntity : e));
+              setEntities(entities.map(e => e.id === infoViewEntity.id ? { ...e, lifecycleStatus: 'approved' } as MasterDataEntity : e));
             }
             setShowInfoViewModal(false);
           }}
@@ -1009,6 +1085,56 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
           form={approvalRequestForm}
           setForm={setApprovalRequestForm}
           onSubmit={() => {
+            if (approvalRequestData) {
+              const newReqId = (requests.length + 1).toString();
+              const reqType: ApprovalType =
+                approvalRequestData.type === 'structure' ? 'structure'
+                : approvalRequestData.type === 'version' ? 'version'
+                : 'category';
+              const newRequest: ApprovalRequest = {
+                id: newReqId,
+                type: reqType,
+                entityId: approvalRequestData.id,
+                entityCode: approvalRequestData.code,
+                entityName: approvalRequestData.name,
+                requestedBy: 'Nguyễn Văn A',
+                requestedDate: new Date().toLocaleString('vi-VN'),
+                status: 'pending'
+              };
+              setRequests([newRequest, ...requests]);
+
+              // Cập nhật trạng thái entity
+              if (approvalRequestData.type === 'category' || approvalRequestData.type === 'version') {
+                setEntities(entities.map(e => e.id === approvalRequestData.id ? { ...e, lifecycleStatus: 'pending_approval' } as MasterDataEntity : e));
+              }
+              // If it is a structure approval submission, auto-increment version
+              if (approvalRequestData.type === 'structure') {
+                setEntities(entities.map(e => e.id === approvalRequestData.id ? { ...e, version: (e.version || 1) + 1 } as MasterDataEntity : e));
+              }
+
+              // Tạo phiên bản mới với trạng thái Chờ phê duyệt
+              const entity = entities.find(e => e.id === approvalRequestData.id);
+              const versionTypeMap: Record<string, VersionRecord['type']> = {
+                category: 'Thông tin chung',
+                version: 'Thông tin chung',
+                structure: 'Cấu trúc',
+                relationship: 'Quan hệ',
+              };
+              const newVersion: VersionRecord = {
+                id: Date.now(),
+                version: String(entity?.version || 1),
+                author: 'Nguyễn Văn A',
+                category: approvalRequestData.name,
+                date: new Date().toLocaleString('vi-VN'),
+                content: `Chỉnh sửa ${versionTypeMap[approvalRequestData.type] || 'thông tin'} danh mục`,
+                type: versionTypeMap[approvalRequestData.type] || 'Thông tin chung',
+                status: 'pending_approval',
+                entityId: approvalRequestData.id,
+                requestId: newReqId,
+              };
+              setVersions(prev => [newVersion, ...prev]);
+            }
+
             setGenericConfirm({
                isOpen: true, type: 'success', title: 'Đã trình duyệt', subtitle: '', message: 'Gửi yêu cầu phê duyệt thành công!', confirmText: 'Đóng', onConfirm: () => setGenericConfirm(null)
             });

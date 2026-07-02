@@ -211,7 +211,7 @@ export function AttributeFormModal({
       <ApprovalRequestModal
         isOpen={showApproval}
         onClose={() => setShowApproval(false)}
-        data={{ id: '', code: entityCode, name: entityName, type: 'category' }}
+        data={{ id: '', code: entityCode, name: entityName, type: 'version' }}
         approvers={approvers}
         form={approvalForm}
         setForm={setApprovalForm}

@@ -42,7 +42,7 @@ const BASE_MOCK_FIELDS = [
 const emptyForm: Partial<EntityRelationship> = {
   sourceEntityId: '',
   targetEntityId: '',
-  relationshipType: '1-n',
+  relationshipType: 'n-1',
   sourceKey: '',
   targetKey: '',
   targetDisplayField: '',
@@ -184,7 +184,7 @@ export function RelationshipsTab({
     setFormData({
       sourceEntityId: selectedEntityId,
       targetEntityId: '',
-      relationshipType: '1-n',
+      relationshipType: 'n-1',
       sourceKey: '',
       targetKey: '',
       targetDisplayField: '',
@@ -608,9 +608,11 @@ export function RelationshipsTab({
                 onChange={(e: ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, relationshipType: e.target.value as RelationshipType })}
                 className="w-full px-3 py-2 border border-slate-250 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-[13px] bg-white border-slate-300"
               >
-                {Object.entries(relationTypeLabels).map(([value, label]) => (
-                  <option key={value} value={value}>{label}</option>
-                ))}
+                {Object.entries(relationTypeLabels)
+                  .filter(([value]) => value !== '1-n')
+                  .map(([value, label]) => (
+                    <option key={value} value={value}>{label}</option>
+                  ))}
               </select>
             </div>
           </div>
@@ -734,7 +736,7 @@ export function RelationshipsTab({
       <ApprovalRequestModal
         isOpen={showRelApproval}
         onClose={() => setShowRelApproval(false)}
-        data={{ id: '', code: currentEntityCode || '', name: currentEntityName || '', type: 'category' }}
+        data={{ id: '', code: currentEntityCode || '', name: currentEntityName || '', type: 'version' }}
         approvers={approvers}
         form={relApprovalForm}
         setForm={setRelApprovalForm}

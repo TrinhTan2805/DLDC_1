@@ -26,6 +26,7 @@ interface CategoryWizardModalProps {
   getDataTypeLabel: (type: FieldDataType) => string;
   onAddAttributeInline?: (data: Partial<MasterDataAttribute>) => void;
   isViewOnly?: boolean;
+  isEditMode?: boolean;
 }
 
 /**
@@ -51,7 +52,8 @@ export function CategoryWizardModal({
   onDeleteAttribute,
   getDataTypeLabel,
   onAddAttributeInline,
-  isViewOnly = false
+  isViewOnly = false,
+  isEditMode = false
 }: CategoryWizardModalProps) {
   const [modalIndex, setModalIndex] = useState(1);
 
@@ -93,7 +95,7 @@ export function CategoryWizardModal({
           <div className="flex flex-col border-b border-slate-200 bg-white shrink-0">
             <div className="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-white">
               <h3 className="text-[18px] font-semibold text-slate-900">
-                {isViewOnly ? 'Chi tiết danh mục dùng chung' : 'Thiết lập danh mục dùng chung'}
+                {isViewOnly ? 'Chi tiết danh mục dùng chung' : isEditMode ? 'Chỉnh sửa danh mục dùng chung' : 'Thiết lập danh mục dùng chung'}
               </h3>
               <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors" aria-label="Đóng" title="Đóng">
                 <X className="w-5 h-5" />
@@ -108,13 +110,11 @@ export function CategoryWizardModal({
                 ].map((item, index, array) => {
                   const isActive = step === item.s;
                   const isCompleted = step > item.s;
-                  const isLocked = !entityId && item.s > 1;
                   return (
                     <div key={item.s} className="flex items-center flex-1 last:flex-none">
                       <button
-                        disabled={isLocked}
                         onClick={() => setStep(item.s)}
-                        className={`flex items-center gap-3 group ${isLocked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                        className="flex items-center gap-3 group cursor-pointer"
                       >
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${isActive ? 'border-blue-600 bg-blue-600 text-white shadow-md' : isCompleted ? 'border-blue-600 bg-white text-blue-600' : 'border-slate-300 bg-white text-slate-400 group-hover:border-blue-400 group-hover:text-blue-500'}`}>
                           {isCompleted ? <Check className="w-5 h-5" /> : <item.icon className="w-5 h-5" />}
@@ -255,6 +255,7 @@ export function CategoryWizardModal({
                       <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                     </div>
                   </div>
+
                   {false && (
                     <div className="col-span-2 grid grid-cols-3 gap-4 bg-blue-50/30 p-4 rounded-xl border border-blue-100/50 animate-in fade-in zoom-in-95 duration-200">
                       <div>
@@ -386,12 +387,12 @@ export function CategoryWizardModal({
                   <Save className="w-4 h-4" /> Lưu tạm
                 </button>
               )}
-              {!isViewOnly && entityId && step === 3 && (
+              {!isViewOnly && step === 3 && (
                 <button onClick={() => onSaveStep1('submit')} className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[13px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm">
                   <Send className="w-4 h-4" /> Gửi trình duyệt
                 </button>
               )}
-              {step < 3 ? (
+              {step < 3 && (
                 <button onClick={() => {
                   if (isViewOnly) { setStep(step + 1); return; }
                   if (step === 1) { onSaveStep1('next'); return; }
@@ -400,17 +401,12 @@ export function CategoryWizardModal({
                 }} className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[13px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm">
                   Tiếp tục <ChevronRight className="w-4 h-4" />
                 </button>
-              ) : (
-                !isViewOnly && !entityId && (
-                  <button onClick={() => onSaveStep1('submit')} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[13px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm">
-                    <Send className="w-4 h-4" /> Hoàn tất & Trình duyệt
-                  </button>
-                )
               )}
             </div>
           </div>
         </div>
       </div>
+
     </Portal>
   );
 }

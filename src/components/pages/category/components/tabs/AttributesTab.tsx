@@ -747,7 +747,7 @@ export function AttributesTab({
             </div>
 
             <div className="flex items-center gap-2 w-full md:w-auto">
-              {!isViewOnly && (
+              {!isViewOnly && entityDataSource !== 'manual' && (
                 <button
                   type="button"
                   onClick={() => {
@@ -1141,8 +1141,8 @@ export function AttributesTab({
           {/* ── Mode: Manual (direct update) ── */}
           {dataSource === 'manual' && (
             <>
-              {/* Inline Attribute Form */}
-              <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
+              {/* Inline Attribute Form — ẩn khi xem chi tiết */}
+              {!isViewOnly && <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
                 <div className="px-5 py-4 border-b border-slate-100 bg-slate-50">
                   <p className="text-[13px] font-semibold text-slate-700">Thêm trường dữ liệu mới</p>
                 </div>
@@ -1291,7 +1291,7 @@ export function AttributesTab({
                 </button>
               </div>
             </div>
-          </div>
+          </div>}
 
           {/* Compact list of added attributes */}
           <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
@@ -1948,7 +1948,7 @@ export function AttributesTab({
       <ApprovalRequestModal
         isOpen={showDldcApproval}
         onClose={() => setShowDldcApproval(false)}
-        data={{ id: '', code: dldcEntity?.code || '', name: dldcEntity?.name || '', type: 'category' }}
+        data={{ id: '', code: dldcEntity?.code || '', name: dldcEntity?.name || '', type: 'version' }}
         approvers={approvers}
         form={dldcApprovalForm}
         setForm={setDldcApprovalForm}

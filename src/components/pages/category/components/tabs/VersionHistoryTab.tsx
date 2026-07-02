@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { BaseModal } from '../../../../common/BaseModal';
 
-interface VersionRecord {
+export interface VersionRecord {
   id: number;
   version: string;
   author: string;
@@ -13,13 +13,16 @@ interface VersionRecord {
   date: string;
   content: string;
   type: 'Cấu trúc' | 'Dữ liệu' | 'Quan hệ' | 'Thông tin chung';
-  status: 'active' | 'archived';
+  status: 'active' | 'archived' | 'pending_approval';
+  entityId?: string;
+  requestId?: string;
 }
 
 interface VersionHistoryTabProps {
   searchTerm: string;
   setSearchTerm: (term: string) => void;
   onViewDetail?: (version: VersionRecord) => void;
+  versions?: VersionRecord[];
 }
 
 const ALL_HISTORY: VersionRecord[] = [
@@ -42,7 +45,7 @@ const typeColors: Record<VersionRecord['type'], string> = {
   'Thông tin chung': 'bg-slate-100 text-slate-600 border-slate-200',
 };
 
-export function VersionHistoryTab({ searchTerm, setSearchTerm }: VersionHistoryTabProps) {
+export function VersionHistoryTab({ searchTerm, setSearchTerm, versions }: VersionHistoryTabProps) {
   const [showFilters, setShowFilters] = React.useState(false);
   const [filterCategory, setFilterCategory]     = React.useState('all');
   const [filterType, setFilterType]             = React.useState('all');
@@ -53,14 +56,16 @@ export function VersionHistoryTab({ searchTerm, setSearchTerm }: VersionHistoryT
   const [pageSize, setPageSize]                 = React.useState(10);
   const [selectedVersion, setSelectedVersion]   = React.useState(null as VersionRecord | null);
 
+  const data = versions !== undefined ? versions : ALL_HISTORY;
+
   React.useEffect(() => { setCurrentPageNum(1); }, [searchTerm, filterCategory, filterType, filterStatus, filterFromDate, filterToDate]);
 
-  const totalCount     = ALL_HISTORY.length;
-  const structureCount = ALL_HISTORY.filter(v => v.type === 'Cấu trúc').length;
-  const dataCount      = ALL_HISTORY.filter(v => v.type === 'Dữ liệu').length;
-  const activeCount    = ALL_HISTORY.filter(v => v.status === 'active').length;
+  const totalCount     = data.length;
+  const structureCount = data.filter(v => v.type === 'Cấu trúc').length;
+  const dataCount      = data.filter(v => v.type === 'Dữ liệu').length;
+  const pendingCount   = data.filter(v => v.status === 'pending_approval').length;
 
-  const filtered = ALL_HISTORY.filter(v => {
+  const filtered = data.filter(v => {
     const q = searchTerm.toLowerCase();
     const matchSearch  = !q || v.category.toLowerCase().includes(q) || v.author.toLowerCase().includes(q) || v.content.toLowerCase().includes(q);
     const matchCat     = filterCategory === 'all' || v.category === filterCategory;
@@ -125,7 +130,7 @@ export function VersionHistoryTab({ searchTerm, setSearchTerm }: VersionHistoryT
     );
   };
 
-  const uniqueCategories = Array.from(new Set(ALL_HISTORY.map(v => v.category)));
+  const uniqueCategories = Array.from(new Set(data.map(v => v.category)));
 
   return (
     <div className="space-y-4">
@@ -160,10 +165,10 @@ export function VersionHistoryTab({ searchTerm, setSearchTerm }: VersionHistoryT
         </div>
         <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[13px] text-slate-500">Đang dùng</span>
-            <CheckSquare className="w-5 h-5 text-green-600" />
+            <span className="text-[13px] text-slate-500">Chờ phê duyệt</span>
+            <CheckSquare className="w-5 h-5 text-orange-500" />
           </div>
-          <div className="text-2xl font-bold text-slate-900">{activeCount}</div>
+          <div className="text-2xl font-bold text-slate-900">{pendingCount}</div>
         </div>
       </div>
 
@@ -244,7 +249,8 @@ export function VersionHistoryTab({ searchTerm, setSearchTerm }: VersionHistoryT
                     className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
                   >
                     <option value="all">Tất cả trạng thái</option>
-                    <option value="active">Đang dùng</option>
+                    <option value="active">Hiệu lực</option>
+                    <option value="pending_approval">Chờ phê duyệt</option>
                     <option value="archived">Đã lưu trữ</option>
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
@@ -314,7 +320,11 @@ export function VersionHistoryTab({ searchTerm, setSearchTerm }: VersionHistoryT
                     <td className="px-6 py-4 text-center">
                       {v.status === 'active' ? (
                         <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[13px] font-normal border bg-green-50 text-green-700 border-green-100 whitespace-nowrap">
-                          Đang dùng
+                          Hiệu lực
+                        </span>
+                      ) : v.status === 'pending_approval' ? (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[13px] font-normal border bg-orange-50 text-orange-700 border-orange-100 whitespace-nowrap">
+                          Chờ phê duyệt
                         </span>
                       ) : (
                         <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[13px] font-normal border bg-slate-50 text-slate-500 border-slate-200 whitespace-nowrap">
@@ -378,7 +388,7 @@ export function VersionHistoryTab({ searchTerm, setSearchTerm }: VersionHistoryT
               </div>
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
                 <div className="text-[13px] text-slate-500 mb-1">Loại thay đổi</div>
-                <span className={`px-2 py-0.5 rounded border text-[13px] font-medium ${typeColors[selectedVersion.type]}`}>
+                <span className={`px-2 py-0.5 rounded border text-[13px] font-medium ${typeColors[selectedVersion.type as VersionRecord['type']]}`}>
                   {selectedVersion.type}
                 </span>
               </div>

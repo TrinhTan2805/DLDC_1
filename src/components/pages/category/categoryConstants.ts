@@ -128,6 +128,55 @@ export const defaultEntities: MasterDataEntity[] = [
     version: 1,
     dataSource: 'manual',
     databaseSystem: 'Cơ sở dữ liệu Quốc gia về Dân cư'
+  },
+  {
+    id: '9',
+    code: 'DM-NGHENGHIEP',
+    name: 'Dữ liệu Danh mục nghề nghiệp',
+    dataType: 'reference',
+    managingAgency: 'Bộ Lao động - Thương binh và Xã hội',
+    scope: 'national',
+    description: 'Danh mục nghề nghiệp theo phân loại quốc gia',
+    lifecycleStatus: 'approved',
+    createdDate: '15/11/2024',
+    updatedDate: '10/01/2025',
+    createdBy: 'Hệ thống',
+    version: 2,
+    dataSource: 'manual',
+    databaseSystem: 'Hệ thống Quản lý lao động việc làm'
+  },
+  {
+    id: '10',
+    code: 'DM-TRINHDO',
+    name: 'Dữ liệu Danh mục trình độ học vấn',
+    dataType: 'reference',
+    managingAgency: 'Bộ Giáo dục và Đào tạo',
+    scope: 'national',
+    description: 'Danh mục các cấp trình độ học vấn và bằng cấp chuyên môn',
+    lifecycleStatus: 'rejected',
+    createdDate: '01/11/2024',
+    updatedDate: '05/01/2025',
+    createdBy: 'Hệ thống',
+    version: 1,
+    dataSource: 'manual',
+    databaseSystem: 'Hệ thống Quản lý giáo dục quốc dân'
+  },
+  {
+    id: '11',
+    code: 'DM-HONNHAN',
+    name: 'Dữ liệu Danh mục tình trạng hôn nhân',
+    dataType: 'reference',
+    managingAgency: 'Bộ Tư pháp',
+    scope: 'national',
+    description: 'Danh mục các tình trạng hôn nhân (Độc thân, Đã kết hôn, Ly hôn...)',
+    lifecycleStatus: 'inactive',
+    createdDate: '10/08/2023',
+    updatedDate: '15/03/2025',
+    effectiveDate: '01/09/2023',
+    createdBy: 'Hệ thống',
+    version: 2,
+    dataSource: 'manual',
+    databaseSystem: 'Cơ sở dữ liệu Hộ tịch điện tử'
   }
 ];
 
@@ -147,10 +196,12 @@ export const scopeLabels: Record<ScopeType, string> = {
 export const lifecycleLabels: Record<LifecycleStatus, { label: string; color: string }> = {
   active: { label: 'Hiệu lực', color: 'bg-green-100 text-green-700' },
   draft: { label: 'Đang soạn thảo', color: 'bg-yellow-100 text-yellow-700' },
-  inactive: { label: 'Ngừng sử dụng', color: 'bg-red-100 text-red-700' },
+  inactive: { label: 'Hết hiệu lực', color: 'bg-red-100 text-red-700' },
   archived: { label: 'Đã lưu trữ', color: 'bg-slate-100 text-slate-700' },
   pending_approval: { label: 'Chờ phê duyệt', color: 'bg-orange-100 text-orange-700' },
-  pending_expiration: { label: 'Chờ hết hiệu lực', color: 'bg-purple-100 text-purple-700' }
+  pending_expiration: { label: 'Chờ hết hiệu lực', color: 'bg-purple-100 text-purple-700' },
+  approved: { label: 'Đã phê duyệt', color: 'bg-blue-100 text-blue-700' },
+  rejected: { label: 'Từ chối', color: 'bg-red-100 text-red-700' }
 };
 
 export const approvalTypeLabels: Record<ApprovalType, string> = {

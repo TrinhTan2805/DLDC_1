@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { X, Check, ChevronRight, ChevronLeft, AlertCircle, Plus, Trash2 } from 'lucide-react';
+import { Portal } from '../../common/Portal';
 
 type LifecycleStatus = 'active' | 'draft' | 'inactive' | 'archived';
 type DataType = 'standard' | 'reference' | 'transactional';
@@ -162,8 +163,9 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[95vh] overflow-hidden flex flex-col">
+    <Portal>
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+        <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[95vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300 ease-out">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-slate-200">
           <div>
@@ -667,5 +669,6 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
         </div>
       </div>
     </div>
+  </Portal>
   );
 }

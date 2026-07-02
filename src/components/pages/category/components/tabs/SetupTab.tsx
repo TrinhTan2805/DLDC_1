@@ -252,7 +252,7 @@ export function SetupTab({
                     <option value="all">Tất cả trạng thái</option>
                     <option value="active">Đã hiệu lực</option>
                     <option value="draft">Đang soạn thảo</option>
-                    <option value="inactive">Ngừng sử dụng</option>
+                    <option value="inactive">Hết hiệu lực</option>
                     <option value="archived">Đã lưu trữ</option>
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
@@ -310,6 +310,8 @@ export function SetupTab({
                 <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Đơn vị chủ quản</th>
                 <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Phạm vi</th>
                 <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Nguồn dữ liệu</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Phiên bản</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Ngày hiệu lực</th>
                 <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Trạng thái</th>
                 <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-48">Thao tác</th>
               </tr>
@@ -331,16 +333,28 @@ export function SetupTab({
                       <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">
                         {getDataSourceLabel(entity.dataSource)}
                       </td>
+                      <td className="px-6 py-4 text-center text-[13px] text-slate-700 font-mono">
+                        {entity.version ? `v${entity.version}.0` : '--'}
+                      </td>
+                      <td className="px-6 py-4 text-center text-[13px] text-slate-700">
+                        {entity.lifecycleStatus === 'active'
+                          ? (entity.effectiveDate || entity.updatedDate || '--')
+                          : '--'}
+                      </td>
                       <td className="px-6 py-4 text-center">
                         <div className="flex justify-center">
                           <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[13px] font-normal border whitespace-nowrap ${
                             entity.lifecycleStatus === 'active'
                               ? 'bg-green-50 text-green-700 border-green-100'
-                              : entity.lifecycleStatus === 'pending_approval'
-                                ? 'bg-purple-50 text-purple-700 border-purple-100'
-                                : entity.lifecycleStatus === 'draft'
-                                  ? 'bg-slate-50 text-slate-700 border-slate-200'
-                                  : 'bg-orange-50 text-orange-700 border-orange-100'
+                              : entity.lifecycleStatus === 'approved'
+                                ? 'bg-blue-50 text-blue-700 border-blue-100'
+                                : entity.lifecycleStatus === 'pending_approval'
+                                  ? 'bg-purple-50 text-purple-700 border-purple-100'
+                                  : entity.lifecycleStatus === 'rejected'
+                                    ? 'bg-red-50 text-red-700 border-red-100'
+                                    : entity.lifecycleStatus === 'draft'
+                                      ? 'bg-slate-50 text-slate-700 border-slate-200'
+                                      : 'bg-orange-50 text-orange-700 border-orange-100'
                           }`}>
                             {lifecycleLabels[entity.lifecycleStatus].label}
                           </span>
@@ -383,9 +397,9 @@ export function SetupTab({
 
                           <button
                             onClick={() => onEdit(entity)}
-                            disabled={entity.lifecycleStatus === 'active' || entity.lifecycleStatus === 'pending_approval' || entity.lifecycleStatus === 'pending_expiration'}
+                            disabled={entity.lifecycleStatus === 'pending_approval' || entity.lifecycleStatus === 'pending_expiration'}
                             className={`p-1.5 rounded-lg transition-colors ${
-                              entity.lifecycleStatus === 'active' || entity.lifecycleStatus === 'pending_approval' || entity.lifecycleStatus === 'pending_expiration'
+                              entity.lifecycleStatus === 'pending_approval' || entity.lifecycleStatus === 'pending_expiration'
                                 ? 'text-slate-300 cursor-not-allowed bg-transparent'
                                 : 'text-slate-500 hover:text-amber-600 hover:bg-amber-50 cursor-pointer'
                             }`}
@@ -427,7 +441,7 @@ export function SetupTab({
                 })
               ) : (
                 <tr>
-                  <td colSpan={8} className="px-6 py-8 text-center text-[13px] text-slate-500">
+                  <td colSpan={11} className="px-6 py-8 text-center text-[13px] text-slate-500">
                     Không tìm thấy dữ liệu
                   </td>
                 </tr>

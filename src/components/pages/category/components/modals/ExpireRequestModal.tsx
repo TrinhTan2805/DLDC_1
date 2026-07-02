@@ -1,5 +1,5 @@
 import { ChangeEvent, useState } from 'react';
-import { Send, AlertTriangle, Info, CalendarClock, UserCheck } from 'lucide-react';
+import { Send, Info, CalendarClock, UserCheck, Clock } from 'lucide-react';
 import { approvers } from '../../categoryConstants';
 import { BaseModal } from '../../../../common/BaseModal';
 
@@ -33,10 +33,10 @@ export function ExpireRequestModal({
     <BaseModal
       isOpen={isOpen}
       onClose={onClose}
-      title="Gửi yêu cầu Khóa / Ngừng sử dụng danh mục"
+      title="Gửi yêu cầu hết hiệu lực danh mục"
       maxWidth="max-w-lg"
       customHeaderIcon={
-        <AlertTriangle className="w-5 h-5 text-orange-600 mr-3" />
+        <Clock className="w-5 h-5 text-blue-600 mr-3" />
       }
       footer={
         <>
@@ -49,7 +49,7 @@ export function ExpireRequestModal({
           <button
             onClick={() => onSubmit(formData)}
             disabled={!formData.expireDate || !formData.reason || !formData.approver}
-            className="px-6 py-2.5 bg-orange-600 text-white rounded-xl flex items-center justify-center gap-2 hover:bg-orange-700 transition-all text-[13px] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-orange-200"
+            className="px-6 py-2.5 bg-blue-600 text-white rounded-xl flex items-center justify-center gap-2 hover:bg-blue-700 transition-all text-[13px] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-200"
           >
             <Send className="w-4 h-4" />
             Trình duyệt hết hiệu lực
@@ -58,8 +58,8 @@ export function ExpireRequestModal({
       }
     >
       <div className="space-y-6">
-        <div className="bg-orange-50 border border-orange-100 rounded-xl p-4 flex gap-3 text-[13px] text-orange-800">
-          <Info className="w-5 h-5 shrink-0" />
+        <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex gap-3 text-[13px] text-blue-800">
+          <Info className="w-5 h-5 shrink-0 text-blue-500" />
           <p>
             Danh mục bị ngừng sử dụng sẽ <strong>không được dùng</strong> trong các quan hệ và truy vấn dữ liệu tham chiếu mới, nhưng vẫn được lưu trữ cho mục đích thống kê, tra cứu.
           </p>
@@ -67,15 +67,15 @@ export function ExpireRequestModal({
 
         <div className="space-y-4">
           <div>
-            <label className="block text-[13px] font-semibold text-slate-700 mb-1">Danh mục áp dụng</label>
-            <div className="w-full px-4 py-2 border border-slate-200 bg-slate-50 rounded-xl text-[13px] font-medium text-slate-900 flex justify-between">
+            <label className="block text-[13px] text-slate-700 mb-1">Danh mục áp dụng</label>
+            <div className="w-full px-4 py-2 border border-slate-200 bg-slate-50 rounded-xl text-[13px] text-slate-900 flex justify-between">
               <span>{entity.name}</span>
               <span className="text-slate-500 font-mono">{entity.code}</span>
             </div>
           </div>
 
           <div>
-            <label className="block text-[13px] font-semibold text-slate-700 mb-1">
+            <label className="block text-[13px] text-slate-700 mb-1">
               Thời điểm hết hiệu lực <span className="text-red-500">*</span>
             </label>
             <div className="relative">
@@ -85,20 +85,20 @@ export function ExpireRequestModal({
                 type="date"
                 value={formData.expireDate}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, expireDate: e.target.value })}
-                className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl bg-white text-[13px] focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none"
+                className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl bg-white text-[13px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-[13px] font-semibold text-slate-700 mb-1">
+            <label className="block text-[13px] text-slate-700 mb-1">
               Lý do ngừng sử dụng <span className="text-red-500">*</span>
             </label>
             <select
               title="Lý do ngừng sử dụng"
               value={formData.reason}
               onChange={(e: ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, reason: e.target.value })}
-              className="w-full px-4 py-2 border border-slate-200 rounded-xl bg-white text-[13px] focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none"
+              className="w-full px-4 py-2 border border-slate-200 rounded-xl bg-white text-[13px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
             >
               <option value="">-- Chọn lý do --</option>
               <option value="Tích hợp vào danh mục khác">Tích hợp vào danh mục khác</option>
@@ -109,7 +109,7 @@ export function ExpireRequestModal({
           </div>
 
           <div>
-            <label className="block text-[13px] font-semibold text-slate-700 mb-1">
+            <label className="block text-[13px] text-slate-700 mb-1">
               Lãnh đạo phê duyệt <span className="text-red-500">*</span>
             </label>
             <div className="relative">
@@ -118,7 +118,7 @@ export function ExpireRequestModal({
                 title="Lãnh đạo phê duyệt"
                 value={formData.approver}
                 onChange={(e: ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, approver: e.target.value })}
-                className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl bg-white text-[13px] focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none"
+                className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl bg-white text-[13px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
               >
                 <option value="">-- Chọn lãnh đạo trình duyệt --</option>
                 {approvers.map(a => (
@@ -129,14 +129,14 @@ export function ExpireRequestModal({
           </div>
 
           <div>
-            <label className="block text-[13px] font-semibold text-slate-700 mb-1">Ghi chú thêm</label>
+            <label className="block text-[13px] text-slate-700 mb-1">Ghi chú thêm</label>
             <textarea
               title="Ghi chú thêm"
               rows={3}
               value={formData.note}
               onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setFormData({ ...formData, note: e.target.value })}
               placeholder="Nhập ghi chú chi tiết trình lãnh đạo..."
-              className="w-full px-4 py-3 border border-slate-200 rounded-xl bg-white text-[13px] focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none resize-none"
+              className="w-full px-4 py-3 border border-slate-200 rounded-xl bg-white text-[13px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none resize-none"
             />
           </div>
         </div>
