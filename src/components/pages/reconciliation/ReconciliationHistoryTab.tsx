@@ -15,13 +15,114 @@ interface ReconciliationHistory {
   status: 'success' | 'failed';
   statusText: string;
   statusColor: string;
+  statusVariant?: 'blue' | 'green' | 'orange' | 'red' | 'amber' | 'slate';
   details: string;
+  // Các cột theo danh sách đối soát ngoài
+  datasetName?: string;
+  runLabel?: string;
+  sourceCount?: number;
+  warehouseCount?: number;
+}
+
+// Bản ghi đối soát ở danh sách ngoài — dùng để sinh lịch sử theo đúng bộ dữ liệu được chọn
+interface HistorySourceRecord {
+  datasetCode: string;
+  datasetName: string;
+  providerSystem: string;
+  recordCount: number;
+  receiveDate: string;
+  lastReconcileDate?: string;
+  status: 'matched' | 'mismatched' | 'pending' | 'error';
+  statusText?: string;
+  receivedCount?: number;
+  sentCount?: number;
 }
 
 interface ReconciliationHistoryTabProps {
   initialSearchTerm?: string;
   hideSearchAndFilters?: boolean;
+  record?: HistorySourceRecord;
 }
+
+// Ước lượng dung lượng gói tin theo số bản ghi (~2.7 KB/bản ghi) cho dữ liệu mô phỏng
+const formatDataSize = (records: number) => {
+  const bytes = records * 2700;
+  if (bytes >= 1e9) return `${(bytes / 1e9).toFixed(1)} GB`;
+  if (bytes >= 1e6) return `${Math.round(bytes / 1e6)} MB`;
+  return `${Math.max(1, Math.round(bytes / 1e3))} KB`;
+};
+
+// Sinh danh sách lịch sử đối soát từ bản ghi được chọn ở danh sách ngoài
+const buildHistoriesFromRecord = (r: HistorySourceRecord): ReconciliationHistory[] => {
+  const received = r.receivedCount ?? r.recordCount;
+  const sent = r.sentCount ?? received;
+  const diff = Math.abs(received - sent);
+  const isError = r.status === 'error';
+  const isMismatch = r.status === 'mismatched';
+  const isPending = r.status === 'pending';
+  const lastTs = r.lastReconcileDate || r.receiveDate;
+  const cleanCode = r.datasetCode.replace(/-\d{4}(-\d{2})?$/, ''); // Mã thu thập, bỏ đuôi năm-tháng
+
+  // Trạng thái + hành động của lần chạy đối soát mới nhất bám theo bản ghi ở danh sách ngoài
+  const statusVariantMap: Record<string, 'green' | 'orange' | 'blue' | 'red'> = {
+    matched: 'green',
+    mismatched: 'orange',
+    pending: 'blue',
+    error: 'red',
+  };
+  const runStatus: 'success' | 'failed' = isError ? 'failed' : 'success';
+  const runStatusText = r.statusText || (isError ? 'Thất bại' : 'Thành công');
+  const runStatusVariant = statusVariantMap[r.status] || 'green';
+  const runAction = isError ? 'Đối soát lỗi' : isPending ? 'Đang đối soát' : 'Hoàn tất đối soát';
+  const runDetails = isError
+    ? 'Đối soát lỗi - Hệ thống đích không phản hồi'
+    : isPending
+      ? 'Đang đối soát - Chờ hệ thống đích xác nhận'
+      : isMismatch
+        ? `Đối soát hoàn tất - Lệch ${diff.toLocaleString()} bản ghi so với nguồn`
+        : `Đối soát hoàn tất - Đã nhận đủ ${received.toLocaleString()} bản ghi`;
+
+  return [
+    {
+      id: `${r.datasetCode}-RUN-001`,
+      timestamp: lastTs,
+      packageName: `Gói tin đối soát ${r.datasetName} - Lần chạy 1`,
+      packageCode: 'PKG-RUN-001',
+      systemName: r.providerSystem,
+      action: runAction,
+      recordsSent: received,
+      dataSizeSent: formatDataSize(received),
+      status: runStatus,
+      statusText: runStatusText,
+      statusColor: '',
+      statusVariant: runStatusVariant,
+      details: runDetails,
+      datasetName: r.datasetName,
+      runLabel: cleanCode,
+      sourceCount: sent,
+      warehouseCount: received
+    },
+    {
+      id: `${r.datasetCode}-RUN-002`,
+      timestamp: r.receiveDate,
+      packageName: `Gói tin đối soát ${r.datasetName} - Lần chạy 2`,
+      packageCode: 'PKG-RUN-002',
+      systemName: r.providerSystem,
+      action: 'Gửi gói tin',
+      recordsSent: sent,
+      dataSizeSent: formatDataSize(sent),
+      status: 'success',
+      statusText: 'Khớp dữ liệu',
+      statusColor: '',
+      statusVariant: 'green',
+      details: 'Gửi gói tin thành công - Đã nhận đủ bản ghi',
+      datasetName: r.datasetName,
+      runLabel: cleanCode,
+      sourceCount: sent,
+      warehouseCount: sent
+    }
+  ];
+};
 
 const getDatasetName = (code: string) => {
   const map: Record<string, string> = {
@@ -37,7 +138,7 @@ const getDatasetName = (code: string) => {
   return map[code] || code;
 };
 
-export function ReconciliationHistoryTab({ initialSearchTerm = '', hideSearchAndFilters = false }: ReconciliationHistoryTabProps) {
+export function ReconciliationHistoryTab({ initialSearchTerm = '', hideSearchAndFilters = false, record }: ReconciliationHistoryTabProps) {
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [showFilters, setShowFilters] = useState(false);
   const [filterStatus, setFilterStatus] = useState<'all' | 'success' | 'failed'>('all');
@@ -55,7 +156,7 @@ export function ReconciliationHistoryTab({ initialSearchTerm = '', hideSearchAnd
     }
   }, [initialSearchTerm]);
 
-  const histories: ReconciliationHistory[] = initialSearchTerm ? [
+  const histories: ReconciliationHistory[] = record ? buildHistoriesFromRecord(record) : initialSearchTerm ? [
     {
       id: 'HIST-001',
       timestamp: '2024-12-20 10:15:00',
@@ -298,14 +399,12 @@ export function ReconciliationHistoryTab({ initialSearchTerm = '', hideSearchAnd
             <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-[1]">
               <tr>
                 <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-12 text-[13px]">STT</th>
-                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Thời gian</th>
-                <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Gói tin</th>
-                <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Hệ thống đích</th>
-                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Hành động</th>
-                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Số bản ghi đã nhận</th>
-                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Dung lượng đã nhận</th>
+                <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Thu thập</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Số bản ghi (Nguồn)</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Số bản ghi (Kho)</th>
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Lệch</th>
                 <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái</th>
-                
+                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Ngày đối soát</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -316,32 +415,39 @@ export function ReconciliationHistoryTab({ initialSearchTerm = '', hideSearchAnd
                     <td className="px-4 py-3 text-center text-slate-500 font-medium text-[13px]">
                       {(currentPage - 1) * itemsPerPage + index + 1}
                     </td>
+                    <td className="px-4 py-3 text-left text-[13px]">
+                      <div className="font-medium text-slate-950 leading-snug text-[13px]">{history.datasetName ?? history.packageName}</div>
+                      <div className="text-slate-500 mt-1 text-[12px] font-mono">{history.runLabel ?? history.packageCode}</div>
+                    </td>
+                    <td className="px-4 py-3 text-center text-slate-950 font-semibold font-mono text-[13px]">
+                      {(history.sourceCount ?? history.recordsSent).toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3 text-center text-slate-950 font-semibold font-mono text-[13px]">
+                      {(history.warehouseCount ?? history.recordsSent).toLocaleString()}
+                    </td>
+                    {(() => {
+                      const diff = (history.warehouseCount ?? history.recordsSent) - (history.sourceCount ?? history.recordsSent);
+                      return (
+                        <td className={`px-4 py-3 text-center font-mono text-[13px] ${diff === 0 ? 'text-slate-500 font-medium' : 'text-rose-600 font-semibold'}`}>
+                          {diff > 0 ? `+${diff.toLocaleString()}` : diff.toLocaleString()}
+                        </td>
+                      );
+                    })()}
+                    <td className="px-4 py-3 text-center">
+                      <StatusTag
+                        label={history.statusText}
+                        variant={history.statusVariant ?? (history.status === 'success' ? 'green' : 'red')}
+                      />
+                    </td>
                     <td className="px-4 py-3 text-center text-slate-500 font-medium font-mono whitespace-nowrap text-[13px]">
                       <div>{history.timestamp.split(' ')[0]}</div>
                       <div className="text-xs text-slate-400 mt-0.5">{history.timestamp.split(' ')[1]}</div>
                     </td>
-                    <td className="px-4 py-3 text-left text-[13px]">
-                      <div className="font-medium text-slate-950 leading-snug text-[13px]">{history.packageName}</div>
-                      <div className="text-slate-500 mt-1 text-[12px]">{history.packageCode}</div>
-                    </td>
-                    <td className="px-4 py-3 text-left text-slate-600 font-medium text-[13px]">{history.systemName}</td>
-                    <td className="px-4 py-3 text-center text-slate-600 font-medium text-[13px]">{history.action}</td>
-                    <td className="px-4 py-3 text-center text-slate-950 font-semibold font-mono text-[13px]">
-                      {history.recordsSent.toLocaleString()}
-                    </td>
-                    <td className="px-4 py-3 text-center text-slate-500 font-medium font-mono text-[13px]">{history.dataSizeSent}</td>
-                    <td className="px-4 py-3 text-center">
-                      <StatusTag
-                        label={history.statusText}
-                        variant={history.status === 'success' ? 'green' : 'red'}
-                      />
-                    </td>
-                    
                   </tr>
                 ))}
               {filteredHistories.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-8 text-center text-slate-500">
+                  <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
                     Không tìm thấy lịch sử đối soát
                   </td>
                 </tr>

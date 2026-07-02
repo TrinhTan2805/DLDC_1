@@ -1,5 +1,27 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Phiên bản 2.6.05 (Ngày cập nhật: 02/07/2026)
+
+> Lưu ý: File thuộc Phân hệ 9 (Cung cấp dữ liệu) đang `[ ]` LOCKED. Thay đổi theo **chỉ đạo trực tiếp của PM**.
+
+**Nội dung thay đổi:**
+1. **Bỏ khối "Nhật ký kết nối gần đây" trong tab Sơ đồ** của màn "Kiểm soát & Giám sát cung cấp" (`DataProvisionMonitoringPage.tsx`) do **trùng với tab "Nhật ký khai thác (Audit Logs)"**. Đổi tên tab từ *"Sơ đồ giám sát & Logs kết nối"* → **"Sơ đồ giám sát"** cho khớp nội dung còn lại (chỉ còn sơ đồ luồng + danh sách hệ thống).
+2. **Danh sách API đang giám sát**: bỏ badge trạng thái *"Kết nối ổn định / Có cảnh báo"*, thay bằng **2 nút "Xem chi tiết" + "Xem sơ đồ"**. "Xem chi tiết" **dùng lại popup "Xem chi tiết Dịch vụ"** (`ProvisionServiceModal`, chế độ `view`) của màn Thiết lập điều phối dữ liệu — truyền service rút gọn (tên, mã `SVC-*`, loại dữ liệu...).
+3. **Đổi hành vi tab "Sơ đồ giám sát"**: nay **luôn hiển thị danh sách API** (kể cả khi lọc 1 API ở header — danh sách lọc theo API đó); bấm **"Xem sơ đồ"** mới hiện **sơ đồ luồng** của API đó, kèm **nút "Đóng"** để quay lại danh sách.
+4. **Bỏ tiêu đề màn** ("Kiểm soát & Giám sát cung cấp" + phụ đề) và **dàn bộ lọc thành 1 hàng**: Cơ sở dữ liệu · API · Từ ngày · Đến ngày · nút Xuất báo cáo.
+5. **Modal "Lịch sử đối soát thu thập"** (`ReconciliationHistoryTab` trong `ReconciliationTemplate.tsx`): **sinh danh sách lịch sử theo đúng bản ghi được chọn ở danh sách ngoài** thay vì dữ liệu cố định. Nút "Xem lịch sử" ở bảng ngoài lưu bản ghi được chọn (`setSelectedRecord`) và truyền vào modal.
+   - **Đồng bộ cột với danh sách đối soát ngoài**: đổi cột modal thành **STT · Thu thập · Số bản ghi (Nguồn) · Số bản ghi (Kho) · Lệch · Trạng thái · Ngày đối soát** (bỏ Hệ thống đích / Hành động / Dung lượng đã nhận). Nguồn = số gửi, Kho = số nhận, Lệch = Kho − Nguồn (tô đỏ khi ≠ 0). Trạng thái lần chạy mới nhất bám theo trạng thái record (Khớp dữ liệu / Không khớp / Đang xử lý / Lỗi) với đúng màu.
+   - **Chuẩn hóa cột "Thu thập"** ở cả bảng ngoài (`ReconciliationTemplate.tsx`) và modal lịch sử: chỉ còn **Tên thu thập** (dòng trên) + **Mã thu thập** (dòng dưới, font-mono, đã bỏ đuôi năm-tháng `-YYYY-MM`, vd `DM-GIOITINH`), bỏ nhãn "Lần chạy N".
+
+**Các file bị ảnh hưởng:**
+- `package.json`
+- `src/components/pages/provisioning/DataProvisionMonitoringPage.tsx`
+- `src/components/pages/reconciliation/ReconciliationTemplate.tsx`
+- `src/components/pages/reconciliation/ReconciliationHistoryTab.tsx`
+- `src/components/pages/reconciliation/ExternalCourtJudgmentReconciliationPage.tsx`
+
+---
+
 ## Phiên bản 2.6.04 (Ngày cập nhật: 02/07/2026)
 
 **Nội dung thay đổi:**
