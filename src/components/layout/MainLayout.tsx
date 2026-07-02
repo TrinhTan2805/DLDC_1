@@ -68,7 +68,7 @@ import { MasterDataIPage } from '../pages/master-data-list/MasterDataIPage';
 import { MasterDataJPage } from '../pages/master-data-list/MasterDataJPage';
 import { MasterDataScaleManagementPage } from '../pages/master-data/MasterDataScaleManagementPage';
 import { MasterDataUpdatePage } from '../pages/master-data/MasterDataUpdatePage';
-import { MasterDataAPage as MasterDataUpdateAPage } from '../pages/master-data/MasterDataAPage';
+import { MasterDataUpdateListPage } from '../pages/master-data/MasterDataUpdateListPage';
 import MasterDataReportsPage from '../pages/master-data/MasterDataReportsPage';
 import { DataCoordinationPage } from '../pages/DataCoordinationPage';
 import { ProvisionReconciliationPage } from '../pages/provisioning/DataReconciliationPage';
@@ -285,7 +285,7 @@ const pageConfig: Record<string, { title: string; description: string }> = {
     description: 'Thiết lập và quản lý danh mục dữ liệu'
   },
   'category-list': {
-    title: 'Danh sách danh mục dùng chung',
+    title: 'Biên tập danh mục dùng chung',
     description: 'Biên tập và quản lý các danh mục dùng chung'
   },
   'collection-setup': {
@@ -317,7 +317,7 @@ const pageConfig: Record<string, { title: string; description: string }> = {
     description: 'Cấu hình và thiết lập các danh mục dữ liệu mở phục vụ công khai, chia sẻ'
   },
   'open-data-category-list': {
-    title: 'Danh sách danh mục dữ liệu mở',
+    title: 'Biên tập danh mục dữ liệu mở',
     description: 'Quản lý và theo dõi các danh mục dữ liệu mở được công khai'
   },
   'open-data-category-a': {
@@ -361,16 +361,16 @@ const pageConfig: Record<string, { title: string; description: string }> = {
     description: 'Tra cứu, báo cáo sử dụng và theo dõi vòng đời dữ liệu chủ'
   },
   'master-data-scale-management': {
-    title: 'Quản lý quy mô dữ liệu chủ',
-    description: 'Quản lý và thiết lập quy mô dữ liệu chủ'
+    title: 'Mô hình dữ liệu chủ',
+    description: 'Quản lý và thiết lập mô hình dữ liệu chủ'
   },
   'master-data-update': {
     title: 'Cập nhật dữ liệu chủ',
     description: 'Cập nhật và xử lý dữ liệu chủ'
   },
   'master-data-update-a': {
-    title: 'CSDL A',
-    description: 'Xử lý dữ liệu từ CSDL A'
+    title: 'Danh sách dữ liệu chủ',
+    description: 'Cập nhật và quản lý dữ liệu chủ theo từng loại'
   },
   'target-database-management': {
     title: 'Quản lý CSDL đích',
@@ -553,7 +553,7 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'master-data-j' && <MasterDataJPage />}
             {currentPage === 'master-data-scale-management' && <MasterDataScaleManagementPage />}
             {currentPage === 'master-data-update' && <MasterDataUpdatePage />}
-            {currentPage === 'master-data-update-a' && <MasterDataUpdateAPage />}
+            {currentPage === 'master-data-update-a' && <MasterDataUpdateListPage />}
             {currentPage === 'master-data-update-b' && <ProcessingNationalityPage />}
             {currentPage === 'master-data-update-c' && <ProcessingJudgmentPage />}
             {currentPage === 'master-data-reports' && <MasterDataReportsPage />}
@@ -1055,17 +1055,17 @@ const getBreadcrumbPath = (pageId: string, search: string = ''): string[] => {
     'processing-external-children-group': ['Xử lý dữ liệu', 'CSDL Ngoài ngành', 'Trẻ em'],
 
     // Category
-    'category-setup': ['Quản lý danh mục dùng chung', 'Thiết lập danh mục'],
-    'category-list': ['Quản lý danh mục dùng chung', 'Biên tập & Công khai', 'Danh sách danh mục'],
-    'category-moj-units': ['Quản lý danh mục dùng chung', 'Biên tập & Công khai', 'Đơn vị thuộc BTP'],
-    'category-a': ['Quản lý danh mục dùng chung', 'Biên tập & Công khai', 'Danh sách danh mục', 'Biên tập danh mục A'],
-    'category-published-list': ['Quản lý danh mục dùng chung', 'Công khai danh mục'],
-    'category-report-group': ['Quản lý danh mục dùng chung', 'Thống kê danh mục'],
-    'category-report': ['Quản lý danh mục dùng chung', 'Thống kê danh mục', 'Khai thác báo cáo'],
-    'category-report-list': ['Quản lý danh mục dùng chung', 'Thống kê danh mục', 'Báo cáo thống kê danh sách danh mục'],
-    'category-report-exploitation': ['Quản lý danh mục dùng chung', 'Thống kê danh mục', 'Báo cáo tình trạng khai thác danh mục'],
-    'category-report-status': ['Quản lý danh mục dùng chung', 'Thống kê danh mục', 'Báo cáo trạng thái danh mục'],
-    'category-report-version': ['Quản lý danh mục dùng chung', 'Thống kê danh mục', 'Báo cáo phiên bản danh mục'],
+    'category-setup': ['Danh mục dùng chung', 'Thiết lập danh mục'],
+    'category-list': ['Danh mục dùng chung', 'Biên tập & Công khai', 'Biên tập danh mục'],
+    'category-moj-units': ['Danh mục dùng chung', 'Biên tập & Công khai', 'Đơn vị thuộc BTP'],
+    'category-a': ['Danh mục dùng chung', 'Biên tập & Công khai', 'Biên tập danh mục', 'Biên tập danh mục A'],
+    'category-published-list': ['Danh mục dùng chung', 'Công khai danh mục'],
+    'category-report-group': ['Danh mục dùng chung', 'Thống kê danh mục'],
+    'category-report': ['Danh mục dùng chung', 'Thống kê danh mục', 'Khai thác báo cáo'],
+    'category-report-list': ['Danh mục dùng chung', 'Thống kê danh mục', 'Báo cáo thống kê danh sách danh mục'],
+    'category-report-exploitation': ['Danh mục dùng chung', 'Thống kê danh mục', 'Báo cáo tình trạng khai thác danh mục'],
+    'category-report-status': ['Danh mục dùng chung', 'Thống kê danh mục', 'Báo cáo trạng thái danh mục'],
+    'category-report-version': ['Danh mục dùng chung', 'Thống kê danh mục', 'Báo cáo phiên bản danh mục'],
 
     // Open Data
     'open-data-setup': ['Dữ liệu mở', 'Quản lý danh mục'],
@@ -1077,10 +1077,10 @@ const getBreadcrumbPath = (pageId: string, search: string = ''): string[] => {
     'open-data-report': ['Dữ liệu mở', 'Thống kê dữ liệu mở'],
 
     // Master Data
-    'master-data-scale-management': ['Quản lý dữ liệu chủ', 'Quản lý quy mô dữ liệu chủ'],
-    'master-data-update': ['Quản lý dữ liệu chủ', 'Cập nhật dữ liệu chủ'],
-    'master-data-update-a': ['Quản lý dữ liệu chủ', 'Cập nhật dữ liệu chủ', 'Dữ liệu chủ A'],
-    'master-data-reports': ['Quản lý dữ liệu chủ', 'Báo cáo tìm kiếm dữ liệu chủ'],
+    'master-data-scale-management': ['Dữ liệu chủ', 'Mô hình dữ liệu chủ'],
+    'master-data-update': ['Dữ liệu chủ', 'Cập nhật dữ liệu chủ'],
+    'master-data-update-a': ['Dữ liệu chủ', 'Cập nhật dữ liệu chủ', 'Danh sách dữ liệu chủ'],
+    'master-data-reports': ['Dữ liệu chủ', 'Báo cáo tìm kiếm dữ liệu chủ'],
 
     // Orchestration
     'orchestration-service-setup': ['Điều phối dữ liệu', 'Thiết lập dịch vụ'],

@@ -1,5 +1,84 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Phiên bản 2.6.04 (Ngày cập nhật: 02/07/2026)
+
+**Nội dung thay đổi:**
+1. **Thay đổi tên hiển thị Menu tại Sidebar**:
+   - Đổi tên phân hệ **Quản lý dữ liệu chủ** thành **Dữ liệu chủ** (`menuStructure.ts`, `Sidebar.tsx`, `MainLayout.tsx`).
+   - Đổi tên trang **Quản lý quy mô dữ liệu chủ** thành **Mô hình dữ liệu chủ** (`menuStructure.ts`, `Sidebar.tsx`, `MainLayout.tsx`).
+2. **Đổi tên Tab trong trang Mô hình dữ liệu chủ**:
+   - Đổi tên Tab **Thiết lập DL chủ** thành **Thiết lập thực thể** (`MasterDataScaleManagementPage.tsx`).
+3. **Loại bỏ liên kết 1-n (Một - Nhiều)**:
+   - Loại bỏ tùy chọn **1 - n (Một - Nhiều)** khỏi danh sách các loại liên kết có thể tạo mới tại tab Thiết lập quan hệ danh mục (`RelationshipsTab.tsx`) và Thiết lập quan hệ thực thể (`EntityRelationshipsTab.tsx`).
+   - Cập nhật lại giá trị mặc định của form liên kết sang `n-1` và `many-to-many`.
+
+## Phiên bản 2.6.03 (Ngày cập nhật: 01/07/2026)
+
+**Nội dung thay đổi:**
+1. **Ẩn nút "Thêm trường dữ liệu" khi nguồn là "Tự cập nhật trực tiếp"**: Tại tab *"Thiết lập cấu trúc"* (`AttributesTab.tsx`), khi `entityDataSource === 'manual'` (nguồn dữ liệu là "Tự cập nhật trực tiếp"), nút **Thêm trường dữ liệu** bị ẩn hoàn toàn ở chế độ xem chi tiết (non-wizard mode). Danh mục có nguồn này chỉ được xem danh sách các trường, không cho phép thêm mới.
+2. **Ẩn form "Thêm trường dữ liệu mới" trong wizard Chi tiết danh mục**: Trong `CategoryWizardModal` (wizard chi tiết, `isViewOnly=true`), khi nguồn dữ liệu là `manual`, form inline thêm trường ở bước 2 được ẩn. Danh sách trường vẫn hiển thị bình thường.
+3. **Tách modal Chỉnh sửa danh mục dùng chung** (`CategoryWizardModal.tsx`, `CategorySetupPage.tsx`):
+   - Thêm prop `isEditMode` vào `CategoryWizardModal`: khi `isEditMode=true`, tiêu đề modal hiển thị **"Chỉnh sửa danh mục dùng chung"** (thay vì "Thiết lập danh mục dùng chung"). Các nút submit ở mọi bước đều hiện label **"Gửi trình duyệt"** thay vì "Gửi duyệt danh mục" / "Gửi duyệt cấu trúc".
+   - Thêm state `isEditMode` và đặt `isEditMode=true` khi gọi `handleEdit`, `isEditMode=false` khi `handleAdd`/`handleView`.
+   - Khi submit trong edit mode: type approval là `'version'` → `ApprovalRequestModal` wrapper tự dispatch sang **`VersionApprovalModal`** ("Trình duyệt phiên bản").
+   - Mở rộng kiểu `approvalRequestData.type` để bao gồm `'version'`; cập nhật logic tạo `newRequest` và update entity status cho type `'version'`.
+4. **Luồng phê duyệt danh mục – cập nhật trạng thái entity** (`CategorySetupPage.tsx`):
+   - Khi **Gửi duyệt danh mục**: entity `lifecycleStatus` chuyển sang `'pending_approval'` ("Chờ phê duyệt") ngay sau khi submit.
+   - Khi **Phê duyệt**: entity `lifecycleStatus` chuyển sang `'approved'` ("Đã phê duyệt") — đã hoạt động từ trước.
+   - Khi **Từ chối**: entity `lifecycleStatus` chuyển sang `'rejected'` ("Từ chối") thay vì về `'draft'`.
+   - Thêm `'rejected'` vào `LifecycleStatus` type (`categoryTypes.ts`) và bổ sung label/màu tương ứng vào `lifecycleLabels` (`categoryConstants.ts`): `{ label: 'Từ chối', color: 'bg-red-100 text-red-700' }`.
+5. **Đồng bộ thiết kế Quản lý quy mô dữ liệu chủ** (`MasterDataScaleManagementPage.tsx`, `MasterDataWizard.tsx`):
+   - Cập nhật lại toàn bộ thiết kế giao diện theo style của trang Thiết lập danh mục (`CategorySetupPage.tsx`).
+   - Thêm các thẻ thống kê số liệu (Statistics Cards) cho Dữ liệu chủ ở đầu trang.
+   - Làm lại thanh tab bar sang style tối giản, có icon và chỉ báo active đậm chất chuyên nghiệp.
+   - Bổ sung bộ lọc nâng cao (Collapsible Filters Panel) lọc theo Trạng thái, Phạm vi, và Nguồn dữ liệu chủ.
+   - Chuyển đổi bảng danh sách Grid và thanh phân trang (Pagination Block) sang giao diện HSL bo góc mềm mại, hiển thị số bản ghi linh hoạt.
+   - Cải tiến lại Form Modal thêm mới/chỉnh sửa nhanh với z-index và backdrop-blur premium.
+   - **Bọc các modal trong Portal**: Sử dụng component `<Portal>` bao quanh Form Modal và Wizard Modal nhằm chuyển vị trí render trực tiếp ra body. Điều này loại bỏ hoàn toàn viền trắng hay khung trắng bị thừa do thuộc tính overflow/border của thẻ cha bao quanh trang.
+
+---
+
+## Phiên bản 2.6.02 (Ngày cập nhật: 01/07/2026)
+
+**Nội dung thay đổi:**
+1. **Thêm cột Mã danh mục**: Thêm cột **Mã danh mục** (`entity.code`) vào vị trí thứ hai (sau cột STT) trong bảng danh sách danh mục dùng chung ở tab *"Thiết lập danh sách"* (`SetupTab.tsx`), đồng thời cập nhật thuộc tính `colSpan` của dòng không tìm thấy dữ liệu lên `9`.
+2. **Tách biệt 2 modal Trình duyệt danh mục và Trình duyệt phiên bản**: 
+   - Định nghĩa hai modal riêng biệt là **Trình duyệt danh mục** (`CategoryApprovalModal` - chỉ gồm Người phê duyệt, Nội dung trình duyệt) và **Trình duyệt phiên bản** (`VersionApprovalModal` - gồm Tên phiên bản, Hiệu lực, Người phê duyệt, Mô tả thay đổi).
+   - Thiết lập **Trình duyệt danh mục** hiển thị khi:
+     - Nhấp nút *"Gửi duyệt"* lúc thêm mới danh mục (Wizard bước 3/hoàn tất).
+     - Nhấp nút *"Gửi duyệt"* (paper plane icon) tại bảng danh sách *"Thiết lập danh sách"* đối với các dòng có sẵn.
+   - Thiết lập **Trình duyệt phiên bản** hiển thị khi:
+     - Thực hiện chỉnh sửa/thêm mới thuộc tính tại tab *"Thiết lập cấu trúc"* (`AttributesTab` và `AttributeFormModal`).
+     - Thực hiện chỉnh sửa/thêm mới liên kết tại tab *"Thiết lập quan hệ"* (`RelationshipsTab`).
+     - Thực hiện chỉnh sửa/cập nhật thông tin danh mục có sẵn tại tab *"Thiết lập danh sách"* (Wizard chế độ chỉnh sửa).
+     - Thực hiện thêm mới/chỉnh sửa bản ghi dữ liệu tại tab *"Danh sách danh mục"* (`RecordFormModal` và các tác vụ duyệt bản ghi bulk-actions).
+3. **Chuẩn hóa z-index & Cỡ chữ Header cho modal Chỉnh sửa bản ghi**:
+   - Refactor lại modal **Chỉnh sửa/Thêm mới bản ghi** (`RecordFormModal`) từ sử dụng markup tùy biến sang việc sử dụng trực tiếp `BaseModal`.
+   - Giúp sửa lỗi chồng lớp z-index (modal trình duyệt phiên bản bị khuất phía sau modal chỉnh sửa bản ghi do z-index cũ bị hardcode cứng `99999`). Với `BaseModal`, z-index của cả hai modal sẽ tự động phân lớp tăng dần (modal sau chồng lên modal trước).
+   - Đồng thời tự động kế thừa cỡ chữ tiêu đề (Header Title) là **18px** của `BaseModal` đúng yêu cầu.
+   - Sửa thông tin hiển thị ở khung Banner trong modal Trình duyệt phiên bản khi thêm mới/chỉnh sửa bản ghi: Lấy đúng Tên danh mục (`entityName`) và Mã danh mục (`entityCode`) của danh mục đang chọn bên ngoài thay vì lấy theo tên/mã bản ghi vừa nhập.
+   - Loại bỏ nút **Xuất File** (`Download` icon và dropdown menu Excel/PDF/CSV) khỏi tab *"Danh sách danh mục"* trong trang Biên tập danh mục.
+   - Loại bỏ hoàn toàn tab phụ **Phê duyệt hủy công khai** (`unpublish`) trong tab *"Phê duyệt"* của trang Biên tập danh mục.
+   - Thay đổi wording (nhãn chữ): Đổi toàn bộ nhãn **Phê duyệt thay đổi dữ liệu** thành **Phê duyệt danh mục cập nhật** tại các tiêu đề, mô tả và nút điều hướng tương ứng.
+   - Thêm lại nút **Gửi duyệt danh mục** vào footer của Bước 1 (Thông tin chung) và nút **Gửi duyệt cấu trúc** vào footer của Bước 2 (Thiết lập cấu trúc) trong Wizard thiết lập danh mục (`CategoryWizardModal.tsx`), đồng thời cấu hình để khi nhấn các nút này luôn hiển thị modal **Trình duyệt danh mục** thay vì trình duyệt phiên bản.
+   - Sửa logic lưu/chuyển bước trong Wizard (`CategorySetupPage.tsx`): Chỉ cho phép tăng số phiên bản (version) khi người dùng thực hiện gửi phê duyệt (`action === 'submit'`). Các thao tác lưu nháp (draft), chuyển tiếp (next), hay quay lại bước cũ sẽ không tăng phiên bản khi chưa gửi duyệt.
+   - **Sửa luồng phê duyệt & Ràng buộc chuyển bước trong Wizard**:
+    - Khi tạo mới thiết lập danh mục mà chưa được phê duyệt (status khác `'approved'` và `'active'`), hệ thống khóa và không kích hoạt Bước 2, Bước 3. Nếu người dùng cố gắng click "Tiếp tục" tại Bước 1, hệ thống hiển thị thông báo cảnh báo: *"Vui lòng phê duyệt thông tin chung của danh mục trước khi thiết lập cấu trúc và quan hệ của danh mục."*
+    - Khi thông tin chung được duyệt, trạng thái danh mục chuyển sang **"Đã phê duyệt"** (`'approved'`).
+    - Cho phép thực hiện Thiết lập cấu trúc (Bước 2) khi danh mục đang ở trạng thái **"Đã phê duyệt"**. Khi thiết lập cấu trúc xong và click *"Gửi duyệt cấu trúc"*, hệ thống mở modal **Trình duyệt phiên bản** (tự động tăng version +1).
+    - Khi cấu trúc này được phê duyệt thành công, trạng thái danh mục chuyển sang **"Hiệu lực"** (`'active'`).
+4. **Kiểm tra biên dịch & Đóng gói:** Chạy `npm run build` thành công hoàn hảo.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/components/tabs/SetupTab.tsx`
+- `src/components/pages/category/components/tabs/RelationshipsTab.tsx`
+- `src/components/pages/category/components/tabs/AttributesTab.tsx`
+- `src/components/pages/category/components/modals/ApprovalRequestModal.tsx`
+- `src/components/pages/category/components/modals/AttributeFormModal.tsx`
+- `src/components/pages/category/components/modals/RecordFormModal.tsx`
+- `src/components/pages/category/CategorySetupPage.tsx`
+- `src/components/pages/category/CategoryPage.tsx`
+
 ## Phiên bản 2.6.01 (Ngày cập nhật: 30/06/2026)
 
 **Nội dung thay đổi:**

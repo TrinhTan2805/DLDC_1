@@ -45,6 +45,7 @@ import { CreateVersionModal } from './components/modals/CreateVersionModal';
 import { ArchiveRecordModal } from './components/modals/ArchiveRecordModal';
 import { RecordFormModal } from './components/modals/RecordFormModal';
 import { ApprovalRequestModal } from './components/modals/ApprovalRequestModal';
+import { UpdateApprovalModal } from './components/modals/UpdateApprovalModal';
 import { Portal } from '../../common/Portal';
 
 interface CategoryPageProps {
@@ -58,7 +59,7 @@ interface Category {
   name: string;
   description: string;
   type: 'standard' | 'reference' | 'system';
-  status: 'pending' | 'approved' | 'published' | 'unpublished' | 'active' | 'inactive';
+  status: 'draft' | 'pending' | 'approved' | 'rejected' | 'published' | 'unpublished' | 'active' | 'inactive';
   createdDate: string;
   createdBy?: string;
   updatedDate?: string;
@@ -83,9 +84,13 @@ interface CategoryField {
 
 const MOCK_RECORDS_BY_CATEGORY: Record<string, Category[]> = {
   'category-a-1': [
-    { id: '1', code: 'MALE', name: 'Nam', description: 'Giới tính Nam', type: 'standard', status: 'approved', createdDate: '01/01/2024', version: 1, fields: [] },
-    { id: '2', code: 'FEMALE', name: 'Nữ', description: 'Giới tính Nữ', type: 'standard', status: 'approved', createdDate: '01/01/2024', version: 1, fields: [] },
-    { id: '3', code: 'OTHER', name: 'Khác', description: 'Giới tính khác/chưa xác định', type: 'standard', status: 'approved', createdDate: '01/01/2024', version: 1, fields: [] }
+    { id: '1', code: 'MALE', name: 'Nam', description: 'Giới tính Nam', type: 'standard', status: 'approved', createdDate: '01/01/2024', createdBy: 'Hệ thống', updatedDate: '15/01/2026', updatedBy: 'Hoàng Văn E', version: 1, fields: [] },
+    { id: '2', code: 'FEMALE', name: 'Nữ', description: 'Giới tính Nữ', type: 'standard', status: 'approved', createdDate: '01/01/2024', createdBy: 'Hệ thống', updatedDate: '15/01/2026', updatedBy: 'Nguyễn Văn A', version: 1, fields: [] },
+    { id: '3', code: 'OTHER', name: 'Khác', description: 'Giới tính khác/chưa xác định', type: 'standard', status: 'approved', createdDate: '01/01/2024', createdBy: 'Hệ thống', updatedDate: '15/01/2026', updatedBy: 'Nguyễn Văn A', version: 1, fields: [] },
+    { id: '4', code: 'UNKNOWN', name: 'Không xác định', description: 'Giới tính không xác định', type: 'standard', status: 'pending', createdDate: '20/06/2026', createdBy: 'Nguyễn Văn A', updatedDate: '20/06/2026', updatedBy: 'Nguyễn Văn A', version: 1, fields: [] },
+    { id: '5', code: 'INTERSEX', name: 'Liên giới tính', description: 'Sinh học không hoàn toàn nam hoặc nữ', type: 'standard', status: 'rejected', createdDate: '10/06/2026', createdBy: 'Trần Thị B', updatedDate: '15/06/2026', updatedBy: 'Trần Thị B', version: 1, fields: [] },
+    { id: '6', code: 'NON_BINARY', name: 'Phi nhị giới', description: 'Không thuộc nhị giới tính truyền thống', type: 'standard', status: 'draft', createdDate: '01/07/2026', createdBy: 'Lê Văn C', updatedDate: '01/07/2026', updatedBy: 'Lê Văn C', version: 1, fields: [] },
+    { id: '7', code: 'AGENDER', name: 'Vô giới tính', description: 'Không nhận dạng với bất kỳ giới tính nào', type: 'standard', status: 'inactive', createdDate: '05/03/2025', createdBy: 'Phạm Thị D', updatedDate: '10/06/2026', updatedBy: 'Phạm Thị D', version: 1, fields: [] }
   ],
   'category-a-2': [
     { id: '1', code: 'KINH', name: 'Kinh', description: 'Dân tộc Kinh', type: 'standard', status: 'approved', createdDate: '01/01/2024', version: 1, fields: [] },
@@ -205,10 +210,10 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
   React.useEffect(() => {
     const mockRecords = MOCK_RECORDS_BY_CATEGORY[categoryId] || MOCK_RECORDS_BY_CATEGORY['category-a-1'] || [];
     setCategories(mockRecords.map(r => ({
+      createdBy: 'Hệ thống',
+      updatedDate: '15/01/2026',
+      updatedBy: 'Nguyễn Văn A',
       ...r,
-      createdBy: r.createdBy || 'Hệ thống',
-      updatedDate: r.updatedDate || '15/01/2026',
-      updatedBy: r.updatedBy || 'Nguyễn Văn A'
     })));
   }, [categoryId]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -273,7 +278,7 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
       effectiveDate: '01/01/2026',
       user: 'Trần Thị B',
       changes: 'Cập nhật 15 bản ghi tỉnh thành',
-      status: 'archived'
+      status: 'pending'
     },
     {
       version: 'v3.0',
@@ -289,7 +294,7 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
       effectiveDate: '05/12/2025',
       user: 'Phạm Thị D',
       changes: 'Thêm ràng buộc unique cho mã tỉnh',
-      status: 'archived'
+      status: 'locked'
     },
     {
       version: 'v2.0',
@@ -323,21 +328,37 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
     const currentDate = new Date().toLocaleDateString('vi-VN');
     setCategories(prev =>
       prev.map(c =>
-        c.id === id ? { 
-          ...c, 
-          code: inlineEditData.code, 
-          name: inlineEditData.name, 
-          description: inlineEditData.description, 
-          status: 'pending',
+        c.id === id ? {
+          ...c,
+          code: inlineEditData.code,
+          name: inlineEditData.name,
+          description: inlineEditData.description,
+          status: 'draft' as const,
           updatedDate: currentDate,
           updatedBy: 'Nguyễn Văn A'
         } : c
       )
     );
+    setVersionHistoryList(prev => [{
+      version: getNextVersionLabel(),
+      date: currentDate,
+      effectiveDate: '',
+      user: 'Nguyễn Văn A',
+      changes: `Chỉnh sửa bản ghi: ${inlineEditData.name} (${inlineEditData.code})`,
+      status: 'pending'
+    }, ...prev]);
     setEditingRowId(null);
     setSuccessNotificationMessage('Đã lưu thay đổi thành công!');
     setShowSuccessNotification(true);
     setTimeout(() => setShowSuccessNotification(false), 3000);
+  };
+
+  const getNextVersionLabel = () => {
+    if (versionHistoryList.length === 0) return 'v1.0';
+    const latest = versionHistoryList[0].version;
+    const match = latest.match(/v(\d+)\.(\d+)/);
+    if (!match) return 'v1.0';
+    return `v${match[1]}.${parseInt(match[2]) + 1}`;
   };
 
   const handleSaveInlineAdd = () => {
@@ -353,7 +374,7 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
       name: inlineAddData.name,
       description: inlineAddData.description,
       type: 'standard',
-      status: 'pending',
+      status: 'draft' as const,
       createdDate: currentDate,
       createdBy: 'Nguyễn Văn A',
       updatedDate: currentDate,
@@ -362,6 +383,14 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
       fields: []
     };
     setCategories(prev => [...prev, newCat]);
+    setVersionHistoryList(prev => [{
+      version: getNextVersionLabel(),
+      date: currentDate,
+      effectiveDate: '',
+      user: 'Nguyễn Văn A',
+      changes: `Thêm bản ghi: ${inlineAddData.name} (${inlineAddData.code})`,
+      status: 'pending'
+    }, ...prev]);
     setAddingRow(false);
     setSuccessNotificationMessage('Đã thêm bản ghi mới thành công!');
     setShowSuccessNotification(true);
@@ -757,14 +786,21 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
   };
 
   const getStatusBadge = (status: string) => {
-    const normalizedStatus = status === 'active' || status === 'published' ? 'approved' : (status === 'inactive' ? 'unpublished' : status);
-    switch (normalizedStatus) {
+    switch (status) {
+      case 'draft':
+        return <span className="px-3 py-1 bg-slate-100 text-slate-600 border border-slate-200 text-[13px] rounded-full whitespace-nowrap">Bản nháp</span>;
       case 'pending':
-        return <span className="px-3 py-1 bg-yellow-50 text-yellow-700 border border-yellow-200 text-xs rounded-full whitespace-nowrap">Chờ phê duyệt</span>;
+        return <span className="px-3 py-1 bg-orange-50 text-orange-700 border border-orange-200 text-[13px] rounded-full whitespace-nowrap">Chờ duyệt</span>;
       case 'approved':
-        return <span className="px-3 py-1 bg-green-50 text-green-700 border border-green-200 text-xs rounded-full whitespace-nowrap">Đã phê duyệt</span>;
+      case 'active':
+      case 'published':
+        return <span className="px-3 py-1 bg-green-50 text-green-700 border border-green-200 text-[13px] rounded-full whitespace-nowrap">Đã phê duyệt</span>;
+      case 'rejected':
+        return <span className="px-3 py-1 bg-red-50 text-red-700 border border-red-200 text-[13px] rounded-full whitespace-nowrap">Từ chối</span>;
+      case 'inactive':
+        return <span className="px-3 py-1 bg-slate-200 text-slate-600 border border-slate-300 text-[13px] rounded-full whitespace-nowrap">Ngừng áp dụng</span>;
       case 'unpublished':
-        return <span className="px-3 py-1 bg-slate-200 text-slate-700 text-xs rounded-full whitespace-nowrap">Hủy công khai</span>;
+        return <span className="px-3 py-1 bg-slate-200 text-slate-700 text-[13px] rounded-full whitespace-nowrap">Hủy công khai</span>;
       default:
         return null;
     }
@@ -874,10 +910,10 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
       <div className="bg-white border-b border-slate-200">
         <div className="flex px-6 gap-2">
           {[
-            { id: 'setup' as const,           label: 'Danh sách',                   icon: List },
-            { id: 'approval' as const,         label: 'Phê duyệt',                   icon: CheckCircle2 },
-            { id: 'publish' as const,          label: 'Công khai',                   icon: Globe },
-            { id: 'version-history' as const,  label: 'Quản lý phiên bản danh mục',  icon: Clock },
+            { id: 'setup' as const,           label: 'Dữ liệu',   icon: List },
+            { id: 'approval' as const,         label: 'Phê duyệt', icon: CheckCircle2 },
+            { id: 'publish' as const,          label: 'Công khai',  icon: Globe },
+            { id: 'version-history' as const,  label: 'Phiên bản',  icon: Clock },
           ].map(tab => (
             <button
               key={tab.id}
@@ -937,19 +973,19 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                       <ArrowUpDown className="w-4 h-4" />
                       Sắp xếp{sortConditions.length > 0 && !showSortPanel ? <span className="ml-1 w-2 h-2 rounded-full bg-blue-500 inline-block" /> : null}
                     </button>
-                    {/* Gửi duyệt hàng loạt */}
+                    {/* Gửi duyệt phiên bản */}
                     <button
                       type="button"
-                      onClick={() => setShowBulkApproval(true)}
+                      onClick={() => selectedRecordIds.length > 0 && setShowApprovalRequestModal(true)}
                       disabled={selectedRecordIds.length === 0}
                       className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-[13px] font-medium transition-all active:scale-95 whitespace-nowrap ${
                         selectedRecordIds.length > 0
-                          ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-sm cursor-pointer'
-                          : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                          ? 'bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 cursor-pointer'
+                          : 'bg-slate-100 border border-slate-200 text-slate-400 cursor-not-allowed'
                       }`}
                     >
                       <Send className="w-4 h-4" />
-                      Gửi duyệt{selectedRecordIds.length > 0 ? ` (${selectedRecordIds.length})` : ''}
+                      Gửi duyệt
                     </button>
                     {/* Thêm bản ghi mới */}
                     <button
@@ -960,32 +996,6 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                       <Plus className="w-4 h-4" />
                       Thêm bản ghi mới
                     </button>
-                    {/* Xuất File */}
-                    <div className="relative">
-                      <button
-                        type="button"
-                        onClick={() => setShowExportMenu(prev => !prev)}
-                        className="flex items-center gap-1.5 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[13px] font-medium transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
-                      >
-                        <Download className="w-4 h-4" />
-                        Xuất File
-                        <ChevronDown className="w-4 h-4" />
-                      </button>
-                      {showExportMenu && (
-                        <div className="absolute right-0 top-full mt-1.5 w-40 rounded-xl border border-slate-200 bg-white shadow-xl z-20 overflow-hidden">
-                          {['Excel', 'PDF', 'CSV'].map(fmt => (
-                            <button
-                              key={fmt}
-                              type="button"
-                              onClick={() => handleExportFile(fmt)}
-                              className="w-full text-left px-4 py-2.5 hover:bg-slate-50 text-[13px] text-slate-700 transition-colors"
-                            >
-                              {fmt}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
                   </div>
                 </div>
 
@@ -1167,17 +1177,17 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                         <th className="px-4 py-4 w-10 text-center">
                           <input
                             type="checkbox"
-                            title="Chọn tất cả bản ghi chờ duyệt"
+                            title="Chọn tất cả bản ghi bản nháp"
                             checked={
-                              paginatedCategories.filter(c => c.status === 'pending').length > 0 &&
-                              paginatedCategories.filter(c => c.status === 'pending').every(c => selectedRecordIds.includes(c.id))
+                              paginatedCategories.filter(c => c.status === 'draft').length > 0 &&
+                              paginatedCategories.filter(c => c.status === 'draft').every(c => selectedRecordIds.includes(c.id))
                             }
                             onChange={(e) => {
-                              const pendingIds = paginatedCategories.filter(c => c.status === 'pending').map(c => c.id);
+                              const draftIds = paginatedCategories.filter(c => c.status === 'draft').map(c => c.id);
                               if (e.target.checked) {
-                                setSelectedRecordIds(prev => [...new Set([...prev, ...pendingIds])]);
+                                setSelectedRecordIds(prev => [...new Set([...prev, ...draftIds])]);
                               } else {
-                                setSelectedRecordIds(prev => prev.filter(id => !pendingIds.includes(id)));
+                                setSelectedRecordIds(prev => prev.filter(id => !draftIds.includes(id)));
                               }
                             }}
                             className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
@@ -1203,7 +1213,7 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                             return (
                               <tr key={category.id} className={`hover:bg-slate-50/50 transition-all group border-b border-slate-100 ${isEditing ? 'bg-blue-50/10' : ''} ${selectedRecordIds.includes(category.id) ? 'bg-blue-50/30' : ''}`}>
                                 <td className="px-4 py-4 text-center">
-                                  {category.status === 'pending' ? (
+                                  {category.status === 'draft' ? (
                                     <input
                                       type="checkbox"
                                       title="Chọn bản ghi"
@@ -1228,9 +1238,9 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                                       placeholder="Nhập mã"
                                     />
                                   ) : (
-                                    <code className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[13px] border border-blue-100 font-mono">
+                                    <span className="text-[13px] font-mono text-slate-700">
                                       {category.code}
-                                    </code>
+                                    </span>
                                   )}
                                 </td>
                                 <td className="px-6 py-4">
@@ -1304,9 +1314,10 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                                         <SquarePen className="w-4 h-4" />
                                       </button>
                                       <button
+                                        disabled={category.status !== 'approved'}
                                         onClick={() => { setSelectedCategory(category); setShowArchiveModal(true); }}
-                                        className="p-1.5 text-slate-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors cursor-pointer"
-                                        title="Ngừng áp dụng bản ghi"
+                                        className={`p-1.5 rounded-lg transition-colors ${category.status === 'approved' ? 'text-slate-500 hover:text-orange-600 hover:bg-orange-50 cursor-pointer' : 'text-slate-300 cursor-not-allowed'}`}
+                                        title={category.status === 'approved' ? 'Ngừng áp dụng bản ghi' : 'Chỉ có thể ngừng áp dụng bản ghi đã phê duyệt'}
                                       >
                                         <PowerOff className="w-4 h-4" />
                                       </button>
@@ -1401,29 +1412,6 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
 
           {activeTab === 'approval' && (
             <div className="space-y-6">
-              {/* Sub-tabs for Approval */}
-              <div className="flex space-x-1 bg-slate-100 p-1 rounded-lg w-fit">
-                <button
-                  onClick={() => setActiveApprovalTab('data-change')}
-                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                    activeApprovalTab === 'data-change'
-                      ? 'bg-white text-blue-600 shadow-sm'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
-                  }`}
-                >
-                  Phê duyệt thay đổi dữ liệu
-                </button>
-                <button
-                  onClick={() => setActiveApprovalTab('unpublish')}
-                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                    activeApprovalTab === 'unpublish'
-                      ? 'bg-white text-blue-600 shadow-sm'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
-                  }`}
-                >
-                  Phê duyệt hủy công khai
-                </button>
-              </div>
 
               {/* Stats Cards */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -1481,24 +1469,24 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                   {/* Header */}
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-lg text-slate-900">Phê duyệt thay đổi dữ liệu</h3>
-                      <p className="text-sm text-slate-500 mt-1">Quản lý các yêu cầu thay đổi giá trị bản ghi</p>
+                       <h3 className="text-[13px] font-semibold text-slate-900">Phê duyệt danh mục cập nhật</h3>
+                      <p className="text-[13px] text-slate-500 mt-1">Quản lý các yêu cầu phê duyệt cập nhật danh mục</p>
                     </div>
                 {selectedApprovalIds.length > 0 && (
                   <div className="flex items-center gap-3">
-                    <span className="text-sm text-slate-600">
+                    <span className="text-[13px] text-slate-600">
                       Đã chọn: <span className="font-medium text-blue-600">{selectedApprovalIds.length}</span> yêu cầu
                     </span>
                     <button
                       onClick={handleBulkApprove}
-                      className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-[13px]"
                     >
                       <CheckCircle2 className="w-4 h-4" />
                       Phê duyệt hàng loạt
                     </button>
                     <button
                       onClick={handleBulkReject}
-                      className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-[13px]"
                     >
                       <XCircle className="w-4 h-4" />
                       Từ chối hàng loạt
@@ -1518,22 +1506,28 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                       placeholder="Tìm kiếm theo mã, tên bản ghi..."
                       value={searchTerm}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
-                  <div className="relative">
-                    <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <select
-                      title="Lọc trạng thái phê duyệt"
-                      value={approvalStatusFilter}
-                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setApprovalStatusFilter(e.target.value)}
-                      className="pl-10 pr-8 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
-                    >
-                      <option value="all">Tất cả trạng thái</option>
-                      <option value="pending">Chờ phê duyệt</option>
-                      <option value="approved">Đã phê duyệt</option>
-                      <option value="rejected">Đã từ chối</option>
-                    </select>
+                  <div className="flex items-center gap-2">
+                    {[
+                      { value: 'all', label: 'Tất cả', activeClass: 'bg-slate-700 text-white border-slate-700' },
+                      { value: 'pending', label: 'Chờ phê duyệt', activeClass: 'bg-orange-500 text-white border-orange-500' },
+                      { value: 'approved', label: 'Đã phê duyệt', activeClass: 'bg-green-600 text-white border-green-600' },
+                      { value: 'rejected', label: 'Đã từ chối', activeClass: 'bg-red-500 text-white border-red-500' },
+                    ].map(opt => (
+                      <button
+                        key={opt.value}
+                        onClick={() => setApprovalStatusFilter(opt.value)}
+                        className={`px-3 py-2 text-[13px] rounded-lg border transition-all font-medium cursor-pointer ${
+                          approvalStatusFilter === opt.value
+                            ? opt.activeClass
+                            : 'bg-white text-slate-600 border-slate-300 hover:border-slate-400 hover:bg-slate-50'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -1553,16 +1547,16 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                             className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500"
                           />
                         </th>
-                        <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">STT</th>
-                        <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Mã bản ghi</th>
-                        <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Tên bản ghi</th>
-                        <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Mô tả</th>
-                        <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Ngày tạo</th>
-                        <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Người tạo</th>
-                        <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Người cập nhật</th>
-                        <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Ngày cập nhật</th>
-                        <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Trạng thái</th>
-                        <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">Thao tác</th>
+                        <th className="px-6 py-3 text-left text-[13px] font-medium text-slate-600">STT</th>
+                        <th className="px-6 py-3 text-left text-[13px] font-medium text-slate-600">Mã bản ghi</th>
+                        <th className="px-6 py-3 text-left text-[13px] font-medium text-slate-600">Tên bản ghi</th>
+                        <th className="px-6 py-3 text-left text-[13px] font-medium text-slate-600">Mô tả</th>
+                        <th className="px-6 py-3 text-left text-[13px] font-medium text-slate-600">Ngày tạo</th>
+                        <th className="px-6 py-3 text-left text-[13px] font-medium text-slate-600">Người tạo</th>
+                        <th className="px-6 py-3 text-left text-[13px] font-medium text-slate-600">Người cập nhật</th>
+                        <th className="px-6 py-3 text-left text-[13px] font-medium text-slate-600">Ngày cập nhật</th>
+                        <th className="px-6 py-3 text-left text-[13px] font-medium text-slate-600">Trạng thái</th>
+                        <th className="px-6 py-3 text-left text-[13px] font-medium text-slate-600">Thao tác</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1579,24 +1573,24 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                               />
                             )}
                           </td>
-                          <td className="px-6 py-4 text-sm text-slate-900">{index + 1}</td>
-                          <td className="px-6 py-4 text-sm">
-                            <code className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">
+                          <td className="px-6 py-3 text-[13px] text-slate-900">{index + 1}</td>
+                          <td className="px-6 py-3 text-[13px]">
+                            <code className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-[13px]">
                               {request.recordCode}
                             </code>
                           </td>
-                          <td className="px-6 py-4">
-                            <div className="text-sm text-slate-900">{request.recordName}</div>
+                          <td className="px-6 py-3">
+                            <div className="text-[13px] text-slate-900">{request.recordName}</div>
                           </td>
-                          <td className="px-6 py-4 text-sm text-slate-600">
+                          <td className="px-6 py-3 text-[13px] text-slate-600">
                             {request.description || '—'}
                           </td>
-                          <td className="px-6 py-4 text-sm text-slate-600">{request.createdDate}</td>
-                          <td className="px-6 py-4 text-sm text-slate-600">{request.createdBy}</td>
-                          <td className="px-6 py-4 text-sm text-slate-600">{request.changedBy}</td>
-                          <td className="px-6 py-4 text-sm text-slate-600">{request.changedDate}</td>
-                          <td className="px-6 py-4 whitespace-nowrap">{getApprovalStatusBadge(request.status)}</td>
-                          <td className="px-6 py-4">
+                          <td className="px-6 py-3 text-[13px] text-slate-600">{request.createdDate}</td>
+                          <td className="px-6 py-3 text-[13px] text-slate-600">{request.createdBy}</td>
+                          <td className="px-6 py-3 text-[13px] text-slate-600">{request.changedBy}</td>
+                          <td className="px-6 py-3 text-[13px] text-slate-600">{request.changedDate}</td>
+                          <td className="px-6 py-3 whitespace-nowrap">{getApprovalStatusBadge(request.status)}</td>
+                          <td className="px-6 py-3">
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={() => handleViewApprovalDetail(request)}
@@ -2108,12 +2102,14 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                     return;
                   }
                   
-                  // Mock sending request
                   const selectedApprover = approvers.find(a => a.id === archiveRequestData.approver);
-                  setSuccessNotificationMessage(`Đã gửi yêu cầu ngừng áp dụng đến ${selectedApprover?.name} (${selectedApprover?.role})`);
+                  setCategories(prev => prev.map(c =>
+                    c.id === selectedCategory.id ? { ...c, status: 'pending' as const } : c
+                  ));
+                  setSuccessNotificationMessage(`Đã gửi yêu cầu ngừng áp dụng đến ${selectedApprover?.name} — bản ghi chuyển sang Chờ phê duyệt`);
                   setShowSuccessNotification(true);
                   setTimeout(() => setShowSuccessNotification(false), 3000);
-                  
+
                   setShowArchiveModal(false);
                   setSelectedCategory(null);
                   setArchiveRequestData({ reason: '', approver: '' });
@@ -2135,19 +2131,28 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
         entityName={categoryName}
         entityCode={categoryId}
         onSave={(data) => {
+          const currentDate = new Date().toLocaleDateString('vi-VN');
           const newCat: Category = {
             id: `cat-${Date.now()}`,
             code: data.code,
             name: data.name,
             description: data.description,
             type: 'standard',
-            status: 'pending',
-            createdDate: new Date().toLocaleDateString('vi-VN'),
+            status: 'draft',
+            createdDate: currentDate,
             createdBy: 'Nguyễn Văn A',
           };
           setCategories(prev => [...prev, newCat]);
+          setVersionHistoryList(prev => [{
+            version: getNextVersionLabel(),
+            date: currentDate,
+            effectiveDate: '',
+            user: 'Nguyễn Văn A',
+            changes: `Thêm bản ghi: ${data.name} (${data.code})`,
+            status: 'pending'
+          }, ...prev]);
           setShowAddModal(false);
-          setSuccessNotificationMessage('Đã gửi bản ghi mới chờ phê duyệt thành công!');
+          setSuccessNotificationMessage('Đã lưu bản ghi mới thành công!');
           setShowSuccessNotification(true);
           setTimeout(() => setShowSuccessNotification(false), 3000);
         }}
@@ -2161,34 +2166,44 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
         entityName={categoryName}
         entityCode={categoryId}
         onSave={(data) => {
+          const currentDate = new Date().toLocaleDateString('vi-VN');
           setCategories(prev => prev.map(c =>
             c.id === editingRecord?.id
-              ? { ...c, code: data.code, name: data.name, description: data.description, status: 'pending' as const, updatedDate: new Date().toLocaleDateString('vi-VN'), updatedBy: 'Nguyễn Văn A' }
+              ? { ...c, code: data.code, name: data.name, description: data.description, status: 'draft' as const, updatedDate: currentDate, updatedBy: 'Nguyễn Văn A' }
               : c
           ));
+          setVersionHistoryList(prev => [{
+            version: getNextVersionLabel(),
+            date: currentDate,
+            effectiveDate: '',
+            user: 'Nguyễn Văn A',
+            changes: `Chỉnh sửa bản ghi: ${data.name} (${data.code})`,
+            status: 'pending'
+          }, ...prev]);
           setShowEditModal(false);
           setEditingRecord(null);
-          setSuccessNotificationMessage('Đã gửi yêu cầu chỉnh sửa chờ phê duyệt thành công!');
+          setSuccessNotificationMessage('Đã lưu chỉnh sửa bản ghi thành công!');
           setShowSuccessNotification(true);
           setTimeout(() => setShowSuccessNotification(false), 3000);
         }}
       />
 
       {showApprovalRequestModal && (
-        <ApprovalRequestModal
+        <UpdateApprovalModal
           isOpen={showApprovalRequestModal}
           onClose={() => setShowApprovalRequestModal(false)}
-          data={{ id: 'new', code: 'NEW', name: 'Danh mục mới', type: 'category' }}
           approvers={[
             { id: '1', name: 'Nguyễn Văn A', position: 'Trưởng phòng', department: 'Phòng Quản lý dữ liệu' },
             { id: '2', name: 'Trần Thị B', position: 'Phó Giám đốc', department: 'Trung tâm CNTT' }
           ]}
-          form={approvalForm}
-          setForm={setApprovalForm}
-          onSubmit={() => {
-            alert('Đã gửi yêu cầu trình duyệt thành công!');
+          onSubmit={(_data) => {
+            const ids = selectedRecordIds;
+            setCategories(prev => prev.map(c => ids.includes(c.id) && c.status === 'draft' ? { ...c, status: 'pending' as const } : c));
+            setSelectedRecordIds([]);
             setShowApprovalRequestModal(false);
-            setShowAddModal(false);
+            setSuccessNotificationMessage(`Đã gửi ${ids.length} bản ghi chờ phê duyệt thành công!`);
+            setShowSuccessNotification(true);
+            setTimeout(() => setShowSuccessNotification(false), 3000);
           }}
         />
       )}
@@ -2220,23 +2235,9 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
 
       {activeTab === 'version-history' && (
         <div className="space-y-4">
-          <div className="flex justify-between items-center bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
-             <div>
-                <h3 className="font-bold text-slate-800 text-[15px]">Danh sách phiên bản</h3>
-                <p className="text-sm text-slate-500 mt-1">Quản lý, tra cứu và đóng băng các phiên bản của danh mục hệ thống</p>
-             </div>
-             <button
-               onClick={() => {
-                 setNewVersionName('v3.3');
-                 setNewEffectiveDate(new Date().toISOString().split('T')[0]);
-                 setNewChangeDesc('');
-                 setShowCreateVersionModal(true);
-               }}
-               className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[13px] font-medium transition-colors cursor-pointer active:scale-95 shadow-sm shadow-blue-100/50"
-             >
-               <Plus className="w-4 h-4" />
-               Tạo phiên bản mới
-             </button>
+          <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
+             <h3 className="font-bold text-slate-800 text-[15px]">Danh sách phiên bản</h3>
+             <p className="text-sm text-slate-500 mt-1">Quản lý, tra cứu và đóng băng các phiên bản của danh mục hệ thống</p>
           </div>
           {/* Version History Table */}
           <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
@@ -2263,24 +2264,16 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                       <td className="px-4 py-3 text-sm text-slate-700">{history.changes}</td>
                       <td className="px-4 py-3">
                         {history.status === 'active' && (
-                          <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
-                            Đang dùng
-                          </span>
+                          <span className="px-2 py-1 bg-green-100 text-green-700 text-[13px] rounded-full">Hiệu lực</span>
                         )}
                         {history.status === 'archived' && (
-                          <span className="px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-full">
-                            Hết hiệu lực
-                          </span>
-                        )}
-                        {history.status === 'draft' && (
-                          <span className="px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded-full">
-                            Bản nháp
-                          </span>
+                          <span className="px-2 py-1 bg-slate-100 text-slate-600 text-[13px] rounded-full">Hết hiệu lực</span>
                         )}
                         {history.status === 'pending' && (
-                          <span className="px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded-full">
-                            Chờ duyệt
-                          </span>
+                          <span className="px-2 py-1 bg-purple-100 text-purple-700 text-[13px] rounded-full">Chờ phê duyệt</span>
+                        )}
+                        {history.status === 'locked' && (
+                          <span className="px-2 py-1 bg-red-100 text-red-700 text-[13px] rounded-full">Ngừng tham chiếu</span>
                         )}
                       </td>
                       <td className="px-4 py-3">
@@ -2297,57 +2290,36 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                             <Eye className="w-4 h-4" />
                           </button>
 
-                          {/* 2. Đặt làm phiên bản chính */}
-                          <button
-                            onClick={() => {
-                               setSelectedVersionData(history);
-                               setShowRestoreModal(true);
-                            }}
-                            className="p-1 text-green-600 hover:bg-green-50 rounded cursor-pointer"
-                            title="Đặt làm phiên bản chính"
-                          >
-                            <Clock className="w-4 h-4" />
-                          </button>
-
-                          {/* 3. Khóa */}
-                          <button
-                            onClick={() => alert(`Đã khóa tham chiếu phiên bản ${history.version}`)}
-                            className="p-1 text-orange-600 hover:bg-orange-50 rounded cursor-pointer"
-                            title="Khóa phiên bản"
-                          >
-                            <Lock className="w-4 h-4" />
-                          </button>
+                          {/* 3. Khóa / Mở khóa */}
+                          {history.status === 'locked' ? (
+                            <button
+                              onClick={() => setVersionHistoryList(prev => prev.map((v, i) => i === index ? { ...v, status: 'archived' } : v))}
+                              className="p-1 text-slate-500 hover:bg-slate-100 rounded cursor-pointer"
+                              title="Mở tham chiếu"
+                            >
+                              <Unlock className="w-4 h-4" />
+                            </button>
+                          ) : (
+                            <button
+                              disabled={history.status === 'active'}
+                              onClick={() => setVersionHistoryList(prev => prev.map((v, i) => i === index ? { ...v, status: 'locked' } : v))}
+                              className={`p-1 rounded ${history.status === 'active' ? 'text-slate-300 cursor-not-allowed' : 'text-orange-600 hover:bg-orange-50 cursor-pointer'}`}
+                              title={history.status === 'active' ? 'Không thể khóa phiên bản đang hiệu lực' : 'Ngừng tham chiếu'}
+                            >
+                              <Lock className="w-4 h-4" />
+                            </button>
+                          )}
 
                           {/* 4. Tải xuống */}
                           <button
+                            disabled={history.status === 'locked'}
                             onClick={() => alert('Đang tải xuống dữ liệu phiên bản ' + history.version)}
-                            className="p-1 text-slate-600 hover:bg-slate-50 rounded cursor-pointer"
-                            title="Tải xuống"
+                            className={`p-1 rounded ${history.status === 'locked' ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-slate-50 cursor-pointer'}`}
+                            title={history.status === 'locked' ? 'Không thể tải xuống phiên bản đã ngừng tham chiếu' : 'Tải xuống'}
                           >
                             <Download className="w-4 h-4" />
                           </button>
 
-                          {/* 5. Chỉnh sửa thông tin và cấu trúc */}
-                          <button
-                            onClick={() => {
-                              setSelectedCategory({
-                                id: '1', code: 'VN01', name: 'Hà Nội', description: 'Thành phố trực thuộc Trung ương', type: 'standard', status: 'active', createdDate: '01/01/2024', fields: []
-                              });
-                              setEditedCategoryData({
-                                code: 'VN01',
-                                name: 'Hà Nội',
-                                type: 'standard',
-                                status: 'active',
-                                description: 'Thành phố trực thuộc Trung ương',
-                                approver: ''
-                              });
-                              setShowEditModal(true);
-                            }}
-                            className="p-1 text-amber-600 hover:bg-amber-50 rounded cursor-pointer"
-                            title="Chỉnh sửa thông tin và cấu trúc phiên bản"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
                         </div>
                       </td>
                     </tr>
@@ -2450,7 +2422,16 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
               </button>
               <button
                 onClick={() => {
+                  const currentDate = new Date().toLocaleDateString('vi-VN');
                   setNewCategoryFields([...newCategoryFields, { ...newFieldData, id: Date.now().toString() }]);
+                  setVersionHistoryList(prev => [{
+                    version: getNextVersionLabel(),
+                    date: currentDate,
+                    effectiveDate: '',
+                    user: 'Nguyễn Văn A',
+                    changes: `Thêm trường dữ liệu: ${newFieldData.name}`,
+                    status: 'pending'
+                  }, ...prev]);
                   setNewFieldData({ name: '', dataType: 'TEXT', required: false, defaultValue: '', maxLength: 255, description: '', isPrimaryKey: false, isForeignKey: false, referenceTable: '', referenceField: '' });
                 }}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -2704,12 +2685,24 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                     fieldsToUpdate = fieldsToUpdate.map(f => ({ ...f, isPrimaryKey: false }));
                   }
 
-                  if (editingFieldIndex !== null) {
+                  const currentDate = new Date().toLocaleDateString('vi-VN');
+                  const isEditing = editingFieldIndex !== null;
+                  if (isEditing) {
                     fieldsToUpdate[editingFieldIndex] = { ...newFieldData, id: newCategoryFields[editingFieldIndex].id };
                     setNewCategoryFields(fieldsToUpdate);
                   } else {
                     setNewCategoryFields([...fieldsToUpdate, { ...newFieldData, id: Date.now().toString() }]);
                   }
+                  setVersionHistoryList(prev => [{
+                    version: getNextVersionLabel(),
+                    date: currentDate,
+                    effectiveDate: '',
+                    user: 'Nguyễn Văn A',
+                    changes: isEditing
+                      ? `Chỉnh sửa trường dữ liệu: ${newFieldData.name}`
+                      : `Thêm trường dữ liệu: ${newFieldData.name}`,
+                    status: 'pending'
+                  }, ...prev]);
                   setNewFieldData({ name: '', dataType: 'TEXT', required: false, defaultValue: '', maxLength: 255, description: '', isPrimaryKey: false, isForeignKey: false, referenceTable: '', referenceField: '' });
                   setEditingFieldIndex(null);
                   setFieldErrors({});
@@ -3330,7 +3323,7 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                       selectedVersionData.status === 'pending' ? 'bg-orange-100 text-orange-700' :
                       'bg-slate-100 text-slate-600'
                     }`}>{
-                      selectedVersionData.status === 'active' ? 'Đang dùng' :
+                      selectedVersionData.status === 'active' ? 'Hiệu lực' :
                       selectedVersionData.status === 'draft' ? 'Bản nháp' :
                       selectedVersionData.status === 'pending' ? 'Chờ duyệt' : 'Hết hiệu lực'
                     }</span></div>
@@ -3372,7 +3365,7 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
               </div>
             </div>
             <div className="p-5 text-[14px] text-slate-600 text-center">
-              Hệ thống sẽ chuyển đổi trạng thái của phiên bản {selectedVersionData.version} sang "Chờ duyệt". Phiên bản hiện tại đang sử dụng vẫn giữ nguyên trạng thái "Đang dùng" (Hiệu lực).
+              Hệ thống sẽ chuyển đổi trạng thái của phiên bản {selectedVersionData.version} sang "Chờ duyệt". Phiên bản hiện tại đang sử dụng vẫn giữ nguyên trạng thái "Hiệu lực".
             </div>
             <div className="p-5 border-t border-slate-200 flex justify-center gap-3 bg-slate-50">
               <button onClick={() => setShowRestoreModal(false)} className="px-5 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors text-[14px] flex-1">

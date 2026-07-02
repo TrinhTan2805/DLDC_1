@@ -2,7 +2,7 @@ export type TabType = 'setup' | 'attributes' | 'relationships' | 'approval' | 'v
 export type RelationshipType = '1-1' | '1-n' | 'n-1' | 'n-n';
 export type RelationshipStatus = 'active' | 'inactive';
 
-export type LifecycleStatus = 'active' | 'draft' | 'inactive' | 'archived' | 'pending_approval' | 'pending_expiration';
+export type LifecycleStatus = 'active' | 'draft' | 'inactive' | 'archived' | 'pending_approval' | 'pending_expiration' | 'approved' | 'rejected';
 export type DataType = 'standard' | 'reference' | 'transactional';
 export type ScopeType = 'national' | 'ministry' | 'provincial' | 'internal';
 export type DataSourceType = 'dldc' | 'manual';
@@ -119,4 +119,6 @@ export interface MasterDataEntity {
   syncFrequency?: SyncFrequencyType;
   customFields?: CustomField[];
   version?: number;
+  effectiveDate?: string;
+  effectiveImmediate?: boolean;
 }

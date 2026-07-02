@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Settings, Sliders, GitCompare, Network, Key, Plus, Edit, Trash2, X, Search, Filter, Check, Circle, CheckSquare } from 'lucide-react';
+import { Settings, Sliders, GitCompare, Network, Key, Plus, Edit, Trash2, X, Search, Filter, Circle, CheckSquare, ChevronDown, Eye, FileText, Clock, XCircle, Send } from 'lucide-react';
 import { AttributesManagementTab } from './AttributesManagementTab';
 import { MasterDataWizard } from './MasterDataWizard';
 import { MergeRulesManagementTab } from './MergeRulesManagementTab';
 import { EntityRelationshipsTab } from './EntityRelationshipsTab';
 import { UniqueIdentifierRulesTab } from './UniqueIdentifierRulesTab';
 import { ApprovalTab } from './ApprovalTab';
+import { Portal } from '../../common/Portal';
 
 type TabType = 'setup' | 'attributes' | 'merge-rules' | 'relationships' | 'identifier-rules' | 'approval';
 
@@ -145,6 +146,29 @@ const lifecycleLabels: Record<LifecycleStatus, { label: string; color: string }>
   archived: { label: 'Đã lưu trữ', color: 'bg-slate-100 text-slate-700' }
 };
 
+const getDataSourceLabel = (src?: string) => {
+  switch (src) {
+    case 'dldc':
+      return 'Đồng bộ Kho DLDC';
+    case 'lgsp':
+      return 'API qua trục LGSP';
+    case 'ndxp':
+      return 'API qua trục NDXP';
+    case 'manual':
+      return 'Nhập thủ công';
+    default:
+      return 'Chưa cấu hình';
+  }
+};
+
+const MOCK_APPROVERS = [
+  { id: 'a1', name: 'Nguyễn Văn An',    position: 'Trưởng phòng',       department: 'Phòng Quản lý dữ liệu' },
+  { id: 'a2', name: 'Trần Thị Bình',    position: 'Phó Cục trưởng',     department: 'Cục Hành chính tư pháp' },
+  { id: 'a3', name: 'Lê Minh Cường',    position: 'Chuyên viên cao cấp', department: 'Vụ Kế hoạch - Tài chính' },
+  { id: 'a4', name: 'Phạm Quốc Hùng',   position: 'Cục trưởng',         department: 'Cục Công nghệ thông tin' },
+  { id: 'a5', name: 'Hoàng Thị Lan',    position: 'Trưởng phòng',       department: 'Phòng Nghiệp vụ pháp lý' },
+];
+
 export function MasterDataScaleManagementPage() {
   const [activeTab, setActiveTab] = useState<TabType>('setup');
   const [entities, setEntities] = useState<MasterDataEntity[]>(defaultEntities);
@@ -152,8 +176,14 @@ export function MasterDataScaleManagementPage() {
   const [showWizard, setShowWizard] = useState(false);
   const [wizardStep, setWizardStep] = useState(1);
   const [editingEntity, setEditingEntity] = useState<MasterDataEntity | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<LifecycleStatus | 'all'>('all');
+  const [filterScope, setFilterScope] = useState<string>('all');
+  const [filterDataSource, setFilterDataSource] = useState<string>('all');
+  const [showFilters, setShowFilters] = useState(false);
+  const [pageSize, setPageSize] = useState(10);
+  const [currentPageNum, setCurrentPageNum] = useState(1);
 
   const [formData, setFormData] = useState<Partial<MasterDataEntity>>({
     name: '',
@@ -221,8 +251,42 @@ export function MasterDataScaleManagementPage() {
   };
 
   const handleDelete = (id: string) => {
-    if (confirm('Bạn có chắc chắn muốn xóa thực thể này?')) {
-      setEntities(entities.filter(e => e.id !== id));
+    setDeleteConfirmId(id);
+  };
+
+  const handleConfirmDelete = () => {
+    if (deleteConfirmId) {
+      setEntities(entities.filter(e => e.id !== deleteConfirmId));
+      setDeleteConfirmId(null);
+    }
+  };
+
+  const [approvalEntity, setApprovalEntity] = useState<MasterDataEntity | null>(null);
+  const [selectedApprover, setSelectedApprover] = useState('');
+  const [approvalNote, setApprovalNote] = useState('');
+
+  const handleApprove = (entity: MasterDataEntity) => {
+    setApprovalEntity(entity);
+    setSelectedApprover('');
+    setApprovalNote('');
+  };
+
+  const handleCloseApprovalModal = () => {
+    setApprovalEntity(null);
+    setSelectedApprover('');
+    setApprovalNote('');
+  };
+
+  const handleConfirmApprove = () => {
+    if (approvalEntity && selectedApprover) {
+      const now = new Date();
+      const dateStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+      setEntities(entities.map(e =>
+        e.id === approvalEntity.id
+          ? { ...e, lifecycleStatus: 'active' as LifecycleStatus, updatedDate: dateStr }
+          : e
+      ));
+      handleCloseApprovalModal();
     }
   };
 
@@ -242,99 +306,166 @@ export function MasterDataScaleManagementPage() {
   const filteredEntities = entities.filter(e => {
     const matchesSearch = e.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       e.code.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterStatus === 'all' || e.lifecycleStatus === filterStatus;
-    return matchesSearch && matchesFilter;
+    const matchesStatus = filterStatus === 'all' || e.lifecycleStatus === filterStatus;
+    const matchesScope = filterScope === 'all' || e.scope === filterScope;
+    const matchesDataSource = filterDataSource === 'all' || e.dataSource === filterDataSource;
+    return matchesSearch && matchesStatus && matchesScope && matchesDataSource;
   });
+
+  const paginatedEntities = filteredEntities.slice((currentPageNum - 1) * pageSize, currentPageNum * pageSize);
+
+  const renderPagination = (totalItemsCount: number) => {
+    if (totalItemsCount <= 0) return null;
+    const totalPages = Math.ceil(totalItemsCount / pageSize);
+    const startItem = (currentPageNum - 1) * pageSize + 1;
+    const endItem = Math.min(currentPageNum * pageSize, totalItemsCount);
+
+    return (
+      <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-white text-[13px] font-medium">
+        {/* Left Side: Page Size Selector */}
+        <div className="flex items-center gap-2">
+          <span className="text-slate-600 font-normal">Hiển thị</span>
+          <select
+            aria-label="Select record count"
+            value={pageSize}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value));
+              setCurrentPageNum(1);
+            }}
+            className="px-2 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 bg-white text-[13px] cursor-pointer font-medium"
+            title="Số bản ghi trên trang"
+          >
+            <option value={10}>10</option>
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+          </select>
+          <span className="text-slate-600 font-normal">bản ghi/trang</span>
+        </div>
+
+        {/* Right Side: Page Range and Navigation */}
+        <div className="flex items-center gap-4">
+          <span className="text-slate-600 font-normal">
+            {startItem} - {endItem} / {totalItemsCount}
+          </span>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setCurrentPageNum(Math.max(1, currentPageNum - 1))}
+              disabled={currentPageNum === 1}
+              className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
+            >
+              Trước
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                onClick={() => setCurrentPageNum(page)}
+                className={`px-3 py-1.5 border rounded-xl font-medium text-[13px] transition-colors cursor-pointer ${currentPageNum === page
+                  ? 'bg-blue-600 border-blue-600 text-white'
+                  : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
+              >
+                {page}
+              </button>
+            ))}
+            <button
+              onClick={() => setCurrentPageNum(Math.min(totalPages, currentPageNum + 1))}
+              disabled={currentPageNum === totalPages}
+              className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
+            >
+              Sau
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-6">
-      <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+      <div className="overflow-hidden">
         {/* Tabs */}
-        <div className="flex border-b border-slate-200 overflow-x-auto">
-          <button title="Nút bấm"
-            onClick={() => setActiveTab('setup')}
-            className={`flex items-center gap-2 px-6 py-3 text-sm transition-colors whitespace-nowrap ${activeTab === 'setup'
-              ? 'bg-white text-slate-900 border-b-2 border-slate-900'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+        <div className="flex border-b border-slate-200 overflow-x-auto bg-white">
+          {[
+            { id: 'setup', label: 'Thiết lập thực thể', icon: Settings },
+            { id: 'attributes', label: 'Thiết lập thuộc tính', icon: Sliders },
+            { id: 'merge-rules', label: 'Thiết lập quy tắc hợp nhất', icon: GitCompare },
+            { id: 'relationships', label: 'Thiết lập quan hệ thực thể', icon: Network },
+            { id: 'identifier-rules', label: 'Quy tắc định danh duy nhất', icon: Key },
+            { id: 'approval', label: 'Phê duyệt', icon: CheckSquare }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as TabType)}
+              className={`flex items-center gap-2 px-6 py-4 text-[13px] font-medium transition-all border-b-2 cursor-pointer whitespace-nowrap ${activeTab === tab.id
+                ? 'border-blue-600 text-blue-600 bg-blue-50/50 font-bold'
+                : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
               }`}
-          >
-            <Settings className="w-4 h-4" />
-            Thiết lập DL chủ
-          </button>
-          <button title="Nút bấm"
-            onClick={() => setActiveTab('attributes')}
-            className={`flex items-center gap-2 px-6 py-3 text-sm transition-colors whitespace-nowrap ${activeTab === 'attributes'
-              ? 'bg-white text-slate-900 border-b-2 border-slate-900'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-              }`}
-          >
-            <Sliders className="w-4 h-4" />
-            Thiết lập thuộc tính
-          </button>
-          <button title="Nút bấm"
-            onClick={() => setActiveTab('merge-rules')}
-            className={`flex items-center gap-2 px-6 py-3 text-sm transition-colors whitespace-nowrap ${activeTab === 'merge-rules'
-              ? 'bg-white text-slate-900 border-b-2 border-slate-900'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-              }`}
-          >
-            <GitCompare className="w-4 h-4" />
-            Thiết lập quy tắc hợp nhất
-          </button>
-          <button title="Nút bấm"
-            onClick={() => setActiveTab('relationships')}
-            className={`flex items-center gap-2 px-6 py-3 text-sm transition-colors whitespace-nowrap ${activeTab === 'relationships'
-              ? 'bg-white text-slate-900 border-b-2 border-slate-900'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-              }`}
-          >
-            <Network className="w-4 h-4" />
-            Thiết lập quan hệ thực thể
-          </button>
-          <button title="Nút bấm"
-            onClick={() => setActiveTab('identifier-rules')}
-            className={`flex items-center gap-2 px-6 py-3 text-sm transition-colors whitespace-nowrap ${activeTab === 'identifier-rules'
-              ? 'bg-white text-slate-900 border-b-2 border-slate-900'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-              }`}
-          >
-            <Key className="w-4 h-4" />
-            Quy tắc định danh duy nhất
-          </button>
-          <button title="Nút bấm"
-            onClick={() => setActiveTab('approval')}
-            className={`flex items-center gap-2 px-6 py-3 text-sm transition-colors whitespace-nowrap ${activeTab === 'approval'
-              ? 'bg-white text-slate-900 border-b-2 border-slate-900'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-              }`}
-          >
-            <CheckSquare className="w-4 h-4" />
-            Phê duyệt
-          </button>
+            >
+              <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-blue-600' : 'text-slate-400'}`} />
+              {tab.label}
+            </button>
+          ))}
         </div>
 
         {/* Tab Content */}
         <div className="p-6">
           {activeTab === 'setup' && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
+              {/* Statistics Cards */}
+              <div className="grid grid-cols-4 gap-4 mb-6">
+                <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[13px] text-slate-500">Tổng số dữ liệu chủ</span>
+                    <FileText className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div className="text-2xl font-bold text-slate-900">{entities.length}</div>
+                </div>
+
+                <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[13px] text-slate-500">Đang soạn thảo</span>
+                    <Clock className="w-5 h-5 text-yellow-500" />
+                  </div>
+                  <div className="text-2xl font-bold text-slate-900">{entities.filter(e => e.lifecycleStatus === 'draft').length}</div>
+                </div>
+
+                <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[13px] text-slate-500">Đã hiệu lực</span>
+                    <CheckSquare className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div className="text-2xl font-bold text-slate-900">{entities.filter(e => e.lifecycleStatus === 'active').length}</div>
+                </div>
+
+                <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[13px] text-slate-500">Ngừng sử dụng</span>
+                    <XCircle className="w-5 h-5 text-red-600" />
+                  </div>
+                  <div className="text-2xl font-bold text-slate-900">{entities.filter(e => e.lifecycleStatus === 'inactive').length}</div>
+                </div>
+              </div>
+
+              {/* Header section with Buttons */}
+              <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h2 className="text-slate-900">Thiết lập dữ liệu chủ</h2>
-                  <p className="text-sm text-slate-600 mt-1">
+                  <h2 className="text-[16px] font-bold text-slate-900">Thiết lập dữ liệu chủ</h2>
+                  <p className="text-[13px] text-slate-500 mt-0.5">
                     Quản lý các thực thể dữ liệu chủ trong hệ thống
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <button title="Nút bấm"
+                  <button
                     onClick={() => setShowWizard(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-sm"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-[13px] flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm active:scale-95 animate-none"
                   >
                     <Plus className="w-4 h-4" />
                     Tạo mới (Wizard 5 bước)
                   </button>
-                  <button title="Nút bấm"
+                  <button
                     onClick={() => setShowForm(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+                    className="bg-white text-[#020817] border border-[#e2e8f0] hover:bg-slate-50 px-4 py-2 rounded-lg font-medium text-[13px] flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm active:scale-95"
                   >
                     <Plus className="w-4 h-4" />
                     Thêm mới nhanh
@@ -342,135 +473,247 @@ export function MasterDataScaleManagementPage() {
                 </div>
               </div>
 
-              {/* Search and Filter */}
-              <div className="flex gap-4">
-                <div className="flex-1 relative">
-                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input title="Dữ liệu"
-                    type="text"
-                    placeholder="Tìm kiếm theo tên hoặc mã..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+              {/* Search and Action Bar */}
+              <div className="space-y-3 mb-6">
+                <div className="flex flex-col md:flex-row items-center gap-3">
+                  <div className="flex-1 w-full flex items-center gap-2">
+                    <div className="flex-1 relative">
+                      <input
+                        type="text"
+                        placeholder="Tìm kiếm theo tên hoặc mã dữ liệu chủ..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full px-4 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-400 bg-white hover:bg-slate-50/50 font-medium shadow-sm"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      className="w-10 h-10 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shrink-0 transition-all cursor-pointer active:scale-95 shadow-sm"
+                      title="Tìm kiếm"
+                    >
+                      <Search className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowFilters(!showFilters)}
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all border cursor-pointer active:scale-95 ${
+                        showFilters
+                          ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-sm'
+                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                      }`}
+                      title={showFilters ? "Đóng bộ lọc" : "Bộ lọc nâng cao"}
+                    >
+                      {showFilters ? <X className="w-4.5 h-4.5" /> : <Filter className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Filter className="w-4 h-4 text-slate-600" />
-                  <select title="Lựa chọn"
-                    value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value as LifecycleStatus | 'all')}
-                    className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="all">Tất cả trạng thái</option>
-                    <option value="active">Đã hiệu lực</option>
-                    <option value="draft">Đang soạn thảo</option>
-                    <option value="inactive">Ngừng sử dụng</option>
-                    <option value="archived">Đã lưu trữ</option>
-                  </select>
-                </div>
+
+                {/* Collapsible Filters Panel */}
+                {showFilters && (
+                  <div className="relative p-4 bg-white border border-slate-200 rounded-xl shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] before:content-[''] before:absolute before:-top-[7px] before:right-[208px] md:before:right-[auto] md:before:left-[calc(100%-100px)] lg:before:left-[calc(100%-242px)] before:w-3 before:h-3 before:bg-white before:rotate-45 before:border-l before:border-t before:border-slate-200">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Trạng thái vòng đời</label>
+                        <div className="relative">
+                          <select
+                            value={filterStatus}
+                            onChange={(e) => setFilterStatus(e.target.value as LifecycleStatus | 'all')}
+                            className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium font-sans"
+                          >
+                            <option value="all">Tất cả trạng thái</option>
+                            <option value="active">Đã hiệu lực</option>
+                            <option value="draft">Đang soạn thảo</option>
+                            <option value="inactive">Ngừng sử dụng</option>
+                            <option value="archived">Đã lưu trữ</option>
+                          </select>
+                          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Phạm vi sử dụng</label>
+                        <div className="relative">
+                          <select
+                            value={filterScope}
+                            onChange={(e) => setFilterScope(e.target.value)}
+                            className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium font-sans"
+                          >
+                            <option value="all">Tất cả phạm vi</option>
+                            <option value="national">Cấp quốc gia</option>
+                            <option value="ministry">Cấp bộ</option>
+                            <option value="provincial">Cấp tỉnh/thành</option>
+                            <option value="internal">Sử dụng nội bộ</option>
+                          </select>
+                          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Nguồn dữ liệu</label>
+                        <div className="relative">
+                          <select
+                            value={filterDataSource}
+                            onChange={(e) => setFilterDataSource(e.target.value)}
+                            className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium font-sans"
+                          >
+                            <option value="all">Tất cả nguồn dữ liệu</option>
+                            <option value="dldc">Từ Kho DLDC</option>
+                            <option value="lgsp">API qua trục LGSP</option>
+                            <option value="ndxp">API qua trục NDXP</option>
+                            <option value="manual">Nhập thủ công</option>
+                          </select>
+                          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Entity List */}
-              <div className="border border-slate-200 rounded-lg overflow-hidden">
-                <table className="w-full">
-                  <thead className="bg-slate-50">
-                    <tr>
-                      <th className="text-left px-4 py-3 text-sm text-slate-700">Mã</th>
-                      <th className="text-left px-4 py-3 text-sm text-slate-700">Tên dữ liệu chủ</th>
-                      <th className="text-left px-4 py-3 text-sm text-slate-700">Loại dữ liệu</th>
-                      <th className="text-left px-4 py-3 text-sm text-slate-700">Cơ quan quản lý</th>
-                      <th className="text-left px-4 py-3 text-sm text-slate-700">Trạng thái</th>
-                      <th className="text-left px-4 py-3 text-sm text-slate-700">Cập nhật</th>
-                      <th className="text-right px-4 py-3 text-sm text-slate-700">Thao tác</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredEntities.map((entity) => (
-                      <tr key={entity.id} className="border-t border-slate-200 hover:bg-slate-50">
-                        <td className="px-4 py-3 text-sm text-slate-900">{entity.code}</td>
-                        <td className="px-4 py-3 text-sm text-slate-900">{entity.name}</td>
-                        <td className="px-4 py-3 text-sm text-slate-600">{dataTypeLabels[entity.dataType]}</td>
-                        <td className="px-4 py-3 text-sm text-slate-600">{entity.managingAgency}</td>
-                        <td className="px-4 py-3">
-                          <span className={`inline-flex items-center px-2 py-1 rounded text-xs ${lifecycleLabels[entity.lifecycleStatus].color}`}>
-                            {lifecycleLabels[entity.lifecycleStatus].label}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-sm text-slate-600">{entity.updatedDate}</td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center justify-end gap-2">
-                            <button title="Nút bấm"
-                              onClick={() => handleEdit(entity)}
-                              className="p-1 text-blue-600 hover:bg-blue-50 rounded"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </button>
-                            <button title="Nút bấm"
-                              onClick={() => handleDelete(entity.id)}
-                              className="p-1 text-red-600 hover:bg-red-50 rounded"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
+              <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
+                      <tr>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">STT</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Mã dữ liệu chủ</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên dữ liệu chủ</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Loại dữ liệu</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Cơ quan quản lý</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Phạm vi sử dụng</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Nguồn dữ liệu</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Cập nhật lần cuối</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Trạng thái</th>
+                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-28">Thao tác</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 bg-white">
+                      {paginatedEntities.length > 0 ? (
+                        paginatedEntities.map((entity, index) => (
+                          <tr key={entity.id} className="hover:bg-slate-50/50 transition-all group border-b border-slate-100">
+                            <td className="px-6 py-4 text-slate-500 text-[13px] font-normal">{(currentPageNum - 1) * pageSize + index + 1}</td>
+                            <td className="px-6 py-4 text-slate-900 text-[13px] font-mono font-semibold">{entity.code}</td>
+                            <td className="px-6 py-4 text-slate-900 text-[13px] font-normal hover:text-blue-600 transition-colors">{entity.name}</td>
+                            <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{dataTypeLabels[entity.dataType]}</td>
+                            <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{entity.managingAgency}</td>
+                            <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{scopeLabels[entity.scope] || entity.scope}</td>
+                            <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{getDataSourceLabel(entity.dataSource)}</td>
+                            <td className="px-6 py-4 text-center text-[13px] text-slate-700">{entity.updatedDate}</td>
+                            <td className="px-6 py-4 text-center">
+                              <div className="flex justify-center">
+                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[13px] font-normal border whitespace-nowrap ${
+                                  entity.lifecycleStatus === 'active'
+                                    ? 'bg-green-50 text-green-700 border-green-100'
+                                    : entity.lifecycleStatus === 'draft'
+                                      ? 'bg-yellow-50 text-yellow-700 border-yellow-100'
+                                      : entity.lifecycleStatus === 'inactive'
+                                        ? 'bg-red-50 text-red-700 border-red-100'
+                                        : 'bg-slate-50 text-slate-700 border-slate-200'
+                                }`}>
+                                  {lifecycleLabels[entity.lifecycleStatus]?.label || entity.lifecycleStatus}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex items-center justify-center gap-1.5">
+                                <button
+                                  onClick={() => entity.lifecycleStatus === 'draft' && handleApprove(entity)}
+                                  disabled={entity.lifecycleStatus !== 'draft'}
+                                  className={`p-1.5 rounded-lg transition-colors ${
+                                    entity.lifecycleStatus === 'draft'
+                                      ? 'text-indigo-600 hover:bg-indigo-50 cursor-pointer'
+                                      : 'text-slate-300 cursor-not-allowed'
+                                  }`}
+                                  title={entity.lifecycleStatus === 'draft' ? 'Gửi trình duyệt' : 'Chỉ gửi được bản ghi đang soạn thảo'}
+                                >
+                                  <Send className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleEdit(entity)}
+                                  className="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 cursor-pointer transition-colors"
+                                  title="Chỉnh sửa"
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleDelete(entity.id)}
+                                  className="p-1.5 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-50 cursor-pointer transition-colors"
+                                  title="Xóa"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={10} className="px-6 py-8 text-center text-[13px] text-slate-500">
+                            Không tìm thấy dữ liệu
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+                {/* Pagination */}
+                {renderPagination(filteredEntities.length)}
               </div>
 
               {/* Form Modal */}
               {showForm && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                  <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-                    <div className="flex items-center justify-between p-6 border-b border-slate-200">
-                      <h3 className="text-lg text-slate-900">
+                <Portal>
+                  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 transition-all">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-slate-200">
+                    <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-white">
+                      <h3 className="text-[16px] font-bold text-slate-900">
                         {editingEntity ? 'Chỉnh sửa thực thể dữ liệu chủ' : 'Thêm mới thực thể dữ liệu chủ'}
                       </h3>
-                      <button title="Nút bấm" onClick={handleCloseForm} className="p-1 hover:bg-slate-100 rounded">
+                      <button onClick={handleCloseForm} className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
                         <X className="w-5 h-5" />
                       </button>
                     </div>
 
-                    <div className="p-6 space-y-4">
+                    <div className="p-6 space-y-4 overflow-y-auto flex-1 text-[13px]">
                       {/* Code (auto-generated) */}
                       {editingEntity && (
                         <div>
-                          <label className="block text-sm text-slate-700 mb-1">
-                            Mã dữ liệu chủ <span className="text-slate-500">(chi tiết)</span>
+                          <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
+                            Mã dữ liệu chủ
                           </label>
-                          <input title="Dữ liệu"
+                          <input
                             type="text"
                             value={editingEntity.code}
                             disabled
-                            className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-slate-50 text-slate-500"
+                            className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-400 outline-none text-[13px]"
                           />
                         </div>
                       )}
 
                       {/* Name */}
                       <div>
-                        <label className="block text-sm text-slate-700 mb-1">
+                        <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
                           Tên dữ liệu chủ <span className="text-red-600">*</span>
                         </label>
-                        <input title="Dữ liệu"
+                        <input
                           type="text"
                           value={formData.name}
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                           placeholder="VD: Bộ dữ liệu chủ Công dân"
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700"
                         />
                       </div>
 
                       {/* Data Type */}
                       <div>
-                        <label className="block text-sm text-slate-700 mb-1">
+                        <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
                           Loại dữ liệu <span className="text-red-600">*</span>
                         </label>
-                        <select title="Lựa chọn"
+                        <select
                           value={formData.dataType}
                           onChange={(e) => setFormData({ ...formData, dataType: e.target.value as DataType })}
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 cursor-pointer"
                         >
                           <option value="standard">Dữ liệu chuẩn</option>
                           <option value="reference">Dữ liệu tham chiếu</option>
@@ -480,27 +723,27 @@ export function MasterDataScaleManagementPage() {
 
                       {/* Managing Agency */}
                       <div>
-                        <label className="block text-sm text-slate-700 mb-1">
+                        <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
                           Cơ quan quản lý <span className="text-red-600">*</span>
                         </label>
-                        <input title="Dữ liệu"
+                        <input
                           type="text"
                           value={formData.managingAgency}
                           onChange={(e) => setFormData({ ...formData, managingAgency: e.target.value })}
                           placeholder="VD: Cục Hộ tịch - Quốc tịch - Chứng thực"
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700"
                         />
                       </div>
 
                       {/* Scope */}
                       <div>
-                        <label className="block text-sm text-slate-700 mb-1">
+                        <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
                           Phạm vi sử dụng <span className="text-red-600">*</span>
                         </label>
-                        <select title="Lựa chọn"
+                        <select
                           value={formData.scope}
                           onChange={(e) => setFormData({ ...formData, scope: e.target.value as ScopeType })}
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 cursor-pointer"
                         >
                           <option value="national">Cấp quốc gia</option>
                           <option value="ministry">Cấp bộ</option>
@@ -511,25 +754,25 @@ export function MasterDataScaleManagementPage() {
 
                       {/* Description */}
                       <div>
-                        <label className="block text-sm text-slate-700 mb-1">Mô tả</label>
-                        <textarea title="Dữ liệu"
+                        <label className="block text-[13px] font-medium text-slate-700 mb-1.5">Mô tả</label>
+                        <textarea
                           value={formData.description}
                           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                          placeholder="Dữ liệu chuẩn về công dân Việt Nam bao gồm thông tin cá nhân như họ tên, ngày sinh, số CCCD, nơi cư trú theo quy định của Luật CCCD 2023"
-                          rows={4}
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="Mô tả tóm tắt bộ dữ liệu chủ..."
+                          rows={3}
+                          className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 resize-none"
                         />
                       </div>
 
                       {/* Lifecycle Status */}
                       <div>
-                        <label className="block text-sm text-slate-700 mb-1">
-                          Trạng thái vòng đời <span className="text-slate-500">(chi tiết)</span>
+                        <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
+                          Trạng thái vòng đời
                         </label>
-                        <select title="Lựa chọn"
+                        <select
                           value={formData.lifecycleStatus}
                           onChange={(e) => setFormData({ ...formData, lifecycleStatus: e.target.value as LifecycleStatus })}
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 cursor-pointer"
                         >
                           <option value="draft">Đang soạn thảo</option>
                           <option value="active">Đã hiệu lực</option>
@@ -540,17 +783,17 @@ export function MasterDataScaleManagementPage() {
 
                       {/* SECTION: Data Source Configuration */}
                       <div className="pt-4 border-t border-slate-200">
-                        <h4 className="text-sm text-slate-900 mb-3">Cấu hình nguồn dữ liệu</h4>
+                        <h4 className="text-[13px] font-bold text-slate-900 mb-3">Cấu hình nguồn dữ liệu</h4>
 
                         {/* Data Source Type */}
                         <div className="mb-4">
-                          <label className="block text-sm text-slate-700 mb-1">
+                          <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
                             Nguồn dữ liệu <span className="text-red-600">*</span>
                           </label>
-                          <select title="Lựa chọn"
+                          <select
                             value={formData.dataSource || 'dldc'}
                             onChange={(e) => setFormData({ ...formData, dataSource: e.target.value as DataSourceType })}
-                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 cursor-pointer"
                           >
                             <option value="dldc">Từ Kho DLDC</option>
                             <option value="lgsp">API qua trục LGSP</option>
@@ -561,15 +804,15 @@ export function MasterDataScaleManagementPage() {
 
                         {/* DLDC Configuration */}
                         {formData.dataSource === 'dldc' && (
-                          <div className="space-y-3 bg-blue-50 p-4 rounded-lg">
+                          <div className="space-y-3 bg-blue-50/50 p-4 rounded-xl border border-blue-100/50">
                             <div>
-                              <label className="block text-sm text-slate-700 mb-1">
+                              <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
                                 Bảng dữ liệu <span className="text-red-600">*</span>
                               </label>
-                              <select title="Lựa chọn"
+                              <select
                                 value={formData.dldcTable || ''}
                                 onChange={(e) => setFormData({ ...formData, dldcTable: e.target.value })}
-                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 cursor-pointer"
                               >
                                 <option value="">-- Chọn bảng --</option>
                                 <option value="tbl_citizen">tbl_citizen - Thông tin công dân</option>
@@ -582,13 +825,13 @@ export function MasterDataScaleManagementPage() {
                               </select>
                             </div>
                             <div>
-                              <label className="block text-sm text-slate-700 mb-1">
+                              <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
                                 Cột/Trường dữ liệu <span className="text-slate-500">(chọn nhiều)</span>
                               </label>
-                              <div className="border border-slate-300 rounded-lg p-3 bg-white space-y-2 max-h-40 overflow-y-auto">
+                              <div className="border border-slate-200 rounded-lg p-3 bg-white space-y-2 max-h-40 overflow-y-auto">
                                 {['id', 'full_name', 'citizen_id', 'date_of_birth', 'address', 'phone_number', 'email', 'created_date', 'updated_date'].map(col => (
-                                  <label key={col} className="flex items-center gap-2 text-sm">
-                                    <input title="Dữ liệu"
+                                  <label key={col} className="flex items-center gap-2 text-[13px] font-normal cursor-pointer select-none">
+                                    <input
                                       type="checkbox"
                                       checked={formData.dldcColumns?.includes(col) || false}
                                       onChange={(e) => {
@@ -599,7 +842,7 @@ export function MasterDataScaleManagementPage() {
                                           setFormData({ ...formData, dldcColumns: current.filter(c => c !== col) });
                                         }
                                       }}
-                                      className="rounded"
+                                      className="rounded border-slate-200 text-blue-600 focus:ring-blue-500/20"
                                     />
                                     <span className="text-slate-700">{col}</span>
                                   </label>
@@ -611,51 +854,51 @@ export function MasterDataScaleManagementPage() {
 
                         {/* LGSP Configuration */}
                         {formData.dataSource === 'lgsp' && (
-                          <div className="space-y-3 bg-green-50 p-4 rounded-lg">
+                          <div className="space-y-3 bg-green-50/50 p-4 rounded-xl border border-green-100/50">
                             <div>
-                              <label className="block text-sm text-slate-700 mb-1">
+                              <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
                                 Hệ thống nguồn <span className="text-red-600">*</span>
                               </label>
-                              <input title="Dữ liệu"
+                              <input
                                 type="text"
                                 value={formData.apiSystem || ''}
                                 onChange={(e) => setFormData({ ...formData, apiSystem: e.target.value })}
                                 placeholder="VD: Hệ thống CCCD - Bộ Công an"
-                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700"
                               />
                             </div>
                             <div>
-                              <label className="block text-sm text-slate-700 mb-1">
+                              <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
                                 Đơn vị quản lý <span className="text-red-600">*</span>
                               </label>
-                              <input title="Dữ liệu"
+                              <input
                                 type="text"
                                 value={formData.apiManagingUnit || ''}
                                 onChange={(e) => setFormData({ ...formData, apiManagingUnit: e.target.value })}
                                 placeholder="VD: Cục Cảnh sát quản lý hành chính về trật tự xã hội"
-                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700"
                               />
                             </div>
                             <div>
-                              <label className="block text-sm text-slate-700 mb-1">
+                              <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
                                 API Endpoint <span className="text-red-600">*</span>
                               </label>
-                              <input title="Dữ liệu"
+                              <input
                                 type="text"
                                 value={formData.apiEndpoint || ''}
                                 onChange={(e) => setFormData({ ...formData, apiEndpoint: e.target.value })}
                                 placeholder="VD: https://lgsp.gov.vn/api/v1/citizen/info"
-                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700"
                               />
                             </div>
                             <div>
-                              <label className="block text-sm text-slate-700 mb-1">
+                              <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
                                 Phương thức <span className="text-red-600">*</span>
                               </label>
-                              <select title="Lựa chọn"
+                              <select
                                 value={formData.apiMethod || 'GET'}
                                 onChange={(e) => setFormData({ ...formData, apiMethod: e.target.value as 'GET' | 'POST' | 'PUT' })}
-                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 cursor-pointer"
                               >
                                 <option value="GET">GET</option>
                                 <option value="POST">POST</option>
@@ -667,51 +910,51 @@ export function MasterDataScaleManagementPage() {
 
                         {/* NDXP Configuration */}
                         {formData.dataSource === 'ndxp' && (
-                          <div className="space-y-3 bg-purple-50 p-4 rounded-lg">
+                          <div className="space-y-3 bg-purple-50/50 p-4 rounded-xl border border-purple-100/50">
                             <div>
-                              <label className="block text-sm text-slate-700 mb-1">
+                              <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
                                 Hệ thống nguồn <span className="text-red-600">*</span>
                               </label>
-                              <input title="Dữ liệu"
+                              <input
                                 type="text"
                                 value={formData.apiSystem || ''}
                                 onChange={(e) => setFormData({ ...formData, apiSystem: e.target.value })}
                                 placeholder="VD: Hệ thống Đăng ký kinh doanh - Bộ Kế hoạch và Đầu tư"
-                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700"
                               />
                             </div>
                             <div>
-                              <label className="block text-sm text-slate-700 mb-1">
+                              <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
                                 Đơn vị quản lý <span className="text-red-600">*</span>
                               </label>
-                              <input title="Dữ liệu"
+                              <input
                                 type="text"
                                 value={formData.apiManagingUnit || ''}
                                 onChange={(e) => setFormData({ ...formData, apiManagingUnit: e.target.value })}
                                 placeholder="VD: Cục Đăng ký kinh doanh"
-                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700"
                               />
                             </div>
                             <div>
-                              <label className="block text-sm text-slate-700 mb-1">
+                              <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
                                 API Endpoint <span className="text-red-600">*</span>
                               </label>
-                              <input title="Dữ liệu"
+                              <input
                                 type="text"
                                 value={formData.apiEndpoint || ''}
                                 onChange={(e) => setFormData({ ...formData, apiEndpoint: e.target.value })}
                                 placeholder="VD: https://ndxp.gov.vn/api/v1/business/registry"
-                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700"
                               />
                             </div>
                             <div>
-                              <label className="block text-sm text-slate-700 mb-1">
+                              <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
                                 Phương thức <span className="text-red-600">*</span>
                               </label>
-                              <select title="Lựa chọn"
+                              <select
                                 value={formData.apiMethod || 'GET'}
                                 onChange={(e) => setFormData({ ...formData, apiMethod: e.target.value as 'GET' | 'POST' | 'PUT' })}
-                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 cursor-pointer"
                               >
                                 <option value="GET">GET</option>
                                 <option value="POST">POST</option>
@@ -723,8 +966,8 @@ export function MasterDataScaleManagementPage() {
 
                         {/* Manual Entry Note */}
                         {formData.dataSource === 'manual' && (
-                          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                            <p className="text-sm text-amber-800">
+                          <div className="bg-amber-50/50 border border-amber-200/50 rounded-xl p-4">
+                            <p className="text-[13px] text-amber-800">
                               ℹ️ Dữ liệu sẽ được nhập thủ công bởi người dùng có quyền. Không cần cấu hình nguồn tự động.
                             </p>
                           </div>
@@ -733,17 +976,17 @@ export function MasterDataScaleManagementPage() {
                         {/* Update Strategy */}
                         {formData.dataSource && formData.dataSource !== 'manual' && (
                           <div className="mt-4 pt-4 border-t border-slate-200">
-                            <h5 className="text-sm text-slate-900 mb-3">Chiến lược cập nhật</h5>
+                            <h5 className="text-[13px] font-bold text-slate-900 mb-3">Chiến lược cập nhật</h5>
 
                             <div className="grid grid-cols-2 gap-3">
                               <div>
-                                <label className="block text-sm text-slate-700 mb-1">
+                                <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
                                   Loại cập nhật <span className="text-red-600">*</span>
                                 </label>
-                                <select title="Lựa chọn"
+                                <select
                                   value={formData.updateStrategy || 'reference'}
                                   onChange={(e) => setFormData({ ...formData, updateStrategy: e.target.value as UpdateStrategyType })}
-                                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 cursor-pointer"
                                 >
                                   <option value="reference">Tham chiếu (Reference)</option>
                                   <option value="scheduled">Cập nhật định kỳ (Scheduled)</option>
@@ -753,13 +996,13 @@ export function MasterDataScaleManagementPage() {
 
                               {formData.updateStrategy === 'scheduled' && (
                                 <div>
-                                  <label className="block text-sm text-slate-700 mb-1">
+                                  <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
                                     Tần suất đồng bộ <span className="text-red-600">*</span>
                                   </label>
-                                  <select title="Lựa chọn"
+                                  <select
                                     value={formData.syncFrequency || 'daily'}
                                     onChange={(e) => setFormData({ ...formData, syncFrequency: e.target.value as SyncFrequencyType })}
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 cursor-pointer"
                                   >
                                     <option value="daily">Hàng ngày</option>
                                     <option value="weekly">Hàng tuần</option>
@@ -771,7 +1014,7 @@ export function MasterDataScaleManagementPage() {
                             </div>
 
                             {/* Strategy Description */}
-                            <div className="mt-3 text-xs text-slate-600 bg-slate-50 p-3 rounded">
+                            <div className="mt-3 text-xs text-slate-600 bg-slate-50 p-3 rounded-lg">
                               {formData.updateStrategy === 'reference' && (
                                 <p>🔗 <strong>Tham chiếu:</strong> Dữ liệu được truy vấn trực tiếp từ nguồn khi cần, không lưu bản sao cục bộ.</p>
                               )}
@@ -790,59 +1033,60 @@ export function MasterDataScaleManagementPage() {
                       {editingEntity && (
                         <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200">
                           <div>
-                            <label className="block text-sm text-slate-700 mb-1">
-                              Ngày tạo <span className="text-slate-500">(chi tiết)</span>
+                            <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
+                              Ngày tạo
                             </label>
-                            <input title="Dữ liệu"
+                            <input
                               type="text"
                               value={editingEntity.createdDate}
                               disabled
-                              className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-slate-50 text-slate-500"
+                              className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-400 outline-none text-[13px]"
                             />
                           </div>
                           <div>
-                            <label className="block text-sm text-slate-700 mb-1">
-                              Cập nhật lần cuối <span className="text-slate-500">(chi tiết)</span>
+                            <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
+                              Cập nhật lần cuối
                             </label>
-                            <input title="Dữ liệu"
+                            <input
                               type="text"
                               value={editingEntity.updatedDate}
                               disabled
-                              className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-slate-50 text-slate-500"
+                              className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-400 outline-none text-[13px]"
                             />
                           </div>
                           <div className="col-span-2">
-                            <label className="block text-sm text-slate-700 mb-1">
-                              Người tạo <span className="text-slate-500">(chi tiết)</span>
+                            <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
+                              Người tạo
                             </label>
-                            <input title="Dữ liệu"
+                            <input
                               type="text"
                               value={editingEntity.createdBy}
                               disabled
-                              className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-slate-50 text-slate-500"
+                              className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-400 outline-none text-[13px]"
                             />
                           </div>
                         </div>
                       )}
                     </div>
 
-                    <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-200 bg-slate-50">
+                    <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3 shrink-0">
                       <button
                         onClick={handleCloseForm}
-                        className="px-4 py-2 text-slate-700 hover:bg-slate-200 rounded-lg transition-colors"
+                        className="bg-white text-[#020817] border border-[#e2e8f0] hover:bg-slate-50 px-4 py-2 rounded-lg font-medium text-[13px] transition-colors cursor-pointer active:scale-95 shadow-sm"
                       >
                         Hủy
                       </button>
                       <button
                         onClick={handleSubmit}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg font-medium text-[13px] transition-colors cursor-pointer active:scale-95 shadow-sm"
                       >
                         {editingEntity ? 'Cập nhật' : 'Tạo mới'}
                       </button>
                     </div>
                   </div>
                 </div>
-              )}
+              </Portal>
+            )}
             </div>
           )}
 
@@ -867,6 +1111,150 @@ export function MasterDataScaleManagementPage() {
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmId && (
+        <Portal>
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md border border-slate-200">
+              <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+                <h3 className="text-[16px] font-bold text-slate-900">Xác nhận xóa</h3>
+                <button
+                  onClick={() => setDeleteConfirmId(null)}
+                  className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="px-6 py-5">
+                <p className="text-[13px] text-slate-600">
+                  Bạn có chắc chắn muốn xóa thực thể này? Hành động này không thể hoàn tác.
+                </p>
+              </div>
+              <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl flex justify-end gap-3">
+                <button
+                  onClick={() => setDeleteConfirmId(null)}
+                  className="bg-white text-[#020817] border border-[#e2e8f0] hover:bg-slate-50 px-4 py-2 rounded-lg font-medium text-[13px] transition-colors cursor-pointer shadow-sm"
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={handleConfirmDelete}
+                  className="bg-red-600 text-white hover:bg-red-700 px-4 py-2 rounded-lg font-medium text-[13px] transition-colors cursor-pointer shadow-sm"
+                >
+                  Xóa
+                </button>
+              </div>
+            </div>
+          </div>
+        </Portal>
+      )}
+
+      {/* Gửi trình duyệt Modal */}
+      {approvalEntity && (
+        <Portal>
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl border border-slate-200">
+              <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+                <div>
+                  <h3 className="text-[16px] font-bold text-slate-900">Gửi trình duyệt</h3>
+                  <p className="text-[12px] text-slate-500 mt-0.5">
+                    Bản ghi: <span className="text-indigo-700 font-medium">{approvalEntity.name}</span>
+                  </p>
+                </div>
+                <button
+                  onClick={handleCloseApprovalModal}
+                  className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
+                    Chọn người duyệt <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={selectedApprover}
+                    onChange={e => setSelectedApprover(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-200 focus:border-indigo-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all cursor-pointer"
+                  >
+                    <option value="">-- Chọn người duyệt --</option>
+                    {MOCK_APPROVERS.map(u => (
+                      <option key={u.id} value={u.id}>
+                        {u.name} - {u.position} ({u.department})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
+                    Nội dung yêu cầu
+                  </label>
+                  <textarea
+                    value={approvalNote}
+                    onChange={e => setApprovalNote(e.target.value)}
+                    rows={4}
+                    placeholder="Nhập nội dung gửi kèm (nếu có)..."
+                    className="w-full px-3 py-2 border border-slate-200 focus:border-indigo-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all resize-none"
+                  />
+                </div>
+
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                  <h4 className="text-[13px] font-semibold text-slate-700 mb-3">Thông tin bản ghi</h4>
+                  <div className="space-y-2 text-[13px]">
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Mã dữ liệu chủ:</span>
+                      <code className="px-2 py-0.5 bg-white border border-slate-200 text-indigo-700 rounded text-[12px]">
+                        {approvalEntity.code}
+                      </code>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Loại dữ liệu:</span>
+                      <span className="text-slate-800 font-medium">
+                        {approvalEntity.dataType === 'standard' ? 'Dữ liệu chuẩn'
+                          : approvalEntity.dataType === 'reference' ? 'Dữ liệu tham chiếu'
+                          : 'Dữ liệu giao dịch'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Cơ quan quản lý:</span>
+                      <span className="text-slate-800 font-medium">{approvalEntity.managingAgency}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Người tạo:</span>
+                      <span className="text-slate-800">{approvalEntity.createdBy}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl flex justify-end gap-3">
+                <button
+                  onClick={handleCloseApprovalModal}
+                  className="bg-white text-[#020817] border border-[#e2e8f0] hover:bg-slate-50 px-4 py-2 rounded-lg font-medium text-[13px] transition-colors cursor-pointer shadow-sm"
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={handleConfirmApprove}
+                  disabled={!selectedApprover}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-[13px] transition-colors shadow-sm ${
+                    selectedApprover
+                      ? 'bg-indigo-600 text-white hover:bg-indigo-700 cursor-pointer'
+                      : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                  }`}
+                >
+                  <Send className="w-4 h-4" />
+                  Gửi trình duyệt
+                </button>
+              </div>
+            </div>
+          </div>
+        </Portal>
+      )}
 
       {/* Wizard Modal */}
       <MasterDataWizard
@@ -901,7 +1289,7 @@ export function MasterDataScaleManagementPage() {
 
           setEntities([...entities, newEntity]);
           setShowWizard(false);
-          alert(`✅ Tạo thành công "${wizardData.name}" với ${wizardData.attributes.length} thuộc tính!\\n\\nĐã gửi yêu cầu phê duyệt.`);
+          alert(`✅ Tạo thành công "${wizardData.name}" với ${wizardData.attributes.length} thuộc tính!\n\nĐã gửi yêu cầu phê duyệt.`);
         }}
       />
     </div>

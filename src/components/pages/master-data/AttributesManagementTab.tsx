@@ -418,78 +418,64 @@ export function AttributesManagementTab() {
       )}
 
       {/* Attributes Table */}
-      <div className="border border-slate-200 rounded-lg overflow-hidden">
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-slate-50">
+          <table className="w-full text-left">
+            <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="text-left px-4 py-3 text-sm text-slate-700">Tên trường</th>
-                <th className="text-left px-4 py-3 text-sm text-slate-700">Tên hiển thị</th>
-                <th className="text-left px-4 py-3 text-sm text-slate-700">Kiểu dữ liệu</th>
-                <th className="text-left px-4 py-3 text-sm text-slate-700">Độ dài</th>
-                <th className="text-left px-4 py-3 text-sm text-slate-700">Ràng buộc</th>
-                <th className="text-left px-4 py-3 text-sm text-slate-700">Phiên bản</th>
-                <th className="text-right px-4 py-3 text-sm text-slate-700">Thao tác</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên trường</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên hiển thị</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Kiểu dữ liệu</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Độ dài</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Ràng buộc</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Phiên bản</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-right">Thao tác</th>
               </tr>
             </thead>
             <tbody>
               {filteredAttributes.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
+                  <td colSpan={7} className="px-6 py-10 text-center text-[13px] text-slate-500">
                     {searchTerm ? 'Không tìm thấy thuộc tính phù hợp' : 'Chưa có thuộc tính nào. Nhấn "Thêm thuộc tính" để bắt đầu.'}
                   </td>
                 </tr>
               ) : (
                 filteredAttributes.map((attribute) => (
-                  <tr key={attribute.id} className="border-t border-slate-200 hover:bg-slate-50">
-                    <td className="px-4 py-3">
-                      <code className="text-sm bg-slate-100 px-2 py-1 rounded text-slate-800">{attribute.fieldName}</code>
+                  <tr key={attribute.id} className="border-t border-slate-100 hover:bg-slate-50 transition-colors">
+                    <td className="px-6 py-4">
+                      <code className="text-[13px] bg-slate-100 px-2 py-1 rounded text-slate-800">{attribute.fieldName}</code>
                     </td>
-                    <td className="px-4 py-3 text-sm text-slate-900">{attribute.displayName}</td>
-                    <td className="px-4 py-3 text-sm text-slate-600">{fieldDataTypeLabels[attribute.dataType]}</td>
-                    <td className="px-4 py-3 text-sm text-slate-600">{attribute.length || '-'}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-6 py-4 text-[13px] text-slate-900">{attribute.displayName}</td>
+                    <td className="px-6 py-4 text-[13px] text-slate-600">{fieldDataTypeLabels[attribute.dataType]}</td>
+                    <td className="px-6 py-4 text-[13px] text-slate-600">{attribute.length || '-'}</td>
+                    <td className="px-6 py-4">
                       <div className="flex flex-wrap gap-1">
                         {attribute.required && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-red-100 text-red-700">
-                            Bắt buộc
-                          </span>
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[12px] bg-red-100 text-red-700">Bắt buộc</span>
                         )}
                         {attribute.unique && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-purple-100 text-purple-700">
-                            Duy nhất
-                          </span>
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[12px] bg-purple-100 text-purple-700">Duy nhất</span>
                         )}
                         {attribute.indexed && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-700">
-                            Index
-                          </span>
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[12px] bg-blue-100 text-blue-700">Index</span>
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-6 py-4">
                       <button
                         onClick={() => handleViewHistory(attribute.id)}
-                        className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+                        className="flex items-center gap-1 text-[13px] text-blue-600 hover:text-blue-800"
                       >
                         <HistoryIcon className="w-3 h-3" />
                         v{attribute.version}
                       </button>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => handleEdit(attribute)}
-                          className="p-1 text-blue-600 hover:bg-blue-50 rounded"
-                          title="Chỉnh sửa"
-                        >
+                        <button onClick={() => handleEdit(attribute)} className="p-1 text-blue-600 hover:bg-blue-50 rounded" title="Chỉnh sửa">
                           <Edit className="w-4 h-4" />
                         </button>
-                        <button
-                          onClick={() => handleDelete(attribute.id)}
-                          className="p-1 text-red-600 hover:bg-red-50 rounded"
-                          title="Xóa"
-                        >
+                        <button onClick={() => handleDelete(attribute.id)} className="p-1 text-red-600 hover:bg-red-50 rounded" title="Xóa">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>

@@ -347,26 +347,26 @@ export function MergeRulesManagementTab() {
       </div>
 
       {/* Rules Table */}
-      <div className="border border-slate-200 rounded-lg overflow-hidden">
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-slate-50">
+          <table className="w-full text-left">
+            <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="text-left px-4 py-3 text-sm text-slate-700">Tên quy tắc</th>
-                <th className="text-left px-4 py-3 text-sm text-slate-700">Thực thể dữ liệu chủ</th>
-                <th className="text-left px-4 py-3 text-sm text-slate-700">Số nguồn</th>
-                <th className="text-left px-4 py-3 text-sm text-slate-700">Chiến lược</th>
-                <th className="text-left px-4 py-3 text-sm text-slate-700">Trạng thái</th>
-                <th className="text-left px-4 py-3 text-sm text-slate-700">Lần áp dụng cuối</th>
-                <th className="text-right px-4 py-3 text-sm text-slate-700">Thao tác</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên quy tắc</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Thực thể dữ liệu chủ</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Số nguồn</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Chiến lược</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Trạng thái</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Lần áp dụng cuối</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-right">Thao tác</th>
               </tr>
             </thead>
             <tbody>
               {rules.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-16 text-center">
+                  <td colSpan={7} className="px-6 py-16 text-center">
                     <GitMerge className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                    <p className="text-slate-500">
+                    <p className="text-[13px] text-slate-500">
                       Nội dung chức năng Thiết lập quy tắc hợp nhất dữ liệu chủ
                     </p>
                   </td>
@@ -375,40 +375,40 @@ export function MergeRulesManagementTab() {
                 rules.map((rule) => {
                   const statusBadge = getStatusBadge(rule.status);
                   return (
-                    <tr key={rule.id} className="border-t border-slate-200 hover:bg-slate-50">
-                      <td className="px-4 py-3">
+                    <tr key={rule.id} className="border-t border-slate-100 hover:bg-slate-50 transition-colors">
+                      <td className="px-6 py-4">
                         <div>
-                          <p className="text-sm text-slate-900">{rule.name}</p>
-                          <p className="text-xs text-slate-500 mt-0.5">
+                          <p className="text-[13px] text-slate-900">{rule.name}</p>
+                          <p className="text-[12px] text-slate-500 mt-0.5">
                             {rule.matchRules.length} quy tắc so khớp, {rule.extractRules.length} quy tắc trích rút
                           </p>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-sm text-slate-900">{rule.entityName}</td>
-                      <td className="px-4 py-3">
+                      <td className="px-6 py-4 text-[13px] text-slate-900">{rule.entityName}</td>
+                      <td className="px-6 py-4">
                         <div className="flex flex-col gap-1">
                           {rule.sources.slice(0, 2).map((source, idx) => (
-                            <span key={idx} className="text-xs text-blue-600">
+                            <span key={idx} className="text-[12px] text-blue-600">
                               {source.sourceName}
                             </span>
                           ))}
                           {rule.sources.length > 2 && (
-                            <span className="text-xs text-slate-500">+{rule.sources.length - 2} nguồn khác</span>
+                            <span className="text-[12px] text-slate-500">+{rule.sources.length - 2} nguồn khác</span>
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-sm text-slate-600">
+                      <td className="px-6 py-4 text-[13px] text-slate-600">
                         {mergeStrategyLabels[rule.mergeStrategy]}
                       </td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs ${statusBadge.className}`}>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-[12px] ${statusBadge.className}`}>
                           {statusBadge.label}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-sm text-slate-600">
+                      <td className="px-6 py-4 text-[13px] text-slate-600">
                         {rule.lastApplied || '-'}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-6 py-4">
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => handleTestRule(rule)}

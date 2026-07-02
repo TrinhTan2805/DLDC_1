@@ -286,18 +286,18 @@ export function UniqueIdentifierRulesTab() {
       </div>
 
       {/* Rules Table */}
-      <div className="border border-slate-200 rounded-lg overflow-hidden">
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-slate-50">
+          <table className="w-full text-left">
+            <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="text-left px-4 py-3 text-sm text-slate-700">Thực thể</th>
-                <th className="text-left px-4 py-3 text-sm text-slate-700">Cấu trúc mã</th>
-                <th className="text-left px-4 py-3 text-sm text-slate-700">Ví dụ</th>
-                <th className="text-left px-4 py-3 text-sm text-slate-700">Số hiện tại</th>
-                <th className="text-left px-4 py-3 text-sm text-slate-700">Đã tạo</th>
-                <th className="text-left px-4 py-3 text-sm text-slate-700">Trạng thái</th>
-                <th className="text-right px-4 py-3 text-sm text-slate-700">Thao tác</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Thực thể</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Cấu trúc mã</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Ví dụ</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Số hiện tại</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Đã tạo</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Trạng thái</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-right">Thao tác</th>
               </tr>
             </thead>
             <tbody>
@@ -314,9 +314,9 @@ export function UniqueIdentifierRulesTab() {
                 rules.map((rule) => {
                   const statusBadge = getStatusBadge(rule.status);
                   return (
-                    <tr key={rule.id} className="border-t border-slate-200 hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-900">{rule.entityName}</td>
-                      <td className="px-4 py-3">
+                    <tr key={rule.id} className="border-t border-slate-100 hover:bg-slate-50 transition-colors">
+                      <td className="px-6 py-4 text-[13px] text-slate-900">{rule.entityName}</td>
+                      <td className="px-6 py-4">
                         <div className="space-y-1">
                           <code className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-700">
                             {rule.format}
@@ -330,9 +330,9 @@ export function UniqueIdentifierRulesTab() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
-                          <code className="text-sm bg-green-50 text-green-700 px-2 py-1 rounded border border-green-200">
+                          <code className="text-[13px] bg-green-50 text-green-700 px-2 py-1 rounded border border-green-200">
                             {rule.example}
                           </code>
                           <button
@@ -344,22 +344,22 @@ export function UniqueIdentifierRulesTab() {
                           </button>
                         </div>
                       </td>
-                      <td className="px-4 py-3">
-                        <span className="text-sm text-slate-900">
+                      <td className="px-6 py-4">
+                        <span className="text-[13px] text-slate-900">
                           {String(rule.currentNumber).padStart(6, '0')}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
-                        <span className="text-sm text-blue-600">
+                      <td className="px-6 py-4">
+                        <span className="text-[13px] text-blue-600">
                           {rule.totalGenerated.toLocaleString()} mã
                         </span>
                       </td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs ${statusBadge.className}`}>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-[12px] ${statusBadge.className}`}>
                           {statusBadge.label}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-6 py-4">
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => handleEdit(rule)}

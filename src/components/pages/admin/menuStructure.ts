@@ -1621,15 +1621,15 @@ export const menuStructure: MenuItem[] = [
   },
   {
     id: "master-data",
-    name: "Quản lý dữ liệu chủ",
+    name: "Dữ liệu chủ",
     children: [
       {
         id: "master-data-scale-management",
-        name: "Quản lý quy mô dữ liệu chủ",
+        name: "Mô hình dữ liệu chủ",
         functions: [
           {
             id: "master-data-scale-management-func",
-            name: "Quản lý quy mô dữ liệu chủ",
+            name: "Mô hình dữ liệu chủ",
             actions: [
               "Xem",
               "Thêm",

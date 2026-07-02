@@ -79,7 +79,7 @@ export function EntityRelationshipsTab() {
   const [formData, setFormData] = useState<Partial<EntityRelationship>>({
     sourceEntityId: '',
     targetEntityId: '',
-    relationType: 'one-to-many',
+    relationType: 'many-to-many',
     foreignKey: '',
     referencedKey: '',
     junctionTable: '',
@@ -172,7 +172,7 @@ export function EntityRelationshipsTab() {
     setFormData({
       sourceEntityId: '',
       targetEntityId: '',
-      relationType: 'one-to-many',
+      relationType: 'many-to-many',
       foreignKey: '',
       referencedKey: '',
       junctionTable: '',
@@ -209,17 +209,17 @@ export function EntityRelationshipsTab() {
       </div>
 
       {/* Relationships Table */}
-      <div className="border border-slate-200 rounded-lg overflow-hidden">
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-slate-50">
+          <table className="w-full text-left">
+            <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="text-left px-4 py-3 text-sm text-slate-700">Thực thể nguồn</th>
-                <th className="text-center px-4 py-3 text-sm text-slate-700">Loại quan hệ</th>
-                <th className="text-left px-4 py-3 text-sm text-slate-700">Thực thể đích</th>
-                <th className="text-left px-4 py-3 text-sm text-slate-700">Điều kiện liên kết</th>
-                <th className="text-left px-4 py-3 text-sm text-slate-700">Trạng thái</th>
-                <th className="text-right px-4 py-3 text-sm text-slate-700">Thao tác</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Thực thể nguồn</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Loại quan hệ</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Thực thể đích</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Điều kiện liên kết</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Trạng thái</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-right">Thao tác</th>
               </tr>
             </thead>
             <tbody>
@@ -236,14 +236,14 @@ export function EntityRelationshipsTab() {
                 relationships.map((relationship) => {
                   const statusBadge = getStatusBadge(relationship.status);
                   return (
-                    <tr key={relationship.id} className="border-t border-slate-200 hover:bg-slate-50">
-                      <td className="px-4 py-3">
+                    <tr key={relationship.id} className="border-t border-slate-100 hover:bg-slate-50 transition-colors">
+                      <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
                           <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                          <span className="text-sm text-slate-900">{relationship.sourceEntityName}</span>
+                          <span className="text-[13px] text-slate-900">{relationship.sourceEntityName}</span>
                         </div>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-6 py-4">
                         <div className="flex flex-col items-center gap-1">
                           <span className="inline-flex items-center px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded">
                             {relationTypeIcons[relationship.relationType]}
@@ -253,13 +253,13 @@ export function EntityRelationshipsTab() {
                           </span>
                         </div>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
                           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          <span className="text-sm text-slate-900">{relationship.targetEntityName}</span>
+                          <span className="text-[13px] text-slate-900">{relationship.targetEntityName}</span>
                         </div>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-6 py-4">
                         {relationship.relationType === 'many-to-many' ? (
                           <div className="text-xs">
                             <div className="flex items-center gap-1 text-purple-600">
@@ -282,12 +282,12 @@ export function EntityRelationshipsTab() {
                           </div>
                         )}
                       </td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs ${statusBadge.className}`}>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-[12px] ${statusBadge.className}`}>
                           {statusBadge.label}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-6 py-4">
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => handleEdit(relationship)}
@@ -407,9 +407,11 @@ export function EntityRelationshipsTab() {
                     onChange={(e) => setFormData({ ...formData, relationType: e.target.value as RelationType })}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    {Object.entries(relationTypeLabels).map(([value, label]) => (
-                      <option key={value} value={value}>{label}</option>
-                    ))}
+                    {Object.entries(relationTypeLabels)
+                      .filter(([value]) => value !== 'one-to-many')
+                      .map(([value, label]) => (
+                        <option key={value} value={value}>{label}</option>
+                      ))}
                   </select>
                 </div>
 

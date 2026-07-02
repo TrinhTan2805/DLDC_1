@@ -311,7 +311,7 @@ const menuItems: MenuItem[] = [
   {
     id: "category",
     icon: FolderTree,
-    label: "Quản lý danh mục dùng chung",
+    label: "Danh mục dùng chung",
     color: "text-indigo-600",
     subItems: [
       {
@@ -331,7 +331,7 @@ const menuItems: MenuItem[] = [
         subItems: [
           {
             id: "category-list",
-            label: "Danh sách danh mục",
+            label: "Biên tập danh mục",
             icon: List,
           },
           {
@@ -406,12 +406,12 @@ const menuItems: MenuItem[] = [
   {
     id: "master-data",
     icon: HardDrive,
-    label: "Quản lý dữ liệu chủ",
+    label: "Dữ liệu chủ",
     color: "text-teal-600",
     subItems: [
       {
         id: "master-data-scale-management",
-        label: "Quản lý quy mô dữ liệu chủ",
+        label: "Mô hình dữ liệu chủ",
         icon: BarChart3,
       },
       {
@@ -421,7 +421,7 @@ const menuItems: MenuItem[] = [
         subItems: [
           {
             id: "master-data-update-a",
-            label: "Dữ liệu chủ A",
+            label: "Danh sách dữ liệu chủ",
           },
         ],
       },
