@@ -11,9 +11,9 @@ import { Portal } from '../../common/Portal';
 type TabType = 'setup' | 'attributes' | 'merge-rules' | 'relationships' | 'identifier-rules' | 'approval';
 
 type LifecycleStatus = 'active' | 'draft' | 'inactive' | 'archived';
-type DataType = 'standard' | 'reference' | 'transactional';
+type DataType = 'individual' | 'organization' | 'legal' | 'asset';
 type ScopeType = 'national' | 'ministry' | 'provincial' | 'internal';
-type DataSourceType = 'dldc' | 'lgsp' | 'ndxp' | 'manual';
+type DataSourceType = 'dldc' | 'manual';
 type UpdateStrategyType = 'reference' | 'scheduled' | 'realtime';
 type SyncFrequencyType = 'daily' | 'weekly' | 'monthly' | 'event';
 type FieldDataType = 'string' | 'number' | 'date' | 'datetime' | 'boolean' | 'text' | 'email' | 'phone' | 'url';
@@ -46,6 +46,8 @@ interface MasterDataEntity {
   createdDate: string;
   updatedDate: string;
   createdBy: string;
+  updatedBy?: string;
+  systemName?: string;
   // Data source fields
   dataSource?: DataSourceType;
   dldcTable?: string;
@@ -63,73 +65,92 @@ const defaultEntities: MasterDataEntity[] = [
     id: '1',
     code: 'MD-CITIZEN-001',
     name: 'Bộ dữ liệu chủ Công dân',
-    dataType: 'standard',
-    managingAgency: 'Cục Hộ tịch - Quốc tịch - Chứng thực',
+    dataType: 'individual',
+    managingAgency: 'Cục Hành chính tư pháp',
     scope: 'national',
     description: 'Dữ liệu chuẩn về công dân Việt Nam bao gồm thông tin cá nhân như họ tên, ngày sinh, số CCCD, nơi cư trú theo quy định của Luật CCCD 2023',
     lifecycleStatus: 'active',
     createdDate: '01/01/2024',
     updatedDate: '10/12/2024',
-    createdBy: 'Nguyễn Văn A'
+    createdBy: 'Nguyễn Văn A',
+    updatedBy: 'Trần Thị Bình',
+    systemName: 'CSDL hộ tịch điện tử',
+    dataSource: 'dldc',
+    dldcTable: 'tbl_citizen'
   },
   {
     id: '2',
     code: 'MD-ORG-001',
     name: 'Bộ dữ liệu chủ Tổ chức',
-    dataType: 'standard',
+    dataType: 'organization',
     managingAgency: 'Cục Đăng ký kinh doanh',
     scope: 'national',
     description: 'Thông tin doanh nghiệp, tổ chức, cơ quan nhà nước bao gồm tên, mã số thuế, địa chỉ, người đại diện',
     lifecycleStatus: 'active',
     createdDate: '15/01/2024',
     updatedDate: '20/11/2024',
-    createdBy: 'Trần Thị B'
+    createdBy: 'Trần Thị B',
+    updatedBy: 'Lê Minh Cường',
+    systemName: 'Hệ thống đăng ký kinh doanh',
+    dataSource: 'dldc',
+    dldcTable: 'tbl_business_registry'
   },
   {
     id: '3',
     code: 'MD-DOC-001',
     name: 'Bộ dữ liệu chủ Văn bản pháp luật',
-    dataType: 'reference',
+    dataType: 'legal',
     managingAgency: 'Bộ Tư pháp',
     scope: 'national',
     description: 'Danh mục văn bản pháp luật, nghị định, thông tư, quyết định',
     lifecycleStatus: 'active',
     createdDate: '10/02/2024',
     updatedDate: '05/12/2024',
-    createdBy: 'Lê Văn C'
+    createdBy: 'Lê Văn C',
+    updatedBy: 'Phạm Quốc Hùng',
+    systemName: 'Cơ sở dữ liệu quốc gia về pháp luật',
+    dataSource: 'dldc',
+    dldcTable: 'tbl_legal_document'
   },
   {
     id: '4',
     code: 'MD-ADMIN-001',
     name: 'Bộ dữ liệu chủ Đơn vị hành chính',
-    dataType: 'reference',
+    dataType: 'organization',
     managingAgency: 'Bộ Nội vụ',
     scope: 'national',
     description: 'Danh mục 63 tỉnh/thành phố, quận/huyện, phường/xã của Việt Nam',
     lifecycleStatus: 'active',
     createdDate: '20/01/2024',
     updatedDate: '15/10/2024',
-    createdBy: 'Phạm Thị D'
+    createdBy: 'Phạm Thị D',
+    updatedBy: 'Phạm Thị D',
+    systemName: 'Hệ thống quản lý đơn vị hành chính',
+    dataSource: 'dldc',
+    dldcTable: 'tbl_administrative_unit'
   },
   {
     id: '5',
     code: 'MD-AGENCY-001',
     name: 'Bộ dữ liệu chủ Cơ quan nhà nước',
-    dataType: 'reference',
+    dataType: 'organization',
     managingAgency: 'Bộ Nội vụ',
     scope: 'national',
     description: 'Danh sách các cơ quan nhà nước, bộ, ngành, sở, ban',
     lifecycleStatus: 'draft',
     createdDate: '01/03/2024',
     updatedDate: '18/12/2024',
-    createdBy: 'Hoàng Văn E'
+    createdBy: 'Hoàng Văn E',
+    updatedBy: 'Hoàng Văn E',
+    dataSource: 'manual'
   }
 ];
 
 const dataTypeLabels: Record<DataType, string> = {
-  standard: 'Dữ liệu chuẩn',
-  reference: 'Dữ liệu tham chiếu',
-  transactional: 'Dữ liệu giao dịch'
+  individual:   'Thực thể Cá nhân',
+  organization: 'Thực thể Tổ chức',
+  legal:        'Thực thể Văn bản/Sự kiện pháp lý',
+  asset:        'Thực thể Tài sản',
 };
 
 const scopeLabels: Record<ScopeType, string> = {
@@ -150,16 +171,32 @@ const getDataSourceLabel = (src?: string) => {
   switch (src) {
     case 'dldc':
       return 'Đồng bộ Kho DLDC';
-    case 'lgsp':
-      return 'API qua trục LGSP';
-    case 'ndxp':
-      return 'API qua trục NDXP';
     case 'manual':
       return 'Nhập thủ công';
     default:
       return 'Chưa cấu hình';
   }
 };
+
+const MANAGING_UNITS = [
+  'Cục Hành chính tư pháp',
+  'Cục Bổ trợ tư pháp',
+  'Cục Phổ biến, GDPL và Trợ giúp pháp lý',
+  'Cục Đăng ký giao dịch bảo đảm và Bồi thường nhà nước',
+  'Cục Quản lý thi hành án dân sự',
+  'Cục Đăng ký kinh doanh',
+  'Cục Công nghệ thông tin',
+  'Vụ Pháp luật dân sự - Kinh tế',
+  'Vụ Pháp luật hình sự - Hành chính',
+  'Vụ Pháp luật quốc tế',
+  'Vụ Các vấn đề chung về xây dựng pháp luật',
+  'Vụ Kế hoạch - Tài chính',
+  'Văn phòng Bộ',
+  'Bộ Tư pháp',
+  'Bộ Nội vụ',
+  'Bộ Công an',
+  'Bộ Kế hoạch và Đầu tư',
+];
 
 const MOCK_APPROVERS = [
   { id: 'a1', name: 'Nguyễn Văn An',    position: 'Trưởng phòng',       department: 'Phòng Quản lý dữ liệu' },
@@ -187,15 +224,16 @@ export function MasterDataScaleManagementPage() {
 
   const [formData, setFormData] = useState<Partial<MasterDataEntity>>({
     name: '',
-    dataType: 'standard',
+    dataType: 'individual',
     managingAgency: '',
     scope: 'national',
     description: '',
+    systemName: '',
     lifecycleStatus: 'draft'
   });
 
   const generateCode = (type: string) => {
-    const prefix = type === 'standard' ? 'MD-STD-' : type === 'reference' ? 'MD-REF-' : 'MD-TRX-';
+    const prefix = type === 'individual' ? 'MD-IND-' : type === 'organization' ? 'MD-ORG-' : type === 'legal' ? 'MD-LGL-' : 'MD-AST-';
     const maxNum = entities
       .filter(e => e.code.startsWith(prefix))
       .map(e => parseInt(e.code.split('-')[2]))
@@ -204,7 +242,7 @@ export function MasterDataScaleManagementPage() {
   };
 
   const handleSubmit = () => {
-    if (!formData.name || !formData.managingAgency) {
+    if (!formData.name || !formData.managingAgency || (!editingEntity && !formData.code?.trim())) {
       alert('Vui lòng điền đầy đủ thông tin bắt buộc');
       return;
     }
@@ -227,12 +265,13 @@ export function MasterDataScaleManagementPage() {
       // Create new
       const newEntity: MasterDataEntity = {
         id: String(entities.length + 1),
-        code: generateCode(formData.dataType || 'standard'),
+        code: formData.code?.trim() || generateCode(formData.dataType || 'individual'),
         name: formData.name!,
         dataType: formData.dataType!,
         managingAgency: formData.managingAgency!,
         scope: formData.scope!,
         description: formData.description || '',
+        systemName: formData.systemName || '',
         lifecycleStatus: formData.lifecycleStatus!,
         createdDate: dateStr,
         updatedDate: dateStr,
@@ -260,6 +299,8 @@ export function MasterDataScaleManagementPage() {
       setDeleteConfirmId(null);
     }
   };
+
+  const [viewingEntity, setViewingEntity] = useState<MasterDataEntity | null>(null);
 
   const [approvalEntity, setApprovalEntity] = useState<MasterDataEntity | null>(null);
   const [selectedApprover, setSelectedApprover] = useState('');
@@ -295,10 +336,11 @@ export function MasterDataScaleManagementPage() {
     setEditingEntity(null);
     setFormData({
       name: '',
-      dataType: 'standard',
+      dataType: 'individual',
       managingAgency: '',
       scope: 'national',
       description: '',
+      systemName: '',
       lifecycleStatus: 'draft'
     });
   };
@@ -558,8 +600,6 @@ export function MasterDataScaleManagementPage() {
                           >
                             <option value="all">Tất cả nguồn dữ liệu</option>
                             <option value="dldc">Từ Kho DLDC</option>
-                            <option value="lgsp">API qua trục LGSP</option>
-                            <option value="ndxp">API qua trục NDXP</option>
                             <option value="manual">Nhập thủ công</option>
                           </select>
                           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
@@ -617,6 +657,13 @@ export function MasterDataScaleManagementPage() {
                             </td>
                             <td className="px-6 py-4">
                               <div className="flex items-center justify-center gap-1.5">
+                                <button
+                                  onClick={() => setViewingEntity(entity)}
+                                  className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 cursor-pointer transition-colors"
+                                  title="Xem chi tiết"
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </button>
                                 <button
                                   onClick={() => entity.lifecycleStatus === 'draft' && handleApprove(entity)}
                                   disabled={entity.lifecycleStatus !== 'draft'}
@@ -677,19 +724,24 @@ export function MasterDataScaleManagementPage() {
 
                     <div className="p-6 space-y-4 overflow-y-auto flex-1 text-[13px]">
                       {/* Code (auto-generated) */}
-                      {editingEntity && (
-                        <div>
-                          <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                            Mã dữ liệu chủ
-                          </label>
-                          <input
-                            type="text"
-                            value={editingEntity.code}
-                            disabled
-                            className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-400 outline-none text-[13px]"
-                          />
-                        </div>
-                      )}
+                      {/* Mã thực thể */}
+                      <div>
+                        <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
+                          Mã thực thể <span className="text-red-600">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={editingEntity ? editingEntity.code : (formData.code || '')}
+                          onChange={(e) => !editingEntity && setFormData({ ...formData, code: e.target.value })}
+                          disabled={!!editingEntity}
+                          placeholder="VD: MD-CITIZEN-001"
+                          className={`w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none transition-all ${
+                            editingEntity
+                              ? 'bg-slate-50 text-slate-400'
+                              : 'bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 font-medium text-slate-700'
+                          }`}
+                        />
+                      </div>
 
                       {/* Name */}
                       <div>
@@ -708,31 +760,35 @@ export function MasterDataScaleManagementPage() {
                       {/* Data Type */}
                       <div>
                         <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                          Loại dữ liệu <span className="text-red-600">*</span>
+                          Loại thực thể <span className="text-red-600">*</span>
                         </label>
                         <select
                           value={formData.dataType}
                           onChange={(e) => setFormData({ ...formData, dataType: e.target.value as DataType })}
                           className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 cursor-pointer"
                         >
-                          <option value="standard">Dữ liệu chuẩn</option>
-                          <option value="reference">Dữ liệu tham chiếu</option>
-                          <option value="transactional">Dữ liệu giao dịch</option>
+                          <option value="individual">Thực thể Cá nhân</option>
+                          <option value="organization">Thực thể Tổ chức</option>
+                          <option value="legal">Thực thể Văn bản/Sự kiện pháp lý</option>
+                          <option value="asset">Thực thể Tài sản</option>
                         </select>
                       </div>
 
-                      {/* Managing Agency */}
+                      {/* Đơn vị chủ quản */}
                       <div>
                         <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                          Cơ quan quản lý <span className="text-red-600">*</span>
+                          Đơn vị chủ quản <span className="text-red-600">*</span>
                         </label>
-                        <input
-                          type="text"
+                        <select
                           value={formData.managingAgency}
                           onChange={(e) => setFormData({ ...formData, managingAgency: e.target.value })}
-                          placeholder="VD: Cục Hộ tịch - Quốc tịch - Chứng thực"
-                          className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700"
-                        />
+                          className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 cursor-pointer"
+                        >
+                          <option value="">-- Chọn đơn vị chủ quản --</option>
+                          {MANAGING_UNITS.map(u => (
+                            <option key={u} value={u}>{u}</option>
+                          ))}
+                        </select>
                       </div>
 
                       {/* Scope */}
@@ -752,15 +808,29 @@ export function MasterDataScaleManagementPage() {
                         </select>
                       </div>
 
-                      {/* Description */}
+                      {/* Mô tả đối tượng */}
                       <div>
-                        <label className="block text-[13px] font-medium text-slate-700 mb-1.5">Mô tả</label>
+                        <label className="block text-[13px] font-medium text-slate-700 mb-1.5">Mô tả đối tượng</label>
                         <textarea
                           value={formData.description}
                           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                          placeholder="Mô tả tóm tắt bộ dữ liệu chủ..."
+                          placeholder="Mô tả tóm tắt về đối tượng dữ liệu chủ này..."
                           rows={3}
                           className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 resize-none"
+                        />
+                      </div>
+
+                      {/* Tên cơ sở dữ liệu / Hệ thống */}
+                      <div>
+                        <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
+                          Tên cơ sở dữ liệu / Hệ thống
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.systemName || ''}
+                          onChange={(e) => setFormData({ ...formData, systemName: e.target.value })}
+                          placeholder="VD: CSDL hộ tịch điện tử, Hệ thống TGPL..."
+                          className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700"
                         />
                       </div>
 
@@ -796,8 +866,6 @@ export function MasterDataScaleManagementPage() {
                             className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 cursor-pointer"
                           >
                             <option value="dldc">Từ Kho DLDC</option>
-                            <option value="lgsp">API qua trục LGSP</option>
-                            <option value="ndxp">API qua trục NDXP</option>
                             <option value="manual">Nhập thủ công</option>
                           </select>
                         </div>
@@ -848,118 +916,6 @@ export function MasterDataScaleManagementPage() {
                                   </label>
                                 ))}
                               </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* LGSP Configuration */}
-                        {formData.dataSource === 'lgsp' && (
-                          <div className="space-y-3 bg-green-50/50 p-4 rounded-xl border border-green-100/50">
-                            <div>
-                              <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                                Hệ thống nguồn <span className="text-red-600">*</span>
-                              </label>
-                              <input
-                                type="text"
-                                value={formData.apiSystem || ''}
-                                onChange={(e) => setFormData({ ...formData, apiSystem: e.target.value })}
-                                placeholder="VD: Hệ thống CCCD - Bộ Công an"
-                                className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700"
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                                Đơn vị quản lý <span className="text-red-600">*</span>
-                              </label>
-                              <input
-                                type="text"
-                                value={formData.apiManagingUnit || ''}
-                                onChange={(e) => setFormData({ ...formData, apiManagingUnit: e.target.value })}
-                                placeholder="VD: Cục Cảnh sát quản lý hành chính về trật tự xã hội"
-                                className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700"
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                                API Endpoint <span className="text-red-600">*</span>
-                              </label>
-                              <input
-                                type="text"
-                                value={formData.apiEndpoint || ''}
-                                onChange={(e) => setFormData({ ...formData, apiEndpoint: e.target.value })}
-                                placeholder="VD: https://lgsp.gov.vn/api/v1/citizen/info"
-                                className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700"
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                                Phương thức <span className="text-red-600">*</span>
-                              </label>
-                              <select
-                                value={formData.apiMethod || 'GET'}
-                                onChange={(e) => setFormData({ ...formData, apiMethod: e.target.value as 'GET' | 'POST' | 'PUT' })}
-                                className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 cursor-pointer"
-                              >
-                                <option value="GET">GET</option>
-                                <option value="POST">POST</option>
-                                <option value="PUT">PUT</option>
-                              </select>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* NDXP Configuration */}
-                        {formData.dataSource === 'ndxp' && (
-                          <div className="space-y-3 bg-purple-50/50 p-4 rounded-xl border border-purple-100/50">
-                            <div>
-                              <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                                Hệ thống nguồn <span className="text-red-600">*</span>
-                              </label>
-                              <input
-                                type="text"
-                                value={formData.apiSystem || ''}
-                                onChange={(e) => setFormData({ ...formData, apiSystem: e.target.value })}
-                                placeholder="VD: Hệ thống Đăng ký kinh doanh - Bộ Kế hoạch và Đầu tư"
-                                className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700"
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                                Đơn vị quản lý <span className="text-red-600">*</span>
-                              </label>
-                              <input
-                                type="text"
-                                value={formData.apiManagingUnit || ''}
-                                onChange={(e) => setFormData({ ...formData, apiManagingUnit: e.target.value })}
-                                placeholder="VD: Cục Đăng ký kinh doanh"
-                                className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700"
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                                API Endpoint <span className="text-red-600">*</span>
-                              </label>
-                              <input
-                                type="text"
-                                value={formData.apiEndpoint || ''}
-                                onChange={(e) => setFormData({ ...formData, apiEndpoint: e.target.value })}
-                                placeholder="VD: https://ndxp.gov.vn/api/v1/business/registry"
-                                className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700"
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                                Phương thức <span className="text-red-600">*</span>
-                              </label>
-                              <select
-                                value={formData.apiMethod || 'GET'}
-                                onChange={(e) => setFormData({ ...formData, apiMethod: e.target.value as 'GET' | 'POST' | 'PUT' })}
-                                className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 cursor-pointer"
-                              >
-                                <option value="GET">GET</option>
-                                <option value="POST">POST</option>
-                                <option value="PUT">PUT</option>
-                              </select>
                             </div>
                           </div>
                         )}
@@ -1112,6 +1068,156 @@ export function MasterDataScaleManagementPage() {
         </div>
       </div>
 
+      {/* Xem chi tiết Modal */}
+      {viewingEntity && (
+        <Portal>
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-slate-200">
+              <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-white shrink-0">
+                <h3 className="text-[16px] font-bold text-slate-900">Xem chi tiết thực thể dữ liệu chủ</h3>
+                <button
+                  onClick={() => setViewingEntity(null)}
+                  className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="p-6 overflow-y-auto flex-1 space-y-4 text-[13px]">
+                {/* Mã thực thể */}
+                <div>
+                  <label className="block text-[13px] font-medium text-slate-500 mb-1">Mã thực thể</label>
+                  <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-mono font-semibold text-slate-800">
+                    {viewingEntity.code}
+                  </div>
+                </div>
+
+                {/* Tên dữ liệu chủ */}
+                <div>
+                  <label className="block text-[13px] font-medium text-slate-500 mb-1">Tên dữ liệu chủ</label>
+                  <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-800">
+                    {viewingEntity.name}
+                  </div>
+                </div>
+
+                {/* Loại thực thể + Phạm vi */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[13px] font-medium text-slate-500 mb-1">Loại thực thể</label>
+                    <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-800">
+                      {dataTypeLabels[viewingEntity.dataType]}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-[13px] font-medium text-slate-500 mb-1">Phạm vi sử dụng</label>
+                    <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-800">
+                      {scopeLabels[viewingEntity.scope]}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Đơn vị chủ quản */}
+                <div>
+                  <label className="block text-[13px] font-medium text-slate-500 mb-1">Đơn vị chủ quản</label>
+                  <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-800">
+                    {viewingEntity.managingAgency || <span className="text-slate-400 font-normal italic">Chưa cập nhật</span>}
+                  </div>
+                </div>
+
+                {/* Mô tả đối tượng */}
+                <div>
+                  <label className="block text-[13px] font-medium text-slate-500 mb-1">Mô tả đối tượng</label>
+                  <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] text-slate-800 min-h-[72px] whitespace-pre-wrap">
+                    {viewingEntity.description || <span className="text-slate-400 italic">Chưa có mô tả</span>}
+                  </div>
+                </div>
+
+                {/* Tên cơ sở dữ liệu / Hệ thống */}
+                <div>
+                  <label className="block text-[13px] font-medium text-slate-500 mb-1">Tên cơ sở dữ liệu / Hệ thống</label>
+                  <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-800">
+                    {viewingEntity.systemName || <span className="text-slate-400 font-normal italic">Chưa cập nhật</span>}
+                  </div>
+                </div>
+
+                {/* Trạng thái vòng đời */}
+                <div>
+                  <label className="block text-[13px] font-medium text-slate-500 mb-1">Trạng thái vòng đời</label>
+                  <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-800">
+                    {lifecycleLabels[viewingEntity.lifecycleStatus]?.label}
+                  </div>
+                </div>
+
+                {/* Nguồn dữ liệu */}
+                <div>
+                  <label className="block text-[13px] font-medium text-slate-500 mb-1">Nguồn dữ liệu</label>
+                  <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-800">
+                    {getDataSourceLabel(viewingEntity.dataSource)}
+                  </div>
+                </div>
+
+                {/* DLDC table if applicable */}
+                {viewingEntity.dataSource === 'dldc' && viewingEntity.dldcTable && (
+                  <div>
+                    <label className="block text-[13px] font-medium text-slate-500 mb-1">Bảng dữ liệu (DLDC)</label>
+                    <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-mono text-slate-800">
+                      {viewingEntity.dldcTable}
+                    </div>
+                  </div>
+                )}
+
+                {/* Thông tin hệ thống */}
+                <div className="pt-4 border-t border-slate-200">
+                  <h4 className="text-[13px] font-bold text-slate-700 mb-3">Thông tin hệ thống</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[13px] font-medium text-slate-500 mb-1">Ngày tạo</label>
+                      <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] text-slate-800">
+                        {viewingEntity.createdDate}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[13px] font-medium text-slate-500 mb-1">Người tạo</label>
+                      <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-800">
+                        {viewingEntity.createdBy}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[13px] font-medium text-slate-500 mb-1">Ngày cập nhật gần nhất</label>
+                      <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] text-slate-800">
+                        {viewingEntity.updatedDate}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[13px] font-medium text-slate-500 mb-1">Người cập nhật</label>
+                      <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-800">
+                        {viewingEntity.updatedBy || <span className="text-slate-400 font-normal italic">Chưa có</span>}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl flex justify-end gap-3 shrink-0">
+                <button
+                  onClick={() => { setViewingEntity(null); handleEdit(viewingEntity); }}
+                  className="bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-lg font-medium text-[13px] flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
+                >
+                  <Edit className="w-4 h-4" />
+                  Chỉnh sửa
+                </button>
+                <button
+                  onClick={() => setViewingEntity(null)}
+                  className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg font-medium text-[13px] transition-colors cursor-pointer shadow-sm"
+                >
+                  Đóng
+                </button>
+              </div>
+            </div>
+          </div>
+        </Portal>
+      )}
+
       {/* Delete Confirmation Modal */}
       {deleteConfirmId && (
         <Portal>
@@ -1212,11 +1318,9 @@ export function MasterDataScaleManagementPage() {
                       </code>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-500">Loại dữ liệu:</span>
+                      <span className="text-slate-500">Loại thực thể:</span>
                       <span className="text-slate-800 font-medium">
-                        {approvalEntity.dataType === 'standard' ? 'Dữ liệu chuẩn'
-                          : approvalEntity.dataType === 'reference' ? 'Dữ liệu tham chiếu'
-                          : 'Dữ liệu giao dịch'}
+                        {dataTypeLabels[approvalEntity.dataType]}
                       </span>
                     </div>
                     <div className="flex justify-between">
