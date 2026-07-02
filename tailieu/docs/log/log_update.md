@@ -1,5 +1,18 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Phiên bản 2.6.06 (Ngày cập nhật: 02/07/2026)
+
+**Nội dung thay đổi:**
+1. **Màn danh sách thực thể (tab "Thiết lập thực thể")** trong `MasterDataScaleManagementPage.tsx`:
+   - **Bỏ 2 cột** khỏi bảng: *Phạm vi sử dụng* và *Nguồn dữ liệu*.
+   - **Thay 2 bộ lọc**: đổi *Phạm vi sử dụng* → **Loại dữ liệu** (4 tùy chọn: Thực thể Cá nhân / Tổ chức / Văn bản pháp lý / Tài sản) và đổi *Nguồn dữ liệu* → **Cơ quan quản lý** (dropdown lấy từ `MANAGING_UNITS`).
+   - Cập nhật state (`filterScope`/`filterDataSource` → `filterDataType`/`filterManagingAgency`) và logic lọc tương ứng.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/master-data/MasterDataScaleManagementPage.tsx`
+
+---
+
 ## Phiên bản 2.6.05 (Ngày cập nhật: 02/07/2026)
 
 > Lưu ý: File thuộc Phân hệ 9 (Cung cấp dữ liệu) đang `[ ]` LOCKED. Thay đổi theo **chỉ đạo trực tiếp của PM**.

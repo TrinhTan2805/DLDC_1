@@ -216,8 +216,8 @@ export function MasterDataScaleManagementPage() {
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<LifecycleStatus | 'all'>('all');
-  const [filterScope, setFilterScope] = useState<string>('all');
-  const [filterDataSource, setFilterDataSource] = useState<string>('all');
+  const [filterDataType, setFilterDataType] = useState<string>('all');
+  const [filterManagingAgency, setFilterManagingAgency] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
   const [pageSize, setPageSize] = useState(10);
   const [currentPageNum, setCurrentPageNum] = useState(1);
@@ -349,9 +349,9 @@ export function MasterDataScaleManagementPage() {
     const matchesSearch = e.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       e.code.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'all' || e.lifecycleStatus === filterStatus;
-    const matchesScope = filterScope === 'all' || e.scope === filterScope;
-    const matchesDataSource = filterDataSource === 'all' || e.dataSource === filterDataSource;
-    return matchesSearch && matchesStatus && matchesScope && matchesDataSource;
+    const matchesDataType = filterDataType === 'all' || e.dataType === filterDataType;
+    const matchesManagingAgency = filterManagingAgency === 'all' || e.managingAgency === filterManagingAgency;
+    return matchesSearch && matchesStatus && matchesDataType && matchesManagingAgency;
   });
 
   const paginatedEntities = filteredEntities.slice((currentPageNum - 1) * pageSize, currentPageNum * pageSize);
@@ -573,34 +573,35 @@ export function MasterDataScaleManagementPage() {
                       </div>
 
                       <div>
-                        <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Phạm vi sử dụng</label>
+                        <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Loại dữ liệu</label>
                         <div className="relative">
                           <select
-                            value={filterScope}
-                            onChange={(e) => setFilterScope(e.target.value)}
+                            value={filterDataType}
+                            onChange={(e) => setFilterDataType(e.target.value)}
                             className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium font-sans"
                           >
-                            <option value="all">Tất cả phạm vi</option>
-                            <option value="national">Cấp quốc gia</option>
-                            <option value="ministry">Cấp bộ</option>
-                            <option value="provincial">Cấp tỉnh/thành</option>
-                            <option value="internal">Sử dụng nội bộ</option>
+                            <option value="all">Tất cả loại dữ liệu</option>
+                            <option value="individual">Thực thể Cá nhân</option>
+                            <option value="organization">Thực thể Tổ chức</option>
+                            <option value="legal">Thực thể Văn bản/Sự kiện pháp lý</option>
+                            <option value="asset">Thực thể Tài sản</option>
                           </select>
                           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                         </div>
                       </div>
 
                       <div>
-                        <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Nguồn dữ liệu</label>
+                        <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Cơ quan quản lý</label>
                         <div className="relative">
                           <select
-                            value={filterDataSource}
-                            onChange={(e) => setFilterDataSource(e.target.value)}
+                            value={filterManagingAgency}
+                            onChange={(e) => setFilterManagingAgency(e.target.value)}
                             className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium font-sans"
                           >
-                            <option value="all">Tất cả nguồn dữ liệu</option>
-                            <option value="dldc">Từ Kho DLDC</option>
-                            <option value="manual">Nhập thủ công</option>
+                            <option value="all">Tất cả cơ quan</option>
+                            {MANAGING_UNITS.map(unit => (
+                              <option key={unit} value={unit}>{unit}</option>
+                            ))}
                           </select>
                           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                         </div>
@@ -621,8 +622,6 @@ export function MasterDataScaleManagementPage() {
                         <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên dữ liệu chủ</th>
                         <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Loại dữ liệu</th>
                         <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Cơ quan quản lý</th>
-                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Phạm vi sử dụng</th>
-                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Nguồn dữ liệu</th>
                         <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Cập nhật lần cuối</th>
                         <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Trạng thái</th>
                         <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-28">Thao tác</th>
@@ -637,8 +636,6 @@ export function MasterDataScaleManagementPage() {
                             <td className="px-6 py-4 text-slate-900 text-[13px] font-normal hover:text-blue-600 transition-colors">{entity.name}</td>
                             <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{dataTypeLabels[entity.dataType]}</td>
                             <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{entity.managingAgency}</td>
-                            <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{scopeLabels[entity.scope] || entity.scope}</td>
-                            <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{getDataSourceLabel(entity.dataSource)}</td>
                             <td className="px-6 py-4 text-center text-[13px] text-slate-700">{entity.updatedDate}</td>
                             <td className="px-6 py-4 text-center">
                               <div className="flex justify-center">

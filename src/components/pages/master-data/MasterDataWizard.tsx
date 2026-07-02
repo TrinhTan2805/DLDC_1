@@ -227,13 +227,6 @@ const FIELD_DATA_TYPES: { value: FieldDataType; label: string }[] = [
   { value: 'url',      label: 'URL' },
 ];
 
-function getDatabaseForTable(tableId: string): string {
-  for (const [dbId, tables] of Object.entries(DLDC_TABLES)) {
-    if (tables.some(t => t.id === tableId)) return dbId;
-  }
-  return '';
-}
-
 interface AttributeForm {
   fieldName: string;
   displayName: string;
@@ -1189,17 +1182,17 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
               </div>
 
               {/* ── Lớp 1: Matching Rules ── */}
-              <div className="border border-slate-200 rounded-xl overflow-hidden">
-                <div className="bg-blue-600 px-4 py-3 flex items-center gap-3">
-                  <span className="w-6 h-6 rounded-full bg-white/20 text-white text-[13px] font-bold flex items-center justify-center flex-shrink-0">1</span>
+              <div className="border border-blue-200 rounded-xl overflow-hidden">
+                <div className="bg-blue-50 px-4 py-3 flex items-center gap-3 border-b border-blue-200">
+                  <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-[13px] font-bold flex items-center justify-center flex-shrink-0">1</span>
                   <div>
-                    <p className="text-[13px] font-semibold text-white">Lớp 1 — Quy tắc so khớp (Matching Rules)</p>
-                    <p className="text-[13px] text-blue-200">Xác định khi nào hai bản ghi từ hai nguồn khác nhau được coi là cùng một thực thể</p>
+                    <p className="text-[13px] font-semibold text-blue-800">Lớp 1 — Quy tắc so khớp (Matching Rules)</p>
+                    <p className="text-[13px] text-blue-500">Xác định khi nào hai bản ghi từ hai nguồn khác nhau được coi là cùng một thực thể</p>
                   </div>
                 </div>
                 <div className="p-4 space-y-4 bg-white">
                   <div className="flex items-center gap-3">
-                    <label className="text-[13px] font-medium text-slate-700 whitespace-nowrap">Điểm tổng hợp tối thiểu để xác nhận khớp:</label>
+                    <label className="text-[13px] font-medium text-slate-700 whitespace-nowrap">Tỷ lệ khớp tối thiểu để hệ thống tự động gộp bản ghi:</label>
                     <input
                       type="number" min={0} max={100}
                       value={mergeConfig.minMatchScore}
@@ -1213,12 +1206,12 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
                     <table className="w-full text-[13px]">
                       <thead className="bg-slate-50 border-b border-slate-100">
                         <tr>
-                          <th className="px-3 py-2.5 text-left font-semibold text-slate-500">Trường so khớp</th>
-                          <th className="px-3 py-2.5 text-left font-semibold text-slate-500">Phương pháp</th>
-                          <th className="px-3 py-2.5 text-center font-semibold text-slate-500 w-24">Ngưỡng (%)</th>
-                          <th className="px-3 py-2.5 text-center font-semibold text-slate-500 w-24">Chuẩn hóa</th>
-                          <th className="px-3 py-2.5 text-center font-semibold text-slate-500 w-20">Toán tử</th>
-                          <th className="px-3 py-2.5 text-center font-semibold text-slate-500 w-10"></th>
+                          <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Trường đối chiếu</th>
+                          <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Phương pháp</th>
+                          <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-32">Tỷ lệ khớp tối thiểu (%)</th>
+                          <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-24">Chuẩn hóa</th>
+                          <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-36">Điều kiện kết hợp</th>
+                          <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-10"></th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-50 bg-white">
@@ -1251,7 +1244,6 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
                                 >
                                   <option value="exact">Khớp chính xác (Exact)</option>
                                   <option value="fuzzy">Khớp gần đúng (Fuzzy)</option>
-                                  <option value="normalized">Chuẩn hóa rồi khớp</option>
                                 </select>
                               </td>
                               <td className="px-2 py-1.5 text-center">
@@ -1311,12 +1303,12 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
               </div>
 
               {/* ── Lớp 2: Extraction Rules ── */}
-              <div className="border border-slate-200 rounded-xl overflow-hidden">
-                <div className="bg-blue-600 px-4 py-3 flex items-center gap-3">
-                  <span className="w-6 h-6 rounded-full bg-white/20 text-white text-[13px] font-bold flex items-center justify-center flex-shrink-0">2</span>
+              <div className="border border-blue-200 rounded-xl overflow-hidden">
+                <div className="bg-blue-50 px-4 py-3 flex items-center gap-3 border-b border-blue-200">
+                  <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-[13px] font-bold flex items-center justify-center flex-shrink-0">2</span>
                   <div>
-                    <p className="text-[13px] font-semibold text-white">Lớp 2 — Quy tắc trích rút (Extraction Rules)</p>
-                    <p className="text-[13px] text-blue-100">Sau khi xác định hai bản ghi là cùng thực thể, lấy giá trị từng trường từ nguồn nào</p>
+                    <p className="text-[13px] font-semibold text-blue-800">Lớp 2 — Quy tắc trích rút (Extraction Rules)</p>
+                    <p className="text-[13px] text-blue-500">Sau khi xác định hai bản ghi là cùng thực thể, lấy giá trị từng trường từ nguồn nào</p>
                   </div>
                 </div>
                 <div className="p-4 bg-white">
@@ -1327,17 +1319,17 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
                       <table className="w-full text-[13px]">
                         <thead className="bg-slate-50 border-b border-slate-100">
                           <tr>
-                            <th className="px-3 py-2.5 text-left font-semibold text-slate-500">Trường</th>
-                            <th className="px-3 py-2.5 text-left font-semibold text-slate-500">Nguồn ưu tiên</th>
-                            <th className="px-3 py-2.5 text-left font-semibold text-slate-500">Fallback (khi null)</th>
-                            <th className="px-3 py-2.5 text-left font-semibold text-slate-500">Chiến lược xung đột</th>
+                            <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Trường</th>
+                            <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Nguồn ưu tiên</th>
+                            <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Nguồn thay thế (nếu rỗng)</th>
+                            <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Xử lý xung đột dữ liệu</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50 bg-white">
                           {extractionRules.map(rule => (
                             <tr key={rule.id}>
                               <td className="px-3 py-2">
-                                <span className="font-medium text-slate-700">{availableFields.find(f => f.fieldName === rule.fieldName)?.displayName || rule.fieldName}</span>
+                                <span className="text-[13px] font-medium text-slate-700">{availableFields.find(f => f.fieldName === rule.fieldName)?.displayName || rule.fieldName}</span>
                                 <code className="ml-1.5 text-[13px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{rule.fieldName}</code>
                               </td>
                               <td className="px-2 py-1.5">
@@ -1356,7 +1348,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
                                   onChange={(e: ChangeEvent<HTMLSelectElement>) => setExtractionRules(prev => prev.map(r => r.id === rule.id ? { ...r, fallbackSource: e.target.value } : r))}
                                   className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
                                 >
-                                  <option value="">Không fallback</option>
+                                  <option value="">Không tìm nguồn thay thế</option>
                                   {availableSources.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
                                 </select>
                               </td>
@@ -1382,12 +1374,12 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
               </div>
 
               {/* ── Lớp 3: Merge Config ── */}
-              <div className="border border-slate-200 rounded-xl overflow-hidden">
-                <div className="bg-blue-600 px-4 py-3 flex items-center gap-3">
-                  <span className="w-6 h-6 rounded-full bg-white/20 text-white text-[13px] font-bold flex items-center justify-center flex-shrink-0">3</span>
+              <div className="border border-blue-200 rounded-xl overflow-hidden">
+                <div className="bg-blue-50 px-4 py-3 flex items-center gap-3 border-b border-blue-200">
+                  <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-[13px] font-bold flex items-center justify-center flex-shrink-0">3</span>
                   <div>
-                    <p className="text-[13px] font-semibold text-white">Lớp 3 — Quy tắc hợp nhất (Merge Rules)</p>
-                    <p className="text-[13px] text-blue-200">Cách tạo ra bản ghi dữ liệu chủ cuối cùng từ kết quả trích rút</p>
+                    <p className="text-[13px] font-semibold text-blue-800">Lớp 3 — Quy tắc hợp nhất (Merge Rules)</p>
+                    <p className="text-[13px] text-blue-500">Cách tạo ra bản ghi dữ liệu chủ cuối cùng từ kết quả trích rút</p>
                   </div>
                 </div>
                 <div className="p-4 space-y-4 bg-white">
@@ -1413,7 +1405,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
                           onChange={() => setMergeConfig(prev => ({ ...prev, mergeTrigger: 'auto' }))}
                           className="text-blue-600 focus:ring-blue-500/20 cursor-pointer"
                         />
-                        <span className="text-[13px] text-slate-700">Tự động merge lại ngay</span>
+                        <span className="text-[13px] text-slate-700">Tự động hợp nhất lại ngay</span>
                       </label>
                       <label className="flex items-center gap-2 cursor-pointer">
                         <input
@@ -1422,7 +1414,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
                           onChange={() => setMergeConfig(prev => ({ ...prev, mergeTrigger: 'approval' }))}
                           className="text-blue-600 focus:ring-blue-500/20 cursor-pointer"
                         />
-                        <span className="text-[13px] text-slate-700">Chờ phê duyệt trước khi merge</span>
+                        <span className="text-[13px] text-slate-700">Chờ phê duyệt trước khi hợp nhất</span>
                       </label>
                     </div>
                   </div>
