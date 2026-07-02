@@ -3,9 +3,10 @@ import { createPortal } from 'react-dom';
 import { 
   Activity, BarChart3, Download, Network, Share2, Server, Database, 
   AlertCircle, ChevronRight, X, Clock, HelpCircle, CheckCircle2, ArrowRightLeft,
-  ChevronDown, Search, Check
+  ChevronDown, Search, Check, Info
 } from 'lucide-react';
 import { ProvisionExportReportModal } from './modals/ProvisionExportReportModal';
+import { ProvisionServiceModal } from './modals/ProvisionServiceModal';
 import { AuditLogsTab } from './tabs/AuditLogsTab';
 import { ScrollText } from 'lucide-react';
 import { AreaChart, Area, LineChart, Line, BarChart, Bar, ReferenceLine, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -98,9 +99,9 @@ const apiMockStats: Record<string, {
 };
 
 const apiList = [
-  { id: 'Lấy danh sách Hộ tịch', name: 'Lấy danh sách Hộ tịch', database: 'CSDL Hộ tịch điện tử' },
-  { id: 'Đồng bộ dữ liệu THADS', name: 'Đồng bộ dữ liệu THADS', database: 'Cơ sở dữ liệu THADS' },
-  { id: 'Đọc thông tin Biện pháp bảo đảm', name: 'Đọc thông tin Biện pháp bảo đảm', database: 'CSDL Biện pháp bảo đảm' }
+  { id: 'Lấy danh sách Hộ tịch', name: 'Lấy danh sách Hộ tịch', database: 'CSDL Hộ tịch điện tử', code: 'SVC-HOTICH-001' },
+  { id: 'Đồng bộ dữ liệu THADS', name: 'Đồng bộ dữ liệu THADS', database: 'Cơ sở dữ liệu THADS', code: 'SVC-THADS-001' },
+  { id: 'Đọc thông tin Biện pháp bảo đảm', name: 'Đọc thông tin Biện pháp bảo đảm', database: 'CSDL Biện pháp bảo đảm', code: 'SVC-BPBD-001' }
 ];
 
 const databases = Array.from(new Set(apiList.map(api => api.database)));
@@ -153,6 +154,13 @@ export function DataProvisionMonitoringPage() {
   
   // Log Detail modal state
   const [selectedLog, setSelectedLog] = useState<any>(null);
+  // API được chọn để xem chi tiết (modal chi tiết API)
+  const [detailApi, setDetailApi] = useState<string | null>(null);
+  // API đang xem sơ đồ luồng (null = hiển thị danh sách)
+  const [flowApi, setFlowApi] = useState<string | null>(null);
+  // Bộ lọc thời gian
+  const [monFrom, setMonFrom] = useState('');
+  const [monTo, setMonTo] = useState('');
 
   const isAllApi = selectedApi === '';
   const stats = apiMockStats[selectedApi] || apiMockStats[filteredApis[0]?.id] || apiMockStats['Lấy danh sách Hộ tịch'];
@@ -175,6 +183,8 @@ export function DataProvisionMonitoringPage() {
   }, [filteredApis]);
 
   const view = isAllApi ? aggregateStats : stats;
+  // Danh sách API hiển thị trong tab Sơ đồ (lọc theo API đang chọn ở header)
+  const listApis = isAllApi ? filteredApis : filteredApis.filter(a => a.id === selectedApi);
 
   const paginatedChartData = React.useMemo(() => {
     return stats.chartData.slice((tablePage - 1) * tableItemsPerPage, tablePage * tableItemsPerPage);
@@ -265,50 +275,40 @@ export function DataProvisionMonitoringPage() {
       `}} />
       <div className="space-y-6">
         
-        {/* Page Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-          <div>
-            <h1 className="text-base font-bold text-slate-900">Kiểm soát & Giám sát cung cấp</h1>
-            <p className="text-xs text-slate-500 mt-1">Giám sát hiệu năng kết nối API thời gian thực, lưu lượng Gateway và báo cáo logs</p>
-          </div>
-          <div className="flex items-center gap-3 w-full md:w-auto">
-            
-            {/* Cascading API Selectors */}
-            <div className="flex flex-col sm:flex-row items-center gap-0 bg-white border border-slate-200 rounded-lg p-1 shadow-sm shrink-0">
-              
-              {/* Database Selector */}
-              <div className="flex items-center px-3 py-1.5 hover:bg-slate-50 rounded-md transition-colors border-b sm:border-b-0 sm:border-r border-slate-100">
-                <Database className="w-3.5 h-3.5 text-slate-400 mr-2 shrink-0" />
-                <select
-                  value={selectedDatabase}
-                  onChange={(e) => setSelectedDatabase(e.target.value)}
-                  className="text-xs font-bold text-slate-600 bg-transparent focus:outline-none cursor-pointer max-w-[150px] truncate"
-                >
-                  <option value="">Tất cả CSDL</option>
-                  {databases.map(db => (
-                    <option key={db} value={db}>{db}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* API Selector */}
-              <div className="flex items-center px-3 py-1.5 hover:bg-slate-50 rounded-md transition-colors">
-                <span className="text-[10px] font-bold text-slate-400 uppercase mr-2 shrink-0">API:</span>
-                <select
-                  value={selectedApi}
-                  onChange={(e) => setSelectedApi(e.target.value)}
-                  className="text-xs font-semibold text-blue-700 bg-transparent focus:outline-none cursor-pointer max-w-[200px] truncate"
-                >
-                  <option value="">Tất cả API</option>
-                  {filteredApis.map(api => (
-                    <option key={api.id} value={api.id}>{api.name}</option>
-                  ))}
-                </select>
-              </div>
-
+        {/* Filter bar */}
+        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div className="flex flex-wrap items-end gap-3">
+            <div className="flex-1 min-w-[180px]">
+              <label className="block text-[12px] text-slate-500 mb-1 font-medium">Cơ sở dữ liệu</label>
+              <select
+                value={selectedDatabase}
+                onChange={(e) => setSelectedDatabase(e.target.value)}
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Tất cả CSDL</option>
+                {databases.map(db => (<option key={db} value={db}>{db}</option>))}
+              </select>
             </div>
-
-            <button 
+            <div className="flex-1 min-w-[180px]">
+              <label className="block text-[12px] text-slate-500 mb-1 font-medium">API</label>
+              <select
+                value={selectedApi}
+                onChange={(e) => setSelectedApi(e.target.value)}
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Tất cả API</option>
+                {filteredApis.map(api => (<option key={api.id} value={api.id}>{api.name}</option>))}
+              </select>
+            </div>
+            <div className="min-w-[150px]">
+              <label className="block text-[12px] text-slate-500 mb-1 font-medium">Từ ngày</label>
+              <input type="date" value={monFrom} onChange={(e) => setMonFrom(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div className="min-w-[150px]">
+              <label className="block text-[12px] text-slate-500 mb-1 font-medium">Đến ngày</label>
+              <input type="date" value={monTo} onChange={(e) => setMonTo(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <button
               onClick={() => setShowExportModal(true)}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition-colors font-medium text-[13px] shadow-sm shrink-0"
             >
@@ -374,7 +374,7 @@ export function DataProvisionMonitoringPage() {
                 }`}
               >
                 <Network className="w-4 h-4 mr-2" />
-                Sơ đồ giám sát & Logs kết nối
+                Sơ đồ giám sát
               </button>
               <button
                 onClick={() => setActiveTab('bao_cao')}
@@ -405,8 +405,22 @@ export function DataProvisionMonitoringPage() {
           {activeTab === 'luong_du_lieu' ? (
             <div className="space-y-6">
               
-              {/* Sơ đồ luồng (1 API) hoặc danh sách API (Tất cả API) */}
-              {!isAllApi ? (
+              {/* Danh sách API; bấm "Xem sơ đồ" để xem sơ đồ luồng chi tiết */}
+              {flowApi ? (() => {
+                const stats = apiMockStats[flowApi];
+                const info = apiList.find(a => a.id === flowApi);
+                if (!stats) return null;
+                return (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-[13px] text-slate-600">
+                    <Network className="w-4 h-4 text-blue-600" />
+                    Sơ đồ luồng: <span className="font-semibold text-slate-800">{info?.name}</span>
+                  </div>
+                  <button onClick={() => setFlowApi(null)} className="px-3 py-1.5 text-[13px] text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 font-medium flex items-center gap-1.5">
+                    <X className="w-4 h-4" /> Đóng
+                  </button>
+                </div>
               <div className="bg-slate-50 rounded-xl border border-slate-200 p-8 flex items-center justify-center min-h-[300px] overflow-hidden">
                 <div className="flex w-full max-w-5xl items-center relative">
                   
@@ -521,13 +535,15 @@ export function DataProvisionMonitoringPage() {
 
                 </div>
               </div>
-              ) : (
+              </div>
+                );
+              })() : (
                 <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
                   <div className="px-5 py-3 border-b border-slate-200 bg-slate-50 text-[13px] font-semibold text-slate-600">
-                    Danh sách API đang giám sát ({filteredApis.length})
+                    Danh sách API đang giám sát ({listApis.length})
                   </div>
                   <div className="divide-y divide-slate-100">
-                    {filteredApis.map(api => {
+                    {listApis.map(api => {
                       const st = apiMockStats[api.id];
                       const err = !!st && (st.sourceConnection === 'error' || (st.partners || []).some(p => p.connection === 'error'));
                       return (
@@ -539,13 +555,16 @@ export function DataProvisionMonitoringPage() {
                               <p className="text-[11px] text-slate-400 truncate">{api.database}</p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-3 shrink-0">
-                            <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${err ? 'text-rose-600 bg-rose-50 border-rose-100' : 'text-emerald-600 bg-emerald-50 border-emerald-100'}`}>
-                              {err ? 'Có cảnh báo' : 'Kết nối ổn định'}
-                            </span>
+                          <div className="flex items-center gap-2 shrink-0">
                             <button
-                              onClick={() => setSelectedApi(api.id)}
-                              className="text-[13px] text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+                              onClick={() => setDetailApi(api.id)}
+                              className="px-3 py-1.5 text-[13px] text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 font-medium flex items-center gap-1.5"
+                            >
+                              <Info className="w-4 h-4" /> Xem chi tiết
+                            </button>
+                            <button
+                              onClick={() => setFlowApi(api.id)}
+                              className="px-3 py-1.5 text-[13px] text-blue-600 border border-blue-200 bg-blue-50 rounded-lg hover:bg-blue-100 font-medium flex items-center gap-1"
                             >
                               Xem sơ đồ <ChevronRight className="w-4 h-4" />
                             </button>
@@ -556,52 +575,6 @@ export function DataProvisionMonitoringPage() {
                   </div>
                 </div>
               )}
-
-              {/* Dynamic Connection logs for chosen API */}
-              <div>
-                <h3 className="text-[13px] font-extrabold text-slate-800 mb-4 flex items-center uppercase tracking-wider">
-                  <Activity className="w-4 h-4 text-blue-600 mr-1.5" /> 
-                  Nhật ký kết nối gần đây
-                </h3>
-                
-                <div className="border border-slate-200 rounded-lg overflow-hidden divide-y divide-slate-100 bg-white">
-                  {view.logs.map((log, idx) => (
-                    <div 
-                      key={idx}
-                      onClick={() => setSelectedLog(log)}
-                      className="p-4 hover:bg-slate-50/70 transition-all flex items-center justify-between gap-4 cursor-pointer"
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="mt-0.5">
-                          {log.type === 'INFO' && (
-                            <span className="px-2 py-0.5 bg-green-50 text-green-700 border border-green-200 rounded text-[10px] font-bold">INFO</span>
-                          )}
-                          {log.type === 'WARN' && (
-                            <span className="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded text-[10px] font-bold">WARN</span>
-                          )}
-                          {log.type === 'ERROR' && (
-                            <span className="px-2 py-0.5 bg-rose-50 text-rose-700 border border-rose-200 rounded text-[10px] font-bold">ERROR</span>
-                          )}
-                        </div>
-                        <div>
-                          <p className={`text-xs font-bold ${log.type === 'ERROR' ? 'text-rose-700' : log.type === 'WARN' ? 'text-amber-700' : 'text-slate-700'}`}>
-                            {log.message}
-                          </p>
-                          <span className="text-[10px] text-slate-400 font-mono block mt-1">Client: {log.clientIp} • Kích thước: {log.responseSize}</span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3 shrink-0">
-                        <div className="text-right">
-                          <span className="text-[10px] text-slate-400 font-mono block">{log.time}</span>
-                          <span className="text-xs font-bold text-slate-600 font-mono mt-0.5 block">{log.latency}</span>
-                        </div>
-                        <ChevronRight className="w-4 h-4 text-slate-400" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
 
             </div>
           ) : activeTab === 'bao_cao' ? (
@@ -825,6 +798,30 @@ export function DataProvisionMonitoringPage() {
           </div>
         </div>
       , document.body)}
+
+      {/* API Detail modal — dùng lại popup "Xem chi tiết Dịch vụ" của màn Thiết lập điều phối */}
+      {detailApi && (() => {
+        const info = apiList.find(a => a.id === detailApi);
+        if (!info) return null;
+        const svc = {
+          name: info.name,
+          code: info.code,
+          type: 'REST',
+          protocol: 'HTTPS',
+          method: 'GET',
+          dataType: info.database,
+          contextPath: '',
+          description: '',
+        };
+        return (
+          <ProvisionServiceModal
+            isOpen={true}
+            mode="view"
+            service={svc}
+            onClose={() => setDetailApi(null)}
+          />
+        );
+      })()}
 
       {/* Reports exporting modal */}
       <ProvisionExportReportModal 
