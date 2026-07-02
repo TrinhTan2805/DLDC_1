@@ -380,8 +380,8 @@ export function ReconciliationTemplate({
                           {(currentPage - 1) * itemsPerPage + index + 1}
                         </td>
                         <td className="px-4 py-3 text-left text-[13px]">
-                          <div className="font-medium text-slate-950 leading-snug text-[13px]">{record.datasetCode}</div>
-                          <div className="text-slate-500 mt-0.5 text-[12px]">{record.datasetName}</div>
+                          <div className="font-medium text-slate-950 leading-snug text-[13px]">{record.datasetName}</div>
+                          <div className="text-slate-500 mt-0.5 text-[12px] font-mono">{record.datasetCode.replace(/-\d{4}(-\d{2})?$/, '')}</div>
                         </td>
                         <td className="px-4 py-3 text-center text-slate-950 font-semibold font-mono text-[13px]">
                           {c.sent.toLocaleString()}
@@ -423,6 +423,9 @@ export function ReconciliationTemplate({
                             </button>
                             <button
                               onClick={() => {
+                                const cc = deriveCounts(record);
+                                setSelectedRecordCode(record.datasetCode);
+                                setSelectedRecord({ ...record, sentCount: cc.sent, receivedCount: cc.received, matchRate: cc.rate });
                                 setHistorySearchTerm(record.datasetCode);
                                 setHistoryModalOpen(true);
                               }}
@@ -561,7 +564,7 @@ export function ReconciliationTemplate({
             
             {/* Body */}
             <div className="p-6 overflow-y-auto flex-1 bg-white">
-              <ReconciliationHistoryTab initialSearchTerm={historySearchTerm} hideSearchAndFilters={true} />
+              <ReconciliationHistoryTab initialSearchTerm={historySearchTerm} record={selectedRecord ?? undefined} hideSearchAndFilters={true} />
             </div>
 
             {/* Footer */}

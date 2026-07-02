@@ -3,8 +3,8 @@ import { ReconciliationTemplate } from './ReconciliationTemplate';
 const mockRecords = [
   {
     id: 'REC-COURT-001',
-    datasetCode: 'BA-TAND-2024-12',
-    datasetName: 'Bản án TAND - Tháng 12/2024',
+    datasetCode: 'BA-HINHSU-2024-12',
+    datasetName: 'Bản án hình sự',
     providerSystem: 'TAND Tối cao',
     dataType: 'Bản án',
     recordCount: 398000,
@@ -17,8 +17,8 @@ const mockRecords = [
   },
   {
     id: 'REC-COURT-002',
-    datasetCode: 'QD-TAND-2024-12',
-    datasetName: 'Quyết định TAND - Tháng 12/2024',
+    datasetCode: 'QD-HINHSU-2024-12',
+    datasetName: 'Quyết định hình sự',
     providerSystem: 'TAND Tối cao',
     dataType: 'Quyết định',
     recordCount: 125000,
@@ -33,8 +33,8 @@ const mockRecords = [
   },
   {
     id: 'REC-COURT-003',
-    datasetCode: 'BA-TAND-2024-11',
-    datasetName: 'Bản án TAND - Tháng 11/2024',
+    datasetCode: 'BA-DANSU-2024-11',
+    datasetName: 'Bản án dân sự',
     providerSystem: 'TAND Tối cao',
     dataType: 'Bản án',
     recordCount: 387000,
@@ -47,8 +47,8 @@ const mockRecords = [
   },
   {
     id: 'REC-COURT-004',
-    datasetCode: 'QD-TAND-2024-11',
-    datasetName: 'Quyết định TAND - Tháng 11/2024',
+    datasetCode: 'QD-DANSU-2024-11',
+    datasetName: 'Quyết định dân sự',
     providerSystem: 'TAND Tối cao',
     dataType: 'Quyết định',
     recordCount: 118000,
@@ -61,8 +61,8 @@ const mockRecords = [
   },
   {
     id: 'REC-COURT-005',
-    datasetCode: 'BA-TAND-2024-10',
-    datasetName: 'Bản án TAND - Tháng 10/2024',
+    datasetCode: 'BA-HANHCHINH-2024-10',
+    datasetName: 'Bản án hành chính',
     providerSystem: 'TAND Tối cao',
     dataType: 'Bản án',
     recordCount: 365000,
