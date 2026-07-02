@@ -7,6 +7,21 @@ interface VersionHistoryModalProps {
 
 const mockVersions = [
   {
+    id: 23,
+    version: 'v2.6.05',
+    date: '02/07/2026',
+    time: '18:50',
+    content: `1. Phân hệ Cung cấp dữ liệu (Kiểm soát & Giám sát):
+- Bỏ khối "Nhật ký kết nối gần đây" trong tab Sơ đồ của màn "Kiểm soát & Giám sát cung cấp" (DataProvisionMonitoringPage.tsx) do trùng với tab Audit Logs. Đổi tên tab thành "Sơ đồ giám sát".
+- Danh sách API đang giám sát: Bỏ badge trạng thái, thay bằng 2 nút "Xem chi tiết" (dùng lại popup ProvisionServiceModal) + "Xem sơ đồ" (hiển thị sơ đồ luồng của API).
+- Bỏ tiêu đề màn hình và dàn bộ lọc thành 1 hàng ngang tối giản.
+
+2. Phân hệ Đối soát dữ liệu (Reconciliation):
+- Modal "Lịch sử đối soát thu thập" (ReconciliationHistoryTab): Sinh danh sách lịch sử theo đúng bản ghi được chọn ở danh sách ngoài thay vì dữ liệu mock cố định.
+- Đồng bộ cột với danh sách đối soát ngoài: STT, Thu thập, Số bản ghi (Nguồn), Số bản ghi (Kho), Lệch, Trạng thái, Ngày đối soát.
+- Chuẩn hóa cột "Thu thập" ở cả bảng ngoài và modal lịch sử: Hiển thị Tên thu thập xếp trên và Mã thu thập (font-mono, không chứa đuôi ngày tháng) xếp dưới.`
+  },
+  {
     id: 22,
     version: 'v2.6.1',
     date: '02/07/2026',
