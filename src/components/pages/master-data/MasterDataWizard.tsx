@@ -1,5 +1,5 @@
 import { useState, ChangeEvent } from 'react';
-import { X, Check, ChevronRight, ChevronLeft, AlertCircle, Plus, Trash2, Database, FileText, ChevronDown } from 'lucide-react';
+import { X, Check, ChevronRight, ChevronLeft, AlertCircle, Plus, Trash2, Database, FileText, ChevronDown, Network, ArrowRight, Key, Search, SquarePen } from 'lucide-react';
 import { Portal } from '../../common/Portal';
 
 type LifecycleStatus = 'active' | 'draft' | 'inactive' | 'archived';
@@ -9,6 +9,8 @@ type DataSourceType = 'dldc' | 'manual';
 type UpdateStrategyType = 'reference' | 'scheduled' | 'realtime';
 type SyncFrequencyType = 'daily' | 'weekly' | 'monthly' | 'event';
 type FieldDataType = 'string' | 'number' | 'date' | 'datetime' | 'boolean' | 'text' | 'email' | 'phone' | 'url';
+type WizardRelType = '1-1' | '1-n' | 'n-1' | 'n-n';
+type SeparatorType = 'none' | '-' | '.' | '/';
 type MatchMethod = 'exact' | 'fuzzy' | 'normalized';
 type ConflictStrategy = 'priority' | 'most_recent' | 'most_complete' | 'flag';
 type MergeTrigger = 'auto' | 'approval';
@@ -29,6 +31,37 @@ interface ExtractionRule {
   primarySource: string;
   fallbackSource: string;
   conflictStrategy: ConflictStrategy;
+}
+
+interface WizardRelationship {
+  id: string;
+  targetEntityId: string;
+  targetEntityName: string;
+  type: WizardRelType;
+  sourceKey: string;
+  targetKey: string;
+  displayField?: string;
+  mappingTable?: string;
+}
+
+interface RelFormData {
+  targetEntityId: string;
+  targetEntityName: string;
+  type: WizardRelType;
+  sourceKey: string;
+  targetKey: string;
+  displayField: string;
+  mappingTable: string;
+}
+
+interface IdentifierConfig {
+  prefix: string;
+  separator: SeparatorType;
+  digits: number;
+  startFrom: number;
+  increment: number;
+  suffix: string;
+  checkDuplicate: boolean;
 }
 
 interface MergeConfig {
@@ -264,10 +297,11 @@ interface WizardData {
   // Step 3
   mergeRules: string[];
 
-  // Step 4
-  relationships: string[];
-
   // Step 5
+  relationships: WizardRelationship[];
+
+  // Step 6
+  approvalReviewer: string;
   approvalNotes: string;
 }
 
@@ -297,12 +331,57 @@ const MANAGING_UNITS = [
   'Bộ Kế hoạch và Đầu tư',
 ];
 
+const MOCK_REVIEWERS = [
+  { id: 'rv-01', name: 'Nguyễn Văn An', title: 'Trưởng phòng CNTT' },
+  { id: 'rv-02', name: 'Trần Thị Bình', title: 'Phó Cục trưởng' },
+  { id: 'rv-03', name: 'Lê Văn Cường', title: 'Trưởng ban Quản lý dữ liệu' },
+  { id: 'rv-04', name: 'Phạm Thị Dung', title: 'Giám đốc Kho dữ liệu' },
+  { id: 'rv-05', name: 'Hoàng Văn Em', title: 'Trưởng phòng Pháp chế' },
+];
+
+const WIZARD_MOCK_ENTITIES = [
+  { id: 'me-citizen',   code: 'CITIZEN',   name: 'Công dân' },
+  { id: 'me-org',       code: 'ORG',       name: 'Tổ chức' },
+  { id: 'me-authority', code: 'AUTHORITY', name: 'Cơ quan nhà nước' },
+  { id: 'me-address',   code: 'ADDRESS',   name: 'Địa chỉ hành chính' },
+  { id: 'me-land',      code: 'LAND',      name: 'Đất đai' },
+  { id: 'me-vehicle',   code: 'VEHICLE',   name: 'Phương tiện' },
+  { id: 'me-license',   code: 'LICENSE',   name: 'Giấy phép' },
+];
+
+const REL_TYPE_LABELS: Record<WizardRelType, string> = {
+  '1-1': '1 - 1 (Một - Một)',
+  '1-n': '1 - n (Một - Nhiều)',
+  'n-1': 'n - 1 (Nhiều - Một)',
+  'n-n': 'n - n (Nhiều - Nhiều)',
+};
+
+const REL_TYPE_COLORS: Record<WizardRelType, string> = {
+  '1-1': 'bg-teal-50 text-teal-700 border-teal-200',
+  '1-n': 'bg-blue-50 text-blue-700 border-blue-200',
+  'n-1': 'bg-indigo-50 text-indigo-700 border-indigo-200',
+  'n-n': 'bg-purple-50 text-purple-700 border-purple-200',
+};
+
+const BASE_TARGET_FIELDS = [
+  { name: 'id',     label: 'ID định danh' },
+  { name: 'code',   label: 'Mã định danh' },
+  { name: 'name',   label: 'Tên/Tiêu đề' },
+  { name: 'status', label: 'Trạng thái' },
+];
+
+const EMPTY_REL_FORM: RelFormData = {
+  targetEntityId: '', targetEntityName: '', type: 'n-1',
+  sourceKey: '', targetKey: '', displayField: '', mappingTable: '',
+};
+
 const steps = [
   { number: 1, title: 'Khởi tạo dữ liệu chủ', description: 'Thông tin cơ bản và nguồn dữ liệu' },
-  { number: 2, title: 'Tạo thuộc tính', description: 'Định nghĩa các trường dữ liệu' },
-  { number: 3, title: 'Quy tắc hợp nhất', description: 'Thiết lập quy tắc merge dữ liệu' },
-  { number: 4, title: 'Thiết lập quan hệ', description: 'Liên kết giữa các thực thể' },
-  { number: 5, title: 'Phê duyệt', description: 'Xem lại và gửi phê duyệt' }
+  { number: 2, title: 'Định danh duy nhất', description: 'Thiết lập quy tắc mã định danh' },
+  { number: 3, title: 'Tạo thuộc tính', description: 'Định nghĩa các trường dữ liệu' },
+  { number: 4, title: 'Quy tắc hợp nhất', description: 'Thiết lập quy tắc merge dữ liệu' },
+  { number: 5, title: 'Thiết lập quan hệ', description: 'Liên kết giữa các thực thể' },
+  { number: 6, title: 'Phê duyệt', description: 'Xem lại và gửi phê duyệt' },
 ];
 
 export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizardProps) {
@@ -321,6 +400,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
     attributes: [],
     mergeRules: [],
     relationships: [],
+    approvalReviewer: '',
     approvalNotes: ''
   });
 
@@ -333,7 +413,25 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
     indexed: false
   });
 
-  // Step 3 state
+  // Step 5 state — Thiết lập quan hệ
+  const [relFormOpen, setRelFormOpen] = useState(false);
+  const [editingRelId, setEditingRelId] = useState<string | null>(null);
+  const [relFormData, setRelFormData] = useState<RelFormData>(EMPTY_REL_FORM);
+  const [relFormError, setRelFormError] = useState('');
+  const [relSearch, setRelSearch] = useState('');
+
+  // Step 2 state — Định danh duy nhất
+  const [identifierConfig, setIdentifierConfig] = useState<IdentifierConfig>({
+    prefix: '',
+    separator: '-',
+    digits: 6,
+    startFrom: 1,
+    increment: 1,
+    suffix: '',
+    checkDuplicate: true,
+  });
+
+  // Step 3 (old step 2) state — Matching/Extraction/Merge
   const [matchingRules, setMatchingRules] = useState<MatchingRule[]>([]);
   const [extractionRules, setExtractionRules] = useState<ExtractionRule[]>([]);
   const [mergeConfig, setMergeConfig] = useState<MergeConfig>({
@@ -399,11 +497,90 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
     setDldcFieldRows(prev => prev.filter(r => r.id !== rowId));
   };
 
+  // ── Step 5 handlers ──
+  const handleOpenAddRel = () => {
+    setEditingRelId(null);
+    setRelFormData(EMPTY_REL_FORM);
+    setRelFormError('');
+    setRelFormOpen(true);
+  };
+
+  const handleOpenEditRel = (rel: WizardRelationship) => {
+    setEditingRelId(rel.id);
+    setRelFormData({
+      targetEntityId: rel.targetEntityId,
+      targetEntityName: rel.targetEntityName,
+      type: rel.type,
+      sourceKey: rel.sourceKey,
+      targetKey: rel.targetKey,
+      displayField: rel.displayField || '',
+      mappingTable: rel.mappingTable || '',
+    });
+    setRelFormError('');
+    setRelFormOpen(true);
+  };
+
+  const handleCancelRel = () => {
+    setRelFormOpen(false);
+    setRelFormError('');
+  };
+
+  const handleSaveRel = () => {
+    setRelFormError('');
+    if (!relFormData.targetEntityId) { setRelFormError('Vui lòng chọn thực thể đích.'); return; }
+    if (relFormData.type === 'n-n') {
+      if (!relFormData.mappingTable || !relFormData.sourceKey || !relFormData.targetKey) {
+        setRelFormError('Quan hệ n-n cần có đầy đủ: bảng liên kết, khóa ngoại nguồn và đích.'); return;
+      }
+    } else {
+      if (!relFormData.sourceKey || !relFormData.targetKey) {
+        setRelFormError('Cần khai báo đầy đủ khóa nguồn và khóa đích.'); return;
+      }
+    }
+    const hasDuplicate = wizardData.relationships.some(r =>
+      r.id !== (editingRelId || '') &&
+      r.targetEntityId === relFormData.targetEntityId &&
+      r.type === relFormData.type
+    );
+    if (hasDuplicate) { setRelFormError('Đã tồn tại quan hệ cùng loại với thực thể này.'); return; }
+
+    const targetEntity = WIZARD_MOCK_ENTITIES.find(e => e.id === relFormData.targetEntityId);
+    if (editingRelId) {
+      setWizardData({ ...wizardData, relationships: wizardData.relationships.map(r => r.id === editingRelId ? {
+        ...r, ...relFormData, targetEntityName: targetEntity?.name || relFormData.targetEntityName,
+      } : r) });
+    } else {
+      const newRel: WizardRelationship = {
+        id: `wr-${Date.now()}`,
+        targetEntityId: relFormData.targetEntityId,
+        targetEntityName: targetEntity?.name || '',
+        type: relFormData.type,
+        sourceKey: relFormData.sourceKey,
+        targetKey: relFormData.targetKey,
+        displayField: relFormData.displayField || undefined,
+        mappingTable: relFormData.mappingTable || undefined,
+      };
+      setWizardData({ ...wizardData, relationships: [...wizardData.relationships, newRel] });
+    }
+    setRelFormOpen(false);
+  };
+
+  const handleDeleteRel = (relId: string) => {
+    setWizardData({ ...wizardData, relationships: wizardData.relationships.filter(r => r.id !== relId) });
+  };
+
   if (!isOpen) return null;
 
   const availableFields = wizardData.dataSource === 'dldc'
     ? dldcFieldRows.filter(r => r.shared).map(r => ({ fieldName: r.columnName, displayName: r.displayName }))
     : wizardData.attributes.map(a => ({ fieldName: a.fieldName, displayName: a.displayName }));
+
+  const sourceEntityFields = [
+    ...(wizardData.dataSource === 'dldc'
+      ? dldcFieldRows.filter(r => r.shared).map(r => ({ name: r.columnName, label: r.displayName }))
+      : wizardData.attributes.map(a => ({ name: a.fieldName, label: a.displayName }))),
+    ...(identifierConfig.prefix ? [{ name: 'identifier_code', label: 'Mã định danh' }] : []),
+  ];
 
   const availableSources: { id: string; label: string }[] = wizardData.dataSource === 'dldc'
     ? [
@@ -423,7 +600,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
         return;
       }
     }
-    if (currentStep === 2) {
+    if (currentStep === 3) {
       if (wizardData.dataSource === 'dldc') {
         if (!wizardData.dldcTable) {
           alert('Vui lòng chọn cơ sở dữ liệu và bảng dữ liệu chính');
@@ -447,7 +624,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
       }
     }
 
-    if (currentStep < 5) {
+    if (currentStep < 6) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -510,7 +687,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
         <div className="flex items-center justify-between p-6 border-b border-slate-200">
           <div>
             <h2 className="text-xl text-slate-900">Tạo mới dữ liệu chủ</h2>
-            <p className="text-[13px] text-slate-600 mt-1">Quy trình 5 bước</p>
+            <p className="text-[13px] text-slate-600 mt-1">Quy trình 6 bước</p>
           </div>
           <button onClick={onClose} className="p-1 hover:bg-slate-100 rounded" title="Đóng" aria-label="Đóng">
             <X className="w-5 h-5" />
@@ -719,11 +896,176 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
             </div>
           )}
 
-          {/* Step 2: Tạo thuộc tính */}
-          {currentStep === 2 && (
+          {/* Step 2: Định danh duy nhất */}
+          {currentStep === 2 && (() => {
+            const sep = identifierConfig.separator === 'none' ? '' : identifierConfig.separator;
+            const paddedNum = String(identifierConfig.startFrom).padStart(identifierConfig.digits, '0');
+            const previewCode = [
+              identifierConfig.prefix,
+              paddedNum,
+              identifierConfig.suffix,
+            ].filter(Boolean).join(sep);
+            return (
+              <div className="space-y-6">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h3 className="text-[13px] font-semibold text-blue-900 mb-1">Bước 2: Định danh duy nhất</h3>
+                  <p className="text-[13px] text-blue-700">
+                    Thiết lập cấu trúc mã định danh toàn cục cho từng bản ghi của thực thể này
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-8">
+                  {/* Left — form */}
+                  <div className="space-y-5">
+                    <div className="border border-slate-200 rounded-xl p-5 space-y-5 bg-white">
+                      <h4 className="text-[13px] font-bold text-slate-800">Cấu trúc mã định danh</h4>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[13px] font-medium text-slate-700 mb-2">Tiền tố (Prefix)</label>
+                          <input
+                            type="text"
+                            value={identifierConfig.prefix}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) => setIdentifierConfig(prev => ({ ...prev, prefix: e.target.value.toUpperCase() }))}
+                            placeholder="VD: NDAN, ORG"
+                            className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 uppercase"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[13px] font-medium text-slate-700 mb-2">Hậu tố (Suffix)</label>
+                          <input
+                            type="text"
+                            value={identifierConfig.suffix}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) => setIdentifierConfig(prev => ({ ...prev, suffix: e.target.value.toUpperCase() }))}
+                            placeholder="Để trống nếu không dùng"
+                            className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 uppercase"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[13px] font-medium text-slate-700 mb-2">Ký tự phân cách</label>
+                          <select
+                            value={identifierConfig.separator}
+                            onChange={(e: ChangeEvent<HTMLSelectElement>) => setIdentifierConfig(prev => ({ ...prev, separator: e.target.value as SeparatorType }))}
+                            className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
+                          >
+                            <option value="none">Không dùng</option>
+                            <option value="-">Gạch ngang ( - )</option>
+                            <option value=".">Dấu chấm ( . )</option>
+                            <option value="/">Dấu gạch chéo ( / )</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-[13px] font-medium text-slate-700 mb-2">Độ dài số thứ tự</label>
+                          <input
+                            type="number" min={1} max={12}
+                            value={identifierConfig.digits}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) => setIdentifierConfig(prev => ({ ...prev, digits: Number(e.target.value) }))}
+                            className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="border border-slate-200 rounded-xl p-5 space-y-5 bg-white">
+                      <h4 className="text-[13px] font-bold text-slate-800">Số tự tăng</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[13px] font-medium text-slate-700 mb-2">Bắt đầu từ</label>
+                          <input
+                            type="number" min={0}
+                            value={identifierConfig.startFrom}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) => setIdentifierConfig(prev => ({ ...prev, startFrom: Number(e.target.value) }))}
+                            className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[13px] font-medium text-slate-700 mb-2">Bước tăng</label>
+                          <input
+                            type="number" min={1}
+                            value={identifierConfig.increment}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) => setIdentifierConfig(prev => ({ ...prev, increment: Number(e.target.value) }))}
+                            className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <label className="flex items-start gap-3 cursor-pointer select-none border border-slate-200 rounded-xl p-5 bg-white">
+                      <input
+                        type="checkbox"
+                        checked={identifierConfig.checkDuplicate}
+                        onChange={() => setIdentifierConfig(prev => ({ ...prev, checkDuplicate: !prev.checkDuplicate }))}
+                        className="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 cursor-pointer w-4 h-4 flex-shrink-0"
+                      />
+                      <div>
+                        <p className="text-[13px] font-medium text-slate-700">Kiểm tra trùng lặp khi tạo mới</p>
+                        <p className="text-[13px] text-slate-500 mt-1">Hệ thống từ chối tạo bản ghi nếu mã định danh đã tồn tại</p>
+                      </div>
+                    </label>
+                  </div>
+
+                  {/* Right — preview */}
+                  <div className="space-y-5">
+                    <div className="border border-blue-200 rounded-xl p-5 bg-blue-50 space-y-5">
+                      <h4 className="text-[13px] font-bold text-blue-900">Mẫu mã định danh</h4>
+
+                      <div className="bg-white border border-blue-200 rounded-lg px-6 py-7 text-center">
+                        {previewCode ? (
+                          <code className="text-2xl font-mono font-bold text-blue-700 tracking-widest">
+                            {previewCode}
+                          </code>
+                        ) : (
+                          <span className="text-[13px] text-slate-400">Nhập tiền tố để xem mẫu mã</span>
+                        )}
+                      </div>
+
+                      <div className="space-y-3 text-[13px]">
+                        <div className="flex justify-between items-center py-1.5 border-b border-blue-100">
+                          <span className="text-slate-600">Mã thứ 1:</span>
+                          <code className="font-mono font-semibold text-slate-800">
+                            {[identifierConfig.prefix, String(identifierConfig.startFrom).padStart(identifierConfig.digits, '0'), identifierConfig.suffix].filter(Boolean).join(sep) || '—'}
+                          </code>
+                        </div>
+                        <div className="flex justify-between items-center py-1.5 border-b border-blue-100">
+                          <span className="text-slate-600">Mã thứ 2:</span>
+                          <code className="font-mono font-semibold text-slate-800">
+                            {[identifierConfig.prefix, String(identifierConfig.startFrom + identifierConfig.increment).padStart(identifierConfig.digits, '0'), identifierConfig.suffix].filter(Boolean).join(sep) || '—'}
+                          </code>
+                        </div>
+                        <div className="flex justify-between items-center py-1.5">
+                          <span className="text-slate-600">Mã thứ 3:</span>
+                          <code className="font-mono font-semibold text-slate-800">
+                            {[identifierConfig.prefix, String(identifierConfig.startFrom + identifierConfig.increment * 2).padStart(identifierConfig.digits, '0'), identifierConfig.suffix].filter(Boolean).join(sep) || '—'}
+                          </code>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="border border-slate-200 rounded-xl p-5 bg-white space-y-3">
+                      <h4 className="text-[13px] font-bold text-slate-800">Tóm tắt cấu hình</h4>
+                      <div className="space-y-2.5 text-[13px]">
+                        <div className="flex justify-between items-center"><span className="text-slate-500">Tiền tố:</span><span className="font-medium text-slate-800">{identifierConfig.prefix || '(không có)'}</span></div>
+                        <div className="flex justify-between items-center"><span className="text-slate-500">Ký tự phân cách:</span><span className="font-medium text-slate-800">{identifierConfig.separator === 'none' ? 'Không dùng' : `"${identifierConfig.separator}"`}</span></div>
+                        <div className="flex justify-between items-center"><span className="text-slate-500">Độ dài số:</span><span className="font-medium text-slate-800">{identifierConfig.digits} chữ số</span></div>
+                        <div className="flex justify-between items-center"><span className="text-slate-500">Bắt đầu từ:</span><span className="font-medium text-slate-800">{identifierConfig.startFrom}</span></div>
+                        <div className="flex justify-between items-center"><span className="text-slate-500">Bước tăng:</span><span className="font-medium text-slate-800">{identifierConfig.increment}</span></div>
+                        <div className="flex justify-between items-center"><span className="text-slate-500">Kiểm tra trùng:</span><span className={`font-medium ${identifierConfig.checkDuplicate ? 'text-green-700' : 'text-slate-500'}`}>{identifierConfig.checkDuplicate ? 'Bật' : 'Tắt'}</span></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Step 3: Tạo thuộc tính */}
+          {currentStep === 3 && (
             <div className="space-y-4">
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                <h3 className="text-[13px] font-semibold text-blue-900 mb-1">Bước 2: Tạo thuộc tính</h3>
+                <h3 className="text-[13px] font-semibold text-blue-900 mb-1">Bước 3: Tạo thuộc tính</h3>
                 <p className="text-[13px] text-blue-700">
                   Định nghĩa các trường dữ liệu cho thực thể <strong>{wizardData.name || 'dữ liệu chủ'}</strong>
                 </p>
@@ -1171,8 +1513,8 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
             </div>
           )}
 
-          {/* Step 3: Quy tắc hợp nhất */}
-          {currentStep === 3 && (
+          {/* Step 4: Quy tắc hợp nhất */}
+          {currentStep === 4 && (
             <div className="space-y-5">
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <h3 className="text-[13px] font-semibold text-blue-900 mb-1">Bước 3: Quy tắc hợp nhất dữ liệu</h3>
@@ -1423,79 +1765,481 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
             </div>
           )}
 
-          {/* Step 4: Thiết lập quan hệ */}
-          {currentStep === 4 && (
-            <div className="space-y-4">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                <h3 className="text-[13px] text-blue-900 mb-1">Bước 4: Thiết lập quan hệ</h3>
-                <p className="text-[13px] text-blue-700">
-                  Định nghĩa mối quan hệ với các thực thể khác
-                </p>
+          {/* Step 5: Thiết lập quan hệ */}
+          {currentStep === 5 && (
+            <div className="space-y-5">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h3 className="text-[13px] font-semibold text-blue-900 mb-1">Bước 5: Thiết lập quan hệ</h3>
+                <p className="text-[13px] text-blue-700">Định nghĩa mối quan hệ giữa thực thể này với các thực thể dữ liệu chủ khác trong hệ thống</p>
               </div>
 
-              <div className="border border-slate-200 rounded-lg p-8 bg-slate-50 text-center">
-                <p className="text-[13px] text-slate-600">
-                  Bỏ qua bước này hoặc thêm quan hệ sau khi tạo xong.
-                </p>
-                <p className="text-[13px] text-slate-500 mt-2">
-                  Bạn có thể thiết lập quan hệ 1-n, n-n với các thực thể khác sau.
-                </p>
+              {/* Entity info + add button */}
+              <div className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-[13px] flex-shrink-0">
+                    {(wizardData.code || wizardData.name || 'E').charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="text-[13px] text-slate-500">Thực thể đang cấu hình:</p>
+                    <p className="text-[13px] font-semibold text-slate-800">
+                      {wizardData.code && <code className="text-blue-600 bg-blue-50 px-1 rounded mr-1.5">{wizardData.code}</code>}
+                      {wizardData.name || '(Chưa đặt tên)'}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  {!relFormOpen && wizardData.relationships.length > 0 && (
+                    <div className="relative">
+                      <input
+                        type="text" value={relSearch}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => setRelSearch(e.target.value)}
+                        placeholder="Tìm kiếm quan hệ..."
+                        className="h-9 pl-8 pr-3 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 w-52"
+                      />
+                      <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                    </div>
+                  )}
+                  {!relFormOpen && (
+                    <button
+                      type="button" onClick={handleOpenAddRel}
+                      className="h-9 flex items-center gap-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-[13px] font-medium shadow-sm whitespace-nowrap"
+                    >
+                      <Plus className="w-4 h-4" /> Thêm quan hệ
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Inline add / edit form */}
+              {relFormOpen && (
+                <div className="border border-blue-200 rounded-xl bg-blue-50/30 overflow-hidden">
+                  <div className="bg-blue-600 px-5 py-3 flex items-center justify-between">
+                    <p className="text-[13px] font-semibold text-white">
+                      {editingRelId ? 'Chỉnh sửa quan hệ' : 'Thêm quan hệ mới'}
+                    </p>
+                    <button type="button" onClick={handleCancelRel} className="text-white/70 hover:text-white transition-colors">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <div className="p-5 space-y-5">
+                    {/* 1. Chọn thực thể */}
+                    <div className="space-y-3">
+                      <h4 className="text-[13px] font-semibold text-slate-700 border-b border-slate-200 pb-2">1. Chọn thực thể liên kết</h4>
+                      <div className="grid grid-cols-2 gap-6">
+                        <div>
+                          <label className="block text-[13px] font-medium text-slate-600 mb-1.5">
+                            Thực thể nguồn <span className="text-slate-400 font-normal">(thực thể đang tạo)</span>
+                          </label>
+                          <div className="h-10 px-3 flex items-center border border-slate-200 rounded-lg bg-slate-50 text-[13px] text-slate-600">
+                            {wizardData.code && <code className="text-blue-600 bg-blue-100 px-1 rounded mr-1.5 text-[13px]">{wizardData.code}</code>}
+                            {wizardData.name || '(Thực thể đang tạo)'}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-[13px] font-medium text-slate-600 mb-1.5">
+                            Thực thể đích <span className="text-red-500">*</span>
+                          </label>
+                          <select
+                            value={relFormData.targetEntityId}
+                            onChange={(e: ChangeEvent<HTMLSelectElement>) => {
+                              const ent = WIZARD_MOCK_ENTITIES.find(x => x.id === e.target.value);
+                              setRelFormData(prev => ({ ...prev, targetEntityId: e.target.value, targetEntityName: ent?.name || '', sourceKey: '', targetKey: '' }));
+                              setRelFormError('');
+                            }}
+                            className="w-full h-10 px-3 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
+                          >
+                            <option value="">-- Chọn thực thể đích --</option>
+                            {WIZARD_MOCK_ENTITIES.map(e => <option key={e.id} value={e.id}>{e.code} - {e.name}</option>)}
+                          </select>
+                        </div>
+                      </div>
+
+                      {relFormData.targetEntityId && (
+                        <div className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-center gap-8">
+                          <div className="flex flex-col items-center gap-1.5">
+                            <div className="w-9 h-9 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-[13px]">A</div>
+                            <span className="text-[13px] font-semibold text-slate-800">{wizardData.name || '(Thực thể đang tạo)'}</span>
+                          </div>
+                          <ArrowRight className="w-5 h-5 text-slate-400 flex-shrink-0" />
+                          <div className="flex flex-col items-center gap-1.5">
+                            <div className="w-9 h-9 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center font-bold text-[13px]">B</div>
+                            <span className="text-[13px] font-semibold text-slate-800">{WIZARD_MOCK_ENTITIES.find(e => e.id === relFormData.targetEntityId)?.name}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* 2. Loại quan hệ */}
+                    <div className="space-y-3">
+                      <h4 className="text-[13px] font-semibold text-slate-700 border-b border-slate-200 pb-2">2. Loại quan hệ</h4>
+                      <select
+                        value={relFormData.type}
+                        onChange={(e: ChangeEvent<HTMLSelectElement>) => setRelFormData(prev => ({ ...prev, type: e.target.value as WizardRelType, sourceKey: '', targetKey: '', mappingTable: '' }))}
+                        className="w-64 px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
+                      >
+                        {(Object.entries(REL_TYPE_LABELS) as [WizardRelType, string][])
+                          .filter(([val]) => val !== '1-n')
+                          .map(([val, label]) => (
+                            <option key={val} value={val}>{label}</option>
+                          ))}
+                      </select>
+                    </div>
+
+                    {/* 3. Điều kiện liên kết */}
+                    <div className="space-y-3">
+                      <h4 className="text-[13px] font-semibold text-slate-700 border-b border-slate-200 pb-2 flex items-center justify-between">
+                        <span>3. Điều kiện liên kết</span>
+                        {!relFormData.targetEntityId && (
+                          <span className="text-[13px] text-orange-600 bg-orange-50 font-normal px-2 py-0.5 rounded border border-orange-100">Chọn thực thể đích để tải danh sách trường</span>
+                        )}
+                      </h4>
+
+                      {relFormData.targetEntityId ? (
+                        relFormData.type === 'n-n' ? (
+                          <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 space-y-4">
+                            <p className="text-[13px] font-semibold text-purple-900">Bảng liên kết (Mapping Table)</p>
+                            <div>
+                              <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Tên bảng liên kết <span className="text-red-500">*</span></label>
+                              <input type="text" value={relFormData.mappingTable}
+                                onChange={(e: ChangeEvent<HTMLInputElement>) => setRelFormData(prev => ({ ...prev, mappingTable: e.target.value }))}
+                                placeholder="VD: tbl_map_entity_a_entity_b"
+                                className="w-full px-3 py-2 border border-slate-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                              />
+                            </div>
+                            <div className="grid grid-cols-2 gap-6">
+                              <div>
+                                <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Khoá ngoại Nguồn <span className="text-red-500">*</span></label>
+                                <select value={relFormData.sourceKey} onChange={(e: ChangeEvent<HTMLSelectElement>) => setRelFormData(prev => ({ ...prev, sourceKey: e.target.value }))}
+                                  className="w-full px-3 py-2 border border-slate-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono">
+                                  <option value="">-- Chọn trường Nguồn --</option>
+                                  {(sourceEntityFields.length > 0 ? sourceEntityFields : [{ name: 'id', label: 'ID định danh' }, { name: 'code', label: 'Mã định danh' }]).map(f => <option key={f.name} value={f.name}>{f.name} ({f.label})</option>)}
+                                </select>
+                              </div>
+                              <div>
+                                <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Khoá ngoại Đích <span className="text-red-500">*</span></label>
+                                <select value={relFormData.targetKey} onChange={(e: ChangeEvent<HTMLSelectElement>) => setRelFormData(prev => ({ ...prev, targetKey: e.target.value }))}
+                                  className="w-full px-3 py-2 border border-slate-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono">
+                                  <option value="">-- Chọn trường Đích --</option>
+                                  {BASE_TARGET_FIELDS.map(f => <option key={f.name} value={f.name}>{f.name} ({f.label})</option>)}
+                                </select>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="bg-blue-50/50 border border-blue-200 rounded-xl p-4 space-y-4">
+                            <div className="flex items-center gap-2">
+                              <Key className="w-4 h-4 text-blue-600" />
+                              <span className="text-[13px] font-semibold text-blue-900">Khóa ngoại (Foreign Key)</span>
+                            </div>
+                            <div className="grid grid-cols-2 gap-6">
+                              <div>
+                                <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Khóa nguồn <span className="text-red-500">*</span></label>
+                                <select value={relFormData.sourceKey} onChange={(e: ChangeEvent<HTMLSelectElement>) => setRelFormData(prev => ({ ...prev, sourceKey: e.target.value }))}
+                                  className="w-full px-3 py-2 border border-slate-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-mono">
+                                  <option value="">-- Chọn trường Nguồn --</option>
+                                  {(sourceEntityFields.length > 0 ? sourceEntityFields : [{ name: 'id', label: 'ID định danh' }, { name: 'code', label: 'Mã định danh' }]).map(f => <option key={f.name} value={f.name}>{f.name} ({f.label})</option>)}
+                                </select>
+                                <p className="text-[13px] text-slate-400 mt-1">Trường trong thực thể đang tạo</p>
+                              </div>
+                              <div>
+                                <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Khóa đích <span className="text-red-500">*</span></label>
+                                <select value={relFormData.targetKey} onChange={(e: ChangeEvent<HTMLSelectElement>) => setRelFormData(prev => ({ ...prev, targetKey: e.target.value }))}
+                                  className="w-full px-3 py-2 border border-slate-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-mono">
+                                  <option value="">-- Chọn trường Đích --</option>
+                                  {BASE_TARGET_FIELDS.map(f => <option key={f.name} value={f.name}>{f.name} ({f.label})</option>)}
+                                </select>
+                                <p className="text-[13px] text-slate-400 mt-1">Trường dùng để join (thường là ID/Code)</p>
+                              </div>
+                            </div>
+                            <div className="pt-3 border-t border-blue-100">
+                              <label className="block text-[13px] font-medium text-emerald-700 mb-1.5">
+                                Trường hiển thị (Lookup Display) <span className="text-slate-400 font-normal">(Không bắt buộc)</span>
+                              </label>
+                              <select value={relFormData.displayField} onChange={(e: ChangeEvent<HTMLSelectElement>) => setRelFormData(prev => ({ ...prev, displayField: e.target.value }))}
+                                className="w-full max-w-xs px-3 py-2 border border-emerald-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-mono">
+                                <option value="">-- Không chọn --</option>
+                                {BASE_TARGET_FIELDS.map(f => <option key={f.name} value={f.name}>{f.name} ({f.label})</option>)}
+                              </select>
+                            </div>
+                          </div>
+                        )
+                      ) : (
+                        <div className="bg-slate-50 border border-dashed border-slate-200 rounded-lg p-6 text-center text-[13px] text-slate-400">
+                          Hãy chọn thực thể đích ở mục 1 để cấu hình khóa liên kết
+                        </div>
+                      )}
+                    </div>
+
+                    {relFormError && (
+                      <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                        <p className="text-[13px] text-red-600">{relFormError}</p>
+                      </div>
+                    )}
+
+                    <div className="flex justify-end gap-3 pt-2 border-t border-slate-100">
+                      <button type="button" onClick={handleCancelRel}
+                        className="px-4 py-2 border border-slate-200 text-slate-700 rounded-lg text-[13px] font-medium hover:bg-slate-50 transition-colors">
+                        Hủy
+                      </button>
+                      <button type="button" onClick={handleSaveRel}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg text-[13px] font-medium hover:bg-blue-700 transition-colors flex items-center gap-2">
+                        <Check className="w-4 h-4" />
+                        {editingRelId ? 'Cập nhật quan hệ' : 'Lưu quan hệ'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Relationships table */}
+              <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
+                {wizardData.relationships.filter(r =>
+                  !relSearch || r.targetEntityName.toLowerCase().includes(relSearch.toLowerCase()) ||
+                  r.sourceKey.toLowerCase().includes(relSearch.toLowerCase()) ||
+                  r.targetKey.toLowerCase().includes(relSearch.toLowerCase())
+                ).length === 0 ? (
+                  <div className="py-12 flex flex-col items-center justify-center text-center">
+                    <Network className="w-12 h-12 text-slate-300 mb-3 stroke-[1.5]" />
+                    <p className="text-[13px] font-semibold text-slate-700">Chưa có quan hệ nào</p>
+                    <p className="text-[13px] text-slate-500 mt-1 max-w-sm">Thực thể này chưa được cấu hình liên kết với thực thể dữ liệu chủ nào khác.</p>
+                    {!relFormOpen && (
+                      <button type="button" onClick={handleOpenAddRel}
+                        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-[13px] font-medium flex items-center gap-1.5">
+                        <Plus className="w-4 h-4" /> Thêm quan hệ
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse text-left text-[13px]">
+                      <thead>
+                        <tr className="bg-slate-50 border-b border-slate-200">
+                          <th className="px-4 py-3 font-semibold text-slate-500 text-center w-12">STT</th>
+                          <th className="px-4 py-3 font-semibold text-slate-500">Thực thể đích</th>
+                          <th className="px-4 py-3 font-semibold text-slate-500 text-center w-24">Loại</th>
+                          <th className="px-4 py-3 font-semibold text-slate-500">Khóa nguồn</th>
+                          <th className="px-4 py-3 font-semibold text-slate-500">Khóa đích</th>
+                          <th className="px-4 py-3 font-semibold text-slate-500">Trường hiển thị / Bảng liên kết</th>
+                          <th className="px-4 py-3 font-semibold text-slate-500 text-center w-20">Thao tác</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {wizardData.relationships.filter(r =>
+                          !relSearch || r.targetEntityName.toLowerCase().includes(relSearch.toLowerCase()) ||
+                          r.sourceKey.toLowerCase().includes(relSearch.toLowerCase()) ||
+                          r.targetKey.toLowerCase().includes(relSearch.toLowerCase())
+                        ).map((rel, idx) => (
+                          <tr key={rel.id} className="hover:bg-slate-50/50 transition-colors">
+                            <td className="px-4 py-3 text-center text-slate-500 font-medium">{idx + 1}</td>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-2">
+                                <div className="w-7 h-7 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center font-bold text-[13px] flex-shrink-0">
+                                  {rel.targetEntityName.charAt(0)}
+                                </div>
+                                <span className="font-medium text-slate-800">{rel.targetEntityName}</span>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              <span className={`px-2 py-0.5 rounded border text-[13px] font-semibold ${REL_TYPE_COLORS[rel.type]}`}>
+                                {rel.type}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 font-mono text-slate-600">{rel.sourceKey || '—'}</td>
+                            <td className="px-4 py-3 font-mono text-slate-600">{rel.targetKey || '—'}</td>
+                            <td className="px-4 py-3 text-slate-600">
+                              {rel.type === 'n-n' ? (
+                                rel.mappingTable ? <code className="text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded font-mono">{rel.mappingTable}</code> : <span className="text-slate-400">—</span>
+                              ) : (
+                                rel.displayField ? <code className="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-mono">{rel.displayField}</code> : <span className="text-slate-400">—</span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center justify-center gap-1.5">
+                                <button type="button" onClick={() => handleOpenEditRel(rel)}
+                                  className="p-1.5 border border-slate-200 bg-white text-slate-500 hover:text-blue-600 hover:border-blue-300 rounded-lg transition-colors" title="Chỉnh sửa">
+                                  <SquarePen className="w-3.5 h-3.5" />
+                                </button>
+                                <button type="button" onClick={() => handleDeleteRel(rel.id)}
+                                  className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Xóa">
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             </div>
           )}
 
-          {/* Step 5: Phê duyệt */}
-          {currentStep === 5 && (
+          {/* Step 6: Phê duyệt */}
+          {currentStep === 6 && (
             <div className="space-y-4">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                <h3 className="text-[13px] text-blue-900 mb-1">Bước 5: Xem lại và gửi phê duyệt</h3>
-                <p className="text-[13px] text-blue-700">
-                  Kiểm tra lại thông tin trước khi gửi phê duyệt
-                </p>
+
+              {/* Reviewer + Notes */}
+              <div className="border border-blue-200 rounded-lg overflow-hidden">
+                <div className="bg-blue-50 px-4 py-2.5 border-b border-blue-200">
+                  <h4 className="text-[13px] font-semibold text-blue-900">Thông tin phê duyệt</h4>
+                </div>
+                <div className="p-4 space-y-4">
+                  <div>
+                    <label className="block text-[13px] text-slate-700 mb-1.5">
+                      Chọn người trình duyệt <span className="text-red-600">*</span>
+                    </label>
+                    <select
+                      value={wizardData.approvalReviewer}
+                      onChange={(e) => setWizardData({ ...wizardData, approvalReviewer: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    >
+                      <option value="">-- Chọn người trình duyệt --</option>
+                      {MOCK_REVIEWERS.map(r => (
+                        <option key={r.id} value={r.id}>{r.name} — {r.title}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[13px] text-slate-700 mb-1.5">
+                      Ghi chú phê duyệt
+                    </label>
+                    <textarea
+                      value={wizardData.approvalNotes}
+                      onChange={(e) => setWizardData({ ...wizardData, approvalNotes: e.target.value })}
+                      placeholder="Nhập lý do và ghi chú cho việc tạo dữ liệu chủ này..."
+                      rows={3}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
               </div>
 
-              {/* Summary */}
-              <div className="border border-slate-200 rounded-lg overflow-hidden">
-                <div className="bg-slate-50 px-4 py-2 border-b border-slate-200">
-                  <h4 className="text-[13px] text-slate-900">Tóm tắt thông tin</h4>
+              {/* Review 1: Thông tin cơ bản */}
+              <div className="border border-blue-200 rounded-lg overflow-hidden">
+                <div className="bg-blue-50 px-4 py-2.5 border-b border-blue-200">
+                  <h4 className="text-[13px] font-semibold text-blue-900">Thông tin cơ bản</h4>
+                </div>
+                <div className="p-4 grid grid-cols-2 gap-x-8 gap-y-2 text-[13px]">
+                  <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Tên dữ liệu chủ:</span><span className="text-slate-900">{wizardData.name || '—'}</span></div>
+                  <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Mã:</span><span className="text-slate-900">{wizardData.code || '—'}</span></div>
+                  <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Loại dữ liệu:</span><span className="text-slate-900">{wizardData.dataType || '—'}</span></div>
+                  <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Phạm vi:</span><span className="text-slate-900">{wizardData.scope || '—'}</span></div>
+                  <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Cơ quan quản lý:</span><span className="text-slate-900">{wizardData.managingAgency || '—'}</span></div>
+                  <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Nguồn dữ liệu:</span><span className="text-slate-900">{wizardData.dataSource === 'dldc' ? 'DLDC' : wizardData.dataSource === 'api' ? 'API' : 'Thủ công'}</span></div>
+                </div>
+              </div>
+
+              {/* Review 2: Quy tắc định danh */}
+              <div className="border border-blue-200 rounded-lg overflow-hidden">
+                <div className="bg-blue-50 px-4 py-2.5 border-b border-blue-200">
+                  <h4 className="text-[13px] font-semibold text-blue-900">Quy tắc định danh</h4>
+                </div>
+                <div className="p-4 grid grid-cols-2 gap-x-8 gap-y-2 text-[13px]">
+                  <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Tiền tố:</span><span className="text-slate-900">{identifierConfig.prefix || '(Không có)'}</span></div>
+                  <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Hậu tố:</span><span className="text-slate-900">{identifierConfig.suffix || '(Không có)'}</span></div>
+                  <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Ký tự phân cách:</span><span className="text-slate-900">{{ none: 'Không có', '-': 'Gạch ngang (-)', '.': 'Dấu chấm (.)', '/': 'Gạch chéo (/)' }[identifierConfig.separator]}</span></div>
+                  <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Độ dài số:</span><span className="text-slate-900">{identifierConfig.digits} chữ số</span></div>
+                  <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Bắt đầu từ:</span><span className="text-slate-900">{identifierConfig.startFrom}</span></div>
+                  <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Kiểm tra trùng:</span><span className="text-slate-900">{identifierConfig.checkDuplicate ? 'Có' : 'Không'}</span></div>
+                </div>
+              </div>
+
+              {/* Review 3: Các trường dữ liệu */}
+              <div className="border border-blue-200 rounded-lg overflow-hidden">
+                <div className="bg-blue-50 px-4 py-2.5 border-b border-blue-200 flex items-center justify-between">
+                  <h4 className="text-[13px] font-semibold text-blue-900">Các trường dữ liệu</h4>
+                  <span className="text-[13px] text-blue-600">{availableFields.length} trường</span>
+                </div>
+                {availableFields.length === 0 ? (
+                  <div className="p-4 text-[13px] text-slate-500 text-center">Chưa có trường dữ liệu nào</div>
+                ) : (
+                  <table className="w-full text-[13px]">
+                    <thead className="bg-slate-50 border-b border-slate-200">
+                      <tr>
+                        <th className="px-4 py-2 text-left text-slate-600 font-medium">Tên trường</th>
+                        <th className="px-4 py-2 text-left text-slate-600 font-medium">Tên hiển thị</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {availableFields.map((f, i) => (
+                        <tr key={i} className="hover:bg-slate-50">
+                          <td className="px-4 py-2 font-mono text-slate-700">{f.fieldName}</td>
+                          <td className="px-4 py-2 text-slate-700">{f.displayName}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+
+              {/* Review 4: Quy tắc hợp nhất */}
+              <div className="border border-blue-200 rounded-lg overflow-hidden">
+                <div className="bg-blue-50 px-4 py-2.5 border-b border-blue-200">
+                  <h4 className="text-[13px] font-semibold text-blue-900">Quy tắc hợp nhất</h4>
                 </div>
                 <div className="p-4 space-y-3 text-[13px]">
-                  <div className="grid grid-cols-2 gap-2">
-                    <span className="text-slate-600">Tên dữ liệu chủ:</span>
-                    <span className="text-slate-900">{wizardData.name}</span>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                      <div className="text-slate-500 mb-1">Quy tắc so khớp</div>
+                      <div className="text-xl font-semibold text-slate-900">{matchingRules.length}</div>
+                      <div className="text-[12px] text-slate-400">quy tắc</div>
+                    </div>
+                    <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                      <div className="text-slate-500 mb-1">Quy tắc trích rút</div>
+                      <div className="text-xl font-semibold text-slate-900">{extractionRules.length}</div>
+                      <div className="text-[12px] text-slate-400">quy tắc</div>
+                    </div>
+                    <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                      <div className="text-slate-500 mb-1">Ngưỡng so khớp</div>
+                      <div className="text-xl font-semibold text-slate-900">{mergeConfig.minMatchScore}%</div>
+                      <div className="text-[12px] text-slate-400">tối thiểu</div>
+                    </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <span className="text-slate-600">Loại dữ liệu:</span>
-                    <span className="text-slate-900">{wizardData.dataType}</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <span className="text-slate-600">Cơ quan quản lý:</span>
-                    <span className="text-slate-900">{wizardData.managingAgency}</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <span className="text-slate-600">Số thuộc tính:</span>
-                    <span className="text-slate-900">{wizardData.attributes.length} trường</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <span className="text-slate-600">Nguồn dữ liệu:</span>
-                    <span className="text-slate-900">{wizardData.dataSource}</span>
+                  <div className="grid grid-cols-2 gap-x-8 gap-y-2">
+                    <div className="flex gap-2"><span className="text-slate-500 w-40 flex-shrink-0">Phương thức hợp nhất:</span><span className="text-slate-900">{mergeConfig.mergeTrigger === 'auto' ? 'Tự động' : 'Cần phê duyệt'}</span></div>
+                    <div className="flex gap-2"><span className="text-slate-500 w-40 flex-shrink-0">Lưu tham chiếu nguồn:</span><span className="text-slate-900">{mergeConfig.keepSourceRef ? 'Có' : 'Không'}</span></div>
                   </div>
                 </div>
               </div>
 
-              <div>
-                <label className="block text-[13px] text-slate-700 mb-1">
-                  Ghi chú phê duyệt <span className="text-red-600">*</span>
-                </label>
-                <textarea
-                  value={wizardData.approvalNotes}
-                  onChange={(e) => setWizardData({ ...wizardData, approvalNotes: e.target.value })}
-                  placeholder="Nhập lý do và ghi chú cho việc tạo dữ liệu chủ này..."
-                  rows={4}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+              {/* Review 5: Quan hệ đã thiết lập */}
+              <div className="border border-blue-200 rounded-lg overflow-hidden">
+                <div className="bg-blue-50 px-4 py-2.5 border-b border-blue-200 flex items-center justify-between">
+                  <h4 className="text-[13px] font-semibold text-blue-900">Quan hệ đã thiết lập</h4>
+                  <span className="text-[13px] text-blue-600">{wizardData.relationships.length} quan hệ</span>
+                </div>
+                {wizardData.relationships.length === 0 ? (
+                  <div className="p-4 text-[13px] text-slate-500 text-center">Chưa thiết lập quan hệ nào</div>
+                ) : (
+                  <table className="w-full text-[13px]">
+                    <thead className="bg-slate-50 border-b border-slate-200">
+                      <tr>
+                        <th className="px-4 py-2 text-left text-slate-600 font-medium">Thực thể liên kết</th>
+                        <th className="px-4 py-2 text-left text-slate-600 font-medium">Loại quan hệ</th>
+                        <th className="px-4 py-2 text-left text-slate-600 font-medium">Trường liên kết</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {wizardData.relationships.map((rel) => (
+                        <tr key={rel.id} className="hover:bg-slate-50">
+                          <td className="px-4 py-2 text-slate-700">{rel.targetEntityName}</td>
+                          <td className="px-4 py-2">
+                            <span className={`px-2 py-0.5 rounded border text-[12px] ${REL_TYPE_COLORS[rel.type]}`}>
+                              {REL_TYPE_LABELS[rel.type]}
+                            </span>
+                          </td>
+                          <td className="px-4 py-2 text-slate-500">{rel.sourceKey} → {rel.targetKey}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
               </div>
 
+              {/* Info */}
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <div className="flex items-start gap-2">
                   <AlertCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
@@ -1524,7 +2268,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
             Bước {currentStep} / {steps.length}
           </div>
 
-          {currentStep < 5 ? (
+          {currentStep < 6 ? (
             <button
               onClick={handleNext}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"

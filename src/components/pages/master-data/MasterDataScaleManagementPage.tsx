@@ -489,65 +489,52 @@ export function MasterDataScaleManagementPage() {
                 </div>
               </div>
 
-              {/* Header section with Buttons */}
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h2 className="text-[16px] font-bold text-slate-900">Thiết lập dữ liệu chủ</h2>
-                  <p className="text-[13px] text-slate-500 mt-0.5">
-                    Quản lý các thực thể dữ liệu chủ trong hệ thống
-                  </p>
-                </div>
-                <div className="flex gap-2">
+              {/* Search and Action Bar */}
+              <div className="space-y-3 mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 relative">
+                    <input
+                      type="text"
+                      placeholder="Tìm kiếm theo tên hoặc mã dữ liệu chủ..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full px-4 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-400 bg-white hover:bg-slate-50/50 font-medium shadow-sm"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    className="w-10 h-10 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shrink-0 transition-all cursor-pointer active:scale-95 shadow-sm"
+                    title="Tìm kiếm"
+                  >
+                    <Search className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowFilters(!showFilters)}
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all border cursor-pointer active:scale-95 ${
+                      showFilters
+                        ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-sm'
+                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                    }`}
+                    title={showFilters ? "Đóng bộ lọc" : "Bộ lọc nâng cao"}
+                  >
+                    {showFilters ? <X className="w-4 h-4" /> : <Filter className="w-4 h-4" />}
+                  </button>
+                  <div className="h-6 w-px bg-slate-200 mx-1" />
                   <button
                     onClick={() => setShowWizard(true)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-[13px] flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm active:scale-95 animate-none"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-[13px] flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm active:scale-95 whitespace-nowrap"
                   >
                     <Plus className="w-4 h-4" />
-                    Tạo mới (Wizard 5 bước)
+                    Tạo mới (Wizard 6 bước)
                   </button>
                   <button
                     onClick={() => setShowForm(true)}
-                    className="bg-white text-[#020817] border border-[#e2e8f0] hover:bg-slate-50 px-4 py-2 rounded-lg font-medium text-[13px] flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm active:scale-95"
+                    className="bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-lg font-medium text-[13px] flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm active:scale-95 whitespace-nowrap"
                   >
                     <Plus className="w-4 h-4" />
                     Thêm mới nhanh
                   </button>
-                </div>
-              </div>
-
-              {/* Search and Action Bar */}
-              <div className="space-y-3 mb-6">
-                <div className="flex flex-col md:flex-row items-center gap-3">
-                  <div className="flex-1 w-full flex items-center gap-2">
-                    <div className="flex-1 relative">
-                      <input
-                        type="text"
-                        placeholder="Tìm kiếm theo tên hoặc mã dữ liệu chủ..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full px-4 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-400 bg-white hover:bg-slate-50/50 font-medium shadow-sm"
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      className="w-10 h-10 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shrink-0 transition-all cursor-pointer active:scale-95 shadow-sm"
-                      title="Tìm kiếm"
-                    >
-                      <Search className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setShowFilters(!showFilters)}
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all border cursor-pointer active:scale-95 ${
-                        showFilters
-                          ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-sm'
-                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                      }`}
-                      title={showFilters ? "Đóng bộ lọc" : "Bộ lọc nâng cao"}
-                    >
-                      {showFilters ? <X className="w-4.5 h-4.5" /> : <Filter className="w-4 h-4" />}
-                    </button>
-                  </div>
                 </div>
 
                 {/* Collapsible Filters Panel */}
@@ -627,13 +614,15 @@ export function MasterDataScaleManagementPage() {
                         <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-28">Thao tác</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 bg-white">
+                    <tbody className="bg-white">
                       {paginatedEntities.length > 0 ? (
                         paginatedEntities.map((entity, index) => (
-                          <tr key={entity.id} className="hover:bg-slate-50/50 transition-all group border-b border-slate-100">
-                            <td className="px-6 py-4 text-slate-500 text-[13px] font-normal">{(currentPageNum - 1) * pageSize + index + 1}</td>
-                            <td className="px-6 py-4 text-slate-900 text-[13px] font-mono font-semibold">{entity.code}</td>
-                            <td className="px-6 py-4 text-slate-900 text-[13px] font-normal hover:text-blue-600 transition-colors">{entity.name}</td>
+                          <tr key={entity.id} className="border-t border-slate-100 hover:bg-slate-50 transition-colors">
+                            <td className="px-6 py-4 text-slate-500 text-[13px]">{(currentPageNum - 1) * pageSize + index + 1}</td>
+                            <td className="px-6 py-4">
+                              <code className="text-[13px] bg-slate-100 px-2 py-1 rounded text-slate-800">{entity.code}</code>
+                            </td>
+                            <td className="px-6 py-4 text-slate-900 text-[13px]">{entity.name}</td>
                             <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{dataTypeLabels[entity.dataType]}</td>
                             <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{entity.managingAgency}</td>
                             <td className="px-6 py-4 text-center text-[13px] text-slate-700">{entity.updatedDate}</td>
