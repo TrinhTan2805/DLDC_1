@@ -5548,6 +5548,19 @@ table.stats-table tbody td {
   font-size: 13px !important;
 }
 
+/* Ghi đè 13px cho dòng tiêu đề bảng Phê duyệt (danh mục/cấu trúc/phiên bản/hết hiệu lực) */
+table.approval-table thead th {
+  font-size: 13px !important;
+}
+
+/* Ghi đè 13px cho bảng tóm tắt trường dữ liệu DLDC khi xem chi tiết danh mục dùng chung */
+table.dldc-summary-table th,
+table.dldc-summary-table thead th,
+table.dldc-summary-table td,
+table.dldc-summary-table tbody td {
+  font-size: 13px !important;
+}
+
 .collection-pagination,
 .collection-pagination span,
 .collection-pagination select,

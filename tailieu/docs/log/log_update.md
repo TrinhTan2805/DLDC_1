@@ -1,5 +1,19 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Phiên bản 2.6.13 (Ngày cập nhật: 03/07/2026)
+
+**Nội dung thay đổi:**
+1. **Danh mục dùng chung → Thiết lập danh mục → Tab Phê duyệt** (`category/components/tabs/ApprovalTab.tsx`):
+   - Chuyển danh sách yêu cầu phê duyệt từ dạng thẻ (card) sang bảng dữ liệu (table/grid), theo mẫu thiết kế bảng được cung cấp.
+   - Cột bảng: STT, Mã bản ghi, Tên bản ghi, Đơn vị chủ quản, Nguồn dữ liệu, Ngày gửi, Người gửi (tab `category`/`version`/`expire`) hoặc Số trường dữ liệu/Số quan hệ (tab `structure`), Trạng thái, Thao tác — giữ nguyên toàn bộ dữ liệu đã hiển thị trên thẻ trước đó, không thêm trường mới.
+   - Cột "Thao tác" chuyển từ nút chữ sang icon button (Xem chi tiết/Phê duyệt/Từ chối) theo quy ước icon-only trong bảng của design system.
+   - Không thay đổi logic phê duyệt/từ chối, bộ lọc trạng thái, hay khu vực thẻ thống kê (Chờ phê duyệt/Đã phê duyệt/Từ chối) phía trên.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/components/tabs/ApprovalTab.tsx`
+
+---
+
 ## Phiên bản 2.6.12 (Ngày cập nhật: 03/07/2026)
 
 **Nội dung thay đổi:**

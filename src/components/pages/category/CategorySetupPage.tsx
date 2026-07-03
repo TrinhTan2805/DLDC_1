@@ -33,6 +33,8 @@ import { RestoreVersionModal } from './components/modals/RestoreVersionModal';
 import { ReviewApprovalModal } from './components/modals/ReviewApprovalModal';
 import { SimpleApproveModal } from './components/modals/SimpleApproveModal';
 import { SimpleRejectModal } from './components/modals/SimpleRejectModal';
+import { BulkApproveModal } from './components/modals/BulkApproveModal';
+import { BulkRejectModal } from './components/modals/BulkRejectModal';
 import { ExpireRequestModal } from './components/modals/ExpireRequestModal';
 import { ExpireApproveModal } from './components/modals/ExpireApproveModal';
 import { CategoryInfoViewModal } from './components/modals/CategoryInfoViewModal';
@@ -125,19 +127,6 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
       createdBy: 'Hệ thống'
     },
     {
-      id: 'rel-2',
-      sourceEntityId: '8',
-      sourceEntityName: 'Dữ liệu Danh mục mã giấy tờ tùy thân',
-      targetEntityId: '1',
-      targetEntityName: 'Dữ liệu Danh mục giới tính',
-      relationshipType: 'n-1',
-      sourceKey: 'gioitinh_id',
-      targetKey: 'id',
-      status: 'active',
-      createdDate: '20/12/2024 15:00',
-      createdBy: 'Hệ thống'
-    },
-    {
       id: 'rel-3',
       sourceEntityId: '5',
       sourceEntityName: 'Dữ liệu Danh mục cơ quan',
@@ -214,12 +203,14 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
     {
       id: '1', type: 'category', entityId: '1', entityCode: 'DM-GIOITINH',
       entityName: 'Dữ liệu Danh mục giới tính', requestedBy: 'Nguyễn Văn A',
-      requestedDate: '20/12/2024 14:30', status: 'pending'
+      requestedDate: '20/12/2024 14:30', status: 'pending',
+      submissionContent: 'Đề nghị phê duyệt danh mục giới tính chuẩn quốc gia, áp dụng cho các hệ thống trao đổi dữ liệu dân cư.'
     },
     {
       id: '2', type: 'category', entityId: '2', entityCode: 'DM-DANTOC',
       entityName: 'Dữ liệu Danh mục và mã các dân tộc', requestedBy: 'Trần Thị B',
-      requestedDate: '18/12/2024 10:15', status: 'pending'
+      requestedDate: '18/12/2024 10:15', status: 'pending',
+      submissionContent: 'Trình duyệt danh mục và mã các dân tộc theo quy định hiện hành, phục vụ đồng bộ với Kho DLDC.'
     },
     {
       id: '3', type: 'structure', entityId: '3', entityCode: 'DM-QUOCGIA',
@@ -252,11 +243,6 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
       reviewedBy: 'Trưởng phòng Nguyễn A', reviewedDate: '09/12/2024'
     },
     {
-      id: '8', type: 'category', entityId: '8', entityCode: 'DM-GTTT',
-      entityName: 'Dữ liệu Danh mục mã giấy tờ tùy thân', requestedBy: 'Đặng Minh H',
-      requestedDate: '06/12/2024 10:00', status: 'pending'
-    },
-    {
       id: '9', type: 'structure', entityId: '1', entityCode: 'DM-GIOITINH',
       entityName: 'Dữ liệu Danh mục giới tính', requestedBy: 'Bùi Thị I',
       requestedDate: '04/12/2024 15:20', status: 'rejected',
@@ -267,6 +253,14 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
       id: '10', type: 'category', entityId: '2', entityCode: 'DM-DANTOC',
       entityName: 'Dữ liệu Danh mục và mã các dân tộc', requestedBy: 'Tô Văn J',
       requestedDate: '02/12/2024 09:45', status: 'pending'
+    },
+    {
+      id: '16', type: 'category', entityId: '6', entityCode: 'DM-HC',
+      entityName: 'Dữ liệu Danh mục đơn vị hành chính', requestedBy: 'Đỗ Thị M',
+      requestedDate: '28/12/2024 09:00', status: 'rejected',
+      reviewedBy: 'Giám đốc Nguyễn Văn Q', reviewedDate: '29/12/2024',
+      submissionContent: 'Đề nghị Lãnh đạo xem xét phê duyệt danh mục dữ liệu mở "Dữ liệu Danh mục đơn vị hành chính" theo Nghị định 47/2020/NĐ-CP.',
+      comments: 'Từ chối do tệp dữ liệu thiếu các cột thông tin bắt buộc theo quy định: Mã đơn vị hành chính, Cấp hành chính, Trạng thái hoạt động. Đề nghị bổ sung đầy đủ và nộp lại.'
     },
     {
       id: '11', type: 'version', entityId: '1', entityCode: 'DM-GIOITINH',
@@ -352,6 +346,48 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
       reviewedBy: 'Phó Giám đốc Trần B', reviewedDate: '19/12/2024',
       changes: { expireDate: '2024-12-31', reason: 'Quy định pháp luật thay đổi', approver: 'Phó Giám đốc Trần B', note: 'Theo công văn số 123/BTP/2024' },
       comments: 'Từ chối do danh mục vẫn đang được sử dụng ở 2 hệ thống vệ tinh.'
+    },
+    {
+      id: '17', type: 'category', entityId: '3', entityCode: 'DM-QUOCGIA',
+      entityName: 'Dữ liệu Danh mục và mã Quốc gia, Quốc tịch', requestedBy: 'Lê Minh C',
+      requestedDate: '15/12/2024 09:00', status: 'pending',
+      submissionContent: 'Đề nghị Lãnh đạo xem xét phê duyệt danh mục quốc gia, quốc tịch chuẩn theo danh sách ISO 3166-1 cập nhật mới nhất.'
+    },
+    {
+      id: '18', type: 'category', entityId: '9', entityCode: 'DM-NGHENGHIEP',
+      entityName: 'Dữ liệu Danh mục nghề nghiệp', requestedBy: 'Vũ Thị Nga',
+      requestedDate: '08/01/2025 10:00', status: 'approved',
+      reviewedBy: 'Giám đốc Nguyễn Văn K', reviewedDate: '10/01/2025',
+      submissionContent: 'Đề nghị phê duyệt cập nhật danh mục nghề nghiệp theo phân loại quốc gia phiên bản mới (v2.0).',
+      comments: 'Đồng ý phê duyệt. Dữ liệu đã được rà soát đầy đủ, khớp với danh mục nghề nghiệp do Bộ Lao động - Thương binh và Xã hội ban hành.'
+    },
+    {
+      id: '19', type: 'category', entityId: '10', entityCode: 'DM-TRINHDO',
+      entityName: 'Dữ liệu Danh mục trình độ học vấn', requestedBy: 'Nguyễn Thị Hoa',
+      requestedDate: '02/01/2025 09:30', status: 'rejected',
+      reviewedBy: 'Giám đốc Nguyễn Văn K', reviewedDate: '05/01/2025',
+      submissionContent: 'Đề nghị phê duyệt danh mục trình độ học vấn áp dụng thống nhất trong hệ thống quản lý giáo dục quốc dân.',
+      comments: 'Từ chối do danh mục chưa phân biệt rõ giữa trình độ đào tạo và văn bằng chuyên môn. Đề nghị rà soát, bổ sung lại theo Khung trình độ quốc gia Việt Nam.'
+    },
+    {
+      id: '20', type: 'expire', actionType: 'expire', entityId: '11', entityCode: 'DM-HONNHAN',
+      entityName: 'Dữ liệu Danh mục tình trạng hôn nhân', requestedBy: 'Lê Thị Mai',
+      requestedDate: '10/03/2025 08:00', status: 'approved',
+      reviewedBy: 'Giám đốc Nguyễn Văn K', reviewedDate: '15/03/2025',
+      changes: { expireDate: '2025-03-15', reason: 'Quy định pháp luật thay đổi', approver: 'Giám đốc Nguyễn Văn K', note: 'Thay thế bằng danh mục tình trạng hôn nhân mới theo Thông tư sửa đổi Luật Hộ tịch' },
+      comments: 'Đồng ý cho ngừng sử dụng. Đã xác nhận danh mục thay thế đáp ứng đầy đủ yêu cầu nghiệp vụ.'
+    },
+    {
+      id: '21', type: 'version', entityId: '9', entityCode: 'DM-NGHENGHIEP',
+      entityName: 'Dữ liệu Danh mục nghề nghiệp', requestedBy: 'Vũ Thị Nga',
+      requestedDate: '05/01/2025 08:30', status: 'approved',
+      reviewedBy: 'Giám đốc Nguyễn Văn K', reviewedDate: '10/01/2025',
+      changes: {
+        versionName: 'v2.0',
+        effectiveDate: '2025-01-10',
+        changeDescription: 'Cập nhật bổ sung 15 mã nghề nghiệp mới theo phân loại nghề nghiệp Việt Nam sửa đổi, đồng thời điều chỉnh mô tả một số nhóm nghề hiện có cho phù hợp với thực tế thị trường lao động.'
+      },
+      comments: 'Đồng ý phê duyệt phiên bản v2.0. Nội dung cập nhật phù hợp với danh mục nghề nghiệp do Bộ Lao động - Thương binh và Xã hội ban hành.'
     }
   ]);
   const [statusFilter, setStatusFilter] = useState<ApprovalStatus | 'all'>('all');
@@ -361,6 +397,8 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
   const [approvalRequestForm, setApprovalRequestForm] = useState({ reviewer: '', note: '' });
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [selectedRequests, setSelectedRequests] = useState<ApprovalRequest[]>([]);
+  const [showBulkApproveModal, setShowBulkApproveModal] = useState(false);
+  const [showBulkRejectModal, setShowBulkRejectModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [entityToDelete, setEntityToDelete] = useState<MasterDataEntity | null>(null);
   const [showDeleteAttributeModal, setShowDeleteAttributeModal] = useState(false);
@@ -448,6 +486,39 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
     setEditingEntity(null);
   };
 
+  // Hành động Phê duyệt / Từ chối hàng loạt (dùng chung cho ReviewApprovalModal và Phê duyệt nhanh/Từ chối nhanh)
+  const applyBulkApprove = (ids: string[], note: string, partialStatuses?: Record<string, Record<string, 'approved' | 'rejected'>>) => {
+    const approvedEntityIdsForCategory: string[] = [];
+    setRequests(requests.map(r => {
+      if (ids.includes(r.id)) {
+        const currentLineStatuses = partialStatuses?.[r.id] || {};
+        if (r.type === 'category') approvedEntityIdsForCategory.push(r.entityId);
+        return { ...r, status: 'approved', reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note, lineStatuses: currentLineStatuses };
+      }
+      return r;
+    }));
+    let updatedEntities = [...entities];
+    if (approvedEntityIdsForCategory.length > 0) {
+      updatedEntities = updatedEntities.map(e => {
+        if (!approvedEntityIdsForCategory.includes(e.id)) return e;
+        const goLive = e.effectiveImmediate !== false;
+        return { ...e, lifecycleStatus: goLive ? 'active' : 'approved' } as MasterDataEntity;
+      });
+    }
+    setEntities(updatedEntities);
+    setVersions(prev => prev.map(v => {
+      if (ids.includes(v.requestId || '')) return { ...v, status: 'active' as const };
+      if (v.status === 'active' && approvedEntityIdsForCategory.includes(v.entityId || '')) {
+        return { ...v, status: 'archived' as const };
+      }
+      return v;
+    }));
+  };
+
+  const applyBulkReject = (ids: string[], note: string) => {
+    setRequests(requests.map(r => ids.includes(r.id) ? { ...r, status: 'rejected', reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note } : r));
+  };
+
   // Hành động Xóa
   const handleDelete = (id: string) => {
     const entity = entities.find(e => e.id === id);
@@ -494,7 +565,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
       setEntities(updated);
       savedId = editingEntity.id;
     } else {
-      const newId = (entities.length + 1).toString();
+      const newId = (Math.max(0, ...entities.map(e => Number(e.id) || 0)) + 1).toString();
       const newEntity: MasterDataEntity = {
         ...(formData as MasterDataEntity),
         id: newId,
@@ -679,6 +750,8 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
     showSimpleApproveModal ||
     showSimpleRejectModal ||
     showReviewModal ||
+    showBulkApproveModal ||
+    showBulkRejectModal ||
     showExpireRequestModal ||
     showExpireApproveModal ||
     showInfoViewModal ||
@@ -801,6 +874,8 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
             onApproveClick={(req) => { setPendingApprovalData(req); setShowSimpleApproveModal(true); }}
             onRejectClick={(req) => { setPendingApprovalData(req); setShowSimpleRejectModal(true); }}
             onApproveAll={() => { }}
+            onQuickApprove={(ids) => { setSelectedRequests(requests.filter(r => ids.includes(r.id))); setShowBulkApproveModal(true); }}
+            onQuickReject={(ids) => { setSelectedRequests(requests.filter(r => ids.includes(r.id))); setShowBulkRejectModal(true); }}
             approvalTypeLabels={approvalTypeLabels}
             approvalStatusLabels={approvalStatusLabels}
           />}
@@ -832,6 +907,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
           getDataTypeLabel={getDataTypeLabel}
           isViewOnly={isViewMode}
           isEditMode={isEditMode}
+          requests={requests}
         />
 
         {genericConfirm && (
@@ -887,6 +963,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
           isOpen={showSimpleApproveModal}
           onClose={() => setShowSimpleApproveModal(false)}
           entity={entities.find(e => e.id === pendingApprovalData?.entityId) || null}
+          submissionContent={pendingApprovalData?.submissionContent}
           onConfirm={(note) => {
             setRequests(requests.map(r => r.id === pendingApprovalData?.id ? { ...r, status: 'approved', reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note } : r));
             // Cập nhật lifecycle status của entity nếu approved
@@ -916,6 +993,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
           isOpen={showSimpleRejectModal}
           onClose={() => setShowSimpleRejectModal(false)}
           entity={entities.find(e => e.id === pendingApprovalData?.entityId) || null}
+          submissionContent={pendingApprovalData?.submissionContent}
           onConfirm={(note) => {
             setRequests(requests.map(r => r.id === pendingApprovalData?.id ? { ...r, status: 'rejected', reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note } : r));
             // Cập nhật lifecycle status của entity nếu rejected
@@ -935,37 +1013,34 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
           entities={entities}
           attributes={attributes}
           onApprove={(ids, note, partialStatuses) => {
-            const approvedEntityIdsForCategory: string[] = [];
-            setRequests(requests.map(r => {
-              if (ids.includes(r.id)) {
-                const currentLineStatuses = partialStatuses?.[r.id] || {};
-                if (r.type === 'category') approvedEntityIdsForCategory.push(r.entityId);
-                return { ...r, status: 'approved', reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note, lineStatuses: currentLineStatuses };
-              }
-              return r;
-            }));
-            let updatedEntities = [...entities];
-            if (approvedEntityIdsForCategory.length > 0) {
-              updatedEntities = updatedEntities.map(e => {
-                if (!approvedEntityIdsForCategory.includes(e.id)) return e;
-                const goLive = e.effectiveImmediate !== false;
-                return { ...e, lifecycleStatus: goLive ? 'active' : 'approved' } as MasterDataEntity;
-              });
-            }
-            setEntities(updatedEntities);
-            // Cập nhật trạng thái phiên bản cho batch approve
-            setVersions(prev => prev.map(v => {
-              if (ids.includes(v.requestId || '')) return { ...v, status: 'active' as const };
-              if (v.status === 'active' && approvedEntityIdsForCategory.includes(v.entityId || '')) {
-                return { ...v, status: 'archived' as const };
-              }
-              return v;
-            }));
+            applyBulkApprove(ids, note, partialStatuses);
             setShowReviewModal(false);
           }}
           onReject={(ids, note) => {
-            setRequests(requests.map(r => ids.includes(r.id) ? { ...r, status: 'rejected', reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note } : r));
+            applyBulkReject(ids, note);
             setShowReviewModal(false);
+          }}
+        />
+
+        <BulkApproveModal
+          isOpen={showBulkApproveModal}
+          onClose={() => { setShowBulkApproveModal(false); setSelectedRequests([]); }}
+          requests={selectedRequests}
+          onConfirm={(note) => {
+            applyBulkApprove(selectedRequests.map(r => r.id), note);
+            setShowBulkApproveModal(false);
+            setSelectedRequests([]);
+          }}
+        />
+
+        <BulkRejectModal
+          isOpen={showBulkRejectModal}
+          onClose={() => { setShowBulkRejectModal(false); setSelectedRequests([]); }}
+          requests={selectedRequests}
+          onConfirm={(reason) => {
+            applyBulkReject(selectedRequests.map(r => r.id), reason);
+            setShowBulkRejectModal(false);
+            setSelectedRequests([]);
           }}
         />
 
@@ -1043,6 +1118,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
           attributes={attributes}
           relationships={relationships}
           requestStatus={requests.find(r => r.id === structureViewRequestId)?.status}
+          reviewComment={requests.find(r => r.id === structureViewRequestId)?.comments}
           onApprove={(note) => {
             setRequests(requests.map(r => r.id === structureViewRequestId ? { ...r, status: 'approved', reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note } : r));
             if (structureViewEntity) {
@@ -1061,6 +1137,8 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
           onClose={() => setShowInfoViewModal(false)}
           entity={infoViewEntity}
           requestStatus={requests.find(r => r.id === infoViewRequestId)?.status}
+          submissionContent={requests.find(r => r.id === infoViewRequestId)?.submissionContent}
+          reviewComment={requests.find(r => r.id === infoViewRequestId)?.comments}
           onApprove={(note) => {
             setRequests(requests.map(r => r.id === infoViewRequestId ? { ...r, status: 'approved', reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note } : r));
             if (infoViewEntity) {
@@ -1086,11 +1164,12 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
           setForm={setApprovalRequestForm}
           onSubmit={() => {
             if (approvalRequestData) {
-              const newReqId = (requests.length + 1).toString();
+              const newReqId = (Math.max(0, ...requests.map(r => Number(r.id) || 0)) + 1).toString();
               const reqType: ApprovalType =
                 approvalRequestData.type === 'structure' ? 'structure'
                 : approvalRequestData.type === 'version' ? 'version'
                 : 'category';
+              const formAny = approvalRequestForm as any;
               const newRequest: ApprovalRequest = {
                 id: newReqId,
                 type: reqType,
@@ -1099,7 +1178,15 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
                 entityName: approvalRequestData.name,
                 requestedBy: 'Nguyễn Văn A',
                 requestedDate: new Date().toLocaleString('vi-VN'),
-                status: 'pending'
+                status: 'pending',
+                ...(reqType === 'category' ? { submissionContent: formAny.changeDescription } : {}),
+                ...(reqType === 'version' ? {
+                  changes: {
+                    versionName: formAny.versionName,
+                    effectiveDate: formAny.effectiveDate,
+                    changeDescription: formAny.changeDescription,
+                  }
+                } : {}),
               };
               setRequests([newRequest, ...requests]);
 

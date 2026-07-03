@@ -7,16 +7,6 @@ import {
 import { MasterDataEntity, LifecycleStatus } from '../../categoryTypes';
 import { dataTypeLabels, lifecycleLabels, scopeLabels } from '../../categoryConstants';
 
-const getDataSourceLabel = (src?: string) => {
-  switch (src) {
-    case 'dldc':
-      return 'Đồng bộ Kho DLDC';
-    case 'manual':
-    default:
-      return 'Tự cập nhật trực tiếp';
-  }
-};
-
 interface SetupTabProps {
   entities: MasterDataEntity[];
   searchTerm: string;
@@ -63,20 +53,22 @@ export function SetupTab({
   const [currentPageNum, setCurrentPageNum] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(10);
   const [filterScope, setFilterScope] = React.useState<string>('all');
-  const [filterDataSource, setFilterDataSource] = React.useState<string>('all');
+  const [filterManagingAgency, setFilterManagingAgency] = React.useState<string>('all');
+
+  const managingAgencyOptions = Array.from(new Set(entities.map(e => e.managingAgency).filter(Boolean))) as string[];
 
   // Reset pagination to page 1 on filter or search query change
   React.useEffect(() => {
     setCurrentPageNum(1);
-  }, [searchTerm, filterStatus, filterScope, filterDataSource]);
+  }, [searchTerm, filterStatus, filterScope, filterManagingAgency]);
 
   const filteredEntities = entities.filter(e => {
     const matchesSearch = e.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       e.code.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterStatus === 'all' || e.lifecycleStatus === filterStatus;
     const matchesScope = filterScope === 'all' || e.scope === filterScope;
-    const matchesDataSource = filterDataSource === 'all' || (e.dataSource || 'manual') === filterDataSource;
-    return matchesSearch && matchesFilter && matchesScope && matchesDataSource;
+    const matchesManagingAgency = filterManagingAgency === 'all' || e.managingAgency === filterManagingAgency;
+    return matchesSearch && matchesFilter && matchesScope && matchesManagingAgency;
   });
 
   const paginatedEntities = filteredEntities.slice((currentPageNum - 1) * pageSize, currentPageNum * pageSize);
@@ -278,16 +270,17 @@ export function SetupTab({
               </div>
 
               <div>
-                <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Nguồn dữ liệu</label>
+                <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Đơn vị chủ quản</label>
                 <div className="relative">
                   <select
-                    value={filterDataSource}
-                    onChange={(e: ChangeEvent<HTMLSelectElement>) => setFilterDataSource(e.target.value)}
+                    value={filterManagingAgency}
+                    onChange={(e: ChangeEvent<HTMLSelectElement>) => setFilterManagingAgency(e.target.value)}
                     className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
                   >
-                    <option value="all">Tất cả nguồn dữ liệu</option>
-                    <option value="manual">Tự cập nhật trực tiếp</option>
-                    <option value="dldc">Đồng bộ Kho DLDC</option>
+                    <option value="all">Tất cả đơn vị chủ quản</option>
+                    {managingAgencyOptions.map(agency => (
+                      <option key={agency} value={agency}>{agency}</option>
+                    ))}
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                 </div>
@@ -306,10 +299,8 @@ export function SetupTab({
                 <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">STT</th>
                 <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Mã danh mục</th>
                 <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên danh mục</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Cơ sở dữ liệu/ Hệ thống</th>
                 <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Đơn vị chủ quản</th>
                 <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Phạm vi</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Nguồn dữ liệu</th>
                 <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Phiên bản</th>
                 <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Ngày hiệu lực</th>
                 <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Trạng thái</th>
@@ -327,12 +318,8 @@ export function SetupTab({
                       <td className="px-6 py-4 text-slate-900 text-[13px] font-normal hover:text-blue-600 transition-colors">
                         {entity.name}
                       </td>
-                      <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{entity.databaseSystem || '--'}</td>
                       <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{entity.managingAgency || '--'}</td>
                       <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{scopeLabels[entity.scope] || entity.scope || '--'}</td>
-                      <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">
-                        {getDataSourceLabel(entity.dataSource)}
-                      </td>
                       <td className="px-6 py-4 text-center text-[13px] text-slate-700 font-mono">
                         {entity.version ? `v${entity.version}.0` : '--'}
                       </td>
@@ -441,7 +428,7 @@ export function SetupTab({
                 })
               ) : (
                 <tr>
-                  <td colSpan={11} className="px-6 py-8 text-center text-[13px] text-slate-500">
+                  <td colSpan={9} className="px-6 py-8 text-center text-[13px] text-slate-500">
                     Không tìm thấy dữ liệu
                   </td>
                 </tr>

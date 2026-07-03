@@ -114,20 +114,21 @@ export const defaultEntities: MasterDataEntity[] = [
     databaseSystem: 'Cơ sở dữ liệu Hộ tịch điện tử'
   },
   {
-    id: '8',
-    code: 'DM-GTTT',
-    name: 'Dữ liệu Danh mục mã giấy tờ tùy thân',
+    id: '11',
+    code: 'DM-HONNHAN',
+    name: 'Dữ liệu Danh mục tình trạng hôn nhân',
     dataType: 'reference',
-    managingAgency: 'Bộ Công an',
+    managingAgency: 'Bộ Tư pháp',
     scope: 'national',
-    description: 'Danh mục các loại giấy tờ tùy thân (CCCD, CMND, Hộ chiếu...)',
-    lifecycleStatus: 'draft',
-    createdDate: '20/12/2024',
-    updatedDate: '20/12/2024',
+    description: 'Danh mục các tình trạng hôn nhân (Độc thân, Đã kết hôn, Ly hôn...)',
+    lifecycleStatus: 'inactive',
+    createdDate: '10/08/2023',
+    updatedDate: '15/03/2025',
+    effectiveDate: '01/09/2023',
     createdBy: 'Hệ thống',
-    version: 1,
+    version: 2,
     dataSource: 'manual',
-    databaseSystem: 'Cơ sở dữ liệu Quốc gia về Dân cư'
+    databaseSystem: 'Cơ sở dữ liệu Hộ tịch điện tử'
   },
   {
     id: '9',
@@ -160,23 +161,6 @@ export const defaultEntities: MasterDataEntity[] = [
     version: 1,
     dataSource: 'manual',
     databaseSystem: 'Hệ thống Quản lý giáo dục quốc dân'
-  },
-  {
-    id: '11',
-    code: 'DM-HONNHAN',
-    name: 'Dữ liệu Danh mục tình trạng hôn nhân',
-    dataType: 'reference',
-    managingAgency: 'Bộ Tư pháp',
-    scope: 'national',
-    description: 'Danh mục các tình trạng hôn nhân (Độc thân, Đã kết hôn, Ly hôn...)',
-    lifecycleStatus: 'inactive',
-    createdDate: '10/08/2023',
-    updatedDate: '15/03/2025',
-    effectiveDate: '01/09/2023',
-    createdBy: 'Hệ thống',
-    version: 2,
-    dataSource: 'manual',
-    databaseSystem: 'Cơ sở dữ liệu Hộ tịch điện tử'
   }
 ];
 
@@ -215,7 +199,7 @@ export const approvalTypeLabels: Record<ApprovalType, string> = {
 export const approvalStatusLabels: Record<ApprovalStatus, { label: string; color: string }> = {
   pending: { label: 'Chờ phê duyệt', color: 'bg-orange-100 text-orange-700' },
   approved: { label: 'Đã phê duyệt', color: 'bg-green-100 text-green-700' },
-  rejected: { label: 'Đã từ chối', color: 'bg-red-100 text-red-700' },
+  rejected: { label: 'Từ chối', color: 'bg-red-100 text-red-700' },
   partial: { label: 'Duyệt một phần', color: 'bg-blue-100 text-blue-700' }
 };
 
@@ -282,6 +266,25 @@ export const mockAttributesByEntity: Record<string, MasterDataAttribute[]> = {
       createdDate: '01/01/2024',
       sourceTable: 'tbl_gioi_tinh',
       sourceField: 'mo_ta',
+      sourceKey: '',
+      masked: false
+    },
+    {
+      id: 'a-gt-4',
+      fieldName: 'so_dinh_danh_ca_nhan',
+      displayName: 'Số định danh cá nhân',
+      dataType: 'string',
+      required: false,
+      unique: false,
+      indexed: false,
+      length: 12,
+      description: 'Số định danh cá nhân, tham chiếu (join) từ dữ liệu khai sinh',
+      defaultValue: '',
+      version: 1,
+      status: 'approved',
+      createdDate: '01/01/2024',
+      sourceTable: 'tbl_khaisinh',
+      sourceField: 'so_dinh_danh',
       sourceKey: '',
       masked: false
     }

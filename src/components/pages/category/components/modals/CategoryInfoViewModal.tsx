@@ -1,13 +1,16 @@
-import { useState, ChangeEvent } from 'react';
-import { Info, CheckCircle2, XCircle } from 'lucide-react';
+import { useState, ChangeEvent, ReactNode } from 'react';
+import { Info, CheckCircle2, XCircle, FileText } from 'lucide-react';
 import { MasterDataEntity, ScopeType, DataSourceType } from '../../categoryTypes';
 import { BaseModal } from '../../../../common/BaseModal';
+import { ReviewResultCard } from './ReviewResultCard';
 
 interface CategoryInfoViewModalProps {
   isOpen: boolean;
   onClose: () => void;
   entity: MasterDataEntity | null;
   requestStatus?: string;
+  submissionContent?: string;
+  reviewComment?: string;
   onApprove: (note: string) => void;
   onReject: (note: string) => void;
 }
@@ -24,10 +27,13 @@ const dataSourceLabels: Record<DataSourceType, string> = {
   dldc: 'Đồng bộ Kho DLDC',
 };
 
-function Field({ label, value, colSpan = 1 }: { label: string; value?: string | number | null; colSpan?: number }) {
+function Field({ label, value, colSpan = 1, icon }: { label: string; value?: string | number | null; colSpan?: number; icon?: ReactNode }) {
   return (
     <div className={colSpan === 2 ? 'col-span-2' : ''}>
-      <div className="text-[13px] text-slate-500 font-medium mb-1">{label}</div>
+      <div className="flex items-center gap-1.5 text-[13px] text-slate-500 font-medium mb-1">
+        {icon}
+        {label}
+      </div>
       <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] text-slate-700 font-medium min-h-[34px]">
         {value ?? <span className="text-slate-400 italic">Chưa cập nhật</span>}
       </div>
@@ -35,7 +41,7 @@ function Field({ label, value, colSpan = 1 }: { label: string; value?: string | 
   );
 }
 
-export function CategoryInfoViewModal({ isOpen, onClose, entity, requestStatus, onApprove, onReject }: CategoryInfoViewModalProps) {
+export function CategoryInfoViewModal({ isOpen, onClose, entity, requestStatus, submissionContent, reviewComment, onApprove, onReject }: CategoryInfoViewModalProps) {
   const [note, setNote] = useState('');
 
   if (!isOpen || !entity) return null;
@@ -90,18 +96,23 @@ export function CategoryInfoViewModal({ isOpen, onClose, entity, requestStatus, 
           <Field label="Căn cứ" value={entity.canCu} colSpan={2} />
           <Field label="Phạm vi vĩ mô" value={entity.scope ? scopeLabels[entity.scope] : undefined} />
           <Field label="Nguồn dữ liệu" value={entity.dataSource ? dataSourceLabels[entity.dataSource] : undefined} />
+          <Field label="Nội dung trình duyệt" value={submissionContent} colSpan={2} icon={<FileText className="w-4 h-4 text-slate-400" />} />
         </div>
 
-        <div className="space-y-2">
-          <label className="block text-[13px] font-semibold text-slate-700">Ý kiến phê duyệt</label>
-          <textarea
-            rows={3}
-            value={note}
-            onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setNote(e.target.value)}
-            placeholder="Nhập ý kiến phê duyệt hoặc lý do từ chối (nếu có)..."
-            className="w-full px-4 py-3 border border-slate-200 rounded-xl bg-white text-[13px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none resize-none"
-          />
-        </div>
+        {requestStatus === 'approved' || requestStatus === 'rejected' ? (
+          <ReviewResultCard status={requestStatus} comment={reviewComment} />
+        ) : (
+          <div className="space-y-2">
+            <label className="block text-[13px] font-semibold text-slate-700">Ý kiến phê duyệt</label>
+            <textarea
+              rows={3}
+              value={note}
+              onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setNote(e.target.value)}
+              placeholder="Nhập ý kiến phê duyệt hoặc lý do từ chối (nếu có)..."
+              className="w-full px-4 py-3 border border-slate-200 rounded-xl bg-white text-[13px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none resize-none"
+            />
+          </div>
+        )}
       </div>
     </BaseModal>
   );
