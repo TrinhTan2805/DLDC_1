@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, Settings, Eye, Edit, Trash2, Save, X, CheckSquare, Share2, FileSearch, BarChart3, Filter, XCircle, Globe, Send, Check, Ban, Upload, Paperclip, RefreshCw, Clock, FileText, AlertCircle, Shield, ChevronDown, Download, Database } from 'lucide-react';
+import { Plus, Search, Settings, Eye, Edit, Trash2, Save, X, CheckSquare, Share2, FileSearch, BarChart3, Filter, XCircle, Globe, Send, Check, Ban, Upload, Paperclip, RefreshCw, Clock, FileText, AlertCircle, Shield, ChevronDown, Download, Database, CheckCircle2, Edit2 } from 'lucide-react';
 import { units } from '../admin/GroupManagementPage';
 
 interface DataField {
@@ -753,6 +753,10 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
   const [rejectReason, setRejectReason] = useState('');
   const [approvalNote, setApprovalNote] = useState('');
   const [selectedApprover, setSelectedApprover] = useState('');
+  const [selectedApprovalIds, setSelectedApprovalIds] = useState<string[]>([]);
+  const [showBulkApprovalModal, setShowBulkApprovalModal] = useState(false);
+  const [bulkApprovalAction, setBulkApprovalAction] = useState<'approved' | 'rejected'>('approved');
+  const [bulkApprovalNote, setBulkApprovalNote] = useState('');
 
   // Mock list of approvers
   const approvers = [
@@ -937,7 +941,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
   const approvalStats = {
     pending: approvalList.filter(c => c.approvalStatus === 'pending').length,
     approved: approvalList.filter(c => c.approvalStatus === 'approved').length,
-    rejected: approvalList.filter(c => c.approvalStatus === 'rejected').length
+    rejected: approvalList.filter(c => c.approvalStatus === 'rejected').length,
+    total: approvalList.length
   };
 
   // Filter for history
@@ -974,6 +979,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
     setStatusFilter('');
     setUnitFilter('');
     setFrequencyFilter('');
+    setSelectedApprovalIds([]);
   }, [activeTab]);
 
   const paginatedLicenses = filteredLicenseEntries.slice((currentPageNum - 1) * pageSize, currentPageNum * pageSize);
@@ -984,6 +990,61 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
 
   const [showFilters, setShowFilters] = useState(false);
 
+
+  const renderApprovalAdvancedFilters = () => (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+        <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Trạng thái phê duyệt</label>
+        <div className="relative">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+          >
+            <option value="">Tất cả trạng thái</option>
+            <option value="pending">Chờ duyệt</option>
+            <option value="approved">Đã phê duyệt</option>
+            <option value="rejected">Từ chối</option>
+          </select>
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+        </div>
+      </div>
+      <div>
+        <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Đơn vị chủ trì</label>
+        <div className="relative">
+          <select
+            value={unitFilter}
+            onChange={(e) => setUnitFilter(e.target.value)}
+            className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+          >
+            <option value="">Tất cả đơn vị</option>
+            {units.map((unit) => (
+              <option key={unit.id} value={unit.name}>
+                {unit.name}
+              </option>
+            ))}
+          </select>
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+        </div>
+      </div>
+      <div>
+        <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Tần suất cập nhật</label>
+        <div className="relative">
+          <select
+            value={frequencyFilter}
+            onChange={(e) => setFrequencyFilter(e.target.value)}
+            className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+          >
+            <option value="">Tất cả tần suất</option>
+            <option value="monthly">Hàng tháng</option>
+            <option value="quarterly">Hàng quý</option>
+            <option value="yearly">Hàng năm</option>
+          </select>
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+        </div>
+      </div>
+    </div>
+  );
 
   const renderFilterRow = () => {
     let placeholder = "Tìm kiếm...";
@@ -1024,6 +1085,67 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
         onAddClick = () => openMetadataModal();
         break;
 
+    }
+
+    if (activeTab === 'approval') {
+      const statusPills = [
+        { value: '', label: 'Tất cả', activeClass: 'bg-slate-700 text-white border-slate-700' },
+        { value: 'pending', label: 'Chờ phê duyệt', activeClass: 'bg-orange-500 text-white border-orange-500' },
+        { value: 'approved', label: 'Đã phê duyệt', activeClass: 'bg-green-600 text-white border-green-600' },
+        { value: 'rejected', label: 'Đã từ chối', activeClass: 'bg-red-500 text-white border-red-500' },
+      ];
+
+      return (
+        <div className="space-y-3 mb-6">
+          <div className="bg-white border border-slate-200 rounded-lg p-4">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder={placeholder}
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                {statusPills.map(opt => (
+                  <button
+                    key={opt.value || 'all'}
+                    type="button"
+                    onClick={() => setStatusFilter(opt.value)}
+                    className={`px-3 py-2 text-[13px] rounded-lg border transition-all font-medium cursor-pointer ${statusFilter === opt.value
+                      ? opt.activeClass
+                      : 'bg-white text-slate-600 border-slate-300 hover:border-slate-400 hover:bg-slate-50'
+                      }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-all border cursor-pointer active:scale-95 ${showFilters
+                    ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-sm'
+                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                    }`}
+                  title={showFilters ? "Đóng bộ lọc" : "Bộ lọc nâng cao"}
+                >
+                  {showFilters ? <X className="w-4.5 h-4.5" /> : <Filter className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Advanced Collapsible Filter Panel — vẫn giữ nguyên các bộ lọc Đơn vị chủ trì, Tần suất cập nhật hiện có */}
+          {showFilters && (
+            <div className="relative p-4 bg-white border border-slate-200 rounded-xl shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]">
+              {renderApprovalAdvancedFilters()}
+            </div>
+          )}
+        </div>
+      );
     }
 
     return (
@@ -1108,61 +1230,6 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                     >
                       <option value="">Tất cả trạng thái</option>
                       <option value="draft">Bản nháp</option>
-                      <option value="pending">Chờ duyệt</option>
-                      <option value="approved">Đã phê duyệt</option>
-                      <option value="rejected">Từ chối</option>
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Đơn vị chủ trì</label>
-                  <div className="relative">
-                    <select
-                      value={unitFilter}
-                      onChange={(e) => setUnitFilter(e.target.value)}
-                      className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                    >
-                      <option value="">Tất cả đơn vị</option>
-                      {units.map((unit) => (
-                        <option key={unit.id} value={unit.name}>
-                          {unit.name}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Tần suất cập nhật</label>
-                  <div className="relative">
-                    <select
-                      value={frequencyFilter}
-                      onChange={(e) => setFrequencyFilter(e.target.value)}
-                      className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                    >
-                      <option value="">Tất cả tần suất</option>
-                      <option value="monthly">Hàng tháng</option>
-                      <option value="quarterly">Hàng quý</option>
-                      <option value="yearly">Hàng năm</option>
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'approval' && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Trạng thái phê duyệt</label>
-                  <div className="relative">
-                    <select
-                      value={statusFilter}
-                      onChange={(e) => setStatusFilter(e.target.value)}
-                      className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                    >
-                      <option value="">Tất cả trạng thái</option>
                       <option value="pending">Chờ duyệt</option>
                       <option value="approved">Đã phê duyệt</option>
                       <option value="rejected">Từ chối</option>
@@ -1546,6 +1613,40 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
     }
   };
 
+  // Phê duyệt nhanh / Từ chối nhanh (chọn nhiều bản ghi)
+  const toggleSelectApprovalId = (id: string) => {
+    setSelectedApprovalIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  };
+
+  const toggleSelectAllApprovalIds = () => {
+    const pendingIds = filteredApprovalList.filter(c => c.approvalStatus === 'pending').map(c => c.id);
+    setSelectedApprovalIds(prev => prev.length === pendingIds.length ? [] : pendingIds);
+  };
+
+  const openBulkApprovalModal = (action: 'approved' | 'rejected') => {
+    setBulkApprovalAction(action);
+    setBulkApprovalNote('');
+    setShowBulkApprovalModal(true);
+  };
+
+  const confirmBulkApprovalAction = () => {
+    const ids = selectedApprovalIds;
+    setApprovalList(prev => prev.map(c =>
+      ids.includes(c.id)
+        ? {
+          ...c,
+          status: bulkApprovalAction,
+          approvalStatus: bulkApprovalAction,
+          approvalNote: bulkApprovalAction === 'approved' ? bulkApprovalNote : c.approvalNote,
+          rejectReason: bulkApprovalAction === 'rejected' ? bulkApprovalNote : c.rejectReason
+        }
+        : c
+    ));
+    setSelectedApprovalIds([]);
+    setShowBulkApprovalModal(false);
+    setBulkApprovalNote('');
+  };
+
   // Custom field handlers
   const handleAddCustomField = () => {
     const newField: DataField = {
@@ -1669,6 +1770,82 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
 
       {/* Main Tab Content */}
       <div className="p-6">
+        {activeTab === 'approval' && (
+          <div className="space-y-4 mb-6">
+            {selectedApprovalIds.length > 0 && (
+              <div className="flex items-center justify-end gap-3">
+                <span className="text-[13px] text-slate-600">
+                  Đã chọn: <span className="font-medium text-blue-600">{selectedApprovalIds.length}</span> yêu cầu
+                </span>
+                <button
+                  onClick={() => openBulkApprovalModal('approved')}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-[13px]"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  Phê duyệt nhanh
+                </button>
+                <button
+                  onClick={() => openBulkApprovalModal('rejected')}
+                  className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-[13px]"
+                >
+                  <XCircle className="w-4 h-4" />
+                  Từ chối nhanh
+                </button>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-lg p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center">
+                    <Clock className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-[13px] text-orange-700">Chờ phê duyệt</p>
+                    <p className="text-2xl text-orange-900">{approvalStats.pending}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-lg p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
+                    <CheckCircle2 className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-[13px] text-green-700">Đã phê duyệt</p>
+                    <p className="text-2xl text-green-900">{approvalStats.approved}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-red-50 to-red-100 border border-red-200 rounded-lg p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center">
+                    <XCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-[13px] text-red-700">Đã từ chối</p>
+                    <p className="text-2xl text-red-900">{approvalStats.rejected}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                    <Edit2 className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-[13px] text-blue-700">Tổng yêu cầu</p>
+                    <p className="text-2xl text-blue-900">{approvalStats.total}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {renderFilterRow()}
 
 
@@ -1677,6 +1854,17 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
             <table className="w-full text-left">
               <thead className="bg-[#f8fafc] text-slate-700 border-b border-slate-100">
                 <tr>
+                  {activeTab === 'approval' && (
+                    <th className="px-4 py-4 text-left w-10">
+                      <input
+                        type="checkbox"
+                        title="Chọn tất cả"
+                        checked={selectedApprovalIds.length > 0 && selectedApprovalIds.length === filteredApprovalList.filter(c => c.approvalStatus === 'pending').length}
+                        onChange={toggleSelectAllApprovalIds}
+                        className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                      />
+                    </th>
+                  )}
                   <th className={`px-6 py-4 text-center whitespace-nowrap w-16 text-[13px] ${activeTab === 'metadata' ? 'font-bold text-slate-500' : 'font-semibold text-slate-700'}`}>STT</th>
                   {activeTab === 'metadata' ? (
                     <>
@@ -1825,9 +2013,20 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   paginatedApproval.length > 0 ? (
                     paginatedApproval.map((category, index) => (
                       <tr key={category.id} className="hover:bg-slate-50 transition-all group border-b border-slate-100">
+                        <td className="px-4 py-3">
+                          {category.approvalStatus === 'pending' && (
+                            <input
+                              type="checkbox"
+                              title="Chọn bản ghi"
+                              checked={selectedApprovalIds.includes(category.id)}
+                              onChange={() => toggleSelectApprovalId(category.id)}
+                              className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                            />
+                          )}
+                        </td>
                         <td className="px-4 py-3 text-center text-slate-500 font-medium text-[13px]">{(currentPageNum - 1) * pageSize + index + 1}</td>
-                        <td className="px-4 py-3 text-left">
-                          <code className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-xs border border-slate-200">{category.code}</code>
+                        <td className="px-4 py-3 text-left text-[13px] text-slate-700">
+                          {category.code}
                         </td>
                         <td className="px-4 py-3 text-left text-[13px] font-semibold text-slate-950">{category.name}</td>
                         <td className="px-4 py-3 text-left text-slate-600 font-medium text-[13px]">{category.dataField}</td>
@@ -1866,7 +2065,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                       </tr>
                     ))
                   ) : (
-                    <tr><td colSpan={6} className="px-4 py-8 text-center text-sm text-slate-500">Không tìm thấy dữ liệu</td></tr>
+                    <tr><td colSpan={7} className="px-4 py-8 text-center text-sm text-slate-500">Không tìm thấy dữ liệu</td></tr>
                   )
                 ) : (
                   paginatedCategories.length > 0 ? (
@@ -2958,6 +3157,85 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
           </div>
         );
       })()}
+
+      {/* Bulk Approval / Reject Modal (Phê duyệt nhanh / Từ chối nhanh) */}
+      {showBulkApprovalModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-full max-w-2xl m-4">
+            <div className="border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+              <h3 className="text-[18px] text-slate-900 font-bold">
+                {bulkApprovalAction === 'approved' ? 'Phê duyệt nhanh' : 'Từ chối nhanh'}
+              </h3>
+              <button
+                onClick={() => setShowBulkApprovalModal(false)}
+                className="text-slate-400 hover:text-slate-600"
+                aria-label="Đóng"
+                title="Đóng"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className={`border rounded-lg p-4 ${bulkApprovalAction === 'approved' ? 'bg-blue-50 border-blue-200' : 'bg-red-50 border-red-200'}`}>
+                <div className="flex items-start gap-3">
+                  {bulkApprovalAction === 'approved'
+                    ? <CheckSquare className="w-5 h-5 text-blue-600 mt-0.5" />
+                    : <XCircle className="w-5 h-5 text-red-600 mt-0.5" />}
+                  <div className="min-w-0">
+                    <div className={`text-[13px] font-medium mb-1 ${bulkApprovalAction === 'approved' ? 'text-blue-900' : 'text-red-900'}`}>
+                      Danh mục được chọn ({selectedApprovalIds.length})
+                    </div>
+                    <div className="space-y-1 max-h-32 overflow-y-auto pr-1">
+                      {approvalList.filter(c => selectedApprovalIds.includes(c.id)).map(c => (
+                        <div key={c.id} className={`text-[13px] ${bulkApprovalAction === 'approved' ? 'text-blue-800' : 'text-red-800'}`}>
+                          <span className="font-mono">{c.code}</span> — {c.name}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[13px] font-medium text-slate-700 mb-2">
+                  {bulkApprovalAction === 'approved' ? (
+                    <>Ý kiến phê duyệt <span className="text-slate-400 font-normal">(Không bắt buộc)</span></>
+                  ) : (
+                    <>Lý do từ chối <span className="text-red-600">*</span></>
+                  )}
+                </label>
+                <textarea
+                  value={bulkApprovalNote}
+                  onChange={(e) => setBulkApprovalNote(e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-lg text-[13px] focus:ring-2 outline-none ${bulkApprovalAction === 'approved' ? 'border-slate-300 focus:ring-green-500 focus:border-green-500' : 'border-slate-300 focus:ring-red-500 focus:border-red-500'}`}
+                  rows={4}
+                  placeholder={bulkApprovalAction === 'approved'
+                    ? 'Nhập ý kiến phê duyệt áp dụng cho tất cả các danh mục đã chọn (nếu có)...'
+                    : 'Nhập lý do từ chối áp dụng cho tất cả các danh mục đã chọn...'}
+                />
+              </div>
+            </div>
+
+            <div className="bg-slate-50 border-t border-slate-200 px-6 py-4 flex items-center justify-end gap-3">
+              <button
+                onClick={() => setShowBulkApprovalModal(false)}
+                className="px-4 py-2 text-[13px] font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={confirmBulkApprovalAction}
+                disabled={bulkApprovalAction === 'rejected' && !bulkApprovalNote.trim()}
+                className={`px-4 py-2 text-[13px] font-medium text-white rounded-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${bulkApprovalAction === 'approved' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}`}
+              >
+                {bulkApprovalAction === 'approved' ? <Check className="w-4 h-4" /> : <Ban className="w-4 h-4" />}
+                {bulkApprovalAction === 'approved' ? 'Phê duyệt' : 'Từ chối'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Approval Modal */}
       {showApprovalModal && selectedCategory && approvalAction === 'approved' && (
