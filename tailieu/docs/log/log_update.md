@@ -1,5 +1,82 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Phiên bản 2.6.12 (Ngày cập nhật: 03/07/2026)
+
+**Nội dung thay đổi:**
+1. **Thiết lập danh mục dữ liệu mở** (`OpenDataSetupPage.tsx`):
+   - Bỏ `italic` khỏi khối "Nội dung trình duyệt" trong modal "Chi tiết danh mục".
+   - **Sửa lỗi kiểu dữ liệu (pre-existing, TS2322)**: state `formData` (dùng cho form Thêm/Sửa danh mục) trước đây được khai báo qua `useState({...})` không có type annotation, khiến TypeScript suy luận `updateFrequency` và `status` thành kiểu literal đơn (`'monthly'`, `'active'`) thay vì union đầy đủ. Điều này khiến `handleEdit` gán `category.updateFrequency` / `category.status` (kiểu union rộng hơn) vào bị báo lỗi. Đã thêm type annotation tường minh cho `useState<{...}>` với `updateFrequency: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly'` và `status: 'active' | 'inactive'`, khớp với kiểu dữ liệu thực tế được gán vào.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/open-data/OpenDataSetupPage.tsx`
+
+---
+
+## Phiên bản 2.6.11 (Ngày cập nhật: 03/07/2026)
+
+**Nội dung thay đổi:**
+1. **Lịch sử triển khai** (`src/components/modals/VersionHistoryModal.tsx`): Thêm bản ghi phiên bản mới **v2.6.06** (đầu danh sách, đánh dấu "Hiện tại") tổng hợp toàn bộ các thay đổi của phiên bản 2.6.07–2.6.10 trong `log_update.md` (tính năng "Nội dung trình duyệt" ở `OpenDataSetupPage.tsx` và `OpenDataPublishedListPage.tsx`).
+   - Lưu ý: trường `time` ("17:30") là giá trị ước lượng do không có mốc giờ hệ thống chính xác tại thời điểm ghi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/modals/VersionHistoryModal.tsx`
+
+---
+
+## Phiên bản 2.6.10 (Ngày cập nhật: 03/07/2026)
+
+**Nội dung thay đổi:**
+1. **Công bố dữ liệu mở → Yêu cầu công bố** (`OpenDataPublishedListPage.tsx`):
+   - Bổ sung dữ liệu mẫu `submitNote` ("Nội dung trình duyệt") cho 2 bản ghi đang **"Chờ công bố"** trong `mockPublishedData` (id `3` – Danh sách Luật sư Việt Nam, id `4` – Danh sách tổ chức TGPL Tỉnh B) để minh họa hiển thị ở modal Phê duyệt.
+   - Thêm cơ chế **version hóa `localStorage`** cho key `open_data_published` (`open_data_published_version`, giống pattern đã dùng cho `open_data_metadata`): khi phiên bản không khớp, tự xóa dữ liệu cũ lưu trong trình duyệt (gồm các bản ghi test rác kiểu "fdfgfd", "hgjhgj"... người dùng tự tạo khi thử nghiệm) và nạp lại bộ dữ liệu mẫu sạch.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/open-data/OpenDataPublishedListPage.tsx`
+
+---
+
+## Phiên bản 2.6.09 (Ngày cập nhật: 03/07/2026)
+
+**Nội dung thay đổi:**
+1. **Công bố dữ liệu mở → Phê duyệt dữ liệu mở** (`OpenDataPublishedListPage.tsx`), modal **"Phê duyệt yêu cầu công bố"**:
+   - Thêm khối **"Nội dung trình duyệt"** (đọc từ `selectedApprovalItem.submitNote`) vào phần thông tin chi tiết của yêu cầu, ngay sau "Thông tin mô tả" và trước checkbox "Công bố dữ liệu ngay sau khi được phê duyệt". Chỉ hiển thị khi có nội dung.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/open-data/OpenDataPublishedListPage.tsx`
+
+---
+
+## Phiên bản 2.6.08 (Ngày cập nhật: 03/07/2026)
+
+**Nội dung thay đổi:**
+1. **Thiết lập danh mục dữ liệu mở** (`OpenDataSetupPage.tsx`) — hoàn thiện hiển thị "Nội dung trình duyệt":
+   - Thêm khối **"Nội dung trình duyệt"** vào modal **"Chi tiết danh mục"** (đọc từ `selectedCategory.submitNote`), trước đó modal này chưa hiển thị nội dung này.
+   - Bổ sung dữ liệu mẫu `submitNote` cho 3 bản ghi đang "Chờ duyệt" (ODC005, ODC006, ODC007) trong `mockApprovalList` để minh họa/kiểm thử hiển thị ở tab Phê duyệt danh mục.
+2. **Công bố dữ liệu mở → Yêu cầu công bố** (`OpenDataPublishedListPage.tsx`):
+   - Thêm trường `submitNote` vào `PublishedData`.
+   - Nút **"Gửi yêu cầu"** trong modal "Gửi yêu cầu công bố dữ liệu" (tạo mới, không áp dụng cho "Cập nhật") **không lưu bản ghi và báo thành công ngay** như trước, mà **mở modal "Gửi duyệt yêu cầu công bố"** (chọn người phê duyệt + nhập nội dung trình duyệt — modal đang dùng chung với luồng gửi duyệt bản nháp).
+   - `handleConfirmSendApproval`: xử lý cả 2 trường hợp — **thêm mới** bản ghi (khi gửi từ modal tạo yêu cầu, bản ghi chưa có trong `dataList`) và **cập nhật** bản ghi đã có (khi gửi duyệt từ bản nháp) — đều gắn `approver` + `submitNote`. Thông báo "Yêu cầu công bố đã được gửi đi phê duyệt thành công!" chỉ hiển thị sau khi xác nhận **"Gửi phê duyệt"** trong modal này.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/open-data/OpenDataSetupPage.tsx`
+- `src/components/pages/open-data/OpenDataPublishedListPage.tsx`
+
+---
+
+## Phiên bản 2.6.07 (Ngày cập nhật: 03/07/2026)
+
+**Nội dung thay đổi:**
+1. **Thiết lập danh mục dữ liệu mở** (`OpenDataSetupPage.tsx`), tab **Quản lý danh mục** → **Phê duyệt danh mục**:
+   - Thêm trường `submitNote` vào `OpenDataCategory` để lưu **"Nội dung trình duyệt"** nhập ở modal *Trình duyệt danh mục*.
+   - `confirmApprovalAction`: khi trình duyệt (`approvalAction === 'pending'`), lưu nội dung trình duyệt vào bản ghi và **đồng bộ/thêm bản ghi sang danh sách Phê duyệt** (`approvalList`, khớp theo `code`) để người phê duyệt thấy đúng nội dung đã trình.
+   - Modal **"Phê duyệt danh mục dữ liệu mở"** và **"Từ chối phê duyệt danh mục"**: hiển thị thêm khối **"Nội dung trình duyệt"** (đọc từ `selectedCategory.submitNote`) phía trên ô nhập ý kiến phê duyệt / lý do từ chối.
+   - `handleSubmitForApproval`: nạp lại `submitNote` cũ (nếu có) vào ô nhập khi mở lại modal trình duyệt.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/open-data/OpenDataSetupPage.tsx`
+
+---
+
 ## Phiên bản 2.6.06 (Ngày cập nhật: 02/07/2026)
 
 **Nội dung thay đổi:**

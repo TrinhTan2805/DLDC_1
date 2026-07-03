@@ -7,6 +7,21 @@ interface VersionHistoryModalProps {
 
 const mockVersions = [
   {
+    id: 24,
+    version: 'v2.6.06',
+    date: '03/07/2026',
+    time: '17:30',
+    content: `1. Dữ liệu mở — Thiết lập danh mục dữ liệu mở (OpenDataSetupPage):
+- Bổ sung trường submitNote để lưu lại "Nội dung trình duyệt" nhập tại modal Trình duyệt danh mục; khi trình duyệt sẽ tự đồng bộ bản ghi sang danh sách của tab Phê duyệt danh mục.
+- Hiển thị khối "Nội dung trình duyệt" tại modal Phê duyệt danh mục dữ liệu mở, Từ chối phê duyệt danh mục và modal Chi tiết danh mục.
+- Modal Trình duyệt danh mục nạp lại nội dung đã nhập trước đó khi mở lại (trường hợp trình duyệt lại).
+
+2. Dữ liệu mở — Công bố dữ liệu mở (OpenDataPublishedListPage):
+- Nút "Gửi yêu cầu" tại modal Gửi yêu cầu công bố dữ liệu không còn lưu và báo thành công ngay lập tức; thay vào đó mở modal "Gửi duyệt yêu cầu công bố" để chọn Người phê duyệt và nhập Nội dung trình duyệt trước khi hoàn tất gửi.
+- Hiển thị khối "Nội dung trình duyệt" tại modal Phê duyệt yêu cầu công bố.
+- Bổ sung dữ liệu mẫu minh họa và cơ chế version hóa dữ liệu lưu trong trình duyệt (localStorage) để tự động dọn các bản ghi thử nghiệm cũ khi tải lại trang.`
+  },
+  {
     id: 23,
     version: 'v2.6.05',
     date: '02/07/2026',

@@ -27,6 +27,7 @@ interface PublishedData {
   dataFields?: any[];
   topic?: string;
   publishImmediately?: boolean;
+  submitNote?: string;
 }
 
 const getPreviewFallback = (categoryName: string) => {
@@ -121,6 +122,7 @@ const mockPublishedData: PublishedData[] = [
     license: 'Giấy phép dữ liệu mở công cộng',
     fileSize: '512 KB',
     dataSource: 'CSDL Luật sư Việt Nam',
+    submitNote: 'Đề nghị Lãnh đạo xem xét phê duyệt yêu cầu công bố dữ liệu danh sách Luật sư Việt Nam cập nhật quý 1/2026 theo Nghị định 47/2020/NĐ-CP.',
     previewHeaders: ['Họ và tên', 'Ngày sinh', 'Giới tính', 'Quốc tịch', 'Số Chứng chỉ hành nghề luật sư', 'Số Thẻ luật sư', 'Nơi làm việc/nơi hành nghề', 'Thành viên Đoàn Luật sư', 'Tình trạng hành nghề'],
     previewRows: [
       ['Lê Văn Long', '15/08/1985', 'Nam', 'Việt Nam', 'CC-9988-BTP', 'THE-1234-LS', 'Văn phòng Luật sư Long & Partners', 'Đoàn Luật sư TP. Hà Nội', 'Đang hoạt động'],
@@ -143,6 +145,7 @@ const mockPublishedData: PublishedData[] = [
     license: 'Giấy phép dữ liệu mở công cộng',
     fileSize: '48 KB',
     dataSource: 'CSDL Trợ giúp pháp lý - Bảng tổ chức',
+    submitNote: 'Đề nghị Lãnh đạo xem xét phê duyệt yêu cầu cập nhật, bổ sung danh sách tổ chức trợ giúp pháp lý tại Tỉnh B.',
     previewHeaders: ['Tên tổ chức thực hiện trợ giúp pháp lý', 'Người đại diện', 'Địa chỉ liên hệ'],
     previewRows: [
       ['Văn phòng TGPL Tình Thương B', 'Phạm Quốc Bảo', '789 Trần Phú, Tỉnh B'],
@@ -581,13 +584,17 @@ const getOpenDataDetails = (item: any) => {
 export function OpenDataPublishedListPage() {
   const [activeTab, setActiveTab] = useState<'requests' | 'approval' | 'schedule'>('requests');
   const [dataList, setDataList] = useState<PublishedData[]>(() => {
+    const DATA_VERSION = 'v2';
     const saved = localStorage.getItem('open_data_published');
-    if (saved) {
+    const version = localStorage.getItem('open_data_published_version');
+    if (saved && version === DATA_VERSION) {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       } catch (e) {}
     }
+    localStorage.removeItem('open_data_published');
+    localStorage.setItem('open_data_published_version', DATA_VERSION);
     return mockPublishedData;
   });
 
@@ -1093,13 +1100,15 @@ export function OpenDataPublishedListPage() {
       setTimeout(() => setShowSuccessPopup(false), 3000);
       resetRequestForm();
     } else {
+      // Instead of saving right away, open the send-for-approval modal so the
+      // user picks an approver and enters "Nội dung trình duyệt" first.
       const newRecord = createNewRecord('pending');
-      setDataList([newRecord, ...dataList]);
       setShowRequestModal(false);
-      setSuccessPopupMessage('Yêu cầu công bố đã được gửi đi phê duyệt');
-      setShowSuccessPopup(true);
-      setTimeout(() => setShowSuccessPopup(false), 3000);
       resetRequestForm();
+      setSendApprovalItem(newRecord);
+      setSendApprovalApprover('');
+      setSendApprovalNote('');
+      setShowSendApprovalModal(true);
     }
   };
 
@@ -1233,10 +1242,18 @@ export function OpenDataPublishedListPage() {
   const handleConfirmSendApproval = () => {
     if (!sendApprovalItem || !sendApprovalApprover) return;
     const approverName = approvers.find(a => a.id === sendApprovalApprover)?.name || '';
-    setDataList(dataList.map(d => d.id === sendApprovalItem.id
-      ? { ...d, status: 'pending', approver: approverName }
-      : d
-    ));
+    const isNewRequest = !dataList.some(d => d.id === sendApprovalItem.id);
+    if (isNewRequest) {
+      setDataList([
+        { ...sendApprovalItem, status: 'pending', approver: approverName, submitNote: sendApprovalNote },
+        ...dataList
+      ]);
+    } else {
+      setDataList(dataList.map(d => d.id === sendApprovalItem.id
+        ? { ...d, status: 'pending', approver: approverName, submitNote: sendApprovalNote }
+        : d
+      ));
+    }
     setShowSendApprovalModal(false);
     setSendApprovalItem(null);
     setSendApprovalApprover('');
@@ -3075,6 +3092,13 @@ export function OpenDataPublishedListPage() {
                     <div className="text-[13px] font-semibold text-black uppercase">Thông tin mô tả</div>
                     <div className="text-[13px] text-black font-medium mt-0.5 whitespace-pre-wrap">{selectedApprovalItem.description || 'Không có mô tả'}</div>
                   </div>
+
+                  {selectedApprovalItem.submitNote && (
+                    <div className="col-span-1 md:col-span-2 bg-purple-50 border border-purple-200 rounded-lg p-3">
+                      <div className="text-[13px] font-semibold text-purple-700 uppercase">Nội dung trình duyệt</div>
+                      <div className="text-[13px] text-purple-900 font-medium mt-0.5 whitespace-pre-wrap">{selectedApprovalItem.submitNote}</div>
+                    </div>
+                  )}
 
                   <div className="col-span-1 md:col-span-2 flex items-center gap-2 mt-1">
                     <input

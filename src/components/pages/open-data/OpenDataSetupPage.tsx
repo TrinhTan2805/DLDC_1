@@ -22,6 +22,7 @@ interface OpenDataCategory {
   approvalStatus?: 'draft' | 'pending' | 'approved' | 'rejected';
   customFields?: DataField[];
   version?: string;
+  submitNote?: string;
   approvalNote?: string;
   rejectReason?: string;
   parentId?: string;
@@ -170,7 +171,8 @@ const mockApprovalList: OpenDataCategory[] = [
     status: 'pending',
     approvalStatus: 'pending',
     createdDate: '26/12/2024',
-    updatedDate: '26/12/2024'
+    updatedDate: '26/12/2024',
+    submitNote: 'Đề nghị Lãnh đạo xem xét phê duyệt danh mục dữ liệu mở "Danh sách công chứng viên Việt Nam" theo Nghị định 47/2020/NĐ-CP.'
   },
   {
     id: 'ap2',
@@ -183,7 +185,8 @@ const mockApprovalList: OpenDataCategory[] = [
     status: 'pending',
     approvalStatus: 'pending',
     createdDate: '25/12/2024',
-    updatedDate: '25/12/2024'
+    updatedDate: '25/12/2024',
+    submitNote: 'Đề nghị Lãnh đạo xem xét phê duyệt danh mục dữ liệu mở "Danh sách tổ chức hành nghề công chứng" để công bố công khai theo quy định.'
   },
   {
     id: 'ap3',
@@ -196,7 +199,8 @@ const mockApprovalList: OpenDataCategory[] = [
     status: 'pending',
     approvalStatus: 'pending',
     createdDate: '24/12/2024',
-    updatedDate: '24/12/2024'
+    updatedDate: '24/12/2024',
+    submitNote: 'Đề nghị Lãnh đạo xem xét phê duyệt danh mục dữ liệu mở "Danh sách đấu giá viên" theo đề xuất của đơn vị.'
   },
   {
     id: 'ap4',
@@ -834,16 +838,28 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
   };
 
   // Form state for add/edit
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    code: string;
+    name: string;
+    description: string;
+    dataField: string;
+    updateFrequency: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+    dataFormat: string[];
+    status: 'active' | 'inactive';
+    selectedTable: string;
+    selectedFields: string[];
+    version: string;
+    parentId: string;
+  }>({
     code: '',
     name: '',
     description: '',
     dataField: '',
-    updateFrequency: 'monthly' as const,
-    dataFormat: [] as string[],
-    status: 'active' as const,
+    updateFrequency: 'monthly',
+    dataFormat: [],
+    status: 'active',
     selectedTable: '',
-    selectedFields: [] as string[],
+    selectedFields: [],
     version: '1.0',
     parentId: ''
   });
@@ -1461,6 +1477,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
   const handleSubmitForApproval = (category: OpenDataCategory) => {
     setSelectedCategory(category);
     setApprovalAction('pending');
+    setApprovalNote(category.submitNote || '');
     setShowApprovalModal(true);
   };
 
@@ -1498,11 +1515,30 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
             ...c,
             status: approvalAction,
             approvalStatus: approvalAction,
+            submitNote: approvalAction === 'pending' ? approvalNote : c.submitNote,
             approvalNote: approvalAction === 'approved' ? approvalNote : c.approvalNote,
             rejectReason: approvalAction === 'rejected' ? rejectReason : c.rejectReason
           }
           : c
       ));
+
+      // Submitting for approval also pushes/updates the record in the Approval tab
+      // so the reviewer sees the same "Nội dung trình duyệt" when phê duyệt/từ chối.
+      if (approvalAction === 'pending') {
+        const submittedCategory: OpenDataCategory = {
+          ...selectedCategory,
+          status: 'pending',
+          approvalStatus: 'pending',
+          submitNote: approvalNote
+        };
+        setApprovalList(prev => {
+          const exists = prev.some(c => c.code === submittedCategory.code);
+          return exists
+            ? prev.map(c => c.code === submittedCategory.code ? { ...c, ...submittedCategory } : c)
+            : [...prev, submittedCategory];
+        });
+      }
+
       setShowApprovalModal(false);
       setSelectedCategory(null);
       setRejectReason('');
@@ -2698,6 +2734,14 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   <div>{getApprovalStatusBadge(selectedCategory.approvalStatus)}</div>
                 </div>
 
+                {selectedCategory.submitNote && (
+                  <div className="col-span-2 bg-slate-50 border border-slate-200 rounded-lg p-3">
+                    <label className="block text-[13px] font-semibold text-slate-700 mb-1">Nội dung trình duyệt</label>
+                    <div className="text-[13px] text-slate-900 whitespace-pre-wrap">
+                      {selectedCategory.submitNote}
+                    </div>
+                  </div>
+                )}
                 {selectedCategory.approvalStatus === 'approved' && (
                   <div className="col-span-2 bg-green-50 border border-green-200 rounded-lg p-3">
                     <label className="block text-[13px] font-semibold text-green-800 mb-1">Ý kiến người phê duyệt</label>
@@ -2947,6 +2991,18 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                 </div>
               </div>
 
+              {selectedCategory.submitNote && (
+                <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <FileText className="w-5 h-5 text-slate-500 mt-0.5" />
+                    <div>
+                      <div className="text-[13px] font-medium text-slate-700 mb-1">Nội dung trình duyệt</div>
+                      <div className="text-[13px] text-slate-600 whitespace-pre-wrap">{selectedCategory.submitNote}</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div>
                 <label className="block text-[13px] font-medium text-slate-700 mb-2">
                   Ý kiến phê duyệt
@@ -3014,6 +3070,18 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   </div>
                 </div>
               </div>
+
+              {selectedCategory.submitNote && (
+                <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <FileText className="w-5 h-5 text-slate-500 mt-0.5" />
+                    <div>
+                      <div className="text-[13px] font-medium text-slate-700 mb-1">Nội dung trình duyệt</div>
+                      <div className="text-[13px] text-slate-600 whitespace-pre-wrap">{selectedCategory.submitNote}</div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div>
                 <label className="block text-[13px] font-medium text-slate-700 mb-2">

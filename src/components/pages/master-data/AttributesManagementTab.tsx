@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { Plus, Edit, Trash2, X, Search, History as HistoryIcon, Check, AlertCircle, ChevronDown } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, History as HistoryIcon, Check, AlertCircle, ChevronDown, Database } from 'lucide-react';
+import { BaseModal } from '../../common/BaseModal';
 
 type FieldDataType = 'string' | 'number' | 'date' | 'datetime' | 'boolean' | 'text' | 'email' | 'phone' | 'url';
 type DataSourceType = 'dldc' | 'manual';
@@ -9,6 +10,18 @@ interface MasterDataEntity {
   code: string;
   name: string;
   dataSource: DataSourceType;
+  primaryDatabaseId?: string;
+  primaryTableId?: string;
+}
+
+interface DldcFieldRow {
+  id: string;
+  tableId: string;
+  fieldName: string;
+  displayName: string;
+  dataType: FieldDataType;
+  shared: boolean;
+  isPK: boolean;
 }
 
 interface MasterDataAttribute {
@@ -38,11 +51,11 @@ interface VersionHistory {
 }
 
 const mockEntities: MasterDataEntity[] = [
-  { id: '1', code: 'MD-CITIZEN-001', name: 'Bộ dữ liệu chủ Công dân',          dataSource: 'dldc'   },
-  { id: '2', code: 'MD-ORG-001',     name: 'Bộ dữ liệu chủ Tổ chức',           dataSource: 'dldc'   },
+  { id: '1', code: 'MD-CITIZEN-001', name: 'Bộ dữ liệu chủ Công dân',          dataSource: 'dldc',   primaryDatabaseId: 'hotich', primaryTableId: 'tbl_citizen'      },
+  { id: '2', code: 'MD-ORG-001',     name: 'Bộ dữ liệu chủ Tổ chức',           dataSource: 'dldc',   primaryDatabaseId: 'dkkd',   primaryTableId: 'tbl_organization' },
   { id: '3', code: 'MD-DOC-001',     name: 'Bộ dữ liệu chủ Văn bản pháp luật', dataSource: 'manual' },
   { id: '4', code: 'MD-ADMIN-001',   name: 'Bộ dữ liệu chủ Đơn vị hành chính', dataSource: 'manual' },
-  { id: '5', code: 'MD-AGENCY-001',  name: 'Bộ dữ liệu chủ Cơ quan nhà nước',  dataSource: 'dldc'   },
+  { id: '5', code: 'MD-AGENCY-001',  name: 'Bộ dữ liệu chủ Cơ quan nhà nước',  dataSource: 'dldc',   primaryDatabaseId: 'lltp',   primaryTableId: 'tbl_lich_su'      },
 ];
 
 const defaultAttributes: Record<string, MasterDataAttribute[]> = {
@@ -207,14 +220,9 @@ export function AttributesManagementTab() {
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // DLDC field selection modal
+  // DLDC field configuration modal
   const [showDldcModal, setShowDldcModal] = useState(false);
-  const [dldcModalMode, setDldcModalMode] = useState<'add' | 'edit'>('add');
-  const [dldcEditingAttr, setDldcEditingAttr] = useState<MasterDataAttribute | null>(null);
-  const [dldcSelectedDb, setDldcSelectedDb] = useState('');
-  const [dldcSelectedTable, setDldcSelectedTable] = useState('');
-  const [dldcSelectedField, setDldcSelectedField] = useState('');
-  const [dldcDisplayName, setDldcDisplayName] = useState('');
+  const [dldcFieldRows, setDldcFieldRows] = useState<DldcFieldRow[]>([]);
 
   // Delete confirmation modal
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -342,73 +350,74 @@ export function AttributesManagementTab() {
   };
 
   const handleOpenDldcModal = () => {
-    setDldcModalMode('add');
-    setDldcEditingAttr(null);
-    setDldcSelectedDb('');
-    setDldcSelectedTable('');
-    setDldcSelectedField('');
-    setDldcDisplayName('');
-    setShowDldcModal(true);
-  };
-
-  const handleEditDldc = (attribute: MasterDataAttribute) => {
-    setDldcModalMode('edit');
-    setDldcEditingAttr(attribute);
-    const dbId = DLDC_DATABASES.find(db => db.label === attribute.databaseName)?.id || '';
-    setDldcSelectedDb(dbId);
-    setDldcSelectedTable(attribute.tableName || '');
-    setDldcSelectedField(attribute.fieldName);
-    setDldcDisplayName(attribute.displayName);
+    const entity = mockEntities.find(e => e.id === selectedEntity);
+    const currentAttrs = attributes[selectedEntity] || [];
+    const rows: DldcFieldRow[] = currentAttrs.map(attr => ({
+      id: attr.id,
+      tableId: attr.tableName || entity?.primaryTableId || '',
+      fieldName: attr.fieldName,
+      displayName: attr.displayName,
+      dataType: attr.dataType,
+      shared: true,
+      isPK: attr.unique,
+    }));
+    setDldcFieldRows(rows);
     setShowDldcModal(true);
   };
 
   const handleCloseDldcModal = () => {
     setShowDldcModal(false);
-    setDldcEditingAttr(null);
-    setDldcSelectedDb('');
-    setDldcSelectedTable('');
-    setDldcSelectedField('');
-    setDldcDisplayName('');
+    setDldcFieldRows([]);
+  };
+
+  const handleAddDldcRow = () => {
+    const entity = mockEntities.find(e => e.id === selectedEntity);
+    setDldcFieldRows(rows => [...rows, {
+      id: `row-${Date.now()}`,
+      tableId: entity?.primaryTableId || '',
+      fieldName: '',
+      displayName: '',
+      dataType: 'string',
+      shared: true,
+      isPK: false,
+    }]);
+  };
+
+  const updateDldcRow = (rowId: string, updates: Partial<DldcFieldRow>) => {
+    setDldcFieldRows(rows => rows.map(r => r.id === rowId ? { ...r, ...updates } : r));
+  };
+
+  const removeDldcRow = (rowId: string) => {
+    setDldcFieldRows(rows => rows.filter(r => r.id !== rowId));
   };
 
   const handleDldcConfirm = () => {
-    if (!dldcSelectedDb || !dldcSelectedTable || !dldcSelectedField || !dldcDisplayName.trim()) return;
-
-    const dbLabel = DLDC_DATABASES.find(db => db.id === dldcSelectedDb)?.label || dldcSelectedDb;
-    const fieldInfo = (DLDC_FIELDS[dldcSelectedTable] || []).find(f => f.fieldName === dldcSelectedField);
-    if (!fieldInfo) return;
-
+    const entity = mockEntities.find(e => e.id === selectedEntity);
+    const dbLabel = DLDC_DATABASES.find(db => db.id === entity?.primaryDatabaseId)?.label || '';
     const now = new Date();
     const dateStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
-    const currentAttributes = attributes[selectedEntity] || [];
+    const currentAttrs = attributes[selectedEntity] || [];
 
-    if (dldcModalMode === 'edit' && dldcEditingAttr) {
-      const updatedAttributes = currentAttributes.map(attr =>
-        attr.id === dldcEditingAttr.id
-          ? { ...attr, fieldName: dldcSelectedField, displayName: dldcDisplayName.trim(), dataType: fieldInfo.dataType, databaseName: dbLabel, tableName: dldcSelectedTable, version: attr.version + 1 }
-          : attr
-      );
-      setAttributes({ ...attributes, [selectedEntity]: updatedAttributes });
-    } else {
-      if (currentAttributes.some(a => a.fieldName === dldcSelectedField)) {
-        alert('Trường này đã được thêm. Vui lòng chọn trường khác.');
-        return;
-      }
-      const newAttr: MasterDataAttribute = {
-        id: `attr-${Date.now()}`,
-        fieldName: dldcSelectedField,
-        displayName: dldcDisplayName.trim(),
-        dataType: fieldInfo.dataType,
-        required: false,
-        unique: false,
-        indexed: false,
-        databaseName: dbLabel,
-        tableName: dldcSelectedTable,
-        createdDate: dateStr,
-        version: 1,
-      };
-      setAttributes({ ...attributes, [selectedEntity]: [...currentAttributes, newAttr] });
-    }
+    const newAttrs: MasterDataAttribute[] = dldcFieldRows
+      .filter(row => row.fieldName)
+      .map(row => {
+        const existing = currentAttrs.find(a => a.id === row.id);
+        return {
+          id: row.id,
+          fieldName: row.fieldName,
+          displayName: row.displayName || row.fieldName,
+          dataType: row.dataType,
+          required: false,
+          unique: row.isPK,
+          indexed: row.isPK,
+          databaseName: dbLabel,
+          tableName: row.tableId,
+          createdDate: existing?.createdDate || dateStr,
+          version: existing ? existing.version + 1 : 1,
+        };
+      });
+
+    setAttributes({ ...attributes, [selectedEntity]: newAttrs });
     handleCloseDldcModal();
   };
 
@@ -647,7 +656,7 @@ export function AttributesManagementTab() {
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-center gap-1.5">
                         <button
-                          onClick={() => selectedEntityData?.dataSource === 'dldc' ? handleEditDldc(attribute) : handleEdit(attribute)}
+                          onClick={() => selectedEntityData?.dataSource === 'dldc' ? handleOpenDldcModal() : handleEdit(attribute)}
                           className="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 cursor-pointer transition-colors"
                           title="Chỉnh sửa"
                         >
@@ -721,409 +730,406 @@ export function AttributesManagementTab() {
         )}
       </div>
 
-      {/* Form Modal */}
-      {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-6 border-b border-slate-200">
-              <h3 className="text-lg text-slate-900">
-                {editingAttribute ? 'Chỉnh sửa thuộc tính' : 'Thêm thuộc tính mới'}
-              </h3>
-              <button onClick={handleCloseForm} className="p-1 hover:bg-slate-100 rounded" title="Đóng" aria-label="Đóng">
-                <X className="w-5 h-5" />
-              </button>
+      {/* Form Modal — manual entity add/edit */}
+      <BaseModal
+        isOpen={showForm}
+        onClose={handleCloseForm}
+        title={editingAttribute ? 'Chỉnh sửa thuộc tính' : 'Thêm thuộc tính mới'}
+        subtitle="Điền đầy đủ thông tin để cấu hình thuộc tính dữ liệu chủ"
+        maxWidth="max-w-2xl"
+        footer={
+          <>
+            <button
+              onClick={handleCloseForm}
+              className="px-4 py-2 text-[13px] text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+            >
+              Hủy
+            </button>
+            <button
+              onClick={handleSubmit}
+              className="flex items-center gap-2 px-4 py-2 text-[13px] font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <Check className="w-4 h-4" />
+              {editingAttribute ? 'Cập nhật' : 'Tạo mới'}
+            </button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-[13px] font-medium text-slate-700 mb-1">
+              Tên trường <span className="text-red-600">*</span>
+            </label>
+            <input
+              type="text"
+              value={formData.fieldName}
+              onChange={(e) => setFormData({ ...formData, fieldName: e.target.value.toLowerCase() })}
+              placeholder="VD: citizen_id, full_name, date_of_birth"
+              disabled={!!editingAttribute}
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 disabled:bg-slate-100 disabled:text-slate-500 disabled:cursor-not-allowed"
+            />
+            <p className="text-[12px] text-slate-500 mt-1">Chỉ sử dụng chữ thường, số và dấu gạch dưới. Bắt đầu bằng chữ cái.</p>
+          </div>
+
+          <div>
+            <label className="block text-[13px] font-medium text-slate-700 mb-1">
+              Tên hiển thị <span className="text-red-600">*</span>
+            </label>
+            <input
+              type="text"
+              value={formData.displayName}
+              onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
+              placeholder="VD: Số CCCD, Họ và tên, Ngày sinh"
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[13px] font-medium text-slate-700 mb-1">
+              Kiểu dữ liệu <span className="text-red-600">*</span>
+            </label>
+            <select
+              value={formData.dataType}
+              onChange={(e) => setFormData({ ...formData, dataType: e.target.value as FieldDataType })}
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+            >
+              {Object.entries(fieldDataTypeLabels).map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
+          </div>
+
+          {(['string', 'email', 'phone', 'url'] as FieldDataType[]).includes(formData.dataType!) && (
+            <div>
+              <label className="block text-[13px] font-medium text-slate-700 mb-1">Độ dài tối đa</label>
+              <input
+                type="number"
+                value={formData.length || ''}
+                onChange={(e) => setFormData({ ...formData, length: parseInt(e.target.value) || undefined })}
+                placeholder="VD: 255"
+                min="1"
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+              />
             </div>
+          )}
 
-            <div className="p-6 space-y-4">
-              {/* Field Name */}
-              <div>
-                <label className="block text-sm text-slate-700 mb-1">
-                  Tên trường <span className="text-red-600">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.fieldName}
-                  onChange={(e) => setFormData({ ...formData, fieldName: e.target.value.toLowerCase() })}
-                  placeholder="VD: citizen_id, full_name, date_of_birth"
-                  disabled={!!editingAttribute}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-500"
-                />
-                <p className="text-xs text-slate-500 mt-1">
-                  Chỉ sử dụng chữ thường, số và dấu gạch dưới. Bắt đầu bằng chữ cái.
-                </p>
+          <div className="space-y-3 p-4 bg-slate-50 rounded-lg border border-slate-100">
+            <h4 className="text-[13px] font-medium text-slate-800">Ràng buộc</h4>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked={formData.required} onChange={(e) => setFormData({ ...formData, required: e.target.checked })} className="accent-blue-600 w-4 h-4" />
+              <span className="text-[13px] text-slate-700">Bắt buộc (Required) — Trường này không được để trống</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked={formData.unique} onChange={(e) => setFormData({ ...formData, unique: e.target.checked })} className="accent-blue-600 w-4 h-4" />
+              <span className="text-[13px] text-slate-700">Duy nhất (Unique) — Giá trị không được trùng lặp</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked={formData.indexed} onChange={(e) => setFormData({ ...formData, indexed: e.target.checked })} className="accent-blue-600 w-4 h-4" />
+              <span className="text-[13px] text-slate-700">Đánh chỉ mục (Indexed) — Tối ưu hóa tìm kiếm</span>
+            </label>
+          </div>
+
+          <div>
+            <label className="block text-[13px] font-medium text-slate-700 mb-1">Giá trị mặc định</label>
+            <input
+              type="text"
+              value={formData.defaultValue || ''}
+              onChange={(e) => setFormData({ ...formData, defaultValue: e.target.value })}
+              placeholder="VD: Nam, 0, true"
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[13px] font-medium text-slate-700 mb-1">Mô tả</label>
+            <textarea
+              value={formData.description || ''}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="Mô tả chi tiết về thuộc tính này"
+              rows={3}
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[13px] font-medium text-slate-700 mb-1">Quy tắc kiểm tra</label>
+            <textarea
+              value={formData.validationRules || ''}
+              onChange={(e) => setFormData({ ...formData, validationRules: e.target.value })}
+              placeholder="VD: Regex: ^[0-9]{12}$, Min: 0, Max: 100"
+              rows={2}
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+            />
+          </div>
+
+          {editingAttribute && (
+            <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div className="text-[13px] text-amber-800">
+                <p className="mb-1">Khi chỉnh sửa, phiên bản sẽ tự động tăng từ <strong>v{editingAttribute.version}</strong> lên <strong>v{editingAttribute.version + 1}</strong>.</p>
+                <p>Thay đổi này sẽ được ghi nhận trong lịch sử phiên bản.</p>
               </div>
+            </div>
+          )}
+        </div>
+      </BaseModal>
 
-              {/* Display Name */}
-              <div>
-                <label className="block text-sm text-slate-700 mb-1">
-                  Tên hiển thị <span className="text-red-600">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.displayName}
-                  onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
-                  placeholder="VD: Số CCCD, Họ và tên, Ngày sinh"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+      {/* DLDC Field Configuration Modal */}
+      <BaseModal
+        isOpen={showDldcModal}
+        onClose={handleCloseDldcModal}
+        title="Cấu hình nguồn dữ liệu"
+        subtitle="Kho dữ liệu từ nguồn đồng bộ và cấu hình các trường"
+        maxWidth="max-w-5xl"
+        customHeaderIcon={<Database className="w-5 h-5 text-blue-600 mr-3 flex-shrink-0" />}
+        footer={
+          <>
+            <button
+              onClick={handleCloseDldcModal}
+              className="px-4 py-2 text-[13px] text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+            >
+              Hủy bỏ
+            </button>
+            <button
+              onClick={handleDldcConfirm}
+              className="flex items-center gap-2 px-4 py-2 text-[13px] font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <Check className="w-4 h-4" />
+              Gửi duyệt cấu trúc
+            </button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          {/* Sub-info bar */}
+          <div className="flex items-center gap-2 px-4 py-2.5 bg-blue-50 border border-blue-100 rounded-lg">
+            <Database className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
+            <span className="text-[13px] text-blue-700">
+              Kho dữ liệu:{' '}
+              <strong>{DLDC_DATABASES.find(db => db.id === selectedEntityData?.primaryDatabaseId)?.label || '—'}</strong>
+              {' '}—{' '}
+              <strong>{(DLDC_TABLES[selectedEntityData?.primaryDatabaseId || ''] || []).find(t => t.id === selectedEntityData?.primaryTableId)?.displayName || '—'}</strong>
+            </span>
+          </div>
 
-              {/* Data Type */}
-              <div>
-                <label className="block text-sm text-slate-700 mb-1">
-                  Kiểu dữ liệu <span className="text-red-600">*</span>
-                </label>
+          {/* DB + Table (disabled) */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="block text-[13px] font-medium text-slate-600">Cơ sở dữ liệu</label>
+              <div className="relative">
                 <select
-                  value={formData.dataType}
-                  onChange={(e) => setFormData({ ...formData, dataType: e.target.value as FieldDataType })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled
+                  value={selectedEntityData?.primaryDatabaseId || ''}
+                  title="Cơ sở dữ liệu (không chỉnh sửa)"
+                  className="w-full pl-3 pr-8 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-slate-100 text-slate-500 appearance-none cursor-not-allowed opacity-70"
                 >
-                  {Object.entries(fieldDataTypeLabels).map(([value, label]) => (
-                    <option key={value} value={value}>{label}</option>
+                  <option value="">—</option>
+                  {DLDC_DATABASES.map(db => <option key={db.id} value={db.id}>{db.label}</option>)}
+                </select>
+                <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-[13px] font-medium text-slate-600">Bảng dữ liệu chính</label>
+              <div className="relative">
+                <select
+                  disabled
+                  value={selectedEntityData?.primaryTableId || ''}
+                  title="Bảng dữ liệu chính (không chỉnh sửa)"
+                  className="w-full pl-3 pr-8 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-slate-100 text-slate-500 appearance-none cursor-not-allowed opacity-70"
+                >
+                  <option value="">—</option>
+                  {(DLDC_TABLES[selectedEntityData?.primaryDatabaseId || ''] || []).map(t => (
+                    <option key={t.id} value={t.id}>{t.displayName} ({t.id})</option>
                   ))}
                 </select>
+                <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
-
-              {/* Length */}
-              {(['string', 'email', 'phone', 'url'] as FieldDataType[]).includes(formData.dataType!) && (
-                <div>
-                  <label className="block text-sm text-slate-700 mb-1">
-                    Độ dài tối đa
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.length || ''}
-                    onChange={(e) => setFormData({ ...formData, length: parseInt(e.target.value) || undefined })}
-                    placeholder="VD: 255"
-                    min="1"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              )}
-
-              {/* Constraints */}
-              <div className="space-y-3 p-4 bg-slate-50 rounded-lg">
-                <h4 className="text-sm text-slate-900">Ràng buộc</h4>
-                
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.required}
-                    onChange={(e) => setFormData({ ...formData, required: e.target.checked })}
-                    className="rounded"
-                  />
-                  <span className="text-sm text-slate-700">Bắt buộc (Required) - Trường này không được để trống</span>
-                </label>
-
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.unique}
-                    onChange={(e) => setFormData({ ...formData, unique: e.target.checked })}
-                    className="rounded"
-                  />
-                  <span className="text-sm text-slate-700">Duy nhất (Unique) - Giá trị không được trùng lặp</span>
-                </label>
-
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.indexed}
-                    onChange={(e) => setFormData({ ...formData, indexed: e.target.checked })}
-                    className="rounded"
-                  />
-                  <span className="text-sm text-slate-700">Đánh chỉ mục (Indexed) - Tối ưu hóa tìm kiếm</span>
-                </label>
-              </div>
-
-              {/* Default Value */}
-              <div>
-                <label className="block text-sm text-slate-700 mb-1">
-                  Giá trị mặc định
-                </label>
-                <input
-                  type="text"
-                  value={formData.defaultValue || ''}
-                  onChange={(e) => setFormData({ ...formData, defaultValue: e.target.value })}
-                  placeholder="VD: Nam, 0, true"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              {/* Description */}
-              <div>
-                <label className="block text-sm text-slate-700 mb-1">Mô tả</label>
-                <textarea
-                  value={formData.description || ''}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Mô tả chi tiết về thuộc tính này"
-                  rows={3}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              {/* Validation Rules */}
-              <div>
-                <label className="block text-sm text-slate-700 mb-1">
-                  Quy tắc kiểm tra
-                </label>
-                <textarea
-                  value={formData.validationRules || ''}
-                  onChange={(e) => setFormData({ ...formData, validationRules: e.target.value })}
-                  placeholder="VD: Regex: ^[0-9]{12}$, Min: 0, Max: 100"
-                  rows={2}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              {/* Version Warning */}
-              {editingAttribute && (
-                <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                  <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                  <div className="text-sm text-amber-800">
-                    <p className="mb-1">Khi chỉnh sửa thuộc tính, phiên bản sẽ tự động tăng từ <strong>v{editingAttribute.version}</strong> lên <strong>v{editingAttribute.version + 1}</strong>.</p>
-                    <p>Thay đổi này sẽ được ghi nhận trong lịch sử phiên bản.</p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-200 bg-slate-50">
-              <button
-                onClick={handleCloseForm}
-                className="px-4 py-2 text-slate-700 hover:bg-slate-200 rounded-lg transition-colors"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={handleSubmit}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <Check className="w-4 h-4" />
-                {editingAttribute ? 'Cập nhật' : 'Tạo mới'}
-              </button>
             </div>
           </div>
-        </div>
-      )}
 
-      {/* DLDC Field Selection Modal */}
-      {showDldcModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl flex flex-col max-h-[90vh]">
-            {/* Header */}
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-              <div>
-                <h3 className="text-[15px] font-semibold text-slate-900">
-                  {dldcModalMode === 'edit' ? 'Chỉnh sửa trường DLDC' : 'Chọn trường từ Kho DLDC'}
-                </h3>
-                <p className="text-[13px] text-slate-500 mt-0.5">Chọn cơ sở dữ liệu, bảng và trường nguồn cần ánh xạ</p>
+          {/* Field selection section */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <span className="text-[13px] font-medium text-slate-700">Chọn trường dữ liệu chia sẻ (Field Selection)</span>
+                <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-[12px] font-medium rounded-full">
+                  {dldcFieldRows.filter(r => r.fieldName).length}/{dldcFieldRows.length} trường được chọn
+                </span>
               </div>
-              <button onClick={handleCloseDldcModal} className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors" title="Đóng">
-                <X className="w-5 h-5 text-slate-500" />
+              <button
+                onClick={handleAddDldcRow}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-[13px] text-blue-600 border border-blue-300 bg-white rounded-lg hover:bg-blue-50 transition-colors"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                Thêm trường dữ liệu
               </button>
             </div>
 
-            {/* Body */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-5">
-              {/* DB + Table selectors */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="block text-[13px] font-medium text-slate-600">
-                    Cơ sở dữ liệu <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    value={dldcSelectedDb}
-                    onChange={(e) => { setDldcSelectedDb(e.target.value); setDldcSelectedTable(''); setDldcSelectedField(''); setDldcDisplayName(''); }}
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                  >
-                    <option value="">-- Chọn cơ sở dữ liệu --</option>
-                    {DLDC_DATABASES.map(db => (
-                      <option key={db.id} value={db.id}>{db.label}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-1.5">
-                  <label className="block text-[13px] font-medium text-slate-600">
-                    Bảng dữ liệu <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    value={dldcSelectedTable}
-                    onChange={(e) => { setDldcSelectedTable(e.target.value); setDldcSelectedField(''); setDldcDisplayName(''); }}
-                    disabled={!dldcSelectedDb}
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 disabled:bg-slate-50 disabled:text-slate-400"
-                  >
-                    <option value="">-- Chọn bảng dữ liệu --</option>
-                    {(DLDC_TABLES[dldcSelectedDb] || []).map(t => (
-                      <option key={t.id} value={t.id}>{t.displayName} ({t.id})</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Field list */}
-              {dldcSelectedTable && (
-                <div className="space-y-2">
-                  <label className="block text-[13px] font-medium text-slate-600">
-                    Chọn trường nguồn <span className="text-red-500">*</span>
-                  </label>
-                  <div className="border border-slate-200 rounded-lg overflow-hidden">
-                    <table className="w-full text-left">
-                      <thead className="bg-slate-50 border-b border-slate-200">
-                        <tr>
-                          <th className="px-4 py-2.5 text-[13px] font-semibold text-slate-600 w-10 text-center">Chọn</th>
-                          <th className="px-4 py-2.5 text-[13px] font-semibold text-slate-600">Trường gốc</th>
-                          <th className="px-4 py-2.5 text-[13px] font-semibold text-slate-600">Tên hiển thị mặc định</th>
-                          <th className="px-4 py-2.5 text-[13px] font-semibold text-slate-600">Kiểu dữ liệu</th>
+            <div className="border border-slate-200 rounded-lg overflow-hidden">
+              <div className="overflow-x-auto max-h-[320px] overflow-y-auto">
+                <table className="w-full text-left">
+                  <thead className="bg-slate-50 border-b border-slate-100 sticky top-0 z-[2]">
+                    <tr>
+                      <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center whitespace-nowrap">Chia sẻ</th>
+                      <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center">PK</th>
+                      <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Nguồn dữ liệu (Table)</th>
+                      <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Trường gốc (Column)</th>
+                      <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Tên hiển thị</th>
+                      <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Kiểu dữ liệu</th>
+                      <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center">Xóa</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white">
+                    {dldcFieldRows.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="px-4 py-10 text-center text-[13px] text-slate-400">
+                          Chưa có trường nào. Nhấn "+ Thêm trường dữ liệu" để bắt đầu.
+                        </td>
+                      </tr>
+                    ) : (
+                      dldcFieldRows.map((row) => (
+                        <tr key={row.id} className="border-t border-slate-100">
+                          <td className="px-3 py-2.5 text-center">
+                            <input type="checkbox" checked={row.shared} onChange={(e) => updateDldcRow(row.id, { shared: e.target.checked })} className="accent-blue-600 w-4 h-4 cursor-pointer" />
+                          </td>
+                          <td className="px-3 py-2.5 text-center">
+                            <input type="checkbox" checked={row.isPK} onChange={(e) => updateDldcRow(row.id, { isPK: e.target.checked })} className="accent-blue-600 w-4 h-4 cursor-pointer" />
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <select
+                              value={row.tableId}
+                              onChange={(e) => updateDldcRow(row.id, { tableId: e.target.value, fieldName: '' })}
+                              className="w-full px-2 py-1.5 border border-slate-200 rounded text-[13px] bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 min-w-[140px]"
+                            >
+                              <option value="">-- Chọn bảng --</option>
+                              {(DLDC_TABLES[selectedEntityData?.primaryDatabaseId || ''] || []).map(t => (
+                                <option key={t.id} value={t.id}>{t.id}</option>
+                              ))}
+                            </select>
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <select
+                              value={row.fieldName}
+                              disabled={!row.tableId}
+                              onChange={(e) => {
+                                const f = (DLDC_FIELDS[row.tableId] || []).find(f => f.fieldName === e.target.value);
+                                updateDldcRow(row.id, { fieldName: e.target.value, ...(f ? { displayName: f.displayName, dataType: f.dataType } : {}) });
+                              }}
+                              className="w-full px-2 py-1.5 border border-slate-200 rounded text-[13px] bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 min-w-[140px] disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
+                            >
+                              <option value="">-- Chọn trường --</option>
+                              {(DLDC_FIELDS[row.tableId] || []).map(f => (
+                                <option key={f.fieldName} value={f.fieldName}>{f.fieldName}</option>
+                              ))}
+                            </select>
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <input
+                              type="text"
+                              value={row.displayName}
+                              onChange={(e) => updateDldcRow(row.id, { displayName: e.target.value })}
+                              placeholder="Tên hiển thị"
+                              className="w-full px-2 py-1.5 border border-slate-200 rounded text-[13px] focus:outline-none focus:ring-1 focus:ring-blue-400 min-w-[120px]"
+                            />
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <select
+                              value={row.dataType}
+                              onChange={(e) => updateDldcRow(row.id, { dataType: e.target.value as FieldDataType })}
+                              className="w-full px-2 py-1.5 border border-slate-200 rounded text-[13px] bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 min-w-[130px]"
+                            >
+                              {Object.entries(fieldDataTypeLabels).map(([val, label]) => (
+                                <option key={val} value={val}>{label}</option>
+                              ))}
+                            </select>
+                          </td>
+                          <td className="px-3 py-2.5 text-center">
+                            <button onClick={() => removeDldcRow(row.id)} className="p-1 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded transition-colors" title="Xóa dòng">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </td>
                         </tr>
-                      </thead>
-                      <tbody className="bg-white">
-                        {(DLDC_FIELDS[dldcSelectedTable] || []).map((field) => (
-                          <tr
-                            key={field.fieldName}
-                            onClick={() => { setDldcSelectedField(field.fieldName); setDldcDisplayName(field.displayName); }}
-                            className={`border-t border-slate-100 cursor-pointer transition-colors ${dldcSelectedField === field.fieldName ? 'bg-blue-50' : 'hover:bg-slate-50'}`}
-                          >
-                            <td className="px-4 py-2.5 text-center">
-                              <input
-                                type="radio"
-                                name="dldcField"
-                                checked={dldcSelectedField === field.fieldName}
-                                onChange={() => { setDldcSelectedField(field.fieldName); setDldcDisplayName(field.displayName); }}
-                                className="accent-blue-600"
-                              />
-                            </td>
-                            <td className="px-4 py-2.5">
-                              <code className="text-[13px] bg-slate-100 px-2 py-0.5 rounded text-slate-800">{field.fieldName}</code>
-                            </td>
-                            <td className="px-4 py-2.5 text-[13px] text-slate-700">{field.displayName}</td>
-                            <td className="px-4 py-2.5 text-[13px] text-slate-500">{fieldDataTypeLabels[field.dataType]}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-
-              {/* Display name edit */}
-              {dldcSelectedField && (
-                <div className="space-y-1.5">
-                  <label className="block text-[13px] font-medium text-slate-600">
-                    Tên hiển thị <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={dldcDisplayName}
-                    onChange={(e) => setDldcDisplayName(e.target.value)}
-                    placeholder="Nhập tên hiển thị cho trường này"
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                  />
-                  <p className="text-[12px] text-slate-400">Có thể chỉnh sửa tên hiển thị theo nghiệp vụ của đơn vị.</p>
-                </div>
-              )}
-            </div>
-
-            {/* Footer */}
-            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex items-center justify-end gap-3 rounded-b-xl">
-              <button
-                onClick={handleCloseDldcModal}
-                className="px-4 py-2 text-[13px] text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={handleDldcConfirm}
-                disabled={!dldcSelectedDb || !dldcSelectedTable || !dldcSelectedField || !dldcDisplayName.trim()}
-                className="px-4 py-2 text-[13px] font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-              >
-                <Check className="w-4 h-4" />
-                {dldcModalMode === 'edit' ? 'Cập nhật' : 'Thêm trường'}
-              </button>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
-      )}
+      </BaseModal>
 
       {/* Delete Confirmation Modal */}
-      {showDeleteConfirm && deletingAttr && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-              <h3 className="text-[15px] font-semibold text-slate-900">Xác nhận xóa trường</h3>
-              <button onClick={() => { setShowDeleteConfirm(false); setDeletingAttr(null); }} className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors">
-                <X className="w-5 h-5 text-slate-500" />
-              </button>
-            </div>
-            <div className="px-6 py-5 space-y-3">
-              <div className="flex items-start gap-3 p-3 bg-red-50 border border-red-100 rounded-lg">
-                <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-                <p className="text-[13px] text-red-700">
-                  Bạn có chắc chắn muốn xóa trường <strong>{deletingAttr.displayName}</strong> (<code className="bg-red-100 px-1 rounded text-[12px]">{deletingAttr.fieldName}</code>) không? Thao tác này không thể hoàn tác.
-                </p>
-              </div>
-            </div>
-            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex items-center justify-end gap-3 rounded-b-xl">
-              <button
-                onClick={() => { setShowDeleteConfirm(false); setDeletingAttr(null); }}
-                className="px-4 py-2 text-[13px] text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={handleConfirmDelete}
-                className="px-4 py-2 text-[13px] font-medium bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
-              >
-                <Trash2 className="w-4 h-4" />
-                Xác nhận xóa
-              </button>
-            </div>
-          </div>
+      <BaseModal
+        isOpen={showDeleteConfirm && !!deletingAttr}
+        onClose={() => { setShowDeleteConfirm(false); setDeletingAttr(null); }}
+        title="Xác nhận xóa trường"
+        maxWidth="max-w-md"
+        footer={
+          <>
+            <button
+              onClick={() => { setShowDeleteConfirm(false); setDeletingAttr(null); }}
+              className="px-4 py-2 text-[13px] text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+            >
+              Hủy
+            </button>
+            <button
+              onClick={handleConfirmDelete}
+              className="flex items-center gap-2 px-4 py-2 text-[13px] font-medium bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+              Xác nhận xóa
+            </button>
+          </>
+        }
+      >
+        <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-100 rounded-lg">
+          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+          <p className="text-[13px] text-red-700">
+            Bạn có chắc chắn muốn xóa trường{' '}
+            <strong>{deletingAttr?.displayName}</strong>{' '}
+            (<code className="bg-red-100 px-1 py-0.5 rounded text-[12px]">{deletingAttr?.fieldName}</code>)?{' '}
+            Thao tác này không thể hoàn tác.
+          </p>
         </div>
-      )}
+      </BaseModal>
 
       {/* Version History Modal */}
-      {showVersionHistory && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-6 border-b border-slate-200">
-              <h3 className="text-lg text-slate-900">Lịch sử phiên bản</h3>
-              <button onClick={() => setShowVersionHistory(false)} className="p-1 hover:bg-slate-100 rounded">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-6">
-              <div className="space-y-4">
-                {mockVersionHistory.map((history) => (
-                  <div key={history.version} className="flex gap-4 pb-4 border-b border-slate-200 last:border-0">
-                    <div className="flex-shrink-0">
-                      <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                        <span className="text-blue-600">v{history.version}</span>
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm text-slate-900">{history.changes}</p>
-                      <div className="flex items-center gap-4 mt-2 text-xs text-slate-500">
-                        <span>Người cập nhật: {history.updatedBy}</span>
-                        <span>Ngày: {history.updatedDate}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+      <BaseModal
+        isOpen={showVersionHistory}
+        onClose={() => setShowVersionHistory(false)}
+        title="Lịch sử phiên bản"
+        subtitle="Toàn bộ thay đổi đã được ghi nhận theo phiên bản"
+        maxWidth="max-w-2xl"
+        footer={
+          <button
+            onClick={() => setShowVersionHistory(false)}
+            className="px-4 py-2 text-[13px] text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+          >
+            Đóng
+          </button>
+        }
+      >
+        <div className="space-y-4">
+          {mockVersionHistory.map((history) => (
+            <div key={history.version} className="flex gap-4 pb-4 border-b border-slate-100 last:border-0">
+              <div className="flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                  <span className="text-[13px] font-semibold text-blue-600">v{history.version}</span>
+                </div>
+              </div>
+              <div className="flex-1">
+                <p className="text-[13px] text-slate-900">{history.changes}</p>
+                <div className="flex items-center gap-4 mt-1.5 text-[12px] text-slate-500">
+                  <span>Người cập nhật: {history.updatedBy}</span>
+                  <span>Ngày: {history.updatedDate}</span>
+                </div>
               </div>
             </div>
-
-            <div className="flex items-center justify-end p-6 border-t border-slate-200 bg-slate-50">
-              <button
-                onClick={() => setShowVersionHistory(false)}
-                className="px-4 py-2 text-slate-700 hover:bg-slate-200 rounded-lg transition-colors"
-              >
-                Đóng
-              </button>
-            </div>
-          </div>
+          ))}
         </div>
-      )}
+      </BaseModal>
     </div>
   );
 }

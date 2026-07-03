@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Plus, Edit, Trash2, X, Check, AlertCircle, Play, Save, GitMerge, Database, Target, Weight } from 'lucide-react';
+import { Plus, Edit, Trash2, Check, AlertCircle, Play, Save, GitMerge, Database, Target, Weight } from 'lucide-react';
+import { BaseModal } from '../../common/BaseModal';
 
 type RuleStatus = 'active' | 'inactive' | 'testing';
 type DataSourceType = 'dldc' | 'lgsp' | 'ndxp' | 'manual';
@@ -450,19 +451,32 @@ export function MergeRulesManagementTab() {
       </div>
 
       {/* Form Modal */}
-      {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[95vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-6 border-b border-slate-200 sticky top-0 bg-white z-10">
-              <h3 className="text-lg text-slate-900">
-                {editingRule ? 'Chỉnh sửa quy tắc hợp nhất' : 'Thêm quy tắc hợp nhất mới'}
-              </h3>
-              <button onClick={handleCloseForm} className="p-1 hover:bg-slate-100 rounded" title="Đóng" aria-label="Đóng">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-6">
+      <BaseModal
+        isOpen={showForm}
+        onClose={handleCloseForm}
+        title={editingRule ? 'Chỉnh sửa quy tắc hợp nhất' : 'Thêm quy tắc hợp nhất mới'}
+        subtitle="Cấu hình nguồn dữ liệu, quy tắc so khớp và trích rút cho bộ dữ liệu chủ"
+        maxWidth="max-w-5xl"
+        customHeaderIcon={<GitMerge className="w-5 h-5 text-blue-600 mr-3 flex-shrink-0" />}
+        footer={
+          <>
+            <button
+              onClick={handleCloseForm}
+              className="px-4 py-2 text-[13px] text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+            >
+              Hủy
+            </button>
+            <button
+              onClick={handleSubmit}
+              className="flex items-center gap-2 px-4 py-2 text-[13px] font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <Save className="w-4 h-4" />
+              {editingRule ? 'Cập nhật' : 'Lưu quy tắc'}
+            </button>
+          </>
+        }
+      >
+        <div className="space-y-6">
               {/* Basic Info */}
               <div className="space-y-4">
                 <h4 className="text-sm text-slate-900">Thông tin cơ bản</h4>
@@ -795,83 +809,62 @@ export function MergeRulesManagementTab() {
                   </div>
                 )}
               </div>
-            </div>
-
-            <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-200 bg-slate-50 sticky bottom-0">
-              <button
-                onClick={handleCloseForm}
-                className="px-4 py-2 text-slate-700 hover:bg-slate-200 rounded-lg transition-colors"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={handleSubmit}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <Save className="w-4 h-4" />
-                {editingRule ? 'Cập nhật' : 'Lưu quy tắc'}
-              </button>
-            </div>
-          </div>
         </div>
-      )}
+      </BaseModal>
 
       {/* Test Modal */}
-      {showTestModal && testingRule && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-6 border-b border-slate-200">
-              <h3 className="text-lg text-slate-900">Kiểm thử quy tắc hợp nhất</h3>
-              <button onClick={() => setShowTestModal(false)} className="p-1 hover:bg-slate-100 rounded">
-                <X className="w-5 h-5" />
-              </button>
+      <BaseModal
+        isOpen={showTestModal && !!testingRule}
+        onClose={() => setShowTestModal(false)}
+        title="Kiểm thử quy tắc hợp nhất"
+        subtitle={testingRule ? `${testingRule.sources.length} nguồn dữ liệu · ${testingRule.matchRules.length} quy tắc so khớp` : undefined}
+        maxWidth="max-w-3xl"
+        customHeaderIcon={<Play className="w-5 h-5 text-green-600 mr-3 flex-shrink-0" />}
+        footer={
+          <button
+            onClick={() => setShowTestModal(false)}
+            className="px-4 py-2 text-[13px] text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+          >
+            Đóng
+          </button>
+        }
+      >
+        <div className="space-y-4">
+          <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
+            <p className="text-[13px] font-medium text-slate-800 mb-1">Quy tắc: {testingRule?.name}</p>
+            <p className="text-[12px] text-slate-500">
+              {testingRule?.sources.length} nguồn dữ liệu • {testingRule?.matchRules.length} quy tắc so khớp
+            </p>
+          </div>
+
+          <div className="border border-slate-200 rounded-lg p-8 text-center">
+            <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+              <Play className="w-7 h-7 text-green-600" />
             </div>
+            <p className="text-[13px] font-medium text-slate-900 mb-1.5">Chạy kiểm thử hợp nhất</p>
+            <p className="text-[12px] text-slate-500 mb-4">
+              Hệ thống sẽ lấy mẫu dữ liệu từ các nguồn và thử nghiệm quy tắc hợp nhất
+            </p>
+            <button className="px-5 py-2 text-[13px] font-medium bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+              Bắt đầu kiểm thử
+            </button>
+          </div>
 
-            <div className="p-6 space-y-4">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-sm text-slate-900 mb-2">Quy tắc: {testingRule.name}</p>
-                <p className="text-xs text-slate-600">
-                  {testingRule.sources.length} nguồn dữ liệu • {testingRule.matchRules.length} quy tắc so khớp
-                </p>
+          <div className="bg-amber-50 border border-amber-100 rounded-lg p-4">
+            <div className="flex items-start gap-2.5">
+              <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div className="text-[13px] text-amber-800">
+                <p className="font-medium mb-1.5">Lưu ý khi kiểm thử:</p>
+                <ul className="list-disc list-inside space-y-1 text-[12px]">
+                  <li>Kiểm thử chỉ sử dụng dữ liệu mẫu, không ảnh hưởng đến dữ liệu thật</li>
+                  <li>Kết quả kiểm thử sẽ hiển thị các bản ghi được khớp và hợp nhất</li>
+                  <li>Bạn có thể xem chi tiết từng bước hợp nhất</li>
+                </ul>
               </div>
-
-              <div className="border border-slate-200 rounded-lg p-6 text-center">
-                <Play className="w-12 h-12 text-green-600 mx-auto mb-3" />
-                <p className="text-sm text-slate-900 mb-2">Chạy kiểm thử hợp nhất</p>
-                <p className="text-xs text-slate-600 mb-4">
-                  Hệ thống sẽ lấy mẫu dữ liệu từ các nguồn và thử nghiệm quy tắc hợp nhất
-                </p>
-                <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                  Bắt đầu kiểm thử
-                </button>
-              </div>
-
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                <div className="flex items-start gap-2">
-                  <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                  <div className="text-sm text-amber-800">
-                    <p className="mb-1">Lưu ý khi kiểm thử:</p>
-                    <ul className="list-disc list-inside space-y-1 text-xs">
-                      <li>Kiểm thử chỉ sử dụng dữ liệu mẫu, không ảnh hưởng đến dữ liệu thật</li>
-                      <li>Kết quả kiểm thử sẽ hiển thị các bản ghi được khớp và hợp nhất</li>
-                      <li>Bạn có thể xem chi tiết từng bước hợp nhất</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-200 bg-slate-50">
-              <button
-                onClick={() => setShowTestModal(false)}
-                className="px-4 py-2 text-slate-700 hover:bg-slate-200 rounded-lg transition-colors"
-              >
-                Đóng
-              </button>
             </div>
           </div>
         </div>
-      )}
+      </BaseModal>
     </div>
   );
 }
