@@ -785,22 +785,22 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string, textSizeClass: string = 'text-[13px]') => {
     switch (status) {
       case 'draft':
-        return <span className="px-3 py-1 bg-slate-100 text-slate-600 border border-slate-200 text-[13px] rounded-full whitespace-nowrap">Bản nháp</span>;
+        return <span className={`px-3 py-1 bg-slate-100 text-slate-600 border border-slate-200 ${textSizeClass} rounded-full whitespace-nowrap`}>Bản nháp</span>;
       case 'pending':
-        return <span className="px-3 py-1 bg-orange-50 text-orange-700 border border-orange-200 text-[13px] rounded-full whitespace-nowrap">Chờ duyệt</span>;
+        return <span className={`px-3 py-1 bg-orange-50 text-orange-700 border border-orange-200 ${textSizeClass} rounded-full whitespace-nowrap`}>Chờ duyệt</span>;
       case 'approved':
       case 'active':
       case 'published':
-        return <span className="px-3 py-1 bg-green-50 text-green-700 border border-green-200 text-[13px] rounded-full whitespace-nowrap">Đã phê duyệt</span>;
+        return <span className={`px-3 py-1 bg-green-50 text-green-700 border border-green-200 ${textSizeClass} rounded-full whitespace-nowrap`}>Đã phê duyệt</span>;
       case 'rejected':
-        return <span className="px-3 py-1 bg-red-50 text-red-700 border border-red-200 text-[13px] rounded-full whitespace-nowrap">Từ chối</span>;
+        return <span className={`px-3 py-1 bg-red-50 text-red-700 border border-red-200 ${textSizeClass} rounded-full whitespace-nowrap`}>Từ chối</span>;
       case 'inactive':
-        return <span className="px-3 py-1 bg-slate-200 text-slate-600 border border-slate-300 text-[13px] rounded-full whitespace-nowrap">Ngừng áp dụng</span>;
+        return <span className={`px-3 py-1 bg-slate-200 text-slate-600 border border-slate-300 ${textSizeClass} rounded-full whitespace-nowrap`}>Ngừng áp dụng</span>;
       case 'unpublished':
-        return <span className="px-3 py-1 bg-slate-200 text-slate-700 text-[13px] rounded-full whitespace-nowrap">Hủy công khai</span>;
+        return <span className={`px-3 py-1 bg-slate-200 text-slate-700 ${textSizeClass} rounded-full whitespace-nowrap`}>Hủy công khai</span>;
       default:
         return null;
     }
@@ -1272,7 +1272,7 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                                   )}
                                 </td>
                                 <td className="px-6 py-4 text-center">
-                                  {getStatusBadge(category.status)}
+                                  {getStatusBadge(category.status, 'text-[12px]')}
                                 </td>
                                 <td className="px-6 py-4 text-[13px] text-slate-600 font-normal">
                                   {category.createdDate}

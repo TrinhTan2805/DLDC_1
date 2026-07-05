@@ -28,6 +28,7 @@ interface PublishedData {
   topic?: string;
   publishImmediately?: boolean;
   submitNote?: string;
+  approvalNote?: string;
 }
 
 const getPreviewFallback = (categoryName: string) => {
@@ -3876,8 +3877,8 @@ export function OpenDataPublishedListPage() {
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-purple-100 rounded-lg flex items-center justify-center shrink-0">
-                  <Send className="w-4 h-4 text-purple-600" />
+                <div className="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
+                  <Send className="w-4 h-4 text-blue-600" />
                 </div>
                 <h3 className="text-[18px] font-semibold text-slate-900">Gửi duyệt yêu cầu công bố</h3>
               </div>
@@ -3907,7 +3908,7 @@ export function OpenDataPublishedListPage() {
                 <select
                   value={sendApprovalApprover}
                   onChange={(e) => setSendApprovalApprover(e.target.value)}
-                  className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-purple-500/20 focus:border-purple-400 outline-none transition-colors bg-white"
+                  className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-colors bg-white"
                   title="Chọn người phê duyệt"
                 >
                   <option value="">-- Chọn người phê duyệt --</option>
@@ -3925,7 +3926,7 @@ export function OpenDataPublishedListPage() {
                 <textarea
                   value={sendApprovalNote}
                   onChange={(e) => setSendApprovalNote(e.target.value)}
-                  className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-purple-500/20 focus:border-purple-400 outline-none transition-colors resize-none"
+                  className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-colors resize-none"
                   rows={4}
                   placeholder={`Nhập nội dung trình duyệt...\nVí dụ: Đề nghị Lãnh đạo xem xét phê duyệt yêu cầu công bố dữ liệu mở theo Nghị định 47/2020/NĐ-CP`}
                 />
@@ -3943,7 +3944,7 @@ export function OpenDataPublishedListPage() {
               <button
                 onClick={handleConfirmSendApproval}
                 disabled={!sendApprovalApprover}
-                className="px-4 py-2 text-white bg-purple-600 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-[13px] font-medium transition-colors cursor-pointer"
+                className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-[13px] font-medium transition-colors cursor-pointer"
               >
                 <Send className="w-4 h-4" />
                 Gửi phê duyệt

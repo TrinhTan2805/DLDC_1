@@ -301,8 +301,6 @@ export function SetupTab({
                 <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên danh mục</th>
                 <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Đơn vị chủ quản</th>
                 <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Phạm vi</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Phiên bản</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Ngày hiệu lực</th>
                 <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Trạng thái</th>
                 <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-48">Thao tác</th>
               </tr>
@@ -320,17 +318,9 @@ export function SetupTab({
                       </td>
                       <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{entity.managingAgency || '--'}</td>
                       <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{scopeLabels[entity.scope] || entity.scope || '--'}</td>
-                      <td className="px-6 py-4 text-center text-[13px] text-slate-700 font-mono">
-                        {entity.version ? `v${entity.version}.0` : '--'}
-                      </td>
-                      <td className="px-6 py-4 text-center text-[13px] text-slate-700">
-                        {entity.lifecycleStatus === 'active'
-                          ? (entity.effectiveDate || entity.updatedDate || '--')
-                          : '--'}
-                      </td>
                       <td className="px-6 py-4 text-center">
                         <div className="flex justify-center">
-                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[13px] font-normal border whitespace-nowrap ${
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-normal border whitespace-nowrap ${
                             entity.lifecycleStatus === 'active'
                               ? 'bg-green-50 text-green-700 border-green-100'
                               : entity.lifecycleStatus === 'approved'
@@ -428,7 +418,7 @@ export function SetupTab({
                 })
               ) : (
                 <tr>
-                  <td colSpan={9} className="px-6 py-8 text-center text-[13px] text-slate-500">
+                  <td colSpan={7} className="px-6 py-8 text-center text-[13px] text-slate-500">
                     Không tìm thấy dữ liệu
                   </td>
                 </tr>

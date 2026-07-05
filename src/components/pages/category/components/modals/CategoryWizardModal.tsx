@@ -293,6 +293,17 @@ export function CategoryWizardModal({
                       <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                     </div>
                   </div>
+                  <div>
+                    <label className="block text-[13px] text-slate-700 mb-2 font-medium">Ngày hiệu lực</label>
+                    <input
+                      type="text"
+                      disabled={isViewOnly}
+                      value={formData.effectiveDate || ''}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, effectiveDate: e.target.value })}
+                      placeholder="VD: 20/12/2024"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none disabled:bg-slate-50 disabled:text-slate-500 font-medium bg-white hover:bg-slate-50/30 transition-all shadow-sm"
+                    />
+                  </div>
 
                   {false && (
                     <div className="col-span-2 grid grid-cols-3 gap-4 bg-blue-50/30 p-4 rounded-xl border border-blue-100/50 animate-in fade-in zoom-in-95 duration-200">

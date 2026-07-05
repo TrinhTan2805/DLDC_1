@@ -2383,7 +2383,6 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                     <th className="px-6 py-3.5 font-semibold text-center w-28">Phiên bản</th>
                     <th className="px-6 py-3.5 font-semibold text-left w-44">Người cập nhật</th>
                     <th className="px-6 py-3.5 font-semibold text-left w-52">Ngày phát hành</th>
-                    <th className="px-6 py-3.5 font-semibold text-left">Ghi chú thay đổi</th>
                     <th className="px-6 py-3.5 font-semibold text-center w-36">Trạng thái</th>
                     <th className="px-6 py-3.5 font-semibold text-center w-48">So sánh phiên bản</th>
                   </tr>
@@ -2425,7 +2424,6 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                       </td>
                       <td className="px-6 py-4 text-slate-700 font-medium">{v.updatedBy}</td>
                       <td className="px-6 py-4 text-slate-500 font-medium">{v.updatedDate}</td>
-                      <td className="px-6 py-4 text-slate-600 leading-relaxed font-normal">{v.changes}</td>
                       <td className="px-6 py-4 text-center">
                         <span className={`px-2.5 py-0.5 rounded-full text-[13px] font-semibold ${
                           v.status === 'Kích hoạt'
