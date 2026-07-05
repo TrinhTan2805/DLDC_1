@@ -304,7 +304,7 @@ export function ApprovalTab({
                         </>
                       )}
                       <td className="px-4 py-3">
-                        <span className={`px-2.5 py-0.5 rounded-full text-[13px] border ${req.status === 'pending' ? 'bg-orange-50 text-orange-600 border-orange-200' :
+                        <span className={`inline-block px-2.5 py-0.5 rounded-full text-[13px] border whitespace-nowrap ${req.status === 'pending' ? 'bg-orange-50 text-orange-600 border-orange-200' :
                           (req.status === 'approved' || req.status === 'partial') ? 'bg-green-50 text-green-700 border-green-200' :
                             'bg-red-50 text-red-600 border-red-200'
                           }`}>

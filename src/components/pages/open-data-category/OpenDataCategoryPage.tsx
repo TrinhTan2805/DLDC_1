@@ -316,6 +316,8 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
   const [showUnpublishModal, setShowUnpublishModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [detailModalTab, setDetailModalTab] = useState<'general' | 'data'>('general');
+  const [sourceDataPage, setSourceDataPage] = useState(1);
+  const sourceDataPageSize = 10;
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<CategoryItem | null>(null);
   const [data, setData] = useState<CategoryItem[]>(sampleData);
@@ -378,6 +380,10 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
       });
     }
   }, [selectedItem]);
+
+  useEffect(() => {
+    setSourceDataPage(1);
+  }, [selectedItem, detailModalTab]);
 
   const handleSaveEdit = () => {
     if (selectedItem) {
@@ -1387,7 +1393,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
       {/* Detail Modal */}
       {showDetailModal && selectedItem && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col">
+          <div className="bg-white rounded-xl w-full max-w-6xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col">
             <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between z-10">
               <div className="flex items-center gap-2">
                 <FileCheck className="w-5 h-5 text-blue-600" />
@@ -1426,8 +1432,8 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
 
             <div className="p-6 space-y-6 flex-1 text-[13px]">
               {detailModalTab === 'general' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="col-span-1 md:col-span-2">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="col-span-1 md:col-span-3">
                   <label className="block font-semibold text-slate-700 mb-1">Tên tập dữ liệu</label>
                   <input
                     type="text"
@@ -1480,7 +1486,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-slate-50 outline-none text-slate-600 font-medium" />
                 </div>
 
-                <div className="col-span-1 md:col-span-2">
+                <div className="col-span-1 md:col-span-3">
                   <label className="block font-semibold text-slate-700 mb-1">Thông tin mô tả</label>
                   <textarea rows={2} readOnly value={selectedItem.description || '—'}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-slate-50 outline-none text-slate-600 font-medium" />
@@ -1504,14 +1510,42 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                   ODC001: [
                     { id: '1', ten_to_chuc: 'Trung tâm TGPL TP. Hà Nội', loai_hinh: 'Nhà nước', dia_chi: '60 Trần Phú, Hà Nội', nguoi_dai_dien: 'Nguyễn Văn A', so_dien_thoai: '024.3845.xxxx', ngay_thanh_lap: '01/01/2015', trang_thai: 'Hoạt động' },
                     { id: '2', ten_to_chuc: 'VP Luật sư Thành Đô', loai_hinh: 'Hợp đồng', dia_chi: '12 Lý Thường Kiệt, HN', nguoi_dai_dien: 'Trần Thị B', so_dien_thoai: '024.3854.xxxx', ngay_thanh_lap: '05/03/2018', trang_thai: 'Hoạt động' },
+                    { id: '3', ten_to_chuc: 'Trung tâm TGPL TP. Đà Nẵng', loai_hinh: 'Nhà nước', dia_chi: '15 Trần Phú, Đà Nẵng', nguoi_dai_dien: 'Lê Văn Cường', so_dien_thoai: '0236.3821.xxxx', ngay_thanh_lap: '10/06/2013', trang_thai: 'Hoạt động' },
+                    { id: '4', ten_to_chuc: 'VP Luật sư Minh Khai', loai_hinh: 'Hợp đồng', dia_chi: '25 Bà Triệu, Hà Nội', nguoi_dai_dien: 'Phạm Thị Dung', so_dien_thoai: '024.3826.xxxx', ngay_thanh_lap: '18/09/2017', trang_thai: 'Hoạt động' },
+                    { id: '5', ten_to_chuc: 'Trung tâm TGPL Tỉnh Nghệ An', loai_hinh: 'Nhà nước', dia_chi: '8 Nguyễn Sỹ Sách, Vinh', nguoi_dai_dien: 'Hoàng Văn Em', so_dien_thoai: '0238.3844.xxxx', ngay_thanh_lap: '22/02/2011', trang_thai: 'Hoạt động' },
+                    { id: '6', ten_to_chuc: 'VP Luật sư Thăng Long', loai_hinh: 'Hợp đồng', dia_chi: '99 Giải Phóng, Hà Nội', nguoi_dai_dien: 'Ngô Thị Phượng', so_dien_thoai: '024.3868.xxxx', ngay_thanh_lap: '14/11/2019', trang_thai: 'Tạm ngừng' },
+                    { id: '7', ten_to_chuc: 'Trung tâm TGPL Tỉnh Bình Dương', loai_hinh: 'Nhà nước', dia_chi: '5 Yersin, Thủ Dầu Một', nguoi_dai_dien: 'Vũ Thị Giang', so_dien_thoai: '0274.3822.xxxx', ngay_thanh_lap: '30/07/2014', trang_thai: 'Hoạt động' },
+                    { id: '8', ten_to_chuc: 'VP Luật sư Đông Đô', loai_hinh: 'Hợp đồng', dia_chi: '40 Cầu Giấy, Hà Nội', nguoi_dai_dien: 'Đặng Văn Hải', so_dien_thoai: '024.3792.xxxx', ngay_thanh_lap: '02/04/2020', trang_thai: 'Hoạt động' },
+                    { id: '9', ten_to_chuc: 'Trung tâm TGPL TP. Hải Phòng', loai_hinh: 'Nhà nước', dia_chi: '20 Điện Biên Phủ, Hải Phòng', nguoi_dai_dien: 'Bùi Thị Lan', so_dien_thoai: '0225.3823.xxxx', ngay_thanh_lap: '17/12/2012', trang_thai: 'Hoạt động' },
+                    { id: '10', ten_to_chuc: 'VP Luật sư Hòa Bình', loai_hinh: 'Hợp đồng', dia_chi: '3 Trần Hưng Đạo, Hòa Bình', nguoi_dai_dien: 'Trịnh Văn Khoa', so_dien_thoai: '0218.3852.xxxx', ngay_thanh_lap: '09/05/2016', trang_thai: 'Tạm ngừng' },
+                    { id: '11', ten_to_chuc: 'Trung tâm TGPL Tỉnh Cần Thơ', loai_hinh: 'Nhà nước', dia_chi: '12 Hòa Bình, Cần Thơ', nguoi_dai_dien: 'Lý Thị Mai', so_dien_thoai: '0292.3821.xxxx', ngay_thanh_lap: '25/01/2015', trang_thai: 'Hoạt động' },
+                    { id: '12', ten_to_chuc: 'VP Luật sư Sài Gòn Xanh', loai_hinh: 'Hợp đồng', dia_chi: '88 Nguyễn Huệ, TP. HCM', nguoi_dai_dien: 'Đỗ Văn Nam', so_dien_thoai: '028.3822.xxxx', ngay_thanh_lap: '11/08/2018', trang_thai: 'Hoạt động' },
                   ],
                   ODC002: [
                     { id: '1', ho_ten: 'Nguyễn Văn An', so_nam_hanh_nghe: '8', vai_tro: 'Trợ giúp viên', so_chung_chi: 'TGV-001/2016', trang_thai: 'Hoạt động' },
                     { id: '2', ho_ten: 'Lê Thị Bình', so_nam_hanh_nghe: '5', vai_tro: 'Luật sư cộng tác', so_chung_chi: 'LS-123/2019', trang_thai: 'Hoạt động' },
+                    { id: '3', ho_ten: 'Trần Văn Cường', so_nam_hanh_nghe: '12', vai_tro: 'Trợ giúp viên', so_chung_chi: 'TGV-014/2011', trang_thai: 'Hoạt động' },
+                    { id: '4', ho_ten: 'Phạm Thị Dung', so_nam_hanh_nghe: '3', vai_tro: 'Cộng tác viên', so_chung_chi: 'CTV-045/2021', trang_thai: 'Hoạt động' },
+                    { id: '5', ho_ten: 'Hoàng Văn Em', so_nam_hanh_nghe: '6', vai_tro: 'Luật sư cộng tác', so_chung_chi: 'LS-208/2017', trang_thai: 'Hoạt động' },
+                    { id: '6', ho_ten: 'Ngô Thị Phượng', so_nam_hanh_nghe: '9', vai_tro: 'Trợ giúp viên', so_chung_chi: 'TGV-032/2014', trang_thai: 'Tạm ngừng' },
+                    { id: '7', ho_ten: 'Vũ Văn Giang', so_nam_hanh_nghe: '4', vai_tro: 'Cộng tác viên', so_chung_chi: 'CTV-061/2020', trang_thai: 'Hoạt động' },
+                    { id: '8', ho_ten: 'Đặng Thị Hải', so_nam_hanh_nghe: '15', vai_tro: 'Trợ giúp viên', so_chung_chi: 'TGV-005/2008', trang_thai: 'Hoạt động' },
+                    { id: '9', ho_ten: 'Bùi Văn Kiên', so_nam_hanh_nghe: '7', vai_tro: 'Luật sư cộng tác', so_chung_chi: 'LS-176/2018', trang_thai: 'Hoạt động' },
+                    { id: '10', ho_ten: 'Trịnh Thị Lan', so_nam_hanh_nghe: '2', vai_tro: 'Cộng tác viên', so_chung_chi: 'CTV-089/2022', trang_thai: 'Tạm ngừng' },
+                    { id: '11', ho_ten: 'Lý Văn Minh', so_nam_hanh_nghe: '10', vai_tro: 'Trợ giúp viên', so_chung_chi: 'TGV-021/2013', trang_thai: 'Hoạt động' },
                   ],
                   ODC003: [
                     { id: '1', ho_ten: 'Lê Văn Long', ngay_sinh: '15/08/1985', gioi_tinh: 'Nam', quoc_tich: 'Việt Nam', so_chung_chi_hn: 'CC-9988-BTP', so_the_luat_su: 'THE-1234-LS', noi_lam_viec: 'VP Luật sư Long & Partners', doan_luat_su: 'TP. Hà Nội', tinh_trang_hn: 'Đang hoạt động' },
                     { id: '2', ho_ten: 'Phạm Thị Hoa', ngay_sinh: '22/04/1990', gioi_tinh: 'Nữ', quoc_tich: 'Việt Nam', so_chung_chi_hn: 'CC-5544-BTP', so_the_luat_su: 'THE-5678-LS', noi_lam_viec: 'Công ty Luật TNHH Sen Vàng', doan_luat_su: 'TP. HCM', tinh_trang_hn: 'Đang hoạt động' },
+                    { id: '3', ho_ten: 'Nguyễn Văn Khánh', ngay_sinh: '03/11/1982', gioi_tinh: 'Nam', quoc_tich: 'Việt Nam', so_chung_chi_hn: 'CC-3321-BTP', so_the_luat_su: 'THE-2211-LS', noi_lam_viec: 'VP Luật sư Khánh An', doan_luat_su: 'TP. Đà Nẵng', tinh_trang_hn: 'Đang hoạt động' },
+                    { id: '4', ho_ten: 'Trần Thị Mai', ngay_sinh: '19/07/1988', gioi_tinh: 'Nữ', quoc_tich: 'Việt Nam', so_chung_chi_hn: 'CC-7712-BTP', so_the_luat_su: 'THE-3345-LS', noi_lam_viec: 'Công ty Luật Mai & Cộng sự', doan_luat_su: 'TP. Hà Nội', tinh_trang_hn: 'Đang hoạt động' },
+                    { id: '5', ho_ten: 'Hoàng Văn Nam', ngay_sinh: '27/02/1979', gioi_tinh: 'Nam', quoc_tich: 'Việt Nam', so_chung_chi_hn: 'CC-1198-BTP', so_the_luat_su: 'THE-4456-LS', noi_lam_viec: 'VP Luật sư Nam Phong', doan_luat_su: 'TP. Cần Thơ', tinh_trang_hn: 'Đang hoạt động' },
+                    { id: '6', ho_ten: 'Ngô Thị Oanh', ngay_sinh: '05/09/1993', gioi_tinh: 'Nữ', quoc_tich: 'Việt Nam', so_chung_chi_hn: 'CC-8834-BTP', so_the_luat_su: 'THE-5567-LS', noi_lam_viec: 'Công ty Luật Oanh Vũ', doan_luat_su: 'TP. HCM', tinh_trang_hn: 'Tạm ngừng hành nghề' },
+                    { id: '7', ho_ten: 'Vũ Văn Phúc', ngay_sinh: '12/01/1975', gioi_tinh: 'Nam', quoc_tich: 'Việt Nam', so_chung_chi_hn: 'CC-2256-BTP', so_the_luat_su: 'THE-6678-LS', noi_lam_viec: 'VP Luật sư Phúc Thịnh', doan_luat_su: 'Tỉnh Nghệ An', tinh_trang_hn: 'Đang hoạt động' },
+                    { id: '8', ho_ten: 'Đặng Thị Quỳnh', ngay_sinh: '30/06/1991', gioi_tinh: 'Nữ', quoc_tich: 'Việt Nam', so_chung_chi_hn: 'CC-4467-BTP', so_the_luat_su: 'THE-7789-LS', noi_lam_viec: 'Công ty Luật Quỳnh Anh', doan_luat_su: 'TP. Hà Nội', tinh_trang_hn: 'Đang hoạt động' },
+                    { id: '9', ho_ten: 'Bùi Văn Rạng', ngay_sinh: '08/12/1984', gioi_tinh: 'Nam', quoc_tich: 'Việt Nam', so_chung_chi_hn: 'CC-6690-BTP', so_the_luat_su: 'THE-8890-LS', noi_lam_viec: 'VP Luật sư Rạng Đông', doan_luat_su: 'Tỉnh Bình Dương', tinh_trang_hn: 'Đang hoạt động' },
+                    { id: '10', ho_ten: 'Trịnh Thị Sương', ngay_sinh: '14/03/1987', gioi_tinh: 'Nữ', quoc_tich: 'Việt Nam', so_chung_chi_hn: 'CC-5523-BTP', so_the_luat_su: 'THE-9901-LS', noi_lam_viec: 'Công ty Luật Sương Mai', doan_luat_su: 'TP. Hải Phòng', tinh_trang_hn: 'Đang hoạt động' },
+                    { id: '11', ho_ten: 'Lý Văn Tâm', ngay_sinh: '21/10/1980', gioi_tinh: 'Nam', quoc_tich: 'Việt Nam', so_chung_chi_hn: 'CC-9945-BTP', so_the_luat_su: 'THE-1023-LS', noi_lam_viec: 'VP Luật sư Tâm Đức', doan_luat_su: 'Tỉnh Hòa Bình', tinh_trang_hn: 'Đang hoạt động' },
                   ],
                 };
                 const code = catIdToCode[categoryId] || '';
@@ -1523,6 +1557,11 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                     <p className="text-sm">Chưa có cấu hình nguồn dữ liệu</p>
                   </div>
                 );
+                const totalRows = rows.length;
+                const totalPages = Math.max(1, Math.ceil(totalRows / sourceDataPageSize));
+                const startItem = (sourceDataPage - 1) * sourceDataPageSize + 1;
+                const endItem = Math.min(sourceDataPage * sourceDataPageSize, totalRows);
+                const pagedRows = rows.slice((sourceDataPage - 1) * sourceDataPageSize, sourceDataPage * sourceDataPageSize);
                 return (
                   <div className="space-y-3">
                     <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-[13px] space-y-1.5">
@@ -1540,25 +1579,59 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                       </div>
                     </div>
                     {rows.length > 0 && (
-                      <div className="overflow-x-auto border border-slate-200 rounded-lg">
-                        <table className="w-full text-[12px]">
-                          <thead className="bg-slate-50 border-b border-slate-200">
-                            <tr>
-                              {config.fields.map(f => (
-                                <th key={f} className="px-3 py-2 text-left font-semibold text-slate-600 whitespace-nowrap">{f}</th>
-                              ))}
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-100 bg-white">
-                            {rows.map((row, i) => (
-                              <tr key={i} className="hover:bg-slate-50">
+                      <div className="border border-slate-200 rounded-lg overflow-hidden">
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-[12px]">
+                            <thead className="bg-slate-50 border-b border-slate-200">
+                              <tr>
                                 {config.fields.map(f => (
-                                  <td key={f} className="px-3 py-2 text-slate-700 whitespace-nowrap">{row[f] || '—'}</td>
+                                  <th key={f} className="px-3 py-2 text-left font-semibold text-slate-600 whitespace-nowrap">{f}</th>
                                 ))}
                               </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 bg-white">
+                              {pagedRows.map((row, i) => (
+                                <tr key={i} className="hover:bg-slate-50">
+                                  {config.fields.map(f => (
+                                    <td key={f} className="px-3 py-2 text-slate-700 whitespace-nowrap">{row[f] || '—'}</td>
+                                  ))}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                        <div className="px-3 py-2 border-t border-slate-200 bg-white flex items-center justify-between text-[12px] text-slate-600">
+                          <span>{startItem} - {endItem} / {totalRows}</span>
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => setSourceDataPage(p => Math.max(1, p - 1))}
+                              disabled={sourceDataPage === 1}
+                              className="px-2.5 py-1 border border-slate-200 rounded-lg text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors cursor-pointer"
+                            >
+                              Trước
+                            </button>
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                              <button
+                                key={page}
+                                onClick={() => setSourceDataPage(page)}
+                                className={`px-2.5 py-1 border rounded-lg font-medium transition-colors cursor-pointer ${
+                                  sourceDataPage === page
+                                    ? 'bg-blue-600 border-blue-600 text-white'
+                                    : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                                }`}
+                              >
+                                {page}
+                              </button>
                             ))}
-                          </tbody>
-                        </table>
+                            <button
+                              onClick={() => setSourceDataPage(p => Math.min(totalPages, p + 1))}
+                              disabled={sourceDataPage === totalPages}
+                              className="px-2.5 py-1 border border-slate-200 rounded-lg text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors cursor-pointer"
+                            >
+                              Sau
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>

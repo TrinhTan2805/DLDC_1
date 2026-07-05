@@ -1,5 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
 
+/* Legacy statically pre-built Tailwind output kept below for the custom theme
+   variables, @layer base resets and @keyframes it defines. The utility classes
+   in this block are now regenerated live by @tailwindcss/vite above; anything
+   missing from this stale snapshot (e.g. gap-y-14) is covered by the live import. */
 /*! tailwindcss v4.1.3 | MIT License | https://tailwindcss.com */
 @layer properties {
   @supports (((-webkit-hyphens: none)) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color: rgb(from red r g b)))) {
