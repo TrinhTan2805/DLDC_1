@@ -62,44 +62,44 @@ interface VersionHistory {
 }
 
 const mockEntities: MasterDataEntity[] = [
-  { id: '1', code: 'MD-CITIZEN-001', name: 'Bộ dữ liệu chủ Công dân',          dataSource: 'dldc',   primaryDatabaseId: 'hotich', primaryTableId: 'tbl_citizen'      },
-  { id: '2', code: 'MD-ORG-001',     name: 'Bộ dữ liệu chủ Tổ chức',           dataSource: 'dldc',   primaryDatabaseId: 'dkkd',   primaryTableId: 'tbl_organization' },
-  { id: '3', code: 'MD-DOC-001',     name: 'Bộ dữ liệu chủ Văn bản pháp luật', dataSource: 'manual' },
-  { id: '4', code: 'MD-ADMIN-001',   name: 'Bộ dữ liệu chủ Đơn vị hành chính', dataSource: 'manual' },
-  { id: '5', code: 'MD-AGENCY-001',  name: 'Bộ dữ liệu chủ Cơ quan nhà nước',  dataSource: 'dldc',   primaryDatabaseId: 'lltp',   primaryTableId: 'tbl_lich_su'      },
+  { id: '1', code: 'MD-CITIZEN-001', name: 'Bộ dữ liệu chủ Công dân', dataSource: 'dldc', primaryDatabaseId: 'hotich', primaryTableId: 'tbl_citizen' },
+  { id: '2', code: 'MD-ORG-001', name: 'Bộ dữ liệu chủ Tổ chức', dataSource: 'dldc', primaryDatabaseId: 'dkkd', primaryTableId: 'tbl_organization' },
+  { id: '3', code: 'MD-DOC-001', name: 'Bộ dữ liệu chủ Văn bản pháp luật', dataSource: 'manual' },
+  { id: '4', code: 'MD-ADMIN-001', name: 'Bộ dữ liệu chủ Đơn vị hành chính', dataSource: 'manual' },
+  { id: '5', code: 'MD-AGENCY-001', name: 'Bộ dữ liệu chủ Cơ quan nhà nước', dataSource: 'dldc', primaryDatabaseId: 'lltp', primaryTableId: 'tbl_lich_su' },
 ];
 
 const defaultAttributes: Record<string, MasterDataAttribute[]> = {
   // DLDC source — includes databaseName + tableName
   '1': [
-    { id: 'attr-1', fieldName: 'citizen_id',   displayName: 'Số CCCD',           dataType: 'string', length: 12,  required: true,  unique: true,  indexed: true,  createdDate: '10/12/2024', version: 1, databaseName: 'CSDL Hộ tịch điện tử',   tableName: 'tbl_citizen'  },
-    { id: 'attr-2', fieldName: 'full_name',     displayName: 'Họ và tên',         dataType: 'string', length: 255, required: true,  unique: false, indexed: true,  createdDate: '10/12/2024', version: 1, databaseName: 'CSDL Hộ tịch điện tử',   tableName: 'tbl_citizen'  },
-    { id: 'attr-3', fieldName: 'date_of_birth', displayName: 'Ngày sinh',         dataType: 'date',                required: true,  unique: false, indexed: false, createdDate: '10/12/2024', version: 1, databaseName: 'CSDL Hộ tịch điện tử',   tableName: 'tbl_citizen'  },
-    { id: 'attr-4', fieldName: 'gender',        displayName: 'Giới tính',         dataType: 'string', length: 10,  required: false, unique: false, indexed: false, createdDate: '10/12/2024', version: 1, databaseName: 'CSDL Hộ tịch điện tử',   tableName: 'tbl_citizen'  },
-    { id: 'attr-5', fieldName: 'address',       displayName: 'Địa chỉ thường trú', dataType: 'text',               required: false, unique: false, indexed: false, createdDate: '10/12/2024', version: 1, databaseName: 'CSDL Hộ tịch điện tử',   tableName: 'tbl_citizen'  },
-    { id: 'attr-6', fieldName: 'email',         displayName: 'Email',             dataType: 'email',  length: 255, required: false, unique: false, indexed: true,  createdDate: '10/12/2024', version: 1, databaseName: 'CSDL Hộ tịch điện tử',   tableName: 'tbl_citizen'  },
-    { id: 'attr-7', fieldName: 'phone_number',  displayName: 'Số điện thoại',     dataType: 'phone',  length: 15,  required: false, unique: false, indexed: true,  createdDate: '10/12/2024', version: 1, databaseName: 'CSDL Hộ tịch điện tử',   tableName: 'tbl_citizen'  },
+    { id: 'attr-1', fieldName: 'citizen_id', displayName: 'Số CCCD', dataType: 'string', length: 12, required: true, unique: true, indexed: true, createdDate: '10/12/2024', version: 1, databaseName: 'CSDL Hộ tịch điện tử', tableName: 'tbl_citizen' },
+    { id: 'attr-2', fieldName: 'full_name', displayName: 'Họ và tên', dataType: 'string', length: 255, required: true, unique: false, indexed: true, createdDate: '10/12/2024', version: 1, databaseName: 'CSDL Hộ tịch điện tử', tableName: 'tbl_citizen' },
+    { id: 'attr-3', fieldName: 'date_of_birth', displayName: 'Ngày sinh', dataType: 'date', required: true, unique: false, indexed: false, createdDate: '10/12/2024', version: 1, databaseName: 'CSDL Hộ tịch điện tử', tableName: 'tbl_citizen' },
+    { id: 'attr-4', fieldName: 'gender', displayName: 'Giới tính', dataType: 'string', length: 10, required: false, unique: false, indexed: false, createdDate: '10/12/2024', version: 1, databaseName: 'CSDL Hộ tịch điện tử', tableName: 'tbl_citizen' },
+    { id: 'attr-5', fieldName: 'address', displayName: 'Địa chỉ thường trú', dataType: 'text', required: false, unique: false, indexed: false, createdDate: '10/12/2024', version: 1, databaseName: 'CSDL Hộ tịch điện tử', tableName: 'tbl_citizen' },
+    { id: 'attr-6', fieldName: 'email', displayName: 'Email', dataType: 'email', length: 255, required: false, unique: false, indexed: true, createdDate: '10/12/2024', version: 1, databaseName: 'CSDL Hộ tịch điện tử', tableName: 'tbl_citizen' },
+    { id: 'attr-7', fieldName: 'phone_number', displayName: 'Số điện thoại', dataType: 'phone', length: 15, required: false, unique: false, indexed: true, createdDate: '10/12/2024', version: 1, databaseName: 'CSDL Hộ tịch điện tử', tableName: 'tbl_citizen' },
   ],
   '2': [
-    { id: 'attr-8',  fieldName: 'org_id',       displayName: 'Mã tổ chức',        dataType: 'string', length: 20,  required: true,  unique: true,  indexed: true,  createdDate: '10/12/2024', version: 1, databaseName: 'CSDL Đăng ký kinh doanh', tableName: 'tbl_organization' },
-    { id: 'attr-9',  fieldName: 'org_name',     displayName: 'Tên tổ chức',       dataType: 'string', length: 500, required: true,  unique: false, indexed: true,  createdDate: '10/12/2024', version: 1, databaseName: 'CSDL Đăng ký kinh doanh', tableName: 'tbl_organization' },
-    { id: 'attr-10', fieldName: 'tax_code',     displayName: 'Mã số thuế',        dataType: 'string', length: 13,  required: true,  unique: true,  indexed: true,  createdDate: '10/12/2024', version: 1, databaseName: 'CSDL Đăng ký kinh doanh', tableName: 'tbl_organization' },
-    { id: 'attr-11', fieldName: 'founded_date', displayName: 'Ngày thành lập',    dataType: 'date',                required: false, unique: false, indexed: false, createdDate: '10/12/2024', version: 1, databaseName: 'CSDL Đăng ký kinh doanh', tableName: 'tbl_organization' },
-    { id: 'attr-12', fieldName: 'address',      displayName: 'Địa chỉ trụ sở',   dataType: 'text',                required: false, unique: false, indexed: false, createdDate: '10/12/2024', version: 1, databaseName: 'CSDL Đăng ký kinh doanh', tableName: 'tbl_organization' },
+    { id: 'attr-8', fieldName: 'org_id', displayName: 'Mã tổ chức', dataType: 'string', length: 20, required: true, unique: true, indexed: true, createdDate: '10/12/2024', version: 1, databaseName: 'CSDL Đăng ký kinh doanh', tableName: 'tbl_organization' },
+    { id: 'attr-9', fieldName: 'org_name', displayName: 'Tên tổ chức', dataType: 'string', length: 500, required: true, unique: false, indexed: true, createdDate: '10/12/2024', version: 1, databaseName: 'CSDL Đăng ký kinh doanh', tableName: 'tbl_organization' },
+    { id: 'attr-10', fieldName: 'tax_code', displayName: 'Mã số thuế', dataType: 'string', length: 13, required: true, unique: true, indexed: true, createdDate: '10/12/2024', version: 1, databaseName: 'CSDL Đăng ký kinh doanh', tableName: 'tbl_organization' },
+    { id: 'attr-11', fieldName: 'founded_date', displayName: 'Ngày thành lập', dataType: 'date', required: false, unique: false, indexed: false, createdDate: '10/12/2024', version: 1, databaseName: 'CSDL Đăng ký kinh doanh', tableName: 'tbl_organization' },
+    { id: 'attr-12', fieldName: 'address', displayName: 'Địa chỉ trụ sở', dataType: 'text', required: false, unique: false, indexed: false, createdDate: '10/12/2024', version: 1, databaseName: 'CSDL Đăng ký kinh doanh', tableName: 'tbl_organization' },
   ],
   // Manual source — no databaseName/tableName
   '3': [
-    { id: 'attr-13', fieldName: 'doc_number',   displayName: 'Số hiệu văn bản',   dataType: 'string', length: 50,  required: true,  unique: true,  indexed: true,  createdDate: '10/12/2024', version: 1 },
-    { id: 'attr-14', fieldName: 'doc_title',    displayName: 'Tiêu đề văn bản',   dataType: 'string', length: 500, required: true,  unique: false, indexed: true,  createdDate: '10/12/2024', version: 1 },
-    { id: 'attr-15', fieldName: 'issued_date',  displayName: 'Ngày ban hành',     dataType: 'date',                required: true,  unique: false, indexed: false, createdDate: '10/12/2024', version: 1 },
-    { id: 'attr-16', fieldName: 'issuing_body', displayName: 'Cơ quan ban hành',  dataType: 'string', length: 255, required: true,  unique: false, indexed: false, createdDate: '10/12/2024', version: 1 },
-    { id: 'attr-17', fieldName: 'doc_type',     displayName: 'Loại văn bản',      dataType: 'string', length: 100, required: false, unique: false, indexed: false, createdDate: '10/12/2024', version: 1 },
+    { id: 'attr-13', fieldName: 'doc_number', displayName: 'Số hiệu văn bản', dataType: 'string', length: 50, required: true, unique: true, indexed: true, createdDate: '10/12/2024', version: 1 },
+    { id: 'attr-14', fieldName: 'doc_title', displayName: 'Tiêu đề văn bản', dataType: 'string', length: 500, required: true, unique: false, indexed: true, createdDate: '10/12/2024', version: 1 },
+    { id: 'attr-15', fieldName: 'issued_date', displayName: 'Ngày ban hành', dataType: 'date', required: true, unique: false, indexed: false, createdDate: '10/12/2024', version: 1 },
+    { id: 'attr-16', fieldName: 'issuing_body', displayName: 'Cơ quan ban hành', dataType: 'string', length: 255, required: true, unique: false, indexed: false, createdDate: '10/12/2024', version: 1 },
+    { id: 'attr-17', fieldName: 'doc_type', displayName: 'Loại văn bản', dataType: 'string', length: 100, required: false, unique: false, indexed: false, createdDate: '10/12/2024', version: 1 },
   ],
   '4': [
-    { id: 'attr-18', fieldName: 'unit_code',    displayName: 'Mã đơn vị',         dataType: 'string', length: 20,  required: true,  unique: true,  indexed: true,  createdDate: '10/12/2024', version: 1 },
-    { id: 'attr-19', fieldName: 'unit_name',    displayName: 'Tên đơn vị',        dataType: 'string', length: 255, required: true,  unique: false, indexed: true,  createdDate: '10/12/2024', version: 1 },
-    { id: 'attr-20', fieldName: 'parent_code',  displayName: 'Đơn vị cấp trên',   dataType: 'string', length: 20,  required: false, unique: false, indexed: false, createdDate: '10/12/2024', version: 1 },
-    { id: 'attr-21', fieldName: 'level',        displayName: 'Cấp đơn vị',        dataType: 'number',              required: true,  unique: false, indexed: false, createdDate: '10/12/2024', version: 1 },
+    { id: 'attr-18', fieldName: 'unit_code', displayName: 'Mã đơn vị', dataType: 'string', length: 20, required: true, unique: true, indexed: true, createdDate: '10/12/2024', version: 1 },
+    { id: 'attr-19', fieldName: 'unit_name', displayName: 'Tên đơn vị', dataType: 'string', length: 255, required: true, unique: false, indexed: true, createdDate: '10/12/2024', version: 1 },
+    { id: 'attr-20', fieldName: 'parent_code', displayName: 'Đơn vị cấp trên', dataType: 'string', length: 20, required: false, unique: false, indexed: false, createdDate: '10/12/2024', version: 1 },
+    { id: 'attr-21', fieldName: 'level', displayName: 'Cấp đơn vị', dataType: 'number', required: true, unique: false, indexed: false, createdDate: '10/12/2024', version: 1 },
   ],
 };
 
@@ -117,101 +117,109 @@ const fieldDataTypeLabels: Record<FieldDataType, string> = {
 
 const DLDC_DATABASES = [
   { id: 'hotich', label: 'CSDL Hộ tịch điện tử' },
-  { id: 'cccd',   label: 'CSDL Căn cước công dân' },
-  { id: 'dkkd',   label: 'CSDL Đăng ký kinh doanh' },
-  { id: 'lltp',   label: 'CSDL Lý lịch tư pháp' },
-  { id: 'btdp',   label: 'CSDL Bổ trợ tư pháp' },
+  { id: 'cccd', label: 'CSDL Căn cước công dân' },
+  { id: 'dkkd', label: 'CSDL Đăng ký kinh doanh' },
+  { id: 'lltp', label: 'CSDL Lý lịch tư pháp' },
+  { id: 'btdp', label: 'CSDL Bổ trợ tư pháp' },
 ];
 
 const DLDC_TABLES: Record<string, { id: string; displayName: string }[]> = {
   hotich: [
-    { id: 'tbl_citizen',  displayName: 'Hồ sơ công dân' },
+    { id: 'tbl_citizen', displayName: 'Hồ sơ công dân' },
     { id: 'tbl_khaisinh', displayName: 'Khai sinh' },
-    { id: 'tbl_kethon',   displayName: 'Kết hôn' },
-    { id: 'tbl_ly_hon',   displayName: 'Ly hôn' },
-    { id: 'tbl_khai_tu',  displayName: 'Khai tử' },
+    { id: 'tbl_kethon', displayName: 'Kết hôn' },
+    { id: 'tbl_ly_hon', displayName: 'Ly hôn' },
+    { id: 'tbl_khai_tu', displayName: 'Khai tử' },
   ],
   cccd: [
     { id: 'tbl_cccd_info', displayName: 'Thông tin CCCD' },
     { id: 'tbl_nhan_dang', displayName: 'Dữ liệu nhận dạng' },
   ],
   dkkd: [
-    { id: 'tbl_organization',  displayName: 'Tổ chức / Doanh nghiệp' },
+    { id: 'tbl_organization', displayName: 'Tổ chức / Doanh nghiệp' },
     { id: 'tbl_ho_kinh_doanh', displayName: 'Hộ kinh doanh' },
-    { id: 'tbl_giay_phep',     displayName: 'Giấy phép kinh doanh' },
+    { id: 'tbl_giay_phep', displayName: 'Giấy phép kinh doanh' },
   ],
   lltp: [
     { id: 'tbl_lich_su', displayName: 'Lịch sử tư pháp' },
   ],
   btdp: [
-    { id: 'tbl_luat_su',   displayName: 'Luật sư' },
+    { id: 'tbl_luat_su', displayName: 'Luật sư' },
     { id: 'tbl_cong_chung', displayName: 'Công chứng viên' },
   ],
 };
 
 const DLDC_FIELDS: Record<string, { fieldName: string; displayName: string; dataType: FieldDataType }[]> = {
   tbl_citizen: [
-    { fieldName: 'citizen_id',    displayName: 'Số CCCD',             dataType: 'string' },
-    { fieldName: 'full_name',     displayName: 'Họ và tên',           dataType: 'string' },
-    { fieldName: 'date_of_birth', displayName: 'Ngày sinh',           dataType: 'date'   },
-    { fieldName: 'gender',        displayName: 'Giới tính',           dataType: 'string' },
-    { fieldName: 'address',       displayName: 'Địa chỉ thường trú', dataType: 'text'   },
-    { fieldName: 'email',         displayName: 'Email',               dataType: 'email'  },
-    { fieldName: 'phone_number',  displayName: 'Số điện thoại',       dataType: 'phone'  },
+    { fieldName: 'citizen_id', displayName: 'Số CCCD', dataType: 'string' },
+    { fieldName: 'full_name', displayName: 'Họ và tên', dataType: 'string' },
+    { fieldName: 'date_of_birth', displayName: 'Ngày sinh', dataType: 'date' },
+    { fieldName: 'gender', displayName: 'Giới tính', dataType: 'string' },
+    { fieldName: 'address', displayName: 'Địa chỉ thường trú', dataType: 'text' },
+    { fieldName: 'email', displayName: 'Email', dataType: 'email' },
+    { fieldName: 'phone_number', displayName: 'Số điện thoại', dataType: 'phone' },
   ],
   tbl_khaisinh: [
-    { fieldName: 'ma_khai_sinh', displayName: 'Mã khai sinh',          dataType: 'string' },
-    { fieldName: 'ho_ten',       displayName: 'Họ và tên',             dataType: 'string' },
-    { fieldName: 'ngay_sinh',    displayName: 'Ngày sinh',             dataType: 'date'   },
-    { fieldName: 'gioi_tinh',    displayName: 'Giới tính',             dataType: 'string' },
-    { fieldName: 'noi_sinh',     displayName: 'Nơi sinh',              dataType: 'string' },
-    { fieldName: 'ten_cha',      displayName: 'Tên cha',               dataType: 'string' },
-    { fieldName: 'ten_me',       displayName: 'Tên mẹ',                dataType: 'string' },
+    { fieldName: 'ma_khai_sinh', displayName: 'Mã khai sinh', dataType: 'string' },
+    { fieldName: 'ho_ten', displayName: 'Họ và tên', dataType: 'string' },
+    { fieldName: 'ngay_sinh', displayName: 'Ngày sinh', dataType: 'date' },
+    { fieldName: 'gioi_tinh', displayName: 'Giới tính', dataType: 'string' },
+    { fieldName: 'noi_sinh', displayName: 'Nơi sinh', dataType: 'string' },
+    { fieldName: 'ten_cha', displayName: 'Tên cha', dataType: 'string' },
+    { fieldName: 'ten_me', displayName: 'Tên mẹ', dataType: 'string' },
   ],
   tbl_kethon: [
-    { fieldName: 'ma_ket_hon',     displayName: 'Mã đăng ký kết hôn',    dataType: 'string' },
-    { fieldName: 'ten_vo_chong_1', displayName: 'Họ tên vợ/chồng 1',    dataType: 'string' },
-    { fieldName: 'ten_vo_chong_2', displayName: 'Họ tên vợ/chồng 2',    dataType: 'string' },
-    { fieldName: 'ngay_ket_hon',   displayName: 'Ngày đăng ký kết hôn', dataType: 'date'   },
+    { fieldName: 'ma_ket_hon', displayName: 'Mã đăng ký kết hôn', dataType: 'string' },
+    { fieldName: 'ten_vo_chong_1', displayName: 'Họ tên vợ/chồng 1', dataType: 'string' },
+    { fieldName: 'ten_vo_chong_2', displayName: 'Họ tên vợ/chồng 2', dataType: 'string' },
+    { fieldName: 'ngay_ket_hon', displayName: 'Ngày đăng ký kết hôn', dataType: 'date' },
   ],
   tbl_ly_hon: [
-    { fieldName: 'ma_ly_hon',  displayName: 'Mã đăng ký ly hôn', dataType: 'string' },
-    { fieldName: 'ten_vo',     displayName: 'Họ tên vợ',         dataType: 'string' },
-    { fieldName: 'ten_chong',  displayName: 'Họ tên chồng',      dataType: 'string' },
-    { fieldName: 'ngay_ly_hon', displayName: 'Ngày ly hôn',      dataType: 'date'   },
+    { fieldName: 'ma_ly_hon', displayName: 'Mã đăng ký ly hôn', dataType: 'string' },
+    { fieldName: 'ten_vo', displayName: 'Họ tên vợ', dataType: 'string' },
+    { fieldName: 'ten_chong', displayName: 'Họ tên chồng', dataType: 'string' },
+    { fieldName: 'ngay_ly_hon', displayName: 'Ngày ly hôn', dataType: 'date' },
   ],
   tbl_khai_tu: [
-    { fieldName: 'ma_khai_tu', displayName: 'Mã khai tử',   dataType: 'string' },
-    { fieldName: 'ho_ten',     displayName: 'Họ và tên',    dataType: 'string' },
-    { fieldName: 'ngay_mat',   displayName: 'Ngày mất',     dataType: 'date'   },
-    { fieldName: 'noi_mat',    displayName: 'Nơi mất',      dataType: 'string' },
+    { fieldName: 'ma_khai_tu', displayName: 'Mã khai tử', dataType: 'string' },
+    { fieldName: 'ho_ten', displayName: 'Họ và tên', dataType: 'string' },
+    { fieldName: 'ngay_mat', displayName: 'Ngày mất', dataType: 'date' },
+    { fieldName: 'noi_mat', displayName: 'Nơi mất', dataType: 'string' },
   ],
   tbl_organization: [
-    { fieldName: 'org_id',       displayName: 'Mã tổ chức',       dataType: 'string' },
-    { fieldName: 'org_name',     displayName: 'Tên tổ chức',      dataType: 'string' },
-    { fieldName: 'tax_code',     displayName: 'Mã số thuế',       dataType: 'string' },
-    { fieldName: 'founded_date', displayName: 'Ngày thành lập',   dataType: 'date'   },
-    { fieldName: 'address',      displayName: 'Địa chỉ trụ sở',  dataType: 'text'   },
-    { fieldName: 'phone',        displayName: 'Số điện thoại',    dataType: 'phone'  },
-    { fieldName: 'email',        displayName: 'Email',            dataType: 'email'  },
-    { fieldName: 'website',      displayName: 'Website',          dataType: 'url'    },
+    { fieldName: 'org_id', displayName: 'Mã tổ chức', dataType: 'string' },
+    { fieldName: 'org_name', displayName: 'Tên tổ chức', dataType: 'string' },
+    { fieldName: 'tax_code', displayName: 'Mã số thuế', dataType: 'string' },
+    { fieldName: 'founded_date', displayName: 'Ngày thành lập', dataType: 'date' },
+    { fieldName: 'address', displayName: 'Địa chỉ trụ sở', dataType: 'text' },
+    { fieldName: 'phone', displayName: 'Số điện thoại', dataType: 'phone' },
+    { fieldName: 'email', displayName: 'Email', dataType: 'email' },
+    { fieldName: 'website', displayName: 'Website', dataType: 'url' },
   ],
   tbl_cccd_info: [
-    { fieldName: 'so_cccd',    displayName: 'Số CCCD',              dataType: 'string' },
-    { fieldName: 'ho_ten',     displayName: 'Họ và tên',            dataType: 'string' },
-    { fieldName: 'ngay_sinh',  displayName: 'Ngày sinh',            dataType: 'date'   },
-    { fieldName: 'gioi_tinh',  displayName: 'Giới tính',            dataType: 'string' },
-    { fieldName: 'que_quan',   displayName: 'Quê quán',             dataType: 'string' },
-    { fieldName: 'thuong_tru', displayName: 'Địa chỉ thường trú',  dataType: 'text'   },
-    { fieldName: 'ngay_cap',   displayName: 'Ngày cấp',             dataType: 'date'   },
-    { fieldName: 'noi_cap',    displayName: 'Nơi cấp',              dataType: 'string' },
+    { fieldName: 'so_cccd', displayName: 'Số CCCD', dataType: 'string' },
+    { fieldName: 'ho_ten', displayName: 'Họ và tên', dataType: 'string' },
+    { fieldName: 'ngay_sinh', displayName: 'Ngày sinh', dataType: 'date' },
+    { fieldName: 'gioi_tinh', displayName: 'Giới tính', dataType: 'string' },
+    { fieldName: 'que_quan', displayName: 'Quê quán', dataType: 'string' },
+    { fieldName: 'thuong_tru', displayName: 'Địa chỉ thường trú', dataType: 'text' },
+    { fieldName: 'ngay_cap', displayName: 'Ngày cấp', dataType: 'date' },
+    { fieldName: 'noi_cap', displayName: 'Nơi cấp', dataType: 'string' },
   ],
   tbl_nhan_dang: [
     { fieldName: 'ma_nhan_dang', displayName: 'Mã nhận dạng', dataType: 'string' },
-    { fieldName: 'van_tay',      displayName: 'Vân tay',      dataType: 'string' },
-    { fieldName: 'khuon_mat',    displayName: 'Khuôn mặt',   dataType: 'string' },
+    { fieldName: 'van_tay', displayName: 'Vân tay', dataType: 'string' },
+    { fieldName: 'khuon_mat', displayName: 'Khuôn mặt', dataType: 'string' },
   ],
 };
+
+const MOCK_APPROVERS = [
+  { id: 'a1', name: 'Nguyễn Văn An', position: 'Trưởng phòng', department: 'Phòng Quản lý dữ liệu' },
+  { id: 'a2', name: 'Trần Thị Bình', position: 'Phó Cục trưởng', department: 'Cục Hành chính tư pháp' },
+  { id: 'a3', name: 'Lê Minh Cường', position: 'Chuyên viên cao cấp', department: 'Vụ Kế hoạch - Tài chính' },
+  { id: 'a4', name: 'Phạm Quốc Hùng', position: 'Cục trưởng', department: 'Cục Công nghệ thông tin' },
+  { id: 'a5', name: 'Hoàng Thị Lan', position: 'Trưởng phòng', department: 'Phòng Nghiệp vụ pháp lý' },
+];
 
 export function AttributesManagementTab() {
   const [selectedEntity, setSelectedEntity] = useState<string>('1');
@@ -221,7 +229,7 @@ export function AttributesManagementTab() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showVersionHistory, setShowVersionHistory] = useState(false);
   const [selectedAttributeHistory, setSelectedAttributeHistory] = useState<string | null>(null);
-  
+
   // Combobox states
   const [comboboxOpen, setComboboxOpen] = useState(false);
   const [comboboxSearch, setComboboxSearch] = useState('');
@@ -236,10 +244,16 @@ export function AttributesManagementTab() {
   const [dldcFieldRows, setDldcFieldRows] = useState<DldcFieldRow[]>([]);
   const [modalUseJoin, setModalUseJoin] = useState(false);
   const [modalDldcJoins, setModalDldcJoins] = useState<DldcJoin[]>([]);
+  const [showStructureApprovalModal, setShowStructureApprovalModal] = useState(false);
 
   // Delete confirmation modal
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deletingAttr, setDeletingAttr] = useState<MasterDataAttribute | null>(null);
+
+  // Gửi trình duyệt modal (shown after add/edit)
+  const [approvalAttribute, setApprovalAttribute] = useState<MasterDataAttribute | null>(null);
+  const [selectedApprover, setSelectedApprover] = useState('');
+  const [approvalNote, setApprovalNote] = useState('');
 
   const [formData, setFormData] = useState<Partial<MasterDataAttribute>>({
     fieldName: '',
@@ -282,17 +296,17 @@ export function AttributesManagementTab() {
     const dateStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
 
     const currentAttributes = attributes[selectedEntity] || [];
+    let savedAttribute: MasterDataAttribute;
 
     if (editingAttribute) {
       // Update existing - increment version
+      savedAttribute = {
+        ...editingAttribute,
+        ...formData as MasterDataAttribute,
+        version: editingAttribute.version + 1
+      };
       const updatedAttributes = currentAttributes.map(attr =>
-        attr.id === editingAttribute.id
-          ? {
-              ...attr,
-              ...formData as MasterDataAttribute,
-              version: attr.version + 1
-            }
-          : attr
+        attr.id === editingAttribute.id ? savedAttribute : attr
       );
       setAttributes({ ...attributes, [selectedEntity]: updatedAttributes });
     } else {
@@ -303,7 +317,7 @@ export function AttributesManagementTab() {
       }
 
       // Create new
-      const newAttribute: MasterDataAttribute = {
+      savedAttribute = {
         id: `attr-${Date.now()}`,
         fieldName: formData.fieldName!,
         displayName: formData.displayName!,
@@ -321,11 +335,28 @@ export function AttributesManagementTab() {
 
       setAttributes({
         ...attributes,
-        [selectedEntity]: [...currentAttributes, newAttribute]
+        [selectedEntity]: [...currentAttributes, savedAttribute]
       });
     }
 
     handleCloseForm();
+
+    // Show "Gửi trình duyệt" modal after add/edit, same flow as tab "Thiết lập thực thể"
+    setApprovalAttribute(savedAttribute);
+    setSelectedApprover('');
+    setApprovalNote('');
+  };
+
+  const handleCloseApprovalModal = () => {
+    setApprovalAttribute(null);
+    setSelectedApprover('');
+    setApprovalNote('');
+  };
+
+  const handleConfirmApprove = () => {
+    if (!approvalAttribute || !selectedApprover) return;
+    alert('Đã gửi trình duyệt thuộc tính thành công!');
+    handleCloseApprovalModal();
   };
 
   const handleEdit = (attribute: MasterDataAttribute) => {
@@ -447,7 +478,22 @@ export function AttributesManagementTab() {
     }]);
   };
 
-  const handleDldcConfirm = () => {
+  // Opens the "Gửi trình duyệt" modal for the structure instead of saving immediately
+  const handleOpenStructureApproval = () => {
+    setShowDldcModal(false);
+    setSelectedApprover('');
+    setApprovalNote('');
+    setShowStructureApprovalModal(true);
+  };
+
+  const handleCloseStructureApprovalModal = () => {
+    setShowStructureApprovalModal(false);
+    setSelectedApprover('');
+    setApprovalNote('');
+  };
+
+  const handleConfirmDldcStructure = () => {
+    if (!selectedApprover) return;
     const entity = mockEntities.find(e => e.id === selectedEntity);
     const dbLabel = DLDC_DATABASES.find(db => db.id === entity?.primaryDatabaseId)?.label || '';
     const now = new Date();
@@ -473,6 +519,8 @@ export function AttributesManagementTab() {
       });
     setAttributes({ ...attributes, [selectedEntity]: newAttrs });
     handleCloseDldcModal();
+    handleCloseStructureApprovalModal();
+    alert('Đã gửi trình duyệt cấu trúc thành công!');
   };
 
   const handleOpenDeleteConfirm = (attribute: MasterDataAttribute) => {
@@ -565,9 +613,8 @@ export function AttributesManagementTab() {
                     <li key={entity.id}>
                       <button
                         type="button"
-                        className={`w-full px-4 py-2.5 text-left hover:bg-blue-50 transition-colors ${
-                          selectedEntity === entity.id ? 'bg-blue-50' : ''
-                        }`}
+                        className={`w-full px-4 py-2.5 text-left hover:bg-blue-50 transition-colors ${selectedEntity === entity.id ? 'bg-blue-50' : ''
+                          }`}
                         onClick={() => {
                           setSelectedEntity(entity.id);
                           setComboboxOpen(false);
@@ -595,14 +642,12 @@ export function AttributesManagementTab() {
 
       {/* Data Source Banner */}
       {selectedEntityData && (
-        <div className={`flex items-start gap-3 px-4 py-3 rounded-lg border text-[13px] ${
-          selectedEntityData.dataSource === 'dldc'
-            ? 'bg-amber-50 border-amber-200 text-amber-800'
-            : 'bg-blue-50 border-blue-200 text-blue-800'
-        }`}>
-          <AlertCircle className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
-            selectedEntityData.dataSource === 'dldc' ? 'text-amber-500' : 'text-blue-500'
-          }`} />
+        <div className={`flex items-start gap-3 px-4 py-3 rounded-lg border text-[13px] ${selectedEntityData.dataSource === 'dldc'
+          ? 'bg-amber-50 border-amber-200 text-amber-800'
+          : 'bg-blue-50 border-blue-200 text-blue-800'
+          }`}>
+          <AlertCircle className={`w-4 h-4 mt-0.5 flex-shrink-0 ${selectedEntityData.dataSource === 'dldc' ? 'text-amber-500' : 'text-blue-500'
+            }`} />
           <p>
             <span className="font-medium">Thông tin cấu hình:</span> Đang thực hiện cấu hình thuộc tính cho thực thể{' '}
             <strong>{selectedEntityData.name}</strong>.{' '}
@@ -647,7 +692,7 @@ export function AttributesManagementTab() {
                     <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Kiểu dữ liệu</th>
                     <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Độ dài</th>
                     <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Ràng buộc</th>
-                    <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Phiên bản</th>
+                    <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Giá trị mặc định</th>
                     <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-28">Thao tác</th>
                   </>
                 )}
@@ -696,15 +741,7 @@ export function AttributesManagementTab() {
                             )}
                           </div>
                         </td>
-                        <td className="px-6 py-4">
-                          <button
-                            onClick={() => handleViewHistory(attribute.id)}
-                            className="flex items-center gap-1 text-[13px] text-blue-600 hover:text-blue-800 transition-colors"
-                          >
-                            <HistoryIcon className="w-3 h-3" />
-                            v{attribute.version}
-                          </button>
-                        </td>
+                        <td className="px-6 py-4 text-[13px] text-slate-700 font-normal">{attribute.defaultValue || '—'}</td>
                       </>
                     )}
                     <td className="px-6 py-4">
@@ -762,11 +799,10 @@ export function AttributesManagementTab() {
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
-                    className={`px-3 py-1.5 border rounded-xl font-medium text-[13px] transition-colors cursor-pointer ${
-                      currentPage === page
-                        ? 'bg-blue-600 border-blue-600 text-white'
-                        : 'border-slate-200 text-slate-600 hover:bg-slate-50'
-                    }`}
+                    className={`px-3 py-1.5 border rounded-xl font-medium text-[13px] transition-colors cursor-pointer ${currentPage === page
+                      ? 'bg-blue-600 border-blue-600 text-white'
+                      : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                      }`}
                   >
                     {page}
                   </button>
@@ -804,7 +840,8 @@ export function AttributesManagementTab() {
               className="flex items-center gap-2 px-4 py-2 text-[13px] font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <Check className="w-4 h-4" />
-              {editingAttribute ? 'Cập nhật' : 'Tạo mới'}
+              Gửi duyệt thực thể
+
             </button>
           </>
         }
@@ -894,29 +931,7 @@ export function AttributesManagementTab() {
             />
           </div>
 
-          <div>
-            <label className="block text-[13px] font-medium text-slate-700 mb-1">Mô tả</label>
-            <textarea
-              value={formData.description || ''}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Mô tả chi tiết về thuộc tính này"
-              rows={3}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-            />
-          </div>
-
-          <div>
-            <label className="block text-[13px] font-medium text-slate-700 mb-1">Quy tắc kiểm tra</label>
-            <textarea
-              value={formData.validationRules || ''}
-              onChange={(e) => setFormData({ ...formData, validationRules: e.target.value })}
-              placeholder="VD: Regex: ^[0-9]{12}$, Min: 0, Max: 100"
-              rows={2}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-            />
-          </div>
-
-          {editingAttribute && (
+          {editingAttribute ? (
             <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
               <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
               <div className="text-[13px] text-amber-800">
@@ -924,9 +939,116 @@ export function AttributesManagementTab() {
                 <p>Thay đổi này sẽ được ghi nhận trong lịch sử phiên bản.</p>
               </div>
             </div>
+          ) : (
+            <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div className="text-[13px] text-amber-800">
+                <p className="mb-1">Khi thêm mới thuộc tính, phiên bản thực thể dữ liệu chủ sẽ tăng lên <strong>v2.0</strong>.</p>
+                <p>Thay đổi này sẽ được ghi nhận trong lịch sử phiên bản.</p>
+              </div>
+            </div>
           )}
         </div>
       </BaseModal>
+
+      {/* Gửi trình duyệt Modal — shown after add/edit, same pattern as tab "Thiết lập thực thể" */}
+      {approvalAttribute && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl border border-slate-200">
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+              <div>
+                <h3 className="text-[16px] font-bold text-slate-900">Gửi trình duyệt</h3>
+                <p className="text-[12px] text-slate-500 mt-0.5">
+                  Thuộc tính: <span className="text-indigo-700 font-medium">{approvalAttribute.displayName}</span>
+                </p>
+              </div>
+              <button
+                onClick={handleCloseApprovalModal}
+                className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
+                  Chọn người duyệt <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={selectedApprover}
+                  onChange={e => setSelectedApprover(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-200 focus:border-indigo-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all cursor-pointer"
+                >
+                  <option value="">-- Chọn người duyệt --</option>
+                  {MOCK_APPROVERS.map(u => (
+                    <option key={u.id} value={u.id}>
+                      {u.name} - {u.position} ({u.department})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
+                  Nội dung yêu cầu
+                </label>
+                <textarea
+                  value={approvalNote}
+                  onChange={e => setApprovalNote(e.target.value)}
+                  rows={4}
+                  placeholder="Nhập nội dung gửi kèm (nếu có)..."
+                  className="w-full px-3 py-2 border border-slate-200 focus:border-indigo-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all resize-none"
+                />
+              </div>
+
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                <h4 className="text-[13px] font-semibold text-slate-700 mb-3">Thông tin thuộc tính</h4>
+                <div className="space-y-2 text-[13px]">
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Tên trường:</span>
+                    <code className="px-2 py-0.5 bg-white border border-slate-200 text-indigo-700 rounded text-[12px]">
+                      {approvalAttribute.fieldName}
+                    </code>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Kiểu dữ liệu:</span>
+                    <span className="text-slate-800 font-medium">{approvalAttribute.dataType}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Thuộc thực thể:</span>
+                    <span className="text-slate-800 font-medium">{selectedEntityData?.name}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Phiên bản mới:</span>
+                    <span className="text-slate-800">v{approvalAttribute.version}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl flex justify-end gap-3">
+              <button
+                onClick={handleCloseApprovalModal}
+                className="bg-white text-[#020817] border border-[#e2e8f0] hover:bg-slate-50 px-4 py-2 rounded-lg font-medium text-[13px] transition-colors cursor-pointer shadow-sm"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleConfirmApprove}
+                disabled={!selectedApprover}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-[13px] transition-colors shadow-sm ${selectedApprover
+                  ? 'bg-indigo-600 text-white hover:bg-indigo-700 cursor-pointer'
+                  : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                  }`}
+              >
+                <Send className="w-4 h-4" />
+                Gửi trình duyệt
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* DLDC Field Configuration Modal */}
       <BaseModal
@@ -945,7 +1067,7 @@ export function AttributesManagementTab() {
               Hủy bỏ
             </button>
             <button
-              onClick={handleDldcConfirm}
+              onClick={handleOpenStructureApproval}
               className="flex items-center gap-2 px-4 py-2 text-[13px] font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <Send className="w-4 h-4" />
@@ -1218,8 +1340,115 @@ export function AttributesManagementTab() {
               </table>
             </div>
           </div>
+
+          <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+            <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div className="text-[13px] text-amber-800">
+              <p className="mb-1">Khi gửi duyệt cấu trúc, phiên bản của các thuộc tính thuộc cấu trúc này sẽ tự động tăng lên.</p>
+              <p>Thay đổi này sẽ được ghi nhận trong lịch sử phiên bản.</p>
+            </div>
+          </div>
         </div>
       </BaseModal>
+
+      {/* Gửi trình duyệt cấu trúc Modal — shown when confirming "Gửi duyệt cấu trúc" for DLDC source */}
+      {showStructureApprovalModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl border border-slate-200">
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+              <div>
+                <h3 className="text-[16px] font-bold text-slate-900">Gửi trình duyệt cấu trúc</h3>
+                <p className="text-[12px] text-slate-500 mt-0.5">
+                  Thực thể: <span className="text-indigo-700 font-medium">{selectedEntityData?.name}</span>
+                </p>
+              </div>
+              <button
+                onClick={handleCloseStructureApprovalModal}
+                className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
+                  Chọn người duyệt <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={selectedApprover}
+                  onChange={e => setSelectedApprover(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-200 focus:border-indigo-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all cursor-pointer"
+                >
+                  <option value="">-- Chọn người duyệt --</option>
+                  {MOCK_APPROVERS.map(u => (
+                    <option key={u.id} value={u.id}>
+                      {u.name} - {u.position} ({u.department})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
+                  Nội dung yêu cầu
+                </label>
+                <textarea
+                  value={approvalNote}
+                  onChange={e => setApprovalNote(e.target.value)}
+                  rows={4}
+                  placeholder="Nhập nội dung gửi kèm (nếu có)..."
+                  className="w-full px-3 py-2 border border-slate-200 focus:border-indigo-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all resize-none"
+                />
+              </div>
+
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                <h4 className="text-[13px] font-semibold text-slate-700 mb-3">Thông tin cấu trúc</h4>
+                <div className="space-y-2 text-[13px]">
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Mã dữ liệu chủ:</span>
+                    <code className="px-2 py-0.5 bg-white border border-slate-200 text-indigo-700 rounded text-[12px]">
+                      {selectedEntityData?.code}
+                    </code>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Kho dữ liệu:</span>
+                    <span className="text-slate-800 font-medium">
+                      {DLDC_DATABASES.find(db => db.id === selectedEntityData?.primaryDatabaseId)?.label || '—'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Số trường chia sẻ:</span>
+                    <span className="text-slate-800 font-medium">
+                      {dldcFieldRows.filter(r => r.shared && r.columnName).length}/{dldcFieldRows.length}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl flex justify-end gap-3">
+              <button
+                onClick={handleCloseStructureApprovalModal}
+                className="bg-white text-[#020817] border border-[#e2e8f0] hover:bg-slate-50 px-4 py-2 rounded-lg font-medium text-[13px] transition-colors cursor-pointer shadow-sm"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleConfirmDldcStructure}
+                disabled={!selectedApprover}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-[13px] transition-colors shadow-sm ${selectedApprover
+                    ? 'bg-indigo-600 text-white hover:bg-indigo-700 cursor-pointer'
+                    : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                  }`}
+              >
+                <Send className="w-4 h-4" />
+                Gửi trình duyệt
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Delete Confirmation Modal */}
       <BaseModal

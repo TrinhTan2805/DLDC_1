@@ -418,12 +418,6 @@ const menuItems: MenuItem[] = [
         id: "master-data-update",
         label: "Cập nhật dữ liệu chủ",
         icon: RefreshCw,
-        subItems: [
-          {
-            id: "master-data-update-a",
-            label: "Danh sách dữ liệu chủ",
-          },
-        ],
       },
       {
         id: "master-data-reports",

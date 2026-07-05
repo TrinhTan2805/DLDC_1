@@ -268,6 +268,7 @@ interface AttributeForm {
   required: boolean;
   unique: boolean;
   indexed: boolean;
+  defaultValue?: string;
 }
 
 interface WizardData {
@@ -410,7 +411,8 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
     dataType: 'string',
     required: false,
     unique: false,
-    indexed: false
+    indexed: false,
+    defaultValue: ''
   });
 
   // Step 5 state — Thiết lập quan hệ
@@ -668,7 +670,8 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
       dataType: 'string',
       required: false,
       unique: false,
-      indexed: false
+      indexed: false,
+      defaultValue: ''
     });
   };
 
@@ -1429,6 +1432,16 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
                           className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
                         />
                       </div>
+                      <div>
+                        <label className="block text-[13px] font-medium text-slate-700 mb-1.5">Giá trị mặc định</label>
+                        <input
+                          type="text"
+                          value={currentAttribute.defaultValue || ''}
+                          onChange={(e) => setCurrentAttribute({ ...currentAttribute, defaultValue: e.target.value })}
+                          placeholder="VD: N/A"
+                          className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                        />
+                      </div>
                     </div>
                     <div className="flex gap-4 mt-3">
                       <label className="flex items-center gap-2 text-[13px] cursor-pointer">
@@ -1477,6 +1490,8 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
                             <th className="text-left px-4 py-3 text-[13px] font-semibold text-slate-600">Tên trường</th>
                             <th className="text-left px-4 py-3 text-[13px] font-semibold text-slate-600">Tên hiển thị</th>
                             <th className="text-left px-4 py-3 text-[13px] font-semibold text-slate-600">Kiểu</th>
+                            <th className="text-left px-4 py-3 text-[13px] font-semibold text-slate-600">Độ dài</th>
+                            <th className="text-left px-4 py-3 text-[13px] font-semibold text-slate-600">Giá trị mặc định</th>
                             <th className="text-left px-4 py-3 text-[13px] font-semibold text-slate-600">Ràng buộc</th>
                             <th className="text-right px-4 py-3 text-[13px] font-semibold text-slate-600">Thao tác</th>
                           </tr>
@@ -1491,6 +1506,8 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
                               <td className="px-4 py-2.5">
                                 <span className="text-[13px] px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded font-mono">{attr.dataType}</span>
                               </td>
+                              <td className="px-4 py-2.5 text-slate-600">{attr.length ?? '—'}</td>
+                              <td className="px-4 py-2.5 text-slate-600">{attr.defaultValue || '—'}</td>
                               <td className="px-4 py-2.5">
                                 <div className="flex gap-1">
                                   {attr.required && <span className="text-[13px] px-1.5 py-0.5 bg-red-100 text-red-700 rounded">Required</span>}

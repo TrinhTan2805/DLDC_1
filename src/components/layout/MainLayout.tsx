@@ -68,7 +68,6 @@ import { MasterDataIPage } from '../pages/master-data-list/MasterDataIPage';
 import { MasterDataJPage } from '../pages/master-data-list/MasterDataJPage';
 import { MasterDataScaleManagementPage } from '../pages/master-data/MasterDataScaleManagementPage';
 import { MasterDataUpdatePage } from '../pages/master-data/MasterDataUpdatePage';
-import { MasterDataUpdateListPage } from '../pages/master-data/MasterDataUpdateListPage';
 import MasterDataReportsPage from '../pages/master-data/MasterDataReportsPage';
 import { DataCoordinationPage } from '../pages/DataCoordinationPage';
 import { ProvisionReconciliationPage } from '../pages/provisioning/DataReconciliationPage';
@@ -366,10 +365,6 @@ const pageConfig: Record<string, { title: string; description: string }> = {
   },
   'master-data-update': {
     title: 'Cập nhật dữ liệu chủ',
-    description: 'Cập nhật và xử lý dữ liệu chủ'
-  },
-  'master-data-update-a': {
-    title: 'Danh sách dữ liệu chủ',
     description: 'Cập nhật và quản lý dữ liệu chủ theo từng loại'
   },
   'target-database-management': {
@@ -553,7 +548,6 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'master-data-j' && <MasterDataJPage />}
             {currentPage === 'master-data-scale-management' && <MasterDataScaleManagementPage />}
             {currentPage === 'master-data-update' && <MasterDataUpdatePage />}
-            {currentPage === 'master-data-update-a' && <MasterDataUpdateListPage />}
             {currentPage === 'master-data-update-b' && <ProcessingNationalityPage />}
             {currentPage === 'master-data-update-c' && <ProcessingJudgmentPage />}
             {currentPage === 'master-data-reports' && <MasterDataReportsPage />}
@@ -1079,7 +1073,6 @@ const getBreadcrumbPath = (pageId: string, search: string = ''): string[] => {
     // Master Data
     'master-data-scale-management': ['Dữ liệu chủ', 'Mô hình dữ liệu chủ'],
     'master-data-update': ['Dữ liệu chủ', 'Cập nhật dữ liệu chủ'],
-    'master-data-update-a': ['Dữ liệu chủ', 'Cập nhật dữ liệu chủ', 'Danh sách dữ liệu chủ'],
     'master-data-reports': ['Dữ liệu chủ', 'Báo cáo tìm kiếm dữ liệu chủ'],
 
     // Orchestration
