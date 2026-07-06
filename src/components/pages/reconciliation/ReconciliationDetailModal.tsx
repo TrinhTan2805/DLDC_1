@@ -1,4 +1,4 @@
-import { X, Download, CheckCircle, Send, AlertTriangle, RefreshCw, History as HistoryIcon, Server, DownloadCloud } from 'lucide-react';
+import { X, CheckCircle, AlertTriangle, Server, DownloadCloud } from 'lucide-react';
 
 interface ReconciliationDetailModalProps {
   isOpen: boolean;
@@ -24,7 +24,7 @@ interface ReconciliationDetailModalProps {
   onViewHistory?: () => void;
 }
 
-export function ReconciliationDetailModal({ isOpen, onClose, record, onViewHistory }: ReconciliationDetailModalProps) {
+export function ReconciliationDetailModal({ isOpen, onClose, record }: ReconciliationDetailModalProps) {
   if (!isOpen || !record) return null;
 
   const received = record.receivedCount ?? record.recordCount; // Kho đếm được
@@ -125,52 +125,21 @@ export function ReconciliationDetailModal({ isOpen, onClose, record, onViewHisto
                   Đang xử lý
                 </span>
               ) : (
-                <>
-                  <span className="px-4 py-2 text-[13px] font-semibold rounded-lg border bg-rose-50 text-rose-700 border-rose-200 flex items-center justify-center gap-2">
-                    <AlertTriangle className="w-4 h-4" /> Có sai lệch dữ liệu
-                  </span>
-                  {record.isReportSent && (
-                    <span className="px-4 py-1.5 text-[12px] font-medium rounded-lg border bg-indigo-50 text-indigo-700 border-indigo-200 flex items-center justify-center gap-2">
-                      <Send className="w-3.5 h-3.5" /> Đã gửi báo cáo về nguồn
-                    </span>
-                  )}
-                </>
+                <span className="px-4 py-2 text-[13px] font-semibold rounded-lg border bg-rose-50 text-rose-700 border-rose-200 flex items-center justify-center gap-2">
+                  <AlertTriangle className="w-4 h-4" /> {record.statusText || 'Không khớp'}
+                </span>
               )}
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex items-center justify-end gap-3 flex-wrap">
+        <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex items-center justify-end gap-3">
           <button
             onClick={onClose}
             className="px-4 py-2 text-[13px] text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50"
           >
             Đóng
-          </button>
-          <button
-            onClick={onViewHistory}
-            title="Xem lịch sử đối soát của bộ dữ liệu này"
-            className="px-4 py-2 text-[13px] border border-slate-200 text-slate-700 bg-white rounded-lg hover:bg-slate-50 flex items-center gap-2"
-          >
-            <HistoryIcon className="w-4 h-4" />
-            Xem lịch sử
-          </button>
-          {!isMatched && (
-            <button
-              title="Đồng bộ lại thu thập này"
-              className="px-4 py-2 text-[13px] border border-slate-200 text-slate-700 bg-white rounded-lg hover:bg-slate-50 flex items-center gap-2"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Đồng bộ lại
-            </button>
-          )}
-          <button
-            title="Tải báo cáo đối soát"
-            className="px-4 py-2 text-[13px] bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
-          >
-            <Download className="w-4 h-4" />
-            Xuất báo cáo
           </button>
         </div>
       </div>

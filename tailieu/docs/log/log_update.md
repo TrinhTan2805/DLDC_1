@@ -1,5 +1,17 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Phiên bản 2.6.06 (Ngày cập nhật: 02/07/2026)
+
+**Nội dung thay đổi:**
+1. **Modal "Chi tiết đối soát thu thập"** (`ReconciliationDetailModal.tsx`): footer **chỉ giữ nút "Đóng"** — bỏ các nút "Xem lịch sử", "Đồng bộ lại", "Xuất báo cáo".
+2. **View "Không khớp"** giữ giao diện giống "Khớp" (chỉ khác màu): bỏ 2 badge *"Có sai lệch dữ liệu"* và *"Đã gửi báo cáo về nguồn"*, thay bằng **1 badge "Không khớp"** (đỏ) tương tự badge "Khớp dữ liệu".
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/reconciliation/ReconciliationDetailModal.tsx`
+- `package.json`
+
+---
+
 ## Phiên bản 2.6.05 (Ngày cập nhật: 02/07/2026)
 
 > Lưu ý: File thuộc Phân hệ 9 (Cung cấp dữ liệu) đang `[ ]` LOCKED. Thay đổi theo **chỉ đạo trực tiếp của PM**.
