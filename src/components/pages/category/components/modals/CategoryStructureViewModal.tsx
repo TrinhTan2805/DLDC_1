@@ -2,6 +2,7 @@ import { useState, ChangeEvent } from 'react';
 import { Layers, CheckCircle2, XCircle } from 'lucide-react';
 import { MasterDataEntity, MasterDataAttribute, EntityRelationship, FieldDataType, RelationshipType } from '../../categoryTypes';
 import { BaseModal } from '../../../../common/BaseModal';
+import { ReviewResultCard } from './ReviewResultCard';
 
 interface CategoryStructureViewModalProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface CategoryStructureViewModalProps {
   attributes: MasterDataAttribute[];
   relationships: EntityRelationship[];
   requestStatus?: string;
+  reviewComment?: string;
   onApprove: (note: string) => void;
   onReject: (note: string) => void;
 }
@@ -40,6 +42,7 @@ export function CategoryStructureViewModal({
   attributes,
   relationships,
   requestStatus,
+  reviewComment,
   onApprove,
   onReject,
 }: CategoryStructureViewModalProps) {
@@ -243,16 +246,20 @@ export function CategoryStructureViewModal({
         </div>
 
         {/* Ý kiến phê duyệt */}
-        <div className="space-y-2">
-          <label className="block text-[13px] font-semibold text-slate-700">Ý kiến phê duyệt</label>
-          <textarea
-            rows={3}
-            value={note}
-            onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setNote(e.target.value)}
-            placeholder="Nhập ý kiến phê duyệt hoặc lý do từ chối (nếu có)..."
-            className="w-full px-4 py-3 border border-slate-200 rounded-xl bg-white text-[13px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none resize-none"
-          />
-        </div>
+        {requestStatus === 'approved' || requestStatus === 'rejected' ? (
+          <ReviewResultCard status={requestStatus} comment={reviewComment} />
+        ) : (
+          <div className="space-y-2">
+            <label className="block text-[13px] font-semibold text-slate-700">Ý kiến phê duyệt</label>
+            <textarea
+              rows={3}
+              value={note}
+              onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setNote(e.target.value)}
+              placeholder="Nhập ý kiến phê duyệt hoặc lý do từ chối (nếu có)..."
+              className="w-full px-4 py-3 border border-slate-200 rounded-xl bg-white text-[13px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none resize-none"
+            />
+          </div>
+        )}
 
       </div>
     </BaseModal>

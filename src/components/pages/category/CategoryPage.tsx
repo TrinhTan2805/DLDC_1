@@ -785,22 +785,22 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string, textSizeClass: string = 'text-[13px]') => {
     switch (status) {
       case 'draft':
-        return <span className="px-3 py-1 bg-slate-100 text-slate-600 border border-slate-200 text-[13px] rounded-full whitespace-nowrap">Bản nháp</span>;
+        return <span className={`px-3 py-1 bg-slate-100 text-slate-600 border border-slate-200 ${textSizeClass} rounded-full whitespace-nowrap`}>Bản nháp</span>;
       case 'pending':
-        return <span className="px-3 py-1 bg-orange-50 text-orange-700 border border-orange-200 text-[13px] rounded-full whitespace-nowrap">Chờ duyệt</span>;
+        return <span className={`px-3 py-1 bg-orange-50 text-orange-700 border border-orange-200 ${textSizeClass} rounded-full whitespace-nowrap`}>Chờ duyệt</span>;
       case 'approved':
       case 'active':
       case 'published':
-        return <span className="px-3 py-1 bg-green-50 text-green-700 border border-green-200 text-[13px] rounded-full whitespace-nowrap">Đã phê duyệt</span>;
+        return <span className={`px-3 py-1 bg-green-50 text-green-700 border border-green-200 ${textSizeClass} rounded-full whitespace-nowrap`}>Đã phê duyệt</span>;
       case 'rejected':
-        return <span className="px-3 py-1 bg-red-50 text-red-700 border border-red-200 text-[13px] rounded-full whitespace-nowrap">Từ chối</span>;
+        return <span className={`px-3 py-1 bg-red-50 text-red-700 border border-red-200 ${textSizeClass} rounded-full whitespace-nowrap`}>Từ chối</span>;
       case 'inactive':
-        return <span className="px-3 py-1 bg-slate-200 text-slate-600 border border-slate-300 text-[13px] rounded-full whitespace-nowrap">Ngừng áp dụng</span>;
+        return <span className={`px-3 py-1 bg-slate-200 text-slate-600 border border-slate-300 ${textSizeClass} rounded-full whitespace-nowrap`}>Ngừng áp dụng</span>;
       case 'unpublished':
-        return <span className="px-3 py-1 bg-slate-200 text-slate-700 text-[13px] rounded-full whitespace-nowrap">Hủy công khai</span>;
+        return <span className={`px-3 py-1 bg-slate-200 text-slate-700 ${textSizeClass} rounded-full whitespace-nowrap`}>Hủy công khai</span>;
       default:
         return null;
     }
@@ -1272,7 +1272,7 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                                   )}
                                 </td>
                                 <td className="px-6 py-4 text-center">
-                                  {getStatusBadge(category.status)}
+                                  {getStatusBadge(category.status, 'text-[12px]')}
                                 </td>
                                 <td className="px-6 py-4 text-[13px] text-slate-600 font-normal">
                                   {category.createdDate}
@@ -1413,6 +1413,36 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
           {activeTab === 'approval' && (
             <div className="space-y-6">
 
+              {activeApprovalTab === 'data-change' && (
+                <div className="flex items-center justify-between">
+                  <div>
+                     <h3 className="text-[18px] font-semibold text-slate-900">Phê duyệt danh mục cập nhật</h3>
+                    <p className="text-[13px] text-slate-500 mt-1">Quản lý các yêu cầu phê duyệt cập nhật danh mục</p>
+                  </div>
+                  {selectedApprovalIds.length > 0 && (
+                    <div className="flex items-center gap-3">
+                      <span className="text-[13px] text-slate-600">
+                        Đã chọn: <span className="font-medium text-blue-600">{selectedApprovalIds.length}</span> yêu cầu
+                      </span>
+                      <button
+                        onClick={handleBulkApprove}
+                        className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-[13px]"
+                      >
+                        <CheckCircle2 className="w-4 h-4" />
+                        Phê duyệt hàng loạt
+                      </button>
+                      <button
+                        onClick={handleBulkReject}
+                        className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-[13px]"
+                      >
+                        <XCircle className="w-4 h-4" />
+                        Từ chối hàng loạt
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Stats Cards */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-lg p-4">
@@ -1466,36 +1496,7 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
 
               {activeApprovalTab === 'data-change' && (
                 <>
-                  {/* Header */}
-                  <div className="flex items-center justify-between">
-                    <div>
-                       <h3 className="text-[13px] font-semibold text-slate-900">Phê duyệt danh mục cập nhật</h3>
-                      <p className="text-[13px] text-slate-500 mt-1">Quản lý các yêu cầu phê duyệt cập nhật danh mục</p>
-                    </div>
-                {selectedApprovalIds.length > 0 && (
-                  <div className="flex items-center gap-3">
-                    <span className="text-[13px] text-slate-600">
-                      Đã chọn: <span className="font-medium text-blue-600">{selectedApprovalIds.length}</span> yêu cầu
-                    </span>
-                    <button
-                      onClick={handleBulkApprove}
-                      className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-[13px]"
-                    >
-                      <CheckCircle2 className="w-4 h-4" />
-                      Phê duyệt hàng loạt
-                    </button>
-                    <button
-                      onClick={handleBulkReject}
-                      className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-[13px]"
-                    >
-                      <XCircle className="w-4 h-4" />
-                      Từ chối hàng loạt
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Filters */}
+                  {/* Filters */}
               <div className="bg-white border border-slate-200 rounded-lg p-4">
                 <div className="flex flex-col md:flex-row gap-4">
                   <div className="flex-1 relative">
@@ -1574,10 +1575,8 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                             )}
                           </td>
                           <td className="px-6 py-3 text-[13px] text-slate-900">{index + 1}</td>
-                          <td className="px-6 py-3 text-[13px]">
-                            <code className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-[13px]">
-                              {request.recordCode}
-                            </code>
+                          <td className="px-6 py-3 text-[13px] text-slate-700">
+                            {request.recordCode}
                           </td>
                           <td className="px-6 py-3">
                             <div className="text-[13px] text-slate-900">{request.recordName}</div>

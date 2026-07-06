@@ -25,6 +25,7 @@ export interface ApprovalRequest {
   reviewedBy?: string;
   reviewedDate?: string;
   comments?: string;
+  submissionContent?: string;
   changes?: any;
   lineStatuses?: Record<string, 'approved' | 'rejected'>;
 }

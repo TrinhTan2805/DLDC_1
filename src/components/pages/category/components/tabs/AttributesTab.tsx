@@ -332,6 +332,13 @@ export function AttributesTab({
   const [dldcDatabase, setDldcDatabase] = useState<string>(
     () => getDatabaseForTable(wizardConfig?.dldcTable || '')
   );
+
+  // Fallback: khi xem chi tiết, wizardConfig.dldcTable có thể chưa có sẵn — suy ra từ trường đã lưu
+  const primaryDldcTableId = wizardConfig?.dldcTable || attributes.find(a => a.sourceTable)?.sourceTable || '';
+  const primaryDldcDbId = dldcDatabase || getDatabaseForTable(primaryDldcTableId);
+  const joinedDldcTableIds = Array.from(new Set(
+    attributes.map(a => a.sourceTable).filter((t): t is string => !!t && t !== primaryDldcTableId)
+  ));
   const [useJoin, setUseJoin] = useState(false);
   const [dldcJoins, setDldcJoins] = useState<DldcJoin[]>([]);
   const [dldcFieldRows, setDldcFieldRows] = useState<DldcFieldRow[]>(() => {
@@ -776,6 +783,99 @@ export function AttributesTab({
           {/* ── Mode: DLDC Sync ── */}
           {dataSource === 'dldc' && (
             <div className="space-y-4">
+              {isViewOnly ? (
+                /* ── Chế độ xem chi tiết: chỉ hiển thị tên CSDL, tên bảng, các trường — không cho chỉnh sửa ── */
+                <>
+                  <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
+                    <div className="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
+                      <Database className="w-4 h-4 text-slate-500" />
+                      <p className="text-[13px] font-semibold text-slate-700">Cấu hình nguồn dữ liệu</p>
+                    </div>
+                    <div className="p-5 space-y-3">
+                      <div className="flex justify-between items-center text-[13px]">
+                        <span className="text-slate-500">Cơ sở dữ liệu</span>
+                        <span className="font-medium text-slate-900">
+                          {DLDC_DATABASES.find(d => d.id === primaryDldcDbId)?.label || primaryDldcDbId || '--'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center text-[13px]">
+                        <span className="text-slate-500">Bảng dữ liệu chính</span>
+                        <span className="font-medium text-slate-900">
+                          {DLDC_TABLES[primaryDldcDbId]?.find(t => t.id === primaryDldcTableId)?.displayName || primaryDldcTableId || '--'}
+                        </span>
+                      </div>
+                      {joinedDldcTableIds.length > 0 && (
+                        <div className="flex justify-between items-start text-[13px] pt-1 border-t border-slate-100">
+                          <span className="text-slate-500 whitespace-nowrap">Bảng liên kết bổ sung</span>
+                          <div className="flex flex-wrap justify-end gap-1.5">
+                            {joinedDldcTableIds.map(tableId => {
+                              const tableDbId = getDatabaseForTable(tableId);
+                              const tableLabel = DLDC_TABLES[tableDbId]?.find(t => t.id === tableId)?.displayName || tableId;
+                              return (
+                                <span
+                                  key={tableId}
+                                  className="px-2.5 py-1 bg-blue-50 border border-blue-200 text-blue-700 rounded-lg text-[13px] font-medium"
+                                >
+                                  {tableLabel} <span className="text-blue-400 font-mono">({tableId})</span>
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
+                    <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-slate-500" />
+                      <p className="text-[13px] font-semibold text-slate-700">Các trường dữ liệu</p>
+                      <span className="text-[13px] px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">
+                        {attributes.length} trường
+                      </span>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-[13px] dldc-summary-table">
+                        <thead className="bg-slate-50 border-b border-slate-100">
+                          <tr>
+                            <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Tên bảng</th>
+                            <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Trường gốc</th>
+                            <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Tên hiển thị</th>
+                            <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Kiểu dữ liệu</th>
+                            <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap text-center">PK</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 bg-white">
+                          {attributes.length === 0 ? (
+                            <tr>
+                              <td colSpan={5} className="px-5 py-8 text-center text-[13px] text-slate-400">
+                                Chưa có trường dữ liệu nào
+                              </td>
+                            </tr>
+                          ) : (
+                            attributes.map(attr => (
+                              <tr key={attr.id} className="hover:bg-slate-50/50 transition-colors">
+                                <td className="px-4 py-3 text-[13px] font-mono text-slate-700">{attr.sourceTable || primaryDldcTableId || '--'}</td>
+                                <td className="px-4 py-3 text-[13px] font-mono text-slate-700">{attr.sourceField || attr.fieldName}</td>
+                                <td className="px-4 py-3 text-[13px] text-slate-700">{attr.displayName}</td>
+                                <td className="px-4 py-3 text-[13px] text-slate-600">{getDataTypeLabel(attr.dataType)}</td>
+                                <td className="px-4 py-3 text-[13px] text-center">
+                                  {attr.keyType === 'primary' ? (
+                                    <span className="px-1.5 py-0.5 rounded text-[13px] bg-amber-50 text-amber-700 font-bold border border-amber-200">PK</span>
+                                  ) : (
+                                    <span className="text-slate-400">--</span>
+                                  )}
+                                </td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </>
+              ) : (
+              <>
 
               {/* Cấu hình nguồn dữ liệu card */}
               <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
@@ -1133,6 +1233,8 @@ export function AttributesTab({
                     </button>
                   </div>
                 </div>
+              )}
+              </>
               )}
             </div>
           )}

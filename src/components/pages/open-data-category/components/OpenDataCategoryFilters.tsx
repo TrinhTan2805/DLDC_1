@@ -76,7 +76,7 @@ export function OpenDataCategoryFilterPanel({
 }: OpenDataCategoryFilterPanelProps) {
   return (
     <div className="relative mt-3 p-4 bg-white border border-slate-200 rounded-xl shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] before:content-[''] before:absolute before:-top-[7px] before:right-[208px] md:before:right-[auto] md:before:left-[calc(100%-100px)] lg:before:left-[calc(100%-242px)] before:w-3 before:h-3 before:bg-white before:rotate-45 before:border-l before:border-t before:border-slate-200">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Trạng thái công khai */}
         <div>
           <label className="block text-[13px] text-slate-600 mb-2 font-normal">Trạng thái công khai</label>

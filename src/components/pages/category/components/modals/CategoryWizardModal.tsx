@@ -1,9 +1,17 @@
 import React, { ChangeEvent, useState, useEffect } from 'react';
-import { X, FileText, Sliders, ChevronRight, ChevronLeft, Save, Send, Link2, ChevronDown, Check } from 'lucide-react';
+import { X, FileText, Sliders, ChevronRight, ChevronLeft, Save, Send, Link2, ChevronDown, Check, Clock, CalendarClock } from 'lucide-react';
 import { AttributesTab } from '../tabs/AttributesTab';
 import { RelationshipsTab } from '../tabs/RelationshipsTab';
-import { MasterDataEntity, MasterDataAttribute, ScopeType, FieldDataType } from '../../categoryTypes';
+import { MasterDataEntity, MasterDataAttribute, ScopeType, FieldDataType, ApprovalRequest } from '../../categoryTypes';
 import { Portal } from '../../../../common/Portal';
+import { ReviewResultCard } from './ReviewResultCard';
+
+const EXPIRE_REASON_LABELS: Record<string, string> = {
+  'Tích hợp vào danh mục khác': 'Tích hợp vào danh mục khác',
+  'Quy định pháp luật thay đổi': 'Pháp luật, Quyết định bổ sung thay đổi',
+  'Dữ liệu lỗi, cấu trúc cũ': 'Cấu trúc dữ liệu cũ, không còn phù hợp',
+  'Khác': 'Lý do khác',
+};
 
 interface CategoryWizardModalProps {
   isOpen: boolean;
@@ -14,6 +22,7 @@ interface CategoryWizardModalProps {
   formData: Partial<MasterDataEntity>;
   setFormData: (data: Partial<MasterDataEntity>) => void;
   onSaveStep1: (action: 'draft' | 'submit' | 'next' | 'next3') => void;
+  requests?: ApprovalRequest[];
   // AttributesTab props
   entities: MasterDataEntity[];
   attributes: MasterDataAttribute[];
@@ -53,9 +62,20 @@ export function CategoryWizardModal({
   getDataTypeLabel,
   onAddAttributeInline,
   isViewOnly = false,
-  isEditMode = false
+  isEditMode = false,
+  requests
 }: CategoryWizardModalProps) {
   const [modalIndex, setModalIndex] = useState(1);
+
+  const categoryRequest = requests
+    ?.filter(r => r.entityId === entityId && r.type === 'category')
+    .sort((a, b) => Number(b.id) - Number(a.id))[0];
+  const expireRequest = requests
+    ?.filter(r => r.entityId === entityId && r.type === 'expire')
+    .sort((a, b) => Number(b.id) - Number(a.id))[0];
+  const versionRequest = requests
+    ?.filter(r => r.entityId === entityId && r.type === 'version')
+    .sort((a, b) => Number(b.id) - Number(a.id))[0];
 
   useEffect(() => {
     if (!isOpen) return;
@@ -142,14 +162,32 @@ export function CategoryWizardModal({
               <div className="max-w-3xl mx-auto space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-400">
                 <div className="grid grid-cols-2 gap-4">
                   {entityId && (
-                    <div className="col-span-2">
-                      <label className="block text-[13px] text-slate-700 mb-2 font-medium">Phiên bản danh mục</label>
-                      <input
-                        type="text"
-                        disabled
-                        value={`v${formData.version || 1}.0 ${!isViewOnly ? '(Sẽ tự động tăng lên v' + ((formData.version || 1) + 1) + '.0 sau khi lưu/trình duyệt)' : ''}`}
-                        className="w-full px-3 py-2 bg-blue-50/50 border border-blue-200 rounded-lg text-[13px] font-bold text-blue-700 cursor-not-allowed"
-                      />
+                    <div className="col-span-2 border border-blue-200 bg-blue-50/50 rounded-xl p-4 space-y-3">
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="text-[13px] text-slate-600 font-medium shrink-0">Phiên bản danh mục</span>
+                        <span className="text-[13px] font-bold text-blue-700 text-right">
+                          v{formData.version || 1}.0
+                          {!isViewOnly && ` (Sẽ tự động tăng lên v${(formData.version || 1) + 1}.0 sau khi lưu/trình duyệt)`}
+                        </span>
+                      </div>
+                      {isViewOnly && Number(formData.version || 1) > 1 && (
+                        <>
+                          <div className="flex items-center justify-between gap-4 pt-3 border-t border-blue-100">
+                            <span className="text-[13px] text-slate-600 font-medium shrink-0">Hiệu lực</span>
+                            <span className="text-[13px] font-semibold text-slate-800 text-right">
+                              {versionRequest?.changes?.effectiveDate
+                                ? new Date(versionRequest.changes.effectiveDate).toLocaleDateString('vi-VN')
+                                : 'Chưa cập nhật'}
+                            </span>
+                          </div>
+                          <div className="flex items-start justify-between gap-4">
+                            <span className="text-[13px] text-slate-600 font-medium shrink-0">Mô tả thay đổi</span>
+                            <span className="text-[13px] font-semibold text-slate-800 text-right">
+                              {versionRequest?.changes?.changeDescription || 'Chưa cập nhật'}
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
                   )}
                   <div className="col-span-2 sm:col-span-1">
@@ -255,6 +293,17 @@ export function CategoryWizardModal({
                       <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                     </div>
                   </div>
+                  <div>
+                    <label className="block text-[13px] text-slate-700 mb-2 font-medium">Ngày hiệu lực</label>
+                    <input
+                      type="text"
+                      disabled={isViewOnly}
+                      value={formData.effectiveDate || ''}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, effectiveDate: e.target.value })}
+                      placeholder="VD: 20/12/2024"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none disabled:bg-slate-50 disabled:text-slate-500 font-medium bg-white hover:bg-slate-50/30 transition-all shadow-sm"
+                    />
+                  </div>
 
                   {false && (
                     <div className="col-span-2 grid grid-cols-3 gap-4 bg-blue-50/30 p-4 rounded-xl border border-blue-100/50 animate-in fade-in zoom-in-95 duration-200">
@@ -308,6 +357,67 @@ export function CategoryWizardModal({
                   )}
 
                 </div>
+
+                {isViewOnly && entityId && (
+                  <div className="space-y-4">
+                    {(formData.lifecycleStatus === 'pending_approval' || formData.lifecycleStatus === 'approved' || formData.lifecycleStatus === 'active' || formData.lifecycleStatus === 'rejected' || formData.lifecycleStatus === 'inactive') && (
+                      <div className="space-y-2">
+                        <label className="flex items-center gap-1.5 text-[13px] font-semibold text-slate-700">
+                          <FileText className="w-4 h-4 text-slate-400" />
+                          Nội dung trình duyệt
+                        </label>
+                        <div className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] text-slate-700 min-h-[46px] whitespace-pre-wrap">
+                          {categoryRequest?.submissionContent || <span className="text-slate-400 italic">Chưa cập nhật</span>}
+                        </div>
+                      </div>
+                    )}
+
+                    {(formData.lifecycleStatus === 'approved' || formData.lifecycleStatus === 'active' || formData.lifecycleStatus === 'inactive') && (
+                      <ReviewResultCard status="approved" label="Ý kiến phê duyệt danh mục" comment={categoryRequest?.comments} />
+                    )}
+
+                    {formData.lifecycleStatus === 'rejected' && (
+                      <ReviewResultCard status="rejected" label="Lý do từ chối danh mục" comment={categoryRequest?.comments} />
+                    )}
+
+                    {versionRequest && (versionRequest.status === 'approved' || versionRequest.status === 'rejected') && (
+                      <ReviewResultCard
+                        status={versionRequest.status}
+                        label={versionRequest.status === 'approved' ? 'Ý kiến phê duyệt phiên bản' : 'Lý do từ chối phiên bản'}
+                        comment={versionRequest.comments}
+                      />
+                    )}
+
+                    {formData.lifecycleStatus === 'inactive' && (
+                      <div className="space-y-4">
+                        <div className="border border-slate-200 rounded-xl overflow-hidden">
+                          <div className="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center gap-2 text-slate-700 text-[13px] font-medium">
+                            <Clock className="w-4 h-4 text-blue-500" /> Thông tin hết hiệu lực
+                          </div>
+                          <div className="p-4 space-y-3">
+                            <div className="flex justify-between items-center gap-4">
+                              <span className="text-[13px] text-slate-500 flex items-center gap-1.5">
+                                <CalendarClock className="w-3.5 h-3.5" /> Thời điểm hết hiệu lực
+                              </span>
+                              <span className="text-[13px] text-slate-900 font-medium">
+                                {expireRequest?.changes?.expireDate
+                                  ? new Date(expireRequest.changes.expireDate).toLocaleDateString('vi-VN')
+                                  : '--'}
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-start gap-4">
+                              <span className="text-[13px] text-slate-500 whitespace-nowrap">Lý do ngừng sử dụng</span>
+                              <span className="text-[13px] text-slate-900 text-right">
+                                {EXPIRE_REASON_LABELS[expireRequest?.changes?.reason] || expireRequest?.changes?.reason || '--'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <ReviewResultCard status="approved" tone="amber" label="Ý kiến phê duyệt hết hiệu lực" comment={expireRequest?.comments} />
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
             {step === 2 && (

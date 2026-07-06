@@ -1,6 +1,6 @@
 {
   "name": "DLDC_1",
-  "version": "2.6.06",
+  "version": "2.6.14",
   "private": true,
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.3",
@@ -52,10 +52,12 @@
     "xlsx": "*"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.3.2",
     "@types/node": "^20.10.0",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react-swc": "^3.10.2",
+    "tailwindcss": "^4.3.2",
     "typescript": "^6.0.3",
     "vite": "6.3.5"
   },

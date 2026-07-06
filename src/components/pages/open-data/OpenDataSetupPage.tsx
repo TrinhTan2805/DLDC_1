@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, Settings, Eye, Edit, Trash2, Save, X, CheckSquare, Share2, FileSearch, BarChart3, Filter, XCircle, Globe, Send, Check, Ban, Upload, Paperclip, RefreshCw, Clock, FileText, AlertCircle, Shield, ChevronDown, Download, Database } from 'lucide-react';
+import { Plus, Search, Settings, Eye, Edit, Trash2, Save, X, CheckSquare, Share2, FileSearch, BarChart3, Filter, XCircle, Globe, Send, Check, Ban, Upload, Paperclip, RefreshCw, Clock, FileText, AlertCircle, Shield, ChevronDown, Download, Database, CheckCircle2, Edit2, Info } from 'lucide-react';
 import { units } from '../admin/GroupManagementPage';
 
 interface DataField {
@@ -19,26 +19,31 @@ interface OpenDataCategory {
   status: 'active' | 'inactive' | 'pending' | 'approved' | 'rejected' | 'draft';
   createdDate: string;
   updatedDate: string;
+  createdBy?: string;
+  updatedBy?: string;
   approvalStatus?: 'draft' | 'pending' | 'approved' | 'rejected';
   customFields?: DataField[];
   version?: string;
+  submitNote?: string;
   approvalNote?: string;
   rejectReason?: string;
   parentId?: string;
 }
+
+const parseVNDate = (str?: string): number | null => {
+  if (!str) return null;
+  const [d, m, y] = str.split('/').map(Number);
+  if (!d || !m || !y) return null;
+  return new Date(y, m - 1, d).getTime();
+};
 
 const incrementVersion = (v?: string): string => {
   if (!v) return '1.0';
   const parts = v.split('.');
   if (parts.length !== 2) return '1.0';
   const major = parseInt(parts[0], 10);
-  const minor = parseInt(parts[1], 10);
-  if (isNaN(major) || isNaN(minor)) return '1.0';
-  const newMinor = minor + 1;
-  if (newMinor >= 10) {
-    return `${major + 1}.0`;
-  }
-  return `${major}.${newMinor}`;
+  if (isNaN(major)) return '1.0';
+  return `${major + 1}.0`;
 };
 
 const mockCategories: OpenDataCategory[] = [
@@ -54,7 +59,10 @@ const mockCategories: OpenDataCategory[] = [
     approvalStatus: 'approved',
     createdDate: '01/01/2019',
     updatedDate: '10/12/2024',
+    createdBy: 'Nguyễn Văn A',
+    updatedBy: 'Trần Thị Bình',
     version: '1.0',
+    submitNote: 'Đề nghị Lãnh đạo xem xét phê duyệt danh mục dữ liệu mở "Danh sách tổ chức thực hiện trợ giúp pháp lý" để công bố công khai.',
     approvalNote: 'Đồng ý phê duyệt danh sách tổ chức trợ giúp pháp lý.'
   },
   {
@@ -69,7 +77,11 @@ const mockCategories: OpenDataCategory[] = [
     approvalStatus: 'approved',
     createdDate: '01/01/2019',
     updatedDate: '08/12/2024',
-    version: '1.0'
+    createdBy: 'Nguyễn Văn A',
+    updatedBy: 'Trần Thị Bình',
+    version: '1.0',
+    submitNote: 'Đề nghị Lãnh đạo xem xét phê duyệt danh mục dữ liệu mở "Danh sách người thực hiện trợ giúp pháp lý" theo quy định hiện hành.',
+    approvalNote: 'Đồng ý phê duyệt danh sách người thực hiện trợ giúp pháp lý.'
   },
   {
     id: '3',
@@ -83,7 +95,11 @@ const mockCategories: OpenDataCategory[] = [
     approvalStatus: 'approved',
     createdDate: '01/01/2027',
     updatedDate: '05/12/2024',
-    version: '1.0'
+    createdBy: 'Lê Văn Cường',
+    updatedBy: 'Lê Văn Cường',
+    version: '1.0',
+    submitNote: 'Đề nghị Lãnh đạo xem xét phê duyệt danh mục dữ liệu mở "Danh sách Luật sư Việt Nam" để công bố công khai.',
+    approvalNote: 'Đồng ý phê duyệt danh sách Luật sư Việt Nam.'
   },
   {
     id: '4',
@@ -97,7 +113,44 @@ const mockCategories: OpenDataCategory[] = [
     approvalStatus: 'draft',
     createdDate: '01/01/2027',
     updatedDate: '02/06/2026',
+    createdBy: 'Phạm Thị Dung',
+    updatedBy: 'Phạm Thị Dung',
     version: '1.0'
+  },
+  {
+    id: '5',
+    code: 'ODC010',
+    name: 'Danh sách Thừa phát lại',
+    description: 'Dữ liệu bao gồm thông tin về: Họ và tên Thừa phát lại, số Thẻ Thừa phát lại, Văn phòng Thừa phát lại đang hành nghề, địa bàn hoạt động...',
+    dataField: 'Cục Bổ trợ tư pháp',
+    updateFrequency: 'monthly',
+    dataFormat: ['JSON', 'CSV'],
+    status: 'pending',
+    approvalStatus: 'pending',
+    createdDate: '15/03/2025',
+    updatedDate: '20/12/2024',
+    createdBy: 'Hoàng Văn Em',
+    updatedBy: 'Hoàng Văn Em',
+    version: '1.0',
+    submitNote: 'Đề nghị Lãnh đạo xem xét phê duyệt danh mục dữ liệu mở "Danh sách Thừa phát lại" theo quy định hiện hành.'
+  },
+  {
+    id: '6',
+    code: 'ODC011',
+    name: 'Danh sách Trọng tài viên thương mại',
+    description: 'Dữ liệu bao gồm thông tin về: Họ và tên trọng tài viên, Trung tâm trọng tài thương mại, lĩnh vực chuyên môn, số năm kinh nghiệm...',
+    dataField: 'Cục Bổ trợ tư pháp',
+    updateFrequency: 'quarterly',
+    dataFormat: ['JSON'],
+    status: 'rejected',
+    approvalStatus: 'rejected',
+    createdDate: '10/02/2025',
+    updatedDate: '18/12/2024',
+    createdBy: 'Ngô Thị Phượng',
+    updatedBy: 'Ngô Thị Phượng',
+    version: '1.0',
+    submitNote: 'Đề nghị Lãnh đạo xem xét phê duyệt danh mục dữ liệu mở "Danh sách Trọng tài viên thương mại".',
+    rejectReason: 'Từ chối do dữ liệu thiếu trường thông tin bắt buộc: Số Quyết định bổ nhiệm trọng tài viên. Đề nghị bổ sung và trình duyệt lại.'
   },
 ];
 
@@ -170,7 +223,8 @@ const mockApprovalList: OpenDataCategory[] = [
     status: 'pending',
     approvalStatus: 'pending',
     createdDate: '26/12/2024',
-    updatedDate: '26/12/2024'
+    updatedDate: '26/12/2024',
+    submitNote: 'Đề nghị Lãnh đạo xem xét phê duyệt danh mục dữ liệu mở "Danh sách công chứng viên Việt Nam" theo Nghị định 47/2020/NĐ-CP.'
   },
   {
     id: 'ap2',
@@ -183,7 +237,8 @@ const mockApprovalList: OpenDataCategory[] = [
     status: 'pending',
     approvalStatus: 'pending',
     createdDate: '25/12/2024',
-    updatedDate: '25/12/2024'
+    updatedDate: '25/12/2024',
+    submitNote: 'Đề nghị Lãnh đạo xem xét phê duyệt danh mục dữ liệu mở "Danh sách tổ chức hành nghề công chứng" để công bố công khai theo quy định.'
   },
   {
     id: 'ap3',
@@ -196,7 +251,8 @@ const mockApprovalList: OpenDataCategory[] = [
     status: 'pending',
     approvalStatus: 'pending',
     createdDate: '24/12/2024',
-    updatedDate: '24/12/2024'
+    updatedDate: '24/12/2024',
+    submitNote: 'Đề nghị Lãnh đạo xem xét phê duyệt danh mục dữ liệu mở "Danh sách đấu giá viên" theo đề xuất của đơn vị.'
   },
   {
     id: 'ap4',
@@ -210,6 +266,7 @@ const mockApprovalList: OpenDataCategory[] = [
     approvalStatus: 'approved',
     createdDate: '01/01/2015',
     updatedDate: '23/12/2024',
+    submitNote: 'Đề nghị Lãnh đạo xem xét phê duyệt danh mục dữ liệu mở "Dữ liệu thống kê ngành Tư pháp" để công bố công khai.',
     approvalNote: 'Đồng ý phê duyệt dữ liệu thống kê ngành Tư pháp, số liệu đầy đủ.'
   },
   {
@@ -224,6 +281,7 @@ const mockApprovalList: OpenDataCategory[] = [
     approvalStatus: 'approved',
     createdDate: '20/12/2024',
     updatedDate: '22/12/2024',
+    submitNote: 'Đề nghị Lãnh đạo xem xét phê duyệt danh mục dữ liệu mở "Tài sản thi hành án" để công bố công khai.',
     approvalNote: 'Đồng ý phê duyệt tài sản thi hành án.'
   }
 ];
@@ -425,6 +483,8 @@ interface MetadataItem {
   status: 'active' | 'inactive';
   requiredFields?: string[];
   dataSourceConfig?: DataSourceConfig;
+  createdDate?: string;
+  createdBy?: string;
 }
 
 interface JoinTable {
@@ -451,6 +511,7 @@ interface LicenseItem {
   terms: string;
   referenceUrl: string;
   status: 'active' | 'inactive';
+  createdDate?: string;
 }
 
 const sampleMetadata: MetadataItem[] = [
@@ -465,7 +526,9 @@ const sampleMetadata: MetadataItem[] = [
     source: 'API nội bộ',
     frequency: 'monthly',
     status: 'active',
-    requiredFields: ['MaHS', 'HoTen', 'NgaySinh']
+    requiredFields: ['MaHS', 'HoTen', 'NgaySinh'],
+    createdDate: '10/01/2024',
+    createdBy: 'Nguyễn Văn A'
   },
   {
     id: 'm2',
@@ -478,7 +541,9 @@ const sampleMetadata: MetadataItem[] = [
     source: 'Cổng dịch vụ công',
     frequency: 'quarterly',
     status: 'active',
-    requiredFields: ['MaDoanhNghiep', 'TenDoanhNghiep', 'NgayCapGiepPhep']
+    requiredFields: ['MaDoanhNghiep', 'TenDoanhNghiep', 'NgayCapGiepPhep'],
+    createdDate: '22/02/2024',
+    createdBy: 'Trần Thị Bình'
   }
 ];
 
@@ -490,7 +555,8 @@ const sampleLicenses: LicenseItem[] = [
     description: 'Cho phép sử dụng và phân phối dữ liệu mở.',
     terms: 'Ghi nguồn là bắt buộc.',
     referenceUrl: 'https://example.com/license/cc0',
-    status: 'active'
+    status: 'active',
+    createdDate: '01/01/2024'
   },
   {
     id: 'l2',
@@ -499,7 +565,8 @@ const sampleLicenses: LicenseItem[] = [
     description: 'Yêu cầu ghi nhận nguồn khi sử dụng.',
     terms: 'Phải ghi rõ nguồn dữ liệu.',
     referenceUrl: 'https://example.com/license/odc-by',
-    status: 'active'
+    status: 'active',
+    createdDate: '15/03/2024'
   }
 ];
 
@@ -549,7 +616,7 @@ interface OpenDataSetupPageProps {
 }
 
 export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
-  const [activeTab, setActiveTab] = useState<'management' | 'approval' | 'metadata' | 'license'>('license');
+  const [activeTab, setActiveTab] = useState<'management' | 'approval' | 'metadata' | 'license'>('management');
   const [categories, setCategories] = useState<OpenDataCategory[]>(mockCategories);
   const [updateRules, setUpdateRules] = useState<OpenDataCategory[]>(mockUpdateRules);
   const [approvalList, setApprovalList] = useState<OpenDataCategory[]>(mockApprovalList);
@@ -603,11 +670,12 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
   const [licenseError, setLicenseError] = useState('');
   const [searchMetadata, setSearchMetadata] = useState('');
   const [metadataFrequencyFilter, setMetadataFrequencyFilter] = useState('all');
-  const [metadataFieldFilter, setMetadataFieldFilter] = useState('all');
+  const [metadataStatusFilter, setMetadataStatusFilter] = useState('all');
+  const [metadataLicenseFilter, setMetadataLicenseFilter] = useState('all');
   const [searchLicense, setSearchLicense] = useState('');
   const [licenseStatusFilter, setLicenseStatusFilter] = useState('all');
-
-  const allFields = Array.from(new Set(mockCategories.map(c => c.dataField)));
+  const [licenseFromDate, setLicenseFromDate] = useState('');
+  const [licenseToDate, setLicenseToDate] = useState('');
 
   // History filters
   const [fromDate, setFromDate] = useState('');
@@ -665,7 +733,12 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
     }
     const itemToSave: MetadataItem = { ...metadataFormData, dataSourceConfig };
     if (metadataFormData.id === '0') {
-      setMetadataEntries([...metadataEntries, { ...itemToSave, id: String(Date.now()) }]);
+      setMetadataEntries([...metadataEntries, {
+        ...itemToSave,
+        id: String(Date.now()),
+        createdDate: new Date().toLocaleDateString('vi-VN'),
+        createdBy: 'Nguyễn Văn A'
+      }]);
     } else {
       setMetadataEntries(metadataEntries.map(item => item.id === metadataFormData.id ? itemToSave : item));
     }
@@ -715,7 +788,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
       }
     }
     if (licenseFormData.id === '0') {
-      setLicenseEntries([...licenseEntries, { ...licenseFormData, id: String(Date.now()) }]);
+      setLicenseEntries([...licenseEntries, { ...licenseFormData, id: String(Date.now()), createdDate: new Date().toLocaleDateString('vi-VN') }]);
     } else {
       setLicenseEntries(licenseEntries.map(item => item.id === licenseFormData.id ? licenseFormData : item));
     }
@@ -749,6 +822,12 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
   const [rejectReason, setRejectReason] = useState('');
   const [approvalNote, setApprovalNote] = useState('');
   const [selectedApprover, setSelectedApprover] = useState('');
+  const [selectedApprovalIds, setSelectedApprovalIds] = useState<string[]>([]);
+  const [showBulkApprovalModal, setShowBulkApprovalModal] = useState(false);
+  const [bulkApprovalAction, setBulkApprovalAction] = useState<'approved' | 'rejected'>('approved');
+  const [bulkApprovalNote, setBulkApprovalNote] = useState('');
+  const [isNewCategorySubmission, setIsNewCategorySubmission] = useState(false);
+  const [isEditCategorySubmission, setIsEditCategorySubmission] = useState(false);
 
   // Mock list of approvers
   const approvers = [
@@ -834,16 +913,28 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
   };
 
   // Form state for add/edit
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    code: string;
+    name: string;
+    description: string;
+    dataField: string;
+    updateFrequency: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+    dataFormat: string[];
+    status: 'active' | 'inactive';
+    selectedTable: string;
+    selectedFields: string[];
+    version: string;
+    parentId: string;
+  }>({
     code: '',
     name: '',
     description: '',
     dataField: '',
-    updateFrequency: 'monthly' as const,
-    dataFormat: [] as string[],
-    status: 'active' as const,
+    updateFrequency: 'monthly',
+    dataFormat: [],
+    status: 'active',
     selectedTable: '',
-    selectedFields: [] as string[],
+    selectedFields: [],
     version: '1.0',
     parentId: ''
   });
@@ -883,19 +974,18 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
   const filteredMetadataEntries = metadataEntries.filter(m => {
     const matchSearch = m.description.toLowerCase().includes(searchMetadata.toLowerCase()) || m.keywords.toLowerCase().includes(searchMetadata.toLowerCase());
     const matchFreq = metadataFrequencyFilter === 'all' || m.frequency === metadataFrequencyFilter;
-
-    let matchField = true;
-    if (metadataFieldFilter !== 'all') {
-      const linkedFields = m.categoryCodes.map(code => categories.find(c => c.code === code)?.dataField).filter(Boolean);
-      matchField = linkedFields.includes(metadataFieldFilter);
-    }
-    return matchSearch && matchFreq && matchField;
+    const matchStatus = metadataStatusFilter === 'all' || m.status === metadataStatusFilter;
+    const matchLicense = metadataLicenseFilter === 'all' || m.licenseId === metadataLicenseFilter;
+    return matchSearch && matchFreq && matchStatus && matchLicense;
   });
 
   const filteredLicenseEntries = licenseEntries.filter(l => {
     const matchSearch = l.name.toLowerCase().includes(searchLicense.toLowerCase()) || l.description.toLowerCase().includes(searchLicense.toLowerCase());
     const matchStatus = licenseStatusFilter === 'all' || l.status === licenseStatusFilter;
-    return matchSearch && matchStatus;
+    const createdTime = parseVNDate(l.createdDate);
+    const matchFromDate = !licenseFromDate || (createdTime !== null && createdTime >= new Date(licenseFromDate).getTime());
+    const matchToDate = !licenseToDate || (createdTime !== null && createdTime <= new Date(licenseToDate).getTime());
+    return matchSearch && matchStatus && matchFromDate && matchToDate;
   });
 
   const filteredCategories = currentData.filter(cat => {
@@ -921,7 +1011,16 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
   const approvalStats = {
     pending: approvalList.filter(c => c.approvalStatus === 'pending').length,
     approved: approvalList.filter(c => c.approvalStatus === 'approved').length,
-    rejected: approvalList.filter(c => c.approvalStatus === 'rejected').length
+    rejected: approvalList.filter(c => c.approvalStatus === 'rejected').length,
+    total: approvalList.length
+  };
+
+  // Get category management stats
+  const categoryStats = {
+    total: categories.length,
+    pending: categories.filter(c => c.approvalStatus === 'pending').length,
+    approved: categories.filter(c => c.approvalStatus === 'approved').length,
+    rejected: categories.filter(c => c.approvalStatus === 'rejected').length
   };
 
   // Filter for history
@@ -958,6 +1057,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
     setStatusFilter('');
     setUnitFilter('');
     setFrequencyFilter('');
+    setSelectedApprovalIds([]);
   }, [activeTab]);
 
   const paginatedLicenses = filteredLicenseEntries.slice((currentPageNum - 1) * pageSize, currentPageNum * pageSize);
@@ -967,6 +1067,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
   const paginatedApproval = filteredApprovalList.slice((currentPageNum - 1) * pageSize, currentPageNum * pageSize);
 
   const [showFilters, setShowFilters] = useState(false);
+
 
 
   const renderFilterRow = () => {
@@ -1008,6 +1109,49 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
         onAddClick = () => openMetadataModal();
         break;
 
+    }
+
+    if (activeTab === 'approval') {
+      const statusPills = [
+        { value: '', label: 'Tất cả', activeClass: 'bg-slate-700 text-white border-slate-700' },
+        { value: 'pending', label: 'Chờ phê duyệt', activeClass: 'bg-orange-500 text-white border-orange-500' },
+        { value: 'approved', label: 'Đã phê duyệt', activeClass: 'bg-green-600 text-white border-green-600' },
+        { value: 'rejected', label: 'Đã từ chối', activeClass: 'bg-red-500 text-white border-red-500' },
+      ];
+
+      return (
+        <div className="space-y-3 mb-6">
+          <div className="bg-white border border-slate-200 rounded-lg p-4">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder={placeholder}
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                {statusPills.map(opt => (
+                  <button
+                    key={opt.value || 'all'}
+                    type="button"
+                    onClick={() => setStatusFilter(opt.value)}
+                    className={`px-3 py-2 text-[13px] rounded-lg border transition-all font-medium cursor-pointer ${statusFilter === opt.value
+                      ? opt.activeClass
+                      : 'bg-white text-slate-600 border-slate-300 hover:border-slate-400 hover:bg-slate-50'
+                      }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
     }
 
     return (
@@ -1077,11 +1221,33 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                   </div>
                 </div>
+                <div>
+                  <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Ngày tạo từ</label>
+                  <input
+                    type="date"
+                    value={licenseFromDate}
+                    onChange={(e) => setLicenseFromDate(e.target.value)}
+                    aria-label="Ngày tạo từ"
+                    title="Ngày tạo từ"
+                    className="w-full px-3 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-slate-700 font-medium"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Đến ngày</label>
+                  <input
+                    type="date"
+                    value={licenseToDate}
+                    onChange={(e) => setLicenseToDate(e.target.value)}
+                    aria-label="Đến ngày"
+                    title="Đến ngày"
+                    className="w-full px-3 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-slate-700 font-medium"
+                  />
+                </div>
               </div>
             )}
 
             {activeTab === 'management' && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Trạng thái danh mục</label>
                   <div className="relative">
@@ -1117,82 +1283,11 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                   </div>
                 </div>
-                <div>
-                  <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Tần suất cập nhật</label>
-                  <div className="relative">
-                    <select
-                      value={frequencyFilter}
-                      onChange={(e) => setFrequencyFilter(e.target.value)}
-                      className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                    >
-                      <option value="">Tất cả tần suất</option>
-                      <option value="monthly">Hàng tháng</option>
-                      <option value="quarterly">Hàng quý</option>
-                      <option value="yearly">Hàng năm</option>
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'approval' && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Trạng thái phê duyệt</label>
-                  <div className="relative">
-                    <select
-                      value={statusFilter}
-                      onChange={(e) => setStatusFilter(e.target.value)}
-                      className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                    >
-                      <option value="">Tất cả trạng thái</option>
-                      <option value="pending">Chờ duyệt</option>
-                      <option value="approved">Đã phê duyệt</option>
-                      <option value="rejected">Từ chối</option>
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Đơn vị chủ trì</label>
-                  <div className="relative">
-                    <select
-                      value={unitFilter}
-                      onChange={(e) => setUnitFilter(e.target.value)}
-                      className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                    >
-                      <option value="">Tất cả đơn vị</option>
-                      {units.map((unit) => (
-                        <option key={unit.id} value={unit.name}>
-                          {unit.name}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Tần suất cập nhật</label>
-                  <div className="relative">
-                    <select
-                      value={frequencyFilter}
-                      onChange={(e) => setFrequencyFilter(e.target.value)}
-                      className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                    >
-                      <option value="">Tất cả tần suất</option>
-                      <option value="monthly">Hàng tháng</option>
-                      <option value="quarterly">Hàng quý</option>
-                      <option value="yearly">Hàng năm</option>
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                  </div>
-                </div>
               </div>
             )}
 
             {activeTab === 'metadata' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Tần suất</label>
                   <div className="relative">
@@ -1212,17 +1307,32 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Lĩnh vực</label>
+                  <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Giấy phép</label>
                   <div className="relative">
                     <select
-                      value={metadataFieldFilter}
-                      onChange={(e) => setMetadataFieldFilter(e.target.value)}
+                      value={metadataLicenseFilter}
+                      onChange={(e) => setMetadataLicenseFilter(e.target.value)}
                       className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
                     >
-                      <option value="all">Tất cả lĩnh vực</option>
-                      {allFields.map((field, idx) => (
-                        <option key={idx} value={field}>{field}</option>
+                      <option value="all">Tất cả giấy phép</option>
+                      {licenseEntries.map((license) => (
+                        <option key={license.id} value={license.id}>{license.name}</option>
                       ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Trạng thái</label>
+                  <div className="relative">
+                    <select
+                      value={metadataStatusFilter}
+                      onChange={(e) => setMetadataStatusFilter(e.target.value)}
+                      className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
+                    >
+                      <option value="all">Tất cả trạng thái</option>
+                      <option value="active">Hoạt động</option>
+                      <option value="inactive">Ngừng hoạt động</option>
                     </select>
                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                   </div>
@@ -1361,7 +1471,9 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
       status: category.status as 'active' | 'inactive',
       selectedTable: '',
       selectedFields: [],
-      version: category.version || '1.0',
+      version: category.approvalStatus === 'draft'
+        ? (category.version || '1.0')
+        : incrementVersion(category.version || '1.0'),
       parentId: category.parentId || ''
     });
     setShowEditModal(true);
@@ -1388,7 +1500,9 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
       status: 'draft',
       approvalStatus: 'draft',
       createdDate: new Date().toLocaleDateString('vi-VN'),
-      updatedDate: new Date().toLocaleDateString('vi-VN')
+      updatedDate: new Date().toLocaleDateString('vi-VN'),
+      createdBy: 'Nguyễn Văn A',
+      updatedBy: 'Nguyễn Văn A'
     };
     setCurrentData([...currentData, newCategory]);
     setShowAddModal(false);
@@ -1403,8 +1517,9 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
             ...formData,
             status: 'draft',
             approvalStatus: 'draft',
-            version: incrementVersion(c.version),
-            updatedDate: new Date().toLocaleDateString('vi-VN')
+            version: formData.version,
+            updatedDate: new Date().toLocaleDateString('vi-VN'),
+            updatedBy: 'Nguyễn Văn A'
           }
           : c
       ));
@@ -1413,54 +1528,49 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
     }
   };
 
-  const handleSendApproval = () => {
-    if (showAddModal) {
-      const newCategory: OpenDataCategory = {
-        id: String(currentData.length + 1),
-        ...formData,
-        version: '1.0',
-        status: 'pending',
-        approvalStatus: 'pending',
-        createdDate: new Date().toLocaleDateString('vi-VN'),
-        updatedDate: new Date().toLocaleDateString('vi-VN')
-      };
-      setCurrentData([...currentData, newCategory]);
-    } else if (showEditModal && selectedCategory) {
-      setCurrentData(currentData.map(c =>
-        c.id === selectedCategory.id
-          ? {
-            ...c,
-            ...formData,
-            status: 'pending',
-            approvalStatus: 'pending',
-            version: incrementVersion(c.version),
-            updatedDate: new Date().toLocaleDateString('vi-VN')
-          }
-          : c
-      ));
-      setSelectedCategory(null);
-    } else if (showViewModal && selectedCategory) {
-      setCurrentData(currentData.map(c =>
-        c.id === selectedCategory.id
-          ? {
-            ...c,
-            status: 'pending',
-            approvalStatus: 'pending',
-            updatedDate: new Date().toLocaleDateString('vi-VN')
-          }
-          : c
-      ));
-      setSelectedCategory(null);
+  const handleOpenSubmitNewCategory = () => {
+    if (!formData.code.trim() || !formData.name.trim() || !formData.dataField.trim()) {
+      alert('Vui lòng nhập đầy đủ Mã danh mục, Tên danh mục và Đơn vị chủ trì cung cấp!');
+      return;
     }
+    setSelectedCategory({
+      id: 'new',
+      ...formData,
+      version: '1.0',
+      status: 'draft',
+      approvalStatus: 'draft',
+      createdDate: new Date().toLocaleDateString('vi-VN'),
+      updatedDate: new Date().toLocaleDateString('vi-VN'),
+      createdBy: 'Nguyễn Văn A',
+      updatedBy: 'Nguyễn Văn A'
+    });
+    setIsNewCategorySubmission(true);
+    setApprovalAction('pending');
+    setApprovalNote('');
+    setSelectedApprover('');
     setShowAddModal(false);
+    setShowApprovalModal(true);
+  };
+
+  const handleOpenSubmitEditCategory = () => {
+    if (!formData.code.trim() || !formData.name.trim() || !formData.dataField.trim()) {
+      alert('Vui lòng nhập đầy đủ Mã danh mục, Tên danh mục và Đơn vị chủ trì cung cấp!');
+      return;
+    }
+    setIsEditCategorySubmission(true);
+    setApprovalAction('pending');
+    setApprovalNote('');
+    setSelectedApprover('');
     setShowEditModal(false);
-    setShowViewModal(false);
-    alert('Đã gửi yêu cầu phê duyệt!');
+    setShowApprovalModal(true);
   };
 
   const handleSubmitForApproval = (category: OpenDataCategory) => {
     setSelectedCategory(category);
     setApprovalAction('pending');
+    setApprovalNote(category.submitNote || '');
+    setSelectedApprover('');
+    setShowViewModal(false);
     setShowApprovalModal(true);
   };
 
@@ -1491,6 +1601,54 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
   };
 
   const confirmApprovalAction = () => {
+    if (isNewCategorySubmission && selectedCategory) {
+      const newCategory: OpenDataCategory = {
+        ...selectedCategory,
+        id: String(categories.length + 1),
+        status: 'pending',
+        approvalStatus: 'pending',
+        submitNote: approvalNote
+      };
+      setCategories(prev => [...prev, newCategory]);
+      setApprovalList(prev => [...prev, newCategory]);
+
+      setShowApprovalModal(false);
+      setShowAddModal(false);
+      setIsNewCategorySubmission(false);
+      setSelectedCategory(null);
+      setSelectedApprover('');
+      setApprovalNote('');
+      return;
+    }
+
+    if (isEditCategorySubmission && selectedCategory) {
+      const updatedCategory: OpenDataCategory = {
+        ...selectedCategory,
+        ...formData,
+        status: 'pending',
+        approvalStatus: 'pending',
+        version: formData.version,
+        updatedDate: new Date().toLocaleDateString('vi-VN'),
+        updatedBy: 'Nguyễn Văn A',
+        submitNote: approvalNote
+      };
+      setCategories(prev => prev.map(c => c.id === updatedCategory.id ? updatedCategory : c));
+      setApprovalList(prev => {
+        const exists = prev.some(c => c.code === updatedCategory.code);
+        return exists
+          ? prev.map(c => c.code === updatedCategory.code ? { ...c, ...updatedCategory } : c)
+          : [...prev, updatedCategory];
+      });
+
+      setShowApprovalModal(false);
+      setShowEditModal(false);
+      setIsEditCategorySubmission(false);
+      setSelectedCategory(null);
+      setSelectedApprover('');
+      setApprovalNote('');
+      return;
+    }
+
     if (selectedCategory) {
       setCurrentData(currentData.map(c =>
         c.id === selectedCategory.id
@@ -1498,16 +1656,69 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
             ...c,
             status: approvalAction,
             approvalStatus: approvalAction,
+            submitNote: approvalAction === 'pending' ? approvalNote : c.submitNote,
             approvalNote: approvalAction === 'approved' ? approvalNote : c.approvalNote,
             rejectReason: approvalAction === 'rejected' ? rejectReason : c.rejectReason
           }
           : c
       ));
+
+      // Submitting for approval also pushes/updates the record in the Approval tab
+      // so the reviewer sees the same "Nội dung trình duyệt" when phê duyệt/từ chối.
+      if (approvalAction === 'pending') {
+        const submittedCategory: OpenDataCategory = {
+          ...selectedCategory,
+          status: 'pending',
+          approvalStatus: 'pending',
+          submitNote: approvalNote
+        };
+        setApprovalList(prev => {
+          const exists = prev.some(c => c.code === submittedCategory.code);
+          return exists
+            ? prev.map(c => c.code === submittedCategory.code ? { ...c, ...submittedCategory } : c)
+            : [...prev, submittedCategory];
+        });
+      }
+
       setShowApprovalModal(false);
       setSelectedCategory(null);
       setRejectReason('');
       setApprovalNote('');
     }
+  };
+
+  // Phê duyệt nhanh / Từ chối nhanh (chọn nhiều bản ghi)
+  const toggleSelectApprovalId = (id: string) => {
+    setSelectedApprovalIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  };
+
+  const toggleSelectAllApprovalIds = () => {
+    const pendingIds = filteredApprovalList.filter(c => c.approvalStatus === 'pending').map(c => c.id);
+    setSelectedApprovalIds(prev => prev.length === pendingIds.length ? [] : pendingIds);
+  };
+
+  const openBulkApprovalModal = (action: 'approved' | 'rejected') => {
+    setBulkApprovalAction(action);
+    setBulkApprovalNote('');
+    setShowBulkApprovalModal(true);
+  };
+
+  const confirmBulkApprovalAction = () => {
+    const ids = selectedApprovalIds;
+    setApprovalList(prev => prev.map(c =>
+      ids.includes(c.id)
+        ? {
+          ...c,
+          status: bulkApprovalAction,
+          approvalStatus: bulkApprovalAction,
+          approvalNote: bulkApprovalAction === 'approved' ? bulkApprovalNote : c.approvalNote,
+          rejectReason: bulkApprovalAction === 'rejected' ? bulkApprovalNote : c.rejectReason
+        }
+        : c
+    ));
+    setSelectedApprovalIds([]);
+    setShowBulkApprovalModal(false);
+    setBulkApprovalNote('');
   };
 
   // Custom field handlers
@@ -1589,16 +1800,6 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
       <div className="bg-white border-b border-slate-200">
         <div className="flex px-6 gap-2">
           <button
-            onClick={() => setActiveTab('license')}
-            className={`flex items-center gap-2 px-6 py-4 text-[13px] font-medium transition-all border-b-2 cursor-pointer ${activeTab === 'license'
-              ? 'border-blue-600 text-blue-600 bg-blue-50/50'
-              : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
-              }`}
-          >
-            <Shield className={`w-4 h-4 ${activeTab === 'license' ? 'text-blue-600' : 'text-slate-400'}`} />
-            Giấy phép
-          </button>
-          <button
             onClick={() => setActiveTab('management')}
             className={`flex items-center gap-2 px-6 py-4 text-[13px] font-medium transition-all border-b-2 cursor-pointer ${activeTab === 'management'
               ? 'border-blue-600 text-blue-600 bg-blue-50/50'
@@ -1609,14 +1810,14 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
             Quản lý danh mục
           </button>
           <button
-            onClick={() => setActiveTab('approval')}
-            className={`flex items-center gap-2 px-6 py-4 text-[13px] font-medium transition-all border-b-2 cursor-pointer ${activeTab === 'approval'
+            onClick={() => setActiveTab('license')}
+            className={`flex items-center gap-2 px-6 py-4 text-[13px] font-medium transition-all border-b-2 cursor-pointer ${activeTab === 'license'
               ? 'border-blue-600 text-blue-600 bg-blue-50/50'
               : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
               }`}
           >
-            <CheckSquare className={`w-4 h-4 ${activeTab === 'approval' ? 'text-blue-600' : 'text-slate-400'}`} />
-            Phê duyệt danh mục
+            <Shield className={`w-4 h-4 ${activeTab === 'license' ? 'text-blue-600' : 'text-slate-400'}`} />
+            Giấy phép
           </button>
           <button
             onClick={() => setActiveTab('metadata')}
@@ -1628,19 +1829,152 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
             <FileText className={`w-4 h-4 ${activeTab === 'metadata' ? 'text-blue-600' : 'text-slate-400'}`} />
             Metadata
           </button>
+          <button
+            onClick={() => setActiveTab('approval')}
+            className={`flex items-center gap-2 px-6 py-4 text-[13px] font-medium transition-all border-b-2 cursor-pointer ${activeTab === 'approval'
+              ? 'border-blue-600 text-blue-600 bg-blue-50/50'
+              : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
+              }`}
+          >
+            <CheckSquare className={`w-4 h-4 ${activeTab === 'approval' ? 'text-blue-600' : 'text-slate-400'}`} />
+            Phê duyệt danh mục
+          </button>
         </div>
       </div>
 
       {/* Main Tab Content */}
       <div className="p-6">
+        {activeTab === 'management' && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[13px] text-slate-500">Tổng số danh mục</span>
+                <FileText className="w-5 h-5 text-blue-600" />
+              </div>
+              <div className="text-2xl font-bold text-slate-900">{categoryStats.total}</div>
+            </div>
+
+            <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[13px] text-slate-500">Chờ phê duyệt</span>
+                <Clock className="w-5 h-5 text-orange-500" />
+              </div>
+              <div className="text-2xl font-bold text-slate-900">{categoryStats.pending}</div>
+            </div>
+
+            <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[13px] text-slate-500">Đã phê duyệt</span>
+                <CheckSquare className="w-5 h-5 text-green-600" />
+              </div>
+              <div className="text-2xl font-bold text-slate-900">{categoryStats.approved}</div>
+            </div>
+
+            <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[13px] text-slate-500">Từ chối</span>
+                <XCircle className="w-5 h-5 text-red-600" />
+              </div>
+              <div className="text-2xl font-bold text-slate-900">{categoryStats.rejected}</div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'approval' && (
+          <div className="space-y-4 mb-6">
+            {selectedApprovalIds.length > 0 && (
+              <div className="flex items-center justify-end gap-3">
+                <span className="text-[13px] text-slate-600">
+                  Đã chọn: <span className="font-medium text-blue-600">{selectedApprovalIds.length}</span> yêu cầu
+                </span>
+                <button
+                  onClick={() => openBulkApprovalModal('approved')}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-[13px]"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  Phê duyệt nhanh
+                </button>
+                <button
+                  onClick={() => openBulkApprovalModal('rejected')}
+                  className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-[13px]"
+                >
+                  <XCircle className="w-4 h-4" />
+                  Từ chối nhanh
+                </button>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-lg p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center">
+                    <Clock className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-[13px] text-orange-700">Chờ phê duyệt</p>
+                    <p className="text-2xl text-orange-900">{approvalStats.pending}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-lg p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
+                    <CheckCircle2 className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-[13px] text-green-700">Đã phê duyệt</p>
+                    <p className="text-2xl text-green-900">{approvalStats.approved}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-red-50 to-red-100 border border-red-200 rounded-lg p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center">
+                    <XCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-[13px] text-red-700">Đã từ chối</p>
+                    <p className="text-2xl text-red-900">{approvalStats.rejected}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                    <Edit2 className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-[13px] text-blue-700">Tổng yêu cầu</p>
+                    <p className="text-2xl text-blue-900">{approvalStats.total}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {renderFilterRow()}
 
 
         <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left">
-              <thead className="bg-[#f8fafc] text-slate-700 border-b border-slate-100">
+              <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
                 <tr>
+                  {activeTab === 'approval' && (
+                    <th className="px-4 py-4 text-left w-10">
+                      <input
+                        type="checkbox"
+                        title="Chọn tất cả"
+                        checked={selectedApprovalIds.length > 0 && selectedApprovalIds.length === filteredApprovalList.filter(c => c.approvalStatus === 'pending').length}
+                        onChange={toggleSelectAllApprovalIds}
+                        className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                      />
+                    </th>
+                  )}
                   <th className={`px-6 py-4 text-center whitespace-nowrap w-16 text-[13px] ${activeTab === 'metadata' ? 'font-bold text-slate-500' : 'font-semibold text-slate-700'}`}>STT</th>
                   {activeTab === 'metadata' ? (
                     <>
@@ -1657,6 +1991,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                       <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Tên viết tắt</th>
                       <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Mô tả</th>
                       <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Điều kiện sử dụng</th>
+                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[13px]">Ngày tạo</th>
                       <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[13px]">Trạng thái</th>
                       <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[13px] w-32">Thao tác</th>
                     </>
@@ -1673,6 +2008,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                       <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Mã danh mục</th>
                       <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Tên danh mục</th>
                       <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Đơn vị chủ trì cung cấp</th>
+                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[13px]">Phiên bản</th>
                       <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[13px]">Trạng thái</th>
                       <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[13px] w-48">Thao tác</th>
                     </>
@@ -1696,14 +2032,12 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                         <td className="px-4 py-3 text-left text-[13px] text-slate-700">
                           {getLicenseName(item.licenseId)}
                         </td>
-                        <td className="px-4 py-3 text-center">
-                          <span className="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-semibold border border-slate-200">{item.format}</span>
-                        </td>
+                        <td className="px-4 py-3 text-center text-slate-700 text-[13px]">{item.format}</td>
                         <td className="px-4 py-3 text-center text-slate-600 font-medium text-[13px]">
                           {item.frequency === 'daily' ? 'Hàng ngày' : item.frequency === 'weekly' ? 'Hàng tuần' : item.frequency === 'monthly' ? 'Hàng tháng' : 'Hàng quý'}
                         </td>
                         <td className="px-4 py-3 text-center">
-                          <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border whitespace-nowrap ${item.status === 'active' ? 'bg-green-50 text-green-700 border-green-100' : 'bg-slate-100 text-slate-700 border-slate-200'}`}>
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-normal border whitespace-nowrap ${item.status === 'active' ? 'bg-green-50 text-green-700 border-green-100' : 'bg-slate-100 text-slate-700 border-slate-200'}`}>
                             {item.status === 'active' ? 'Hoạt động' : 'Ngừng'}
                           </span>
                         </td>
@@ -1744,6 +2078,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                         </td>
                         <td className="px-6 py-4 text-left text-slate-700 text-[13px]">{item.description}</td>
                         <td className="px-6 py-4 text-left text-slate-600 max-w-xs truncate text-[13px]" title={item.terms}>{item.terms}</td>
+                        <td className="px-6 py-4 text-center text-slate-600 text-[13px]">{item.createdDate || '--'}</td>
                         <td className="px-6 py-4 text-center">
                           {item.status === 'active' ? (
                             <span className="px-2.5 py-1 text-xs bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-full font-medium whitespace-nowrap">
@@ -1783,15 +2118,26 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                       </tr>
                     ))
                   ) : (
-                    <tr><td colSpan={7} className="px-6 py-8 text-center text-[13px] text-slate-500">Không tìm thấy dữ liệu</td></tr>
+                    <tr><td colSpan={8} className="px-6 py-8 text-center text-[13px] text-slate-500">Không tìm thấy dữ liệu</td></tr>
                   )
                 ) : activeTab === 'approval' ? (
                   paginatedApproval.length > 0 ? (
                     paginatedApproval.map((category, index) => (
                       <tr key={category.id} className="hover:bg-slate-50 transition-all group border-b border-slate-100">
+                        <td className="px-4 py-3">
+                          {category.approvalStatus === 'pending' && (
+                            <input
+                              type="checkbox"
+                              title="Chọn bản ghi"
+                              checked={selectedApprovalIds.includes(category.id)}
+                              onChange={() => toggleSelectApprovalId(category.id)}
+                              className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                            />
+                          )}
+                        </td>
                         <td className="px-4 py-3 text-center text-slate-500 font-medium text-[13px]">{(currentPageNum - 1) * pageSize + index + 1}</td>
-                        <td className="px-4 py-3 text-left">
-                          <code className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-xs border border-slate-200">{category.code}</code>
+                        <td className="px-4 py-3 text-left text-[13px] text-slate-700">
+                          {category.code}
                         </td>
                         <td className="px-4 py-3 text-left text-[13px] font-semibold text-slate-950">{category.name}</td>
                         <td className="px-4 py-3 text-left text-slate-600 font-medium text-[13px]">{category.dataField}</td>
@@ -1799,46 +2145,46 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                           {getApprovalStatusBadge(category.approvalStatus)}
                         </td>
                         <td className="px-4 py-3 text-center">
-                          <div className="flex items-center justify-center gap-1">
-                            <button onClick={() => handleView(category)} className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Xem chi tiết">
+                          <div className="flex items-center justify-center gap-2">
+                            <button onClick={() => handleView(category)} className="p-1 text-blue-600 hover:bg-blue-50 rounded cursor-pointer transition-colors" title="Xem chi tiết">
                               <Eye className="w-4 h-4" />
                             </button>
                             <button
-                              onClick={() => handleApprove(category)}
-                              disabled={category.approvalStatus === 'approved' || category.approvalStatus === 'rejected'}
-                              className={`p-1.5 rounded-lg transition-colors ${category.approvalStatus === 'approved' || category.approvalStatus === 'rejected'
-                                ? 'text-slate-300 cursor-not-allowed bg-transparent'
-                                : 'text-slate-500 hover:text-green-600 hover:bg-green-50'
+                              onClick={() => category.approvalStatus === 'pending' && handleApprove(category)}
+                              disabled={category.approvalStatus !== 'pending'}
+                              className={`p-1 rounded transition-colors ${category.approvalStatus === 'pending'
+                                ? 'text-green-600 hover:bg-green-50 cursor-pointer'
+                                : 'text-slate-300 cursor-not-allowed'
                                 }`}
-                              title="Phê duyệt"
+                              title={category.approvalStatus === 'pending' ? "Phê duyệt" : "Đã xử lý"}
                             >
-                              <Check className="w-4 h-4" />
+                              <CheckCircle2 className="w-4 h-4" />
                             </button>
                             <button
-                              onClick={() => handleReject(category)}
-                              disabled={category.approvalStatus === 'approved' || category.approvalStatus === 'rejected'}
-                              className={`p-1.5 rounded-lg transition-colors ${category.approvalStatus === 'approved' || category.approvalStatus === 'rejected'
-                                ? 'text-slate-300 cursor-not-allowed bg-transparent'
-                                : 'text-slate-500 hover:text-red-600 hover:bg-red-50'
+                              onClick={() => category.approvalStatus === 'pending' && handleReject(category)}
+                              disabled={category.approvalStatus !== 'pending'}
+                              className={`p-1 rounded transition-colors ${category.approvalStatus === 'pending'
+                                ? 'text-red-600 hover:bg-red-50 cursor-pointer'
+                                : 'text-slate-300 cursor-not-allowed'
                                 }`}
-                              title="Từ chối"
+                              title={category.approvalStatus === 'pending' ? "Từ chối" : "Đã xử lý"}
                             >
-                              <Ban className="w-4 h-4" />
+                              <XCircle className="w-4 h-4" />
                             </button>
                           </div>
                         </td>
                       </tr>
                     ))
                   ) : (
-                    <tr><td colSpan={6} className="px-4 py-8 text-center text-sm text-slate-500">Không tìm thấy dữ liệu</td></tr>
+                    <tr><td colSpan={7} className="px-4 py-8 text-center text-sm text-slate-500">Không tìm thấy dữ liệu</td></tr>
                   )
                 ) : (
                   paginatedCategories.length > 0 ? (
                     paginatedCategories.map((category, index) => (
                       <tr key={category.id} className="hover:bg-slate-50 transition-all group border-b border-slate-100">
                         <td className="px-4 py-3 text-center text-slate-500 font-medium text-[13px]">{(currentPageNum - 1) * pageSize + index + 1}</td>
-                        <td className="px-4 py-3 text-left">
-                          <code className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-xs border border-slate-200">{category.code}</code>
+                        <td className="px-4 py-3 text-left text-[13px] text-slate-700">
+                          {category.code}
                         </td>
                         <td className="px-4 py-3 text-left text-[13px]">
                           <div>
@@ -1846,6 +2192,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                           </div>
                         </td>
                         <td className="px-4 py-3 text-left text-slate-600 font-medium text-[13px]">{category.dataField}</td>
+                        <td className="px-4 py-3 text-center text-slate-600 font-mono text-[13px]">{category.version ? `v${category.version}` : '--'}</td>
                         <td className="px-4 py-3 text-center text-[13px]">{getApprovalStatusBadge(category.approvalStatus)}</td>
                         <td className="px-4 py-3 text-center">
                           <div className="flex items-center justify-center gap-1">
@@ -1882,7 +2229,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                       </tr>
                     ))
                   ) : (
-                    <tr><td colSpan={6} className="px-4 py-8 text-center text-sm text-slate-500">Không tìm thấy dữ liệu</td></tr>
+                    <tr><td colSpan={7} className="px-4 py-8 text-center text-sm text-slate-500">Không tìm thấy dữ liệu</td></tr>
                   )
                 )}
               </tbody>
@@ -1911,25 +2258,32 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
               </button>
             </div>
 
-            <div className="p-6 space-y-6">
-              {/* Basic info section using grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-14 gap-x-8 text-[13px] font-normal text-slate-900">
+            <div className="p-6 space-y-4">
+              {/* Basic info section using grid — mirrors the "Chi tiết danh mục" modal layout */}
+              <div className="grid grid-cols-2 gap-y-4 gap-x-8 text-[13px] font-normal text-black">
 
                 <div>
-                  <span className="block text-slate-900 mb-1 text-[13px] font-semibold">Trạng thái</span>
+                  <span className="block text-black mb-1 text-[13px] font-normal">Trạng thái</span>
                   <div className="flex items-center">
                     <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${selectedMetadata.status === 'active'
-                      ? 'bg-green-50 text-slate-900 border-green-200'
-                      : 'bg-slate-100 text-slate-900 border-slate-200'
+                      ? 'bg-green-50 text-black border-green-200'
+                      : 'bg-slate-100 text-black border-slate-200'
                       }`}>
                       {selectedMetadata.status === 'active' ? 'Hoạt động' : 'Ngừng hoạt động'}
                     </span>
                   </div>
                 </div>
 
-                <div className="col-span-1 md:col-span-2">
-                  <span className="block text-slate-900 mb-1 text-[13px] font-semibold">Thuộc danh mục</span>
-                  <div className="text-[13px]">
+                <div>
+                  <span className="block text-black mb-1 text-[13px] font-normal">Giấy phép</span>
+                  <div className="text-black text-[13px]">
+                    {getLicenseName(selectedMetadata.licenseId)}
+                  </div>
+                </div>
+
+                <div className="col-span-2">
+                  <span className="block text-black mb-1 text-[13px] font-normal">Thuộc danh mục</span>
+                  <div className="text-[13px] text-black">
                     {selectedMetadata.categoryCodes.map(code => {
                       const cat = categories.find(c => c.code === code) || categoryList.find(c => c.code === code);
                       return cat ? `${cat.code} - ${cat.name}` : code;
@@ -1937,35 +2291,28 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   </div>
                 </div>
 
-                <div className="col-span-1 md:col-span-2">
-                  <span className="block text-slate-900 mb-1 text-[13px] font-semibold">Mô tả</span>
-                  <div className="text-slate-900 whitespace-pre-wrap leading-relaxed text-[13px]">
-                    {selectedMetadata.description || <span className="text-slate-900 italic">Không có mô tả</span>}
+                <div className="col-span-2">
+                  <span className="block text-black mb-1 text-[13px] font-normal">Mô tả</span>
+                  <div className="text-black whitespace-pre-wrap leading-relaxed text-[13px]">
+                    {selectedMetadata.description || <span className="text-black italic">Không có mô tả</span>}
                   </div>
                 </div>
 
-                <div>
-                  <span className="block text-slate-900 mb-1 text-[13px] font-semibold">Giấy phép</span>
-                  <div className="text-slate-900 text-[13px]">
-                    {getLicenseName(selectedMetadata.licenseId)}
-                  </div>
-                </div>
-
-                <div className="col-span-1 md:col-span-2">
-                  <span className="block text-slate-900 mb-2 text-[13px] font-semibold">Nguồn dữ liệu</span>
+                <div className="col-span-2">
+                  <span className="block text-black mb-2 text-[13px] font-normal">Nguồn dữ liệu</span>
                   {selectedMetadata.dataSourceConfig?.database ? (
                     <div className="border border-slate-200 rounded-xl overflow-hidden">
                       <div className="bg-slate-50 px-4 py-3 flex flex-wrap gap-6 border-b border-slate-200">
                         <div>
-                          <span className="text-[13px] text-slate-900 uppercase tracking-wide">CSDL đích</span>
-                          <div className="text-slate-900 text-[13px] mt-0.5">
+                          <span className="text-[13px] text-black uppercase tracking-wide">CSDL đích</span>
+                          <div className="text-black text-[13px] mt-0.5">
                             {MOCK_DATABASES.find(d => d.value === selectedMetadata.dataSourceConfig!.database)?.name || selectedMetadata.dataSourceConfig.database}
                           </div>
                         </div>
                         <div>
-                          <span className="text-[13px] text-slate-900 uppercase tracking-wide">Bảng chính</span>
-                          <div className="font-mono text-slate-900 text-[13px] mt-0.5">
-                            {selectedMetadata.dataSourceConfig.primaryTable || <span className="text-slate-900 italic font-normal">Chưa chọn</span>}
+                          <span className="text-[13px] text-black uppercase tracking-wide">Bảng chính</span>
+                          <div className="font-mono text-black text-[13px] mt-0.5">
+                            {selectedMetadata.dataSourceConfig.primaryTable || <span className="text-black italic font-normal">Chưa chọn</span>}
                           </div>
                         </div>
                       </div>
@@ -1973,55 +2320,55 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                         <table className="w-full table-fixed">
                           <thead>
                             <tr className="bg-blue-50 border-b border-blue-100">
-                              <th className="px-4 py-2 text-left text-slate-900 text-[13px] w-[110px]">Loại JOIN</th>
-                              <th className="px-4 py-2 text-left text-slate-900 text-[13px] w-1/4">Bảng phụ</th>
-                              <th className="px-4 py-2 text-left text-slate-900 text-[13px] w-1/5">Alias</th>
-                              <th className="px-4 py-2 text-left text-slate-900 text-[13px]">Điều kiện</th>
+                              <th className="px-4 py-2 text-left text-black text-[13px] w-[110px]">Loại JOIN</th>
+                              <th className="px-4 py-2 text-left text-black text-[13px] w-1/4">Bảng phụ</th>
+                              <th className="px-4 py-2 text-left text-black text-[13px] w-1/5">Alias</th>
+                              <th className="px-4 py-2 text-left text-black text-[13px]">Điều kiện</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-100">
                             {selectedMetadata.dataSourceConfig.joinTables.map(jt => (
                               <tr key={jt.id} className="bg-white">
-                                <td className="px-4 py-2 text-[13px] text-slate-900 align-top">{jt.joinType}</td>
-                                <td className="px-4 py-2 font-mono text-slate-900 text-[13px] break-all align-top">{jt.table}</td>
-                                <td className="px-4 py-2 text-slate-900 text-[13px] break-all align-top">{jt.alias || '—'}</td>
-                                <td className="px-4 py-2 font-mono text-slate-900 text-[13px] break-all align-top">
-                                  <span className="text-slate-900">{selectedMetadata.dataSourceConfig!.primaryTable}.</span>{jt.leftCol}
-                                  <span className="mx-1 text-slate-900">=</span>
-                                  <span className="text-slate-900">{jt.table}.</span>{jt.rightCol}
+                                <td className="px-4 py-2 text-[13px] text-black align-top">{jt.joinType}</td>
+                                <td className="px-4 py-2 font-mono text-black text-[13px] break-all align-top">{jt.table}</td>
+                                <td className="px-4 py-2 text-black text-[13px] break-all align-top">{jt.alias || '—'}</td>
+                                <td className="px-4 py-2 font-mono text-black text-[13px] break-all align-top">
+                                  <span className="text-black">{selectedMetadata.dataSourceConfig!.primaryTable}.</span>{jt.leftCol}
+                                  <span className="mx-1 text-black">=</span>
+                                  <span className="text-black">{jt.table}.</span>{jt.rightCol}
                                 </td>
                               </tr>
                             ))}
                           </tbody>
                         </table>
                       ) : (
-                        <div className="px-4 py-3 text-[13px] text-slate-900 italic">Không có bảng JOIN</div>
+                        <div className="px-4 py-3 text-[13px] text-black italic">Không có bảng JOIN</div>
                       )}
                     </div>
                   ) : (
-                    <span className="text-slate-900 italic text-[13px]">Chưa cấu hình</span>
+                    <span className="text-black italic text-[13px]">Chưa cấu hình</span>
                   )}
                 </div>
 
                 <div>
-                  <span className="block text-slate-900 mb-1 text-[13px] font-semibold">Định dạng chia sẻ</span>
+                  <span className="block text-black mb-1 text-[13px] font-normal">Định dạng chia sẻ</span>
                   <div className="flex flex-wrap gap-1.5 items-center">
                     {selectedMetadata.format ? (
                       selectedMetadata.format.split(',').map((fmt, idx) => (
-                        <span key={idx} className="px-2 py-0.5 bg-blue-50 text-slate-900 border border-blue-100 rounded text-xs">
+                        <span key={idx} className="px-2 py-0.5 bg-blue-50 text-black border border-blue-100 rounded text-xs">
                           {fmt.trim()}
                         </span>
                       ))
                     ) : (
-                      <span className="text-slate-900 italic text-xs">Chưa chọn</span>
+                      <span className="text-black italic text-xs">Chưa chọn</span>
                     )}
                   </div>
                 </div>
 
                 <div>
-                  <span className="block text-slate-900 mb-1 text-[13px] font-semibold">Tần suất cập nhật</span>
+                  <span className="block text-black mb-1 text-[13px] font-normal">Tần suất cập nhật</span>
                   <div className="flex items-center">
-                    <span className="px-2.5 py-0.5 bg-purple-50 text-slate-900 border border-purple-200 rounded-full text-xs">
+                    <span className="px-2.5 py-0.5 bg-purple-50 text-black border border-purple-200 rounded-full text-xs">
                       {selectedMetadata.frequency === 'daily'
                         ? 'Hàng ngày'
                         : selectedMetadata.frequency === 'weekly'
@@ -2033,28 +2380,47 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   </div>
                 </div>
 
-                <div className="col-span-1 md:col-span-2">
-                  <span className="block text-slate-900 mb-1 text-[13px] font-semibold">Từ khóa</span>
+                <div className="col-span-2">
+                  <span className="block text-black mb-1 text-[13px] font-normal">Từ khóa</span>
                   <div className="flex flex-wrap gap-1.5">
                     {selectedMetadata.keywords ? (
                       selectedMetadata.keywords.split(',').map((k, i) => k.trim() && (
-                        <span key={i} className="px-2 py-0.5 bg-slate-100 text-slate-900 rounded text-xs border border-slate-200">
+                        <span key={i} className="px-2 py-0.5 bg-slate-100 text-black rounded text-xs border border-slate-200">
                           {k.trim()}
                         </span>
                       ))
                     ) : (
-                      <span className="text-slate-900 italic text-xs">Không có từ khóa</span>
+                      <span className="text-black italic text-xs">Không có từ khóa</span>
                     )}
                   </div>
                 </div>
 
+              </div>
+
+              {/* Thông tin hệ thống - separated from the grid above to avoid layout overlap with the last field */}
+              <div className="border border-slate-200 rounded-xl p-4 space-y-3">
+                <h4 className="text-[13px] font-semibold text-black">Thông tin hệ thống</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="block text-black mb-1 text-[13px] font-normal">Ngày tạo</span>
+                    <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] text-black">
+                      {selectedMetadata.createdDate || '--'}
+                    </div>
+                  </div>
+                  <div>
+                    <span className="block text-black mb-1 text-[13px] font-normal">Người tạo</span>
+                    <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] text-black">
+                      {selectedMetadata.createdBy || '--'}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
             <div className="sticky bottom-0 bg-slate-50 border-t border-slate-100 px-6 py-4 flex items-center justify-end">
               <button
                 onClick={() => setShowViewMetadataModal(false)}
-                className="px-5 py-2.5 text-[13px] font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer active:scale-95"
+                className="px-5 py-2.5 text-[13px] font-normal text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer active:scale-95"
               >
                 Đóng
               </button>
@@ -2478,19 +2844,33 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   placeholder="https://example.com/license/cc0"
                 />
               </div>
-              <div>
-                <label className="block text-[13px] text-slate-700 mb-2">Trạng thái</label>
-                <select
-                  value={licenseFormData.status}
-                  onChange={(e) => setLicenseFormData({ ...licenseFormData, status: e.target.value as LicenseItem['status'] })}
-                  disabled={isLicenseViewOnly}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-emerald-500 disabled:bg-slate-50 disabled:text-slate-500"
-                  aria-label="Trạng thái"
-                  title="Trạng thái"
-                >
-                  <option value="active">Còn hiệu lực</option>
-                  <option value="inactive">Hết hiệu lực</option>
-                </select>
+              <div className={licenseFormData.id !== '0' ? 'grid grid-cols-2 gap-4' : ''}>
+                <div>
+                  <label className="block text-[13px] text-slate-700 mb-2">Trạng thái</label>
+                  <select
+                    value={licenseFormData.status}
+                    onChange={(e) => setLicenseFormData({ ...licenseFormData, status: e.target.value as LicenseItem['status'] })}
+                    disabled={isLicenseViewOnly}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-emerald-500 disabled:bg-slate-50 disabled:text-slate-500"
+                    aria-label="Trạng thái"
+                    title="Trạng thái"
+                  >
+                    <option value="active">Còn hiệu lực</option>
+                    <option value="inactive">Hết hiệu lực</option>
+                  </select>
+                </div>
+                {licenseFormData.id !== '0' && (
+                  <div>
+                    <label className="block text-[13px] text-slate-700 mb-2">Ngày tạo</label>
+                    <input
+                      type="text"
+                      value={licenseFormData.createdDate || '--'}
+                      readOnly
+                      disabled
+                      className="w-full px-3 py-2 border border-slate-200 bg-slate-50 text-slate-500 rounded-lg text-[13px] outline-none cursor-not-allowed"
+                    />
+                  </div>
+                )}
               </div>
             </div>
             <div className="sticky bottom-0 bg-slate-50 border-t border-slate-200 px-6 py-4 flex items-center justify-end gap-3">
@@ -2567,6 +2947,26 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                 - updated_at: TIMESTAMP → Auto timestamp
               */}
 
+              {activeTab === 'management' && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[13px] text-slate-700 mb-2">Phiên bản</label>
+                    <input
+                      type="text"
+                      value={formData.version}
+                      readOnly
+                      disabled
+                      className="w-full px-3 py-2 border border-slate-200 bg-slate-50 text-slate-500 rounded-lg text-[13px] outline-none cursor-not-allowed"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[13px] text-slate-700 mb-2">Trạng thái</label>
+                    <div className="w-full px-3 py-2 border border-slate-200 bg-slate-50 rounded-lg text-[13px] flex items-center cursor-not-allowed">
+                      {getApprovalStatusBadge('draft')}
+                    </div>
+                  </div>
+                </div>
+              )}
               <div>
                 <label className="block text-[13px] text-slate-700 mb-2">Mã danh mục <span className="text-red-500">*</span></label>
                 <input
@@ -2587,18 +2987,6 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   placeholder="Nhập tên danh mục"
                 />
               </div>
-              {activeTab === 'management' && (
-                <div>
-                  <label className="block text-[13px] text-slate-700 mb-2">Phiên bản</label>
-                  <input
-                    type="text"
-                    value={formData.version}
-                    readOnly
-                    disabled
-                    className="w-full px-3 py-2 border border-slate-200 bg-slate-50 text-slate-500 rounded-lg text-[13px] outline-none cursor-not-allowed"
-                  />
-                </div>
-              )}
               <div>
                 <label className="block text-[13px] text-slate-700 mb-2">Mô tả</label>
                 <textarea
@@ -2639,15 +3027,15 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
               </button>
               <button
                 onClick={handleSaveAdd}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-[13px] font-medium"
+                className="px-4 py-2 bg-transparent border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 text-[13px] font-medium"
               >
                 <Save className="w-4 h-4 inline mr-2" />
                 Lưu
               </button>
               {activeTab === 'management' && (
                 <button
-                  onClick={handleSendApproval}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-[13px] font-medium"
+                  onClick={handleOpenSubmitNewCategory}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-[13px] font-medium"
                 >
                   <Send className="w-4 h-4 inline mr-2" />
                   Gửi phê duyệt
@@ -2698,22 +3086,69 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   <div>{getApprovalStatusBadge(selectedCategory.approvalStatus)}</div>
                 </div>
 
+                {selectedCategory.submitNote && (
+                  <div className="col-span-2 space-y-2">
+                    <label className="flex items-center gap-1.5 text-[13px] font-semibold text-slate-700">
+                      <FileText className="w-4 h-4 text-slate-400" />
+                      Nội dung trình duyệt
+                    </label>
+                    <div className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] text-slate-700 min-h-[46px] whitespace-pre-wrap">
+                      {selectedCategory.submitNote}
+                    </div>
+                  </div>
+                )}
                 {selectedCategory.approvalStatus === 'approved' && (
-                  <div className="col-span-2 bg-green-50 border border-green-200 rounded-lg p-3">
-                    <label className="block text-[13px] font-semibold text-green-800 mb-1">Ý kiến người phê duyệt</label>
-                    <div className="text-[13px] text-green-900 italic">
-                      {selectedCategory.approvalNote || 'Đồng ý phê duyệt danh mục.'}
+                  <div className="col-span-2 rounded-xl border p-4 bg-emerald-50/60 border-emerald-200">
+                    <div className="flex items-center gap-2 text-[13px] font-semibold mb-1.5 text-emerald-700">
+                      <CheckCircle2 className="w-4 h-4" />
+                      Ý kiến phê duyệt danh mục
+                    </div>
+                    <div className="text-[13px] text-slate-700 leading-relaxed whitespace-pre-wrap">
+                      {selectedCategory.approvalNote || <span className="text-slate-400 italic">Không có ghi chú</span>}
                     </div>
                   </div>
                 )}
                 {selectedCategory.approvalStatus === 'rejected' && (
-                  <div className="col-span-2 bg-red-50 border border-red-200 rounded-lg p-3">
-                    <label className="block text-[13px] font-semibold text-red-800 mb-1">Lý do từ chối</label>
-                    <div className="text-[13px] text-red-900 italic">
-                      {selectedCategory.rejectReason || 'Không có lý do từ chối cụ thể.'}
+                  <div className="col-span-2 rounded-xl border p-4 bg-red-50/60 border-red-200">
+                    <div className="flex items-center gap-2 text-[13px] font-semibold mb-1.5 text-red-600">
+                      <XCircle className="w-4 h-4" />
+                      Lý do từ chối danh mục
+                    </div>
+                    <div className="text-[13px] text-slate-700 leading-relaxed whitespace-pre-wrap">
+                      {selectedCategory.rejectReason || <span className="text-slate-400 italic">Không có ghi chú</span>}
                     </div>
                   </div>
                 )}
+
+                <div className="col-span-2 border border-slate-200 rounded-xl p-4 space-y-3">
+                  <h4 className="text-[13px] font-semibold text-slate-900">Thông tin hệ thống</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[13px] text-slate-600 mb-1">Ngày tạo</label>
+                      <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] text-slate-900">
+                        {selectedCategory.createdDate || '--'}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[13px] text-slate-600 mb-1">Người tạo</label>
+                      <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] text-slate-900">
+                        {selectedCategory.createdBy || '--'}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[13px] text-slate-600 mb-1">Ngày cập nhật gần nhất</label>
+                      <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] text-slate-900">
+                        {selectedCategory.updatedDate || '--'}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[13px] text-slate-600 mb-1">Người cập nhật</label>
+                      <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] text-slate-900">
+                        {selectedCategory.updatedBy || '--'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
             <div className="sticky bottom-0 bg-slate-50 border-t border-slate-200 px-6 py-4 flex items-center justify-end gap-3">
@@ -2728,8 +3163,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                 selectedCategory.approvalStatus !== 'rejected' &&
                 selectedCategory.approvalStatus !== 'pending' && (
                   <button
-                    onClick={handleSendApproval}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-[13px] font-medium"
+                    onClick={() => handleSubmitForApproval(selectedCategory)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-[13px] font-medium"
                   >
                     <Send className="w-4 h-4 inline mr-2" />
                     Gửi phê duyệt
@@ -2771,6 +3206,39 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
               </button>
             </div>
             <div className="p-6 space-y-4">
+              {activeTab === 'management' && (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[13px] text-slate-700 mb-2">Phiên bản</label>
+                      <input
+                        type="text"
+                        value={formData.version}
+                        readOnly
+                        disabled
+                        className="w-full px-3 py-2 border border-slate-200 bg-slate-50 text-slate-500 rounded-lg text-[13px] outline-none cursor-not-allowed"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[13px] text-slate-700 mb-2">Trạng thái</label>
+                      <div className="w-full px-3 py-2 border border-slate-200 bg-slate-50 rounded-lg text-[13px] flex items-center cursor-not-allowed">
+                        {getApprovalStatusBadge(selectedCategory.approvalStatus)}
+                      </div>
+                    </div>
+                  </div>
+                  {selectedCategory.approvalStatus === 'draft' ? (
+                    <div className="flex items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-[13px] text-slate-600">
+                      <Info className="w-4 h-4 mt-0.5 shrink-0" />
+                      <span>Danh mục đang ở dạng bản nháp, chưa từng gửi phê duyệt nên phiên bản giữ nguyên <strong>v{formData.version}</strong> cho đến khi được trình duyệt.</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-[13px] text-blue-700">
+                      <Info className="w-4 h-4 mt-0.5 shrink-0" />
+                      <span>Chỉnh sửa sẽ tạo phiên bản mới <strong>v{formData.version}</strong>. Phiên bản này sẽ tự động được áp dụng ngay sau khi được phê duyệt.</span>
+                    </div>
+                  )}
+                </>
+              )}
               <div>
                 <label className="block text-[13px] text-slate-700 mb-2">Mã danh mục <span className="text-red-500">*</span></label>
                 <input
@@ -2793,18 +3261,6 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   title="Tên danh mục"
                 />
               </div>
-              {activeTab === 'management' && (
-                <div>
-                  <label className="block text-[13px] text-slate-700 mb-2">Phiên bản</label>
-                  <input
-                    type="text"
-                    value={formData.version}
-                    readOnly
-                    disabled
-                    className="w-full px-3 py-2 border border-slate-200 bg-slate-50 text-slate-500 rounded-lg text-[13px] outline-none cursor-not-allowed"
-                  />
-                </div>
-              )}
               <div>
                 <label className="block text-[13px] text-slate-700 mb-2">Mô tả</label>
                 <textarea
@@ -2845,15 +3301,15 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
               </button>
               <button
                 onClick={handleSaveEdit}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-[13px] font-medium"
+                className="px-4 py-2 bg-transparent border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 text-[13px] font-medium"
               >
                 <Save className="w-4 h-4 inline mr-2" />
                 Lưu
               </button>
               {activeTab === 'management' && (
                 <button
-                  onClick={handleSendApproval}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-[13px] font-medium"
+                  onClick={handleOpenSubmitEditCategory}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-[13px] font-medium"
                 >
                   <Send className="w-4 h-4 inline mr-2" />
                   Gửi phê duyệt
@@ -2915,6 +3371,85 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
         );
       })()}
 
+      {/* Bulk Approval / Reject Modal (Phê duyệt nhanh / Từ chối nhanh) */}
+      {showBulkApprovalModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-full max-w-2xl m-4">
+            <div className="border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+              <h3 className="text-[18px] text-slate-900 font-bold">
+                {bulkApprovalAction === 'approved' ? 'Phê duyệt nhanh' : 'Từ chối nhanh'}
+              </h3>
+              <button
+                onClick={() => setShowBulkApprovalModal(false)}
+                className="text-slate-400 hover:text-slate-600"
+                aria-label="Đóng"
+                title="Đóng"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className={`border rounded-lg p-4 ${bulkApprovalAction === 'approved' ? 'bg-blue-50 border-blue-200' : 'bg-red-50 border-red-200'}`}>
+                <div className="flex items-start gap-3">
+                  {bulkApprovalAction === 'approved'
+                    ? <CheckSquare className="w-5 h-5 text-blue-600 mt-0.5" />
+                    : <XCircle className="w-5 h-5 text-red-600 mt-0.5" />}
+                  <div className="min-w-0">
+                    <div className={`text-[13px] font-medium mb-1 ${bulkApprovalAction === 'approved' ? 'text-blue-900' : 'text-red-900'}`}>
+                      Danh mục được chọn ({selectedApprovalIds.length})
+                    </div>
+                    <div className="space-y-1 max-h-32 overflow-y-auto pr-1">
+                      {approvalList.filter(c => selectedApprovalIds.includes(c.id)).map(c => (
+                        <div key={c.id} className={`text-[13px] ${bulkApprovalAction === 'approved' ? 'text-blue-800' : 'text-red-800'}`}>
+                          <span className="font-mono">{c.code}</span> — {c.name}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[13px] font-medium text-slate-700 mb-2">
+                  {bulkApprovalAction === 'approved' ? (
+                    <>Ý kiến phê duyệt <span className="text-slate-400 font-normal">(Không bắt buộc)</span></>
+                  ) : (
+                    <>Lý do từ chối <span className="text-red-600">*</span></>
+                  )}
+                </label>
+                <textarea
+                  value={bulkApprovalNote}
+                  onChange={(e) => setBulkApprovalNote(e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-lg text-[13px] focus:ring-2 outline-none ${bulkApprovalAction === 'approved' ? 'border-slate-300 focus:ring-green-500 focus:border-green-500' : 'border-slate-300 focus:ring-red-500 focus:border-red-500'}`}
+                  rows={4}
+                  placeholder={bulkApprovalAction === 'approved'
+                    ? 'Nhập ý kiến phê duyệt áp dụng cho tất cả các danh mục đã chọn (nếu có)...'
+                    : 'Nhập lý do từ chối áp dụng cho tất cả các danh mục đã chọn...'}
+                />
+              </div>
+            </div>
+
+            <div className="bg-slate-50 border-t border-slate-200 px-6 py-4 flex items-center justify-end gap-3">
+              <button
+                onClick={() => setShowBulkApprovalModal(false)}
+                className="px-4 py-2 text-[13px] font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={confirmBulkApprovalAction}
+                disabled={bulkApprovalAction === 'rejected' && !bulkApprovalNote.trim()}
+                className={`px-4 py-2 text-[13px] font-medium text-white rounded-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${bulkApprovalAction === 'approved' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}`}
+              >
+                {bulkApprovalAction === 'approved' ? <Check className="w-4 h-4" /> : <Ban className="w-4 h-4" />}
+                {bulkApprovalAction === 'approved' ? 'Phê duyệt' : 'Từ chối'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Approval Modal */}
       {showApprovalModal && selectedCategory && approvalAction === 'approved' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -2946,6 +3481,18 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   </div>
                 </div>
               </div>
+
+              {selectedCategory.submitNote && (
+                <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <FileText className="w-5 h-5 text-slate-500 mt-0.5" />
+                    <div>
+                      <div className="text-[13px] font-medium text-slate-700 mb-1">Nội dung trình duyệt</div>
+                      <div className="text-[13px] text-slate-600 whitespace-pre-wrap">{selectedCategory.submitNote}</div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div>
                 <label className="block text-[13px] font-medium text-slate-700 mb-2">
@@ -3015,6 +3562,18 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                 </div>
               </div>
 
+              {selectedCategory.submitNote && (
+                <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <FileText className="w-5 h-5 text-slate-500 mt-0.5" />
+                    <div>
+                      <div className="text-[13px] font-medium text-slate-700 mb-1">Nội dung trình duyệt</div>
+                      <div className="text-[13px] text-slate-600 whitespace-pre-wrap">{selectedCategory.submitNote}</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div>
                 <label className="block text-[13px] font-medium text-slate-700 mb-2">
                   Lý do từ chối <span className="text-red-500">*</span>
@@ -3075,8 +3634,12 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
             <div className="p-6 space-y-4">
               <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
                 <div className="text-[13px] text-slate-600">Danh mục</div>
-                <div className="text-[13px] text-slate-900 mt-1"><strong>{selectedCategory.name}</strong></div>
-                <div className="text-[13px] text-slate-500 mt-1">Mã: {selectedCategory.code}</div>
+                <div className="text-[13px] text-slate-900 mt-1">
+                  <strong>{isEditCategorySubmission ? formData.name : selectedCategory.name}</strong>
+                </div>
+                <div className="text-[13px] text-slate-500 mt-1">
+                  Mã: {isEditCategorySubmission ? formData.code : selectedCategory.code}
+                </div>
               </div>
 
               <div>
@@ -3119,6 +3682,11 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   setShowApprovalModal(false);
                   setSelectedApprover('');
                   setApprovalNote('');
+                  if (isNewCategorySubmission || isEditCategorySubmission) {
+                    setIsNewCategorySubmission(false);
+                    setIsEditCategorySubmission(false);
+                    setSelectedCategory(null);
+                  }
                 }}
                 className="px-4 py-2 text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50"
               >
@@ -3127,7 +3695,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
               <button
                 onClick={confirmApprovalAction}
                 disabled={!selectedApprover}
-                className="px-4 py-2 text-white bg-purple-600 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 <Send className="w-4 h-4" />
                 Gửi phê duyệt

@@ -43,11 +43,11 @@ export function OpenDataCategoryGrid({
                 <td className="px-4 py-3 text-left text-slate-600 font-medium text-[13px]">{item.createdDate}</td>
                 <td className="px-4 py-3 text-left">
                   {item.publishStatus === 'published' ? (
-                    <span className="px-2 py-1 text-[13px] bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-full font-medium whitespace-nowrap inline-block">
+                    <span className="px-2 py-1 text-[12px] bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-full font-medium whitespace-nowrap inline-block">
                       Đã công bố
                     </span>
                   ) : (
-                    <span className="px-2 py-1 text-[13px] bg-slate-100 text-slate-600 border border-slate-200 rounded-full font-medium whitespace-nowrap inline-block">
+                    <span className="px-2 py-1 text-[12px] bg-slate-100 text-slate-600 border border-slate-200 rounded-full font-medium whitespace-nowrap inline-block">
                       Chưa công bố
                     </span>
                   )}

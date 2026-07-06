@@ -27,6 +27,8 @@ interface PublishedData {
   dataFields?: any[];
   topic?: string;
   publishImmediately?: boolean;
+  submitNote?: string;
+  approvalNote?: string;
 }
 
 const getPreviewFallback = (categoryName: string) => {
@@ -121,6 +123,7 @@ const mockPublishedData: PublishedData[] = [
     license: 'Giấy phép dữ liệu mở công cộng',
     fileSize: '512 KB',
     dataSource: 'CSDL Luật sư Việt Nam',
+    submitNote: 'Đề nghị Lãnh đạo xem xét phê duyệt yêu cầu công bố dữ liệu danh sách Luật sư Việt Nam cập nhật quý 1/2026 theo Nghị định 47/2020/NĐ-CP.',
     previewHeaders: ['Họ và tên', 'Ngày sinh', 'Giới tính', 'Quốc tịch', 'Số Chứng chỉ hành nghề luật sư', 'Số Thẻ luật sư', 'Nơi làm việc/nơi hành nghề', 'Thành viên Đoàn Luật sư', 'Tình trạng hành nghề'],
     previewRows: [
       ['Lê Văn Long', '15/08/1985', 'Nam', 'Việt Nam', 'CC-9988-BTP', 'THE-1234-LS', 'Văn phòng Luật sư Long & Partners', 'Đoàn Luật sư TP. Hà Nội', 'Đang hoạt động'],
@@ -143,6 +146,7 @@ const mockPublishedData: PublishedData[] = [
     license: 'Giấy phép dữ liệu mở công cộng',
     fileSize: '48 KB',
     dataSource: 'CSDL Trợ giúp pháp lý - Bảng tổ chức',
+    submitNote: 'Đề nghị Lãnh đạo xem xét phê duyệt yêu cầu cập nhật, bổ sung danh sách tổ chức trợ giúp pháp lý tại Tỉnh B.',
     previewHeaders: ['Tên tổ chức thực hiện trợ giúp pháp lý', 'Người đại diện', 'Địa chỉ liên hệ'],
     previewRows: [
       ['Văn phòng TGPL Tình Thương B', 'Phạm Quốc Bảo', '789 Trần Phú, Tỉnh B'],
@@ -581,13 +585,17 @@ const getOpenDataDetails = (item: any) => {
 export function OpenDataPublishedListPage() {
   const [activeTab, setActiveTab] = useState<'requests' | 'approval' | 'schedule'>('requests');
   const [dataList, setDataList] = useState<PublishedData[]>(() => {
+    const DATA_VERSION = 'v2';
     const saved = localStorage.getItem('open_data_published');
-    if (saved) {
+    const version = localStorage.getItem('open_data_published_version');
+    if (saved && version === DATA_VERSION) {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       } catch (e) {}
     }
+    localStorage.removeItem('open_data_published');
+    localStorage.setItem('open_data_published_version', DATA_VERSION);
     return mockPublishedData;
   });
 
@@ -773,6 +781,9 @@ export function OpenDataPublishedListPage() {
   const [rejectReasonError, setRejectReasonError] = useState(false);
   const [showRejectForm, setShowRejectForm] = useState(false);
   const [approvalPreviewTab, setApprovalPreviewTab] = useState<'metadata' | 'preview'>('metadata');
+  const [selectedApprovalIds, setSelectedApprovalIds] = useState<string[]>([]);
+  const [showBulkRejectModal, setShowBulkRejectModal] = useState(false);
+  const [bulkRejectReason, setBulkRejectReason] = useState('');
 
   const getRecordMetadataConfig = (item: PublishedData) => {
     const dbId = item.sourceDbId || (item.category.includes('tổ chức') ? 'db_tgpl_org' : item.category.includes('người') ? 'db_tgpl_user' : 'db_luatsu');
@@ -874,6 +885,13 @@ export function OpenDataPublishedListPage() {
 
   const totalApprovalItemsCount = filteredApprovalRequests.length;
   const paginatedApprovalRequests = filteredApprovalRequests.slice((currentPageNum - 1) * pageSize, currentPageNum * pageSize);
+
+  const approvalRequestStats = {
+    pending: dataList.filter(d => d.status === 'pending').length,
+    approved: dataList.filter(d => d.status === 'approved').length,
+    rejected: dataList.filter(d => d.status === 'rejected').length,
+    total: dataList.filter(d => d.status !== 'draft').length
+  };
 
 
 
@@ -1088,18 +1106,21 @@ export function OpenDataPublishedListPage() {
       const updatedRecord = { ...createNewRecord('pending'), id: editingItem.id, creator: editingItem.creator, createdDate: editingItem.createdDate };
       setDataList(dataList.map(d => d.id === editingItem.id ? updatedRecord : d));
       setShowRequestModal(false);
-      setSuccessPopupMessage('Yêu cầu công bố đã được cập nhật');
-      setShowSuccessPopup(true);
-      setTimeout(() => setShowSuccessPopup(false), 3000);
       resetRequestForm();
+      setSendApprovalItem(updatedRecord);
+      setSendApprovalApprover('');
+      setSendApprovalNote('');
+      setShowSendApprovalModal(true);
     } else {
+      // Instead of saving right away, open the send-for-approval modal so the
+      // user picks an approver and enters "Nội dung trình duyệt" first.
       const newRecord = createNewRecord('pending');
-      setDataList([newRecord, ...dataList]);
       setShowRequestModal(false);
-      setSuccessPopupMessage('Yêu cầu công bố đã được gửi đi phê duyệt');
-      setShowSuccessPopup(true);
-      setTimeout(() => setShowSuccessPopup(false), 3000);
       resetRequestForm();
+      setSendApprovalItem(newRecord);
+      setSendApprovalApprover('');
+      setSendApprovalNote('');
+      setShowSendApprovalModal(true);
     }
   };
 
@@ -1222,6 +1243,49 @@ export function OpenDataPublishedListPage() {
     setTimeout(() => setShowSuccessPopup(false), 3000);
   };
 
+  // Quick bulk approval actions (row checkbox selection)
+  const toggleSelectApprovalId = (id: string) => {
+    setSelectedApprovalIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  };
+
+  const toggleSelectAllApprovalIds = () => {
+    const pendingIds = paginatedApprovalRequests.filter(item => item.status === 'pending').map(item => item.id);
+    setSelectedApprovalIds(prev => prev.length === pendingIds.length ? [] : pendingIds);
+  };
+
+  const handleBulkApprove = () => {
+    setDataList(dataList.map(d => selectedApprovalIds.includes(d.id) ? {
+      ...d,
+      status: 'approved',
+      approver: 'Lãnh đạo Nghiệp vụ'
+    } : d));
+    setSelectedApprovalIds([]);
+    setSuccessPopupMessage('Đã phê duyệt các yêu cầu đã chọn!');
+    setShowSuccessPopup(true);
+    setTimeout(() => setShowSuccessPopup(false), 3000);
+  };
+
+  const openBulkRejectModal = () => {
+    setBulkRejectReason('');
+    setShowBulkRejectModal(true);
+  };
+
+  const confirmBulkReject = () => {
+    if (!bulkRejectReason.trim()) return;
+    setDataList(dataList.map(d => selectedApprovalIds.includes(d.id) ? {
+      ...d,
+      status: 'rejected',
+      approver: 'Lãnh đạo Nghiệp vụ',
+      approvalNote: bulkRejectReason
+    } : d));
+    setSelectedApprovalIds([]);
+    setShowBulkRejectModal(false);
+    setBulkRejectReason('');
+    setSuccessPopupMessage('Đã từ chối các yêu cầu đã chọn.');
+    setShowSuccessPopup(true);
+    setTimeout(() => setShowSuccessPopup(false), 3000);
+  };
+
 
   const handleOpenSendApproval = (item: PublishedData) => {
     setSendApprovalItem(item);
@@ -1233,10 +1297,18 @@ export function OpenDataPublishedListPage() {
   const handleConfirmSendApproval = () => {
     if (!sendApprovalItem || !sendApprovalApprover) return;
     const approverName = approvers.find(a => a.id === sendApprovalApprover)?.name || '';
-    setDataList(dataList.map(d => d.id === sendApprovalItem.id
-      ? { ...d, status: 'pending', approver: approverName }
-      : d
-    ));
+    const isNewRequest = !dataList.some(d => d.id === sendApprovalItem.id);
+    if (isNewRequest) {
+      setDataList([
+        { ...sendApprovalItem, status: 'pending', approver: approverName, submitNote: sendApprovalNote },
+        ...dataList
+      ]);
+    } else {
+      setDataList(dataList.map(d => d.id === sendApprovalItem.id
+        ? { ...d, status: 'pending', approver: approverName, submitNote: sendApprovalNote }
+        : d
+      ));
+    }
     setShowSendApprovalModal(false);
     setSendApprovalItem(null);
     setSendApprovalApprover('');
@@ -1477,7 +1549,7 @@ export function OpenDataPublishedListPage() {
             <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
-                  <thead className="bg-[#f8fafc] text-slate-700 border-b border-slate-100">
+                  <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
                     <tr>
                       <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap w-16 text-[13px]">STT</th>
                       <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Tên tệp dữ liệu</th>
@@ -1561,109 +1633,131 @@ export function OpenDataPublishedListPage() {
         {/* RENDER TAB 2: PHÊ DUYỆT */}
         {activeTab === 'approval' && (
           <div className="space-y-4 animate-fade-in">
-                        {/* Filter and Search Row */}
-            <div className="flex flex-col md:flex-row items-center gap-3 w-full">
-              <div className="flex-1 flex items-center gap-2 w-full">
-                {/* Search Input */}
+            {/* Header Stat Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-lg p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center">
+                    <Clock className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-[13px] text-orange-700">Chờ công bố</p>
+                    <p className="text-2xl text-orange-900">{approvalRequestStats.pending}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-lg p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-[13px] text-green-700">Đã công bố</p>
+                    <p className="text-2xl text-green-900">{approvalRequestStats.approved}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-red-50 to-red-100 border border-red-200 rounded-lg p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center">
+                    <XCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-[13px] text-red-700">Từ chối</p>
+                    <p className="text-2xl text-red-900">{approvalRequestStats.rejected}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                    <Edit2 className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-[13px] text-blue-700">Tổng yêu cầu</p>
+                    <p className="text-2xl text-blue-900">{approvalRequestStats.total}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Bulk quick action bar */}
+            {selectedApprovalIds.length > 0 && (
+              <div className="flex items-center justify-end gap-3">
+                <span className="text-[13px] text-slate-600">
+                  Đã chọn: <span className="font-medium text-blue-600">{selectedApprovalIds.length}</span> yêu cầu
+                </span>
+                <button
+                  onClick={handleBulkApprove}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-[13px]"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  Phê duyệt nhanh
+                </button>
+                <button
+                  onClick={openBulkRejectModal}
+                  className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-[13px]"
+                >
+                  <XCircle className="w-4 h-4" />
+                  Từ chối nhanh
+                </button>
+              </div>
+            )}
+
+            {/* Search + Status Pills */}
+            <div className="bg-white border border-slate-200 rounded-lg p-4">
+              <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
                     type="text"
                     placeholder="Tìm kiếm theo tên tệp dữ liệu..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full px-4 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-400 bg-white hover:bg-slate-50/50 font-medium shadow-sm"
+                    className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-
-                {/* Search Button */}
-                <button
-                  type="button"
-                  className="w-10 h-10 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shrink-0 transition-all cursor-pointer active:scale-95 shadow-sm"
-                  title="Tìm kiếm"
-                >
-                  <Search className="w-4 h-4" />
-                </button>
-
-                {/* Filter Toggle Button */}
-                <button
-                  type="button"
-                  onClick={() => setShowFilters(!showFilters)}
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all border cursor-pointer active:scale-95 ${
-                    showFilters
-                      ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-sm'
-                      : 'bg-white border-slate-200 text-slate-655 hover:bg-slate-50'
-                  }`}
-                  title={showFilters ? "Đóng bộ lọc" : "Bộ lọc nâng cao"}
-                >
-                  {showFilters ? <X className="w-4.5 h-4.5" /> : <Filter className="w-4 h-4" />}
-                </button>
-              </div>
-
-
-            </div>
-
-            {/* Advanced Collapsible Filter Panel */}
-            {showFilters && (
-              <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-sm">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-[13px] text-black mb-2">Trạng thái yêu cầu</label>
-                    <div className="relative">
-                      <select
-                        value={selectedStatus}
-                        onChange={(e) => setSelectedStatus(e.target.value)}
-                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                      >
-                        <option value="all">Tất cả trạng thái</option>
-                        <option value="pending">Chờ công bố</option>
-                        <option value="approved">Đã công bố</option>
-                        <option value="rejected">Từ chối</option>
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-[13px] text-black mb-2">Danh mục mở</label>
-                    <div className="relative">
-                      <select
-                        value={selectedCategory}
-                        onChange={(e) => setSelectedCategory(e.target.value)}
-                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                      >
-                        <option value="all">Tất cả danh mục</option>
-                        <option value="Danh sách tổ chức thực hiện trợ giúp pháp lý">Danh sách tổ chức thực hiện trợ giúp pháp lý</option>
-                        <option value="Danh sách người thực hiện trợ giúp pháp lý">Danh sách người thực hiện trợ giúp pháp lý</option>
-                        <option value="Danh sách Luật sư Việt Nam">Danh sách Luật sư Việt Nam</option>
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-[13px] text-black mb-2">Cơ quan công bố</label>
-                    <div className="relative">
-                      <select
-                        value={selectedPublisher}
-                        onChange={(e) => setSelectedPublisher(e.target.value)}
-                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                      >
-                        <option value="all">Tất cả cơ quan</option>
-                        <option value="Bộ Tư pháp">Bộ Tư pháp</option>
-                        <option value="Cục Bổ trợ tư pháp">Cục Bổ trợ tư pháp</option>
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                    </div>
-                  </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {[
+                    { value: 'all', label: 'Tất cả', activeClass: 'bg-slate-700 text-white border-slate-700' },
+                    { value: 'pending', label: 'Chờ công bố', activeClass: 'bg-orange-500 text-white border-orange-500' },
+                    { value: 'approved', label: 'Đã công bố', activeClass: 'bg-green-600 text-white border-green-600' },
+                    { value: 'rejected', label: 'Từ chối', activeClass: 'bg-red-500 text-white border-red-500' },
+                  ].map(opt => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setSelectedStatus(opt.value)}
+                      className={`px-3 py-2 text-[13px] rounded-lg border transition-all font-medium cursor-pointer ${selectedStatus === opt.value
+                        ? opt.activeClass
+                        : 'bg-white text-slate-600 border-slate-300 hover:border-slate-400 hover:bg-slate-50'
+                        }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
                 </div>
               </div>
-            )}
+            </div>
 
-
-{/* Grid Data Table */}
+            {/* Grid Data Table */}
             <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
-                  <thead className="bg-[#f8fafc] text-slate-700 border-b border-slate-100">
+                  <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
                     <tr>
+                      <th className="px-4 py-4 text-left w-10">
+                        <input
+                          type="checkbox"
+                          title="Chọn tất cả"
+                          checked={selectedApprovalIds.length > 0 && selectedApprovalIds.length === paginatedApprovalRequests.filter(item => item.status === 'pending').length}
+                          onChange={toggleSelectAllApprovalIds}
+                          className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                        />
+                      </th>
                       <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap w-16 text-[13px]">STT</th>
                       <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Tên tập dữ liệu</th>
                       <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Danh mục</th>
@@ -1677,21 +1771,33 @@ export function OpenDataPublishedListPage() {
                   <tbody className="divide-y divide-slate-100 bg-white">
                     {paginatedApprovalRequests.length === 0 ? (
                       <tr>
-                        <td colSpan={8} className="px-6 py-8 text-center text-slate-500 text-[13px]">
+                        <td colSpan={9} className="px-6 py-8 text-center text-slate-500 text-[13px]">
                           Không có yêu cầu công bố nào được tìm thấy.
                         </td>
                       </tr>
                     ) : (
                       paginatedApprovalRequests.map((item, index) => (
                         <tr key={item.id} className="hover:bg-slate-50 transition-all border-b border-slate-100">
+                          <td className="px-4 py-3">
+                            {item.status === 'pending' && (
+                              <input
+                                type="checkbox"
+                                title="Chọn bản ghi"
+                                checked={selectedApprovalIds.includes(item.id)}
+                                onChange={() => toggleSelectApprovalId(item.id)}
+                                className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                              />
+                            )}
+                          </td>
                           <td className="px-4 py-3 text-center text-slate-500 font-medium text-[13px]">{(currentPageNum - 1) * pageSize + index + 1}</td>
                           <td className="px-4 py-3 text-left text-[13px]">
                             <span
-                              className="text-black"
+                              className="text-black cursor-pointer"
                               onClick={() => {
                                 setSelectedApprovalItem(item);
                                 setRejectReason('');
                                 setShowRejectForm(false);
+                                setShowApproveForm(false);
                                 setShowApprovalModal(true);
                               }}
                             >
@@ -1704,19 +1810,61 @@ export function OpenDataPublishedListPage() {
                           <td className="px-4 py-3 text-slate-550 text-[13px]">{item.createdDate}</td>
                           <td className="px-4 py-3 text-center text-[13px]">{getStatusBadge(item.status)}</td>
                           <td className="px-4 py-3 text-center">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSelectedApprovalItem(item);
-                                setRejectReason('');
-                                setShowRejectForm(false);
-                                setShowApprovalModal(true);
-                              }}
-                              className="p-1.5 text-slate-700 hover:text-black hover:bg-slate-100 rounded-lg inline-flex items-center justify-center cursor-pointer transition-colors"
-                              title="Xem chi tiết & Phê duyệt"
-                            >
-                              <Eye className="w-4 h-4" />
-                            </button>
+                            <div className="flex items-center justify-center gap-1">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedApprovalItem(item);
+                                  setRejectReason('');
+                                  setShowRejectForm(false);
+                                  setShowApproveForm(false);
+                                  setShowApprovalModal(true);
+                                }}
+                                className="p-1 text-blue-600 hover:bg-blue-50 rounded cursor-pointer transition-colors"
+                                title="Xem chi tiết"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (item.status !== 'pending') return;
+                                  setSelectedApprovalItem(item);
+                                  setApproveOpinion('');
+                                  setShowRejectForm(false);
+                                  setShowApproveForm(true);
+                                  setShowApprovalModal(true);
+                                }}
+                                disabled={item.status !== 'pending'}
+                                className={`p-1 rounded transition-colors ${item.status === 'pending'
+                                  ? 'text-green-600 hover:bg-green-50 cursor-pointer'
+                                  : 'text-slate-300 cursor-not-allowed'
+                                  }`}
+                                title={item.status === 'pending' ? 'Phê duyệt' : 'Đã xử lý'}
+                              >
+                                <CheckCircle className="w-4 h-4" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (item.status !== 'pending') return;
+                                  setSelectedApprovalItem(item);
+                                  setRejectReason('');
+                                  setRejectReasonError(false);
+                                  setShowApproveForm(false);
+                                  setShowRejectForm(true);
+                                  setShowApprovalModal(true);
+                                }}
+                                disabled={item.status !== 'pending'}
+                                className={`p-1 rounded transition-colors ${item.status === 'pending'
+                                  ? 'text-red-600 hover:bg-red-50 cursor-pointer'
+                                  : 'text-slate-300 cursor-not-allowed'
+                                  }`}
+                                title={item.status === 'pending' ? 'Từ chối' : 'Đã xử lý'}
+                              >
+                                <XCircle className="w-4 h-4" />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))
@@ -1848,7 +1996,7 @@ export function OpenDataPublishedListPage() {
             <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
-                  <thead className="bg-[#f8fafc] text-slate-700 border-b border-slate-100">
+                  <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
                     <tr>
                       <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap w-16 text-[13px]">STT</th>
                       <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Tên tập dữ liệu</th>
@@ -2027,7 +2175,7 @@ export function OpenDataPublishedListPage() {
               {/* ── Tên tập dữ liệu ── */}
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="col-span-1 md:col-span-2">
-                  <div className="text-[11px] text-black uppercase tracking-wider mb-1">Tên tập dữ liệu</div>
+                  <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-1">Tên tập dữ liệu</div>
                   <div className="text-[13px] text-black flex items-center gap-1.5">
                     <FileSpreadsheet className="w-4 h-4 text-emerald-600 shrink-0" />
                     {selectedData.fileName || 'Không có tên tệp'}
@@ -2035,43 +2183,43 @@ export function OpenDataPublishedListPage() {
                 </div>
 
                 <div>
-                  <div className="text-[11px] text-black uppercase tracking-wider mb-1">Trạng thái</div>
+                  <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-1">Trạng thái</div>
                   <div>{getStatusBadge(selectedData.status)}</div>
                 </div>
                 <div>
-                  <div className="text-[11px] text-black uppercase tracking-wider mb-1">Người phê duyệt</div>
+                  <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-1">Người phê duyệt</div>
                   <div className="text-[13px] text-black">{selectedData.approver}</div>
                 </div>
 
                 <div>
-                  <div className="text-[11px] text-black uppercase tracking-wider mb-1">Người tạo yêu cầu</div>
+                  <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-1">Người tạo yêu cầu</div>
                   <div className="text-[13px] text-black">{selectedData.creator}</div>
                 </div>
                 <div>
-                  <div className="text-[11px] text-black uppercase tracking-wider mb-1">Ngày tạo yêu cầu</div>
+                  <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-1">Ngày tạo yêu cầu</div>
                   <div className="text-[13px] text-black">{selectedData.createdDate}</div>
                 </div>
 
                 <div>
-                  <div className="text-[11px] text-black uppercase tracking-wider mb-1">Danh mục dữ liệu mở</div>
+                  <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-1">Danh mục dữ liệu mở</div>
                   <div className="text-[13px] text-black">{selectedData.category}</div>
                 </div>
                 <div>
-                  <div className="text-[11px] text-black uppercase tracking-wider mb-1">Đơn vị chủ trì cung cấp</div>
+                  <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-1">Đơn vị chủ trì cung cấp</div>
                   <div className="text-[13px] text-black">{selectedData.publisher}</div>
                 </div>
 
                 <div>
-                  <div className="text-[11px] text-black uppercase tracking-wider mb-1">Giấy phép</div>
+                  <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-1">Giấy phép</div>
                   <div className="text-[13px] text-black">{selectedData.license}</div>
                 </div>
                 <div>
-                  <div className="text-[11px] text-black uppercase tracking-wider mb-1">Từ khóa</div>
+                  <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-1">Từ khóa</div>
                   <div className="text-[13px] text-black">{selectedData.keywords || 'N/A'}</div>
                 </div>
 
                 <div>
-                  <div className="text-[11px] text-black uppercase tracking-wider mb-1">Định dạng chia sẻ</div>
+                  <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-1">Định dạng chia sẻ</div>
                   <div className="flex flex-wrap gap-1 mt-0.5">
                     {(selectedData.format || []).length > 0
                       ? selectedData.format.map((fmt, i) => (
@@ -2082,17 +2230,17 @@ export function OpenDataPublishedListPage() {
                   </div>
                 </div>
                 <div>
-                  <div className="text-[11px] text-black uppercase tracking-wider mb-1">Tần suất cập nhật</div>
+                  <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-1">Tần suất cập nhật</div>
                   <div className="text-[13px] text-black">{getFrequencyLabel(selectedData.frequency || '') || '—'}</div>
                 </div>
 
                 <div>
-                  <div className="text-[11px] text-black uppercase tracking-wider mb-1">Chủ đề</div>
+                  <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-1">Chủ đề</div>
                   <div className="text-[13px] text-black">{selectedData.topic || '—'}</div>
                 </div>
 
                 <div className="col-span-1 md:col-span-2">
-                  <div className="text-[11px] text-black uppercase tracking-wider mb-1">Thông tin mô tả</div>
+                  <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-1">Thông tin mô tả</div>
                   <div className="text-[13px] text-black whitespace-pre-wrap">{selectedData.description || '—'}</div>
                 </div>
 
@@ -2110,19 +2258,42 @@ export function OpenDataPublishedListPage() {
                 </div>
               </div>
 
-              {/* ── Ý kiến phê duyệt / Lý do từ chối ── */}
-              {(selectedData.status === 'approved' || selectedData.status === 'rejected') && (
-                <div className={`rounded-xl border p-4 ${selectedData.status === 'approved' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+              {/* ── Nội dung trình duyệt ── */}
+              <div className="space-y-2">
+                <label className="flex items-center gap-1.5 text-[13px] font-semibold text-slate-700">
+                  <FileText className="w-4 h-4 text-slate-400" />
+                  Nội dung trình duyệt
+                </label>
+                <div className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] text-slate-700 min-h-[46px] whitespace-pre-wrap">
+                  {selectedData.submitNote || 'Chưa cập nhật'}
+                </div>
+              </div>
+
+              {/* ── Ý kiến phê duyệt ── */}
+              {selectedData.status === 'approved' && (
+                <div className="rounded-xl border p-4 bg-green-50 border-green-200">
                   <div className="flex items-center gap-2 mb-2">
-                    {selectedData.status === 'approved'
-                      ? <CheckCircle className="w-4 h-4 text-green-600 shrink-0" />
-                      : <XCircle className="w-4 h-4 text-red-500 shrink-0" />
-                    }
-                    <span className={`text-[11px] font-semibold uppercase tracking-wider ${selectedData.status === 'approved' ? 'text-green-700' : 'text-red-600'}`}>
-                      {selectedData.status === 'approved' ? 'Ý kiến phê duyệt' : 'Lý do từ chối'}
+                    <CheckCircle className="w-4 h-4 text-green-600 shrink-0" />
+                    <span className="text-[13px] font-semibold uppercase tracking-wider text-green-700">
+                      Ý kiến phê duyệt
                     </span>
                   </div>
-                  <p className={`text-[13px] leading-relaxed ${selectedData.status === 'approved' ? 'text-green-900' : 'text-red-900'}`}>
+                  <p className="text-[13px] leading-relaxed text-green-900">
+                    {selectedData.approvalNote || '—'}
+                  </p>
+                </div>
+              )}
+
+              {/* ── Lý do từ chối ── */}
+              {selectedData.status === 'rejected' && (
+                <div className="rounded-xl border p-4 bg-red-50 border-red-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <XCircle className="w-4 h-4 text-red-500 shrink-0" />
+                    <span className="text-[13px] font-semibold uppercase tracking-wider text-red-600">
+                      Lý do từ chối
+                    </span>
+                  </div>
+                  <p className="text-[13px] leading-relaxed text-red-900">
                     {selectedData.approvalNote || '—'}
                   </p>
                 </div>
@@ -2141,21 +2312,21 @@ export function OpenDataPublishedListPage() {
                     <div className="p-4 space-y-3">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div className="p-3 bg-white rounded-lg border border-slate-200">
-                          <div className="text-[11px] text-black uppercase tracking-wider mb-1">Kho dữ liệu</div>
+                          <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-1">Kho dữ liệu</div>
                           <div className="text-[13px] text-black flex items-center gap-1.5">
                             <Database className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                             {dbName || '—'}
                           </div>
                         </div>
                         <div className="p-3 bg-white rounded-lg border border-slate-200">
-                          <div className="text-[11px] text-black uppercase tracking-wider mb-1">Bảng dữ liệu chính</div>
+                          <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-1">Bảng dữ liệu chính</div>
                           <div className="text-[13px] text-black font-mono">{meta.mainTable || '—'}</div>
                         </div>
                       </div>
 
                       {meta.joinTables.length > 0 && (
                         <div>
-                          <div className="text-[11px] text-black uppercase tracking-wider mb-2">Bảng liên kết (Join)</div>
+                          <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-2">Bảng liên kết (Join)</div>
                           <div className="space-y-1.5">
                             {meta.joinTables.map((jt, idx) => (
                               <div key={idx} className="bg-white border border-slate-200 rounded-lg px-3 py-2 flex items-center justify-between text-[13px] text-black">
@@ -2169,7 +2340,7 @@ export function OpenDataPublishedListPage() {
 
                       {meta.dataFields.length > 0 && (
                         <div>
-                          <div className="text-[11px] text-black uppercase tracking-wider mb-2">Trường dữ liệu chia sẻ ({meta.dataFields.filter((f: any) => f.shared).length}/{meta.dataFields.length})</div>
+                          <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-2">Trường dữ liệu chia sẻ ({meta.dataFields.filter((f: any) => f.shared).length}/{meta.dataFields.length})</div>
                           <div className="border border-slate-200 rounded-lg overflow-hidden bg-white">
                             <table className="w-full text-left text-[13px] border-collapse">
                               <thead>
@@ -2992,13 +3163,61 @@ export function OpenDataPublishedListPage() {
                           : 'bg-slate-300 cursor-not-allowed text-slate-500'
                       }`}
                     >
-                      {editingItem ? <Edit2 className="w-4 h-4" /> : <Send className="w-4 h-4" />}
-                      {editingItem ? 'Cập nhật' : 'Gửi yêu cầu'}
+                      <Send className="w-4 h-4" />
+                      Gửi yêu cầu
                     </button>
                   )}
                 </div>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* BULK REJECT MODAL */}
+      {showBulkRejectModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl w-full max-w-md shadow-2xl">
+            <div className="border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-slate-900">Từ chối nhanh</h3>
+              <button
+                onClick={() => setShowBulkRejectModal(false)}
+                className="text-slate-400 hover:text-slate-600 p-1 hover:bg-slate-100 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-3">
+              <p className="text-[13px] text-slate-600">
+                Từ chối <span className="font-medium text-blue-600">{selectedApprovalIds.length}</span> yêu cầu công bố đã chọn.
+              </p>
+              <div>
+                <label className="block text-[13px] text-slate-700 mb-2">Lý do từ chối <span className="text-red-500">*</span></label>
+                <textarea
+                  value={bulkRejectReason}
+                  onChange={(e) => setBulkRejectReason(e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-red-500 outline-none"
+                  placeholder="Nhập lý do từ chối..."
+                />
+              </div>
+            </div>
+            <div className="bg-slate-50 border-t border-slate-200 px-6 py-4 flex items-center justify-end gap-3">
+              <button
+                onClick={() => setShowBulkRejectModal(false)}
+                className="px-4 py-2 text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 text-[13px]"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={confirmBulkReject}
+                disabled={!bulkRejectReason.trim()}
+                className="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-[13px] flex items-center gap-2"
+              >
+                <XCircle className="w-4 h-4" />
+                Từ chối
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -3087,6 +3306,19 @@ export function OpenDataPublishedListPage() {
                     <label htmlFor="approvalPublishImmediately" className="text-slate-700 select-none cursor-not-allowed">
                       Công bố dữ liệu ngay sau khi được phê duyệt
                     </label>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Nội dung trình duyệt ── */}
+              {!showApproveForm && !showRejectForm && (
+                <div className="space-y-2">
+                  <label className="flex items-center gap-1.5 text-[13px] font-semibold text-slate-700">
+                    <FileText className="w-4 h-4 text-slate-400" />
+                    Nội dung trình duyệt
+                  </label>
+                  <div className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] text-slate-700 min-h-[46px] whitespace-pre-wrap">
+                    {selectedApprovalItem.submitNote || 'Chưa cập nhật'}
                   </div>
                 </div>
               )}
@@ -3645,8 +3877,8 @@ export function OpenDataPublishedListPage() {
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-purple-100 rounded-lg flex items-center justify-center shrink-0">
-                  <Send className="w-4 h-4 text-purple-600" />
+                <div className="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
+                  <Send className="w-4 h-4 text-blue-600" />
                 </div>
                 <h3 className="text-[18px] font-semibold text-slate-900">Gửi duyệt yêu cầu công bố</h3>
               </div>
@@ -3676,7 +3908,7 @@ export function OpenDataPublishedListPage() {
                 <select
                   value={sendApprovalApprover}
                   onChange={(e) => setSendApprovalApprover(e.target.value)}
-                  className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-purple-500/20 focus:border-purple-400 outline-none transition-colors bg-white"
+                  className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-colors bg-white"
                   title="Chọn người phê duyệt"
                 >
                   <option value="">-- Chọn người phê duyệt --</option>
@@ -3694,7 +3926,7 @@ export function OpenDataPublishedListPage() {
                 <textarea
                   value={sendApprovalNote}
                   onChange={(e) => setSendApprovalNote(e.target.value)}
-                  className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-purple-500/20 focus:border-purple-400 outline-none transition-colors resize-none"
+                  className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-colors resize-none"
                   rows={4}
                   placeholder={`Nhập nội dung trình duyệt...\nVí dụ: Đề nghị Lãnh đạo xem xét phê duyệt yêu cầu công bố dữ liệu mở theo Nghị định 47/2020/NĐ-CP`}
                 />
@@ -3712,7 +3944,7 @@ export function OpenDataPublishedListPage() {
               <button
                 onClick={handleConfirmSendApproval}
                 disabled={!sendApprovalApprover}
-                className="px-4 py-2 text-white bg-purple-600 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-[13px] font-medium transition-colors cursor-pointer"
+                className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-[13px] font-medium transition-colors cursor-pointer"
               >
                 <Send className="w-4 h-4" />
                 Gửi phê duyệt

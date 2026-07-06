@@ -7,6 +7,36 @@ interface VersionHistoryModalProps {
 
 const mockVersions = [
   {
+    id: 24,
+    version: 'v2.6.06',
+    date: '03/07/2026',
+    time: '17:30',
+    content: `1. Dữ liệu mở — Thiết lập danh mục dữ liệu mở (OpenDataSetupPage):
+- Bổ sung trường submitNote để lưu lại "Nội dung trình duyệt" nhập tại modal Trình duyệt danh mục; khi trình duyệt sẽ tự đồng bộ bản ghi sang danh sách của tab Phê duyệt danh mục.
+- Hiển thị khối "Nội dung trình duyệt" tại modal Phê duyệt danh mục dữ liệu mở, Từ chối phê duyệt danh mục và modal Chi tiết danh mục.
+- Modal Trình duyệt danh mục nạp lại nội dung đã nhập trước đó khi mở lại (trường hợp trình duyệt lại).
+
+2. Dữ liệu mở — Công bố dữ liệu mở (OpenDataPublishedListPage):
+- Nút "Gửi yêu cầu" tại modal Gửi yêu cầu công bố dữ liệu không còn lưu và báo thành công ngay lập tức; thay vào đó mở modal "Gửi duyệt yêu cầu công bố" để chọn Người phê duyệt và nhập Nội dung trình duyệt trước khi hoàn tất gửi.
+- Hiển thị khối "Nội dung trình duyệt" tại modal Phê duyệt yêu cầu công bố.
+- Bổ sung dữ liệu mẫu minh họa và cơ chế version hóa dữ liệu lưu trong trình duyệt (localStorage) để tự động dọn các bản ghi thử nghiệm cũ khi tải lại trang.`
+  },
+  {
+    id: 23,
+    version: 'v2.6.05',
+    date: '02/07/2026',
+    time: '18:50',
+    content: `1. Phân hệ Cung cấp dữ liệu (Kiểm soát & Giám sát):
+- Bỏ khối "Nhật ký kết nối gần đây" trong tab Sơ đồ của màn "Kiểm soát & Giám sát cung cấp" (DataProvisionMonitoringPage.tsx) do trùng với tab Audit Logs. Đổi tên tab thành "Sơ đồ giám sát".
+- Danh sách API đang giám sát: Bỏ badge trạng thái, thay bằng 2 nút "Xem chi tiết" (dùng lại popup ProvisionServiceModal) + "Xem sơ đồ" (hiển thị sơ đồ luồng của API).
+- Bỏ tiêu đề màn hình và dàn bộ lọc thành 1 hàng ngang tối giản.
+
+2. Phân hệ Đối soát dữ liệu (Reconciliation):
+- Modal "Lịch sử đối soát thu thập" (ReconciliationHistoryTab): Sinh danh sách lịch sử theo đúng bản ghi được chọn ở danh sách ngoài thay vì dữ liệu mock cố định.
+- Đồng bộ cột với danh sách đối soát ngoài: STT, Thu thập, Số bản ghi (Nguồn), Số bản ghi (Kho), Lệch, Trạng thái, Ngày đối soát.
+- Chuẩn hóa cột "Thu thập" ở cả bảng ngoài và modal lịch sử: Hiển thị Tên thu thập xếp trên và Mã thu thập (font-mono, không chứa đuôi ngày tháng) xếp dưới.`
+  },
+  {
     id: 22,
     version: 'v2.6.1',
     date: '02/07/2026',

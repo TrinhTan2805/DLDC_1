@@ -1,27 +1,25 @@
 import { ChangeEvent, useState } from 'react';
-import { XCircle, AlertCircle, ChevronRight, FileText } from 'lucide-react';
-import { MasterDataEntity } from '../../categoryTypes';
+import { XCircle, AlertCircle, ChevronRight } from 'lucide-react';
+import { ApprovalRequest } from '../../categoryTypes';
 import { BaseModal } from '../../../../common/BaseModal';
 
-interface SimpleRejectModalProps {
+interface BulkRejectModalProps {
   isOpen: boolean;
   onClose: () => void;
-  entity: MasterDataEntity | null;
-  submissionContent?: string;
+  requests: ApprovalRequest[];
   onConfirm: (reason: string) => void;
 }
 
-export function SimpleRejectModal({
+export function BulkRejectModal({
   isOpen,
   onClose,
-  entity,
-  submissionContent,
+  requests,
   onConfirm
-}: SimpleRejectModalProps) {
+}: BulkRejectModalProps) {
   const [reason, setReason] = useState('');
   const [error, setError] = useState(false);
 
-  if (!isOpen || !entity) return null;
+  if (!isOpen || requests.length === 0) return null;
 
   const handleConfirm = () => {
     if (!reason.trim()) {
@@ -35,7 +33,7 @@ export function SimpleRejectModal({
     <BaseModal
       isOpen={isOpen}
       onClose={onClose}
-      title="Từ chối phê duyệt danh mục"
+      title="Từ chối nhanh"
       maxWidth="max-w-lg"
       footer={
         <>
@@ -50,7 +48,7 @@ export function SimpleRejectModal({
             className="px-6 py-2.5 bg-red-500 text-white rounded-xl flex items-center gap-2 hover:bg-red-600 transition-all text-[13px] shadow-lg shadow-red-100"
           >
             <XCircle className="w-5 h-5" />
-            Từ chối
+            Xác nhận từ chối ({requests.length})
           </button>
         </>
       }
@@ -59,25 +57,22 @@ export function SimpleRejectModal({
         {/* Info Banner - Red/Pink */}
         <div className="bg-red-50/50 border border-red-100 rounded-xl p-4">
           <div className="flex items-start gap-3">
-            <div className="w-5 h-5 rounded-lg border-2 border-red-600 flex items-center justify-center mt-0.5">
+            <div className="w-5 h-5 rounded-lg border-2 border-red-600 flex items-center justify-center mt-0.5 shrink-0">
               <ChevronRight className="w-3 h-3 text-red-600 stroke-[3]" />
             </div>
-            <div className="space-y-1">
-              <div className="text-[13px] text-red-700 font-medium uppercase tracking-tight">Thông tin danh mục</div>
-              <div className="text-[13px] font-bold text-red-900">{entity.name}</div>
-              <div className="text-[13px] text-red-600">Đơn vị chủ quản: {entity.managingAgency}</div>
+            <div className="space-y-1.5 flex-1 min-w-0">
+              <div className="text-[13px] text-red-700 font-medium uppercase tracking-tight">
+                Danh mục được chọn ({requests.length})
+              </div>
+              <div className="space-y-1 max-h-40 overflow-y-auto pr-1">
+                {requests.map(r => (
+                  <div key={r.id} className="text-[13px] text-red-900">
+                    <span className="font-mono text-red-600 mr-1.5">{r.entityCode}</span>
+                    {r.entityName}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        </div>
-
-        {/* Nội dung trình duyệt */}
-        <div className="space-y-2">
-          <label className="flex items-center gap-1.5 text-[13px] font-semibold text-slate-700">
-            <FileText className="w-4 h-4 text-slate-400" />
-            Nội dung trình duyệt
-          </label>
-          <div className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] text-slate-700 min-h-[46px] whitespace-pre-wrap">
-            {submissionContent ?? <span className="text-slate-400 italic">Chưa cập nhật</span>}
           </div>
         </div>
 
@@ -93,7 +88,7 @@ export function SimpleRejectModal({
               setReason(e.target.value);
               if (e.target.value.trim()) setError(false);
             }}
-            placeholder="Nhập lý do từ chối phê duyệt... Ví dụ: Danh mục chưa đầy đủ thông tin về cấu trúc dữ liệu. Đề nghị bổ sung các trường dữ liệu bắt buộc theo quy định."
+            placeholder="Nhập lý do từ chối áp dụng cho tất cả các yêu cầu đã chọn..."
             className={`w-full px-4 py-3 border rounded-xl bg-white text-[13px] focus:ring-2 transition-all outline-none ${
               error ? 'border-red-500 focus:ring-red-500/10' : 'border-slate-200 focus:ring-blue-500/20 focus:border-blue-500'
             }`}
@@ -104,7 +99,6 @@ export function SimpleRejectModal({
             </div>
           )}
         </div>
-
       </div>
     </BaseModal>
   );
