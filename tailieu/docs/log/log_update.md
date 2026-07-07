@@ -1,5 +1,31 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Phiên bản 2.6.15 (Ngày cập nhật: 06/07/2026)
+
+**Nội dung thay đổi — Nâng cấp Wizard "Tạo mới dữ liệu chủ"** (`master-data/MasterDataWizard.tsx`) theo mockup đã duyệt, đáp ứng các transaction UC Dữ liệu chủ (485–490):
+1. **Bước 1 (Khởi tạo)**: thêm **kiểm tra trùng Mã/Tên** thực thể ngay khi nhập (đỏ "Đã tồn tại" / xanh "Hợp lệ, chưa trùng"); chặn `handleNext` nếu trùng (UC 485.3).
+2. **Bước 4 (Quy tắc hợp nhất)**: tách **3 sub-tab**:
+   - *So khớp*: thêm cột **Trọng số (%)** (tổng phải =100%), cột **Thuật toán** khi fuzzy (Jaro-Winkler/Levenshtein/Ngữ âm), Việt hóa kiểu so khớp (Khớp tuyệt đối/gần đúng), **2 ngưỡng** (tự động gộp ≥ / rà soát ≥), khối **hard-block** dạng chip.
+   - *Hợp nhất giá trị*: thêm cột **Xử lý null** (Nguồn kế/Bỏ qua) và **Khi hết vẫn trống** (Bắt buộc/Cảnh báo/Cho phép trống).
+   - *Kiểm thử* (mới): chọn dữ liệu mẫu + "Chạy mô phỏng" + 4 thẻ số + bảng "Nghi ngờ cần xem lại" (UC 487 — vá gap kiểm thử).
+   - Validation: ∑trọng số=100%, ngưỡng auto > rà soát, hard-block ≥ 1.
+3. **Bước 5 (Quan hệ)**: **mở lại loại 1-n** (bỏ filter); thêm **sơ đồ quan hệ** (SVG) golden record → thực thể con (UC 488.2 + 488.3).
+4. **Bước 1 (Khởi tạo)**: thêm khối **Đăng ký nguồn dữ liệu** dạng chip — mỗi nguồn có badge **loại** (Bảng/View/Truy vấn) + **độ mịn** (1:1/1:n) + nút xóa; nút "Thêm nguồn" (form inline). Xóa nguồn tự dọn ánh xạ/gom liên quan (UC 485.1 nền tảng cho hợp nhất đa nguồn).
+5. **Bước 3 (Thuộc tính)**: thêm 2 khối:
+   - **Ánh xạ cột nguồn → thuộc tính**: bảng thuộc tính × từng nguồn → chọn cột gốc.
+   - **Gom nguồn 1:n**: chỉ hiện khi có nguồn 1:n; mỗi nguồn 1:n cấu hình Rule gom (mới nhất/nhiều nhất/max/min) + cột mốc thời gian.
+6. **Ẩn/hiện động theo số nguồn**: ≤1 nguồn → ánh xạ ghi chú "ánh xạ trực tiếp", ẩn tab **Hợp nhất giá trị** ở Bước 4 (chỉ giữ So khớp + Kiểm thử); ≥2 nguồn → đủ 3 tab.
+   - **Tinh chỉnh tab Hợp nhất giá trị**: Chiến lược rút còn **2 lựa chọn** — *Theo nguồn* (chọn đúng 1 nguồn dữ liệu) và *Độ ưu tiên* (xếp thứ tự nguồn bằng nút ↑/↓, thiếu ở nguồn đầu → lấy nguồn kế). **Bỏ cột "Nguồn thay thế"**; đổi "Nguồn ưu tiên" → **"Nguồn dữ liệu"** (thích ứng theo chiến lược). `ExtractionRule` bỏ `fallbackSource`, thêm `priorityOrder:string[]`; `ConflictStrategy` = `'source'|'priority'`.
+   - **Bước 3 — công tắc chế độ thuộc tính**: thêm nút chuyển ngay tại Bước 3 giữa *Chọn trường từ Kho DLDC* và *Tự thêm mới từng trường* (không còn phụ thuộc lựa chọn nguồn ở Bước 1).
+   - **Form "Tự thêm mới từng trường"**: bỏ checkbox *Duy nhất* và *Index*, thay bằng checkbox **Khóa (khóa chính)**; cột "Ràng buộc" trong bảng hiển thị badge **Khóa** (icon key) thay cho *Unique*. `AttributeForm` bỏ `unique/indexed`, thêm `isKey`.
+7. **Interface mới**: `MatchingRule.weight/algorithm`, `ExtractionRule.nullHandling/onEmpty`, `MergeConfig.autoThreshold/reviewThreshold/hardBlockFields`, `WizardData.sources/mapping/groupRules` (+ type `WizardSource`, `GroupRule`).
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/master-data/MasterDataWizard.tsx`
+- `package.json`
+
+---
+
 ## Phiên bản 2.6.14 (Ngày cập nhật: 03/07/2026)
 
 **Nội dung thay đổi:**
