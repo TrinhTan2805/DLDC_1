@@ -1,46 +1,36 @@
-import { useState, ChangeEvent } from 'react';
-import { GitCompare, CheckCircle2, XCircle, Plus, Minus, RefreshCw, ChevronRight } from 'lucide-react';
+import { useState, ChangeEvent, ReactNode } from 'react';
+import { GitCompare, CheckCircle2, XCircle, ChevronRight, ArrowUpCircle, History, KeyRound } from 'lucide-react';
 import { MasterDataEntity, ApprovalRequest } from '../../categoryTypes';
 import { BaseModal } from '../../../../common/BaseModal';
 import { ReviewResultCard } from './ReviewResultCard';
 
-// ── Kiểu dữ liệu nội bộ cho changes ──────────────────────────────────────────
+// ── Kiểu dữ liệu nội bộ cho changes (dạng snapshot old/new) ───────────────────
 
-interface GeneralChange {
-  field: string;
+interface GeneralField {
   label: string;
-  oldValue: string;
-  newValue: string;
+  value: string;
 }
 
-interface PropDiff {
-  label: string;
-  oldValue: string;
-  newValue: string;
-}
-
-interface StructureChange {
-  changeType: 'added' | 'modified' | 'removed';
+interface SnapField {
   fieldName: string;
   displayName: string;
-  dataType?: string;
-  changedProps?: PropDiff[];
+  dataType: string;
+  isPK?: boolean;
 }
 
-interface RelationshipChange {
-  changeType: 'added' | 'modified' | 'removed';
+interface SnapRel {
   sourceEntityName: string;
   targetEntityName: string;
   relationshipType: string;
-  changedProps?: PropDiff[];
+  foreignKey: string;
 }
 
 export interface VersionChanges {
   prevVersion: number;
   currentVersion: number;
-  generalChanges: GeneralChange[];
-  structureChanges: StructureChange[];
-  relationshipChanges: RelationshipChange[];
+  general: { old: GeneralField[]; new: GeneralField[] };
+  structure: { old: SnapField[]; new: SnapField[] };
+  relationship: { old: SnapRel[]; new: SnapRel[] };
 }
 
 interface CategoryVersionChangeModalProps {
@@ -54,11 +44,19 @@ interface CategoryVersionChangeModalProps {
 
 type DiffTab = 'general' | 'structure' | 'relationship';
 
-const changeTypeMeta = {
-  added: { label: 'Thêm mới', icon: Plus, bg: 'bg-emerald-50', border: 'border-emerald-200', badge: 'bg-emerald-100 text-emerald-700 border-emerald-200', text: 'text-emerald-700' },
-  modified: { label: 'Chỉnh sửa', icon: RefreshCw, bg: 'bg-amber-50', border: 'border-amber-200', badge: 'bg-amber-100 text-amber-700 border-amber-200', text: 'text-amber-700' },
-  removed: { label: 'Xóa bỏ', icon: Minus, bg: 'bg-red-50', border: 'border-red-200', badge: 'bg-red-100 text-red-600 border-red-200', text: 'text-red-600' },
+const emptySnapshot: VersionChanges = {
+  prevVersion: 1,
+  currentVersion: 2,
+  general: { old: [], new: [] },
+  structure: { old: [], new: [] },
+  relationship: { old: [], new: [] },
 };
+
+const relTypeClass = (type: string) =>
+  type === '1-n' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+  type === 'n-1' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' :
+  type === 'n-n' ? 'bg-purple-50 text-purple-700 border-purple-200' :
+  'bg-teal-50 text-teal-700 border-teal-200';
 
 export function CategoryVersionChangeModal({
   isOpen,
@@ -73,20 +71,18 @@ export function CategoryVersionChangeModal({
 
   if (!isOpen || !entity || !request) return null;
 
-  const changes = request.changes as VersionChanges | undefined;
-  const prevVersion = changes?.prevVersion ?? 1;
-  const currentVersion = changes?.currentVersion ?? 2;
-  const generalChanges = changes?.generalChanges ?? [];
-  const structureChanges = changes?.structureChanges ?? [];
-  const relationshipChanges = changes?.relationshipChanges ?? [];
+  const changes = (request.changes as VersionChanges | undefined) ?? emptySnapshot;
+  const prevVersion = changes.prevVersion ?? 1;
+  const currentVersion = changes.currentVersion ?? 2;
+  const general = changes.general ?? emptySnapshot.general;
+  const structure = changes.structure ?? emptySnapshot.structure;
+  const relationship = changes.relationship ?? emptySnapshot.relationship;
 
   const tabs: { key: DiffTab; label: string; count: number }[] = [
-    { key: 'general', label: 'Thông tin chung', count: generalChanges.length },
-    { key: 'structure', label: 'Cấu trúc', count: structureChanges.length },
-    { key: 'relationship', label: 'Quan hệ', count: relationshipChanges.length },
+    { key: 'general', label: 'Thông tin chung', count: general.new.length },
+    { key: 'structure', label: 'Cấu trúc', count: structure.new.length },
+    { key: 'relationship', label: 'Quan hệ', count: relationship.new.length },
   ];
-
-  const totalChanges = generalChanges.length + structureChanges.length + relationshipChanges.length;
 
   return (
     <BaseModal
@@ -145,29 +141,6 @@ export function CategoryVersionChangeModal({
           </div>
         </div>
 
-        {/* Summary bar */}
-        <div className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px]">
-          <span className="text-slate-600 font-medium">{totalChanges} thay đổi tổng cộng:</span>
-          {structureChanges.filter(c => c.changeType === 'added').length > 0 && (
-            <span className="flex items-center gap-1 px-2 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-full font-medium">
-              <Plus className="w-3 h-3" />
-              {structureChanges.filter(c => c.changeType === 'added').length + relationshipChanges.filter(c => c.changeType === 'added').length} thêm mới
-            </span>
-          )}
-          {(structureChanges.filter(c => c.changeType === 'modified').length + generalChanges.length) > 0 && (
-            <span className="flex items-center gap-1 px-2 py-0.5 bg-amber-50 border border-amber-200 text-amber-700 rounded-full font-medium">
-              <RefreshCw className="w-3 h-3" />
-              {structureChanges.filter(c => c.changeType === 'modified').length + generalChanges.length + relationshipChanges.filter(c => c.changeType === 'modified').length} chỉnh sửa
-            </span>
-          )}
-          {(structureChanges.filter(c => c.changeType === 'removed').length + relationshipChanges.filter(c => c.changeType === 'removed').length) > 0 && (
-            <span className="flex items-center gap-1 px-2 py-0.5 bg-red-50 border border-red-200 text-red-600 rounded-full font-medium">
-              <Minus className="w-3 h-3" />
-              {structureChanges.filter(c => c.changeType === 'removed').length + relationshipChanges.filter(c => c.changeType === 'removed').length} xóa bỏ
-            </span>
-          )}
-        </div>
-
         {/* Tabs */}
         <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl w-fit">
           {tabs.map(tab => (
@@ -194,175 +167,37 @@ export function CategoryVersionChangeModal({
 
         {/* ── Tab: Thông tin chung ── */}
         {activeTab === 'general' && (
-          <div>
-            {generalChanges.length === 0 ? (
-              <EmptyChange label="Không có thay đổi thông tin chung" />
-            ) : (
-              <div className="border border-slate-200 rounded-xl overflow-hidden">
-                <table className="w-full text-[13px]">
-                  <thead className="bg-[#f8fafc] border-b border-slate-200">
-                    <tr>
-                      <th className="px-5 py-3 text-[13px] font-semibold text-slate-500 text-left w-48">Trường thông tin</th>
-                      <th className="px-5 py-3 text-[13px] font-semibold text-slate-500 text-left">
-                        <div className="flex items-center gap-1.5">
-                          <span className="w-2.5 h-2.5 rounded-full bg-red-400 inline-block"></span>
-                          Giá trị cũ (v{prevVersion})
-                        </div>
-                      </th>
-                      <th className="px-5 py-3 text-[13px] font-semibold text-slate-500 text-left">
-                        <div className="flex items-center gap-1.5">
-                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block"></span>
-                          Giá trị mới (v{currentVersion})
-                        </div>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {generalChanges.map((change, idx) => (
-                      <tr key={idx} className="bg-amber-50/60 hover:bg-amber-50 transition-colors">
-                        <td className="px-5 py-3 text-[13px] font-medium text-slate-700">{change.label}</td>
-                        <td className="px-5 py-3 text-[13px]">
-                          <span className="inline-block px-2.5 py-1 text-[13px] bg-red-50 border border-red-200 text-red-700 rounded-lg line-through decoration-red-400">
-                            {change.oldValue || <span className="italic text-slate-400">Chưa có</span>}
-                          </span>
-                        </td>
-                        <td className="px-5 py-3 text-[13px]">
-                          <span className="inline-block px-2.5 py-1 text-[13px] bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-lg font-medium">
-                            {change.newValue || <span className="italic text-slate-400">Trống</span>}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+          <div className="space-y-4">
+            <VersionBlock variant="new" version={currentVersion}>
+              <GeneralList items={general.new} />
+            </VersionBlock>
+            <VersionBlock variant="old" version={prevVersion}>
+              <GeneralList items={general.old} />
+            </VersionBlock>
           </div>
         )}
 
         {/* ── Tab: Cấu trúc ── */}
         {activeTab === 'structure' && (
-          <div className="space-y-3">
-            {structureChanges.length === 0 ? (
-              <EmptyChange label="Không có thay đổi cấu trúc trường dữ liệu" />
-            ) : (
-              structureChanges.map((change, idx) => {
-                const meta = changeTypeMeta[change.changeType];
-                const Icon = meta.icon;
-                return (
-                  <div key={idx} className={`border ${meta.border} rounded-xl overflow-hidden`}>
-                    {/* Row header */}
-                    <div className={`${meta.bg} px-5 py-3 flex items-center gap-3`}>
-                      <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[13px] font-semibold ${meta.badge}`}>
-                        <Icon className="w-3.5 h-3.5" />
-                        {meta.label}
-                      </span>
-                      <span className="font-mono font-semibold text-slate-800 text-[13px]">{change.fieldName}</span>
-                      <span className="text-slate-500 text-[13px]">·</span>
-                      <span className="text-slate-600 text-[13px]">{change.displayName}</span>
-                      {change.dataType && (
-                        <span className="ml-auto px-2 py-0.5 bg-white border border-slate-200 rounded text-[13px] text-slate-600 font-medium">{change.dataType}</span>
-                      )}
-                    </div>
-                    {/* Changed props */}
-                    {change.changedProps && change.changedProps.length > 0 && (
-                      <table className="w-full text-[13px] bg-white">
-                        <thead className="border-b border-slate-100">
-                          <tr>
-                            <th className="px-5 py-2.5 font-semibold text-slate-500 text-left w-40">Thuộc tính</th>
-                            <th className="px-5 py-2.5 font-semibold text-slate-500 text-left">
-                              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-400 inline-block"></span>Cũ</span>
-                            </th>
-                            <th className="px-5 py-2.5 font-semibold text-slate-500 text-left">
-                              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span>Mới</span>
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-50">
-                          {change.changedProps.map((prop, pIdx) => (
-                            <tr key={pIdx} className="hover:bg-slate-50/50">
-                              <td className="px-5 py-2.5 text-slate-600 font-medium">{prop.label}</td>
-                              <td className="px-5 py-2.5">
-                                <span className="text-red-600 line-through decoration-red-400">{prop.oldValue}</span>
-                              </td>
-                              <td className="px-5 py-2.5">
-                                <span className="text-emerald-700 font-medium">{prop.newValue}</span>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    )}
-                    {/* Added/Removed: show full info */}
-                    {change.changeType === 'added' && !change.changedProps && (
-                      <div className="px-5 py-3 bg-white text-[13px] text-emerald-700">Trường mới được thêm vào cấu trúc.</div>
-                    )}
-                    {change.changeType === 'removed' && !change.changedProps && (
-                      <div className="px-5 py-3 bg-white text-[13px] text-red-600">Trường bị xóa khỏi cấu trúc.</div>
-                    )}
-                  </div>
-                );
-              })
-            )}
+          <div className="space-y-4">
+            <VersionBlock variant="new" version={currentVersion}>
+              <StructureTable items={structure.new} />
+            </VersionBlock>
+            <VersionBlock variant="old" version={prevVersion}>
+              <StructureTable items={structure.old} />
+            </VersionBlock>
           </div>
         )}
 
         {/* ── Tab: Quan hệ ── */}
         {activeTab === 'relationship' && (
-          <div className="space-y-3">
-            {relationshipChanges.length === 0 ? (
-              <EmptyChange label="Không có thay đổi quan hệ danh mục" />
-            ) : (
-              relationshipChanges.map((change, idx) => {
-                const meta = changeTypeMeta[change.changeType];
-                const Icon = meta.icon;
-                return (
-                  <div key={idx} className={`border ${meta.border} rounded-xl overflow-hidden`}>
-                    <div className={`${meta.bg} px-5 py-3 flex items-center gap-3 flex-wrap`}>
-                      <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[13px] font-semibold ${meta.badge}`}>
-                        <Icon className="w-3.5 h-3.5" />
-                        {meta.label}
-                      </span>
-                      <span className="font-medium text-slate-800 text-[13px]">{change.sourceEntityName}</span>
-                      <ChevronRight className="w-4 h-4 text-slate-400" />
-                      <span className="font-medium text-slate-800 text-[13px]">{change.targetEntityName}</span>
-                      <span className={`ml-auto px-2 py-0.5 rounded border text-[13px] font-semibold ${
-                        change.relationshipType === '1-n' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                        change.relationshipType === 'n-1' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' :
-                        change.relationshipType === 'n-n' ? 'bg-purple-50 text-purple-700 border-purple-200' :
-                        'bg-teal-50 text-teal-700 border-teal-200'
-                      }`}>
-                        {change.relationshipType}
-                      </span>
-                    </div>
-                    {change.changedProps && change.changedProps.length > 0 && (
-                      <table className="w-full text-[13px] bg-white">
-                        <thead className="border-b border-slate-100">
-                          <tr>
-                            <th className="px-5 py-2.5 font-semibold text-slate-500 text-left w-40">Thuộc tính</th>
-                            <th className="px-5 py-2.5 font-semibold text-slate-500 text-left">
-                              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-400 inline-block"></span>Cũ</span>
-                            </th>
-                            <th className="px-5 py-2.5 font-semibold text-slate-500 text-left">
-                              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span>Mới</span>
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-50">
-                          {change.changedProps.map((prop, pIdx) => (
-                            <tr key={pIdx} className="hover:bg-slate-50/50">
-                              <td className="px-5 py-2.5 text-slate-600 font-medium">{prop.label}</td>
-                              <td className="px-5 py-2.5 text-red-600 line-through decoration-red-400">{prop.oldValue}</td>
-                              <td className="px-5 py-2.5 text-emerald-700 font-medium">{prop.newValue}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    )}
-                  </div>
-                );
-              })
-            )}
+          <div className="space-y-4">
+            <VersionBlock variant="new" version={currentVersion}>
+              <RelationshipList items={relationship.new} />
+            </VersionBlock>
+            <VersionBlock variant="old" version={prevVersion}>
+              <RelationshipList items={relationship.old} />
+            </VersionBlock>
           </div>
         )}
 
@@ -387,10 +222,109 @@ export function CategoryVersionChangeModal({
   );
 }
 
-function EmptyChange({ label }: { label: string }) {
+// ── Khối một phiên bản (mới / cũ) ─────────────────────────────────────────────
+
+function VersionBlock({
+  variant,
+  version,
+  children,
+}: {
+  variant: 'new' | 'old';
+  version: number;
+  children: ReactNode;
+}) {
+  const isNew = variant === 'new';
+  const HeaderIcon = isNew ? ArrowUpCircle : History;
   return (
-    <div className="text-[13px] text-slate-400 italic py-6 text-center border border-dashed border-slate-200 rounded-xl">
-      {label}
+    <div className="border border-slate-200 rounded-xl overflow-hidden">
+      <div
+        className={`px-5 py-3 flex items-center gap-2 border-b ${
+          isNew
+            ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+            : 'bg-red-50 text-red-600 border-red-100'
+        }`}
+      >
+        <HeaderIcon className="w-4 h-4" />
+        <span className="text-[13px] font-semibold">
+          {isNew ? 'Phiên bản mới' : 'Phiên bản cũ'} (v{version})
+        </span>
+      </div>
+      <div className="bg-white">{children}</div>
+    </div>
+  );
+}
+
+function EmptyNote() {
+  return (
+    <div className="px-5 py-6 text-center text-[13px] text-slate-400 italic">
+      Không có dữ liệu
+    </div>
+  );
+}
+
+function GeneralList({ items }: { items: GeneralField[] }) {
+  if (items.length === 0) return <EmptyNote />;
+  return (
+    <div className="divide-y divide-slate-100">
+      {items.map((item, idx) => (
+        <div key={idx} className="px-5 py-2.5 flex items-start gap-3 text-[13px]">
+          <span className="w-44 shrink-0 font-medium text-slate-500">{item.label}</span>
+          <span className="text-slate-800">{item.value || <span className="italic text-slate-400">—</span>}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function StructureTable({ items }: { items: SnapField[] }) {
+  if (items.length === 0) return <EmptyNote />;
+  return (
+    <table className="w-full text-[13px]">
+      <thead className="bg-[#f8fafc] border-b border-slate-200">
+        <tr>
+          <th className="px-5 py-2.5 font-semibold text-slate-500 text-left">Mã trường</th>
+          <th className="px-5 py-2.5 font-semibold text-slate-500 text-left">Tên hiển thị</th>
+          <th className="px-5 py-2.5 font-semibold text-slate-500 text-left">Kiểu</th>
+          <th className="px-5 py-2.5 font-semibold text-slate-500 text-center w-16">PK</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-slate-100">
+        {items.map((item, idx) => (
+          <tr key={idx} className="hover:bg-slate-50/50">
+            <td className="px-5 py-2.5 font-mono font-semibold text-slate-800">{item.fieldName}</td>
+            <td className="px-5 py-2.5 text-slate-600">{item.displayName}</td>
+            <td className="px-5 py-2.5 text-slate-600">{item.dataType}</td>
+            <td className="px-5 py-2.5 text-center">
+              {item.isPK ? (
+                <KeyRound className="w-4 h-4 text-amber-500 inline-block" />
+              ) : (
+                <span className="text-slate-300">—</span>
+              )}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+function RelationshipList({ items }: { items: SnapRel[] }) {
+  if (items.length === 0) return <EmptyNote />;
+  return (
+    <div className="divide-y divide-slate-100">
+      {items.map((item, idx) => (
+        <div key={idx} className="px-5 py-3 flex items-center gap-3 flex-wrap text-[13px]">
+          <span className="font-medium text-slate-800">{item.sourceEntityName}</span>
+          <ChevronRight className="w-4 h-4 text-slate-400" />
+          <span className="font-medium text-slate-800">{item.targetEntityName}</span>
+          <span className={`px-2 py-0.5 rounded border text-[13px] font-semibold ${relTypeClass(item.relationshipType)}`}>
+            {item.relationshipType}
+          </span>
+          <span className="ml-auto text-slate-500">
+            FK: <span className="font-mono text-slate-700">{item.foreignKey || '—'}</span>
+          </span>
+        </div>
+      ))}
     </div>
   );
 }

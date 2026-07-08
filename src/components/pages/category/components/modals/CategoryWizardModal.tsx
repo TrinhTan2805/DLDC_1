@@ -2,7 +2,7 @@ import React, { ChangeEvent, useState, useEffect } from 'react';
 import { X, FileText, Sliders, ChevronRight, ChevronLeft, Save, Send, Link2, ChevronDown, Check, Clock, CalendarClock } from 'lucide-react';
 import { AttributesTab } from '../tabs/AttributesTab';
 import { RelationshipsTab } from '../tabs/RelationshipsTab';
-import { MasterDataEntity, MasterDataAttribute, ScopeType, FieldDataType, ApprovalRequest } from '../../categoryTypes';
+import { MasterDataEntity, MasterDataAttribute, ScopeType, FieldDataType, ApprovalRequest, EntityRelationship } from '../../categoryTypes';
 import { Portal } from '../../../../common/Portal';
 import { ReviewResultCard } from './ReviewResultCard';
 
@@ -66,6 +66,8 @@ export function CategoryWizardModal({
   requests
 }: CategoryWizardModalProps) {
   const [modalIndex, setModalIndex] = useState(1);
+  // State thật cho quan hệ khai báo trong wizard (Bước 3)
+  const [wizardRelationships, setWizardRelationships] = useState<EntityRelationship[]>([]);
 
   const categoryRequest = requests
     ?.filter(r => r.entityId === entityId && r.type === 'category')
@@ -467,8 +469,8 @@ export function CategoryWizardModal({
               <div className="animate-in slide-in-from-right-2 duration-400">
                 <RelationshipsTab
                   entities={entities}
-                  relationships={[]}
-                  setRelationships={() => { }}
+                  relationships={wizardRelationships}
+                  setRelationships={setWizardRelationships}
                   isViewOnly={isViewOnly}
                   currentEntityId={entityId || undefined}
                   currentEntityName={formData.name || ''}
