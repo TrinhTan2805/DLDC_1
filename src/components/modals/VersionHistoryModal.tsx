@@ -7,6 +7,41 @@ interface VersionHistoryModalProps {
 
 const mockVersions = [
   {
+    id: 26,
+    version: 'v2.6.15',
+    date: '06/07/2026',
+    time: '14:30',
+    content: `1. Phân hệ Dữ liệu chủ (Master Data) — Nâng cấp Wizard "Tạo mới dữ liệu chủ" (MasterDataWizard.tsx):
+- Bước 1 (Khởi tạo): Thêm kiểm tra trùng Mã/Tên thực thể trực tiếp; chặn chuyển bước nếu trùng. Tích hợp cấu hình Đăng ký nguồn dữ liệu dạng Chip (badge loại nguồn, độ mịn 1:1 hoặc 1:n, nút xóa).
+- Bước 3 (Thuộc tính): Thêm bảng ánh xạ cột nguồn → thuộc tính và cấu hình gom nguồn 1:n (quy tắc gom: mới nhất, nhiều nhất, max, min). Hỗ trợ nút chuyển nhanh giữa chọn từ Kho DLDC và tự thêm mới trường. Đổi checkbox duy nhất/index thành Khóa chính (PK).
+- Bước 4 (Quy tắc hợp nhất): Tách biệt thành 3 sub-tab:
+  + So khớp: Trọng số (%), Thuật toán so khớp (Jaro-Winkler, Levenshtein, Ngữ âm), Kiểu so khớp (Khớp tuyệt đối/gần đúng), Ngưỡng gộp tự động, Ngưỡng rà soát, và khối hard-block dạng chip.
+  + Hợp nhất giá trị: Cấu hình Null Handling và các chiến lược gộp (Theo nguồn / Độ ưu tiên).
+  + Kiểm thử: Chạy mô phỏng kiểm thử với dữ liệu mẫu, hiển thị 4 thẻ thống kê và bảng nghi ngờ cần xem lại.
+- Bước 5 (Quan hệ): Mở lại loại quan hệ 1-n và hiển thị sơ đồ quan hệ dạng SVG trực quan.
+- Tối ưu hóa: Ẩn/hiện động các tab hợp nhất giá trị tùy thuộc vào số lượng nguồn dữ liệu (≤ 1 nguồn thì ẩn).`
+  },
+  {
+    id: 25,
+    version: 'v2.6.14',
+    date: '07/07/2026',
+    time: '10:00',
+    content: `1. Phân hệ Danh mục dùng chung (Category Setup) — Thiết lập & Biên tập danh mục:
+- Tab "Thiết lập cấu trúc" (AttributesTab.tsx): Chuyển sang chế độ chỉ đọc (read-only) trong trang Thiết lập danh mục (ẩn nút "Thêm trường dữ liệu" và cột "Thao tác" sửa/xóa).
+- Tab "Thiết lập quan hệ" (RelationshipsTab.tsx): Chuyển sang chế độ chỉ đọc (ẩn nút "Thêm mới quan hệ", cột "Thao tác" thay bằng icon Eye xem chi tiết quan hệ).
+- Wizard thiết lập danh mục (CategoryWizardModal.tsx):
+  + Bước 2: Đổi cột "Chia sẻ" thành "Chọn"; thêm cột "Tên cột" (input cho phép sửa tên) kèm mũi tên chỉ định hướng ánh xạ ("Trường gốc → Tên cột").
+  + Bước 3: Sửa lỗi không lưu được quan hệ, liên kết đúng state wizardRelationships và cho phép khai báo lưu vào danh sách tạm.
+- Modal "Xem chi tiết thay đổi" (CategoryVersionChangeModal.tsx): Đổi giao diện so sánh diff từ bảng old|new sang 2 khối snapshot xếp dọc (Phiên bản mới nền xanh lá ở trên, Phiên bản cũ nền đỏ nhạt ở dưới), loại bỏ các chỉ số tóm tắt diff.
+- Biên tập danh mục → tab Phiên bản (CategoryPage.tsx): Nút "Xem chi tiết" (Eye) nay mở modal chi tiết danh mục dạng 3 tab (Thông tin chung, Thuộc tính, Quan hệ) thay vì mở modal so sánh phiên bản cũ. Gộp trạng thái phiên bản thành: "Hiệu lực" (phiên bản hiện hành) và "Lưu trữ" (các phiên bản cũ).
+
+2. Quản trị người dùng — Đồng bộ hóa & Phê duyệt tài khoản (UserManagementPage.tsx):
+- Nút "Đồng bộ" mở modal danh sách người dùng staging (userName, fullName, email, cellphone, identityCard, deptName, posCode, status, update_date).
+- Hệ thống tự động so khớp với danh sách người dùng thật để phân loại trạng thái đồng bộ: "Thêm mới", "Cập nhật", "Không thay đổi", "Lỗi (thiếu email)".
+- Chỉ cho phép Duyệt / Duyệt tất cả đối với dòng "Thêm mới" hoặc "Cập nhật". Khi duyệt xong, dữ liệu mới chính thức được áp dụng vào danh sách người dùng thực tế.
+- Trạng thái phê duyệt sẽ được reset về "Chờ duyệt" mỗi khi nhấn nút "Đồng bộ" mới.`
+  },
+  {
     id: 24,
     version: 'v2.6.06',
     date: '03/07/2026',
