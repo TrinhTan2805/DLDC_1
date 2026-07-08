@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Plus, Edit, Trash2, Lock, Unlock, X, Eye, UserPlus, RefreshCw, Download, Users, Filter } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, Lock, Unlock, X, Eye, UserPlus, RefreshCw, Download, Users, Filter, AlertTriangle } from 'lucide-react';
 import { StatusTag } from '../../common/StatusTag';
 import { StatsCard } from '../../common/StatsCard';
 import { ResetPasswordModal } from '../../user/ResetPasswordModal';
@@ -93,6 +93,63 @@ const initialUsersData: User[] = [
   },
 ];
 
+// Người dùng kéo về từ nguồn (staging) — theo shape API thật
+interface SyncUser {
+  userId: number;
+  userName: string;
+  fullName: string;
+  email: string;
+  cellphone: string;
+  identityCard: string;
+  deptCode: string;
+  deptName: string;
+  posCode: string;
+  status: number; // 1 = active
+  update_date: string;
+  approvalStatus: 'pending' | 'approved'; // field client
+}
+
+// Trạng thái đồng bộ của 1 dòng kéo về (so sánh với danh sách user thật)
+type SyncStatus = 'err' | 'new' | 'upd' | 'same';
+
+const initialSyncUsersData: SyncUser[] = [
+  // Chưa có trong users -> Thêm mới
+  {
+    userId: 1001, userName: 'vuthimai', fullName: 'Vũ Thị Mai', email: 'vuthimai@moj.gov.vn',
+    cellphone: '0987654321', identityCard: '001190001234', deptCode: 'CDKQG', deptName: 'Cục Đăng ký Quốc gia',
+    posCode: 'Biên tập viên', status: 1, update_date: '08/07/2026 09:15:00', approvalStatus: 'pending',
+  },
+  {
+    userId: 1002, userName: 'dangvanhung', fullName: 'Đặng Văn Hùng', email: 'dangvanhung@moj.gov.vn',
+    cellphone: '0987654322', identityCard: '001190005678', deptCode: 'CCC', deptName: 'Cục Công chứng',
+    posCode: 'Người xem', status: 1, update_date: '08/07/2026 09:16:00', approvalStatus: 'pending',
+  },
+  // Trùng username 'tranthibinh' + khác thông tin -> Cập nhật
+  {
+    userId: 1003, userName: 'tranthibinh', fullName: 'Trần Thị Bình', email: 'tranthibinh_new@moj.gov.vn',
+    cellphone: '0912345679', identityCard: '001190009012', deptCode: 'VPLDS', deptName: 'Vụ Pháp luật Dân sự',
+    posCode: 'Quản trị viên', status: 1, update_date: '08/07/2026 09:17:00', approvalStatus: 'pending',
+  },
+  // Trùng username 'levancuong' + giống hệt -> Không thay đổi
+  {
+    userId: 1004, userName: 'levancuong', fullName: 'Lê Văn Cường', email: 'levancuong@moj.gov.vn',
+    cellphone: '0912345680', identityCard: '001190003456', deptCode: 'CCC', deptName: 'Cục Công chứng',
+    posCode: 'Người xem', status: 1, update_date: '08/07/2026 09:18:00', approvalStatus: 'pending',
+  },
+  // Thiếu email -> Lỗi
+  {
+    userId: 1005, userName: 'phamvanloi', fullName: 'Phạm Văn Lợi', email: '',
+    cellphone: '0987654323', identityCard: '001190007890', deptCode: 'CBTTP', deptName: 'Cục Bổ trợ tư pháp',
+    posCode: 'Biên tập viên', status: 1, update_date: '08/07/2026 09:19:00', approvalStatus: 'pending',
+  },
+  // Chưa có trong users -> Thêm mới
+  {
+    userId: 1006, userName: 'ngothihoa', fullName: 'Ngô Thị Hoa', email: 'ngothihoa@moj.gov.vn',
+    cellphone: '0987654324', identityCard: '001190002468', deptCode: 'CCNTT', deptName: 'Cục Công nghệ thông tin',
+    posCode: 'Người xem', status: 1, update_date: '08/07/2026 09:20:00', approvalStatus: 'pending',
+  },
+];
+
 const availableRoles = ['Quản trị hệ thống', 'Quản trị nghiệp vụ', 'Người dùng cơ bản', 'Quản trị viên', 'Biên tập viên', 'Người xem'];
 
 const availableGroups = [
@@ -134,6 +191,124 @@ export function UserManagementPage() {
 
   const [selectedGroups, setSelectedGroups] = useState<number[]>([]);
 
+  // Sync (đồng bộ có bước duyệt) states
+  const [syncUsers, setSyncUsers] = useState<SyncUser[]>(initialSyncUsersData);
+  const [syncSearch, setSyncSearch] = useState('');
+  const [syncFilterStatus, setSyncFilterStatus] = useState<'all' | SyncStatus>('all');
+  const [syncFilterApproval, setSyncFilterApproval] = useState<'all' | 'pending' | 'approved'>('all');
+  const [syncSelectedIds, setSyncSelectedIds] = useState<number[]>([]);
+  const [syncMessage, setSyncMessage] = useState('');
+  const [syncDetail, setSyncDetail] = useState<SyncUser | null>(null);
+
+  // Tính trạng thái đồng bộ 1 dòng kéo về, khớp theo userName với users hiện tại
+  const getSyncStatus = (row: SyncUser): SyncStatus => {
+    if (!row.email || !row.userName || !row.fullName) return 'err';
+    const matched = users.find(u => u.username.toLowerCase() === row.userName.toLowerCase());
+    if (!matched) return 'new';
+    const isSame =
+      row.fullName === matched.name &&
+      row.email === matched.email &&
+      row.deptName === matched.department &&
+      row.posCode === matched.role;
+    return isSame ? 'same' : 'upd';
+  };
+
+  const syncStatusLabel: Record<SyncStatus, string> = {
+    err: 'Lỗi',
+    new: 'Thêm mới',
+    upd: 'Cập nhật',
+    same: 'Không thay đổi',
+  };
+  const syncStatusBadge: Record<SyncStatus, string> = {
+    err: 'bg-red-100 text-red-700',
+    new: 'bg-green-100 text-green-700',
+    upd: 'bg-blue-100 text-blue-700',
+    same: 'bg-slate-100 text-slate-600',
+  };
+  const isApprovable = (row: SyncUser) => {
+    const st = getSyncStatus(row);
+    return (st === 'new' || st === 'upd') && row.approvalStatus === 'pending';
+  };
+
+  const filteredSyncUsers = syncUsers.filter(row => {
+    const term = syncSearch.toLowerCase();
+    const matchesSearch =
+      !term ||
+      row.fullName.toLowerCase().includes(term) ||
+      row.userName.toLowerCase().includes(term) ||
+      row.email.toLowerCase().includes(term);
+    const matchesStatus = syncFilterStatus === 'all' || getSyncStatus(row) === syncFilterStatus;
+    const matchesApproval = syncFilterApproval === 'all' || row.approvalStatus === syncFilterApproval;
+    return matchesSearch && matchesStatus && matchesApproval;
+  });
+
+  const toggleSyncSelect = (row: SyncUser) => {
+    if (!isApprovable(row)) return;
+    setSyncSelectedIds(prev =>
+      prev.includes(row.userId) ? prev.filter(id => id !== row.userId) : [...prev, row.userId]
+    );
+  };
+
+  // Áp 1 dòng kéo về vào danh sách user thật
+  const applySyncRowToUsers = (row: SyncUser, currentUsers: User[]): User[] => {
+    const st = getSyncStatus(row);
+    if (st === 'new') {
+      const newUser: User = {
+        id: currentUsers.length > 0 ? Math.max(...currentUsers.map(u => u.id)) + 1 : 1,
+        name: row.fullName,
+        username: row.userName,
+        email: row.email,
+        phone: row.cellphone,
+        department: row.deptName,
+        role: row.posCode,
+        groups: [],
+        permissions: [],
+        status: row.status === 1 ? 'active' : 'inactive',
+        errors: [],
+      };
+      (newUser as any).createdDate = new Date().toLocaleDateString('vi-VN');
+      (newUser as any).lastLogin = 'Chưa đăng nhập';
+      return [newUser, ...currentUsers];
+    }
+    if (st === 'upd') {
+      return currentUsers.map(u =>
+        u.username.toLowerCase() === row.userName.toLowerCase()
+          ? { ...u, name: row.fullName, email: row.email, department: row.deptName, role: row.posCode }
+          : u
+      );
+    }
+    return currentUsers;
+  };
+
+  const approveSyncRows = (rows: SyncUser[]) => {
+    const approvable = rows.filter(isApprovable);
+    if (approvable.length === 0) {
+      setSyncMessage('Không có dòng nào cần duyệt.');
+      return;
+    }
+    let nextUsers = users;
+    const added: string[] = [];
+    const updated: string[] = [];
+    approvable.forEach(row => {
+      const st = getSyncStatus(row);
+      nextUsers = applySyncRowToUsers(row, nextUsers);
+      if (st === 'new') added.push(row.fullName);
+      else if (st === 'upd') updated.push(row.fullName);
+    });
+    setUsers(nextUsers);
+    const approvedIds = approvable.map(r => r.userId);
+    setSyncUsers(prev =>
+      prev.map(r => (approvedIds.includes(r.userId) ? { ...r, approvalStatus: 'approved' } : r))
+    );
+    setSyncSelectedIds(prev => prev.filter(id => !approvedIds.includes(id)));
+    const parts: string[] = [];
+    if (added.length) parts.push(`thêm mới ${added.join(', ')}`);
+    if (updated.length) parts.push(`cập nhật ${updated.join(', ')}`);
+    setSyncMessage(
+      `Đã duyệt ${approvable.length} người${parts.length ? ': ' + parts.join('; ') : ''}. Danh sách đã cập nhật.`
+    );
+  };
+
   const departmentsList = Array.from(new Set(users.map(u => u.department).filter(Boolean)));
   const groupsList = Array.from(new Set([
     ...availableGroups.map(g => g.name),
@@ -151,6 +326,16 @@ export function UserManagementPage() {
 
   const handleOpenModal = (type: ModalType, user?: User) => {
     setModalType(type);
+    if (type === 'sync') {
+      // Mỗi lần Đồng bộ = gọi lại API SSO lấy danh sách mới → nạp lại staging, mọi dòng về "Chờ duyệt"
+      setSyncUsers(initialSyncUsersData.map(u => ({ ...u, approvalStatus: 'pending' as const })));
+      setSyncSelectedIds([]);
+      setSyncMessage('');
+      setSyncSearch('');
+      setSyncFilterStatus('all');
+      setSyncFilterApproval('all');
+      setSyncDetail(null);
+    }
     if (user) {
       setSelectedUser(user);
       if (type === 'edit') {
@@ -195,6 +380,12 @@ export function UserManagementPage() {
       setSelectedGroups([]);
       setSelectedRole('');
       setPrevModalType(null);
+      setSyncSearch('');
+      setSyncFilterStatus('all');
+      setSyncFilterApproval('all');
+      setSyncSelectedIds([]);
+      setSyncMessage('');
+      setSyncDetail(null);
     }
   };
 
@@ -960,41 +1151,274 @@ export function UserManagementPage() {
         </div>
       )}
 
-      {/* Sync Users Modal */}
+      {/* Sync Users Modal — Đồng bộ người dùng có bước duyệt */}
       {modalType === 'sync' && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={handleCloseModal}>
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full" onClick={e => e.stopPropagation()}>
-            <div className="px-6 py-4 border-b border-slate-200">
-              <h3 className="text-slate-900">Xác nhận đồng bộ người dùng</h3>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999] p-4" onClick={handleCloseModal}>
+          <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto flex flex-col" onClick={e => e.stopPropagation()}>
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-slate-200 flex items-start justify-between sticky top-0 bg-white z-10">
+              <div>
+                <h3 className="text-slate-900 font-bold text-[16px]">Đồng bộ người dùng từ nguồn</h3>
+                <p className="text-[12px] text-slate-500 mt-0.5">Trạng thái = so sánh với danh sách người dùng thật (khớp theo Tên đăng nhập)</p>
+              </div>
+              <button onClick={handleCloseModal} className="text-slate-400 hover:text-slate-600" title="Đóng" aria-label="Đóng">
+                <X className="w-5 h-5" />
+              </button>
             </div>
-            <div className="p-6">
-              <p className="text-slate-700 mb-4">
-                Hệ thống sẽ đồng bộ danh sách người dùng từ hệ thống LDAP/Active Directory của Bộ Tư pháp.
-              </p>
-              <p className="text-sm text-blue-600 mb-4">
-                <strong>Lưu ý:</strong> Quá trình đồng bộ có thể mất vài phút. Các người dùng mới sẽ được thêm vào hệ thống, thông tin người dùng hiện có sẽ được cập nhật.
-              </p>
-              <div className="flex gap-3">
-                <button 
-                  onClick={() => {
-                    // Logic đồng bộ người dùng
-                    alert('Đang đồng bộ người dùng từ hệ thống LDAP...');
-                    handleCloseModal();
-                  }}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+
+            <div className="p-6 space-y-4">
+              {/* Thanh tìm kiếm (form chung) + hành động bên phải */}
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex-1 flex items-center gap-3">
+                  <div className="relative flex-1">
+                    <input
+                      type="text"
+                      placeholder="Tìm kiếm theo họ tên, tên đăng nhập, email..."
+                      className="w-full px-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                      value={syncSearch}
+                      onChange={(e) => setSyncSearch(e.target.value)}
+                    />
+                  </div>
+                  <button title="Tìm kiếm" aria-label="Tìm kiếm" className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center">
+                    <Search className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => approveSyncRows(syncUsers.filter(r => syncSelectedIds.includes(r.userId)))}
+                    disabled={syncSelectedIds.length === 0}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-[13px] font-medium disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                  >
+                    Duyệt ({syncSelectedIds.length})
+                  </button>
+                  <button
+                    onClick={() => approveSyncRows(syncUsers)}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-[13px] font-medium whitespace-nowrap"
+                  >
+                    Duyệt tất cả
+                  </button>
+                </div>
+              </div>
+
+              {/* Bộ lọc */}
+              <div className="flex flex-wrap items-center gap-3">
+                <select
+                  title="Trạng thái đồng bộ"
+                  aria-label="Trạng thái đồng bộ"
+                  className="px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                  value={syncFilterStatus}
+                  onChange={(e) => setSyncFilterStatus(e.target.value as 'all' | SyncStatus)}
                 >
-                  <RefreshCw className="w-4 h-4" />
-                  Đồng bộ ngay
-                </button>
-                <button 
+                  <option value="all">Trạng thái đồng bộ: Tất cả</option>
+                  <option value="new">Thêm mới</option>
+                  <option value="upd">Cập nhật</option>
+                  <option value="same">Không thay đổi</option>
+                  <option value="err">Lỗi</option>
+                </select>
+                <select
+                  title="Trạng thái duyệt"
+                  aria-label="Trạng thái duyệt"
+                  className="px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                  value={syncFilterApproval}
+                  onChange={(e) => setSyncFilterApproval(e.target.value as 'all' | 'pending' | 'approved')}
+                >
+                  <option value="all">Trạng thái duyệt: Tất cả</option>
+                  <option value="pending">Chờ duyệt</option>
+                  <option value="approved">Đã duyệt</option>
+                </select>
+              </div>
+
+              {/* Thông báo sau duyệt */}
+              {syncMessage && (
+                <div className="px-4 py-2.5 bg-green-50 border border-green-200 text-green-700 rounded-lg text-[13px]">
+                  {syncMessage}
+                </div>
+              )}
+
+              {/* Bảng dữ liệu kéo về */}
+              <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse text-[13px]">
+                    <thead className="bg-slate-50 border-b border-slate-200">
+                      <tr>
+                        <th className="px-3 py-3 text-center font-bold text-slate-500 w-10 text-[13px]">
+                          {(() => {
+                            const approvableRows = filteredSyncUsers.filter(isApprovable);
+                            const allSel = approvableRows.length > 0 && approvableRows.every(r => syncSelectedIds.includes(r.userId));
+                            return (
+                              <input
+                                type="checkbox"
+                                checked={allSel}
+                                disabled={approvableRows.length === 0}
+                                onChange={(e) => setSyncSelectedIds(e.target.checked ? approvableRows.map(r => r.userId) : [])}
+                                title="Chọn tất cả"
+                                className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 disabled:opacity-40 disabled:cursor-not-allowed"
+                              />
+                            );
+                          })()}
+                        </th>
+                        <th className="px-3 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-12 text-[13px]">STT</th>
+                        <th className="px-3 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Họ tên</th>
+                        <th className="px-3 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Tên đăng nhập</th>
+                        <th className="px-3 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Email</th>
+                        <th className="px-3 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Đơn vị</th>
+                        <th className="px-3 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Chức vụ</th>
+                        <th className="px-3 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái đồng bộ</th>
+                        <th className="px-3 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái duyệt</th>
+                        <th className="px-3 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Cập nhật lần cuối</th>
+                        <th className="px-3 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {filteredSyncUsers.length === 0 ? (
+                        <tr>
+                          <td colSpan={11} className="px-4 py-8 text-center text-slate-500 text-[13px] italic">
+                            Không có dữ liệu phù hợp.
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredSyncUsers.map((row, index) => {
+                          const st = getSyncStatus(row);
+                          const approvable = isApprovable(row);
+                          const checkboxTitle = st === 'err'
+                            ? 'Không thể duyệt: thiếu thông tin bắt buộc (email)'
+                            : (st === 'same' ? 'Không cần duyệt' : (row.approvalStatus === 'approved' ? 'Đã duyệt' : 'Chọn để duyệt'));
+                          return (
+                            <tr
+                              key={row.userId}
+                              className={`transition-all border-b border-slate-100 ${st === 'err' ? 'bg-red-50' : 'hover:bg-slate-50'}`}
+                            >
+                              <td className="px-3 py-3 text-center">
+                                <input
+                                  type="checkbox"
+                                  checked={syncSelectedIds.includes(row.userId)}
+                                  disabled={!approvable}
+                                  onChange={() => toggleSyncSelect(row)}
+                                  title={checkboxTitle}
+                                  className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 disabled:opacity-40 disabled:cursor-not-allowed"
+                                />
+                              </td>
+                              <td className="px-3 py-3 text-center text-slate-500 font-medium text-[13px]">{index + 1}</td>
+                              <td className="px-3 py-3 text-left">
+                                <div className="flex items-center gap-1.5 font-medium text-slate-950 leading-snug text-[13px]">
+                                  {st === 'err' && <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" />}
+                                  {row.fullName}
+                                </div>
+                              </td>
+                              <td className="px-3 py-3 text-center text-[13px] text-slate-700 font-medium">{row.userName}</td>
+                              <td className="px-3 py-3 text-center text-[13px] text-slate-700">
+                                {row.email || <span className="text-red-500 italic">(thiếu email)</span>}
+                              </td>
+                              <td className="px-3 py-3 text-center text-[13px] text-slate-700 max-w-[140px]"><div className="leading-tight">{row.deptName}</div></td>
+                              <td className="px-3 py-3 text-center text-[13px] text-slate-700">{row.posCode}</td>
+                              <td className="px-3 py-3 text-center">
+                                <span className={`inline-block px-2.5 py-1 rounded-full text-[12px] font-medium ${syncStatusBadge[st]}`}>
+                                  {syncStatusLabel[st]}
+                                </span>
+                              </td>
+                              <td className="px-3 py-3 text-center">
+                                <span className={`inline-block px-2.5 py-1 rounded-full text-[12px] font-medium ${row.approvalStatus === 'approved' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                                  {row.approvalStatus === 'approved' ? 'Đã duyệt' : 'Chờ duyệt'}
+                                </span>
+                              </td>
+                              <td className="px-3 py-3 text-center text-[13px] text-slate-600 font-mono whitespace-nowrap">{row.update_date}</td>
+                              <td className="px-3 py-3 text-center">
+                                <button
+                                  onClick={() => setSyncDetail(row)}
+                                  className="p-1.5 text-slate-500 hover:text-[#2563eb] hover:bg-blue-50 rounded-lg transition-colors"
+                                  title="Xem chi tiết"
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="flex gap-3 pt-2">
+                <button
                   onClick={handleCloseModal}
-                  className="px-6 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50"
+                  className="px-6 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-medium text-sm"
                 >
-                  Hủy
+                  Đóng
                 </button>
               </div>
             </div>
           </div>
+
+          {/* Popup chi tiết 1 dòng kéo về (read-only) */}
+          {syncDetail && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100000] p-4" onClick={(e) => { e.stopPropagation(); setSyncDetail(null); }}>
+              <div className="bg-white rounded-lg shadow-xl max-w-lg w-full" onClick={e => e.stopPropagation()}>
+                <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+                  <h3 className="text-slate-900 font-bold text-[15px]">Chi tiết người dùng đồng bộ</h3>
+                  <button onClick={() => setSyncDetail(null)} className="text-slate-400 hover:text-slate-600" title="Đóng" aria-label="Đóng">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="p-6 grid grid-cols-2 gap-4">
+                  <div>
+                    <div className="text-xs text-slate-500 mb-1">Họ và tên</div>
+                    <div className="text-sm text-slate-900">{syncDetail.fullName}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-slate-500 mb-1">Tên đăng nhập</div>
+                    <div className="text-sm text-slate-900">{syncDetail.userName}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-slate-500 mb-1">Email</div>
+                    <div className="text-sm text-slate-900">{syncDetail.email || '(trống)'}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-slate-500 mb-1">Số điện thoại</div>
+                    <div className="text-sm text-slate-900">{syncDetail.cellphone}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-slate-500 mb-1">CMND/CCCD</div>
+                    <div className="text-sm text-slate-900">{syncDetail.identityCard}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-slate-500 mb-1">User ID</div>
+                    <div className="text-sm text-slate-900">{syncDetail.userId}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-slate-500 mb-1">Mã đơn vị</div>
+                    <div className="text-sm text-slate-900">{syncDetail.deptCode}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-slate-500 mb-1">Đơn vị</div>
+                    <div className="text-sm text-slate-900">{syncDetail.deptName}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-slate-500 mb-1">Chức vụ</div>
+                    <div className="text-sm text-slate-900">{syncDetail.posCode}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-slate-500 mb-1">Trạng thái (status)</div>
+                    <div className="text-sm text-slate-900">{syncDetail.status}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-slate-500 mb-1">Cập nhật lần cuối</div>
+                    <div className="text-sm text-slate-900">{syncDetail.update_date}</div>
+                  </div>
+                </div>
+                <div className="px-6 pb-6 flex justify-end">
+                  <button
+                    onClick={() => setSyncDetail(null)}
+                    className="px-6 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-medium text-sm"
+                  >
+                    Đóng
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

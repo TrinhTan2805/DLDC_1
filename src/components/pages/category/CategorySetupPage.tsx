@@ -269,53 +269,41 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
       changes: {
         prevVersion: 1,
         currentVersion: 2,
-        generalChanges: [
-          { field: 'managingAgency', label: 'Đơn vị chủ quản', oldValue: 'Bộ Nội vụ', newValue: 'Bộ Tư pháp' },
-          { field: 'dataSource', label: 'Nguồn dữ liệu', oldValue: 'Tự cập nhật trực tiếp', newValue: 'Đồng bộ Kho DLDC' },
-          { field: 'description', label: 'Mô tả', oldValue: 'Danh mục giới tính', newValue: 'Danh mục giới tính chuẩn quốc gia theo ISO 5218' },
-        ],
-        structureChanges: [
-          {
-            changeType: 'added',
-            fieldName: 'phone_code',
-            displayName: 'Mã điện thoại',
-            dataType: 'Chuỗi (String)',
-          },
-          {
-            changeType: 'modified',
-            fieldName: 'gender_code',
-            displayName: 'Mã giới tính',
-            dataType: 'Chuỗi (String)',
-            changedProps: [
-              { label: 'Độ dài tối đa', oldValue: '2', newValue: '10' },
-              { label: 'Bắt buộc', oldValue: 'Không', newValue: 'Có' },
-            ],
-          },
-          {
-            changeType: 'removed',
-            fieldName: 'note',
-            displayName: 'Ghi chú',
-            dataType: 'Văn bản dài (Text)',
-          },
-        ],
-        relationshipChanges: [
-          {
-            changeType: 'added',
-            sourceEntityName: 'Dữ liệu Danh mục giới tính',
-            targetEntityName: 'Dữ liệu Danh mục dân tộc',
-            relationshipType: '1-n',
-          },
-          {
-            changeType: 'modified',
-            sourceEntityName: 'Dữ liệu Danh mục giới tính',
-            targetEntityName: 'Dữ liệu Danh mục quốc gia',
-            relationshipType: '1-1',
-            changedProps: [
-              { label: 'Khóa nguồn', oldValue: 'id', newValue: 'gender_code' },
-              { label: 'Trường hiển thị', oldValue: '', newValue: 'country_name' },
-            ],
-          },
-        ],
+        general: {
+          old: [
+            { label: 'Tên danh mục', value: 'Danh mục giới tính' },
+            { label: 'Đơn vị chủ quản', value: 'Bộ Nội vụ' },
+            { label: 'Nguồn dữ liệu', value: 'Tự cập nhật trực tiếp' },
+            { label: 'Mô tả', value: 'Danh mục giới tính' },
+          ],
+          new: [
+            { label: 'Tên danh mục', value: 'Danh mục giới tính' },
+            { label: 'Đơn vị chủ quản', value: 'Bộ Tư pháp' },
+            { label: 'Nguồn dữ liệu', value: 'Đồng bộ Kho DLDC' },
+            { label: 'Mô tả', value: 'Danh mục giới tính chuẩn quốc gia theo ISO 5218' },
+          ],
+        },
+        structure: {
+          old: [
+            { fieldName: 'gender_code', displayName: 'Mã giới tính', dataType: 'Chuỗi (String)', isPK: true },
+            { fieldName: 'gender_name', displayName: 'Tên giới tính', dataType: 'Chuỗi (String)' },
+            { fieldName: 'note', displayName: 'Ghi chú', dataType: 'Văn bản dài (Text)' },
+          ],
+          new: [
+            { fieldName: 'gender_code', displayName: 'Mã giới tính', dataType: 'Chuỗi (String)', isPK: true },
+            { fieldName: 'gender_name', displayName: 'Tên giới tính', dataType: 'Chuỗi (String)' },
+            { fieldName: 'phone_code', displayName: 'Mã điện thoại', dataType: 'Chuỗi (String)' },
+          ],
+        },
+        relationship: {
+          old: [
+            { sourceEntityName: 'Dữ liệu Danh mục giới tính', targetEntityName: 'Dữ liệu Danh mục quốc gia', relationshipType: '1-1', foreignKey: 'id' },
+          ],
+          new: [
+            { sourceEntityName: 'Dữ liệu Danh mục giới tính', targetEntityName: 'Dữ liệu Danh mục quốc gia', relationshipType: '1-1', foreignKey: 'gender_code' },
+            { sourceEntityName: 'Dữ liệu Danh mục giới tính', targetEntityName: 'Dữ liệu Danh mục dân tộc', relationshipType: '1-n', foreignKey: 'gender_code' },
+          ],
+        },
       }
     },
     {
@@ -813,6 +801,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
 
           {activeTab === 'attributes' && (
             <AttributesTab
+              readOnlyStructure={true}
               entities={entities} attributes={attributes}
               requests={requests}
               selectedEntityId={selectedEntityId} setSelectedEntityId={setSelectedEntityId}
@@ -840,7 +829,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
           )}
 
           {/* Các tab khác render đơn giản để tránh lỗi */}
-          {activeTab === 'relationships' && <RelationshipsTab entities={entities} relationships={relationships} setRelationships={setRelationships} />}
+          {activeTab === 'relationships' && <RelationshipsTab entities={entities} relationships={relationships} setRelationships={setRelationships} readOnlyRelations={true} />}
           {activeTab === 'approval' && <ApprovalTab
             entities={entities}
             approvalTab={approvalTab}

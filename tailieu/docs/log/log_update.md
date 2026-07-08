@@ -1,5 +1,27 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Phiên bản 2.6.14 (Ngày cập nhật: 07/07/2026)
+
+**Nội dung thay đổi — Danh mục dùng chung → Thiết lập danh mục** (`category/CategorySetupPage.tsx` + các tab):
+1. **Tab "Thiết lập cấu trúc"** (`AttributesTab.tsx`): chuyển sang **chỉ xem** trong trang Thiết lập danh mục — **bỏ nút "Thêm trường dữ liệu"** và **bỏ cột "Thao tác"** (sửa/xóa). Thêm prop `readOnlyStructure` (mặc định false, truyền `true` từ `CategorySetupPage`) để không ảnh hưởng các nơi dùng khác (wizard/view). Bảng vẫn hiển thị đủ dữ liệu.
+2. **Tab "Thiết lập quan hệ"** (`RelationshipsTab.tsx`): **bỏ nút "Thêm mới quan hệ"**; cột "Thao tác" **bỏ sửa/xóa**, thay bằng **1 icon con mắt (Eye)** mở **modal chi tiết quan hệ ở chế độ chỉ đọc** (Danh mục Nguồn/Đích, Loại, Khóa Nguồn/Đích, Trường hiển thị / Bảng liên kết). Hành vi này gate bằng prop mới `readOnlyRelations` (trang Thiết lập truyền `true`).
+3. **Wizard "Thiết lập danh mục dùng chung"** (`CategoryWizardModal.tsx` — dùng chung `AttributesTab`/`RelationshipsTab`):
+   - **Bước 2 (Thiết lập cấu trúc)**: bảng chọn trường — đổi cột **"Chia sẻ" → "Chọn"**; **thêm cột "Tên cột"** (input sửa được, mặc định = trường gốc) ngay sau "Trường gốc (Column)", có **mũi tên** Trường gốc → Tên cột (field mới `DldcFieldRow.targetColumn`).
+   - **Bước 3 (Thiết lập quan hệ)**: sửa lỗi **không khai báo được quan hệ** — wizard nối state thật `wizardRelationships` (trước đây truyền `[]` + `setRelationships` rỗng); `readOnlyRelations=false` nên hiện lại nút thêm. Khai báo 1 quan hệ **chỉ lưu vào danh sách** (không gửi duyệt); "Gửi trình duyệt" toàn danh mục giữ ở footer bước cuối.
+4. **Modal "Xem chi tiết thay đổi" (Phê duyệt phiên bản)** (`CategoryVersionChangeModal.tsx`): đổi 3 tab (Thông tin chung/Cấu trúc/Quan hệ) từ bảng diff từng-trường (old|new, tô đỏ/xanh) sang **2 khối snapshot xếp dọc**: *Phiên bản mới (v2)* (nền xanh) ở trên, *Phiên bản cũ (v1)* (nền đỏ nhạt) ở dưới — mỗi khối liệt kê đầy đủ, không tô diff. **Bỏ thanh tóm tắt** "N thay đổi (thêm/sửa/xóa)". Đổi mô hình dữ liệu `VersionChanges` sang dạng snapshot `{ general/structure/relationship: {old,new} }`; cập nhật mock ở `CategorySetupPage.tsx`; có `emptySnapshot` fallback an toàn.
+5. **Biên tập danh mục → tab Phiên bản** (`CategoryPage.tsx`):
+   - Nút "Xem chi tiết" (Eye) nay mở **modal chi tiết danh mục** (dùng lại `CategoryInfoViewModal` với prop mới `viewOnly` — chỉ xem, ẩn phê duyệt/ý kiến, title "Chi tiết danh mục") thay vì modal so sánh phiên bản. Modal mở rộng **3 tab: Thông tin chung / Thuộc tính / Quan hệ** (thêm prop `attributes`, `relationships`); tab Thuộc tính hiển thị bảng Mã trường·Tên hiển thị·Kiểu·PK, tab Quan hệ hiển thị Nguồn → Đích + loại + FK.
+   - Cột "Trạng thái": gộp còn **Hiệu lực** (phiên bản hiện hành) / **Lưu trữ** (mọi phiên bản còn lại).
+6. **Quản trị người dùng → Quản lý người dùng — Đồng bộ có bước duyệt** (`admin/UserManagementPage.tsx`): nút "Đồng bộ" mở modal danh sách user kéo về từ nguồn (staging, theo shape API: `userName/fullName/email/cellphone/identityCard/deptName/posCode/status/update_date`). **Trạng thái đồng bộ tính bằng so sánh với danh sách user thật** (khớp `userName`): Thêm mới / Cập nhật / Không thay đổi / Lỗi (thiếu email). Chọn dòng → **Duyệt / Duyệt tất cả** — chỉ dòng "Thêm mới"/"Cập nhật" mới duyệt được; **duyệt xong mới áp vào danh sách user thật** (thêm mới hoặc cập nhật theo `username`). Có tìm kiếm, lọc theo trạng thái đồng bộ/duyệt, icon con mắt xem chi tiết field phụ. **Mỗi lần bấm Đồng bộ** = nạp lại danh sách mới (mô phỏng call API SSO) → toàn bộ trạng thái duyệt reset về **"Chờ duyệt"**.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/CategorySetupPage.tsx`
+- `src/components/pages/category/components/tabs/AttributesTab.tsx`
+- `src/components/pages/category/components/tabs/RelationshipsTab.tsx`
+- `package.json`
+
+---
+
 ## Phiên bản 2.6.13 (Ngày cập nhật: 03/07/2026)
 
 **Nội dung thay đổi:**

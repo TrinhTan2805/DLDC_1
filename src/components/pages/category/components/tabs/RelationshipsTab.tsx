@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, ReactNode, ChangeEvent, MouseEvent } from 'react';
 import { createPortal } from 'react-dom';
-import { Network, ArrowRight, Key, Table, Search, AlertCircle, Info, ChevronDown, Plus, Trash2, SquarePen, CheckCircle2, Send } from 'lucide-react';
+import { Network, ArrowRight, Key, Table, Search, AlertCircle, Info, ChevronDown, Plus, Trash2, SquarePen, CheckCircle2, Send, Eye } from 'lucide-react';
 import { MasterDataEntity, EntityRelationship, RelationshipType, RelationshipStatus, FieldDataType } from '../../categoryTypes';
 import { ConfirmModal } from '../../../../common/ConfirmModal';
 import { BaseModal } from '../../../../common/BaseModal';
@@ -12,6 +12,8 @@ interface RelationshipsTabProps {
   relationships: EntityRelationship[];
   setRelationships: (relationships: EntityRelationship[]) => void;
   isViewOnly?: boolean;
+  /** Chỉ xem quan hệ (trang Thiết lập danh mục): ẩn nút "Thêm mới quan hệ", thao tác chỉ có icon con mắt xem chi tiết */
+  readOnlyRelations?: boolean;
   currentEntityId?: string;
   currentEntityName?: string;
   currentEntityCode?: string;
@@ -55,6 +57,7 @@ export function RelationshipsTab({
   relationships,
   setRelationships,
   isViewOnly = false,
+  readOnlyRelations = false,
   currentEntityId,
   currentEntityName = '',
   currentEntityCode = '',
@@ -74,6 +77,13 @@ export function RelationshipsTab({
   const [gridSearchTerm, setGridSearchTerm] = useState('');
   const [showRelApproval, setShowRelApproval] = useState(false);
   const [relApprovalForm, setRelApprovalForm] = useState({ reviewer: '', note: '' });
+
+  // Xem chi tiết quan hệ (chỉ đọc)
+  const [viewingRelation, setViewingRelation] = useState<EntityRelationship | null>(null);
+
+  const handleViewRelationship = (rel: EntityRelationship) => {
+    setViewingRelation(rel);
+  };
 
   const [genericConfirm, setGenericConfirm] = useState<{
     isOpen: boolean;
@@ -389,33 +399,25 @@ export function RelationshipsTab({
             />
           </div>
 
-          {currentEntityId ? (
-            !isViewOnly && (
-              <button
-                onClick={handleAddRelationship}
-                className="w-full md:w-auto h-10 flex items-center justify-center gap-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-[13px] font-medium active:scale-95 shadow-sm cursor-pointer whitespace-nowrap"
-              >
-                <Plus className="w-4 h-4" />
-                Thêm mới quan hệ
-              </button>
-            )
-          ) : (
+          {(!currentEntityId || !readOnlyRelations) && (
             <div className="flex flex-col md:flex-row md:items-center gap-3 w-full md:w-auto">
-              <div className="w-full md:w-64 relative">
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm quan hệ..."
-                  value={gridSearchTerm}
-                  onChange={(e) => setGridSearchTerm(e.target.value)}
-                  className="w-full h-10 pl-9 pr-3 bg-white border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                />
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              </div>
-
-              {!isViewOnly && (
+              {!currentEntityId && (
+                <div className="w-full md:w-64 relative">
+                  <input
+                    type="text"
+                    placeholder="Tìm kiếm quan hệ..."
+                    value={gridSearchTerm}
+                    onChange={(e) => setGridSearchTerm(e.target.value)}
+                    className="w-full h-10 pl-9 pr-3 bg-white border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  />
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                </div>
+              )}
+              {!readOnlyRelations && (
                 <button
+                  type="button"
                   onClick={handleAddRelationship}
-                  className="w-full md:w-auto h-10 flex items-center justify-center gap-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-[13px] font-medium active:scale-95 shadow-sm cursor-pointer whitespace-nowrap"
+                  className="h-10 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[13px] font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-sm whitespace-nowrap"
                 >
                   <Plus className="w-4 h-4" />
                   Thêm mới quan hệ
@@ -433,14 +435,6 @@ export function RelationshipsTab({
             <Network className="w-12 h-12 text-slate-300 mb-3 stroke-[1.5]" />
             <p className="text-[13px] font-semibold text-slate-700">Chưa có quan hệ nào</p>
             <p className="text-[13px] text-slate-500 mt-1 max-w-sm">Danh mục này hiện chưa được cấu hình liên kết với danh mục nào khác.</p>
-            {!isViewOnly && (
-              <button
-                onClick={handleAddRelationship}
-                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-[13px] font-medium active:scale-95 flex items-center gap-1.5 cursor-pointer"
-              >
-                <Plus className="w-4 h-4" /> Thêm mới quan hệ
-              </button>
-            )}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -454,9 +448,7 @@ export function RelationshipsTab({
                   <th className="px-6 py-3 font-semibold text-slate-500 text-[13px]">Danh mục Đích</th>
                   <th className="px-6 py-3 font-semibold text-slate-500 text-[13px]">Khóa Đích</th>
                   <th className="px-6 py-3 font-semibold text-slate-500 text-[13px]">Trường hiển thị</th>
-                  {!isViewOnly && (
-                    <th className="px-6 py-3 font-semibold text-slate-500 text-[13px] text-center w-24">Thao tác</th>
-                  )}
+                  <th className="px-6 py-3 font-semibold text-slate-500 text-[13px] text-center w-24">Thao tác</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -495,26 +487,36 @@ export function RelationshipsTab({
                         )}
                       </td>
 
-                      {!isViewOnly && (
-                        <td className="px-6 py-4 text-right text-[13px]">
-                          <div className="flex items-center justify-end gap-1.5">
+                      <td className="px-6 py-4 text-center text-[13px]">
+                        <div className="flex items-center justify-center gap-1.5">
+                          {readOnlyRelations ? (
                             <button
-                              onClick={() => handleEditRelationship(rel)}
+                              onClick={() => handleViewRelationship(rel)}
                               className="p-1.5 border border-slate-200 bg-white text-slate-500 hover:text-blue-600 hover:border-blue-300 rounded-lg transition-colors cursor-pointer"
-                              title="Chỉnh sửa quan hệ"
+                              title="Xem chi tiết quan hệ"
                             >
-                              <SquarePen className="w-4 h-4" />
+                              <Eye className="w-4 h-4" />
                             </button>
-                            <button
-                              onClick={() => handleDeleteRelation(rel)}
-                              className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-                              title="Xóa quan hệ"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      )}
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => handleEditRelationship(rel)}
+                                className="p-1.5 border border-slate-200 bg-white text-slate-500 hover:text-blue-600 hover:border-blue-300 rounded-lg transition-colors cursor-pointer"
+                                title="Chỉnh sửa quan hệ"
+                              >
+                                <SquarePen className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteRelation(rel)}
+                                className="p-1.5 border border-slate-200 bg-white text-slate-500 hover:text-red-600 hover:border-red-300 rounded-lg transition-colors cursor-pointer"
+                                title="Xóa quan hệ"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
                     </tr>
                   );
                 })}
@@ -538,11 +540,20 @@ export function RelationshipsTab({
               Hủy bỏ
             </button>
             <button
-              onClick={handleValidateAndOpenApproval}
+              onClick={readOnlyRelations ? handleValidateAndOpenApproval : handleSaveRelation}
               className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg text-[13px] font-medium transition-colors cursor-pointer flex items-center gap-2"
             >
-              <Send className="w-4 h-4" />
-              Gửi duyệt cấu trúc
+              {readOnlyRelations ? (
+                <>
+                  <Send className="w-4 h-4" />
+                  Gửi duyệt cấu trúc
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="w-4 h-4" />
+                  Lưu quan hệ
+                </>
+              )}
             </button>
           </div>
         }
@@ -716,6 +727,98 @@ export function RelationshipsTab({
             </div>
           )}
         </div>
+      </BaseModal>
+
+      {/* Xem chi tiết quan hệ (chỉ đọc) */}
+      <BaseModal
+        isOpen={!!viewingRelation}
+        onClose={() => setViewingRelation(null)}
+        title="Chi tiết quan hệ danh mục"
+        subtitle="Chế độ chỉ xem"
+        footer={
+          <div className="flex justify-end w-full">
+            <button
+              onClick={() => setViewingRelation(null)}
+              className="px-4 py-2 bg-white text-[#020817] border border-[#e2e8f0] hover:bg-slate-50 rounded-lg text-[13px] font-medium transition-colors cursor-pointer"
+            >
+              Đóng
+            </button>
+          </div>
+        }
+      >
+        {viewingRelation && (() => {
+          const srcEntity = allEntities.find(e => e.id === viewingRelation.sourceEntityId);
+          const tgtEntity = allEntities.find(e => e.id === viewingRelation.targetEntityId);
+          const isNn = viewingRelation.relationshipType === 'n-n';
+          return (
+            <div className="space-y-5 text-left">
+              {/* Sơ đồ nguồn → đích */}
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center justify-center gap-6">
+                <div className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
+                  <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-[13px] shrink-0">A</div>
+                  <span className="text-[13px] font-semibold text-slate-800 text-center truncate w-full">
+                    {srcEntity?.name || viewingRelation.sourceEntityName || viewingRelation.sourceEntityId}
+                  </span>
+                </div>
+                <ArrowRight className="w-5 h-5 text-slate-400 shrink-0" />
+                <div className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
+                  <div className="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center font-bold text-[13px] shrink-0">B</div>
+                  <span className="text-[13px] font-semibold text-slate-800 text-center truncate w-full">
+                    {tgtEntity?.name || viewingRelation.targetEntityName || viewingRelation.targetEntityId}
+                  </span>
+                </div>
+              </div>
+
+              {/* Danh sách trường (chỉ đọc) */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="block text-[13px] font-medium text-slate-600">Danh mục Nguồn</label>
+                  <div className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-slate-50 text-slate-800">
+                    {srcEntity?.name || viewingRelation.sourceEntityName || viewingRelation.sourceEntityId}
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-[13px] font-medium text-slate-600">Danh mục Đích</label>
+                  <div className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-slate-50 text-slate-800">
+                    {tgtEntity?.name || viewingRelation.targetEntityName || viewingRelation.targetEntityId}
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-[13px] font-medium text-slate-600">Loại quan hệ</label>
+                  <div className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-slate-50 text-slate-800">
+                    {relationTypeLabels[viewingRelation.relationshipType]}
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-[13px] font-medium text-slate-600">
+                    {isNn ? 'Bảng liên kết' : 'Trường hiển thị'}
+                  </label>
+                  <div className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-slate-50 text-slate-800 font-mono">
+                    {isNn
+                      ? (viewingRelation.mappingTable || '--')
+                      : (viewingRelation.targetDisplayField || '--')}
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-[13px] font-medium text-slate-600">
+                    {isNn ? 'Khóa ngoại Nguồn' : 'Khóa Nguồn'}
+                  </label>
+                  <div className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-slate-50 text-slate-800 font-mono">
+                    {viewingRelation.sourceKey || '--'}
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-[13px] font-medium text-slate-600">
+                    {isNn ? 'Khóa ngoại Đích' : 'Khóa Đích'}
+                  </label>
+                  <div className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-slate-50 text-slate-800 font-mono">
+                    {viewingRelation.targetKey || '--'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
       </BaseModal>
 
       {genericConfirm && (

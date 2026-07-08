@@ -46,6 +46,8 @@ import { ArchiveRecordModal } from './components/modals/ArchiveRecordModal';
 import { RecordFormModal } from './components/modals/RecordFormModal';
 import { ApprovalRequestModal } from './components/modals/ApprovalRequestModal';
 import { UpdateApprovalModal } from './components/modals/UpdateApprovalModal';
+import { CategoryInfoViewModal } from './components/modals/CategoryInfoViewModal';
+import { MasterDataEntity } from './categoryTypes';
 import { Portal } from '../../common/Portal';
 
 interface CategoryPageProps {
@@ -278,7 +280,7 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
       effectiveDate: '01/01/2026',
       user: 'Trần Thị B',
       changes: 'Cập nhật 15 bản ghi tỉnh thành',
-      status: 'pending'
+      status: 'archived'
     },
     {
       version: 'v3.0',
@@ -294,7 +296,7 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
       effectiveDate: '05/12/2025',
       user: 'Phạm Thị D',
       changes: 'Thêm ràng buộc unique cho mã tỉnh',
-      status: 'locked'
+      status: 'archived'
     },
     {
       version: 'v2.0',
@@ -439,6 +441,41 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
   const [showVersionDetailModal, setShowVersionDetailModal] = useState(false);
   const [showRestoreModal, setShowRestoreModal] = useState(false);
   const [selectedVersionData, setSelectedVersionData] = useState<any>(null);
+  // Category detail modal (view-only) for version-history tab
+  const [showCategoryInfoModal, setShowCategoryInfoModal] = useState(false);
+  // Entity dựng từ danh mục đang biên tập để truyền vào CategoryInfoViewModal (chế độ chỉ xem)
+  const activeVersionNumber = (() => {
+    const active = versionHistoryList.find(v => v.status === 'active');
+    const label = active?.version ?? versionHistoryList[0]?.version;
+    const m = label?.match(/v(\d+)/);
+    return m ? parseInt(m[1]) : 1;
+  })();
+  const currentCategoryEntity: MasterDataEntity = {
+    id: categoryId,
+    code: categoryId,
+    name: categoryName,
+    dataType: 'standard',
+    managingAgency: 'Bộ Tư pháp',
+    scope: 'national',
+    description: '',
+    lifecycleStatus: 'active',
+    createdDate: '',
+    updatedDate: '',
+    createdBy: '',
+    databaseSystem: 'Hệ thống DLDC',
+    canCu: '',
+    dataSource: 'manual',
+    version: activeVersionNumber,
+  };
+  // Mock thuộc tính + quan hệ để xem chi tiết danh mục (chế độ chỉ xem) tại tab Phiên bản
+  const currentCategoryAttributes = [
+    { fieldName: 'ma_gt', displayName: 'Mã giới tính', dataType: 'Chuỗi', isPK: true },
+    { fieldName: 'ten_gt', displayName: 'Tên giới tính', dataType: 'Chuỗi' },
+    { fieldName: 'mo_ta', displayName: 'Ghi chú', dataType: 'Chuỗi' },
+  ];
+  const currentCategoryRelationships = [
+    { sourceEntityName: categoryName, targetEntityName: 'Danh mục mối quan hệ gia đình', relationshipType: '1-n', foreignKey: 'gioitinh_id' },
+  ];
 
   // Mock approvers list
   const approvers = [
@@ -2262,17 +2299,10 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                       <td className="px-4 py-3 text-sm text-slate-900">{history.user}</td>
                       <td className="px-4 py-3 text-sm text-slate-700">{history.changes}</td>
                       <td className="px-4 py-3">
-                        {history.status === 'active' && (
+                        {history.status === 'active' ? (
                           <span className="px-2 py-1 bg-green-100 text-green-700 text-[13px] rounded-full">Hiệu lực</span>
-                        )}
-                        {history.status === 'archived' && (
-                          <span className="px-2 py-1 bg-slate-100 text-slate-600 text-[13px] rounded-full">Hết hiệu lực</span>
-                        )}
-                        {history.status === 'pending' && (
-                          <span className="px-2 py-1 bg-purple-100 text-purple-700 text-[13px] rounded-full">Chờ phê duyệt</span>
-                        )}
-                        {history.status === 'locked' && (
-                          <span className="px-2 py-1 bg-red-100 text-red-700 text-[13px] rounded-full">Ngừng tham chiếu</span>
+                        ) : (
+                          <span className="px-2 py-1 bg-slate-100 text-slate-600 text-[13px] rounded-full">Lưu trữ</span>
                         )}
                       </td>
                       <td className="px-4 py-3">
@@ -2280,8 +2310,7 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
                           {/* 1. Xem chi tiết */}
                           <button
                             onClick={() => {
-                               setSelectedVersionData(history);
-                               setShowVersionDetailModal(true);
+                               setShowCategoryInfoModal(true);
                             }}
                             className="p-1 text-blue-600 hover:bg-blue-50 rounded cursor-pointer"
                             title="Xem chi tiết"
@@ -2331,6 +2360,18 @@ export function CategoryPage({ categoryName, categoryId }: CategoryPageProps) {
 
         </div>
       )}
+
+      {/* Xem chi tiết danh mục (chỉ xem) — mở từ nút "Xem chi tiết" ở tab Phiên bản */}
+      <CategoryInfoViewModal
+        isOpen={showCategoryInfoModal}
+        onClose={() => setShowCategoryInfoModal(false)}
+        entity={currentCategoryEntity}
+        viewOnly={true}
+        attributes={currentCategoryAttributes}
+        relationships={currentCategoryRelationships}
+        onApprove={() => {}}
+        onReject={() => {}}
+      />
 
 
 

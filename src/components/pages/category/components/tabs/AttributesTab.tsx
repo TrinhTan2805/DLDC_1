@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import {
   Plus, Search, Filter, X, ChevronDown, SquarePen, Trash2, Send,
   FileText, CheckSquare, Tag, Database, Globe, Lock,
-  AlertCircle, Check
+  AlertCircle, Check, ArrowRight
 } from 'lucide-react';
 import { MasterDataEntity, MasterDataAttribute, FieldDataType } from '../../categoryTypes';
 import { BaseModal } from '../../../../common/BaseModal';
@@ -211,6 +211,8 @@ interface DldcFieldRow {
   tableId: string;
   sourceJoinId: string | null;
   columnName: string;
+  /** Tên cột đích của trường trong danh mục (mặc định = columnName) */
+  targetColumn: string;
   apiFieldName: string;
   dataType: FieldDataType;
   masked: boolean;
@@ -238,6 +240,8 @@ interface AttributesTabProps {
   onApproveAttribute?: (id: string) => void;
   onRejectAttribute?: (id: string) => void;
   isViewOnly?: boolean;
+  /** Chỉ xem cấu trúc trong trang Thiết lập danh mục: ẩn nút "Thêm trường dữ liệu" và cột "Thao tác" ở FULL PAGE MODE */
+  readOnlyStructure?: boolean;
   requests?: any[];
   // wizard data source config
   wizardConfig?: {
@@ -296,9 +300,12 @@ export function AttributesTab({
   onApproveAttribute: _onApproveAttribute = () => {},
   onRejectAttribute: _onRejectAttribute = () => {},
   isViewOnly = false,
+  readOnlyStructure = false,
   wizardConfig,
   onWizardConfigChange,
 }: AttributesTabProps) {
+  // Ẩn các hành động thêm/sửa/xóa ở FULL PAGE MODE khi chỉ xem cấu trúc (dùng trong trang Thiết lập danh mục)
+  const hideStructureActions = isViewOnly || readOnlyStructure;
   const currentEntityId = wizardMode ? wizardEntityId : selectedEntityId;
   const currentEntity = entities.find(e => e.id === currentEntityId);
   const entityDataSource = currentEntity?.dataSource || wizardConfig?.dataSource || 'manual';
@@ -310,7 +317,7 @@ export function AttributesTab({
     } else {
       baseCols += 7; // fieldName, displayName, dataType, length, keyType, required, defaultValue
     }
-    if (!isViewOnly) baseCols += 1; // actions
+    if (!hideStructureActions) baseCols += 1; // actions
     return baseCols;
   };
 
@@ -347,7 +354,7 @@ export function AttributesTab({
     return (DLDC_FIELDS[tableId] || []).map((f, i) => ({
       id: `fr-init-${i}`, shared: true, isPK: i === 0,
       tableId, sourceJoinId: null,
-      columnName: f.fieldName, apiFieldName: f.fieldName,
+      columnName: f.fieldName, targetColumn: f.fieldName, apiFieldName: f.fieldName,
       dataType: f.dataType, masked: false,
     }));
   });
@@ -406,7 +413,7 @@ export function AttributesTab({
     setDldcFieldRows(fields.map((f, i) => ({
       id: `fr-init-${i}`, shared: true, isPK: i === 0,
       tableId, sourceJoinId: null,
-      columnName: f.fieldName, apiFieldName: f.fieldName,
+      columnName: f.fieldName, targetColumn: f.fieldName, apiFieldName: f.fieldName,
       dataType: f.dataType, masked: false,
     })));
   };
@@ -518,6 +525,7 @@ export function AttributesTab({
         tableId: defaultTable,
         sourceJoinId: null,
         columnName: f.fieldName,
+        targetColumn: f.fieldName,
         apiFieldName: f.fieldName,
         dataType: f.dataType,
         masked: false,
@@ -632,6 +640,7 @@ export function AttributesTab({
           tableId: newTableId,
           sourceJoinId: joinId,
           columnName: f.fieldName,
+          targetColumn: f.fieldName,
           apiFieldName: f.fieldName,
           dataType: f.dataType,
           masked: false,
@@ -754,7 +763,7 @@ export function AttributesTab({
             </div>
 
             <div className="flex items-center gap-2 w-full md:w-auto">
-              {!isViewOnly && entityDataSource !== 'manual' && (
+              {!hideStructureActions && entityDataSource !== 'manual' && (
                 <button
                   type="button"
                   onClick={() => {
@@ -1030,7 +1039,7 @@ export function AttributesTab({
                                         const newRows: DldcFieldRow[] = (DLDC_FIELDS[newTableId] || []).map((f, i) => ({
                                           id: `fr-${join.id}-${i}`, shared: true, isPK: false,
                                           tableId: newTableId, sourceJoinId: join.id,
-                                          columnName: f.fieldName, apiFieldName: f.fieldName,
+                                          columnName: f.fieldName, targetColumn: f.fieldName, apiFieldName: f.fieldName,
                                           dataType: f.dataType, masked: false,
                                         }));
                                         return [...withoutOld, ...newRows];
@@ -1111,7 +1120,7 @@ export function AttributesTab({
                         setDldcFieldRows(prev => [...prev, {
                           id: `fr-manual-${prev.length}`, shared: true, isPK: false,
                           tableId: wizardConfig?.dldcTable || '', sourceJoinId: null,
-                          columnName: '', apiFieldName: '', dataType: 'string', masked: false,
+                          columnName: '', targetColumn: '', apiFieldName: '', dataType: 'string', masked: false,
                         }]);
                       }}
                       className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-200 text-blue-600 text-[13px] font-medium rounded-lg hover:bg-blue-50 transition-colors"
@@ -1123,20 +1132,24 @@ export function AttributesTab({
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-[13px]" style={{ tableLayout: 'fixed' }}>
                       <colgroup>
-                        <col style={{ width: '6%' }} />
-                        <col style={{ width: '6%' }} />
-                        <col style={{ width: '22%' }} />
-                        <col style={{ width: '22%' }} />
-                        <col style={{ width: '24%' }} />
-                        <col style={{ width: '15%' }} />
+                        <col style={{ width: '5%' }} />
+                        <col style={{ width: '5%' }} />
+                        <col style={{ width: '18%' }} />
+                        <col style={{ width: '18%' }} />
+                        <col style={{ width: '3%' }} />
+                        <col style={{ width: '16%' }} />
+                        <col style={{ width: '16%' }} />
+                        <col style={{ width: '14%' }} />
                         <col style={{ width: '5%' }} />
                       </colgroup>
                       <thead className="bg-slate-50 border-b border-slate-100">
                         <tr>
-                          <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center">Chia sẻ</th>
+                          <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center">Chọn</th>
                           <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center">PK</th>
                           <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Nguồn dữ liệu (Table)</th>
                           <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Trường gốc (Column)</th>
+                          <th className="px-1 py-3 text-[13px] font-semibold text-slate-500 text-center"></th>
+                          <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Tên cột</th>
                           <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Tên hiển thị</th>
                           <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Kiểu dữ liệu</th>
                           <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center">Xóa</th>
@@ -1145,7 +1158,7 @@ export function AttributesTab({
                       <tbody className="divide-y divide-slate-100 bg-white">
                         {dldcFieldRows.length === 0 ? (
                           <tr>
-                            <td colSpan={7} className="px-5 py-8 text-center text-[13px] text-slate-400">
+                            <td colSpan={9} className="px-5 py-8 text-center text-[13px] text-slate-400">
                               Chọn bảng dữ liệu để tải danh sách trường
                             </td>
                           </tr>
@@ -1180,13 +1193,25 @@ export function AttributesTab({
                                   <select title="Trường gốc" value={row.columnName}
                                     onChange={(e: ChangeEvent<HTMLSelectElement>) => {
                                       const fd = tableFieldsForRow.find(f => f.fieldName === e.target.value);
-                                      setDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, columnName: e.target.value, apiFieldName: e.target.value, dataType: fd?.dataType || r.dataType } : r));
+                                      setDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, columnName: e.target.value, targetColumn: e.target.value, apiFieldName: e.target.value, dataType: fd?.dataType || r.dataType } : r));
                                     }}
                                     className="w-full min-w-0 px-2 py-1.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-1 focus:ring-blue-400/40 focus:border-blue-400 font-medium cursor-pointer"
                                   >
                                     <option value="">--</option>
                                     {tableFieldsForRow.map(f => <option key={f.fieldName} value={f.fieldName}>{f.fieldName}</option>)}
                                   </select>
+                                </td>
+                                <td className="px-1 py-2.5 text-center overflow-hidden">
+                                  <ArrowRight className="w-4 h-4 text-slate-400 mx-auto" />
+                                </td>
+                                <td className="px-3 py-2.5 overflow-hidden">
+                                  <input type="text" value={row.targetColumn}
+                                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                      setDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, targetColumn: e.target.value } : r))
+                                    }
+                                    placeholder="Tên cột đích"
+                                    className="w-full min-w-0 px-2 py-1.5 border border-slate-200 rounded-lg text-[13px] font-mono bg-white focus:outline-none focus:ring-1 focus:ring-blue-400/40 focus:border-blue-400"
+                                  />
                                 </td>
                                 <td className="px-3 py-2.5 overflow-hidden">
                                   <input type="text" value={row.apiFieldName}
@@ -1497,7 +1522,7 @@ export function AttributesTab({
                       <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên hiển thị</th>
                       <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Kiểu dữ liệu</th>
                       <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">PK</th>
-                      {!isViewOnly && <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-right w-48">Thao tác</th>}
+                      {!hideStructureActions && <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-right w-48">Thao tác</th>}
                     </tr>
                   ) : (
                     <tr>
@@ -1509,7 +1534,7 @@ export function AttributesTab({
                       <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Cấu hình khóa</th>
                       <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Bắt buộc</th>
                       <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Giá trị mặc định</th>
-                      {!isViewOnly && <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-right w-48">Thao tác</th>}
+                      {!hideStructureActions && <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-right w-48">Thao tác</th>}
                     </tr>
                   )}
                 </thead>
@@ -1569,7 +1594,7 @@ export function AttributesTab({
                             </>
                           )}
 
-                          {!isViewOnly && (
+                          {!hideStructureActions && (
                             <td className="px-6 py-4 text-right">
                               <div className="flex items-center justify-end gap-1 opacity-80 group-hover:opacity-100 transition-all">
                                 <button
@@ -1881,7 +1906,7 @@ export function AttributesTab({
                       setModalDldcFieldRows(prev => [...prev, {
                         id: `fr-modal-manual-${prev.length}-${Date.now()}`, shared: true, isPK: false,
                         tableId: modalDldcTable, sourceJoinId: null,
-                        columnName: '', apiFieldName: '', dataType: 'string', masked: false,
+                        columnName: '', targetColumn: '', apiFieldName: '', dataType: 'string', masked: false,
                       }]);
                     }}
                     className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-200 text-blue-600 text-[13px] font-medium rounded-lg hover:bg-blue-50 transition-colors cursor-pointer"
