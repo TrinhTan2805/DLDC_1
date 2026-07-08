@@ -1,5 +1,14 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Cập nhật Git (Ngày thực hiện: 08/07/2026)
+
+**Nội dung thực hiện:**
+- Kéo mã nguồn mới từ nhánh `nhalt8/kdlbtp_v1.2` (`upstream/nhalt8/kdlbtp_v1.2`) về máy thành công.
+- Không phát sinh xung đột (conflict).
+- Đã chạy `npm install` và `npm run build` kiểm tra đóng gói hệ thống thành công (không có lỗi TypeScript hay build).
+
+---
+
 ## Phiên bản 2.6.15 (Ngày cập nhật: 06/07/2026)
 
 **Nội dung thay đổi — Nâng cấp Wizard "Tạo mới dữ liệu chủ"** (`master-data/MasterDataWizard.tsx`) theo mockup đã duyệt, đáp ứng các transaction UC Dữ liệu chủ (485–490):
