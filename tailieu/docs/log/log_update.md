@@ -1,5 +1,48 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Cập nhật giao diện (Ngày thực hiện: 15/07/2026)
+
+**Màn hình:** Cung cấp dữ liệu → Quy trình đối soát dữ liệu → Chi tiết đối soát (`ProvisionReconciliationPage`, UC-664 và các tiến trình khác).
+
+**Nội dung thay đổi — Điều chỉnh nhãn & cấu trúc theo yêu cầu PM:**
+1. **4 thẻ tổng quan** (`DataReconciliationPage.tsx`): đổi tên và *điều chỉnh giá trị cho đúng ngữ nghĩa*:
+   - "Tổng số lần chạy" → **"Tổng Dữ liệu đối soát"** (= số dòng trong danh sách lịch sử đối soát).
+   - "Thành công" → **"Khớp dữ liệu"** (= **số dòng** trạng thái Khớp dữ liệu).
+   - "Cảnh báo chênh lệch" → **"Không khớp"** (= **số dòng** trạng thái Không khớp).
+   - "Lần chạy gần nhất" → **"Tỷ lệ khớp"** (= số dòng khớp / tổng số dòng).
+   - Đổi icon tương ứng (Database, Percent) và thêm helper tổng hợp `totalSentAll/totalMatchedAll/totalDiscrepanciesAll/overallMatchRate`.
+2. **Bảng "Lịch sử đối soát"**: "Tổng số gửi đi" → **"Số bản ghi cung cấp"**; "Khớp nối" → **"Số bản ghi nhận"**; giá trị cột **Trạng thái** đổi thành **"Chưa đối soát" / "Khớp dữ liệu" / "Không khớp"** (helper `getReconStatus`, cập nhật `getStatusIcon/getStatusClass`).
+3. **Modal "Chi tiết kết quả đối soát"** (`ProvisionReconciliationDetailsModal.tsx`): "Số bản ghi đã gửi" → **"Số bản ghi cung cấp"**; "Số bản ghi khớp nối" → **"Số bản ghi nhận"**.
+4. **Modal "Lịch sử đối soát dữ liệu cung cấp"** (`ProvisionReconciliationHistoryModal.tsx`): **bỏ** cột "Tiến trình đối soát", "Hành động", "Dung lượng đã gửi"; "Hệ thống đích" → **"Đơn vị khai thác"**; "Số bản ghi đã gửi" → **"Số bản ghi cung cấp"**; **bổ sung** cột "Số bản ghi nhận", "Chênh lệch"; cột "Trạng thái" dùng giá trị mới (Khớp dữ liệu/Không khớp/Chưa đối soát). Dọn helper `getDungLuong` và import không dùng.
+5. **Bố cục trang theo form "Đối soát thu thập"** (`DataReconciliationPage.tsx`):
+   - **Bỏ toàn bộ khối header** (badge UC, tag nhóm, tiêu đề tiến trình, dòng Hệ thống đích / Lịch trình).
+   - **Thêm tab bar "Danh sách đối soát"** (icon List, gạch chân xanh) ở đầu trang; bỏ tiêu đề "Lịch sử đối soát".
+   - **Tái cấu trúc bảng**: thêm cột **STT**; giữ 2 cột riêng **Tên tiến trình đối soát** + **Tên API**; **bỏ** cột "Loại chạy"; "Thời gian chạy gần nhất" → **"Ngày đối soát"** (tách ngày/giờ 2 dòng); "Chi tiết" → **"Thao tác"** (nút Xem chi tiết + Xem lịch sử).
+   - Ô tìm kiếm: placeholder "Tìm theo lịch sử..." → **"Tìm theo tên tiến trình..."**.
+   - **Bỏ nút "Thiết lập lại"** trong bảng lọc nâng cao (lưới còn 3 cột: Từ ngày / Đến ngày / Trạng thái); gỡ hàm `handleResetFilters` không còn dùng.
+6. **Dữ liệu mẫu** (`provisionReconciliationData.ts`): mỗi tiến trình chưa có lịch sử riêng nay sinh **5 dòng** phủ đủ tình trạng: Khớp dữ liệu, Không khớp (cảnh báo/lỗi), Chưa đối soát.
+7. **Đồng bộ giao diện trạng thái theo form "Đối soát thu thập"**:
+   - **Cột Trạng thái** (bảng list, `DataReconciliationPage.tsx`) dùng `StatusTag`: **Khớp dữ liệu** (xanh lá) / **Không khớp** (đỏ) / **Chưa đối soát** (xanh dương) — dạng chữ màu, bỏ icon & viền; gỡ helper `getStatusIcon/getStatusClass`.
+   - **Modal chi tiết** (`ProvisionReconciliationDetailsModal.tsx`): card "Chênh lệch" → **"Sai lệch"** (nhãn phụ Chênh lệch/Trùng khớp, màu đỏ/xanh theo lệch); thanh **Tỷ lệ khớp** + nút trạng thái 3 màu (xanh lá Khớp / đỏ Không khớp / xanh dương Chưa đối soát); "Thời gian chạy" → **"Ngày gọi"** (— khi chưa đối soát).
+   - **Modal lịch sử** (`ProvisionReconciliationHistoryModal.tsx`): cột Trạng thái cũng dùng `StatusTag` đồng bộ với danh sách (Khớp dữ liệu xanh lá / Không khớp đỏ / Chưa đối soát xanh dương); gỡ helper `getStatusClass` thừa.
+
+8. **Cung cấp dữ liệu theo yêu cầu** (`DataProvisionRequestPage.tsx`): thay khối mô tả tiêu đề ("Cung cấp dữ liệu theo yêu cầu / Tiếp nhận, tra cứu...") bằng **hàng 4 thẻ thống kê** đổi theo từng tab:
+   - *Tiếp nhận yêu cầu*: Tổng yêu cầu / Chờ xử lý / Đã phê duyệt / Từ chối.
+   - *Tra cứu & Kết xuất*: Chờ tiếp nhận / Đã phê duyệt / Đã kết xuất / Tổng trong luồng.
+   - *Bàn giao dữ liệu*: Chờ bàn giao / Đã bàn giao / Đã công khai / Đã hủy công khai.
+   - Số liệu đếm động theo trạng thái yêu cầu; số liệu render bằng `<h3>` để không bị CSS ép 13px.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/provisioning/DataReconciliationPage.tsx`
+- `src/components/pages/provisioning/modals/ProvisionReconciliationDetailsModal.tsx`
+- `src/components/pages/provisioning/modals/ProvisionReconciliationHistoryModal.tsx`
+- `src/components/pages/provisioning/DataProvisionRequestPage.tsx`
+- `src/data/provisionReconciliationData.ts`
+
+**Kiểm thử:** Đăng nhập, mở UC-664, xác nhận trực quan 4 thẻ, bảng lịch sử, modal chi tiết và modal lịch sử đều hiển thị đúng nhãn/cột/giá trị mới. Dev server (`npm run dev`) biên dịch không lỗi.
+
+---
+
 ## Cập nhật Git (Ngày thực hiện: 08/07/2026)
 
 **Nội dung thực hiện:**
