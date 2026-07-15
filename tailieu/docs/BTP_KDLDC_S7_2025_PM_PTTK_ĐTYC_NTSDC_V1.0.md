@@ -4668,13 +4668,13 @@ Hình 157 - Màn hình Đối soát tổng hợp với CSDL Hộ tịch điện 
 | 2 | Đóng | Button | Đóng cửa sổ popup/màn hình chi tiết để quay lại danh sách chính. |
 | 3 | Thoát (X) | Icon | Nút đóng nhanh màn hình ở góc trên bên phải. |
 
-##### DC1-ĐXTT-DXTN-143-MH-02.Đối soát tổng hợp với Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch
+##### DC1-ĐXTT-DXTN-143-MH-02.Đối soát tổng hợp với HT quản lý hồ sơ QT
 
 Màn hình
 
 ![](images/BTP_KDLDC_S7_2025_PM_PTTK_ĐTYC_NTSDC_V1.0_img_174.png)
 
-Hình 158 - Màn hình Đối soát Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch
+Hình 158 - Màn hình Đối soát HT quản lý hồ sơ QT
 
 ###### Mô tả thông tin trên màn hình
 
@@ -6585,7 +6585,7 @@ Hình 217 - Màn hình Thiết lập quy tắc biến đổi dữ liệu Bảo t
 | 6 | Hủy | Button | Hủy bỏ các thay đổi tạm thời và đóng cửa sổ cấu hình. |
 | 7 | Đóng | Icon (X) | Thoát màn hình Quản lý quy tắc xử lý. |
 
-#### DC1-XLDL-HSQT. Thiết lập quy tắc XLDL Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch
+#### DC1-XLDL-HSQT. Thiết lập quy tắc XLDL HT quản lý hồ sơ QT
 
 ##### DL-HSQT-204-MH-01.Màn hình Thiết lập quy tắc làm sạch Nhập Quốc tịch
 
@@ -14189,10 +14189,10 @@ Hình 435- Màn hình đăng suất
 | 34 | DC1-QLTT-TN-HTĐT-34-MH-010 | Thu thập dữ liệu trong ngành | 1. Hệ thống nguồn (CSDL Hộ tịch điện tử) gửi dữ liệu Bộ dữ liệu hồ sơ đăng ký giám sát việc giám hộ đến Kho DLDC. Kho DLDC tiếp nhận dữ liệu Bộ dữ liệu hồ sơ đăng ký giám sát việc giám hộ từ hệ thống nguồn thông qua kênh tích hợp. Trường hợp dữ liệu không đạt yêu cầu, hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công. | DC1-QLTT-TN-HTĐT-34 |
 | 35 | DC1-QLTT-TN-HTĐT-35-MH-011 | Thu thập dữ liệu trong ngành | 1. Hệ thống nguồn (CSDL Hộ tịch điện tử) gửi dữ liệu Bộ dữ liệu hồ sơ đăng ký chấm dứt giám sát việc giám hộ đến Kho DLDC. Kho DLDC tiếp nhận dữ liệu Bộ dữ liệu hồ sơ đăng ký chấm dứt giám sát việc giám hộ từ hệ thống nguồn thông qua kênh tích hợp. Trường hợp dữ liệu không đạt yêu cầu, hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công. | DC1-QLTT-TN-HTĐT-35 |
 | 36 | DC1-QLTT-TN-HTĐT-36-MH-012 | Thu thập dữ liệu trong ngành | 1. Hệ thống nguồn (CSDL Hộ tịch điện tử) gửi dữ liệu Bộ dữ liệu hồ sơ ghi vào sổ việc ly hôn/hủy việc kết hôn đã thực hiện tại cơ quan có thẩm quyền của nước ngoài (ghi chú ly hôn) đến Kho DLDC. Kho DLDC tiếp nhận dữ liệu Bộ dữ liệu hồ sơ ghi vào sổ việc ly hôn/hủy việc kết hôn đã thực hiện tại cơ quan có thẩm quyền của nước ngoài (ghi chú ly hôn) từ hệ thống nguồn thông qua kênh tích hợp. Trường hợp dữ liệu không đạt yêu cầu, hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công. | DC1-QLTT-TN-HTĐT-36 |
-| **I.2.1.2** | **Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch** |  |  |  |
-| 37 | DC1-QLTT-QLQT-37-MH-01 | Thu thập dữ liệu trong ngành | 1. Hệ thống nguồn (Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch) gửi dữ liệu Nhập Quốc tịch đến Kho DLDC. Kho DLDC tiếp nhận dữ liệu Nhập Quốc tịch từ hệ thống nguồn thông qua kênh tích hợp. Trường hợp dữ liệu không đạt yêu cầu, hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công. | DC1-QLTT-QLQT-37 |
-| 38 | DC1-QLTT-QLQT-38-MH-02 | Thu thập dữ liệu trong ngành | 1. Hệ thống nguồn (Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch) gửi dữ liệu Thôi Quốc tịch đến Kho DLDC. Kho DLDC tiếp nhận dữ liệu Thôi Quốc tịch từ hệ thống nguồn thông qua kênh tích hợp. Trường hợp dữ liệu không đạt yêu cầu, hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công. | DC1-QLTT-QLQT-38 |
-| 39 | DC1-QLTT-QLQT-39-MH-03 | Thu thập dữ liệu trong ngành | 1. Hệ thống nguồn (Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch) gửi dữ liệu Trở lại Quốc tịch đến Kho DLDC. Kho DLDC tiếp nhận dữ liệu Trở lại Quốc tịch từ hệ thống nguồn thông qua kênh tích hợp. Trường hợp dữ liệu không đạt yêu cầu, hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công. | DC1-QLTT-QLQT-39 |
+| **I.2.1.2** | **HT quản lý hồ sơ QT** |  |  |  |
+| 37 | DC1-QLTT-QLQT-37-MH-01 | Thu thập dữ liệu trong ngành | 1. Hệ thống nguồn (HT quản lý hồ sơ QT) gửi dữ liệu Nhập Quốc tịch đến Kho DLDC. Kho DLDC tiếp nhận dữ liệu Nhập Quốc tịch từ hệ thống nguồn thông qua kênh tích hợp. Trường hợp dữ liệu không đạt yêu cầu, hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công. | DC1-QLTT-QLQT-37 |
+| 38 | DC1-QLTT-QLQT-38-MH-02 | Thu thập dữ liệu trong ngành | 1. Hệ thống nguồn (HT quản lý hồ sơ QT) gửi dữ liệu Thôi Quốc tịch đến Kho DLDC. Kho DLDC tiếp nhận dữ liệu Thôi Quốc tịch từ hệ thống nguồn thông qua kênh tích hợp. Trường hợp dữ liệu không đạt yêu cầu, hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công. | DC1-QLTT-QLQT-38 |
+| 39 | DC1-QLTT-QLQT-39-MH-03 | Thu thập dữ liệu trong ngành | 1. Hệ thống nguồn (HT quản lý hồ sơ QT) gửi dữ liệu Trở lại Quốc tịch đến Kho DLDC. Kho DLDC tiếp nhận dữ liệu Trở lại Quốc tịch từ hệ thống nguồn thông qua kênh tích hợp. Trường hợp dữ liệu không đạt yêu cầu, hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công. | DC1-QLTT-QLQT-39 |
 | **I.2.2** | **Cục Quản lý thi hành án dân sự** |  |  |  |
 | **I.2.2.1** | **Cơ sở dữ liệu thi hành án dân sự** |  |  |  |
 | 40 | DC1-QLTT-THDS-40-MH-01 | Thu thập dữ liệu trong ngành | 1. Hệ thống nguồn (CSDL thi hành án dân sự) gửi dữ liệu Yêu cầu thi hành án của cá nhân, cơ quan, tổ chức đến Kho DLDC. Kho DLDC tiếp nhận dữ liệu Yêu cầu thi hành án của cá nhân, cơ quan, tổ chức từ hệ thống nguồn thông qua kênh tích hợp. Trường hợp dữ liệu không đạt yêu cầu, hệ thống gửi thông báo lỗi kèm nguyên nhân. Nếu dữ liệu đạt yêu cầu, hệ thống tiếp nhận dữ liệu và thông báo thành công. | DC1-QLTT-THDS-40 |
@@ -14316,8 +14316,8 @@ Hình 435- Màn hình đăng suất
 | **II.2.1** | **Cục Hành chính tư pháp** |  |  |  |
 | **II.2.1.1** | **CSDL Hộ tịch điện tử** |  |  |  |
 | 142 | DC1-ĐXTT-DXTN-142-MH-01 | Đối soát thu thập từ trong ngành | 1. Hệ thống nguồn (CSDL Hộ tịch điện tử) định kỳ hoặc theo yêu cầu gửi gói tin chứa thông tin đối soát tổng hợp tới hệ thống Kho DLDC. Kho DLDC tiếp nhận gói tin đối soát và tự động đối chiếu dữ liệu. Sau khi kiểm tra, hệ thống Kho DLDC tổng hợp kết quả đối soát và gửi phản hồi về cho hệ thống nguồn. | DC1-ĐXTT-DXTN-142 |
-| **II.2.1.2** | **Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch** |  |  |  |
-| 143 | DC1-ĐXTT-DXTN-143-MH-02 | Đối soát thu thập từ trong ngành | 1. Hệ thống nguồn (Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch) định kỳ hoặc theo yêu cầu gửi gói tin chứa thông tin đối soát tổng hợp tới hệ thống Kho DLDC. Kho DLDC tiếp nhận gói tin đối soát và tự động đối chiếu dữ liệu. Sau khi kiểm tra, hệ thống Kho DLDC tổng hợp kết quả đối soát và gửi phản hồi về cho hệ thống nguồn. | DC1-ĐXTT-DXTN-143 |
+| **II.2.1.2** | **HT quản lý hồ sơ QT** |  |  |  |
+| 143 | DC1-ĐXTT-DXTN-143-MH-02 | Đối soát thu thập từ trong ngành | 1. Hệ thống nguồn (HT quản lý hồ sơ QT) định kỳ hoặc theo yêu cầu gửi gói tin chứa thông tin đối soát tổng hợp tới hệ thống Kho DLDC. Kho DLDC tiếp nhận gói tin đối soát và tự động đối chiếu dữ liệu. Sau khi kiểm tra, hệ thống Kho DLDC tổng hợp kết quả đối soát và gửi phản hồi về cho hệ thống nguồn. | DC1-ĐXTT-DXTN-143 |
 | **II.2.2** | **Cục Quản lý thi hành án dân sự** |  |  |  |
 | **II.2.2.1** | **Cơ sở dữ liệu thi hành án dân sự** |  |  |  |
 | 144 | DC1-ĐXTT-DXTN-144-MH-03 | Đối soát thu thập từ trong ngành | 1. Hệ thống nguồn (CSDL thi hành án dân sự) định kỳ hoặc theo yêu cầu gửi gói tin chứa thông tin đối soát tổng hợp tới hệ thống Kho DLDC. Kho DLDC tiếp nhận gói tin đối soát và tự động đối chiếu dữ liệu. Sau khi kiểm tra, hệ thống Kho DLDC tổng hợp kết quả đối soát và gửi phản hồi về cho hệ thống nguồn. | DC1-ĐXTT-DXTN-144 |
@@ -14513,7 +14513,7 @@ Hình 435- Màn hình đăng suất
 | 203 | DC1-XLDL-HTĐT-203-MH-036 | Thiết lập xử lý dữ liệu trong ngành | 1. Quản trị hệ thống thực hiện cấu hình kiểm tra quy tắc biến đổi định dạng về Bộ dữ liệu hồ sơ ghi vào sổ việc ly hôn/hủy việc kết hôn đã thực hiện tại cơ quan có thẩm quyền của nước ngoài (ghi chú ly hôn). Hệ thống ghi nhận quy tắc được thiết lập. | DC1-XLDL-HTĐT-203 |
 |  | DC1-XLDL-HTĐT-203-MH-036 | Thiết lập xử lý dữ liệu trong ngành | 2. Quản trị hệ thống có thể cấu hình biến đổi gộp hoặc tách cột về Bộ dữ liệu hồ sơ ghi vào sổ việc ly hôn/hủy việc kết hôn đã thực hiện tại cơ quan có thẩm quyền của nước ngoài (ghi chú ly hôn). Hệ thống ghi nhận quy tắc được thiết lập. |  |
 |  | DC1-XLDL-HTĐT-203-MH-036 | Thiết lập xử lý dữ liệu trong ngành | 3. Quản trị hệ thống có thể cấu hình phân loại, gán nhãn về Bộ dữ liệu hồ sơ ghi vào sổ việc ly hôn/hủy việc kết hôn đã thực hiện tại cơ quan có thẩm quyền của nước ngoài (ghi chú ly hôn). Hệ thống ghi nhận quy tắc được thiết lập. |  |
-| **III.2.1.2** | **Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch** |  |  |  |
+| **III.2.1.2** | **HT quản lý hồ sơ QT** |  |  |  |
 | 204 | DC1-XLDL-HSQT-204-MH-01 | Thiết lập xử lý dữ liệu trong ngành | 1. Quản trị hệ thống thực hiện cấu hình kiểm tra quy tắc về chuẩn định dạng Nhập Quốc tịch. Hệ thống ghi nhận quy tắc được thiết lập. | DC1-XLDL-HSQT-204 |
 |  | DC1-XLDL-HSQT-204-MH-01 | Thiết lập xử lý dữ liệu trong ngành | 2. Quản trị hệ thống có thể cấu hình kiểm tra tính hợp lệ của dữ liệu về Nhập Quốc tịch. Hệ thống ghi nhận quy tắc được thiết lập. |  |
 |  | DC1-XLDL-HSQT-204-MH-01 | Thiết lập xử lý dữ liệu trong ngành | 3. Quản trị hệ thống có thể cấu hình xử lý giá trị thiếu dữ liệu về Nhập Quốc tịch. Hệ thống ghi nhận quy tắc được thiết lập. |  |
@@ -15667,7 +15667,7 @@ Hình 435- Màn hình đăng suất
 |  | DC1-ĐPDL-HTĐT-544-MH-011 | Cung cấp dữ liệu dùng chung | 2. Quản trị hệ thống cấu hình quyền truy cập. Hệ thống ghi nhận cấu hình |  |
 | 545 | DC1-ĐPDL-HTĐT-545-MH-012 | Cung cấp dữ liệu dùng chung | 1. Quản trị hệ thống thiết kế cấu trúc gói tin Bộ dữ liệu hồ sơ ghi vào sổ việc ly hôn/hủy việc kết hôn đã thực hiện tại cơ quan có thẩm quyền của nước ngoài (ghi chú ly hôn) cần cung cấp. Hệ thống lưu cấu hình gói dữ liệu | DC1-ĐPDL-HTĐT-545 |
 |  | DC1-ĐPDL-HTĐT-545-MH-012 | Cung cấp dữ liệu dùng chung | 2. Quản trị hệ thống cấu hình quyền truy cập. Hệ thống ghi nhận cấu hình |  |
-| **VII.5.2.1.2** | **Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch** |  |  |  |
+| **VII.5.2.1.2** | **HT quản lý hồ sơ QT** |  |  |  |
 | 546 | DC1-ĐPDL-HSQT-546-MH-01 | Cung cấp dữ liệu dùng chung | 1. Quản trị hệ thống thiết kế cấu trúc gói tin Nhập Quốc tịch cần cung cấp. Hệ thống lưu cấu hình gói dữ liệu | DC1-ĐPDL-HSQT-546 |
 |  | DC1-ĐPDL-HSQT-546-MH-01 | Cung cấp dữ liệu dùng chung | 2. Quản trị hệ thống cấu hình quyền truy cập. Hệ thống ghi nhận cấu hình |  |
 | 547 | DC1-ĐPDL-HSQT-547-MH-02 | Cung cấp dữ liệu dùng chung | 1. Quản trị hệ thống thiết kế cấu trúc gói tin Thôi Quốc tịch cần cung cấp. Hệ thống lưu cấu hình gói dữ liệu | DC1-ĐPDL-HSQT-547 |
@@ -15921,7 +15921,7 @@ Hình 435- Màn hình đăng suất
 | **VIII.2** | **Đối soát dữ liệu các nhóm dữ liệu chia sẻ** |  |  |  |
 | **VIII.1** | **CSDL Hộ tịch điện tử** |  |  |  |
 | 663 | DC1-ĐPDL-ĐXCC-663-MH-02 | Đối soát dữ liệu các nhóm dữ liệu chia sẻ | 1. Kho DLDC định kỳ hoặc theo yêu cầu gửi gói tin yêu cầu Đối soát tổng hợp về cung cấp dữ liệu Hộ tịch điện tử gửi tới hệ thống đích. Hệ thống đích phản hồi kết quả nhận được. | DC1-ĐPDL-ĐXCC-663 |
-| **VIII.2** | **Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch** |  |  |  |
+| **VIII.2** | **HT quản lý hồ sơ QT** |  |  |  |
 | 664 | DC1-ĐPDL-ĐXCC-664-MH-03 | Đối soát dữ liệu các nhóm dữ liệu chia sẻ | 1. Kho DLDC định kỳ hoặc theo yêu cầu gửi gói tin yêu cầu Đối soát tổng hợp về cung cấp dữ liệu hồ sơ quốc tịch gửi tới hệ thống đích. Hệ thống đích phản hồi kết quả nhận được. | DC1-ĐPDL-ĐXCC-664 |
 | **VIII.3** | **Cơ sở dữ liệu thi hành án dân sự** |  |  |  |
 | 665 | DC1-ĐPDL-ĐXCC-665-MH-04 | Đối soát dữ liệu các nhóm dữ liệu chia sẻ | 1. Kho DLDC định kỳ hoặc theo yêu cầu gửi gói tin yêu cầu Đối soát tổng hợp về cung cấp dữ liệu thi hành án dân sự gửi tới hệ thống đích. Hệ thống đích phản hồi kết quả nhận được. | DC1-ĐPDL-ĐXCC-665 |

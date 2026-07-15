@@ -7,6 +7,25 @@ interface VersionHistoryModalProps {
 
 const mockVersions = [
   {
+    id: 27,
+    version: 'v2.7.0',
+    date: '06/07/2026',
+    time: '08:50',
+    content: `1. Phân hệ Dữ liệu chủ (Master Data):
+- Thiết lập, cập nhật các tab cấu hình dữ liệu chủ: Quản lý thuộc tính (AttributesManagementTab), Quan hệ thực thể (EntityRelationshipsTab), Quy tắc gộp (MergeRulesManagementTab), và Quy tắc định danh (UniqueIdentifierRulesTab).
+- Thiết kế lại trang Chi tiết cập nhật bản ghi dữ liệu chủ (MasterDataUpdateItemPage) và trang chính cập nhật dữ liệu chủ (MasterDataUpdatePage).
+- Cải tiến Wizard tạo dữ liệu chủ (MasterDataWizard) và Tab Phê duyệt dữ liệu chủ (ApprovalTab).
+- Cập nhật Sidebar và MainLayout để đồng bộ điều hướng và quản lý Dữ liệu chủ.
+
+2. Phân hệ Dữ liệu mở (Open Data):
+- Điều chỉnh các màn hình Danh mục dữ liệu mở (OpenDataCategoryPage, OpenDataCategoryGrid) và Danh sách yêu cầu công bố (OpenDataPublishedListPage).
+- Nâng cấp trang Thiết lập dữ liệu mở (OpenDataSetupPage): Tích hợp luồng gửi phê duyệt, trình duyệt danh mục và hiển thị nội dung trình duyệt chi tiết.
+
+3. Phân hệ Danh mục dùng chung (Category Setup):
+- Đồng bộ giao diện và các Tab phê duyệt dữ liệu dùng chung (CategoryPage, CategoryApprovalPage, SetupTab).
+- Tích hợp thêm các modal phục vụ phê duyệt: ReviewApprovalModal, SimpleApproveModal, SimpleRejectModal và bổ sung thông tin hiển thị tại CategoryWizardModal.`
+  },
+  {
     id: 26,
     version: 'v2.6.15',
     date: '06/07/2026',

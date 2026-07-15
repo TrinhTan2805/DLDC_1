@@ -248,7 +248,7 @@ const pageConfig: Record<string, { title: string; description: string }> = {
     description: 'Danh mục dịch vụ cung cấp dữ liệu chủ'
   },
   'provisioning-shared-hotich': { title: 'CSDL Hộ tịch điện tử', description: 'Cung cấp dữ liệu CSDL Hộ tịch điện tử' },
-  'provisioning-shared-quoctich': { title: 'Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch', description: 'Cung cấp dữ liệu Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch' },
+  'provisioning-shared-quoctich': { title: 'HT quản lý hồ sơ QT', description: 'Cung cấp dữ liệu HT quản lý hồ sơ QT' },
   'provisioning-shared-tha': { title: 'Cơ sở dữ liệu thi hành án dân sự', description: 'Cung cấp dữ liệu Cơ sở dữ liệu thi hành án dân sự' },
   'provisioning-shared-bpbd': { title: 'Cơ sở dữ liệu về biện pháp bảo đảm', description: 'Cung cấp dữ liệu Cơ sở dữ liệu về biện pháp bảo đảm' },
   'provisioning-shared-qgpl': { title: 'CSDL quốc gia về pháp luật', description: 'Cung cấp dữ liệu CSDL quốc gia về pháp luật' },
@@ -473,12 +473,12 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             )}
             {currentPage === 'collection-log' && <LogManagement />}
             {(currentPage === 'connection-management' || currentPage.startsWith('connection-management/')) && (
-              <ConnectionManagementPage 
+              <ConnectionManagementPage
                 activeTab={
-                  currentPage === 'connection-management/agents' 
-                    ? 'agents' 
-                    : currentPage === 'connection-management/source-systems' 
-                      ? 'source-systems' 
+                  currentPage === 'connection-management/agents'
+                    ? 'agents'
+                    : currentPage === 'connection-management/source-systems'
+                      ? 'source-systems'
                       : 'units'
                 }
                 onTabChange={(tab) => setCurrentPage(`connection-management/${tab}`)}
@@ -560,7 +560,7 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'provisioning-catalog-shared' && <DataProvisionServicesPage category="shared" title="Dữ liệu dùng chung" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu dùng chung" />}
 
             {currentPage === 'provisioning-shared-hotich' && <DataProvisionServicesPage category="shared" group="CSDL Hộ tịch điện tử" title="CSDL Hộ tịch điện tử" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu CSDL Hộ tịch điện tử" />}
-            {currentPage === 'provisioning-shared-quoctich' && <DataProvisionServicesPage category="shared" group="Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch" title="Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch" />}
+            {currentPage === 'provisioning-shared-quoctich' && <DataProvisionServicesPage category="shared" group="HT quản lý hồ sơ QT" title="HT quản lý hồ sơ QT" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu HT quản lý hồ sơ QT" />}
             {currentPage === 'provisioning-shared-tha' && <DataProvisionServicesPage category="shared" group="Cơ sở dữ liệu thi hành án dân sự" title="Cơ sở dữ liệu thi hành án dân sự" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu Cơ sở dữ liệu thi hành án dân sự" />}
             {currentPage === 'provisioning-shared-bpbd' && <DataProvisionServicesPage category="shared" group="Cơ sở dữ liệu về biện pháp bảo đảm" title="Cơ sở dữ liệu về biện pháp bảo đảm" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu Cơ sở dữ liệu về biện pháp bảo đảm" />}
             {currentPage === 'provisioning-shared-qgpl' && <DataProvisionServicesPage category="shared" group="CSDL quốc gia về pháp luật" title="CSDL quốc gia về pháp luật" description="Quản lý và cấu hình các dịch vụ cung cấp dữ liệu CSDL quốc gia về pháp luật" />}
@@ -850,10 +850,10 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
 // Helper function to get breadcrumb path
 const getBreadcrumbPath = (pageId: string, search: string = ''): string[] => {
   if (pageId === 'connection-management' || pageId.startsWith('connection-management/')) {
-    const subPage = pageId === 'connection-management/agents' 
-      ? 'Trạm kết nối' 
-      : pageId === 'connection-management/source-systems' 
-        ? 'Hệ thống nguồn' 
+    const subPage = pageId === 'connection-management/agents'
+      ? 'Trạm kết nối'
+      : pageId === 'connection-management/source-systems'
+        ? 'Hệ thống nguồn'
         : 'Quản lý đơn vị';
     return ['Quản trị & vận hành', 'Danh mục đơn vị cấp dl', 'Quản lý kết nối', subPage];
   }
@@ -917,7 +917,7 @@ const getBreadcrumbPath = (pageId: string, search: string = ''): string[] => {
   if (pageId.startsWith('provisioning-shared-')) {
     const groupNameMap: Record<string, string> = {
       'hotich': 'CSDL Hộ tịch điện tử',
-      'quoctich': 'Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch',
+      'quoctich': 'HT quản lý hồ sơ QT',
       'tha': 'Cơ sở dữ liệu thi hành án dân sự',
       'bpbd': 'Cơ sở dữ liệu về biện pháp bảo đảm',
       'qgpl': 'CSDL quốc gia về pháp luật',

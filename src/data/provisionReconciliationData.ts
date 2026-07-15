@@ -30,7 +30,7 @@ export const reconciliationData: ReconciliationProcess[] = [
   },
   {
     id: '664',
-    group: 'Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch',
+    group: 'HT quản lý hồ sơ QT',
     name: 'Đối soát tổng hợp về cung cấp dữ liệu hồ sơ quốc tịch',
     targetSystem: 'Hệ thống Bộ Tư pháp',
     schedule: 'Định kỳ (Hàng tháng) / Theo yêu cầu',

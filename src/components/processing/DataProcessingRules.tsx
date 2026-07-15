@@ -136,7 +136,7 @@ const processingRulesData: DataCategory[] = [
           },
           {
             id: 'nationality',
-            name: 'Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch',
+            name: 'HT quản lý hồ sơ QT',
             rules: [
               { id: 'nat-acquire-1', name: 'Thiết lập quy tắc làm sạch - Nhập Quốc tịch', type: 'clean', status: 'configured', lastRun: '06/12/2025' },
               { id: 'nat-acquire-2', name: 'Thiết lập quy tắc chuẩn hóa - Nhập Quốc tịch', type: 'standardize', status: 'configured', lastRun: '06/12/2025' },

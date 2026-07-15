@@ -11,7 +11,7 @@
 | CSDL / Hệ thống nguồn | Đơn vị quản lý | Dữ liệu thu thập vào DLDC |
 | :--- | :--- | :--- |
 | **CSDL Hộ tịch điện tử** | Cục Hộ tịch, Quốc tịch, Chứng thực – BTP | Hồ sơ khai sinh, kết hôn, khai tử, thay đổi/cải chính, bổ sung, cấp lại; giám sát việc giám hộ; chấm dứt giám sát giám hộ; ghi vào sổ việc ly hôn/huỷ kết hôn |
-| **Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch** | Cục Hộ tịch, Quốc tịch, Chứng thực – BTP | Hồ sơ nhập, thôi, trở lại quốc tịch Việt Nam |
+| **HT quản lý hồ sơ QT** | Cục Hộ tịch, Quốc tịch, Chứng thực – BTP | Hồ sơ nhập, thôi, trở lại quốc tịch Việt Nam |
 
 ### I.2. Cục Phổ biến, Giáo dục Pháp luật & Hoà giải cơ sở (Cục PBGD&TGPL)
 
@@ -68,7 +68,7 @@
 | STT | Tên CSDL / Hệ thống nguồn | Hệ thống | Đơn vị quản lý | Loại |
 | :---: | :--- | :--- | :--- | :---: |
 | 1 | CSDL Hộ tịch điện tử | SYS_HOTICH | Cục Hộ tịch, Quốc tịch, Chứng thực – BTP | Nội ngành |
-| 2 | Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch | SYS_QUOCTICH | Cục Hộ tịch, Quốc tịch, Chứng thực – BTP | Nội ngành |
+| 2 | HT quản lý hồ sơ QT | SYS_QUOCTICH | Cục Hộ tịch, Quốc tịch, Chứng thực – BTP | Nội ngành |
 | 3 | Hệ thống thông tin Trợ giúp pháp lý | SYS_TGPL | Cục PBGD&TGPL – BTP | Nội ngành |
 | 4 | CSDL Phổ biến, Giáo dục PL & Hoà giải | SYS_PBGDPL_HGCS | Cục PBGD&TGPL – BTP | Nội ngành |
 | 5 | CSDL Quản lý đấu giá, Bổ trợ tư pháp | SYS_DGTS | Cục Bổ trợ Tư pháp – BTP | Nội ngành |
@@ -103,7 +103,7 @@
 | STT | Hệ thống nguồn | Đơn vị | Số người | Loại |
 | :---: | :--- | :--- | :---: | :---: |
 | 1 | CSDL Hộ tịch điện tử | Cục Hộ tịch, Quốc tịch, Chứng thực | 1 | Nội ngành |
-| 2 | Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch | Cục Hộ tịch, Quốc tịch, Chứng thực | 1 | Nội ngành |
+| 2 | HT quản lý hồ sơ QT | Cục Hộ tịch, Quốc tịch, Chứng thực | 1 | Nội ngành |
 | 3 | Hệ thống thông tin Trợ giúp pháp lý | Cục PBGD&TGPL | 1 | Nội ngành |
 | 4 | CSDL Phổ biến, GDPL & Hoà giải | Cục PBGD&TGPL | 1 | Nội ngành |
 | 5 | CSDL Quản lý đấu giá, Bổ trợ tư pháp | Cục Bổ trợ Tư pháp | 1 | Nội ngành |

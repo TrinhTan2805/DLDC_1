@@ -2690,3 +2690,33 @@ Redesign thanh tìm kiếm & bộ lọc tại tab **Kiểm tra & Phê duyệt** 
 **Các file bị ảnh hưởng:**
 - `src/components/pages/category/components/modals/CategoryWizardModal.tsx`
 - `src/components/pages/category/CategorySetupPage.tsx`
+
+---
+
+## Khắc phục lỗi khởi chạy npm run dev do thiếu dependencies (Ngày cập nhật: 06/07/2026)
+
+**Nội dung thay đổi:**
+1. **Cài đặt các gói phụ thuộc còn thiếu:**
+   - Chạy lệnh `npm install` để cài đặt đầy đủ các thư viện trong `devDependencies` và `dependencies` (đặc biệt là thư viện tích hợp `@tailwindcss/vite` và `tailwindcss` phiên bản `4.3.2`).
+2. **Kiểm tra biên dịch & Đóng gói:**
+   - Thực hiện đóng gói dự án (`npm run build`) thành công, kiểm tra không phát sinh lỗi biên dịch liên quan đến cấu hình Vite hoặc Tailwind CSS.
+
+**Các file bị ảnh hưởng:**
+- `package-lock.json`
+- Thư mục `node_modules/`
+
+---
+
+## Cập nhật Lịch sử triển khai tổng hợp các thay đổi mới kéo về từ Git (Ngày cập nhật: 06/07/2026)
+
+**Nội dung thay đổi:**
+1. **Lịch sử triển khai (`VersionHistoryModal.tsx`):**
+   - Thêm bản ghi phiên bản mới **v2.7.0** (đầu danh sách, đánh dấu "Hiện tại") tổng hợp toàn bộ các thay đổi mới kéo về từ Git bao gồm:
+     - **Phân hệ Dữ liệu chủ (Master Data):** Cập nhật các tab cấu hình (Attributes, Relationships, Merge Rules, Unique Identifier Rules), cải tiến Wizard, Tab Phê duyệt, và trang cập nhật/chi tiết bản ghi.
+     - **Phân hệ Dữ liệu mở (Open Data):** Điều chỉnh màn hình Danh mục dữ liệu mở, danh sách yêu cầu công bố và trang thiết lập (tích hợp luồng gửi phê duyệt và nội dung trình duyệt).
+     - **Phân hệ Danh mục dùng chung (Category Setup):** Đồng bộ giao diện phê duyệt danh mục dùng chung và thêm các modal phê duyệt đi kèm.
+
+**Các file bị ảnh hưởng:**
+- `src/components/modals/VersionHistoryModal.tsx`
+
+

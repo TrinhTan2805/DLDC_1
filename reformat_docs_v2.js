@@ -101,7 +101,7 @@ for (let i = 0; i < lines.length; i++) {
 // Add Nationality Section at the end
 const nextSectionIdx = sections.length + 1;
 const natSection = \
-## 4.2.3.\.PM02.QLTT.TN.QT  Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch
+## 4.2.3.\.PM02.QLTT.TN.QT  HT quản lý hồ sơ QT
 
 ### 4.2.3.\.1 DC1 - QT - DB-01 Dashboard Thu thập quốc tịch
 

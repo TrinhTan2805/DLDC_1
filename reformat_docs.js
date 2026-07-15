@@ -75,7 +75,7 @@ sections.forEach((s, idx) => {
 
 // Final cleanup and append Nationality
 const nationalityDocs = \
-## 4.2.3.13.PM02.QLTT.TN.QT  Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch
+## 4.2.3.13.PM02.QLTT.TN.QT  HT quản lý hồ sơ QT
 
 ### 4.2.3.13.1.DC1 - QT - DB-01 Dashboard Thu thập quốc tịch
 
