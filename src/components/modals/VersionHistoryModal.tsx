@@ -8,22 +8,16 @@ interface VersionHistoryModalProps {
 const mockVersions = [
   {
     id: 27,
-    version: 'v2.7.0',
-    date: '06/07/2026',
-    time: '08:50',
-    content: `1. Phân hệ Dữ liệu chủ (Master Data):
-- Thiết lập, cập nhật các tab cấu hình dữ liệu chủ: Quản lý thuộc tính (AttributesManagementTab), Quan hệ thực thể (EntityRelationshipsTab), Quy tắc gộp (MergeRulesManagementTab), và Quy tắc định danh (UniqueIdentifierRulesTab).
-- Thiết kế lại trang Chi tiết cập nhật bản ghi dữ liệu chủ (MasterDataUpdateItemPage) và trang chính cập nhật dữ liệu chủ (MasterDataUpdatePage).
-- Cải tiến Wizard tạo dữ liệu chủ (MasterDataWizard) và Tab Phê duyệt dữ liệu chủ (ApprovalTab).
-- Cập nhật Sidebar và MainLayout để đồng bộ điều hướng và quản lý Dữ liệu chủ.
+    version: 'v2.6.16',
+    date: '15/07/2026',
+    time: '11:15',
+    content: `1. Phân hệ Cung cấp dữ liệu — Quy trình đối soát dữ liệu (DataReconciliationPage):
+- Thay đổi nhãn & cấu trúc 4 thẻ tổng quan: "Tổng số lần chạy" → "Tổng Dữ liệu đối soát", "Thành công" → "Khớp dữ liệu", "Cảnh báo chênh lệch" → "Không khớp", "Lần chạy gần nhất" → "Tỷ lệ khớp".
+- Redesign bảng Lịch sử đối soát: Bỏ toàn bộ khối header, thêm tab bar Danh sách đối soát, bổ sung cột STT, giữ cột Tên tiến trình & Tên API riêng, cập nhật cột Trạng thái sang dạng StatusTag (Chưa đối soát, Khớp dữ liệu, Không khớp).
+- Cấu hình lại các modal: Modal Chi tiết đối soát và Modal Lịch sử đối soát (đồng bộ hóa nhãn các cột số bản ghi cung cấp/bản ghi nhận, sai lệch và StatusTag).
 
-2. Phân hệ Dữ liệu mở (Open Data):
-- Điều chỉnh các màn hình Danh mục dữ liệu mở (OpenDataCategoryPage, OpenDataCategoryGrid) và Danh sách yêu cầu công bố (OpenDataPublishedListPage).
-- Nâng cấp trang Thiết lập dữ liệu mở (OpenDataSetupPage): Tích hợp luồng gửi phê duyệt, trình duyệt danh mục và hiển thị nội dung trình duyệt chi tiết.
-
-3. Phân hệ Danh mục dùng chung (Category Setup):
-- Đồng bộ giao diện và các Tab phê duyệt dữ liệu dùng chung (CategoryPage, CategoryApprovalPage, SetupTab).
-- Tích hợp thêm các modal phục vụ phê duyệt: ReviewApprovalModal, SimpleApproveModal, SimpleRejectModal và bổ sung thông tin hiển thị tại CategoryWizardModal.`
+2. Cung cấp dữ liệu theo yêu cầu (DataProvisionRequestPage):
+- Thay thế khối mô tả tiêu đề bằng hàng 4 thẻ thống kê hiển thị động theo trạng thái của từng tab (Tiếp nhận yêu cầu, Tra cứu & Kết xuất, Bàn giao dữ liệu).`
   },
   {
     id: 26,
