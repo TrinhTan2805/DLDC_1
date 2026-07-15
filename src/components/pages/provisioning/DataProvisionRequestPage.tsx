@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { FileText, Search, Share, Plus, Filter, Download, XCircle, UploadCloud, CheckCircle, Send, Settings, Eye, Edit, Globe, X } from 'lucide-react';
+import { FileText, Search, Share, Plus, Filter, Download, XCircle, UploadCloud, CheckCircle, Send, Settings, Eye, Edit, Globe, X, Clock } from 'lucide-react';
 import { ProvisionDataRequestModal, CreateDataRequestPayload } from './modals/ProvisionDataRequestModal';
 import { ProvisionRequestApprovalModal } from './modals/ProvisionRequestApprovalModal';
 import { ProvisionRequestExportModal } from './modals/ProvisionRequestExportModal';
@@ -311,6 +311,31 @@ export function DataProvisionRequestPage() {
     );
   };
 
+  // Thẻ thống kê theo từng tab (thay cho phần mô tả tiêu đề)
+  const cnt = (s: RequestStatus) => requests.filter((r) => r.status === s).length;
+  const totalCard = { label: 'Tổng yêu cầu', value: requests.length, Icon: FileText, box: 'bg-blue-50 text-blue-600' };
+  const statCards =
+    activeTab === 'tra_cuu'
+      ? [
+          totalCard,
+          { label: statusLabel.CHO_XU_LY, value: cnt('CHO_XU_LY'), Icon: Clock, box: 'bg-amber-50 text-amber-600' },
+          { label: statusLabel.DA_PHE_DUYET, value: cnt('DA_PHE_DUYET'), Icon: CheckCircle, box: 'bg-blue-50 text-blue-600' },
+          { label: statusLabel.DA_XUAT, value: cnt('DA_XUAT'), Icon: Download, box: 'bg-orange-50 text-orange-600' },
+        ]
+      : activeTab === 'ban_giao'
+      ? [
+          totalCard,
+          { label: statusLabel.DA_XUAT, value: cnt('DA_XUAT'), Icon: Download, box: 'bg-orange-50 text-orange-600' },
+          { label: statusLabel.DA_BAN_GIAO, value: cnt('DA_BAN_GIAO'), Icon: Send, box: 'bg-indigo-50 text-indigo-600' },
+          { label: statusLabel.DA_CONG_KHAI, value: cnt('DA_CONG_KHAI'), Icon: Globe, box: 'bg-green-50 text-green-600' },
+        ]
+      : [
+          totalCard,
+          { label: statusLabel.CHO_XU_LY, value: cnt('CHO_XU_LY'), Icon: Clock, box: 'bg-amber-50 text-amber-600' },
+          { label: statusLabel.DA_PHE_DUYET, value: cnt('DA_PHE_DUYET'), Icon: CheckCircle, box: 'bg-green-50 text-green-600' },
+          { label: statusLabel.TU_CHOI, value: cnt('TU_CHOI'), Icon: XCircle, box: 'bg-red-50 text-red-600' },
+        ];
+
   return (
     <div className="api-requests-page-root" style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px' }}>
       <style dangerouslySetInnerHTML={{__html: `
@@ -363,12 +388,19 @@ export function DataProvisionRequestPage() {
         <div className="flex-1 overflow-auto p-6">
           <div className="space-y-6">
             
-            {/* Page Header */}
-            <div className="flex justify-between items-center bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-              <div>
-                <h1 className="text-base font-bold text-slate-900">Cung cấp dữ liệu theo yêu cầu</h1>
-                <p className="text-xs text-slate-500 mt-1">Tiếp nhận, tra cứu, kết xuất, công bố và hủy công bố dữ liệu theo yêu cầu</p>
-              </div>
+            {/* Statistic cards (thay cho phần mô tả tiêu đề, đổi theo từng tab) */}
+            <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+              {statCards.map(({ label, value, Icon, box }, i) => (
+                <div key={i} className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm flex items-start gap-4">
+                  <div className={`p-3 rounded-lg ${box}`}>
+                    <Icon className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-500 font-medium">{label}</p>
+                    <h3 className="text-2xl font-bold text-slate-800">{value}</h3>
+                  </div>
+                </div>
+              ))}
             </div>
 
             {/* Filters and Actions */}

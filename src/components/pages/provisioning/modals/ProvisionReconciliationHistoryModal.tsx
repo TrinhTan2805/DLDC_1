@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, History, Calendar } from 'lucide-react';
+import { X } from 'lucide-react';
 import { ReconciliationProcess, ReconciliationHistoryEntry } from '../../../../data/provisionReconciliationData';
+import { StatusTag } from '../../../common/StatusTag';
 
 interface ProvisionReconciliationHistoryModalProps {
   isOpen: boolean;
@@ -16,10 +17,10 @@ export function ProvisionReconciliationHistoryModal({ isOpen, onClose, process, 
 
   if (!isOpen) return null;
 
-  // Format received records capacity dynamically
-  const getDungLuong = (totalSent: number) => {
-    if (totalSent > 500000) return (totalSent * 0.0000025).toFixed(1) + ' GB';
-    return (totalSent * 0.002).toFixed(1) + ' MB';
+  // Derive reconciliation display status from an entry
+  const getReconStatus = (entry: ReconciliationHistoryEntry) => {
+    if (!entry.totalSent) return 'Chưa đối soát';
+    return entry.discrepancies === 0 ? 'Khớp dữ liệu' : 'Không khớp';
   };
 
   // Generate dynamic dataset code from process
@@ -78,11 +79,10 @@ export function ProvisionReconciliationHistoryModal({ isOpen, onClose, process, 
                 <tr className="bg-slate-50 text-slate-500 border-b border-slate-200 uppercase tracking-tight whitespace-nowrap">
                   <th className="py-3 px-4 font-semibold text-center w-16">STT</th>
                   <th className="py-3 px-4 font-semibold">Thời gian</th>
-                  <th className="py-3 px-4 font-semibold">Tiến trình đối soát</th>
-                  <th className="py-3 px-4 font-semibold">Hệ thống đích</th>
-                  <th className="py-3 px-4 font-semibold">Hành động</th>
-                  <th className="py-3 px-4 font-semibold text-right">Số bản ghi đã gửi</th>
-                  <th className="py-3 px-4 font-semibold text-right">Dung lượng đã gửi</th>
+                  <th className="py-3 px-4 font-semibold">Đơn vị khai thác</th>
+                  <th className="py-3 px-4 font-semibold text-right">Số bản ghi cung cấp</th>
+                  <th className="py-3 px-4 font-semibold text-right">Số bản ghi nhận</th>
+                  <th className="py-3 px-4 font-semibold text-right">Chênh lệch</th>
                   <th className="py-3 px-4 font-semibold text-center w-32">Trạng thái</th>
                 </tr>
               </thead>
@@ -90,10 +90,10 @@ export function ProvisionReconciliationHistoryModal({ isOpen, onClose, process, 
                 {paginatedData.length > 0 ? (
                   paginatedData.map((entry, index) => {
                     const stt = (currentPage - 1) * itemsPerPage + index + 1;
-                    const runNumber = totalItems - stt + 1; // Display running numbers in reverse order or standard
                     const timeSplit = entry.runDate.split(' ');
                     const datePart = timeSplit[0];
                     const timePart = timeSplit[1] || '00:00:00';
+                    const reconStatus = getReconStatus(entry);
 
                     return (
                       <tr key={entry.id} className="hover:bg-slate-50/50 transition-colors">
@@ -104,41 +104,28 @@ export function ProvisionReconciliationHistoryModal({ isOpen, onClose, process, 
                             <span className="text-[12px] text-slate-400 mt-0.5">{timePart}</span>
                           </div>
                         </td>
-                        <td className="py-3.5 px-4 text-slate-700">
-                          <div className="flex flex-col">
-                            <span className="font-semibold text-slate-800">
-                              Tiến trình đối soát {process.group} - Lần chạy {runNumber}
-                            </span>
-                            <span className="text-[12px] text-slate-500 mt-0.5 font-mono">
-                              PKG-RUN-{String(runNumber).padStart(3, '0')}
-                            </span>
-                          </div>
-                        </td>
                         <td className="py-3.5 px-4 text-slate-600 font-medium">{entry.targetSystem}</td>
-                        <td className="py-3.5 px-4 text-slate-600">Hoàn tất đối soát</td>
                         <td className="py-3.5 px-4 text-right font-medium text-slate-800">
+                          {entry.totalSent.toLocaleString()}
+                        </td>
+                        <td className="py-3.5 px-4 text-right font-medium text-emerald-600">
                           {entry.totalMatched.toLocaleString()}
                         </td>
-                        <td className="py-3.5 px-4 text-right font-medium text-slate-800">
-                          {getDungLuong(entry.totalSent)}
+                        <td className={`py-3.5 px-4 text-right font-bold ${entry.discrepancies > 0 ? 'text-amber-600' : 'text-slate-400'}`}>
+                          {entry.discrepancies.toLocaleString()}
                         </td>
                         <td className="py-3.5 px-4 text-center">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[12px] font-medium border whitespace-nowrap ${
-                            entry.status === 'Thành công'
-                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                              : entry.status === 'Cảnh báo'
-                              ? 'bg-amber-50 text-amber-700 border-amber-200'
-                              : 'bg-rose-50 text-rose-700 border-rose-200'
-                          }`}>
-                            {entry.status}
-                          </span>
+                          <StatusTag
+                            label={reconStatus}
+                            variant={reconStatus === 'Khớp dữ liệu' ? 'green' : reconStatus === 'Không khớp' ? 'red' : 'blue'}
+                          />
                         </td>
                       </tr>
                     );
                   })
                 ) : (
                   <tr>
-                    <td colSpan={8} className="py-8 text-center text-slate-500">
+                    <td colSpan={7} className="py-8 text-center text-slate-500">
                       Không tìm thấy lịch sử đối soát phù hợp.
                     </td>
                   </tr>

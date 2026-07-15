@@ -144,11 +144,20 @@ export const reconciliationHistoryData: Record<string, ReconciliationHistoryEntr
   ]
 };
 
-// Auto generate empty arrays for other process IDs to prevent undefined errors
+// Auto generate history arrays for other process IDs — phủ đủ các tình trạng đối soát
 reconciliationData.forEach(proc => {
   if (!reconciliationHistoryData[proc.id]) {
     reconciliationHistoryData[proc.id] = [
-      { id: `auto-${proc.id}-1`, processId: proc.id, runDate: '2026-05-01 08:00:00', runType: 'Định kỳ', targetSystem: proc.targetSystem, totalSent: 5000, totalMatched: 5000, discrepancies: 0, status: 'Thành công' }
+      // Khớp dữ liệu (định kỳ)
+      { id: `auto-${proc.id}-1`, processId: proc.id, runDate: '2026-05-01 08:00:00', runType: 'Định kỳ', targetSystem: proc.targetSystem, totalSent: 5000, totalMatched: 5000, discrepancies: 0, status: 'Thành công' },
+      // Không khớp — cảnh báo lệch nhẹ
+      { id: `auto-${proc.id}-2`, processId: proc.id, runDate: '2026-04-15 08:00:00', runType: 'Định kỳ', targetSystem: proc.targetSystem, totalSent: 4980, totalMatched: 4965, discrepancies: 15, status: 'Cảnh báo', note: 'Lệch 15 bản ghi do chậm đồng bộ từ đích nhận' },
+      // Khớp dữ liệu (theo yêu cầu)
+      { id: `auto-${proc.id}-3`, processId: proc.id, runDate: '2026-04-01 14:30:00', runType: 'Yêu cầu', targetSystem: proc.targetSystem, totalSent: 4750, totalMatched: 4750, discrepancies: 0, status: 'Thành công' },
+      // Không khớp — lỗi, chênh lệch lớn
+      { id: `auto-${proc.id}-4`, processId: proc.id, runDate: '2026-03-15 08:00:00', runType: 'Định kỳ', targetSystem: proc.targetSystem, totalSent: 5200, totalMatched: 5060, discrepancies: 140, status: 'Lỗi', note: 'Đích nhận từ chối 140 bản ghi do sai định dạng dữ liệu' },
+      // Chưa đối soát — chưa gửi/đối soát
+      { id: `auto-${proc.id}-5`, processId: proc.id, runDate: '2026-03-01 08:00:00', runType: 'Yêu cầu', targetSystem: proc.targetSystem, totalSent: 0, totalMatched: 0, discrepancies: 0, status: 'Cảnh báo', note: 'Chưa thực hiện đối soát' },
     ];
   }
 });

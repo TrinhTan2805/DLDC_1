@@ -1,6 +1,6 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
-import { X, CheckCircle2, Download, Server, DownloadCloud, AlertTriangle, RefreshCw } from 'lucide-react';
+import { X, CheckCircle2, Download, Server, DownloadCloud, AlertTriangle, RefreshCw, Clock } from 'lucide-react';
 import { ReconciliationHistoryEntry, reconciliationData } from '../../../../data/provisionReconciliationData';
 
 interface ProvisionReconciliationDetailsModalProps {
@@ -36,7 +36,11 @@ export function ProvisionReconciliationDetailsModal({ isOpen, onClose, entry }: 
   }
 
   const matchRate = entry.totalSent > 0 ? (entry.totalMatched / entry.totalSent) * 100 : 100;
-  const isMatched = entry.discrepancies === 0;
+  const reconStatus = !entry.totalSent ? 'Chưa đối soát' : (entry.discrepancies === 0 ? 'Khớp dữ liệu' : 'Không khớp');
+  const saiLech = entry.totalSent - entry.totalMatched;
+  const hasDiff = saiLech !== 0;
+  const barColor = reconStatus === 'Khớp dữ liệu' ? 'bg-emerald-500' : reconStatus === 'Không khớp' ? 'bg-rose-500' : 'bg-blue-500';
+  const pctColor = reconStatus === 'Khớp dữ liệu' ? 'text-emerald-600' : reconStatus === 'Không khớp' ? 'text-rose-600' : 'text-blue-600';
 
   return createPortal(
     <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
@@ -82,25 +86,25 @@ export function ProvisionReconciliationDetailsModal({ isOpen, onClose, entry }: 
           <div>
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-[13px] font-semibold text-slate-900 uppercase tracking-tight">Kết quả đối soát</h3>
-              <span className="text-[12px] text-slate-500">Thời gian chạy: {entry.runDate}</span>
+              <span className="text-[12px] text-slate-500">Ngày gọi: {entry.totalSent ? entry.runDate : '—'}</span>
             </div>
 
             <div className="grid grid-cols-3 gap-3">
               <div className="border border-slate-200 rounded-lg p-3 text-center">
-                <p className="text-[12px] text-slate-500">Số bản ghi đã gửi</p>
+                <p className="text-[12px] text-slate-500">Số bản ghi cung cấp</p>
                 <p className="text-xl font-bold text-slate-900">{entry.totalSent.toLocaleString()}</p>
                 <p className="text-[11px] text-slate-400 mt-0.5">Kho DLDC gửi đi</p>
               </div>
               <div className="border border-slate-200 rounded-lg p-3 text-center">
-                <p className="text-[12px] text-slate-500">Số bản ghi khớp nối</p>
+                <p className="text-[12px] text-slate-500">Số bản ghi nhận</p>
                 <p className="text-xl font-bold text-slate-900">{entry.totalMatched.toLocaleString()}</p>
                 <p className="text-[11px] text-slate-400 mt-0.5">Đích nhận trùng khớp</p>
               </div>
-              <div className={`rounded-lg p-3 text-center border ${!isMatched ? 'border-rose-200 bg-rose-50' : 'border-emerald-200 bg-emerald-50'}`}>
-                <p className={`text-[12px] ${!isMatched ? 'text-rose-600' : 'text-emerald-600'}`}>Chênh lệch</p>
-                <p className={`text-xl font-bold ${!isMatched ? 'text-rose-700' : 'text-emerald-700'}`}>{entry.discrepancies.toLocaleString()}</p>
-                <p className={`text-[11px] mt-0.5 ${!isMatched ? 'text-rose-500' : 'text-emerald-500'}`}>
-                  {!isMatched ? 'Cần đối soát lại' : 'Trùng khớp'}
+              <div className={`rounded-lg p-3 text-center border ${hasDiff ? 'border-rose-200 bg-rose-50' : 'border-emerald-200 bg-emerald-50'}`}>
+                <p className={`text-[12px] ${hasDiff ? 'text-rose-600' : 'text-emerald-600'}`}>Sai lệch</p>
+                <p className={`text-xl font-bold ${hasDiff ? 'text-rose-700' : 'text-emerald-700'}`}>{saiLech.toLocaleString()}</p>
+                <p className={`text-[11px] mt-0.5 ${hasDiff ? 'text-rose-500' : 'text-emerald-500'}`}>
+                  {hasDiff ? 'Chênh lệch' : 'Trùng khớp'}
                 </p>
               </div>
             </div>
@@ -111,27 +115,27 @@ export function ProvisionReconciliationDetailsModal({ isOpen, onClose, entry }: 
             <div className="flex-1 min-w-[200px]">
               <div className="flex justify-between text-[13px] mb-1.5">
                 <span className="text-slate-600">Tỷ lệ khớp dữ liệu</span>
-                <span className={`font-semibold ${isMatched ? 'text-emerald-600' : 'text-amber-600'}`}>{matchRate.toFixed(2)}%</span>
+                <span className={`font-semibold ${pctColor}`}>{matchRate.toFixed(2)}%</span>
               </div>
               <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
                 <div
-                  className={`h-full rounded-full transition-all duration-500 ${isMatched ? 'bg-emerald-500' : 'bg-amber-500'}`}
+                  className={`h-full rounded-full transition-all duration-500 ${barColor}`}
                   style={{ width: `${matchRate}%` }}
                 />
               </div>
             </div>
             <div className="flex flex-col gap-2">
-              {isMatched ? (
+              {reconStatus === 'Khớp dữ liệu' ? (
                 <span className="px-4 py-2 text-[13px] font-semibold rounded-lg border bg-emerald-50 text-emerald-700 border-emerald-200 flex items-center justify-center gap-2">
                   <CheckCircle2 className="w-4 h-4" /> Khớp dữ liệu
                 </span>
-              ) : entry.status === 'Lỗi' ? (
+              ) : reconStatus === 'Không khớp' ? (
                 <span className="px-4 py-2 text-[13px] font-semibold rounded-lg border bg-rose-50 text-rose-700 border-rose-200 flex items-center justify-center gap-2">
-                  <AlertTriangle className="w-4 h-4" /> Lỗi đối soát
+                  <AlertTriangle className="w-4 h-4" /> Không khớp
                 </span>
               ) : (
-                <span className="px-4 py-2 text-[13px] font-semibold rounded-lg border bg-amber-50 text-amber-700 border-amber-200 flex items-center justify-center gap-2">
-                  <AlertTriangle className="w-4 h-4" /> Có sai lệch dữ liệu
+                <span className="px-4 py-2 text-[13px] font-semibold rounded-lg border bg-blue-50 text-blue-700 border-blue-200 flex items-center justify-center gap-2">
+                  <Clock className="w-4 h-4" /> Chưa đối soát
                 </span>
               )}
             </div>
@@ -147,7 +151,7 @@ export function ProvisionReconciliationDetailsModal({ isOpen, onClose, entry }: 
           >
             Đóng
           </button>
-          {!isMatched && (
+          {reconStatus === 'Không khớp' && (
             <button
               onClick={() => alert('Đang thực hiện yêu cầu đồng bộ & đối soát lại dữ liệu cung cấp...')}
               className="px-4 py-2 text-[13px] border border-slate-200 text-slate-700 bg-white rounded-lg hover:bg-slate-50 flex items-center gap-2 transition-colors cursor-pointer font-medium"
