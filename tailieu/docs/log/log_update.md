@@ -163,26 +163,6 @@ Rà soát UI phân hệ Dữ liệu chủ theo `Usecae_DuLieuChu.xlsx` (UC485–
 
 **Các file bị ảnh hưởng:**
 - `src/components/pages/reconciliation/ReconciliationDetailModal.tsx`
-- `package.json`der:string[]`; `ConflictStrategy` = `'source'|'priority'`.
-   - **Bước 3 — công tắc chế độ thuộc tính**: thêm nút chuyển ngay tại Bước 3 giữa *Chọn trường từ Kho DLDC* và *Tự thêm mới từng trường* (không còn phụ thuộc lựa chọn nguồn ở Bước 1).
-   - **Form "Tự thêm mới từng trường"**: bỏ checkbox *Duy nhất* và *Index*, thay bằng checkbox **Khóa (khóa chính)**; cột "Ràng buộc" trong bảng hiển thị badge **Khóa** (icon key) thay cho *Unique*. `AttributeForm` bỏ `unique/indexed`, thêm `isKey`.
-7. **Interface mới**: `MatchingRule.weight/algorithm`, `ExtractionRule.nullHandling/onEmpty`, `MergeConfig.autoThreshold/reviewThreshold/hardBlockFields`, `WizardData.sources/mapping/groupRules` (+ type `WizardSource`, `GroupRule`).
-
-**Các file bị ảnh hưởng:**
-- `src/components/pages/master-data/MasterDataWizard.tsx`
-- `package.json`
-
----
-
-## Phiên bản 2.6.14 (Ngày cập nhật: 03/07/2026)
-
-**Nội dung thay đổi:**
-1. **Modal "Chi tiết đối soát thu thập"** (`ReconciliationDetailModal.tsx`): footer **chỉ giữ nút "Đóng"** — bỏ các nút "Xem lịch sử", "Đồng bộ lại", "Xuất báo cáo".
-2. **View "Không khớp"** giữ giao diện giống "Khớp" (chỉ khác màu): bỏ 2 badge *"Có sai lệch dữ liệu"* và *"Đã gửi báo cáo về nguồn"*, thay bằng **1 badge "Không khớp"** (đỏ) tương tự badge "Khớp dữ liệu".
-
-**Các file bị ảnh hưởng:**
-- `src/components/pages/reconciliation/ReconciliationDetailModal.tsx`
->>>>>>> nhalt8/kdlbtp_v1.2
 - `package.json`
 
 ---
