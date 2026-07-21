@@ -194,7 +194,7 @@
 | **II.2.1.1** | **CSDL Hộ**  **tịch điện tử** | | | | | |
 | 142 | Đối soát tổng hợp với CSDL Hộ  tịch điện tử |  |  |  |  | X |
 | **II.2.1.2** | **Hệ thống quản lý hồ sơ quốc tịch** | | | | | |
-| 143 | Đối soát tổng hợp với Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch |  |  |  |  | X |
+| 143 | Đối soát tổng hợp với HT quản lý hồ sơ QT |  |  |  |  | X |
 | **II.2.2** | **Cục Quản lý thi hành án dân sự** | | | | | |
 | **II.2.2.1** | **Cơ sở dữ liệu thi hành án dân sự** | | | | | |
 | 144 | Đối soát tổng hợp với Cơ sở dữ liệu thi hành án dân sự |  |  |  |  | X |

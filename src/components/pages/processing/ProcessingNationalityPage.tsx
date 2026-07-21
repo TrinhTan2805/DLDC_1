@@ -16,9 +16,9 @@ export function ProcessingNationalityPage() {
   return (
     <div className="space-y-6">
       <div className="bg-white border border-slate-200 rounded-lg p-6">
-        <h2 className="text-xl text-slate-900 mb-2">Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch</h2>
+        <h2 className="text-xl text-slate-900 mb-2">HT quản lý hồ sơ QT</h2>
         <p className="text-slate-600">
-          Quản lý xử lý dữ liệu từ Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch thuộc Cục Hành chính tư pháp.
+          Quản lý xử lý dữ liệu từ HT quản lý hồ sơ QT thuộc Cục Hành chính tư pháp.
         </p>
       </div>
       <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
@@ -44,7 +44,7 @@ export function ProcessingNationalityPage() {
           {activeTab === 'data' && (
             <GenericDataTable
               title="Dữ liệu quốc tịch"
-              description="Danh sách dữ liệu từ Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch"
+              description="Danh sách dữ liệu từ HT quản lý hồ sơ QT"
               icon={Database}
               iconColor="purple"
               columns={[
@@ -72,8 +72,8 @@ export function ProcessingNationalityPage() {
 
           {activeTab === 'processing' && (
             <ProcessingConfigManager
-              title="Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch"
-              description="Quản lý xử lý dữ liệu từ Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch thuộc Cục Hành chính tư pháp."
+              title="HT quản lý hồ sơ QT"
+              description="Quản lý xử lý dữ liệu từ HT quản lý hồ sơ QT thuộc Cục Hành chính tư pháp."
               dataSourceKey="nationality"
             />
           )}

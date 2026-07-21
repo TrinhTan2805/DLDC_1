@@ -642,6 +642,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
   const [selectedMetadata, setSelectedMetadata] = useState<MetadataItem | null>(null);
   const [showMetadataModal, setShowMetadataModal] = useState(false);
   const [showViewMetadataModal, setShowViewMetadataModal] = useState(false);
+  const [metadataToDelete, setMetadataToDelete] = useState<MetadataItem | null>(null);
+  const [showDeleteMetadataModal, setShowDeleteMetadataModal] = useState(false);
   const [metadataFormData, setMetadataFormData] = useState<MetadataItem>({
     id: '0',
     categoryCodes: [],
@@ -1492,6 +1494,20 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
     }
   };
 
+  const handleDeleteMetadataClick = (item: MetadataItem) => {
+    if (item.status === 'active') return;
+    setMetadataToDelete(item);
+    setShowDeleteMetadataModal(true);
+  };
+
+  const confirmDeleteMetadata = () => {
+    if (metadataToDelete) {
+      setMetadataEntries(metadataEntries.filter(m => m.id !== metadataToDelete.id));
+      setShowDeleteMetadataModal(false);
+      setMetadataToDelete(null);
+    }
+  };
+
   const handleSaveAdd = () => {
     const newCategory: OpenDataCategory = {
       id: String(currentData.length + 1),
@@ -2048,6 +2064,17 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                             </button>
                             <button onClick={() => openMetadataModal(item)} className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer" title="Chỉnh sửa">
                               <Edit className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteMetadataClick(item)}
+                              disabled={item.status === 'active'}
+                              className={`p-1.5 rounded-lg transition-colors ${item.status === 'active'
+                                ? 'text-slate-300 cursor-not-allowed bg-transparent'
+                                : 'text-slate-500 hover:text-red-600 hover:bg-red-50 cursor-pointer'
+                                }`}
+                              title={item.status === 'active' ? 'Không thể xóa bản ghi đang hoạt động' : 'Xóa'}
+                            >
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
                         </td>
@@ -3370,6 +3397,32 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
           </div>
         );
       })()}
+
+      {/* Delete Metadata Confirm Modal */}
+      {showDeleteMetadataModal && metadataToDelete && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-full max-w-md m-4 p-6">
+            <h3 className="text-[18px] font-semibold text-slate-900 mb-4">Xác nhận xóa</h3>
+            <p className="text-[13px] text-slate-600 mb-6">
+              Bạn có chắc chắn muốn xóa metadata <strong>{metadataToDelete.fileName || metadataToDelete.categoryCodes.join(', ')}</strong>?
+            </p>
+            <div className="flex items-center justify-end gap-3">
+              <button
+                onClick={() => setShowDeleteMetadataModal(false)}
+                className="px-4 py-2 text-[13px] font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={confirmDeleteMetadata}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-[13px] font-medium"
+              >
+                Xóa
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Bulk Approval / Reject Modal (Phê duyệt nhanh / Từ chối nhanh) */}
       {showBulkApprovalModal && (

@@ -44,10 +44,10 @@ export const provisionServicesData: ProvisionService[] = [
   { id: '544', category: 'shared', group: 'CSDL Hộ tịch điện tử', name: 'Cung cấp Bộ dữ liệu hồ sơ đăng ký chấm dứt giám sát việc giám hộ' },
   { id: '545', category: 'shared', group: 'CSDL Hộ tịch điện tử', name: 'Cung cấp Bộ dữ liệu hồ sơ ghi vào sổ việc ly hôn/hủy việc kết hôn đã thực hiện tại cơ quan có thẩm quyền của nước ngoài (ghi chú ly hôn)' },
 
-  // VII.5.2.1.2 Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch
-  { id: '546', category: 'shared', group: 'Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch', name: 'Cung cấp dữ liệu Nhập Quốc tịch' },
-  { id: '547', category: 'shared', group: 'Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch', name: 'Cung cấp dữ liệu Thôi Quốc tịch' },
-  { id: '548', category: 'shared', group: 'Hệ thống quản lý Bộ Tư Pháp hồ sơ quốc tịch', name: 'Cung cấp dữ liệu Trở lại Quốc tịch' },
+  // VII.5.2.1.2 HT quản lý hồ sơ QT
+  { id: '546', category: 'shared', group: 'HT quản lý hồ sơ QT', name: 'Cung cấp dữ liệu Nhập Quốc tịch' },
+  { id: '547', category: 'shared', group: 'HT quản lý hồ sơ QT', name: 'Cung cấp dữ liệu Thôi Quốc tịch' },
+  { id: '548', category: 'shared', group: 'HT quản lý hồ sơ QT', name: 'Cung cấp dữ liệu Trở lại Quốc tịch' },
 
   // VII.5.2.2 Cục Quản lý thi hành án dân sự - CSDL thi hành án dân sự
   { id: '549', category: 'shared', group: 'Cơ sở dữ liệu thi hành án dân sự', name: 'Cung cấp dữ liệu Yêu cầu thi hành án của cá nhân, cơ quan, tổ chức' },
