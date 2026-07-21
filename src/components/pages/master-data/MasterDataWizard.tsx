@@ -1,4 +1,4 @@
-import { useState, ChangeEvent } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import { X, Check, ChevronRight, ChevronLeft, AlertCircle, Plus, Trash2, Database, FileText, ChevronDown, ChevronUp, Network, ArrowRight, Key, Search, SquarePen } from 'lucide-react';
 import { Portal } from '../../common/Portal';
 
@@ -297,7 +297,7 @@ interface AttributeForm {
   defaultValue?: string;
 }
 
-interface WizardData {
+export interface WizardData {
   // Step 1
   code?: string;
   name: string;
@@ -341,6 +341,8 @@ interface MasterDataWizardProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: WizardData) => void;
+  /** Khi truyền vào => chế độ chỉnh sửa: seed dữ liệu bước 1 từ thực thể đang sửa */
+  initialData?: Partial<WizardData> | null;
 }
 
 const MANAGING_UNITS = [
@@ -470,31 +472,41 @@ const steps = [
   { number: 6, title: 'Phê duyệt', description: 'Xem lại và gửi phê duyệt' },
 ];
 
-export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizardProps) {
+const DEFAULT_WIZARD_DATA: WizardData = {
+  code: '',
+  name: '',
+  dataType: 'individual',
+  managingAgency: '',
+  scope: 'national',
+  description: '',
+  systemName: '',
+  lifecycleStatus: 'draft',
+  sources: [
+    { id: 'src-hotich', name: 'Hộ tịch', kind: 'table', grain: '1:1' },
+    { id: 'src-cccd', name: 'CCCD', kind: 'table', grain: '1:1' },
+  ],
+  dataSource: 'dldc',
+  dldcDatabase: '',
+  attributes: [],
+  mergeRules: [],
+  mapping: {},
+  groupRules: {},
+  relationships: [],
+  approvalReviewer: '',
+  approvalNotes: ''
+};
+
+export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: MasterDataWizardProps) {
   const [currentStep, setCurrentStep] = useState(1);
-  const [wizardData, setWizardData] = useState<WizardData>({
-    code: '',
-    name: '',
-    dataType: 'individual',
-    managingAgency: '',
-    scope: 'national',
-    description: '',
-    systemName: '',
-    lifecycleStatus: 'draft',
-    sources: [
-      { id: 'src-hotich', name: 'Hộ tịch', kind: 'table', grain: '1:1' },
-      { id: 'src-cccd', name: 'CCCD', kind: 'table', grain: '1:1' },
-    ],
-    dataSource: 'dldc',
-    dldcDatabase: '',
-    attributes: [],
-    mergeRules: [],
-    mapping: {},
-    groupRules: {},
-    relationships: [],
-    approvalReviewer: '',
-    approvalNotes: ''
-  });
+  const [wizardData, setWizardData] = useState<WizardData>(DEFAULT_WIZARD_DATA);
+
+  // Mở wizard: về bước 1; chế độ sửa (có initialData) seed dữ liệu, chế độ tạo mới reset về mặc định
+  useEffect(() => {
+    if (isOpen) {
+      setCurrentStep(1);
+      setWizardData(initialData ? { ...DEFAULT_WIZARD_DATA, ...initialData } : DEFAULT_WIZARD_DATA);
+    }
+  }, [isOpen, initialData]);
 
   const [currentAttribute, setCurrentAttribute] = useState<AttributeForm>({
     fieldName: '',

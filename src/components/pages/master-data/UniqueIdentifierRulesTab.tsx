@@ -98,7 +98,7 @@ const buildCode = (cfg: PreviewInput, number: number) => {
   return [cfg.prefix, padded, cfg.suffix].filter(Boolean).join(sep);
 };
 
-export function UniqueIdentifierRulesTab() {
+export function UniqueIdentifierRulesTab({ readOnly = false }: { readOnly?: boolean } = {}) {
   const [rules, setRules] = useState<IdentifierRule[]>(mockIdentifierRules);
 
   // Chọn thực thể dữ liệu chủ để xem/cấu hình quy tắc định danh
@@ -252,13 +252,15 @@ export function UniqueIdentifierRulesTab() {
           <p className="text-[13px] text-slate-500 mb-4">
             Chưa cấu hình quy tắc định danh duy nhất nào
           </p>
-          <button
-            onClick={handleOpenAdd}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-[13px] font-medium"
-          >
-            <Plus className="w-4 h-4" />
-            Thêm quy tắc định danh
-          </button>
+          {!readOnly && (
+            <button
+              onClick={handleOpenAdd}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-[13px] font-medium"
+            >
+              <Plus className="w-4 h-4" />
+              Thêm quy tắc định danh
+            </button>
+          )}
         </div>
       ) : (
         <div className="space-y-4">
@@ -275,6 +277,7 @@ export function UniqueIdentifierRulesTab() {
                 Đã tạo {currentRule.totalGenerated.toLocaleString()} mã định danh
               </p>
             </div>
+            {!readOnly && (
             <div className="flex items-center gap-2 flex-shrink-0">
               <button
                 onClick={() => handleOpenEdit(currentRule)}
@@ -291,6 +294,7 @@ export function UniqueIdentifierRulesTab() {
                 <Trash2 className="w-4 h-4" />
               </button>
             </div>
+            )}
           </div>
 
           {/* Mục 2 — Định danh duy nhất (read-only, giống Bước 2 của wizard) */}

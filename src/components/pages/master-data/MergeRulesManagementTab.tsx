@@ -197,7 +197,7 @@ const mergeTriggerLabels: Record<MergeTrigger, string> = {
   approval: 'Chờ phê duyệt trước khi hợp nhất'
 };
 
-export function MergeRulesManagementTab() {
+export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boolean } = {}) {
   const [rules, setRules] = useState<MergeRule[]>(mockMergeRules);
 
   // Chọn thực thể dữ liệu chủ để xem/cấu hình quy tắc hợp nhất
@@ -382,13 +382,15 @@ export function MergeRulesManagementTab() {
           <p className="text-[13px] text-slate-500 mb-4">
             Chưa cấu hình quy tắc hợp nhất dữ liệu nào
           </p>
-          <button
-            onClick={handleOpenAdd}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-[13px] font-medium"
-          >
-            <Plus className="w-4 h-4" />
-            Thêm quy tắc hợp nhất
-          </button>
+          {!readOnly && (
+            <button
+              onClick={handleOpenAdd}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-[13px] font-medium"
+            >
+              <Plus className="w-4 h-4" />
+              Thêm quy tắc hợp nhất
+            </button>
+          )}
         </div>
       ) : (
         <div className="space-y-4">
@@ -406,6 +408,7 @@ export function MergeRulesManagementTab() {
                 {currentRule.lastApplied && <> · Lần áp dụng cuối: {currentRule.lastApplied}</>}
               </p>
             </div>
+            {!readOnly && (
             <div className="flex items-center gap-2 flex-shrink-0">
               <button
                 onClick={() => handleOpenEdit(currentRule)}
@@ -422,6 +425,7 @@ export function MergeRulesManagementTab() {
                 <Trash2 className="w-4 h-4" />
               </button>
             </div>
+            )}
           </div>
 
           {/* Lớp 1: Matching Rules */}

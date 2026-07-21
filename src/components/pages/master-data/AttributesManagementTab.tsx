@@ -221,7 +221,7 @@ const MOCK_APPROVERS = [
   { id: 'a5', name: 'Hoàng Thị Lan', position: 'Trưởng phòng', department: 'Phòng Nghiệp vụ pháp lý' },
 ];
 
-export function AttributesManagementTab() {
+export function AttributesManagementTab({ readOnly = false }: { readOnly?: boolean } = {}) {
   const [selectedEntity, setSelectedEntity] = useState<string>('1');
   const [attributes, setAttributes] = useState<Record<string, MasterDataAttribute[]>>(defaultAttributes);
   const [showForm, setShowForm] = useState(false);
@@ -658,7 +658,7 @@ export function AttributesManagementTab() {
       )}
 
       {/* Add Button */}
-      {selectedEntityData && (
+      {selectedEntityData && !readOnly && (
         <div className="flex justify-end">
           <button
             onClick={() => selectedEntityData.dataSource === 'dldc' ? handleOpenDldcModal() : setShowForm(true)}
@@ -746,20 +746,26 @@ export function AttributesManagementTab() {
                     )}
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-center gap-1.5">
-                        <button
-                          onClick={() => selectedEntityData?.dataSource === 'dldc' ? handleOpenDldcModal() : handleEdit(attribute)}
-                          className="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 cursor-pointer transition-colors"
-                          title="Chỉnh sửa"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => selectedEntityData?.dataSource === 'dldc' ? handleOpenDeleteConfirm(attribute) : handleDelete(attribute.id)}
-                          className="p-1.5 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-50 cursor-pointer transition-colors"
-                          title="Xóa"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        {readOnly ? (
+                          <span className="text-slate-300">—</span>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => selectedEntityData?.dataSource === 'dldc' ? handleOpenDldcModal() : handleEdit(attribute)}
+                              className="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 cursor-pointer transition-colors"
+                              title="Chỉnh sửa"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => selectedEntityData?.dataSource === 'dldc' ? handleOpenDeleteConfirm(attribute) : handleDelete(attribute.id)}
+                              className="p-1.5 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-50 cursor-pointer transition-colors"
+                              title="Xóa"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>

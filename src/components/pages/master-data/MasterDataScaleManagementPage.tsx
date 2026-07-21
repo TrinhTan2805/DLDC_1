@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Settings, Sliders, GitCompare, Network, Key, Plus, Edit, Trash2, X, Search, Filter, Circle, CheckSquare, ChevronDown, Eye, FileText, Clock, XCircle, Send } from 'lucide-react';
 import { AttributesManagementTab } from './AttributesManagementTab';
-import { MasterDataWizard } from './MasterDataWizard';
+import { MasterDataWizard, WizardData } from './MasterDataWizard';
 import { MergeRulesManagementTab } from './MergeRulesManagementTab';
 import { EntityRelationshipsTab } from './EntityRelationshipsTab';
 import { UniqueIdentifierRulesTab } from './UniqueIdentifierRulesTab';
@@ -247,6 +247,22 @@ export function MasterDataScaleManagementPage() {
       return;
     }
 
+    // UC485.3 — Kiểm tra trùng lặp Mã/Tên thực thể (bỏ qua chính bản ghi đang sửa)
+    const nameNorm = (formData.name || '').trim().toLowerCase();
+    const codeNorm = (formData.code || '').trim().toLowerCase();
+    const dupName = entities.some(e => e.id !== editingEntity?.id && e.name.trim().toLowerCase() === nameNorm);
+    if (dupName) {
+      alert(`Tên thực thể "${formData.name}" đã tồn tại. Vui lòng nhập tên khác.`);
+      return;
+    }
+    if (codeNorm) {
+      const dupCode = entities.some(e => e.id !== editingEntity?.id && e.code.trim().toLowerCase() === codeNorm);
+      if (dupCode) {
+        alert(`Mã thực thể "${formData.code}" đã tồn tại. Vui lòng nhập mã khác.`);
+        return;
+      }
+    }
+
     const now = new Date();
     const dateStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
 
@@ -283,11 +299,36 @@ export function MasterDataScaleManagementPage() {
     handleCloseForm();
   };
 
+  // Chỉnh sửa: mở lại Wizard (từng bước) với dữ liệu thực thể đang sửa
   const handleEdit = (entity: MasterDataEntity) => {
     setEditingEntity(entity);
-    setFormData(entity);
-    setShowForm(true);
+    setShowWizard(true);
   };
+
+  // Dữ liệu seed cho Wizard khi ở chế độ sửa (memo để không reset input khi đang nhập)
+  const wizardInitial = useMemo<Partial<WizardData> | null>(() => {
+    if (!editingEntity) return null;
+    const e = editingEntity;
+    return {
+      code: e.code,
+      name: e.name,
+      dataType: e.dataType,
+      managingAgency: e.managingAgency,
+      scope: e.scope,
+      description: e.description,
+      systemName: e.systemName,
+      lifecycleStatus: e.lifecycleStatus,
+      dataSource: e.dataSource ?? 'dldc',
+      dldcTable: e.dldcTable,
+      dldcColumns: e.dldcColumns,
+      apiSystem: e.apiSystem,
+      apiManagingUnit: e.apiManagingUnit,
+      apiEndpoint: e.apiEndpoint,
+      apiMethod: e.apiMethod,
+      updateStrategy: e.updateStrategy,
+      syncFrequency: e.syncFrequency,
+    } as Partial<WizardData>;
+  }, [editingEntity]);
 
   const handleDelete = (id: string) => {
     setDeleteConfirmId(id);
@@ -522,18 +563,11 @@ export function MasterDataScaleManagementPage() {
                   </button>
                   <div className="h-6 w-px bg-slate-200 mx-1" />
                   <button
-                    onClick={() => setShowWizard(true)}
+                    onClick={() => { setEditingEntity(null); setShowWizard(true); }}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-[13px] flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm active:scale-95 whitespace-nowrap"
                   >
                     <Plus className="w-4 h-4" />
-                    Tạo mới (Wizard 6 bước)
-                  </button>
-                  <button
-                    onClick={() => setShowForm(true)}
-                    className="bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-lg font-medium text-[13px] flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm active:scale-95 whitespace-nowrap"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Thêm mới nhanh
+                    Tạo mới
                   </button>
                 </div>
 
@@ -1033,19 +1067,19 @@ export function MasterDataScaleManagementPage() {
           )}
 
           {activeTab === 'attributes' && (
-            <AttributesManagementTab />
+            <AttributesManagementTab readOnly />
           )}
 
           {activeTab === 'merge-rules' && (
-            <MergeRulesManagementTab />
+            <MergeRulesManagementTab readOnly />
           )}
 
           {activeTab === 'relationships' && (
-            <EntityRelationshipsTab />
+            <EntityRelationshipsTab readOnly />
           )}
 
           {activeTab === 'identifier-rules' && (
-            <UniqueIdentifierRulesTab />
+            <UniqueIdentifierRulesTab readOnly />
           )}
 
           {activeTab === 'approval' && (
@@ -1349,10 +1383,38 @@ export function MasterDataScaleManagementPage() {
       {/* Wizard Modal */}
       <MasterDataWizard
         isOpen={showWizard}
-        onClose={() => setShowWizard(false)}
+        initialData={wizardInitial}
+        onClose={() => { setShowWizard(false); setEditingEntity(null); }}
         onSubmit={(wizardData) => {
           const now = new Date();
           const dateStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+
+          if (editingEntity) {
+            // Chế độ sửa: cập nhật thực thể đang chỉnh (giữ nguyên mã, ngày tạo, người tạo)
+            setEntities(entities.map(e => e.id === editingEntity.id ? {
+              ...e,
+              name: wizardData.name,
+              dataType: wizardData.dataType,
+              managingAgency: wizardData.managingAgency,
+              scope: wizardData.scope,
+              description: wizardData.description,
+              systemName: wizardData.systemName,
+              updatedDate: dateStr,
+              dataSource: wizardData.dataSource,
+              dldcTable: wizardData.dldcTable,
+              dldcColumns: wizardData.dldcColumns,
+              apiSystem: wizardData.apiSystem,
+              apiManagingUnit: wizardData.apiManagingUnit,
+              apiEndpoint: wizardData.apiEndpoint,
+              apiMethod: wizardData.apiMethod,
+              updateStrategy: wizardData.updateStrategy,
+              syncFrequency: wizardData.syncFrequency,
+            } : e));
+            setShowWizard(false);
+            setEditingEntity(null);
+            alert(`✅ Đã cập nhật thực thể "${wizardData.name}".`);
+            return;
+          }
 
           const newEntity: MasterDataEntity = {
             id: String(entities.length + 1),

@@ -167,14 +167,46 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
   };
 
   // Reference Rules Handlers
-  const [referenceRules, setReferenceRules] = useState<{ id: number, field: string, refTable: string, refField: string, action: string, isSaved: boolean }[]>([]);
+  const [referenceRules, setReferenceRules] = useState<{ id: number, field: string, csdl: string, refTable: string, refField: string, action: string, defaultValue: string, isSaved: boolean }[]>([]);
+
+  // Danh sách CSDL tham chiếu & bảng tham chiếu load theo CSDL đã chọn
+  const REFERENCE_CSDL_OPTIONS = [
+    { value: 'dm_dung_chung', label: 'Danh mục dùng chung' },
+    { value: 'ho_tich', label: 'CSDL Hộ tịch điện tử' },
+    { value: 'dan_cu', label: 'CSDL Quốc gia về dân cư' },
+  ];
+  const REFERENCE_TABLES_BY_CSDL: Record<string, { value: string, label: string }[]> = {
+    dm_dung_chung: [
+      { value: 'dm_tinh_thanh', label: 'Danh mục Tỉnh/Thành' },
+      { value: 'dm_quan_huyen', label: 'Danh mục Quận/Huyện' },
+      { value: 'dm_phuong_xa', label: 'Danh mục Phường/Xã' },
+      { value: 'dm_dan_toc', label: 'Danh mục Dân tộc' },
+      { value: 'dm_quoc_tich', label: 'Danh mục Quốc tịch' },
+    ],
+    ho_tich: [
+      { value: 'ht_khai_sinh', label: 'Đăng ký khai sinh' },
+      { value: 'ht_khai_tu', label: 'Đăng ký khai tử' },
+      { value: 'ht_ket_hon', label: 'Đăng ký kết hôn' },
+    ],
+    dan_cu: [
+      { value: 'dc_cong_dan', label: 'Thông tin công dân' },
+      { value: 'dc_ho_khau', label: 'Hộ khẩu' },
+    ],
+  };
 
   const handleAddReferenceRule = () => {
-    setReferenceRules(prev => [...prev, { id: Date.now(), field: '', refTable: '', refField: '', action: '', isSaved: false }]);
+    setReferenceRules(prev => [...prev, { id: Date.now(), field: '', csdl: '', refTable: '', refField: '', action: '', defaultValue: '', isSaved: false }]);
   };
 
   const handleUpdateReferenceRule = (id: number, field: string, value: string) => {
-    setReferenceRules(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r));
+    setReferenceRules(prev => prev.map(r => {
+      if (r.id !== id) return r;
+      const next = { ...r, [field]: value };
+      // CSDL đổi -> reset bảng & trường tham chiếu; bảng đổi -> reset trường tham chiếu
+      if (field === 'csdl') { next.refTable = ''; next.refField = ''; }
+      if (field === 'refTable') { next.refField = ''; }
+      return next;
+    }));
   };
 
   const handleSaveReferenceRules = () => {
@@ -183,6 +215,32 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
 
   const handleEditReferenceRule = (id: number) => {
     setReferenceRules(prev => prev.map(r => r.id === id ? { ...r, isSaved: false } : r));
+  };
+
+  // Mapping Value Rules Handlers (std-4: ánh xạ giá trị từ CSDL tham chiếu)
+  const [mappingValueRules, setMappingValueRules] = useState<{ id: number, field: string, mapField: string, csdl: string, refTable: string, refField: string, valueField: string, isSaved: boolean }[]>([]);
+
+  const handleAddMappingValueRule = () => {
+    setMappingValueRules(prev => [...prev, { id: Date.now(), field: '', mapField: '', csdl: '', refTable: '', refField: '', valueField: '', isSaved: false }]);
+  };
+
+  const handleUpdateMappingValueRule = (id: number, field: string, value: string) => {
+    setMappingValueRules(prev => prev.map(r => {
+      if (r.id !== id) return r;
+      const next = { ...r, [field]: value };
+      // CSDL đổi -> reset bảng, trường tham chiếu & giá trị ánh xạ; bảng đổi -> reset trường tham chiếu & giá trị ánh xạ
+      if (field === 'csdl') { next.refTable = ''; next.refField = ''; next.valueField = ''; }
+      if (field === 'refTable') { next.refField = ''; next.valueField = ''; }
+      return next;
+    }));
+  };
+
+  const handleSaveMappingValueRules = () => {
+    setMappingValueRules(prev => prev.map(r => ({ ...r, isSaved: true })));
+  };
+
+  const handleEditMappingValueRule = (id: number) => {
+    setMappingValueRules(prev => prev.map(r => r.id === id ? { ...r, isSaved: false } : r));
   };
 
   // Matching Rules Handlers (std-2)
@@ -1108,77 +1166,9 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                     {referenceRules.length > 0 && (
                       <div className="space-y-4">
                         {referenceRules.map((rule) => (
-                          <div key={rule.id} className={`flex gap-6 items-end p-5 rounded-xl border transition-all relative group ${rule.isSaved ? 'bg-slate-50 border-slate-200' : 'bg-white border-blue-200 shadow-sm'}`}>
-                            <div className="flex-1 space-y-2">
-                              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Trường áp dụng</label>
-                              <select
-                                disabled={rule.isSaved}
-                                value={rule.field}
-                                onChange={(e) => handleUpdateReferenceRule(rule.id, 'field', e.target.value)}
-                                title="Trường áp dụng"
-                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
-                              >
-                                <option value="">-- Chọn trường --</option>
-                                <option value="ma_tinh_thanh">Mã Tỉnh/Thành</option>
-                                <option value="ma_quan_huyen">Mã Quận/Huyện</option>
-                                <option value="ma_phuong_xa">Mã Phường/Xã</option>
-                                <option value="dan_toc">Dân tộc</option>
-                                <option value="quoc_tich">Quốc tịch</option>
-                              </select>
-                            </div>
-
-                            <div className="flex-1 space-y-2">
-                              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Bảng tham chiếu</label>
-                              <select
-                                disabled={rule.isSaved}
-                                value={rule.refTable}
-                                onChange={(e) => handleUpdateReferenceRule(rule.id, 'refTable', e.target.value)}
-                                title="Bảng tham chiếu"
-                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
-                              >
-                                <option value="">-- Chọn bảng --</option>
-                                <option value="dm_tinh_thanh">Danh mục Tỉnh/Thành</option>
-                                <option value="dm_quan_huyen">Danh mục Quận/Huyện</option>
-                                <option value="dm_phuong_xa">Danh mục Phường/Xã</option>
-                                <option value="dm_dan_toc">Danh mục Dân tộc</option>
-                                <option value="dm_quoc_tich">Danh mục Quốc tịch</option>
-                              </select>
-                            </div>
-
-                            <div className="flex-1 space-y-2">
-                              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Trường tham chiếu</label>
-                              <select
-                                disabled={rule.isSaved}
-                                value={rule.refField}
-                                onChange={(e) => handleUpdateReferenceRule(rule.id, 'refField', e.target.value)}
-                                title="Trường tham chiếu"
-                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
-                              >
-                                <option value="">-- Chọn trường --</option>
-                                <option value="ma_danh_muc">Mã danh mục</option>
-                                <option value="ten_danh_muc">Tên danh mục</option>
-                                <option value="ma_code">Mã Code</option>
-                              </select>
-                            </div>
-
-                            <div className="flex-1 space-y-2">
-                              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Hành động</label>
-                              <select
-                                disabled={rule.isSaved}
-                                value={rule.action}
-                                onChange={(e) => handleUpdateReferenceRule(rule.id, 'action', e.target.value)}
-                                title="Hành động"
-                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
-                              >
-                                <option value="">-- Chọn hành động --</option>
-                                <option value="Từ chối bản ghi vi phạm">Từ chối bản ghi vi phạm</option>
-                                <option value="Gán giá trị rỗng (NULL)">Gán giá trị rỗng (NULL)</option>
-                                <option value="Gán giá trị mặc định">Gán giá trị mặc định</option>
-                                <option value="Đánh dấu cảnh báo">Đánh dấu cảnh báo</option>
-                              </select>
-                            </div>
-
-                            <div className="flex items-center gap-1 mb-1">
+                          <div key={rule.id} className={`p-5 rounded-xl border transition-all relative group ${rule.isSaved ? 'bg-slate-50 border-slate-200' : 'bg-white border-blue-200 shadow-sm'}`}>
+                            {/* Nút chỉnh sửa / xóa ở góc phải trên */}
+                            <div className="absolute top-3 right-3 flex items-center gap-1">
                               {rule.isSaved && (
                                 <button
                                   onClick={() => handleEditReferenceRule(rule.id)}
@@ -1195,6 +1185,109 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4 pr-8">
+                              {/* Trường áp dụng */}
+                              <div className="space-y-2">
+                                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Trường áp dụng</label>
+                                <select
+                                  disabled={rule.isSaved}
+                                  value={rule.field}
+                                  onChange={(e) => handleUpdateReferenceRule(rule.id, 'field', e.target.value)}
+                                  title="Trường áp dụng"
+                                  className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none border ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'}`}
+                                >
+                                  <option value="">-- Chọn trường --</option>
+                                  <option value="ma_tinh_thanh">Mã Tỉnh/Thành</option>
+                                  <option value="ma_quan_huyen">Mã Quận/Huyện</option>
+                                  <option value="ma_phuong_xa">Mã Phường/Xã</option>
+                                  <option value="dan_toc">Dân tộc</option>
+                                  <option value="quoc_tich">Quốc tịch</option>
+                                </select>
+                              </div>
+
+                              {/* Chọn CSDL tham chiếu */}
+                              <div className="space-y-2">
+                                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Chọn CSDL tham chiếu</label>
+                                <select
+                                  disabled={rule.isSaved}
+                                  value={rule.csdl}
+                                  onChange={(e) => handleUpdateReferenceRule(rule.id, 'csdl', e.target.value)}
+                                  title="Chọn CSDL tham chiếu"
+                                  className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none border ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'}`}
+                                >
+                                  <option value="">-- Chọn CSDL --</option>
+                                  {REFERENCE_CSDL_OPTIONS.map((o) => (
+                                    <option key={o.value} value={o.value}>{o.label}</option>
+                                  ))}
+                                </select>
+                              </div>
+
+                              {/* Bảng tham chiếu (load theo CSDL) */}
+                              <div className="space-y-2">
+                                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Bảng tham chiếu</label>
+                                <select
+                                  disabled={rule.isSaved || !rule.csdl}
+                                  value={rule.refTable}
+                                  onChange={(e) => handleUpdateReferenceRule(rule.id, 'refTable', e.target.value)}
+                                  title="Bảng tham chiếu"
+                                  className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none border ${(rule.isSaved || !rule.csdl) ? 'bg-slate-100 border-slate-200 text-slate-500 cursor-not-allowed' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'}`}
+                                >
+                                  <option value="">-- Chọn bảng --</option>
+                                  {(REFERENCE_TABLES_BY_CSDL[rule.csdl] || []).map((o) => (
+                                    <option key={o.value} value={o.value}>{o.label}</option>
+                                  ))}
+                                </select>
+                              </div>
+
+                              {/* Trường tham chiếu (load theo bảng) */}
+                              <div className="space-y-2">
+                                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Trường tham chiếu</label>
+                                <select
+                                  disabled={rule.isSaved || !rule.refTable}
+                                  value={rule.refField}
+                                  onChange={(e) => handleUpdateReferenceRule(rule.id, 'refField', e.target.value)}
+                                  title="Trường tham chiếu"
+                                  className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none border ${(rule.isSaved || !rule.refTable) ? 'bg-slate-100 border-slate-200 text-slate-500 cursor-not-allowed' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'}`}
+                                >
+                                  <option value="">-- Chọn trường --</option>
+                                  <option value="ma_danh_muc">Mã danh mục</option>
+                                  <option value="ten_danh_muc">Tên danh mục</option>
+                                  <option value="ma_code">Mã Code</option>
+                                </select>
+                              </div>
+
+                              {/* Hành động */}
+                              <div className="space-y-2">
+                                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Hành động</label>
+                                <select
+                                  disabled={rule.isSaved}
+                                  value={rule.action}
+                                  onChange={(e) => handleUpdateReferenceRule(rule.id, 'action', e.target.value)}
+                                  title="Hành động"
+                                  className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none border ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'}`}
+                                >
+                                  <option value="">-- Chọn hành động --</option>
+                                  <option value="Từ chối bản ghi vi phạm">Từ chối bản ghi vi phạm</option>
+                                  <option value="Gán giá trị rỗng (NULL)">Gán giá trị rỗng (NULL)</option>
+                                  <option value="Gán giá trị mặc định">Gán giá trị mặc định</option>
+                                  <option value="Đánh dấu cảnh báo">Đánh dấu cảnh báo</option>
+                                </select>
+                              </div>
+
+                              {/* Giá trị mặc định */}
+                              <div className="space-y-2">
+                                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Giá trị mặc định</label>
+                                <input
+                                  type="text"
+                                  disabled={rule.isSaved}
+                                  value={rule.defaultValue}
+                                  onChange={(e) => handleUpdateReferenceRule(rule.id, 'defaultValue', e.target.value)}
+                                  placeholder="Nhập giá trị mặc định..."
+                                  className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none border ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'}`}
+                                />
+                              </div>
                             </div>
                           </div>
                         ))}
