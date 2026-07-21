@@ -454,6 +454,7 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
           onUserMenuClick={handleUserMenuClick}
           currentPage={currentPage}
           breadcrumb={getBreadcrumbPath(currentPage, location.search)}
+          onNavigate={setCurrentPage}
         />
 
         {/* Page Content */}

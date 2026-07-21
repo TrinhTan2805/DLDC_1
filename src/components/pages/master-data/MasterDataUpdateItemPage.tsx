@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Filter, Upload, Download, Send, Eye, Clock, CheckCircle2, XCircle, Globe, List, Lock, Check, Edit2, Copy, AlertTriangle, X } from 'lucide-react';
+import { Search, Filter, Upload, Download, Send, Eye, Clock, CheckCircle2, XCircle, Globe, List, Lock, Check, Edit2, Copy, AlertTriangle, X, RotateCcw } from 'lucide-react';
 
 type ApprovalStatus = 'reviewing' | 'pending' | 'approved' | 'rejected';
 type PublicStatus = 'published' | 'unpublished';
@@ -302,6 +302,9 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
   // Phê duyệt (giống tab Phê duyệt tại Biên tập danh mục)
   const [approvalStatusFilter, setApprovalStatusFilter] = useState<'all' | ApprovalStatus>('all');
   const [selectedApprovalIds, setSelectedApprovalIds] = useState<string[]>([]);
+  // UC492 — modal lý do từ chối & xem chi tiết bản ghi
+  const [rejectModal, setRejectModal] = useState<{ open: boolean; ids: string[]; reason: string }>({ open: false, ids: [], reason: '' });
+  const [detailRow, setDetailRow] = useState<Row | null>(null);
 
   // Công khai (giống tab Công khai tại Biên tập danh mục)
   const [publishStatus, setPublishStatus] = useState<'unpublished' | 'published' | 'stopped'>('unpublished');
@@ -364,7 +367,29 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
   };
 
   const handleApproveOne = (id: string) => setApprovalStatusForIds([id], 'approved');
-  const handleRejectOne = (id: string) => setApprovalStatusForIds([id], 'rejected');
+
+  // UC492 — Từ chối phải kèm lý do (mở modal nhập lý do, áp dụng cho 1 hoặc nhiều bản ghi)
+  const openRejectModal = (ids: string[]) => setRejectModal({ open: true, ids, reason: '' });
+  const handleRejectOne = (id: string) => openRejectModal([id]);
+
+  const handleConfirmReject = () => {
+    if (!rejectModal.reason.trim()) {
+      alert('Vui lòng nhập lý do từ chối!');
+      return;
+    }
+    const ids = rejectModal.ids;
+    const reason = rejectModal.reason.trim();
+    setRecordsData(prev => prev.map(r => ids.includes(r.id) ? { ...r, approvalStatus: 'rejected', rejectReason: reason } : r));
+    setSelectedApprovalIds(prev => prev.filter(id => !ids.includes(id)));
+    setRejectModal({ open: false, ids: [], reason: '' });
+    alert('Đã từ chối phê duyệt kèm lý do. Trạng thái cập nhật và thông báo đã gửi tới cán bộ nghiệp vụ.');
+  };
+
+  // UC493 — Hủy phê duyệt: đưa bản ghi đã duyệt về "Chờ phê duyệt", ghi log & thông báo
+  const handleUnapprove = (id: string) => {
+    setRecordsData(prev => prev.map(r => r.id === id ? { ...r, approvalStatus: 'pending' } : r));
+    alert('Đã hủy phê duyệt. Bản ghi chuyển về "Chờ phê duyệt", ghi nhận log thao tác và gửi thông báo tới cán bộ nghiệp vụ.');
+  };
 
   const handleBulkApprove = () => {
     if (selectedApprovalIds.length === 0) {
@@ -379,7 +404,7 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
       alert('Vui lòng chọn ít nhất một bản ghi để từ chối');
       return;
     }
-    setApprovalStatusForIds(selectedApprovalIds, 'rejected');
+    openRejectModal(selectedApprovalIds);
   };
 
   // ─── Rà soát dữ liệu handlers ─────────────────────────────────────────────
@@ -874,6 +899,7 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
                       <td className="px-6 py-3">
                         <div className="flex items-center gap-2">
                           <button
+                            onClick={() => setDetailRow(row)}
                             className="p-1 text-blue-600 hover:bg-blue-50 rounded cursor-pointer transition-colors"
                             title="Xem chi tiết"
                           >
@@ -903,6 +929,16 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
                           >
                             <XCircle className="w-4 h-4" />
                           </button>
+                          {/* UC493 — Hủy phê duyệt (chỉ với bản ghi đã duyệt) */}
+                          {row.approvalStatus === 'approved' && (
+                            <button
+                              onClick={() => handleUnapprove(row.id)}
+                              className="p-1 text-amber-600 hover:bg-amber-50 rounded cursor-pointer transition-colors"
+                              title="Hủy phê duyệt"
+                            >
+                              <RotateCcw className="w-4 h-4" />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -1235,6 +1271,106 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
               >
                 <XCircle className="w-4 h-4" />
                 Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* UC492 — Modal lý do từ chối phê duyệt */}
+      {rejectModal.open && (
+        <div className="fixed inset-0 flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-md overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+              <h3 className="text-sm font-bold text-red-700 uppercase tracking-wider flex items-center gap-2">
+                <XCircle className="w-5 h-5 text-red-600" />
+                Từ chối phê duyệt
+              </h3>
+              <button
+                onClick={() => setRejectModal({ open: false, ids: [], reason: '' })}
+                className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                title="Đóng"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4 text-[13px]">
+              <p className="text-slate-600 font-medium leading-relaxed">
+                Từ chối phê duyệt <strong>{rejectModal.ids.length}</strong> bản ghi. Vui lòng nhập lý do:
+              </p>
+              <div>
+                <label className="block text-slate-700 font-semibold mb-2">Lý do từ chối <span className="text-red-500">*</span></label>
+                <textarea
+                  title="Lý do từ chối"
+                  value={rejectModal.reason}
+                  onChange={(e) => setRejectModal(prev => ({ ...prev, reason: e.target.value }))}
+                  rows={4}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  placeholder="Nhập lý do chi tiết..."
+                />
+              </div>
+            </div>
+            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
+              <button
+                onClick={() => setRejectModal({ open: false, ids: [], reason: '' })}
+                className="px-4 py-2 border border-slate-300 text-slate-700 bg-white rounded-lg hover:bg-slate-50 font-medium text-[13px] transition-colors cursor-pointer active:scale-95"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                onClick={handleConfirmReject}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium text-[13px] transition-colors cursor-pointer active:scale-95 flex items-center gap-1.5"
+              >
+                <XCircle className="w-4 h-4" />
+                Xác nhận từ chối
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* UC492 — Modal xem chi tiết bản ghi */}
+      {detailRow && (
+        <div className="fixed inset-0 flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                <Eye className="w-5 h-5 text-blue-600" />
+                Chi tiết bản ghi
+              </h3>
+              <button
+                onClick={() => setDetailRow(null)}
+                className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                title="Đóng"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-3 text-[13px] overflow-y-auto">
+              <div className="flex items-center gap-2">
+                <span className="text-slate-500">Trạng thái:</span>
+                <ApprovalBadge status={detailRow.approvalStatus} />
+              </div>
+              <div className="border border-slate-200 rounded-lg divide-y divide-slate-100">
+                {cols.map(col => (
+                  <div key={col.key} className="flex px-3 py-2">
+                    <span className="w-40 shrink-0 text-slate-500">{col.label}</span>
+                    <span className="flex-1 text-slate-800 font-medium break-words">{detailRow[col.key] || <span className="text-slate-400 italic">(trống)</span>}</span>
+                  </div>
+                ))}
+              </div>
+              {detailRow.approvalStatus === 'rejected' && detailRow.rejectReason && (
+                <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700">
+                  <span className="font-semibold">Lý do từ chối: </span>{detailRow.rejectReason}
+                </div>
+              )}
+            </div>
+            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end">
+              <button
+                onClick={() => setDetailRow(null)}
+                className="px-4 py-2 border border-slate-300 text-slate-700 bg-white rounded-lg hover:bg-slate-50 font-medium text-[13px] transition-colors cursor-pointer active:scale-95"
+              >
+                Đóng
               </button>
             </div>
           </div>

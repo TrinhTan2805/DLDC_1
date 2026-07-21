@@ -1,5 +1,55 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Cập nhật hệ thống Thông báo theo Noti.xlsx (Ngày thực hiện: 21/07/2026)
+
+Thiết kế lại theo yêu cầu PM: thông báo chỉ gồm tiêu đề + nội dung, 3 loại (Thành công/Lỗi/Thông báo), KHÔNG phân theo mức độ ưu tiên; nội dung lấy từ danh sách `Noti.xlsx` (26 mẫu thông báo phủ các phân hệ: Quản lý thu thập, Xử lý dữ liệu, Danh mục dùng chung, Dữ liệu mở, Dữ liệu chủ, Cung cấp dữ liệu).
+
+- **Tạo `src/data/notificationCatalog.ts`**: danh mục dùng chung cho cả dropdown và màn quản lý — `NotificationType = 'success' | 'error' | 'info'`, `NotificationItem { id, type, source, title, message, time, isRead }`.
+- **`TopBar.tsx`** (dropdown chuông): bỏ loại `warning`; lấy 5 thông báo gần nhất từ catalog; nút "Xem tất cả thông báo" điều hướng sang màn Quản lý thông báo (thêm prop `onNavigate`, `MainLayout.tsx` truyền `setCurrentPage`).
+- **`NotificationPage.tsx`** (màn "Quản lý thông báo", xem được **tất cả** thông báo hệ thống): dùng toàn bộ 26 mục trong catalog; bỏ hẳn field/badge `priority` (không còn "Ưu tiên cao"); 4 thẻ thống kê Tổng/Chưa đọc/Thành công/Lỗi; thêm bộ lọc theo **Loại** (Tất cả loại/Thành công/Lỗi/Thông báo) bên cạnh lọc trạng thái đọc; modal chi tiết hiển thị "Loại thông báo" thay cho "Mức độ ưu tiên".
+- Đã kiểm chứng trên trình duyệt: dropdown hiển thị đúng 5 mục 3 loại, điều hướng "Xem tất cả" hoạt động, màn quản lý hiển thị đủ 26/26, lọc theo Loại đúng, modal chi tiết không còn ưu tiên.
+
+**Tinh chỉnh theo góp ý PM (cùng ngày):**
+- Bỏ dòng **"Nguồn: ..."** dưới mỗi thông báo trong danh sách (màn Quản lý thông báo).
+- Bỏ **badge loại** (Thành công/Lỗi) ở cột phải mỗi dòng trong danh sách — chỉ giữ icon loại bên trái; badge vẫn hiển thị đầy đủ trong modal xem chi tiết ("Loại thông báo").
+- Đổi toàn bộ `time` trong `notificationCatalog.ts` từ dạng tương đối ("5 phút trước", "Hôm qua"...) sang timestamp tuyệt đối **`dd/MM/yyyy HH:mm:ss`**, áp dụng đồng nhất cho cả dropdown chuông và màn quản lý (dùng chung 1 nguồn dữ liệu).
+
+**Tinh chỉnh đợt 2 (cùng ngày):**
+- Bỏ nút "Xem chi tiết" + modal chi tiết ở màn Quản lý thông báo (nội dung ngắn, hiển thị hết trên danh sách); dọn code thừa.
+- **Nâng lên 4 loại thông báo**: thêm **Cảnh báo (warning)** cho trường hợp *bị từ chối phê duyệt* (tách khỏi "Lỗi" — vốn chỉ dành cho sự cố hệ thống). Cập nhật `Noti.xlsx` (các dòng "Từ chối" → Cảnh báo) và đồng bộ code: `notificationCatalog.ts` (type `warning` + 3 mẫu bị từ chối), `TopBar.tsx` (icon/nền amber), `NotificationPage.tsx` (thẻ thống kê + nút lọc "Cảnh báo", icon vàng cam).
+
+**File bị ảnh hưởng:** `notificationCatalog.ts`, `TopBar.tsx`, `NotificationPage.tsx`, `MainLayout.tsx`; spec `Noti.xlsx`.
+
+---
+
+## Cập nhật quy trình Thêm/Sửa & phân quyền view-only Mô hình dữ liệu chủ (Ngày thực hiện: 21/07/2026)
+
+Theo yêu cầu PM: bỏ luồng "Thêm mới nhanh", chỉnh sửa thực thể phải đi qua Wizard từng bước (như tạo mới), và 4 tab cấu hình phụ chỉ được xem trong màn Mô hình dữ liệu chủ.
+
+- **Bỏ "Thêm mới nhanh"** (`MasterDataScaleManagementPage.tsx`): gỡ nút và luồng form đơn giản; chỉ còn nút **"Tạo mới"** mở Wizard 6 bước.
+- **Chỉnh sửa mở lại Wizard từng bước**:
+  - `MasterDataWizard.tsx`: thêm prop `initialData` (export `WizardData`) — khi có giá trị, Wizard seed dữ liệu Bước 1 từ thực thể đang sửa, luôn mở lại từ bước 1 và cho đi tuần tự qua các bước để chỉnh sửa (dùng `useEffect` theo `isOpen`).
+  - `handleEdit()` gọi `setEditingEntity(entity)` + `setShowWizard(true)` (không còn mở form riêng).
+  - `onSubmit` của Wizard phân nhánh: **tạo mới** → thêm entity; **chỉnh sửa** → cập nhật đúng entity đang sửa (giữ nguyên mã, ngày tạo, người tạo).
+- **4 tab chỉ xem (view-only)** trong khu vực Mô hình dữ liệu chủ: `AttributesManagementTab`, `MergeRulesManagementTab`, `EntityRelationshipsTab`, `UniqueIdentifierRulesTab` nhận prop `readOnly`; khi bật, ẩn nút "Thêm...", ẩn nút Sửa/Xóa (thay bằng "—"). `MasterDataScaleManagementPage` truyền `readOnly` cho cả 4 tab.
+- Build production (`vite build`) qua, không lỗi.
+
+**File bị ảnh hưởng:** `MasterDataWizard.tsx`, `MasterDataScaleManagementPage.tsx`, `AttributesManagementTab.tsx`, `MergeRulesManagementTab.tsx`, `EntityRelationshipsTab.tsx`, `UniqueIdentifierRulesTab.tsx`.
+
+---
+
+## Cập nhật Dữ liệu chủ theo UC (Ngày thực hiện: 17/07/2026)
+
+Rà soát UI phân hệ Dữ liệu chủ theo `Usecae_DuLieuChu.xlsx` (UC485–498) và xử lý các gap ưu tiên:
+- **UC488** (`master-data/EntityRelationshipsTab.tsx`): bỏ filter loại trừ `one-to-many` → tạo được quan hệ **1-n** ở form standalone (trước đó chỉ có 1-1 và n-n).
+- **UC485** (`master-data/MasterDataScaleManagementPage.tsx`): form "Thêm nhanh" nay **kiểm tra trùng Mã và Tên thực thể** (bỏ qua chính bản ghi khi sửa), chặn lưu nếu trùng.
+- **UC492** (`master-data/MasterDataUpdateItemPage.tsx`): **Từ chối phê duyệt bắt buộc nhập lý do** (modal, áp dụng cho từ chối đơn & hàng loạt; lưu `rejectReason`); nút **Xem chi tiết** (Eye) mở modal xem đầy đủ trường + trạng thái + lý do từ chối.
+- **UC493** (cùng file): thêm thao tác **Hủy phê duyệt** cho bản ghi đã duyệt → chuyển về "Chờ phê duyệt", ghi log & thông báo.
+
+**Còn lại (đề xuất làm tiếp):** UC487 (tab kiểm thử hợp nhất + trọng số/ưu tiên theo nguồn ở tab standalone), UC488 (sơ đồ ERD), UC490 (drill-down cấu trúc trong modal duyệt), UC494 (so sánh phiên bản + xuất báo cáo lịch sử), UC495 (xóa mềm/khôi phục), UC496 (quản lý phiên bản) — phần lớn nằm ở component "mồ côi" chưa được route.
+
+**File bị ảnh hưởng:** `EntityRelationshipsTab.tsx`, `MasterDataScaleManagementPage.tsx`, `MasterDataUpdateItemPage.tsx`.
+
 ## Cập nhật giao diện (Ngày thực hiện: 15/07/2026)
 
 **Màn hình:** Cung cấp dữ liệu → Quy trình đối soát dữ liệu → Chi tiết đối soát (`ProvisionReconciliationPage`, UC-664 và các tiến trình khác).
@@ -32,7 +82,13 @@
    - *Bàn giao dữ liệu*: Chờ bàn giao / Đã bàn giao / Đã công khai / Đã hủy công khai.
    - Số liệu đếm động theo trạng thái yêu cầu; số liệu render bằng `<h3>` để không bị CSS ép 13px.
 
+9. **Xử lý dữ liệu → tab Chuẩn hóa → "Xử lý vi phạm về ràng buộc thuộc tính tham chiếu"** (`processing/GenericProcessingPage.tsx`):
+   - Chuyển UI mỗi quy tắc từ 1 hàng flex sang **lưới 3 cột**; nút Sửa/Xóa đưa lên góc phải trên card.
+   - **Thêm ô "Chọn CSDL tham chiếu"** (sau Trường áp dụng) — droplist CSDL; **Bảng tham chiếu load động theo CSDL** đã chọn (cascade), Trường tham chiếu khóa tới khi chọn Bảng. Đổi CSDL reset Bảng+Trường; đổi Bảng reset Trường.
+   - **Thêm ô "Giá trị mặc định"**. State bổ sung `csdl`, `defaultValue`.
+
 **Các file bị ảnh hưởng:**
+- `src/components/pages/processing/GenericProcessingPage.tsx`
 - `src/components/pages/provisioning/DataReconciliationPage.tsx`
 - `src/components/pages/provisioning/modals/ProvisionReconciliationDetailsModal.tsx`
 - `src/components/pages/provisioning/modals/ProvisionReconciliationHistoryModal.tsx`
@@ -107,26 +163,6 @@
 
 **Các file bị ảnh hưởng:**
 - `src/components/pages/reconciliation/ReconciliationDetailModal.tsx`
-- `package.json`der:string[]`; `ConflictStrategy` = `'source'|'priority'`.
-   - **Bước 3 — công tắc chế độ thuộc tính**: thêm nút chuyển ngay tại Bước 3 giữa *Chọn trường từ Kho DLDC* và *Tự thêm mới từng trường* (không còn phụ thuộc lựa chọn nguồn ở Bước 1).
-   - **Form "Tự thêm mới từng trường"**: bỏ checkbox *Duy nhất* và *Index*, thay bằng checkbox **Khóa (khóa chính)**; cột "Ràng buộc" trong bảng hiển thị badge **Khóa** (icon key) thay cho *Unique*. `AttributeForm` bỏ `unique/indexed`, thêm `isKey`.
-7. **Interface mới**: `MatchingRule.weight/algorithm`, `ExtractionRule.nullHandling/onEmpty`, `MergeConfig.autoThreshold/reviewThreshold/hardBlockFields`, `WizardData.sources/mapping/groupRules` (+ type `WizardSource`, `GroupRule`).
-
-**Các file bị ảnh hưởng:**
-- `src/components/pages/master-data/MasterDataWizard.tsx`
-- `package.json`
-
----
-
-## Phiên bản 2.6.14 (Ngày cập nhật: 03/07/2026)
-
-**Nội dung thay đổi:**
-1. **Modal "Chi tiết đối soát thu thập"** (`ReconciliationDetailModal.tsx`): footer **chỉ giữ nút "Đóng"** — bỏ các nút "Xem lịch sử", "Đồng bộ lại", "Xuất báo cáo".
-2. **View "Không khớp"** giữ giao diện giống "Khớp" (chỉ khác màu): bỏ 2 badge *"Có sai lệch dữ liệu"* và *"Đã gửi báo cáo về nguồn"*, thay bằng **1 badge "Không khớp"** (đỏ) tương tự badge "Khớp dữ liệu".
-
-**Các file bị ảnh hưởng:**
-- `src/components/pages/reconciliation/ReconciliationDetailModal.tsx`
->>>>>>> nhalt8/kdlbtp_v1.2
 - `package.json`
 
 ---
