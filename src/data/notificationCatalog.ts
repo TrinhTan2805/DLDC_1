@@ -278,3 +278,35 @@ export const notificationCatalog: NotificationItem[] = [
     isRead: true,
   },
 ];
+
+// ── Phát thông báo hệ thống tới tất cả người dùng ────────────────────────────
+// Dùng bởi màn "Quản lý thông báo hệ thống" (Quản trị & vận hành). Vì ứng dụng
+// chỉ mô phỏng phía client (không có backend đa người dùng), "gửi cho tất cả
+// user" được mô phỏng bằng cách thêm bản ghi vào nguồn dùng chung này và báo
+// cho các nơi đang hiển thị thông báo (TopBar, màn Quản lý thông báo) cập nhật lại.
+
+type NotificationListener = (newItem: NotificationItem) => void;
+const listeners: NotificationListener[] = [];
+
+export function subscribeToNotifications(listener: NotificationListener): () => void {
+  listeners.push(listener);
+  return () => {
+    const idx = listeners.indexOf(listener);
+    if (idx !== -1) listeners.splice(idx, 1);
+  };
+}
+
+export function broadcastSystemNotification(title: string, message: string): NotificationItem {
+  const item: NotificationItem = {
+    id: `SYS-${Date.now()}`,
+    type: 'info',
+    source: 'Quản trị & vận hành › Quản lý thông báo hệ thống',
+    title,
+    message,
+    time: new Date().toLocaleString('vi-VN'),
+    isRead: false,
+  };
+  notificationCatalog.unshift(item);
+  listeners.forEach(fn => fn(item));
+  return item;
+}

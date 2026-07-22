@@ -99,6 +99,8 @@ export interface MasterDataEntity {
   createdDate: string;
   updatedDate: string;
   createdBy: string;
+  updatedBy?: string;
+  changeDescription?: string;
   databaseSystem?: string;
   canCu?: string;
   // Data source fields
