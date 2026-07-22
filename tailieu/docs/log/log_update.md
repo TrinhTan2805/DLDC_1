@@ -123,6 +123,24 @@
 
 ---
 
+## Cập nhật Lịch sử triển khai & Đồng bộ mã nguồn Git (Ngày cập nhật: 21/07/2026)
+
+**Nội dung thay đổi:**
+1. **Lịch sử triển khai (`VersionHistoryModal.tsx` & `log_update.md`):**
+   - Thêm bản ghi phiên bản mới **v2.6.17** (đầu danh sách, đánh dấu "Hiện tại") tổng hợp toàn bộ các thay đổi mới kéo về từ Git và hoàn tất merge xung đột:
+     - **Tích hợp Git & Xử lý xung đột:** Đồng bộ thành công nhánh `upstream/main` (bao gồm các cập nhật tính năng mới từ nhánh `nhalt8/kdlbtp_v1.3`), giải quyết xung đột ở các file `AttributesManagementTab.tsx`, `MasterDataScaleManagementPage.tsx`, `log_update.md`.
+     - **Hệ thống Thông báo (Notification System):** Re-design theo spec `Noti.xlsx`, hỗ trợ 4 loại (Thành công, Cảnh báo, Lỗi, Thông báo), dùng `notificationCatalog.ts` thống nhất cho TopBar và trang Quản lý thông báo.
+     - **Phân hệ Dữ liệu chủ (Master Data):** Chuẩn hóa quy trình tạo/sửa đi qua Wizard 6 bước, khóa chế độ view-only cho 4 tab cấu hình phụ, bổ sung kiểm tra trùng mã/tên thực thể, lý do từ chối bắt buộc và nút Hủy phê duyệt.
+     - **Phân hệ Cung cấp dữ liệu & Đối soát:** Cập nhật nhãn và 4 thẻ tổng quan đối soát dữ liệu, redesign bảng Lịch sử đối soát với `StatusTag` và bổ sung thẻ thống kê động theo tab tại màn Cung cấp dữ liệu theo yêu cầu.
+
+**Các file bị ảnh hưởng:**
+- `src/components/modals/VersionHistoryModal.tsx`
+- `src/components/pages/master-data/AttributesManagementTab.tsx`
+- `src/components/pages/master-data/MasterDataScaleManagementPage.tsx`
+- `tailieu/docs/log/log_update.md`
+
+---
+
 ## Cập nhật hệ thống Thông báo theo Noti.xlsx (Ngày thực hiện: 21/07/2026)
 
 Thiết kế lại theo yêu cầu PM: thông báo chỉ gồm tiêu đề + nội dung, 3 loại (Thành công/Lỗi/Thông báo), KHÔNG phân theo mức độ ưu tiên; nội dung lấy từ danh sách `Noti.xlsx` (26 mẫu thông báo phủ các phân hệ: Quản lý thu thập, Xử lý dữ liệu, Danh mục dùng chung, Dữ liệu mở, Dữ liệu chủ, Cung cấp dữ liệu).
@@ -219,6 +237,240 @@ Rà soát UI phân hệ Dữ liệu chủ theo `Usecae_DuLieuChu.xlsx` (UC485–
 - `src/data/provisionReconciliationData.ts`
 
 **Kiểm thử:** Đăng nhập, mở UC-664, xác nhận trực quan 4 thẻ, bảng lịch sử, modal chi tiết và modal lịch sử đều hiển thị đúng nhãn/cột/giá trị mới. Dev server (`npm run dev`) biên dịch không lỗi.
+
+---
+## Cập nhật giao diện (Ngày thực hiện: 09/07/2026) — Modal "Xem chi tiết thực thể": bỏ Nguồn dữ liệu/Bảng dữ liệu, thêm trình duyệt/phê duyệt
+
+**Nội dung thay đổi — Trang "Thiết lập thực thể" (`master-data/MasterDataScaleManagementPage.tsx`)**:
+- Modal "Xem chi tiết thực thể dữ liệu chủ": **bỏ** 2 trường "Nguồn dữ liệu" và "Bảng dữ liệu (DLDC)".
+- Thêm 3 nội dung giống modal "Chi tiết danh mục dùng chung" (`CategoryInfoViewModal.tsx`): **"Nội dung trình duyệt"** (nội dung khi gửi trình duyệt), và khối kết quả phê duyệt hiển thị **"Ý kiến phê duyệt"** hoặc **"Lý do từ chối"** tùy trạng thái — tái dùng component `ReviewResultCard` (import từ `category/components/modals/ReviewResultCard`) để đồng bộ giao diện.
+- Thêm field mới vào `MasterDataEntity`: `requestStatus?: 'pending'|'approved'|'rejected'`, `submissionContent?: string`, `reviewComment?: string`.
+- `handleConfirmApprove` (nút "Gửi trình duyệt") nay lưu `submissionContent` (nội dung yêu cầu) và đánh dấu `requestStatus: 'approved'`.
+- **Không** thêm nút/luồng "Từ chối" mới (theo yêu cầu) — dữ liệu "Lý do từ chối" chỉ hiển thị khi đã có sẵn trong dữ liệu (mock): thêm ví dụ minh họa 1 thực thể `requestStatus: 'approved'` (Công dân) và 1 thực thể `requestStatus: 'rejected'` (Cơ quan nhà nước).
+- Gỡ hàm `getDataSourceLabel` không còn dùng.
+- Đã build (`npm run build`) và type-check thành công, không lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/master-data/MasterDataScaleManagementPage.tsx`
+
+---
+
+## Cập nhật giao diện (Ngày thực hiện: 09/07/2026) — Đồng bộ trường "Xem chi tiết" & "Thêm mới nhanh" theo Bước 1 Wizard
+
+**Nội dung thay đổi — Trang "Thiết lập thực thể" (`master-data/MasterDataScaleManagementPage.tsx`)**:
+- Thêm interface `EntitySource` (id/name/kind/grain) + hằng số `ENTITY_SOURCE_OPTIONS`/`SOURCE_KIND_LABELS`/`SOURCE_KIND_COLORS`/`SOURCE_GRAIN_COLORS`, thêm field `sources?: EntitySource[]` vào `MasterDataEntity` — tương ứng khối "Đăng ký nguồn dữ liệu" (chip nhiều nguồn + loại/độ mịn) ở Bước 1 Wizard.
+- **Modal "Thêm mới nhanh" / "Chỉnh sửa thực thể"**: sắp xếp lại đúng thứ tự Bước 1 Wizard — Mã thực thể → Tên dữ liệu chủ → Đơn vị chủ quản → Tên cơ sở dữ liệu/Hệ thống → Loại thực thể + Phạm vi (cạnh nhau) → Mô tả đối tượng → Trạng thái vòng đời → **Đăng ký nguồn dữ liệu** (mới, dạng chip + form thêm nguồn inline) → Cấu hình nguồn dữ liệu (chỉ còn select Nguồn dữ liệu + banner thông báo, bỏ hẳn "Bảng dữ liệu"/"Cột dữ liệu" chọn tay và khối "Chiến lược cập nhật" — vì Bước 1 Wizard hiện tại không còn các phần này, đã chuyển sang Bước 2/3).
+- **Modal "Xem chi tiết thực thể dữ liệu chủ"**: sắp xếp lại theo cùng thứ tự trên; thêm hiển thị danh sách "Đăng ký nguồn dữ liệu" dạng chip.
+- Tiện sửa 2 lỗi dữ liệu có từ trước: `handleSubmit` (tạo mới qua form nhanh) trước đây **không lưu** `dataSource` đã chọn; `onSubmit` của Wizard 6 bước trước đây **không lưu** `systemName` — nay cả hai đã được lưu đầy đủ.
+- Thêm dữ liệu mẫu `sources` cho thực thể "Bộ dữ liệu chủ Công dân" (Hộ tịch, CCCD) để minh họa hiển thị.
+- Đã build (`npm run build`) và type-check thành công, không lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/master-data/MasterDataScaleManagementPage.tsx`
+
+---
+
+## Cập nhật giao diện (Ngày thực hiện: 09/07/2026) — Đồng bộ combobox chọn thực thể ở Quy tắc hợp nhất & Định danh duy nhất
+
+**Nội dung thay đổi — Trang "Thiết lập Master Data" (`master-data/MergeRulesManagementTab.tsx`, `master-data/UniqueIdentifierRulesTab.tsx`)**:
+- Đồng bộ danh sách `mockEntities` (thực thể dữ liệu chủ) trong 2 tab này khớp với tab "Quản lý thuộc tính dữ liệu chủ" (`AttributesManagementTab.tsx`) — cả 3 tab nay cùng hiển thị đủ 5 thực thể: MD-CITIZEN-001, MD-ORG-001, MD-DOC-001, **MD-ADMIN-001** (Đơn vị hành chính), **MD-AGENCY-001** (Cơ quan nhà nước). Trước đó `MergeRulesManagementTab` chỉ có 3 thực thể, `UniqueIdentifierRulesTab` có 2 thực thể lệch tên/mã (MD-AUTH-001, MD-ADDR-001) so với tab thuộc tính.
+- Đổi ô "Xem theo thực thể dữ liệu chủ" ở cả 2 tab từ `<select>` thường sang **combobox có ô tìm kiếm theo mã hoặc tên** (đóng khi click ra ngoài, dấu check thực thể đang chọn) — cùng UI/UX với tab "Quản lý thuộc tính dữ liệu chủ".
+- Đã build (`npm run build`) thành công, không lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/master-data/MergeRulesManagementTab.tsx`
+- `src/components/pages/master-data/UniqueIdentifierRulesTab.tsx`
+
+---
+
+## Cập nhật giao diện (Ngày thực hiện: 09/07/2026) — Bước 4, đổi 2 khối chọn ở tab "Kiểm thử" sang dropdown
+
+**Nội dung thay đổi — Wizard "Tạo mới dữ liệu chủ" (Bước 4 — tab Kiểm thử)** (`master-data/MasterDataWizard.tsx`):
+- Đổi 2 khối thẻ chọn "Giới hạn số lượng bản ghi" và "Chiến lược lấy mẫu" (thêm ở mục ngay dưới) từ dạng thẻ (card) sang dạng **dropdown** (`<select>`), xếp cạnh nhau 2 cột.
+- Mỗi dropdown hiển thị **ghi chú/mô tả ngay dưới giá trị đang chọn** (mô tả "dùng khi nào" cho mức số lượng; mô tả cách lấy mẫu cho chiến lược).
+- Dropdown "Khoảng thời gian lấy mẫu" (chỉ hiện khi chọn chiến lược "Lấy theo khoảng thời gian") vẫn giữ nguyên, đặt trong khối "Chiến lược lấy mẫu".
+- Đã build (`npm run build`) thành công, không lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/master-data/MasterDataWizard.tsx`
+
+---
+
+## Cập nhật giao diện (Ngày thực hiện: 09/07/2026) — Bước 4, thiết kế lại luồng tab "Kiểm thử"
+
+**Nội dung thay đổi — Wizard "Tạo mới dữ liệu chủ" (Bước 4 — tab Kiểm thử)** (`master-data/MasterDataWizard.tsx`):
+- Bỏ dropdown "Chọn dữ liệu mẫu" cố định (`WIZARD_MOCK_SAMPLES`) — thay bằng luồng 2 bước trước khi chạy thử:
+  1. **Giới hạn số lượng bản ghi** — 3 mức chọn dạng thẻ: Nhanh (100 — kiểm tra logic cơ bản), Tiêu chuẩn (500 — kiểm tra tỷ lệ khớp), Toàn diện (2.000 — kiểm tra trước khi lưu chính thức) (`TEST_SIZE_TIERS`, state `testSizeTier`).
+  2. **Chiến lược lấy mẫu** — 3 lựa chọn dạng thẻ: Lấy ngẫu nhiên, Lấy có chủ đích (bản ghi khả năng trùng cao), Lấy theo khoảng thời gian (kèm dropdown chọn khoảng thời gian: 30/90/180 ngày gần nhất) (`SAMPLING_STRATEGIES`, `TEST_TIME_RANGE_OPTIONS`, state `samplingStrategy`/`testTimeRange`).
+- Nút "Chạy mô phỏng" chỉ bật khi đã chọn **cả 2** mục trên (`canRunTest`); chọn lại bất kỳ mục nào sẽ reset kết quả kiểm thử cũ (`testRun` về `false`).
+- Khối kết quả (4 thẻ số liệu + bảng "Nghi ngờ cần xem lại") giữ nguyên như trước — vẫn là số liệu mock tĩnh, minh họa giao diện.
+- Đã build (`npm run build`) thành công, không lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/master-data/MasterDataWizard.tsx`
+
+---
+
+## Cập nhật giao diện (Ngày thực hiện: 09/07/2026) — Bước 4, bỏ bắt buộc khai báo hard-block
+
+**Nội dung thay đổi — Wizard "Tạo mới dữ liệu chủ" (Bước 4 — validate `handleNext`)** (`master-data/MasterDataWizard.tsx`):
+- Bỏ check chặn "Tiếp theo" khi chưa khai báo trường hard-block (`mergeConfig.hardBlockFields.length < 1`) — người dùng có thể qua bước tiếp theo mà không cần khai báo hard-block.
+- Đã build (`npm run build`) thành công, không lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/master-data/MasterDataWizard.tsx`
+
+---
+
+## Cập nhật giao diện (Ngày thực hiện: 09/07/2026) — Bước 4, đổi tên tiêu đề cột tab "Hợp nhất giá trị"
+
+**Nội dung thay đổi — Wizard "Tạo mới dữ liệu chủ" (Bước 4 — Quy tắc hợp nhất, tab Hợp nhất giá trị)** (`master-data/MasterDataWizard.tsx`):
+- Đổi tiêu đề cột "Xử lý null" → **"Xử lý rỗng"** (bỏ từ tiếng Anh "null").
+- Đổi tiêu đề cột "Khi hết vẫn trống" → **"Xử lý khi vẫn trống"**.
+- Đã build (`npm run build`) thành công, không lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/master-data/MasterDataWizard.tsx`
+
+---
+
+## Cập nhật giao diện (Ngày thực hiện: 09/07/2026) — Bước 4, bỏ icon tooltip cạnh dropdown "Thuật toán"
+
+**Nội dung thay đổi — Wizard "Tạo mới dữ liệu chủ" (Bước 4 — Quy tắc hợp nhất, tab So khớp)** (`master-data/MasterDataWizard.tsx`):
+- Theo yêu cầu, bỏ hẳn icon chấm than vòng tròn + tooltip cạnh dropdown "Thuật toán" (đã thêm ở mục ngay trên). Chỉ giữ lại nhãn tiếng Việt đã rút gọn (không tên tiếng Anh).
+- Gỡ hằng số `FUZZY_ALGORITHM_DESCRIPTIONS` không còn dùng.
+- Đã build (`npm run build`) thành công, không lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/master-data/MasterDataWizard.tsx`
+
+---
+
+## Cập nhật giao diện (Ngày thực hiện: 09/07/2026) — Bước 4, cột "Thuật toán" trong Quy tắc so khớp
+
+**Nội dung thay đổi — Wizard "Tạo mới dữ liệu chủ" (Bước 4 — Quy tắc hợp nhất, tab So khớp)** (`master-data/MasterDataWizard.tsx`):
+- Nhãn các giá trị dropdown "Thuật toán" (`FUZZY_ALGORITHMS`) bỏ tên tiếng Anh: "Jaro-Winkler (tương đồng chuỗi)" → "Tương đồng chuỗi", "Levenshtein (khoảng cách chỉnh sửa)" → "Khoảng cách chỉnh sửa", "Ngữ âm (phiên âm tên)" → "Phiên âm tên".
+- Thêm icon chấm than vòng tròn (`AlertCircle`) **cạnh dropdown "Thuật toán" ở từng dòng** (không phải ở tiêu đề cột) — hover vào hiện tooltip giải thích đúng theo **giá trị đang chọn** của dropdown đó (`FUZZY_ALGORITHM_DESCRIPTIONS[rule.algorithm]`).
+- Đã build (`npm run build`) thành công, không lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/master-data/MasterDataWizard.tsx`
+
+---
+
+## Cập nhật giao diện (Ngày thực hiện: 09/07/2026) — Bước 3, hoàn tác lọc kiểu dữ liệu ở "Cột mốc thời gian"
+
+**Nội dung thay đổi — Wizard "Tạo mới dữ liệu chủ" (Bước 3 — khối "Gom nguồn 1:n")** (`master-data/MasterDataWizard.tsx`):
+- Theo yêu cầu, hoàn tác thay đổi ở mục ngay trên (lọc theo kiểu date/datetime) — dropdown "Cột mốc thời gian" trở lại hiển thị **tất cả** trường đã chia sẻ của nguồn đó, không kiểm tra kiểu dữ liệu nữa.
+- Gỡ biến `timeFieldsForSource` không còn dùng.
+- Đã build (`npm run build`) thành công, không lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/master-data/MasterDataWizard.tsx`
+
+---
+
+## Cập nhật giao diện (Ngày thực hiện: 09/07/2026) — Bước 3, "Cột mốc thời gian" chỉ cho chọn trường kiểu thời gian
+
+**Nội dung thay đổi — Wizard "Tạo mới dữ liệu chủ" (Bước 3 — khối "Gom nguồn 1:n")** (`master-data/MasterDataWizard.tsx`):
+- Dropdown "Cột mốc thời gian" trước đây cho chọn tất cả trường đã chia sẻ của nguồn (kể cả trường kiểu chuỗi như "Loại hình") — nay lọc lại chỉ hiển thị các trường có kiểu dữ liệu **Ngày (date)** hoặc **Ngày giờ (datetime)** (`timeFieldsForSource`).
+- Đã build (`npm run build`) thành công, không lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/master-data/MasterDataWizard.tsx`
+
+---
+
+## Cập nhật giao diện (Ngày thực hiện: 09/07/2026) — Bước 3, lưu "Chọn trường dữ liệu chia sẻ" riêng theo từng nguồn
+
+**Nội dung thay đổi — Wizard "Tạo mới dữ liệu chủ" (Bước 3 — chế độ "Chọn trường từ Kho DLDC")** (`master-data/MasterDataWizard.tsx`):
+- Trước đây `dldcFieldRows` là 1 state duy nhất — mỗi lần bấm chip chọn nguồn khác ở "Nguồn dữ liệu chính" sẽ **ghi đè mất** lựa chọn trường của nguồn đang xem trước đó. Nay đổi sang lưu theo `Record<sourceId, DldcFieldRow[]>` (`dldcFieldRowsBySource` + `activeSourceId`) — mỗi nguồn giữ riêng lựa chọn "Chia sẻ" của nó, chuyển qua lại giữa các nguồn không làm mất dữ liệu đã chọn.
+- Bảng **"Ánh xạ cột nguồn → thuộc tính"** (qua `availableFields`/`sourceEntityFields`) nay gộp trường đã chọn ("Chia sẻ") từ **tất cả nguồn** đã cấu hình (không chỉ nguồn đang xem), khử trùng theo tên trường (`allSharedDldcFields`) — danh sách thuộc tính ổn định, không đổi khi chuyển qua xem nguồn khác.
+- Bảng **"Gom nguồn 1:n"**: mỗi nguồn 1:n lấy trực tiếp trường đã chọn theo `dldcFieldRowsBySource[src.id]` — hiển thị đúng trường của bảng 1:n tương ứng theo từng nguồn.
+- `handleRemoveSource` (Bước 1) dọn thêm dữ liệu `dldcFieldRowsBySource` của nguồn bị xóa; nếu nguồn đang xem bị xóa thì reset `activeSourceId`/`dldcDatabase`.
+- Đã build (`npm run build`) thành công, không lỗi. (TS báo 1 lỗi type có từ trước ở dòng review Bước 6 so sánh `dataSource === 'api'`, không liên quan tới thay đổi lần này.)
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/master-data/MasterDataWizard.tsx`
+
+---
+
+## Cập nhật giao diện (Ngày thực hiện: 09/07/2026) — Bước 3, bỏ "Sử dụng liên kết bảng (Join)"
+
+**Nội dung thay đổi — Wizard "Tạo mới dữ liệu chủ" (Bước 3 — chế độ "Chọn trường từ Kho DLDC")** (`master-data/MasterDataWizard.tsx`):
+- Bỏ toggle **"Sử dụng liên kết bảng (Join)"** ở header khối "Cấu hình nguồn dữ liệu" và toàn bộ khối "Bảng liên kết bổ sung" (thêm/xóa bảng join, chọn kiểu JOIN, chọn điều kiện liên kết) — nguồn dữ liệu ở chế độ Kho DLDC nay chỉ còn 1 bảng chính duy nhất (theo nguồn đã chọn ở khối "Nguồn dữ liệu chính").
+- Gỡ state `useJoin`, `dldcJoins` và các handler `handleDldcAddJoin`, `handleDldcJoinTableChange`, `handleDldcRemoveJoin`; gỡ interface `DldcJoin`; gỡ field `sourceJoinId` khỏi `DldcFieldRow` (không còn ý nghĩa khi không có join).
+- `availableSources` (dùng cho Bước 4) bỏ nhánh gộp danh sách bảng join, chỉ còn bảng chính.
+- Đã build (`npm run build`) thành công, không lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/master-data/MasterDataWizard.tsx`
+
+---
+
+## Cập nhật giao diện (Ngày thực hiện: 09/07/2026) — Bước 3, ẩn "Gom nguồn 1:n" ở chế độ nhập thủ công
+
+**Nội dung thay đổi — Wizard "Tạo mới dữ liệu chủ" (Bước 3)** (`master-data/MasterDataWizard.tsx`):
+- Khối "Gom nguồn 1:n" trước đây hiển thị bất kể chế độ tạo thuộc tính, nay chỉ hiển thị khi đang ở chế độ **"Chọn trường từ Kho DLDC"** (`wizardData.dataSource === 'dldc'`) — ẩn hoàn toàn khi ở chế độ **"Tự thêm mới từng trường"** (manual), vì chế độ nhập tay không có khái niệm nhiều bản ghi nguồn cần gom.
+- Đơn giản hóa `fieldsForSource` (bỏ nhánh fallback `availableFields` cho manual mode, nay không còn được gọi tới trong nhánh này).
+- Đã build (`npm run build`) thành công, không lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/master-data/MasterDataWizard.tsx`
+
+---
+
+## Cập nhật giao diện (Ngày thực hiện: 09/07/2026) — Bước 3, mục Gom nguồn 1:n
+
+**Nội dung thay đổi — Wizard "Tạo mới dữ liệu chủ" (Bước 3 — khối "Gom nguồn 1:n")** (`master-data/MasterDataWizard.tsx`):
+- Trước đây, với mỗi nguồn 1:n, bảng quy tắc gom hiển thị **toàn bộ** `availableFields` (tất cả trường đã chọn ở "Chọn trường dữ liệu chia sẻ", gồm cả trường của bảng khác/nguồn khác) — nay lọc lại chỉ hiển thị các trường thuộc **đúng bảng của nguồn 1:n đó** (ánh xạ qua `SOURCE_NAME_TO_DLDC_TABLE`, so khớp `tableId` trong `dldcFieldRows`).
+- Cột "Cột mốc thời gian" cũng đổi theo: chỉ chọn trong các trường của chính bảng đó (thay vì danh sách mock `MOCK_SOURCE_COLUMNS` không liên quan).
+- Nếu nguồn 1:n chưa có trường nào được chọn "Chia sẻ" ở bảng của nó → hiển thị thông báo hướng dẫn quay lại bảng "Chọn trường dữ liệu chia sẻ".
+- Gỡ hằng số `MOCK_SOURCE_COLUMNS` (không còn nơi nào dùng).
+- Đã build (`npm run build`) thành công, không lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/master-data/MasterDataWizard.tsx`
+
+---
+
+## Cập nhật giao diện (Ngày thực hiện: 09/07/2026) — Bước 3, mục Ánh xạ cột nguồn → thuộc tính
+
+**Nội dung thay đổi — Wizard "Tạo mới dữ liệu chủ" (Bước 3 — khối "Ánh xạ cột nguồn → thuộc tính")** (`master-data/MasterDataWizard.tsx`):
+- Dropdown chọn cột nguồn cho từng ô ánh xạ (thuộc tính × nguồn) trước đây dùng danh sách mock cố định `MOCK_SOURCE_COLUMNS` (không liên quan dữ liệu thật) — nay đổi sang hiển thị đúng danh sách các trường đã chọn ("Chia sẻ") ở bảng "Chọn trường dữ liệu chia sẻ" (gồm cả bảng chính và các bảng liên kết/Join) thông qua `availableFields`.
+- `MOCK_SOURCE_COLUMNS` sau đó bị gỡ bỏ hoàn toàn ở lần cập nhật kế tiếp (xem mục "Bước 3, mục Gom nguồn 1:n" bên trên).
+- Đã build (`npm run build`) thành công, không lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/master-data/MasterDataWizard.tsx`
+
+---
+
+## Cập nhật giao diện (Ngày thực hiện: 09/07/2026) — Bước 3, mục Cấu hình nguồn dữ liệu
+
+**Nội dung thay đổi — Wizard "Tạo mới dữ liệu chủ" (Bước 3 — Tạo thuộc tính, chế độ "Chọn trường từ Kho DLDC")** (`master-data/MasterDataWizard.tsx`):
+- Bỏ 2 dropdown **"Cơ sở dữ liệu"** và **"Bảng dữ liệu chính"** (không cho người dùng chọn tự do CSDL/bảng ở bước này nữa).
+- Thay bằng danh sách **"Nguồn dữ liệu chính"** dạng chip, liệt kê trực tiếp các nguồn đã đăng ký ở Bước 1 (mục "Đăng ký nguồn dữ liệu") — người dùng bấm chọn 1 nguồn để nạp bảng trường tương ứng.
+- Thêm bảng ánh xạ `SOURCE_NAME_TO_DLDC_TABLE` (tên nguồn Bước 1 → CSDL + bảng chính tương ứng trong Kho DLDC) và handler `handleSelectRegisteredSource` để tự nạp `dldcDatabase`/`dldcTable`/danh sách trường khi chọn nguồn.
+- Gỡ 2 handler cũ không còn dùng: `handleDldcDatabaseChange`, `handleDldcTableChange`.
+- Giữ nguyên bảng "Chọn trường dữ liệu chia sẻ" và khối "Bảng liên kết bổ sung (Join)" — cả hai vẫn hoạt động dựa trên `dldcDatabase`/`dldcTable` được nạp tự động từ nguồn đã chọn.
+- Nếu Bước 1 chưa đăng ký nguồn nào, hiển thị cảnh báo yêu cầu quay lại Bước 1.
+- Đã build (`npm run build`) thành công, không lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/master-data/MasterDataWizard.tsx`
+
+---
+
+## Cập nhật giao diện (Ngày thực hiện: 09/07/2026)
+
+**Nội dung thay đổi — Wizard "Tạo mới dữ liệu chủ" (Bước 1)** (`master-data/MasterDataWizard.tsx`):
+- Sắp xếp lại thứ tự trường: **Đơn vị chủ quản** và **Tên cơ sở dữ liệu / Hệ thống** chuyển lên ngay dưới trường **Tên dữ liệu chủ** (trước đây nằm sau khối Loại thực thể/Phạm vi và Mô tả đối tượng).
+- Thứ tự mới: Tên dữ liệu chủ → Đơn vị chủ quản → Tên cơ sở dữ liệu/Hệ thống → Loại thực thể + Phạm vi sử dụng → Mô tả đối tượng.
+- Không thay đổi logic, chỉ đổi vị trí hiển thị (thuần JSX reorder).
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/master-data/MasterDataWizard.tsx`
 
 ---
 
@@ -2866,16 +3118,37 @@ Redesign thanh tìm kiếm & bộ lọc tại tab **Kiểm tra & Phê duyệt** 
 
 ---
 
-## Cập nhật Lịch sử triển khai tổng hợp các thay đổi mới kéo về từ Git (Ngày cập nhật: 06/07/2026)
+## Tự động chọn thực thể chủ đầu tiên trong cấu hình Quy tắc định danh và Quy tắc hợp nhất (Ngày cập nhật: 10/07/2026)
 
 **Nội dung thay đổi:**
-1. **Lịch sử triển khai (`VersionHistoryModal.tsx`):**
-   - Thêm bản ghi phiên bản mới **v2.7.0** (đầu danh sách, đánh dấu "Hiện tại") tổng hợp toàn bộ các thay đổi mới kéo về từ Git bao gồm:
-     - **Phân hệ Dữ liệu chủ (Master Data):** Cập nhật các tab cấu hình (Attributes, Relationships, Merge Rules, Unique Identifier Rules), cải tiến Wizard, Tab Phê duyệt, và trang cập nhật/chi tiết bản ghi.
-     - **Phân hệ Dữ liệu mở (Open Data):** Điều chỉnh màn hình Danh mục dữ liệu mở, danh sách yêu cầu công bố và trang thiết lập (tích hợp luồng gửi phê duyệt và nội dung trình duyệt).
-     - **Phân hệ Danh mục dùng chung (Category Setup):** Đồng bộ giao diện phê duyệt danh mục dùng chung và thêm các modal phê duyệt đi kèm.
+1. **Thiết lập mặc định cho Quy tắc định danh duy nhất:**
+   - Cập nhật state `selectedEntityFilter` trong `UniqueIdentifierRulesTab.tsx` mặc định khởi tạo là `'1'` (mã thực thể chủ đầu tiên - Bộ dữ liệu chủ Công dân) thay vì chuỗi rỗng `''`.
+   - Giúp hệ thống tự động tải và hiển thị quy tắc định danh của thực thể đầu tiên ngay khi tải trang, tương thích hoàn toàn với hành vi của tab Thiết lập thuộc tính.
+2. **Thiết lập mặc định cho Quy tắc hợp nhất dữ liệu:**
+   - Cập nhật state `selectedEntityFilter` trong `MergeRulesManagementTab.tsx` mặc định khởi tạo là `'1'` (mã thực thể chủ đầu tiên) thay vì chuỗi rỗng `''`.
+   - Loại bỏ màn hình trống yêu cầu chọn thực thể chủ trước khi xem, tự động hiển thị cấu hình của thực thể đầu tiên ngay khi người dùng chuyển sang tab này.
+3. **Kiểm tra biên dịch & Đóng gói:**
+   - Thực hiện đóng gói dự án (`npm run build`) thành công hoàn toàn mà không phát sinh lỗi.
 
 **Các file bị ảnh hưởng:**
-- `src/components/modals/VersionHistoryModal.tsx`
+- `src/components/pages/master-data/UniqueIdentifierRulesTab.tsx`
+- `src/components/pages/master-data/MergeRulesManagementTab.tsx`
 
+---
 
+## Bổ sung nút Xem chi tiết và Modal hiển thị cấu hình cho thuộc tính đồng bộ kho DLDC (Ngày cập nhật: 10/07/2026)
+
+**Nội dung thay đổi:**
+1. **Bổ sung nút Thao tác "Xem chi tiết":**
+   - Tại bảng danh sách thuộc tính của tab *Thiết lập thuộc tính* (`AttributesManagementTab.tsx`), thêm icon **Xem chi tiết** (`Eye` từ `lucide-react`) vào trước các nút Sửa/Xóa đối với cả thực thể có nguồn dữ liệu đồng bộ kho DLDC (`dataSource === 'dldc'`) và thực thể có nguồn tự cập nhật thủ công (`dataSource === 'manual'`).
+2. **Cập nhật Modal chi tiết:**
+   - Lược bỏ phần **Cấu hình nguồn dữ liệu** (hộp màu xanh chứa thông tin CSDL và nguồn dữ liệu chính) ở đầu modal theo yêu cầu.
+   - Điều chỉnh bảng **Các trường dữ liệu chia sẻ (Field Selection)**: loại bỏ cột check **Chia sẻ**, thay bằng cột **Bảng gốc** hiển thị tên tiếng Việt hiển thị (display name) của bảng dữ liệu được chọn (ví dụ: "Hồ sơ công dân", "Thông tin CCCD",...) thay cho tên mã bảng gốc. Đối với nguồn tự cập nhật, cột này hiển thị giá trị là "Nhập thủ công".
+   - Bổ sung bảng **Ánh xạ cột nguồn → thuộc tính** dạng tĩnh hiển thị chi tiết quan hệ ánh xạ cột cho từng nguồn tương ứng (bao gồm cả nguồn nhập thủ công).
+   - Bổ sung phần **Gom nguồn 1:n** hiển thị chi tiết các rule gom dữ liệu (ruleType) và cột mốc thời gian (timeColumn) đối với các nguồn có độ mịn 1:n.
+   - Hỗ trợ đổi tiêu đề và mô tả của modal phù hợp động theo loại nguồn của thực thể (đồng bộ hoặc tự cập nhật).
+3. **Kiểm tra biên dịch & Đóng gói:**
+   - Chạy lệnh `npm run build` thành công hoàn tất không có lỗi.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/master-data/AttributesManagementTab.tsx`
