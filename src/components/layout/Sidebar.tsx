@@ -640,6 +640,11 @@ const menuItems: MenuItem[] = [
         label: "Quản lý thông báo",
       },
       {
+        id: "admin-notifications",
+        icon: Bell,
+        label: "Quản lý thông báo hệ thống",
+      },
+      {
         id: "user-guide",
         icon: HelpCircle,
         label: "Hướng dẫn sử dụng",

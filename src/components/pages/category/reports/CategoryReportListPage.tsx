@@ -103,136 +103,130 @@ export function CategoryReportListPage() {
         />
       )}
 
-      {/* Control Panel */}
-      <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 shadow-sm relative z-30">
-        <div className="flex flex-col md:flex-row gap-6 justify-between items-start md:items-center">
-          <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Control Panel - form chung */}
+      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm relative z-30">
+        <div className="flex flex-wrap items-end gap-3">
 
-            {/* Multi-select Đơn vị quản lý */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Đơn vị quản lý</label>
-              <div className="relative" ref={agencyRef}>
-                <button
-                  type="button"
-                  onClick={() => setShowAgencyDropdown(prev => !prev)}
-                  className={`w-full px-4 py-2.5 border rounded-xl text-sm bg-white text-left flex items-center justify-between gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
-                    showAgencyDropdown ? 'border-blue-400 ring-2 ring-blue-500/20' : 'border-slate-300 hover:border-slate-400'
-                  }`}
-                >
-                  <span className={`truncate ${selectedAgencies.length === 0 ? 'text-slate-500' : 'text-slate-800 font-medium'}`}>
-                    {agencyDisplayText()}
-                  </span>
-                  <div className="flex items-center gap-1 shrink-0">
-                    {selectedAgencies.length > 0 && (
-                      <span
-                        onClick={(e) => { e.stopPropagation(); setSelectedAgencies([]); }}
-                        className="w-4 h-4 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center cursor-pointer transition-colors"
-                      >
-                        <X className="w-2.5 h-2.5 text-slate-600" />
-                      </span>
-                    )}
-                    <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${showAgencyDropdown ? 'rotate-180' : ''}`} />
-                  </div>
-                </button>
+          {/* Multi-select Đơn vị quản lý */}
+          <div className="flex-1 min-w-[220px]">
+            <label className="block text-[12px] text-slate-500 mb-1 font-medium">Đơn vị quản lý</label>
+            <div className="relative" ref={agencyRef}>
+              <button
+                type="button"
+                onClick={() => setShowAgencyDropdown(prev => !prev)}
+                className={`w-full px-3 py-2 border rounded-lg text-[13px] bg-white text-left flex items-center justify-between gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  showAgencyDropdown ? 'border-blue-400 ring-2 ring-blue-500/20' : 'border-slate-200 hover:border-slate-300'
+                }`}
+              >
+                <span className={`truncate ${selectedAgencies.length === 0 ? 'text-slate-500' : 'text-slate-800 font-medium'}`}>
+                  {agencyDisplayText()}
+                </span>
+                <div className="flex items-center gap-1 shrink-0">
+                  {selectedAgencies.length > 0 && (
+                    <span
+                      onClick={(e) => { e.stopPropagation(); setSelectedAgencies([]); }}
+                      className="w-4 h-4 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center cursor-pointer transition-colors"
+                    >
+                      <X className="w-2.5 h-2.5 text-slate-600" />
+                    </span>
+                  )}
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${showAgencyDropdown ? 'rotate-180' : ''}`} />
+                </div>
+              </button>
 
-                {showAgencyDropdown && (
-                  <div className="absolute left-0 top-full mt-1.5 w-full bg-white border border-slate-200 rounded-xl shadow-2xl z-40 overflow-hidden">
-                    {/* Chọn tất cả */}
+              {showAgencyDropdown && (
+                <div className="absolute left-0 top-full mt-1.5 w-full bg-white border border-slate-200 rounded-xl shadow-2xl z-40 overflow-hidden">
+                  {/* Chọn tất cả */}
+                  <button
+                    type="button"
+                    onClick={toggleAll}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors border-b border-slate-100 text-sm font-medium text-slate-700"
+                  >
+                    <span className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
+                      selectedAgencies.length === AGENCY_OPTIONS.length
+                        ? 'bg-blue-600 border-blue-600'
+                        : selectedAgencies.length > 0
+                        ? 'bg-blue-100 border-blue-400'
+                        : 'border-slate-300'
+                    }`}>
+                      {selectedAgencies.length === AGENCY_OPTIONS.length && <Check className="w-3 h-3 text-white" />}
+                      {selectedAgencies.length > 0 && selectedAgencies.length < AGENCY_OPTIONS.length && (
+                        <span className="w-2 h-0.5 bg-blue-600 rounded" />
+                      )}
+                    </span>
+                    Tất cả đơn vị
+                  </button>
+
+                  {AGENCY_OPTIONS.map(opt => (
                     <button
+                      key={opt.value}
                       type="button"
-                      onClick={toggleAll}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors border-b border-slate-100 text-sm font-medium text-slate-700"
+                      onClick={() => toggleAgency(opt.value)}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors text-sm text-slate-700"
                     >
                       <span className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
-                        selectedAgencies.length === AGENCY_OPTIONS.length
+                        selectedAgencies.includes(opt.value)
                           ? 'bg-blue-600 border-blue-600'
-                          : selectedAgencies.length > 0
-                          ? 'bg-blue-100 border-blue-400'
                           : 'border-slate-300'
                       }`}>
-                        {selectedAgencies.length === AGENCY_OPTIONS.length && <Check className="w-3 h-3 text-white" />}
-                        {selectedAgencies.length > 0 && selectedAgencies.length < AGENCY_OPTIONS.length && (
-                          <span className="w-2 h-0.5 bg-blue-600 rounded" />
-                        )}
+                        {selectedAgencies.includes(opt.value) && <Check className="w-3 h-3 text-white" />}
                       </span>
-                      Tất cả đơn vị
-                    </button>
-
-                    {AGENCY_OPTIONS.map(opt => (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        onClick={() => toggleAgency(opt.value)}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors text-sm text-slate-700"
-                      >
-                        <span className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
-                          selectedAgencies.includes(opt.value)
-                            ? 'bg-blue-600 border-blue-600'
-                            : 'border-slate-300'
-                        }`}>
-                          {selectedAgencies.includes(opt.value) && <Check className="w-3 h-3 text-white" />}
-                        </span>
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Thời gian */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Thời gian tạo (Năm)</label>
-              <select
-                title="Thời gian tạo"
-                value={dateRange}
-                onChange={(e: ChangeEvent<HTMLSelectElement>) => setDateRange(e.target.value)}
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 focus:outline-none"
-              >
-                <option value="all">Toàn thời gian</option>
-                <option value="2024">Năm 2024</option>
-                <option value="2023">Năm 2023</option>
-              </select>
-            </div>
-
-            <div className="flex items-end">
-              <button
-                type="button"
-                onClick={handleSearch}
-                className="w-full px-4 py-2.5 bg-slate-800 text-white font-medium rounded-xl hover:bg-slate-900 active:scale-95 transition-all flex items-center justify-center gap-2"
-              >
-                <Search className="w-4 h-4" />
-                Truy xuất dữ liệu
-              </button>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 w-full md:w-auto h-full pt-6 md:pt-0">
-            <div className="relative" ref={exportRef}>
-              <button
-                type="button"
-                onClick={() => setShowExportMenu(prev => !prev)}
-                className="px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-medium transition-colors flex items-center gap-2 shadow-sm"
-              >
-                <FileText className="w-4 h-4" />
-                Xuất File
-                <ChevronDown className="w-4 h-4" />
-              </button>
-              {showExportMenu && (
-                <div className="absolute right-0 mt-2 w-44 rounded-xl border border-slate-200 bg-white shadow-xl z-50 overflow-hidden">
-                  {['Excel', 'PDF', 'CSV'].map(fmt => (
-                    <button
-                      key={fmt}
-                      type="button"
-                      onClick={() => handleExportFile(fmt)}
-                      className="w-full text-left px-4 py-2.5 hover:bg-slate-50 text-sm text-slate-700 transition-colors"
-                    >
-                      {fmt}
+                      {opt.label}
                     </button>
                   ))}
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Thời gian */}
+          <div className="min-w-[170px]">
+            <label className="block text-[12px] text-slate-500 mb-1 font-medium">Thời gian tạo (Năm)</label>
+            <select
+              title="Thời gian tạo"
+              value={dateRange}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) => setDateRange(e.target.value)}
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            >
+              <option value="all">Toàn thời gian</option>
+              <option value="2024">Năm 2024</option>
+              <option value="2023">Năm 2023</option>
+            </select>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleSearch}
+            className="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors font-medium text-[13px] shadow-sm shrink-0 active:scale-95"
+          >
+            <Search className="w-4 h-4" />
+            Truy xuất dữ liệu
+          </button>
+
+          <div className="relative shrink-0" ref={exportRef}>
+            <button
+              type="button"
+              onClick={() => setShowExportMenu(prev => !prev)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors font-medium text-[13px] shadow-sm"
+            >
+              <FileText className="w-4 h-4" />
+              Xuất File
+              <ChevronDown className="w-4 h-4" />
+            </button>
+            {showExportMenu && (
+              <div className="absolute right-0 mt-2 w-44 rounded-xl border border-slate-200 bg-white shadow-xl z-50 overflow-hidden">
+                {['Excel', 'PDF', 'CSV'].map(fmt => (
+                  <button
+                    key={fmt}
+                    type="button"
+                    onClick={() => handleExportFile(fmt)}
+                    className="w-full text-left px-4 py-2.5 hover:bg-slate-50 text-sm text-slate-700 transition-colors"
+                  >
+                    {fmt}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

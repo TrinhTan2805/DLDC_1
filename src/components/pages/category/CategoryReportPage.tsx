@@ -1,153 +1,46 @@
 import { useState, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Download, SlidersHorizontal, X, ChevronDown, Eye } from 'lucide-react';
+import { Search, Download, ChevronDown, Eye } from 'lucide-react';
+import { LifecycleStatus, ScopeType } from './categoryTypes';
+import { lifecycleLabels, scopeLabels } from './categoryConstants';
 
-const mockDatasets = [
-  {
-    id: 'category-a-1',
-    name: 'Dữ liệu Danh mục giới tính',
-    structureCount: 4,
-    relationshipCount: 1,
-    agency: 'Cục Hộ tịch, quốc tịch, chứng thực',
-    format: 'JSON',
-    license: 'CC BY 4.0',
-    approval: 'approved',
-    publicStatus: 'published',
-    scope: 'national',
-    dataSource: 'manual',
-    currentVersion: 'v1.0',
-    publishedDate: '2024-01-10',
-  },
-  {
-    id: 'category-a-2',
-    name: 'Dữ liệu Danh mục và mã các dân tộc Việt Nam',
-    structureCount: 54,
-    relationshipCount: 2,
-    agency: 'Ủy ban Dân tộc',
-    format: 'Excel',
-    license: 'ODC-BY',
-    approval: 'approved',
-    publicStatus: 'published',
-    scope: 'national',
-    dataSource: 'dldc',
-    currentVersion: 'v2.0',
-    publishedDate: '2024-02-15',
-  },
-  {
-    id: 'category-a-3',
-    name: 'Dữ liệu Danh mục và mã Quốc gia, Quốc tịch',
-    structureCount: 250,
-    relationshipCount: 3,
-    agency: 'Bộ Ngoại giao',
-    format: 'CSV',
-    license: 'CC BY 4.0',
-    approval: 'approved',
-    publicStatus: 'published',
-    scope: 'national',
-    dataSource: 'dldc',
-    currentVersion: 'v1.2',
-    publishedDate: '2024-03-01',
-  },
-  {
-    id: 'category-a-4',
-    name: 'Dữ liệu Danh mục và mã các Tôn giáo',
-    structureCount: 16,
-    relationshipCount: 0,
-    agency: 'Ban Tôn giáo Chính phủ',
-    format: 'JSON',
-    license: 'ODbL',
-    approval: 'pending',
-    publicStatus: 'unpublished',
-    scope: 'national',
-    dataSource: 'manual',
-    currentVersion: 'v1.0',
-    publishedDate: '2024-03-20',
-  },
-  {
-    id: 'category-a-5',
-    name: 'Dữ liệu Danh mục cơ quan',
-    structureCount: 45,
-    relationshipCount: 4,
-    agency: 'Bộ Tư pháp',
-    format: 'JSON',
-    license: 'CC BY 4.0',
-    approval: 'approved',
-    publicStatus: 'published',
-    scope: 'ministry',
-    dataSource: 'manual',
-    currentVersion: 'v3.1',
-    publishedDate: '2024-01-25',
-  },
-  {
-    id: 'category-a-6',
-    name: 'Dữ liệu Danh mục đơn vị hành chính',
-    structureCount: 1200,
-    relationshipCount: 5,
-    agency: 'Bộ Nội vụ',
-    format: 'Excel',
-    license: 'ODC-BY',
-    approval: 'approved',
-    publicStatus: 'published',
-    scope: 'national',
-    dataSource: 'dldc',
-    currentVersion: 'v4.0',
-    publishedDate: '2024-04-10',
-  },
-  {
-    id: 'category-a-7',
-    name: 'Dữ liệu Danh mục và mã mối quan hệ trong gia đình',
-    structureCount: 12,
-    relationshipCount: 1,
-    agency: 'Cục Hộ tịch, quốc tịch, chứng thực',
-    format: 'JSON',
-    license: 'ODbL',
-    approval: 'pending',
-    publicStatus: 'unpublished',
-    scope: 'internal',
-    dataSource: 'manual',
-    currentVersion: 'v1.1',
-    publishedDate: '2024-02-28',
-  },
+const mockDatasets: {
+  id: string; code: string; name: string; agency: string; scope: ScopeType;
+  structureCount: number; status: LifecycleStatus;
+}[] = [
+  { id: 'category-a-1', code: 'DM-GIOITINH', name: 'Dữ liệu Danh mục giới tính', agency: 'Bộ Tư pháp', scope: 'national', structureCount: 4, status: 'active' },
+  { id: 'category-a-2', code: 'DM-DANTOC', name: 'Dữ liệu Danh mục và mã các dân tộc Việt Nam', agency: 'Ủy ban Dân tộc', scope: 'national', structureCount: 54, status: 'active' },
+  { id: 'category-a-3', code: 'DM-QUOCGIA', name: 'Dữ liệu Danh mục và mã Quốc gia, Quốc tịch', agency: 'Bộ Ngoại giao', scope: 'national', structureCount: 250, status: 'pending_approval' },
+  { id: 'category-a-4', code: 'DM-TONGIAO', name: 'Dữ liệu Danh mục và mã các Tôn giáo', agency: 'Ban Tôn giáo Chính phủ', scope: 'national', structureCount: 16, status: 'pending_approval' },
+  { id: 'category-a-5', code: 'DM-COQUAN', name: 'Dữ liệu Danh mục cơ quan', agency: 'Bộ Nội vụ', scope: 'national', structureCount: 45, status: 'pending_approval' },
+  { id: 'category-a-6', code: 'DM-HC', name: 'Dữ liệu Danh mục đơn vị hành chính', agency: 'Bộ Nội vụ', scope: 'national', structureCount: 1200, status: 'draft' },
+  { id: 'category-a-7', code: 'DM-QUANHEGD', name: 'Dữ liệu Danh mục và mã mối quan hệ trong gia đình', agency: 'Bộ Tư pháp', scope: 'national', structureCount: 12, status: 'draft' },
 ];
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
-const SCOPE_LABELS: Record<string, string> = {
-  national: 'Cấp quốc gia',
-  ministry: 'Cấp bộ',
-  provincial: 'Cấp tỉnh',
-  internal: 'Sử dụng nội bộ',
-};
-
-const DATA_SOURCE_LABELS: Record<string, string> = {
-  manual: 'Tự cập nhật',
-  dldc: 'Đồng bộ Kho DLDC',
-};
-
 export function CategoryReportPage() {
   const navigate = useNavigate();
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
   const [scopeFilter, setScopeFilter] = useState('all');
-  const [dataSourceFilter, setDataSourceFilter] = useState('all');
-  const [publicStatusFilter, setPublicStatusFilter] = useState('all');
-  const [approvalFilter, setApprovalFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [agencyFilter, setAgencyFilter] = useState('all');
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
+  const agencyOptions = Array.from(new Set(mockDatasets.map(d => d.agency)));
+
   const hasActiveFilters =
     scopeFilter !== 'all' ||
-    dataSourceFilter !== 'all' ||
-    publicStatusFilter !== 'all' ||
-    approvalFilter !== 'all';
+    statusFilter !== 'all' ||
+    agencyFilter !== 'all';
 
   const filteredDatasets = mockDatasets.filter(dataset => {
-    if (searchKeyword && !dataset.name.toLowerCase().includes(searchKeyword.toLowerCase()) && !dataset.id.toLowerCase().includes(searchKeyword.toLowerCase())) return false;
+    if (searchKeyword && !dataset.name.toLowerCase().includes(searchKeyword.toLowerCase()) && !dataset.code.toLowerCase().includes(searchKeyword.toLowerCase())) return false;
     if (scopeFilter !== 'all' && dataset.scope !== scopeFilter) return false;
-    if (dataSourceFilter !== 'all' && dataset.dataSource !== dataSourceFilter) return false;
-    if (publicStatusFilter !== 'all' && dataset.publicStatus !== publicStatusFilter) return false;
-    if (approvalFilter !== 'all' && dataset.approval !== approvalFilter) return false;
+    if (statusFilter !== 'all' && dataset.status !== statusFilter) return false;
+    if (agencyFilter !== 'all' && dataset.agency !== agencyFilter) return false;
     return true;
   });
 
@@ -159,9 +52,8 @@ export function CategoryReportPage() {
 
   const handleResetFilters = () => {
     setScopeFilter('all');
-    setDataSourceFilter('all');
-    setPublicStatusFilter('all');
-    setApprovalFilter('all');
+    setStatusFilter('all');
+    setAgencyFilter('all');
     setCurrentPage(1);
   };
 
@@ -176,140 +68,86 @@ export function CategoryReportPage() {
 
   return (
     <div className="space-y-4">
-      {/* Search & Filter Section */}
-      <div className="space-y-3">
-        {/* Search Row */}
-        <div className="flex items-center gap-3">
-          <div className="flex-1 relative">
+      {/* Search & Filter Section - form chung */}
+      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="flex-1 min-w-[220px]">
+            <label className="block text-[12px] text-slate-500 mb-1 font-medium">Từ khóa</label>
             <input
               type="text"
-              placeholder="Tìm kiếm toàn văn (Nhập từ khóa mã danh mục, tên danh mục...)"
+              placeholder="Nhập mã danh mục, tên danh mục..."
               value={searchKeyword}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchKeyword(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              className="w-full px-4 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-400 bg-white hover:bg-slate-50/50 shadow-sm"
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-slate-400 transition-all"
             />
           </div>
+
+          <div className="min-w-[160px]">
+            <label className="block text-[12px] text-slate-500 mb-1 font-medium">Trạng thái</label>
+            <select
+              title="Trạng thái"
+              value={statusFilter}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) => setStatusFilter(e.target.value)}
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            >
+              <option value="all">Tất cả</option>
+              <option value="active">Hiệu lực</option>
+              <option value="pending_approval">Chờ phê duyệt</option>
+              <option value="draft">Đang soạn thảo</option>
+              <option value="inactive">Hết hiệu lực</option>
+            </select>
+          </div>
+
+          <div className="min-w-[160px]">
+            <label className="block text-[12px] text-slate-500 mb-1 font-medium">Phạm vi</label>
+            <select
+              title="Phạm vi"
+              value={scopeFilter}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) => setScopeFilter(e.target.value)}
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            >
+              <option value="all">Tất cả</option>
+              <option value="national">Cấp quốc gia</option>
+              <option value="ministry">Cấp bộ</option>
+              <option value="provincial">Cấp tỉnh/thành</option>
+              <option value="internal">Sử dụng nội bộ</option>
+            </select>
+          </div>
+
+          <div className="min-w-[190px]">
+            <label className="block text-[12px] text-slate-500 mb-1 font-medium">Đơn vị chủ quản</label>
+            <select
+              title="Đơn vị chủ quản"
+              value={agencyFilter}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) => setAgencyFilter(e.target.value)}
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            >
+              <option value="all">Tất cả</option>
+              {agencyOptions.map(agency => (
+                <option key={agency} value={agency}>{agency}</option>
+              ))}
+            </select>
+          </div>
+
           <button
             type="button"
             onClick={handleSearch}
-            className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[13px] font-medium flex items-center gap-2 transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
+            className="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors font-medium text-[13px] shadow-sm shrink-0 cursor-pointer active:scale-95"
           >
             <Search className="w-4 h-4" />
             Tìm kiếm
           </button>
-          <button
-            type="button"
-            onClick={() => setShowFilters(!showFilters)}
-            className={`px-5 py-2.5 rounded-xl text-[13px] font-medium flex items-center gap-2 transition-all border cursor-pointer active:scale-95 relative whitespace-nowrap ${
-              showFilters || hasActiveFilters
-                ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-sm'
-                : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-            }`}
-          >
-            {showFilters ? <X className="w-4 h-4" /> : <SlidersHorizontal className="w-4 h-4" />}
-            Tìm kiếm nâng cao
-            {hasActiveFilters && !showFilters && (
-              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 flex items-center justify-center bg-blue-600 text-white text-[10px] rounded-full border-2 border-white font-bold">
-                !
-              </span>
-            )}
-          </button>
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={handleResetFilters}
+              className="px-4 py-2 border border-slate-200 rounded-lg text-[13px] text-slate-600 hover:bg-slate-50 transition-colors font-medium shrink-0 cursor-pointer"
+            >
+              Đặt lại
+            </button>
+          )}
         </div>
-
-        {/* Collapsible Filter Panel */}
-        {showFilters && (
-          <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-sm">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div>
-                <label className="block text-[13px] font-normal text-slate-800 uppercase tracking-wider mb-2">Phạm vi</label>
-                <div className="relative">
-                  <select
-                    title="Phạm vi"
-                    value={scopeFilter}
-                    onChange={(e: ChangeEvent<HTMLSelectElement>) => setScopeFilter(e.target.value)}
-                    className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                  >
-                    <option value="all">Tất cả</option>
-                    <option value="national">Cấp quốc gia</option>
-                    <option value="ministry">Cấp bộ</option>
-                    <option value="provincial">Cấp tỉnh</option>
-                    <option value="internal">Sử dụng nội bộ</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[13px] font-normal text-slate-800 uppercase tracking-wider mb-2">Nguồn dữ liệu</label>
-                <div className="relative">
-                  <select
-                    title="Nguồn dữ liệu"
-                    value={dataSourceFilter}
-                    onChange={(e: ChangeEvent<HTMLSelectElement>) => setDataSourceFilter(e.target.value)}
-                    className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                  >
-                    <option value="all">Tất cả</option>
-                    <option value="manual">Tự cập nhật trực tiếp</option>
-                    <option value="dldc">Đồng bộ Kho DLDC</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[13px] font-normal text-slate-800 uppercase tracking-wider mb-2">Trạng thái công bố</label>
-                <div className="relative">
-                  <select
-                    title="Trạng thái công bố"
-                    value={publicStatusFilter}
-                    onChange={(e: ChangeEvent<HTMLSelectElement>) => setPublicStatusFilter(e.target.value)}
-                    className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                  >
-                    <option value="all">Tất cả</option>
-                    <option value="published">Đã công bố</option>
-                    <option value="unpublished">Chưa công bố</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[13px] font-normal text-slate-800 uppercase tracking-wider mb-2">Trạng thái phê duyệt</label>
-                <div className="relative">
-                  <select
-                    title="Trạng thái phê duyệt"
-                    value={approvalFilter}
-                    onChange={(e: ChangeEvent<HTMLSelectElement>) => setApprovalFilter(e.target.value)}
-                    className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                  >
-                    <option value="all">Tất cả</option>
-                    <option value="approved">Đã phê duyệt</option>
-                    <option value="pending">Đang chờ</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-slate-100">
-              <button
-                type="button"
-                onClick={handleResetFilters}
-                className="px-4 py-2 border border-slate-200 rounded-lg text-[13px] text-slate-600 hover:bg-slate-50 transition-colors font-medium cursor-pointer"
-              >
-                Đặt lại
-              </button>
-              <button
-                type="button"
-                onClick={() => { setShowFilters(false); setCurrentPage(1); }}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[13px] font-medium transition-colors cursor-pointer active:scale-95"
-              >
-                Áp dụng bộ lọc
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Results Summary + Export */}
@@ -350,75 +188,46 @@ export function CategoryReportPage() {
           <table className="w-full text-left">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap w-14 text-center">STT</th>
                 <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Mã danh mục</th>
                 <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên danh mục</th>
                 <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Đơn vị chủ quản</th>
                 <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Phạm vi</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Nguồn dữ liệu</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Cấu trúc</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Quan hệ</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Phiên bản</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Trạng thái công bố</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Trạng thái phê duyệt</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Ngày công bố</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Thao tác</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Trường thuộc tính</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Trạng thái</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-20">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">
               {paginatedDatasets.length > 0 ? (
-                paginatedDatasets.map((dataset) => (
+                paginatedDatasets.map((dataset, index) => (
                   <tr key={dataset.id} className="hover:bg-slate-50/50 transition-all">
-                    <td className="px-6 py-4 text-[13px] text-slate-700 font-medium whitespace-nowrap">{dataset.id}</td>
+                    <td className="px-6 py-4 text-slate-500 text-[13px] font-normal text-center">{(safePage - 1) * pageSize + index + 1}</td>
+                    <td className="px-6 py-4 text-[13px] text-slate-900 font-mono font-semibold whitespace-nowrap">{dataset.code}</td>
                     <td className="px-6 py-4 text-[13px] text-slate-900">{dataset.name}</td>
                     <td className="px-6 py-4 text-[13px] text-slate-700 whitespace-nowrap">{dataset.agency}</td>
-                    <td className="px-6 py-4 text-[13px] text-slate-700 whitespace-nowrap">{SCOPE_LABELS[dataset.scope] ?? dataset.scope}</td>
-                    <td className="px-6 py-4 text-[13px] text-slate-700 whitespace-nowrap">{DATA_SOURCE_LABELS[dataset.dataSource] ?? dataset.dataSource}</td>
-                    <td className="px-6 py-4 text-[13px] text-center">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-normal bg-blue-50 text-blue-700 border border-blue-100 whitespace-nowrap">
-                        {dataset.structureCount} trường
+                    <td className="px-6 py-4 text-[13px] text-slate-700 whitespace-nowrap">{scopeLabels[dataset.scope] ?? dataset.scope}</td>
+                    <td className="px-6 py-4 text-[13px] text-center whitespace-nowrap">{dataset.structureCount} trường</td>
+                    <td className="px-6 py-4 text-center">
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-normal whitespace-nowrap ${lifecycleLabels[dataset.status].color}`}>
+                        {lifecycleLabels[dataset.status].label}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-[13px] text-center">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-normal bg-violet-50 text-violet-700 border border-violet-100 whitespace-nowrap">
-                        {dataset.relationshipCount} liên kết
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-[13px]">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-normal bg-purple-50 text-purple-700 border border-purple-100">
-                        {dataset.currentVersion}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-[13px]">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-normal border whitespace-nowrap bg-cyan-50 text-cyan-700 border-cyan-100">
-                        {dataset.publicStatus === 'published' ? 'Đã công bố' : 'Chưa công bố'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-[13px]">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-normal border whitespace-nowrap ${
-                        dataset.approval === 'approved'
-                          ? 'bg-indigo-50 text-indigo-700 border-indigo-100'
-                          : 'bg-orange-50 text-orange-700 border-orange-100'
-                      }`}>
-                        {dataset.approval === 'approved' ? 'Đã phê duyệt' : 'Đang chờ'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-[13px] text-slate-600 whitespace-nowrap">{dataset.publishedDate}</td>
-                    <td className="px-6 py-4 text-[13px] text-center whitespace-nowrap">
+                    <td className="px-6 py-4 text-center">
                       <button
                         type="button"
-                        onClick={() => navigate(`/category-list?category=${dataset.id}`)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg text-[12px] font-medium transition-colors cursor-pointer"
+                        onClick={() => navigate(`/category-list?category=${dataset.id}&mode=readonly`)}
+                        className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
                         title="Xem chi tiết"
                       >
-                        <Eye className="w-3.5 h-3.5" />
-                        Xem chi tiết
+                        <Eye className="w-4 h-4" />
                       </button>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={12} className="px-6 py-12 text-center text-[13px] text-slate-500">
+                  <td colSpan={8} className="px-6 py-12 text-center text-[13px] text-slate-500">
                     Không tìm thấy kết quả phù hợp
                   </td>
                 </tr>

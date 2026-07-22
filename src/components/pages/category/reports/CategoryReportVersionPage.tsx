@@ -18,6 +18,8 @@ const reportEntities: MasterDataEntity[] = [
     createdBy: 'admin_tudien',
     updatedBy: 'Nguyễn Văn A',
     version: 3,
+    effectiveDate: '25/06/2026',
+    changeDescription: 'Thêm trường phone_code, cập nhật độ dài gender_code, xóa trường note',
     dataSource: 'dldc',
     databaseSystem: 'Cơ sở dữ liệu Hộ tịch'
   },
@@ -35,6 +37,8 @@ const reportEntities: MasterDataEntity[] = [
     createdBy: 'system_auto',
     updatedBy: 'Trần Thị B',
     version: 2,
+    effectiveDate: '15/03/2026',
+    changeDescription: 'Cập nhật đơn vị chủ quản và nguồn dữ liệu',
     dataSource: 'manual',
     databaseSystem: 'Hệ thống Quản lý thông tin Dân tộc'
   },
@@ -52,6 +56,8 @@ const reportEntities: MasterDataEntity[] = [
     createdBy: 'Lê Văn C',
     updatedBy: 'Nguyễn Văn A',
     version: 3,
+    effectiveDate: '25/06/2026',
+    changeDescription: 'Thêm trường mã điện thoại quốc gia (phone_code)',
     dataSource: 'dldc',
     databaseSystem: 'Cơ sở dữ liệu Quốc tịch / Hộ tịch'
   },
@@ -69,6 +75,8 @@ const reportEntities: MasterDataEntity[] = [
     createdBy: 'Hệ thống',
     updatedBy: 'Phạm Văn D',
     version: 1,
+    effectiveDate: '20/12/2024',
+    changeDescription: 'Khởi tạo cấu trúc ban đầu',
     dataSource: 'manual',
     databaseSystem: 'Hệ thống Quản lý Tôn giáo'
   },
@@ -86,6 +94,8 @@ const reportEntities: MasterDataEntity[] = [
     createdBy: 'Ngô Thị E',
     updatedBy: 'Lãnh đạo bộ',
     version: 2,
+    effectiveDate: '15/12/2024',
+    changeDescription: 'Cập nhật danh sách cơ quan theo Nghị định mới',
     dataSource: 'manual',
     databaseSystem: 'Hệ thống Quản lý Cơ quan hành chính'
   },
@@ -103,6 +113,8 @@ const reportEntities: MasterDataEntity[] = [
     createdBy: 'Hệ thống',
     updatedBy: 'Nguyễn Văn A',
     version: 1,
+    effectiveDate: '20/12/2024',
+    changeDescription: 'Khởi tạo danh mục đơn vị hành chính',
     dataSource: 'manual',
     databaseSystem: 'Cơ sở dữ liệu Đơn vị hành chính'
   }
@@ -188,35 +200,27 @@ export function CategoryReportVersionPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header Title Box */}
-      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-        <h2 className="text-xl font-bold text-slate-900 mb-2">Báo cáo phiên bản danh mục</h2>
-        <p className="text-slate-600 text-sm">
-          Thống kê danh sách danh mục và các phiên bản mới nhất đang có hiệu lực trong hệ thống.
-        </p>
-      </div>
-
-      {/* Search Bar */}
-      <div className="space-y-3">
-        <div className="flex flex-col md:flex-row items-center gap-3">
-          <div className="flex-1 w-full flex items-center gap-2">
-            <div className="flex-1 relative">
-              <input
-                type="text"
-                placeholder="Tìm kiếm danh mục theo tên hoặc mã..."
-                value={searchTerm}
-                onChange={(e) => { setSearchTerm(e.target.value); setCurrentPageNum(1); }}
-                className="w-full px-4 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-400 bg-white hover:bg-slate-50/50 font-medium shadow-sm"
-              />
-            </div>
-            <button
-              type="button"
-              className="w-10 h-10 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shrink-0 transition-all cursor-pointer active:scale-95 shadow-sm"
-              title="Tìm kiếm"
-            >
-              <Search className="w-4 h-4" />
-            </button>
+      {/* Search Bar - form chung */}
+      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="flex-1 min-w-[220px]">
+            <label className="block text-[12px] text-slate-500 mb-1 font-medium">Từ khóa</label>
+            <input
+              type="text"
+              placeholder="Tìm kiếm danh mục theo tên hoặc mã..."
+              value={searchTerm}
+              onChange={(e) => { setSearchTerm(e.target.value); setCurrentPageNum(1); }}
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-slate-400 transition-all"
+            />
           </div>
+          <button
+            type="button"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors font-medium text-[13px] shadow-sm shrink-0 active:scale-95"
+            title="Tìm kiếm"
+          >
+            <Search className="w-4 h-4" />
+            Tìm kiếm
+          </button>
         </div>
       </div>
 
@@ -229,10 +233,10 @@ export function CategoryReportVersionPage() {
                 <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-16">STT</th>
                 <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên danh mục</th>
                 <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-28">Phiên bản</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Người tạo</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Ngày tạo</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Người cập nhật</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Ngày cập nhật</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Ngày thay đổi</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Ngày hiệu lực</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Người thay đổi</th>
+                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700">Nội dung thay đổi</th>
                 <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-28">Thao tác</th>
               </tr>
             </thead>
@@ -249,10 +253,10 @@ export function CategoryReportVersionPage() {
                         v{entity.version}.0
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{entity.createdBy}</td>
-                    <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{entity.createdDate}</td>
-                    <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{entity.updatedBy || 'Nguyễn Văn A'}</td>
                     <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{entity.updatedDate}</td>
+                    <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{entity.effectiveDate || '--'}</td>
+                    <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{entity.updatedBy || 'Nguyễn Văn A'}</td>
+                    <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{entity.changeDescription || '--'}</td>
                     <td className="px-6 py-4 text-center">
                       <button
                         onClick={() => {

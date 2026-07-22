@@ -10,6 +10,21 @@ interface OpenDataCategoryGridProps {
   activeTab: string;
 }
 
+// Cùng bộ nhãn/màu trạng thái với màn "Công bố dữ liệu mở" (OpenDataPublishedListPage)
+const STATUS_STYLES: Record<string, string> = {
+  approved: 'bg-green-50 text-green-600 border-green-200',
+  pending: 'bg-purple-50 text-purple-600 border-purple-200',
+  rejected: 'bg-red-50 text-red-600 border-red-200',
+  draft: 'bg-slate-50 text-slate-600 border-slate-200',
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  approved: 'Đã công bố',
+  pending: 'Chờ công bố',
+  rejected: 'Từ chối',
+  draft: 'Bản nháp',
+};
+
 export function OpenDataCategoryGrid({
   paginatedData,
   currentPage,
@@ -25,9 +40,9 @@ export function OpenDataCategoryGrid({
           <tr>
             <th className="px-6 py-4 text-[13px] font-semibold text-left w-16">STT</th>
             <th className="px-6 py-4 text-[13px] font-semibold text-left">Tên tệp dữ liệu</th>
-            <th className="px-6 py-4 text-[13px] font-semibold text-left">Người cập nhật</th>
-            <th className="px-6 py-4 text-[13px] font-semibold text-left">Ngày gửi công bố</th>
-            <th className="px-6 py-4 text-[13px] font-semibold text-left">Trạng thái công bố</th>
+            <th className="px-6 py-4 text-[13px] font-semibold text-left">Cơ quan công bố</th>
+            <th className="px-6 py-4 text-[13px] font-semibold text-left">Ngày tạo</th>
+            <th className="px-6 py-4 text-[13px] font-semibold text-left">Trạng thái</th>
             <th className="px-6 py-4 text-[13px] font-semibold text-center w-40">Thao tác</th>
           </tr>
         </thead>
@@ -39,18 +54,12 @@ export function OpenDataCategoryGrid({
                 <td className="px-4 py-3 text-left text-[13px] font-semibold text-slate-900">
                   {item.fileName || `${item.name}.xlsx`}
                 </td>
-                <td className="px-4 py-3 text-left text-slate-600 font-medium text-[13px]">{item.updatedBy}</td>
+                <td className="px-4 py-3 text-left text-slate-600 font-medium text-[13px]">{item.publisher || '--'}</td>
                 <td className="px-4 py-3 text-left text-slate-600 font-medium text-[13px]">{item.createdDate}</td>
                 <td className="px-4 py-3 text-left">
-                  {item.publishStatus === 'published' ? (
-                    <span className="px-2 py-1 text-[12px] bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-full font-medium whitespace-nowrap inline-block">
-                      Đã công bố
-                    </span>
-                  ) : (
-                    <span className="px-2 py-1 text-[12px] bg-slate-100 text-slate-600 border border-slate-200 rounded-full font-medium whitespace-nowrap inline-block">
-                      Chưa công bố
-                    </span>
-                  )}
+                  <span className={`inline-block px-2.5 py-1 text-xs border rounded-full font-medium text-center leading-tight whitespace-nowrap ${STATUS_STYLES[item.approvalStatus] || STATUS_STYLES.pending}`}>
+                    {STATUS_LABELS[item.approvalStatus] || 'Chờ công bố'}
+                  </span>
                 </td>
                 <td className="px-4 py-3 text-center">
                   <div className="flex items-center justify-center gap-1">

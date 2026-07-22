@@ -94,9 +94,9 @@ export function OpenDataCategoryFilterPanel({
           </div>
         </div>
 
-        {/* Ngày gửi công bố */}
+        {/* Ngày tạo */}
         <div>
-          <label className="block text-[13px] text-slate-600 mb-2 font-normal">Ngày gửi công bố</label>
+          <label className="block text-[13px] text-slate-600 mb-2 font-normal">Ngày tạo</label>
           <div className="grid grid-cols-2 gap-2">
             <input
               type="date"

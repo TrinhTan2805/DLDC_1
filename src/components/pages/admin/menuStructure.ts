@@ -2610,6 +2610,17 @@ export const menuStructure: MenuItem[] = [
         ],
       },
       {
+        id: "admin-notifications",
+        name: "Quản lý thông báo hệ thống",
+        functions: [
+          {
+            id: "admin-notifications-func",
+            name: "Quản lý thông báo hệ thống",
+            actions: ["Xem", "Thêm", "Sửa", "Xóa", "Gửi"],
+          },
+        ],
+      },
+      {
         id: "user-guide",
         name: "Hướng dẫn sử dụng",
         functions: [

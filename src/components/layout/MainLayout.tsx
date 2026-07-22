@@ -54,6 +54,7 @@ import { OpenDataCategoryIPage } from '../pages/open-data-category/OpenDataCateg
 import { OpenDataCategoryJPage } from '../pages/open-data-category/OpenDataCategoryJPage';
 import { QualityControlPage } from '../pages/QualityControlPage';
 import { NotificationPage } from '../pages/NotificationPage';
+import { SystemNotificationManagementPage } from '../pages/admin/SystemNotificationManagementPage';
 import { MasterDataPage } from '../pages/MasterDataPage';
 import { MasterDataListPage } from '../pages/master-data-list/MasterDataListPage';
 import { MasterDataAPage } from '../pages/master-data-list/MasterDataAPage';
@@ -535,6 +536,7 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'open-data-category-setup' && <CategorySetupPageNew />}
             {currentPage === 'quality' && <QualityControlPage />}
             {currentPage === 'notifications' && <NotificationPage />}
+            {currentPage === 'admin-notifications' && <SystemNotificationManagementPage />}
             {currentPage === 'master-data' && <MasterDataPage />}
             {currentPage === 'master-data-list-setup' && <MasterDataListPage />}
             {currentPage === 'master-data-a' && <MasterDataAPage />}
@@ -1122,6 +1124,7 @@ const getBreadcrumbPath = (pageId: string, search: string = ''): string[] => {
 
     // Notifications
     'notifications': ['Quản lý thông báo'],
+    'admin-notifications': ['Quản trị & vận hành', 'Quản lý thông báo hệ thống'],
 
     // User Guide
     'user-guide': ['Hướng dẫn sử dụng'],

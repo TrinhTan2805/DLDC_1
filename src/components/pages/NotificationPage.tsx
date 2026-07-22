@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Bell, Search, Trash2, Check, Mail, Clock, CheckCircle, XCircle, AlertTriangle, Info } from 'lucide-react';
 import { PageHeader } from '../common/PageHeader';
-import { notificationCatalog, NotificationItem, NotificationType } from '../../data/notificationCatalog';
+import { notificationCatalog, NotificationItem, NotificationType, subscribeToNotifications } from '../../data/notificationCatalog';
 
 // Màn hình Quản lý thông báo — xem được TẤT CẢ thông báo trên hệ thống.
 // 4 loại: Thành công (success) / Lỗi (error) / Cảnh báo (warning - bị từ chối) / Thông báo (info).
@@ -19,6 +19,11 @@ const typeLabel: Record<NotificationType, string> = {
 
 export function NotificationPage() {
   const [notifications, setNotifications] = useState<NotificationItem[]>(notificationCatalog);
+
+  // Cập nhật ngay khi có thông báo hệ thống mới được phát (Quản lý thông báo hệ thống)
+  useEffect(() => {
+    return subscribeToNotifications((newItem) => setNotifications(prev => [newItem, ...prev]));
+  }, []);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [readFilter, setReadFilter] = useState<ReadFilter>('all');

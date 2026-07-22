@@ -1,5 +1,128 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Sửa cột danh sách + bộ lọc — Danh sách danh mục dữ liệu mở (Ngày thực hiện: 22/07/2026)
+
+**Màn hình:** Dữ liệu mở → Biên tập danh mục → **Danh sách danh mục dữ liệu mở** (`open-data-category/components/tabs/OpenDataCategoryGrid.tsx`, `open-data-category/components/OpenDataCategoryFilters.tsx`).
+
+1. **Bảng danh sách:** đổi cột "Người cập nhật" → **"Cơ quan công bố"** (hiển thị `item.publisher`, cùng field đã dùng ở form Thêm/Sửa) và đổi nhãn cột "Ngày gửi công bố" → **"Ngày tạo"** (giữ nguyên dữ liệu `item.createdDate` — nhãn cũ vốn đã sai vì cột này luôn hiển thị ngày tạo, không phải ngày gửi công bố).
+2. **Bộ lọc nâng cao:** đổi nhãn "Ngày gửi công bố" → "Ngày tạo" cho đúng với field đang lọc thực tế (`createdDate`) — không đổi logic lọc vì logic vốn đã lọc theo ngày tạo.
+3. **Cột "Trạng thái công bố" → "Trạng thái":** đổi từ badge nhị phân `publishStatus` (Đã công bố/Chưa công bố) sang lấy đúng theo `item.approvalStatus` (đã có sẵn trong dữ liệu) với cùng bộ nhãn/màu như màn **Công bố dữ liệu mở** (`OpenDataPublishedListPage.tsx`): Đã công bố (xanh lá), Chờ công bố (tím), Từ chối (đỏ), Bản nháp (xám).
+4. Đã build (`npx vite build`) và kiểm chứng trên trình duyệt: bảng hiển thị đúng "Cơ quan công bố"/"Ngày tạo"/"Trạng thái" (4 trạng thái) với dữ liệu đúng theo từng dòng; bộ lọc nâng cao hiển thị đúng nhãn "Ngày tạo".
+
+**File bị ảnh hưởng:** `src/components/pages/open-data-category/components/tabs/OpenDataCategoryGrid.tsx`, `src/components/pages/open-data-category/components/OpenDataCategoryFilters.tsx`.
+
+---
+
+## Thêm chức năng Quản lý thông báo hệ thống (Ngày thực hiện: 22/07/2026)
+
+**Màn hình mới:** Quản trị & vận hành → **Quản lý thông báo hệ thống** (`admin/SystemNotificationManagementPage.tsx`, route `/admin-notifications`).
+
+1. **Danh sách:** STT, Tiêu đề, Nội dung, Ngày cập nhật (sắp xếp được), Thao tác (Sửa/Xóa) — theo đúng mẫu, bỏ 2 cột "Kiểu thông báo" và "Hoạt động" theo yêu cầu. Có ô tìm kiếm theo tiêu đề/nội dung, nút làm mới, nút sắp xếp, nút "+ Thêm mới", phân trang.
+2. **Modal "Thêm mới thông báo hệ thống":** chỉ còn Tiêu đề + Nội dung (bắt buộc) — đã bỏ toggle "Gửi email" + danh sách người nhận email, khu vực "Tải lên tập tin", và toggle "Hoạt động" theo đúng yêu cầu; nút "Lưu" đổi thành **"Gửi"**.
+3. **Nhấn "Gửi" → phát thông báo tới tất cả người dùng trên hệ thống**, thuộc loại **"Thông báo"** (`type: 'info'`) trong hệ thống thông báo dùng chung (chuông ở TopBar + màn "Quản lý thông báo"):
+   - Bổ sung `broadcastSystemNotification(title, message)` và cơ chế subscribe (`subscribeToNotifications`) trong `src/data/notificationCatalog.ts` — thêm bản ghi vào `notificationCatalog` dùng chung và báo ngay cho `TopBar.tsx` + `NotificationPage.tsx` (đang mở) cập nhật, không cần tải lại trang.
+4. Đã đăng ký route/menu mới: thêm mục "Quản lý thông báo hệ thống" vào nhóm "Quản trị & vận hành" trong `Sidebar.tsx` (menu điều hướng thật) và `menuStructure.ts` (khai báo quyền chức năng), cùng import/route/breadcrumb trong `MainLayout.tsx`.
+5. Đã build (`npx vite build`) và kiểm chứng trên trình duyệt: danh sách hiển thị đúng mẫu, modal Thêm mới đúng các trường còn lại, bấm Gửi thấy thông báo mới xuất hiện ngay trong dropdown chuông TopBar và trong màn "Quản lý thông báo" mà không cần tải lại trang.
+
+**File bị ảnh hưởng:** `src/components/pages/admin/SystemNotificationManagementPage.tsx` (mới), `src/data/notificationCatalog.ts`, `src/components/layout/TopBar.tsx`, `src/components/pages/NotificationPage.tsx`, `src/components/layout/Sidebar.tsx`, `src/components/pages/admin/menuStructure.ts`, `src/components/layout/MainLayout.tsx`.
+
+---
+
+## Đồng bộ danh sách + xem dữ liệu chỉ đọc — Khai thác báo cáo (Ngày thực hiện: 22/07/2026)
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → **Khai thác báo cáo** (`CategoryReportPage.tsx`), và màn dữ liệu dùng lại từ Biên tập danh mục (`CategoryPage.tsx`, `CategoryAListPage.tsx`).
+
+1. **Danh sách danh mục đổi theo đúng cột của "Thiết lập danh mục"** (`SetupTab.tsx`): STT, Mã danh mục, Tên danh mục, Đơn vị chủ quản, Phạm vi, **Trường thuộc tính** (cột mới, thêm trước Trạng thái), Trạng thái, Thao tác — bỏ các cột Nguồn dữ liệu/Cấu trúc/Quan hệ/Phiên bản/Trạng thái công bố/Trạng thái phê duyệt/Ngày công bố cũ, gộp về 1 trạng thái vòng đời (dùng lại `lifecycleLabels`, `scopeLabels` từ `categoryConstants.ts` để đồng bộ nhãn/màu với "Thiết lập danh mục"). Bộ lọc cũng đổi tương ứng: Từ khóa, Trạng thái, Phạm vi, Đơn vị chủ quản.
+2. **Cột Thao tác chỉ còn icon** (bỏ chữ "Xem chi tiết", chỉ giữ icon con mắt).
+3. **Nhấn icon Xem chi tiết → mở màn dữ liệu của danh mục đó ở chế độ chỉ đọc** (tương tự tab Dữ liệu của Biên tập danh mục nhưng chỉ cho xem + tìm kiếm/lọc/sắp xếp):
+   - Thêm prop `readOnly?: boolean` cho `CategoryPage`; `CategoryAListPage` đọc query param `mode=readonly` trên URL (`/category-list?category=...&mode=readonly`) để bật chế độ này.
+   - Khi `readOnly`: **bỏ sidebar danh sách 7 danh mục** (chỉ hiển thị đúng 1 danh mục vừa chọn, có tiêu đề + **nút X để đóng, quay lại `/category-report`**); ẩn thanh tab (Dữ liệu/Phê duyệt/Công khai/Phiên bản — chỉ còn hiện dữ liệu); **giữ lại nút Lọc và Sắp xếp**, chỉ ẩn Gửi duyệt/Thêm bản ghi mới và checkbox chọn dòng; cột Thao tác của bảng bản ghi chỉ còn nút "Xem chi tiết" (bỏ Chỉnh sửa, Ngừng áp dụng).
+4. Đã build (`npx vite build`) và kiểm chứng trên trình duyệt: danh sách hiển thị đúng 7 danh mục theo mẫu cột mới; nhấn Xem chi tiết mở đúng màn dữ liệu chỉ đọc (không sidebar, không tab, có Lọc/Sắp xếp hoạt động, không control chỉnh sửa); nút X đóng đưa đúng về `/category-report`.
+
+**File bị ảnh hưởng:** `src/components/pages/category/CategoryReportPage.tsx`, `src/components/pages/category/CategoryPage.tsx`, `src/components/pages/category/CategoryAListPage.tsx`.
+
+---
+
+## Đổi cột lịch sử thay đổi + bỏ "Thêm mới phiên bản" — Báo cáo phiên bản danh mục (Ngày thực hiện: 22/07/2026)
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → **Báo cáo phiên bản danh mục** (`reports/CategoryReportVersionPage.tsx`, modal `components/modals/EntityVersionHistoryModal.tsx`).
+
+1. **Danh sách báo cáo:** bỏ 4 cột `Người tạo / Ngày tạo / Người cập nhật / Ngày cập nhật`, thay bằng `Ngày thay đổi / Ngày hiệu lực / Người thay đổi / Nội dung thay đổi` — cùng khái niệm với bảng "Lịch sử phiên bản" ở tab **Phiên bản** của chức năng Biên tập danh mục (`CategoryPage.tsx`). Bổ sung field `updatedBy?`, `changeDescription?` vào `MasterDataEntity` (`categoryTypes.ts`) để phục vụ 2 cột mới.
+2. **Modal "Xem chi tiết" (Quản lý phiên bản danh mục):**
+   - Bỏ hẳn khối "Danh sách lịch trình nâng cấp..." + nút "Thêm mới phiên bản" (không còn tạo/sửa/gửi duyệt phiên bản từ màn báo cáo này).
+   - Đổi cột bảng lịch sử phiên bản của danh mục đang xem sang **đúng bộ cột như danh sách ngoài**: STT, Phiên bản, Ngày thay đổi, Ngày hiệu lực, Người thay đổi, Nội dung thay đổi, Thao tác (bỏ cột Loại thay đổi/Trạng thái, bỏ các nút Tạo bản nháp/Chỉnh sửa/Gửi duyệt).
+   - Cột **Thao tác** chỉ còn 1 nút duy nhất: so sánh phiên bản đó với phiên bản liền trước (mở modal `EntityVersionDiffModal` có sẵn, hiển thị diff Cấu trúc/Thông tin chung/Quan hệ).
+   - Cột **Phiên bản** trong bảng lịch sử chỉ hiển thị 1 badge phiên bản (vd. `v3.0`) thay vì cặp "phiên bản cũ → phiên bản mới", cùng kiểu badge với danh sách ngoài.
+3. Đã build (`npx vite build`) và kiểm chứng trên trình duyệt: danh sách + modal hiển thị đúng cột mới, nút so sánh mở đúng diff v2.0 → v3.0 cho "Dữ liệu Danh mục giới tính".
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryReportVersionPage.tsx`, `src/components/pages/category/components/modals/EntityVersionHistoryModal.tsx`, `src/components/pages/category/categoryTypes.ts`.
+
+---
+
+## Đồng bộ UI khối tìm kiếm & kết xuất — Thống kê danh mục (Ngày thực hiện: 22/07/2026)
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục (5 trang: `CategoryReportPage.tsx`, `reports/CategoryReportListPage.tsx`, `reports/CategoryReportExploitationPage.tsx`, `reports/CategoryReportStatusPage.tsx`, `reports/CategoryReportVersionPage.tsx`).
+
+1. **Đồng bộ khối tìm kiếm/lọc + kết xuất theo "form chung"** (mẫu tham chiếu: khối lọc màn "Kiểm soát & giám sát cung cấp"): gộp về 1 khối bo góc `border-slate-200 rounded-xl`, các trường lọc xếp `flex-wrap items-end gap-3` (nhãn xám nhỏ phía trên, ô nhập/select bo `rounded-lg` bên dưới), nút hành động (Tìm kiếm/Truy xuất, Xuất báo cáo) nằm cùng hàng.
+   - `Khai thác báo cáo`: bỏ nút "Tìm kiếm nâng cao" dạng ẩn/hiện — 4 bộ lọc (Phạm vi, Nguồn dữ liệu, Trạng thái công bố, Trạng thái phê duyệt) hiện luôn cùng ô từ khóa trong 1 khối; nút "Đặt lại" chỉ hiện khi có lọc đang áp dụng.
+   - `Báo cáo thống kê danh sách danh mục` / `Báo cáo tình trạng khai thác danh mục` / `Báo cáo trạng thái danh mục`: giữ nguyên logic multi-select và biểu đồ, chỉ đổi khối bao ngoài từ `bg-slate-50 rounded-2xl p-6` (2 hàng, cột lọc + cột xuất tách riêng) sang khối trắng 1 hàng theo mẫu chung.
+   - `Báo cáo phiên bản danh mục`: đổi ô tìm kiếm sang khối bo góc có nhãn "Từ khóa", nút tìm kiếm hiện thêm nhãn chữ.
+2. **Bỏ khối tiêu đề (header) riêng của "Báo cáo phiên bản danh mục"** — xoá box "Báo cáo phiên bản danh mục" + mô tả phía trên khối tìm kiếm (tiêu đề trang đã có sẵn ở breadcrumb).
+3. Đã build (`npx vite build`) và kiểm chứng trên trình duyệt cho cả 5 trang: khối lọc hiển thị đúng bố cục mới, các nút Tìm kiếm/Truy xuất/Xuất File hoạt động bình thường, trang phiên bản danh mục không còn header.
+
+**File bị ảnh hưởng:** `src/components/pages/category/CategoryReportPage.tsx`, `src/components/pages/category/reports/CategoryReportListPage.tsx`, `src/components/pages/category/reports/CategoryReportExploitationPage.tsx`, `src/components/pages/category/reports/CategoryReportStatusPage.tsx`, `src/components/pages/category/reports/CategoryReportVersionPage.tsx`.
+
+---
+
+## Cập nhật danh sách + modal Chi tiết thay đổi tab Phê duyệt — Biên tập danh mục (Ngày thực hiện: 22/07/2026)
+
+**Màn hình:** Danh mục dùng chung → Biên tập & Công khai → Biên tập danh mục → tab **Phê duyệt** (`category/CategoryPage.tsx`).
+
+1. **Đồng bộ layout danh sách với tab Dữ liệu:** đổi cột `Ngày tạo | Người tạo | Người cập nhật | Ngày cập nhật | Trạng thái` thành `Trạng thái dữ liệu | Trạng thái` (dùng lại `getDataStatusBadge` đã có ở tab Dữ liệu) — ẩn 4 cột ngày/người khỏi danh sách, đúng theo mẫu tab Dữ liệu.
+2. **Nút "Xem chi tiết" (Chi tiết thay đổi) hiện đúng các trường đã chỉnh sửa thay vì 1 field giả cố định:** thêm hàm `buildRecordChanges(category)` tính diff theo từng trường dựa trên field mới `Category.previousValues` (snapshot Mã/Tên/Mô tả được lưu tại thời điểm chỉnh sửa — cả inline edit và edit qua `RecordFormModal`):
+   - Bản ghi **Chỉnh sửa** (`dataStatus='edited'`) → chỉ liệt kê đúng (các) trường thực sự đổi, kèm giá trị cũ/mới thật (vd. INTERSEX: "Tên giá trị" Lưỡng giới → Liên giới tính).
+   - Bản ghi **Thêm mới** (`dataStatus='new'`) → liệt kê đủ Mã/Tên giá trị/Mô tả với giá trị cũ = "—".
+   - Bản ghi **Ngừng hiệu lực** (`dataStatus='inactive'`) → hiện riêng "Trạng thái áp dụng": Đang áp dụng → Ngừng áp dụng.
+3. Đã kiểm chứng trên trình duyệt cho cả 3 trường hợp trên (INTERSEX/MALE/AGENDER) — modal "Chi tiết thay đổi" hiện đúng số trường và giá trị cũ/mới tương ứng.
+
+**File bị ảnh hưởng:** `src/components/pages/category/CategoryPage.tsx`.
+
+---
+
+## Tinh chỉnh modal Chi tiết bản ghi — Biên tập danh mục (Ngày thực hiện: 21/07/2026)
+
+**Màn hình:** Danh mục dùng chung → Biên tập & Công khai → Biên tập danh mục → tab Dữ liệu → modal "Chi tiết bản ghi" (`category/CategoryPage.tsx`).
+
+1. **Đổi layout modal sang lưới 2 cột** (nhãn xám nhỏ phía trên, giá trị đậm phía dưới, có đường kẻ phân nhóm giữa Thông tin cơ bản / Trạng thái / Ngày tạo-cập nhật), nút "Đóng" xanh dương — theo đúng mẫu modal "Chi tiết bản ghi" tham chiếu.
+2. **Bổ sung nội dung phê duyệt/từ chối** ngay dưới cặp badge Trạng thái dữ liệu/Trạng thái duyệt:
+   - Trạng thái duyệt = **Từ chối** → hiện khối đỏ "Nội dung từ chối" (field mới `Category.rejectReason`).
+   - Trạng thái duyệt = **Đã duyệt** → hiện khối xanh lá "Nội dung phê duyệt" (field mới `Category.approvalNote`).
+   - Chưa duyệt/Chờ duyệt → không hiện khối này.
+   - Nội dung được lưu tự động từ `approvalComment` (Phê duyệt/Từ chối đơn/hàng loạt ở tab Phê duyệt) và `bulkApprovalForm.note`.
+3. Đã kiểm chứng trên trình duyệt: bản ghi Từ chối hiện đúng lý do, bản ghi Đã duyệt hiện đúng nội dung phê duyệt.
+
+**File bị ảnh hưởng:** `src/components/pages/category/CategoryPage.tsx`.
+
+---
+
+## Cập nhật danh sách bản ghi tab Dữ liệu — Biên tập danh mục (Ngày thực hiện: 21/07/2026)
+
+**Màn hình:** Danh mục dùng chung → Biên tập & Công khai → Biên tập danh mục → tab **Dữ liệu** (`category/CategoryPage.tsx`).
+
+1. **Tách cột Trạng thái thành 2 cột độc lập:**
+   - **Trạng thái dữ liệu** (`Category.dataStatus`, field mới): Thêm mới / Chỉnh sửa / Ngừng hiệu lực — cập nhật tự động khi thêm mới, chỉnh sửa (inline hoặc qua modal), hoặc gửi yêu cầu ngừng áp dụng.
+   - **Trạng thái duyệt** (dùng lại field `status` sẵn có, đổi nhãn hiển thị riêng cho tab này qua `getRecordApprovalBadge`, không đổi `getStatusBadge` gốc để không ảnh hưởng tab Công khai/Phê duyệt): Chưa duyệt / Chờ duyệt / Đã duyệt / Từ chối.
+   - Mọi thao tác Thêm mới/Chỉnh sửa (kể cả qua `RecordFormModal`) đặt `status='draft'` (Chưa duyệt) + `dataStatus` tương ứng. Tick chọn + "Gửi duyệt" chuyển `status='pending'` (Chờ duyệt) — giữ nguyên luồng `UpdateApprovalModal` đã có.
+   - Ô checkbox "chọn để gửi duyệt" đầu dòng: chỉ hiện khi Trạng thái duyệt = Chưa duyệt (`status==='draft'`), ẩn với các trạng thái khác — logic này vốn đã đúng, chỉ đổi nhãn.
+2. **Ẩn 4 cột** Ngày tạo / Người tạo / Ngày cập nhật / Người cập nhật khỏi danh sách (dữ liệu vẫn giữ trong bản ghi).
+3. **Thêm nút "Xem chi tiết" (icon con mắt)** vào cột Thao tác — mở modal "Chi tiết bản ghi" hiển thị đầy đủ Mã/Tên/Mô tả/2 trạng thái/Ngày tạo/Người tạo/Ngày cập nhật/Người cập nhật, theo đúng mẫu giao diện modal "Chi tiết bản ghi" của màn Xem dữ liệu thu thập (`DataDetailModal.tsx`).
+4. Đã kiểm chứng trên trình duyệt: danh sách hiển thị đúng 2 cột trạng thái mới, checkbox chỉ xuất hiện ở dòng Chưa duyệt, modal chi tiết hiện đủ 4 trường ẩn; tab Công khai/Phê duyệt (dùng chung dữ liệu `status`) không bị ảnh hưởng.
+5. **Tinh chỉnh layout modal "Chi tiết bản ghi" theo mẫu do PM cung cấp**: chuyển từ danh sách ô viền xếp chồng sang **lưới 2 cột** (nhãn xám nhỏ phía trên, giá trị đậm phía dưới): Mã/Tên giá trị (2 cột) → Mô tả (full-width) → đường kẻ phân nhóm → Trạng thái dữ liệu/Trạng thái duyệt → đường kẻ → Ngày tạo/Người tạo/Ngày cập nhật/Người cập nhật (2×2); nút "Đóng" đổi sang nền xanh dương thay vì viền trắng.
+
+**File bị ảnh hưởng:** `src/components/pages/category/CategoryPage.tsx`.
+
+---
+
 ## Cập nhật hệ thống Thông báo theo Noti.xlsx (Ngày thực hiện: 21/07/2026)
 
 Thiết kế lại theo yêu cầu PM: thông báo chỉ gồm tiêu đề + nội dung, 3 loại (Thành công/Lỗi/Thông báo), KHÔNG phân theo mức độ ưu tiên; nội dung lấy từ danh sách `Noti.xlsx` (26 mẫu thông báo phủ các phân hệ: Quản lý thu thập, Xử lý dữ liệu, Danh mục dùng chung, Dữ liệu mở, Dữ liệu chủ, Cung cấp dữ liệu).

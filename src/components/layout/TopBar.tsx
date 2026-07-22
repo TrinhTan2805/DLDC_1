@@ -33,7 +33,7 @@ import {
   HardDrive,
   TrendingUp
 } from 'lucide-react';
-import { notificationCatalog, NotificationItem } from '../../data/notificationCatalog';
+import { notificationCatalog, NotificationItem, subscribeToNotifications } from '../../data/notificationCatalog';
 
 interface TopBarProps {
   title: string;
@@ -60,6 +60,11 @@ export function TopBar({ title, description, onUserMenuClick, currentPage, bread
   const menuRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
   const settingsRef = useRef<HTMLDivElement>(null);
+
+  // Cập nhật ngay khi có thông báo hệ thống mới được phát (Quản lý thông báo hệ thống)
+  useEffect(() => {
+    return subscribeToNotifications((newItem) => setNotifications(prev => [newItem, ...prev].slice(0, 5)));
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { X } from 'lucide-react';
 import { InnerSidebar } from '../collection/InnerSidebar';
 import { CategoryPage } from './CategoryPage';
 
@@ -15,7 +16,9 @@ const CATEGORIES = [
 
 export function CategoryAListPage() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const categoryParam = searchParams.get('category');
+  const readOnly = searchParams.get('mode') === 'readonly';
 
   const getInitialId = () => {
     if (categoryParam && CATEGORIES.some(c => c.id === categoryParam)) {
@@ -33,6 +36,25 @@ export function CategoryAListPage() {
   }, [categoryParam]);
 
   const selected = CATEGORIES.find(c => c.id === selectedId) || CATEGORIES[0];
+
+  if (readOnly) {
+    return (
+      <div className="h-full min-h-[calc(100vh-140px)]">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-[18px] font-bold text-slate-800">{selected.label}</h2>
+          <button
+            type="button"
+            onClick={() => navigate('/category-report')}
+            className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+            title="Đóng và quay lại Khai thác báo cáo"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <CategoryPage categoryName={selected.label} categoryId={selected.id} readOnly />
+      </div>
+    );
+  }
 
   return (
     <div className="flex gap-6 h-full min-h-[calc(100vh-140px)]">
