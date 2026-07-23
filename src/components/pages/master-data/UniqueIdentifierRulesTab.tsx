@@ -359,17 +359,17 @@ export function UniqueIdentifierRulesTab({ readOnly = false }: { readOnly?: bool
             <div className="flex items-center gap-2 flex-shrink-0">
               <button
                 onClick={() => handleOpenEdit(currentRule)}
-                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
-                title="Chỉnh sửa"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-blue-600 border border-blue-200 hover:bg-blue-50 rounded-lg text-[13px] font-medium transition-colors"
               >
                 <Edit className="w-4 h-4" />
+                Chỉnh sửa
               </button>
               <button
                 onClick={() => handleDelete(currentRule.id)}
-                className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
-                title="Xóa"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-red-600 border border-red-200 hover:bg-red-50 rounded-lg text-[13px] font-medium transition-colors"
               >
                 <Trash2 className="w-4 h-4" />
+                Xóa
               </button>
             </div>
             )}

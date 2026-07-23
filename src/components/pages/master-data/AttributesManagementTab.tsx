@@ -14,25 +14,14 @@ interface MasterDataEntity {
   primaryTableId?: string;
 }
 
-interface DldcJoin {
-  id: string;
-  joinType: 'LEFT JOIN' | 'INNER JOIN' | 'RIGHT JOIN';
-  tableId: string;
-  alias: string;
-  leftField: string;
-  rightField: string;
-}
-
 interface DldcFieldRow {
   id: string;
   shared: boolean;
   isPK: boolean;
   tableId: string;
-  sourceJoinId: string | null;
   columnName: string;
   apiFieldName: string;
   dataType: FieldDataType;
-  masked: boolean;
 }
 
 interface MasterDataAttribute {
@@ -69,7 +58,7 @@ const mockEntities: MasterDataEntity[] = [
   { id: '5', code: 'MD-AGENCY-001', name: 'Bộ dữ liệu chủ Cơ quan nhà nước', dataSource: 'dldc', primaryDatabaseId: 'lltp', primaryTableId: 'tbl_lich_su' },
 ];
 
-const defaultAttributes: Record<string, MasterDataAttribute[]> = {
+export const defaultAttributes: Record<string, MasterDataAttribute[]> = {
   // DLDC source — includes databaseName + tableName
   '1': [
     { id: 'attr-1', fieldName: 'citizen_id', displayName: 'Số CCCD', dataType: 'string', length: 12, required: true, unique: true, indexed: true, createdDate: '10/12/2024', version: 1, databaseName: 'CSDL Hộ tịch điện tử', tableName: 'tbl_citizen' },
@@ -213,6 +202,39 @@ const DLDC_FIELDS: Record<string, { fieldName: string; displayName: string; data
   ],
 };
 
+// Ánh xạ tên nguồn (đăng ký ở Bước 1 wizard) → id kho DLDC — giống SOURCE_NAME_TO_DB_ID trong wizard
+const SOURCE_NAME_TO_DB_ID: Record<string, string> = {
+  'Hộ tịch': 'hotich',
+  'CCCD': 'cccd',
+  'ĐKKD': 'dkkd',
+  'LLTP': 'lltp',
+  'Bổ trợ tư pháp': 'btdp',
+};
+
+// Toàn bộ cột (union các bảng) thuộc 1 kho DLDC — dùng cho dropdown ánh xạ/thêm trường
+const getDbColumnOptions = (dbId: string) => {
+  const tables = DLDC_TABLES[dbId] || [];
+  const seen = new Set<string>();
+  const options: { fieldName: string; displayName: string; dataType: FieldDataType; tableId: string }[] = [];
+  tables.forEach(t => {
+    (DLDC_FIELDS[t.id] || []).forEach(f => {
+      const key = `${t.id}:${f.fieldName}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        options.push({ ...f, tableId: t.id });
+      }
+    });
+  });
+  return options;
+};
+
+const GROUP_RULE_LABELS: Record<string, string> = {
+  latest: 'Bản ghi mới nhất',
+  most_frequent: 'Xuất hiện nhiều nhất',
+  max: 'Lớn nhất',
+  min: 'Nhỏ nhất',
+};
+
 const DLDC_ENTITY_DETAIL_CONFIGS: Record<string, {
   sources: { id: string; name: string; kind: 'table' | 'view' | 'query'; grain: '1:1' | '1:n' }[];
   mapping: Record<string, Record<string, string>>;
@@ -328,11 +350,16 @@ export function AttributesManagementTab({ readOnly = false }: { readOnly?: boole
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // DLDC field configuration modal
+  // Cấu hình chi tiết nguồn DLDC theo từng thực thể (sources/mapping/groupRules) — có thể chỉnh sửa trong phiên làm việc
+  const [entityConfigs, setEntityConfigs] = useState(DLDC_ENTITY_DETAIL_CONFIGS);
+
+  // DLDC field configuration modal — tham chiếu Bước 2 "Tạo thuộc tính" của wizard.
+  // Không cho đổi lại nguồn/phương thức cấu hình đã chọn trước đó: chỉ cho thêm trường,
+  // chỉnh sửa ánh xạ và sửa gom nhóm 1:n.
   const [showDldcModal, setShowDldcModal] = useState(false);
   const [dldcFieldRows, setDldcFieldRows] = useState<DldcFieldRow[]>([]);
-  const [modalUseJoin, setModalUseJoin] = useState(false);
-  const [modalDldcJoins, setModalDldcJoins] = useState<DldcJoin[]>([]);
+  const [dldcMapping, setDldcMapping] = useState<Record<string, Record<string, string>>>({});
+  const [dldcGroupRules, setDldcGroupRules] = useState<Record<string, Record<string, { ruleType: string; timeColumn: string }>>>({});
   const [showStructureApprovalModal, setShowStructureApprovalModal] = useState(false);
 
   // Delete confirmation modal
@@ -483,89 +510,70 @@ export function AttributesManagementTab({ readOnly = false }: { readOnly?: boole
     setShowVersionHistory(true);
   };
 
+  const getDbLabelForTable = (tableId: string) => {
+    for (const dbId in DLDC_TABLES) {
+      if ((DLDC_TABLES[dbId] || []).some(t => t.id === tableId)) {
+        return DLDC_DATABASES.find(d => d.id === dbId)?.label || '';
+      }
+    }
+    return '';
+  };
+
+  // Mở modal "Chỉnh sửa thuộc tính thực thể dữ liệu chủ" — liệt kê toàn bộ trường từ các nguồn
+  // đã liên kết sẵn (đã chọn thì tick "Chia sẻ", chưa chọn thì để trống cho người dùng tick trực tiếp).
+  // KHÔNG cho đổi lại nguồn/phương thức cấu hình đã chọn trước đó.
   const handleOpenDldcModal = () => {
-    const entity = mockEntities.find(e => e.id === selectedEntity);
     const currentAttrs = attributes[selectedEntity] || [];
-    const rows: DldcFieldRow[] = currentAttrs.map(attr => ({
-      id: attr.id,
-      shared: true,
-      isPK: attr.unique,
-      tableId: attr.tableName || entity?.primaryTableId || '',
-      sourceJoinId: null,
-      columnName: attr.fieldName,
-      apiFieldName: attr.displayName,
-      dataType: attr.dataType,
-      masked: false,
-    }));
+    const config = entityConfigs[selectedEntity];
+    const sources = config?.sources || [];
+    const rows: DldcFieldRow[] = [];
+    const seen = new Set<string>();
+    sources.forEach(src => {
+      const dbId = SOURCE_NAME_TO_DB_ID[src.name] || '';
+      getDbColumnOptions(dbId).forEach(col => {
+        const key = `${col.tableId}:${col.fieldName}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+        const existing = currentAttrs.find(a => a.tableName === col.tableId && a.fieldName === col.fieldName);
+        rows.push({
+          id: existing?.id || key,
+          shared: !!existing,
+          isPK: existing?.unique || false,
+          tableId: col.tableId,
+          columnName: col.fieldName,
+          apiFieldName: existing?.displayName || col.displayName,
+          dataType: existing?.dataType || col.dataType,
+        });
+      });
+    });
     setDldcFieldRows(rows);
-    setModalUseJoin(false);
-    setModalDldcJoins([]);
+    setDldcMapping(config ? JSON.parse(JSON.stringify(config.mapping)) : {});
+    setDldcGroupRules(config ? JSON.parse(JSON.stringify(config.groupRules)) : {});
     setShowDldcModal(true);
   };
 
   const handleCloseDldcModal = () => {
     setShowDldcModal(false);
     setDldcFieldRows([]);
-    setModalUseJoin(false);
-    setModalDldcJoins([]);
+    setDldcMapping({});
+    setDldcGroupRules({});
   };
 
-  const handleJoinTableChange = (joinId: string, newTableId: string) => {
-    const oldJoin = modalDldcJoins.find(j => j.id === joinId);
-    const oldTableId = oldJoin?.tableId || '';
-    setModalDldcJoins(prev => prev.map(j =>
-      j.id === joinId ? { ...j, tableId: newTableId, leftField: '', rightField: '' } : j
-    ));
-    setDldcFieldRows(prev => {
-      const filtered = prev.filter(r => r.tableId !== oldTableId);
-      if (newTableId) {
-        const newRows: DldcFieldRow[] = (DLDC_FIELDS[newTableId] || []).map((f, i) => ({
-          id: `fr-join-${joinId}-${i}`,
-          shared: true,
-          isPK: false,
-          tableId: newTableId,
-          sourceJoinId: joinId,
-          columnName: f.fieldName,
-          apiFieldName: f.fieldName,
-          dataType: f.dataType,
-          masked: false,
-        }));
-        return [...filtered, ...newRows];
-      }
-      return filtered;
+  const handleDldcMappingChange = (fieldName: string, sourceId: string, value: string) => {
+    setDldcMapping(prev => ({ ...prev, [fieldName]: { ...(prev[fieldName] || {}), [sourceId]: value } }));
+  };
+
+  const handleDldcGroupRuleChange = (sourceId: string, fieldName: string, patch: Partial<{ ruleType: string; timeColumn: string }>) => {
+    setDldcGroupRules(prev => {
+      const existing = prev[sourceId]?.[fieldName] || { ruleType: 'latest', timeColumn: '' };
+      return {
+        ...prev,
+        [sourceId]: {
+          ...(prev[sourceId] || {}),
+          [fieldName]: { ...existing, ...patch }
+        }
+      };
     });
-  };
-
-  const handleAddJoin = () => {
-    const newJoin: DldcJoin = {
-      id: `join-${Date.now()}`,
-      joinType: 'LEFT JOIN',
-      tableId: '',
-      alias: `t${modalDldcJoins.length + 2}`,
-      leftField: '',
-      rightField: '',
-    };
-    setModalDldcJoins(prev => [...prev, newJoin]);
-  };
-
-  const handleRemoveJoin = (joinId: string) => {
-    const tableIdToRemove = modalDldcJoins.find(j => j.id === joinId)?.tableId || '';
-    setModalDldcJoins(prev => prev.filter(j => j.id !== joinId));
-    setDldcFieldRows(prev => prev.filter(r => r.tableId !== tableIdToRemove));
-  };
-
-  const handleAddDldcRow = () => {
-    setDldcFieldRows(rows => [...rows, {
-      id: `row-${Date.now()}`,
-      shared: true,
-      isPK: false,
-      tableId: selectedEntityData?.primaryTableId || '',
-      sourceJoinId: null,
-      columnName: '',
-      apiFieldName: '',
-      dataType: 'string',
-      masked: false,
-    }]);
   };
 
   // Opens the "Gửi trình duyệt" modal for the structure instead of saving immediately
@@ -584,8 +592,6 @@ export function AttributesManagementTab({ readOnly = false }: { readOnly?: boole
 
   const handleConfirmDldcStructure = () => {
     if (!selectedApprover) return;
-    const entity = mockEntities.find(e => e.id === selectedEntity);
-    const dbLabel = DLDC_DATABASES.find(db => db.id === entity?.primaryDatabaseId)?.label || '';
     const now = new Date();
     const dateStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
     const currentAttrs = attributes[selectedEntity] || [];
@@ -601,13 +607,21 @@ export function AttributesManagementTab({ readOnly = false }: { readOnly?: boole
           required: false,
           unique: row.isPK,
           indexed: row.isPK,
-          databaseName: dbLabel,
+          databaseName: getDbLabelForTable(row.tableId),
           tableName: row.tableId,
           createdDate: existing?.createdDate || dateStr,
           version: existing ? existing.version + 1 : 1,
         };
       });
     setAttributes({ ...attributes, [selectedEntity]: newAttrs });
+    setEntityConfigs(prev => ({
+      ...prev,
+      [selectedEntity]: {
+        sources: prev[selectedEntity]?.sources || [],
+        mapping: dldcMapping,
+        groupRules: dldcGroupRules,
+      }
+    }));
     handleCloseDldcModal();
     handleCloseStructureApprovalModal();
     alert('Đã gửi trình duyệt cấu trúc thành công!');
@@ -1156,12 +1170,14 @@ export function AttributesManagementTab({ readOnly = false }: { readOnly?: boole
         </div>
       )}
 
-      {/* DLDC Field Configuration Modal */}
+      {/* Modal Chỉnh sửa thuộc tính thực thể dữ liệu chủ — tham chiếu Bước 2 "Tạo thuộc tính" của wizard.
+          Không cho đổi lại nguồn/phương thức cấu hình đã chọn trước đó: chỉ cho thêm trường,
+          chỉnh sửa ánh xạ và sửa gom nhóm 1:n. */}
       <BaseModal
         isOpen={showDldcModal}
         onClose={handleCloseDldcModal}
-        title="Cấu hình nguồn dữ liệu"
-        subtitle="Kho dữ liệu từ nguồn đồng bộ và cấu hình các trường"
+        title="Chỉnh sửa thuộc tính thực thể dữ liệu chủ"
+        subtitle="Chỉ có thể thêm trường, chỉnh sửa ánh xạ và gom nhóm 1:n — không đổi lại nguồn dữ liệu đã chọn"
         maxWidth="max-w-5xl"
         customHeaderIcon={<Database className="w-5 h-5 text-blue-600 mr-3 flex-shrink-0" />}
         footer={
@@ -1182,279 +1198,271 @@ export function AttributesManagementTab({ readOnly = false }: { readOnly?: boole
           </>
         }
       >
-        <div className="space-y-4 text-left">
-          {/* Blue header card with Join toggle */}
-          <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
-            <div className="px-5 py-3.5 bg-blue-600 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Database className="w-4 h-4 text-white" />
-                <p className="text-[13px] font-semibold text-white">Cấu hình nguồn dữ liệu</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setModalUseJoin(v => !v)}
-                className="flex items-center gap-2 text-white text-[12px] cursor-pointer"
-              >
-                <span>Sử dụng liên kết bảng (Join)</span>
-                <div className={`relative inline-flex h-5 w-9 items-center rounded-full border border-white/40 transition-colors ${modalUseJoin ? 'bg-white/30' : 'bg-blue-500'}`}>
-                  <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${modalUseJoin ? 'translate-x-4' : 'translate-x-0.5'}`} />
+        {(() => {
+          const config = entityConfigs[selectedEntity];
+          const sources = config?.sources || [];
+          return (
+            <div className="space-y-4 text-left">
+              {/* Nguồn dữ liệu đã liên kết — cố định, không cho đổi lại */}
+              <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
+                <div className="px-5 py-3.5 bg-blue-600 flex items-center gap-2">
+                  <Database className="w-4 h-4 text-white" />
+                  <p className="text-[13px] font-semibold text-white">Nguồn dữ liệu đã liên kết</p>
                 </div>
-              </button>
-            </div>
-
-            {/* Sub-info bar */}
-            <div className="px-5 py-2.5 bg-blue-50 border-b border-blue-100 flex items-center gap-2">
-              <Database className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
-              <p className="text-[13px] text-blue-700">
-                Kho dữ liệu:{' '}
-                <span className="font-semibold">{DLDC_DATABASES.find(db => db.id === selectedEntityData?.primaryDatabaseId)?.label || '—'}</span>
-                {' — '}
-                <span className="font-semibold">{(DLDC_TABLES[selectedEntityData?.primaryDatabaseId || ''] || []).find(t => t.id === selectedEntityData?.primaryTableId)?.displayName || '—'}</span>
-              </p>
-            </div>
-
-            <div className="p-5 space-y-4">
-              {/* DB + Table (disabled) */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="block text-[13px] font-medium text-slate-600">Cơ sở dữ liệu</label>
-                  <div className="relative">
-                    <select disabled value={selectedEntityData?.primaryDatabaseId || ''}
-                      className="w-full pl-3 pr-8 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-slate-50 text-slate-500 appearance-none focus:outline-none cursor-not-allowed font-medium">
-                      <option value="">—</option>
-                      {DLDC_DATABASES.map(db => <option key={db.id} value={db.id}>{db.label}</option>)}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                <div className="p-5">
+                  <div className="flex flex-wrap gap-2">
+                    {sources.length === 0 ? (
+                      <span className="text-[13px] text-slate-400">Chưa có nguồn dữ liệu nào được liên kết</span>
+                    ) : (
+                      sources.map(src => (
+                        <span key={src.id} className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 text-[13px] font-medium text-slate-700">
+                          <Database className="w-3.5 h-3.5" />
+                          {src.name}
+                          <span className="px-1.5 py-0.5 rounded-full border text-[13px] font-medium bg-blue-50 text-blue-700 border-blue-200">
+                            {src.kind === 'table' ? 'Bảng' : src.kind === 'view' ? 'View' : 'Truy vấn'}
+                          </span>
+                          <span className="px-1.5 py-0.5 rounded-full border text-[13px] font-medium bg-emerald-50 text-emerald-700 border-emerald-200">{src.grain}</span>
+                        </span>
+                      ))
+                    )}
                   </div>
-                </div>
-                <div className="space-y-1.5">
-                  <label className="block text-[13px] font-medium text-slate-600">Bảng dữ liệu chính</label>
-                  <div className="relative">
-                    <select disabled value={selectedEntityData?.primaryTableId || ''}
-                      className="w-full pl-3 pr-8 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-slate-50 text-slate-500 appearance-none focus:outline-none cursor-not-allowed font-medium">
-                      <option value="">—</option>
-                      {(DLDC_TABLES[selectedEntityData?.primaryDatabaseId || ''] || []).map(t => (
-                        <option key={t.id} value={t.id}>{t.displayName} ({t.id})</option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                  </div>
+                  <p className="text-[13px] text-slate-400 mt-3">Không thể đổi lại phương thức/nguồn cấu hình đã chọn khi khởi tạo. Chỉ có thể thêm trường mới từ các nguồn này.</p>
                 </div>
               </div>
 
-              {/* Join cards — shown when toggle is ON */}
-              {modalUseJoin && (
-                <div className="space-y-3 pt-2 border-t border-slate-100">
-                  <div className="flex items-center justify-between">
-                    <p className="text-[13px] font-semibold text-slate-700">Bảng liên kết bổ sung ({modalDldcJoins.length})</p>
-                    <button type="button" onClick={handleAddJoin}
-                      className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-200 text-blue-600 text-[13px] font-medium rounded-lg hover:bg-blue-50 transition-colors cursor-pointer">
-                      <Plus className="w-3.5 h-3.5" />
-                      Thêm bảng liên kết
-                    </button>
-                  </div>
-
-                  {modalDldcJoins.map((join) => {
-                    const joinFields = DLDC_FIELDS[join.tableId] || [];
-                    const primaryFields = DLDC_FIELDS[selectedEntityData?.primaryTableId || ''] || [];
-                    return (
-                      <div key={join.id} className="p-4 border border-slate-200 rounded-xl bg-slate-50/50 space-y-4 relative animate-in fade-in zoom-in-95 duration-200">
-                        <button type="button" onClick={() => handleRemoveJoin(join.id)}
-                          className="absolute top-3 right-3 p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors cursor-pointer" title="Xóa liên kết">
-                          <X className="w-4 h-4" />
-                        </button>
-
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div className="space-y-1.5">
-                            <label className="block text-[13px] font-medium text-slate-600">Loại liên kết (Join Type)</label>
-                            <div className="relative">
-                              <select value={join.joinType}
-                                onChange={(e: ChangeEvent<HTMLSelectElement>) => setModalDldcJoins(prev => prev.map(j => j.id === join.id ? { ...j, joinType: e.target.value as DldcJoin['joinType'] } : j))}
-                                className="w-full pl-3 pr-8 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium cursor-pointer">
-                                <option value="LEFT JOIN">LEFT JOIN</option>
-                                <option value="INNER JOIN">INNER JOIN</option>
-                                <option value="RIGHT JOIN">RIGHT JOIN</option>
-                              </select>
-                              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                            </div>
-                          </div>
-                          <div className="space-y-1.5">
-                            <label className="block text-[13px] font-medium text-slate-600">Bảng liên kết (Table)</label>
-                            <div className="relative">
-                              <select value={join.tableId}
-                                onChange={(e: ChangeEvent<HTMLSelectElement>) => handleJoinTableChange(join.id, e.target.value)}
-                                className="w-full pl-3 pr-8 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium cursor-pointer">
-                                <option value="">-- Chọn bảng --</option>
-                                {(DLDC_TABLES[selectedEntityData?.primaryDatabaseId || ''] || [])
-                                  .filter(t => t.id !== selectedEntityData?.primaryTableId)
-                                  .map(t => <option key={t.id} value={t.id}>{t.displayName} ({t.id})</option>)}
-                              </select>
-                              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                            </div>
-                          </div>
-                          <div className="space-y-1.5">
-                            <label className="block text-[13px] font-medium text-slate-600">Bảng phụ danh định (Alias)</label>
-                            <input type="text" disabled value={join.alias}
-                              className="w-full px-3 py-2.5 border border-slate-200 bg-slate-50 text-slate-500 rounded-lg text-[13px] font-mono outline-none cursor-not-allowed font-medium" />
-                          </div>
-                        </div>
-
-                        <div className="space-y-1.5">
-                          <label className="block text-[13px] font-medium text-slate-600">Điều kiện liên kết (Join Condition)</label>
-                          <div className="flex items-center gap-2">
-                            <div className="flex-1 relative">
-                              <select value={join.leftField}
-                                onChange={(e: ChangeEvent<HTMLSelectElement>) => setModalDldcJoins(prev => prev.map(j => j.id === join.id ? { ...j, leftField: e.target.value } : j))}
-                                className="w-full pl-3 pr-8 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium cursor-pointer">
-                                <option value="">-- {join.alias}.field --</option>
-                                {joinFields.map(f => <option key={f.fieldName} value={`${join.alias}.${f.fieldName}`}>{join.alias}.{f.fieldName}</option>)}
-                              </select>
-                              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                            </div>
-                            <div className="w-8 h-9 flex items-center justify-center bg-slate-100 rounded-lg border border-slate-200 text-slate-600 font-bold text-[13px] flex-shrink-0">=</div>
-                            <div className="flex-1 relative">
-                              <select value={join.rightField}
-                                onChange={(e: ChangeEvent<HTMLSelectElement>) => setModalDldcJoins(prev => prev.map(j => j.id === join.id ? { ...j, rightField: e.target.value } : j))}
-                                className="w-full pl-3 pr-8 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium cursor-pointer">
-                                <option value="">-- {selectedEntityData?.primaryTableId}.field --</option>
-                                {primaryFields.map(f => <option key={f.fieldName} value={`${selectedEntityData?.primaryTableId}.${f.fieldName}`}>{selectedEntityData?.primaryTableId}.{f.fieldName}</option>)}
-                              </select>
-                              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+              {/* Field Selection table */}
+              <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
+                <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-slate-500" />
+                  <p className="text-[13px] font-semibold text-slate-700">Chọn trường dữ liệu chia sẻ</p>
+                  <span className="text-[13px] px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">
+                    {dldcFieldRows.filter(r => r.shared).length}/{dldcFieldRows.length} trường được chọn
+                  </span>
                 </div>
-              )}
-            </div>
-          </div>
-
-          {/* Field Selection table */}
-          <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
-            <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <FileText className="w-4 h-4 text-slate-500" />
-                <p className="text-[13px] font-semibold text-slate-700">Chọn trường dữ liệu chia sẻ (Field Selection)</p>
-                <span className="text-[13px] px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">
-                  {dldcFieldRows.filter(r => r.shared).length}/{dldcFieldRows.length} trường được chọn
-                </span>
-              </div>
-              <button type="button" onClick={handleAddDldcRow}
-                className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-200 text-blue-600 text-[13px] font-medium rounded-lg hover:bg-blue-50 transition-colors cursor-pointer">
-                <Plus className="w-3.5 h-3.5" />
-                Thêm trường dữ liệu
-              </button>
-            </div>
-            <div className="overflow-x-auto max-h-[350px] overflow-y-auto">
-              <table className="w-full text-left text-[13px]" style={{ tableLayout: 'fixed' }}>
-                <colgroup>
-                  <col style={{ width: '6%' }} />
-                  <col style={{ width: '6%' }} />
-                  <col style={{ width: '22%' }} />
-                  <col style={{ width: '22%' }} />
-                  <col style={{ width: '24%' }} />
-                  <col style={{ width: '15%' }} />
-                  <col style={{ width: '5%' }} />
-                </colgroup>
-                <thead className="bg-slate-50 border-b border-slate-100 sticky top-0 z-[2]">
-                  <tr>
-                    <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center">Chia sẻ</th>
-                    <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center">PK</th>
-                    <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Nguồn dữ liệu (Table)</th>
-                    <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Trường gốc (Column)</th>
-                    <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Tên hiển thị</th>
-                    <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Kiểu dữ liệu</th>
-                    <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center">Xóa</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 bg-white">
-                  {dldcFieldRows.length === 0 ? (
-                    <tr>
-                      <td colSpan={7} className="px-4 py-10 text-center text-[13px] text-slate-400">
-                        Chưa có trường nào. Nhấn "+ Thêm trường dữ liệu" để bắt đầu.
-                      </td>
-                    </tr>
-                  ) : (
-                    dldcFieldRows.map(row => {
-                      const tableFields = DLDC_FIELDS[row.tableId] || [];
-                      const primaryTableId = selectedEntityData?.primaryTableId || '';
-                      return (
-                        <tr key={row.id} className="hover:bg-slate-50/50 transition-colors">
-                          <td className="px-3 py-2.5 text-center overflow-hidden">
-                            <input type="checkbox" checked={row.shared}
-                              onChange={(e: ChangeEvent<HTMLInputElement>) => setDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, shared: e.target.checked } : r))}
-                              className="w-4 h-4 rounded text-blue-600 border-slate-300 cursor-pointer accent-blue-600" />
-                          </td>
-                          <td className="px-3 py-2.5 text-center overflow-hidden">
-                            <input type="checkbox" checked={row.isPK}
-                              onChange={(e: ChangeEvent<HTMLInputElement>) => setDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, isPK: e.target.checked } : r))}
-                              className="w-4 h-4 rounded text-amber-500 border-slate-300 cursor-pointer accent-amber-500" />
-                          </td>
-                          <td className="px-3 py-2.5 overflow-hidden">
-                            <select value={row.tableId}
-                              onChange={(e: ChangeEvent<HTMLSelectElement>) => setDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, tableId: e.target.value, columnName: '', apiFieldName: '' } : r))}
-                              className="w-full min-w-0 px-2 py-1.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-1 focus:ring-blue-400/40 focus:border-blue-400 font-medium cursor-pointer">
-                              <option value="">--</option>
-                              <option value={primaryTableId}>{primaryTableId}</option>
-                              {modalDldcJoins.filter(j => j.tableId).map(j => (
-                                <option key={j.id} value={j.tableId}>{j.tableId} ({j.alias})</option>
-                              ))}
-                            </select>
-                          </td>
-                          <td className="px-3 py-2.5 overflow-hidden">
-                            <select value={row.columnName}
-                              onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-                                const f = tableFields.find(f => f.fieldName === e.target.value);
-                                setDldcFieldRows(prev => prev.map(r => r.id === row.id ? {
-                                  ...r, columnName: e.target.value, apiFieldName: e.target.value,
-                                  dataType: f?.dataType || r.dataType
-                                } : r));
-                              }}
-                              className="w-full min-w-0 px-2 py-1.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-1 focus:ring-blue-400/40 focus:border-blue-400 font-medium cursor-pointer">
-                              <option value="">--</option>
-                              {tableFields.map(f => <option key={f.fieldName} value={f.fieldName}>{f.fieldName}</option>)}
-                            </select>
-                          </td>
-                          <td className="px-3 py-2.5 overflow-hidden">
-                            <input type="text" value={row.apiFieldName}
-                              onChange={(e: ChangeEvent<HTMLInputElement>) => setDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, apiFieldName: e.target.value } : r))}
-                              className="w-full min-w-0 px-2 py-1.5 border border-slate-200 rounded-lg text-[13px] font-mono bg-white focus:outline-none focus:ring-1 focus:ring-blue-400/40 focus:border-blue-400" />
-                          </td>
-                          <td className="px-3 py-2.5 overflow-hidden">
-                            <select value={row.dataType}
-                              onChange={(e: ChangeEvent<HTMLSelectElement>) => setDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, dataType: e.target.value as FieldDataType } : r))}
-                              className="w-full min-w-0 px-2 py-1.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none font-sans">
-                              {Object.entries(fieldDataTypeLabels).map(([val, label]) => (
-                                <option key={val} value={val}>{label}</option>
-                              ))}
-                            </select>
-                          </td>
-                          <td className="px-3 py-2.5 text-center overflow-hidden">
-                            <button type="button"
-                              onClick={() => setDldcFieldRows(prev => prev.filter(r => r.id !== row.id))}
-                              className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors cursor-pointer">
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
+                <div className="overflow-x-auto max-h-[300px] overflow-y-auto">
+                  <table className="w-full text-left text-[13px]" style={{ tableLayout: 'fixed' }}>
+                    <colgroup>
+                      <col style={{ width: '6%' }} />
+                      <col style={{ width: '6%' }} />
+                      <col style={{ width: '20%' }} />
+                      <col style={{ width: '20%' }} />
+                      <col style={{ width: '24%' }} />
+                      <col style={{ width: '18%' }} />
+                      <col style={{ width: '6%' }} />
+                    </colgroup>
+                    <thead className="bg-slate-50 border-b border-slate-100 sticky top-0 z-[2]">
+                      <tr>
+                        <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center">Chia sẻ</th>
+                        <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center">PK</th>
+                        <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Nguồn dữ liệu (Table)</th>
+                        <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Trường gốc (Column)</th>
+                        <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Tên hiển thị</th>
+                        <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Kiểu dữ liệu</th>
+                        <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center">Xóa</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 bg-white">
+                      {dldcFieldRows.length === 0 ? (
+                        <tr>
+                          <td colSpan={7} className="px-4 py-10 text-center text-[13px] text-slate-400">
+                            Chưa có trường nào.
                           </td>
                         </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                      ) : (
+                        dldcFieldRows.map(row => {
+                          const tableInfo = (DLDC_TABLES[Object.keys(DLDC_TABLES).find(dbId => (DLDC_TABLES[dbId] || []).some(t => t.id === row.tableId)) || ''] || []).find(t => t.id === row.tableId);
+                          return (
+                            <tr key={row.id} className="hover:bg-slate-50/50 transition-colors">
+                              <td className="px-3 py-2.5 text-center overflow-hidden">
+                                <input type="checkbox" checked={row.shared}
+                                  onChange={(e: ChangeEvent<HTMLInputElement>) => setDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, shared: e.target.checked } : r))}
+                                  className="w-4 h-4 rounded text-blue-600 border-slate-300 cursor-pointer accent-blue-600" />
+                              </td>
+                              <td className="px-3 py-2.5 text-center overflow-hidden">
+                                <input type="checkbox" checked={row.isPK}
+                                  onChange={(e: ChangeEvent<HTMLInputElement>) => setDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, isPK: e.target.checked } : r))}
+                                  className="w-4 h-4 rounded text-amber-500 border-slate-300 cursor-pointer accent-amber-500" />
+                              </td>
+                              <td className="px-3 py-2.5 overflow-hidden text-slate-600 font-medium">
+                                {tableInfo?.displayName || row.tableId}
+                              </td>
+                              <td className="px-3 py-2.5 overflow-hidden">
+                                <code className="text-[13px] bg-slate-100 px-2 py-1 rounded text-slate-800 font-mono">{row.columnName}</code>
+                              </td>
+                              <td className="px-3 py-2.5 overflow-hidden">
+                                <input type="text" value={row.apiFieldName}
+                                  onChange={(e: ChangeEvent<HTMLInputElement>) => setDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, apiFieldName: e.target.value } : r))}
+                                  className="w-full min-w-0 px-2 py-1.5 border border-slate-200 rounded-lg text-[13px] font-mono bg-white focus:outline-none focus:ring-1 focus:ring-blue-400/40 focus:border-blue-400" />
+                              </td>
+                              <td className="px-3 py-2.5 overflow-hidden">
+                                <select value={row.dataType}
+                                  onChange={(e: ChangeEvent<HTMLSelectElement>) => setDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, dataType: e.target.value as FieldDataType } : r))}
+                                  className="w-full min-w-0 px-2 py-1.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none font-sans">
+                                  {Object.entries(fieldDataTypeLabels).map(([val, label]) => (
+                                    <option key={val} value={val}>{label}</option>
+                                  ))}
+                                </select>
+                              </td>
+                              <td className="px-3 py-2.5 text-center overflow-hidden">
+                                <button type="button"
+                                  onClick={() => setDldcFieldRows(prev => prev.filter(r => r.id !== row.id))}
+                                  className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors cursor-pointer">
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
 
-          <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-            <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-            <div className="text-[13px] text-amber-800">
-              <p className="mb-1">Khi gửi duyệt cấu trúc, phiên bản của các thuộc tính thuộc cấu trúc này sẽ tự động tăng lên.</p>
-              <p>Thay đổi này sẽ được ghi nhận trong lịch sử phiên bản.</p>
+              {/* Ánh xạ cột nguồn → thuộc tính */}
+              <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
+                <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ArrowRight className="w-4 h-4 text-slate-500" />
+                    <p className="text-[13px] font-semibold text-slate-700">Ánh xạ cột nguồn → thuộc tính</p>
+                  </div>
+                  <span className="text-[13px] text-slate-500">{sources.length} nguồn</span>
+                </div>
+                <div className="p-4">
+                  {dldcFieldRows.filter(r => r.shared).length === 0 ? (
+                    <p className="text-[13px] text-slate-400 text-center py-6">Chưa có thuộc tính để ánh xạ</p>
+                  ) : (
+                    <div className="border border-slate-100 rounded-lg overflow-x-auto">
+                      <table className="w-full text-[13px]">
+                        <thead className="bg-slate-50 border-b border-slate-100">
+                          <tr>
+                            <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Thuộc tính</th>
+                            {sources.map(src => (
+                              <th key={src.id} className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">{src.name}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-50 bg-white">
+                          {dldcFieldRows.filter(r => r.shared).map(row => (
+                            <tr key={row.id}>
+                              <td className="px-3 py-2">
+                                <span className="text-[13px] font-medium text-slate-700">{row.apiFieldName || row.columnName}</span>
+                                <code className="ml-1.5 text-[13px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 font-mono">{row.columnName}</code>
+                              </td>
+                              {sources.map(src => {
+                                const dbId = SOURCE_NAME_TO_DB_ID[src.name] || '';
+                                const options = getDbColumnOptions(dbId);
+                                return (
+                                  <td key={src.id} className="px-2 py-1.5">
+                                    <select
+                                      value={dldcMapping[row.columnName]?.[src.id] || ''}
+                                      onChange={(e: ChangeEvent<HTMLSelectElement>) => handleDldcMappingChange(row.columnName, src.id, e.target.value)}
+                                      className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                                    >
+                                      <option value="">—</option>
+                                      {options.map(c => <option key={c.fieldName} value={c.fieldName}>{c.fieldName}</option>)}
+                                    </select>
+                                  </td>
+                                );
+                              })}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Gom nguồn 1:n */}
+              {sources.filter(s => s.grain === '1:n').length > 0 && (
+                <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
+                  <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Network className="w-4 h-4 text-slate-500" />
+                      <p className="text-[13px] font-semibold text-slate-700">Gom nguồn 1:n</p>
+                    </div>
+                    <span className="text-[13px] px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full font-medium">
+                      {sources.filter(s => s.grain === '1:n').length} nguồn 1:n
+                    </span>
+                  </div>
+                  <div className="p-4 space-y-4">
+                    <p className="text-[13px] text-slate-500">Với nguồn có độ mịn 1:n, chọn quy tắc gom nhiều bản ghi thành một giá trị cho từng thuộc tính</p>
+                    {sources.filter(s => s.grain === '1:n').map(src => {
+                      const dbId = SOURCE_NAME_TO_DB_ID[src.name] || '';
+                      const colOptions = getDbColumnOptions(dbId);
+                      const rowsForSrc = dldcFieldRows.filter(r => r.shared && dldcMapping[r.columnName]?.[src.id]);
+                      return (
+                        <div key={src.id} className="border border-slate-200 rounded-xl overflow-hidden">
+                          <div className="px-4 py-2.5 bg-emerald-50 border-b border-emerald-100">
+                            <span className="text-[13px] font-semibold text-emerald-800">Nguồn (1:n): {src.name}</span>
+                          </div>
+                          {rowsForSrc.length === 0 ? (
+                            <p className="text-[13px] text-slate-400 text-center py-6">Chưa có thuộc tính nào ánh xạ từ nguồn này</p>
+                          ) : (
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-[13px]">
+                                <thead className="bg-slate-50 border-b border-slate-100">
+                                  <tr>
+                                    <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Thuộc tính</th>
+                                    <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Rule gom</th>
+                                    <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Cột mốc thời gian</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-50 bg-white">
+                                  {rowsForSrc.map(row => {
+                                    const gr = dldcGroupRules[src.id]?.[row.columnName];
+                                    return (
+                                      <tr key={row.id}>
+                                        <td className="px-3 py-2">
+                                          <span className="text-[13px] font-medium text-slate-700">{row.apiFieldName || row.columnName}</span>
+                                          <code className="ml-1.5 text-[13px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 font-mono">{row.columnName}</code>
+                                        </td>
+                                        <td className="px-2 py-1.5">
+                                          <select
+                                            value={gr?.ruleType || 'latest'}
+                                            onChange={(e: ChangeEvent<HTMLSelectElement>) => handleDldcGroupRuleChange(src.id, row.columnName, { ruleType: e.target.value })}
+                                            className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                                          >
+                                            {Object.entries(GROUP_RULE_LABELS).map(([val, label]) => (
+                                              <option key={val} value={val}>{label}</option>
+                                            ))}
+                                          </select>
+                                        </td>
+                                        <td className="px-2 py-1.5">
+                                          <select
+                                            value={gr?.timeColumn || ''}
+                                            onChange={(e: ChangeEvent<HTMLSelectElement>) => handleDldcGroupRuleChange(src.id, row.columnName, { timeColumn: e.target.value })}
+                                            className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                                          >
+                                            <option value="">—</option>
+                                            {colOptions.map(c => <option key={c.fieldName} value={c.fieldName}>{c.fieldName}</option>)}
+                                          </select>
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
+                                </tbody>
+                              </table>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div className="text-[13px] text-amber-800">
+                  <p className="mb-1">Khi gửi duyệt cấu trúc, phiên bản của các thuộc tính thuộc cấu trúc này sẽ tự động tăng lên.</p>
+                  <p>Thay đổi này sẽ được ghi nhận trong lịch sử phiên bản.</p>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          );
+        })()}
       </BaseModal>
 
       {/* Gửi trình duyệt cấu trúc Modal — shown when confirming "Gửi duyệt cấu trúc" for DLDC source */}
@@ -1644,7 +1652,7 @@ export function AttributesManagementTab({ readOnly = false }: { readOnly?: boole
         }
       >
         {(() => {
-          const entityConfig = DLDC_ENTITY_DETAIL_CONFIGS[selectedEntity];
+          const entityConfig = entityConfigs[selectedEntity];
           return (
             <div className="space-y-4 text-left font-sans">
               {/* Mapped Fields List */}
@@ -1812,7 +1820,7 @@ export function AttributesManagementTab({ readOnly = false }: { readOnly?: boole
                                       </td>
                                       <td className="px-3 py-2 text-slate-800">
                                         <span className="font-medium text-slate-900 bg-slate-100 px-2 py-0.5 rounded text-[12px]">
-                                          {gr.ruleType === 'latest' ? 'Bản ghi mới nhất' : gr.ruleType === 'most_frequent' ? 'Xuất hiện nhiều nhất' : gr.ruleType === 'max' ? 'Lớn nhất' : gr.ruleType === 'min' ? 'Nhỏ nhất' : gr.ruleType}
+                                          {GROUP_RULE_LABELS[gr.ruleType] || gr.ruleType}
                                         </span>
                                       </td>
                                       <td className="px-3 py-2 text-slate-600 font-mono">

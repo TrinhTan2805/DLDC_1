@@ -1,5 +1,5 @@
 import { useState, ChangeEvent } from 'react';
-import { X, Check, ChevronRight, ChevronLeft, AlertCircle, AlertTriangle, CheckCircle2, Plus, Trash2, Database, FileText, ChevronDown, ChevronUp, Network, ArrowRight, Key, Search, SquarePen, GitMerge, Split, Send, PlusCircle, XCircle } from 'lucide-react';
+import { X, Check, ChevronRight, ChevronLeft, AlertCircle, AlertTriangle, CheckCircle2, Plus, Trash2, Database, FileText, ChevronDown, ChevronUp, Network, ArrowRight, Key, Search, SquarePen, GitMerge, Split, PlusCircle, XCircle } from 'lucide-react';
 import { Portal } from '../../common/Portal';
 
 type LifecycleStatus = 'active' | 'draft' | 'inactive' | 'archived';
@@ -577,7 +577,6 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
   const [unmatchedActions, setUnmatchedActions] = useState<Record<string, 'single_source' | 'discard' | ''>>({});
   const [unmatchedPage, setUnmatchedPage] = useState<number>(1);
   const [reviewProcessedIds, setReviewProcessedIds] = useState<string[]>([]);
-  const [reviewSentIds, setReviewSentIds] = useState<string[]>([]);
   const [unmatchedProcessedIds, setUnmatchedProcessedIds] = useState<string[]>([]);
 
   const [toastState, setToastState] = useState<{
@@ -2374,18 +2373,6 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
                               >
                                 <Split className="w-3.5 h-3.5 text-amber-600" /> Tách biệt
                               </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setReviewProcessedIds(prev => Array.from(new Set([...prev, ...reviewSelectedIds])));
-                                  setReviewSentIds(prev => Array.from(new Set([...prev, ...reviewSelectedIds])));
-                                  setReviewSelectedIds([]);
-                                  triggerToast('Gửi yêu cầu thành công', 'Đã lưu bản ghi mới thành công!');
-                                }}
-                                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[12px] font-medium transition-colors shadow-sm cursor-pointer"
-                              >
-                                <Send className="w-3.5 h-3.5" /> Gửi duyệt
-                              </button>
                             </div>
                           ) : (
                             <span className="text-[12px] text-slate-400">Tích chọn các bản ghi để thực hiện thao tác hàng loạt</span>
@@ -2484,19 +2471,6 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
                                             className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
                                           >
                                             <Split className="w-4 h-4" />
-                                          </button>
-                                          <button
-                                            type="button"
-                                            title="Gửi duyệt"
-                                            onClick={() => {
-                                              setReviewProcessedIds(prev => Array.from(new Set([...prev, item.id])));
-                                              setReviewSentIds(prev => Array.from(new Set([...prev, item.id])));
-                                              setReviewSelectedIds(prev => prev.filter(id => id !== item.id));
-                                              triggerToast('Gửi yêu cầu thành công', 'Đã lưu bản ghi mới thành công!');
-                                            }}
-                                            className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
-                                          >
-                                            <Send className="w-4 h-4" />
                                           </button>
                                         </div>
                                       )}

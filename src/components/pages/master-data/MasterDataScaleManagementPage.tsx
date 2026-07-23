@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Settings, Sliders, GitCompare, Network, Key, Plus, Edit, Trash2, X, Search, Filter, Circle, CheckSquare, ChevronDown, Eye, FileText, Clock, XCircle, Send } from 'lucide-react';
 import { AttributesManagementTab } from './AttributesManagementTab';
-import { MasterDataWizard, WizardData } from './MasterDataWizard';
+import { MasterDataWizard } from './MasterDataWizard';
 import { MergeRulesManagementTab } from './MergeRulesManagementTab';
 import { EntityRelationshipsTab } from './EntityRelationshipsTab';
 import { UniqueIdentifierRulesTab } from './UniqueIdentifierRulesTab';
@@ -359,31 +359,6 @@ export function MasterDataScaleManagementPage() {
     setEditingEntity(entity);
     setShowWizard(true);
   };
-
-  // Dữ liệu seed cho Wizard khi ở chế độ sửa (memo để không reset input khi đang nhập)
-  const wizardInitial = useMemo<Partial<WizardData> | null>(() => {
-    if (!editingEntity) return null;
-    const e = editingEntity;
-    return {
-      code: e.code,
-      name: e.name,
-      dataType: e.dataType,
-      managingAgency: e.managingAgency,
-      scope: e.scope,
-      description: e.description,
-      systemName: e.systemName,
-      lifecycleStatus: e.lifecycleStatus,
-      dataSource: e.dataSource ?? 'dldc',
-      dldcTable: e.dldcTable,
-      dldcColumns: e.dldcColumns,
-      apiSystem: e.apiSystem,
-      apiManagingUnit: e.apiManagingUnit,
-      apiEndpoint: e.apiEndpoint,
-      apiMethod: e.apiMethod,
-      updateStrategy: e.updateStrategy,
-      syncFrequency: e.syncFrequency,
-    } as Partial<WizardData>;
-  }, [editingEntity]);
 
   const handleDelete = (id: string) => {
     setDeleteConfirmId(id);
@@ -1134,19 +1109,19 @@ export function MasterDataScaleManagementPage() {
           )}
 
           {activeTab === 'attributes' && (
-            <AttributesManagementTab readOnly />
+            <AttributesManagementTab />
           )}
 
           {activeTab === 'merge-rules' && (
-            <MergeRulesManagementTab readOnly />
+            <MergeRulesManagementTab />
           )}
 
           {activeTab === 'relationships' && (
-            <EntityRelationshipsTab readOnly />
+            <EntityRelationshipsTab />
           )}
 
           {activeTab === 'identifier-rules' && (
-            <UniqueIdentifierRulesTab readOnly />
+            <UniqueIdentifierRulesTab />
           )}
 
           {activeTab === 'approval' && (
@@ -1472,7 +1447,6 @@ export function MasterDataScaleManagementPage() {
       {/* Wizard Modal */}
       <MasterDataWizard
         isOpen={showWizard}
-        initialData={wizardInitial}
         onClose={() => { setShowWizard(false); setEditingEntity(null); }}
         onSubmit={(wizardData) => {
           const now = new Date();
@@ -1490,8 +1464,6 @@ export function MasterDataScaleManagementPage() {
               systemName: wizardData.systemName,
               updatedDate: dateStr,
               dataSource: wizardData.dataSource,
-              dldcTable: wizardData.dldcTable,
-              dldcColumns: wizardData.dldcColumns,
               apiSystem: wizardData.apiSystem,
               apiManagingUnit: wizardData.apiManagingUnit,
               apiEndpoint: wizardData.apiEndpoint,
@@ -1520,8 +1492,6 @@ export function MasterDataScaleManagementPage() {
             updatedDate: dateStr,
             createdBy: 'Người dùng hiện tại',
             dataSource: wizardData.dataSource,
-            dldcTable: wizardData.dldcTable,
-            dldcColumns: wizardData.dldcColumns,
             apiSystem: wizardData.apiSystem,
             apiManagingUnit: wizardData.apiManagingUnit,
             apiEndpoint: wizardData.apiEndpoint,
