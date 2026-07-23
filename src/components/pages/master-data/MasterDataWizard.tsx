@@ -1,10 +1,5 @@
-<<<<<<< HEAD
 import { useState, ChangeEvent } from 'react';
 import { X, Check, ChevronRight, ChevronLeft, AlertCircle, AlertTriangle, CheckCircle2, Plus, Trash2, Database, FileText, ChevronDown, ChevronUp, Network, ArrowRight, Key, Search, SquarePen, GitMerge, Split, Send, PlusCircle, XCircle } from 'lucide-react';
-=======
-import { useState, useEffect, ChangeEvent } from 'react';
-import { X, Check, ChevronRight, ChevronLeft, AlertCircle, Plus, Trash2, Database, FileText, ChevronDown, ChevronUp, Network, ArrowRight, Key, Search, SquarePen } from 'lucide-react';
->>>>>>> d0d4b0c898b5cf43e3568a8815a60624cbbd3882
 import { Portal } from '../../common/Portal';
 
 type LifecycleStatus = 'active' | 'draft' | 'inactive' | 'archived';
@@ -28,8 +23,6 @@ type MergeSubTab = 'match' | 'survivor' | 'test';
 type SourceKind = 'table' | 'view' | 'query';
 type SourceGrain = '1:1' | '1:n';
 type GroupRuleType = 'latest' | 'most_frequent' | 'max' | 'min';
-type TestSizeTier = 'fast' | 'standard' | 'comprehensive';
-type SamplingStrategy = 'random' | 'targeted' | 'time_range';
 
 interface WizardSource {
   id: string;
@@ -109,179 +102,180 @@ interface DldcFieldRow {
   shared: boolean;
   isPK: boolean;
   tableId: string;
+  sourceJoinId: string | null;
   columnName: string;
   displayName: string;
   dataType: FieldDataType;
 }
 
 const DLDC_DATABASES = [
-  { id: 'hotich', label: 'Hộ tịch' },
-  { id: 'cccd', label: 'Căn cước công dân' },
-  { id: 'dkkd', label: 'Đăng ký kinh doanh' },
-  { id: 'lltp', label: 'Lý lịch tư pháp' },
-  { id: 'btdp', label: 'Bổ trợ tư pháp' },
+  { id: 'hotich', label: 'Hß╗Ö tß╗ïch' },
+  { id: 'cccd',   label: 'C─ân c╞░ß╗¢c c├┤ng d├ón' },
+  { id: 'dkkd',   label: '─É─âng k├╜ kinh doanh' },
+  { id: 'lltp',   label: 'L├╜ lß╗ïch t╞░ ph├íp' },
+  { id: 'btdp',   label: 'Bß╗ò trß╗ú t╞░ ph├íp' },
 ];
 
 const DLDC_TABLES: Record<string, { id: string; displayName: string }[]> = {
   hotich: [
-    { id: 'tbl_khaisinh', displayName: 'Khai sinh' },
-    { id: 'tbl_kethon', displayName: 'Kết hôn' },
-    { id: 'tbl_ly_hon', displayName: 'Ly hôn' },
-    { id: 'tbl_khai_tu', displayName: 'Khai tử' },
-    { id: 'tbl_gioi_tinh', displayName: 'Danh mục giới tính' },
+    { id: 'tbl_khaisinh',  displayName: 'Khai sinh' },
+    { id: 'tbl_kethon',    displayName: 'Kß║┐t h├┤n' },
+    { id: 'tbl_ly_hon',    displayName: 'Ly h├┤n' },
+    { id: 'tbl_khai_tu',   displayName: 'Khai tß╗¡' },
+    { id: 'tbl_gioi_tinh', displayName: 'Danh mß╗Ñc giß╗¢i t├¡nh' },
   ],
   cccd: [
-    { id: 'tbl_can_cuoc', displayName: 'Căn cước công dân' },
-    { id: 'tbl_cu_tru', displayName: 'Cư trú' },
+    { id: 'tbl_can_cuoc', displayName: 'C─ân c╞░ß╗¢c c├┤ng d├ón' },
+    { id: 'tbl_cu_tru',   displayName: 'C╞░ tr├║' },
   ],
   dkkd: [
-    { id: 'tbl_doanhnghiep', displayName: 'Doanh nghiệp' },
-    { id: 'tbl_ho_kinh_doanh', displayName: 'Hộ kinh doanh' },
-    { id: 'tbl_giay_phep', displayName: 'Giấy phép kinh doanh' },
+    { id: 'tbl_doanhnghiep',   displayName: 'Doanh nghiß╗çp' },
+    { id: 'tbl_ho_kinh_doanh', displayName: 'Hß╗Ö kinh doanh' },
+    { id: 'tbl_giay_phep',     displayName: 'Giß║Ñy ph├⌐p kinh doanh' },
   ],
   lltp: [
-    { id: 'tbl_ly_lich_tu_phap', displayName: 'Lý lịch tư pháp' },
-    { id: 'tbl_an_tich', displayName: 'Án tích' },
+    { id: 'tbl_ly_lich_tu_phap', displayName: 'L├╜ lß╗ïch t╞░ ph├íp' },
+    { id: 'tbl_an_tich',         displayName: '├ün t├¡ch' },
   ],
   btdp: [
-    { id: 'tbl_cong_chung', displayName: 'Công chứng' },
-    { id: 'tbl_luat_su', displayName: 'Luật sư' },
-    { id: 'tbl_tro_giup', displayName: 'Trợ giúp pháp lý' },
+    { id: 'tbl_cong_chung', displayName: 'C├┤ng chß╗⌐ng' },
+    { id: 'tbl_luat_su',    displayName: 'Luß║¡t s╞░' },
+    { id: 'tbl_tro_giup',   displayName: 'Trß╗ú gi├║p ph├íp l├╜' },
   ],
 };
 
 const DLDC_FIELDS: Record<string, { fieldName: string; displayName: string; dataType: FieldDataType }[]> = {
   tbl_khaisinh: [
-    { fieldName: 'ma_khai_sinh', displayName: 'Mã khai sinh', dataType: 'string' },
-    { fieldName: 'ho_ten', displayName: 'Họ và tên', dataType: 'string' },
-    { fieldName: 'ngay_sinh', displayName: 'Ngày sinh', dataType: 'date' },
-    { fieldName: 'gioi_tinh', displayName: 'Giới tính', dataType: 'string' },
-    { fieldName: 'noi_sinh', displayName: 'Nơi sinh', dataType: 'string' },
-    { fieldName: 'ho_ten_cha', displayName: 'Họ tên cha', dataType: 'string' },
-    { fieldName: 'ho_ten_me', displayName: 'Họ tên mẹ', dataType: 'string' },
-    { fieldName: 'so_dinh_danh', displayName: 'Số định danh', dataType: 'string' },
+    { fieldName: 'ma_khai_sinh', displayName: 'M├ú khai sinh', dataType: 'string' },
+    { fieldName: 'ho_ten',       displayName: 'Hß╗ì v├á t├¬n',    dataType: 'string' },
+    { fieldName: 'ngay_sinh',    displayName: 'Ng├áy sinh',    dataType: 'date'   },
+    { fieldName: 'gioi_tinh',    displayName: 'Giß╗¢i t├¡nh',    dataType: 'string' },
+    { fieldName: 'noi_sinh',     displayName: 'N╞íi sinh',     dataType: 'string' },
+    { fieldName: 'ho_ten_cha',   displayName: 'Hß╗ì t├¬n cha',   dataType: 'string' },
+    { fieldName: 'ho_ten_me',    displayName: 'Hß╗ì t├¬n mß║╣',    dataType: 'string' },
+    { fieldName: 'so_dinh_danh', displayName: 'Sß╗æ ─æß╗ïnh danh', dataType: 'string' },
   ],
   tbl_kethon: [
-    { fieldName: 'ma_dang_ky', displayName: 'Mã đăng ký', dataType: 'string' },
-    { fieldName: 'ten_chong', displayName: 'Tên chồng', dataType: 'string' },
-    { fieldName: 'cccd_chong', displayName: 'CCCD chồng', dataType: 'string' },
-    { fieldName: 'ten_vo', displayName: 'Tên vợ', dataType: 'string' },
-    { fieldName: 'cccd_vo', displayName: 'CCCD vợ', dataType: 'string' },
-    { fieldName: 'ngay_dang_ky', displayName: 'Ngày đăng ký', dataType: 'date' },
-    { fieldName: 'co_quan_dang_ky', displayName: 'Cơ quan đăng ký', dataType: 'string' },
+    { fieldName: 'ma_dang_ky',     displayName: 'M├ú ─æ─âng k├╜',     dataType: 'string' },
+    { fieldName: 'ten_chong',      displayName: 'T├¬n chß╗ông',       dataType: 'string' },
+    { fieldName: 'cccd_chong',     displayName: 'CCCD chß╗ông',      dataType: 'string' },
+    { fieldName: 'ten_vo',         displayName: 'T├¬n vß╗ú',          dataType: 'string' },
+    { fieldName: 'cccd_vo',        displayName: 'CCCD vß╗ú',         dataType: 'string' },
+    { fieldName: 'ngay_dang_ky',   displayName: 'Ng├áy ─æ─âng k├╜',    dataType: 'date'   },
+    { fieldName: 'co_quan_dang_ky',displayName: 'C╞í quan ─æ─âng k├╜', dataType: 'string' },
   ],
   tbl_ly_hon: [
-    { fieldName: 'ma_ban_an', displayName: 'Mã bản án', dataType: 'string' },
-    { fieldName: 'ten_chong', displayName: 'Tên chồng', dataType: 'string' },
-    { fieldName: 'ten_vo', displayName: 'Tên vợ', dataType: 'string' },
-    { fieldName: 'ngay_ly_hon', displayName: 'Ngày ly hôn', dataType: 'date' },
-    { fieldName: 'toa_an', displayName: 'Tòa án', dataType: 'string' },
+    { fieldName: 'ma_ban_an',   displayName: 'M├ú bß║ún ├ín',   dataType: 'string' },
+    { fieldName: 'ten_chong',   displayName: 'T├¬n chß╗ông',   dataType: 'string' },
+    { fieldName: 'ten_vo',      displayName: 'T├¬n vß╗ú',      dataType: 'string' },
+    { fieldName: 'ngay_ly_hon', displayName: 'Ng├áy ly h├┤n', dataType: 'date'   },
+    { fieldName: 'toa_an',      displayName: 'T├▓a ├ín',      dataType: 'string' },
   ],
   tbl_khai_tu: [
-    { fieldName: 'ma_khai_tu', displayName: 'Mã khai tử', dataType: 'string' },
-    { fieldName: 'ho_ten', displayName: 'Họ và tên', dataType: 'string' },
-    { fieldName: 'ngay_mat', displayName: 'Ngày mất', dataType: 'date' },
-    { fieldName: 'noi_mat', displayName: 'Nơi mất', dataType: 'string' },
-    { fieldName: 'nguyen_nhan', displayName: 'Nguyên nhân', dataType: 'string' },
+    { fieldName: 'ma_khai_tu',  displayName: 'M├ú khai tß╗¡',  dataType: 'string' },
+    { fieldName: 'ho_ten',      displayName: 'Hß╗ì v├á t├¬n',   dataType: 'string' },
+    { fieldName: 'ngay_mat',    displayName: 'Ng├áy mß║Ñt',    dataType: 'date'   },
+    { fieldName: 'noi_mat',     displayName: 'N╞íi mß║Ñt',     dataType: 'string' },
+    { fieldName: 'nguyen_nhan', displayName: 'Nguy├¬n nh├ón', dataType: 'string' },
   ],
   tbl_gioi_tinh: [
-    { fieldName: 'ma_gioi_tinh', displayName: 'Mã giới tính', dataType: 'string' },
-    { fieldName: 'ten_gioi_tinh', displayName: 'Tên giới tính', dataType: 'string' },
-    { fieldName: 'ghi_chu', displayName: 'Ghi chú', dataType: 'string' },
+    { fieldName: 'ma_gioi_tinh',  displayName: 'M├ú giß╗¢i t├¡nh',  dataType: 'string' },
+    { fieldName: 'ten_gioi_tinh', displayName: 'T├¬n giß╗¢i t├¡nh', dataType: 'string' },
+    { fieldName: 'ghi_chu',       displayName: 'Ghi ch├║',       dataType: 'string' },
   ],
   tbl_can_cuoc: [
-    { fieldName: 'so_cccd', displayName: 'Số CCCD', dataType: 'string' },
-    { fieldName: 'ho_ten', displayName: 'Họ và tên', dataType: 'string' },
-    { fieldName: 'ngay_sinh', displayName: 'Ngày sinh', dataType: 'date' },
-    { fieldName: 'gioi_tinh', displayName: 'Giới tính', dataType: 'string' },
-    { fieldName: 'que_quan', displayName: 'Quê quán', dataType: 'string' },
-    { fieldName: 'thuong_tru', displayName: 'Thường trú', dataType: 'string' },
-    { fieldName: 'ngay_cap', displayName: 'Ngày cấp', dataType: 'date' },
-    { fieldName: 'noi_cap', displayName: 'Nơi cấp', dataType: 'string' },
-    { fieldName: 'ngay_het_han', displayName: 'Ngày hết hạn', dataType: 'date' },
+    { fieldName: 'so_cccd',      displayName: 'Sß╗æ CCCD',      dataType: 'string' },
+    { fieldName: 'ho_ten',       displayName: 'Hß╗ì v├á t├¬n',    dataType: 'string' },
+    { fieldName: 'ngay_sinh',    displayName: 'Ng├áy sinh',    dataType: 'date'   },
+    { fieldName: 'gioi_tinh',    displayName: 'Giß╗¢i t├¡nh',    dataType: 'string' },
+    { fieldName: 'que_quan',     displayName: 'Qu├¬ qu├ín',     dataType: 'string' },
+    { fieldName: 'thuong_tru',   displayName: 'Th╞░ß╗¥ng tr├║',   dataType: 'string' },
+    { fieldName: 'ngay_cap',     displayName: 'Ng├áy cß║Ñp',     dataType: 'date'   },
+    { fieldName: 'noi_cap',      displayName: 'N╞íi cß║Ñp',      dataType: 'string' },
+    { fieldName: 'ngay_het_han', displayName: 'Ng├áy hß║┐t hß║ín', dataType: 'date'   },
   ],
   tbl_cu_tru: [
-    { fieldName: 'so_cccd', displayName: 'Số CCCD', dataType: 'string' },
-    { fieldName: 'ho_ten', displayName: 'Họ và tên', dataType: 'string' },
-    { fieldName: 'dia_chi_thuong_tru', displayName: 'Địa chỉ thường trú', dataType: 'string' },
-    { fieldName: 'dia_chi_tam_tru', displayName: 'Địa chỉ tạm trú', dataType: 'string' },
-    { fieldName: 'ngay_dang_ky', displayName: 'Ngày đăng ký', dataType: 'date' },
+    { fieldName: 'so_cccd',             displayName: 'Sß╗æ CCCD',             dataType: 'string' },
+    { fieldName: 'ho_ten',              displayName: 'Hß╗ì v├á t├¬n',           dataType: 'string' },
+    { fieldName: 'dia_chi_thuong_tru',  displayName: '─Éß╗ïa chß╗ë th╞░ß╗¥ng tr├║',  dataType: 'string' },
+    { fieldName: 'dia_chi_tam_tru',     displayName: '─Éß╗ïa chß╗ë tß║ím tr├║',     dataType: 'string' },
+    { fieldName: 'ngay_dang_ky',        displayName: 'Ng├áy ─æ─âng k├╜',        dataType: 'date'   },
   ],
   tbl_doanhnghiep: [
-    { fieldName: 'ma_so_thue', displayName: 'Mã số thuế', dataType: 'string' },
-    { fieldName: 'ten_doanh_nghiep', displayName: 'Tên doanh nghiệp', dataType: 'string' },
-    { fieldName: 'loai_hinh', displayName: 'Loại hình', dataType: 'string' },
-    { fieldName: 'dia_chi', displayName: 'Địa chỉ', dataType: 'string' },
-    { fieldName: 'nguoi_dai_dien', displayName: 'Người đại diện', dataType: 'string' },
-    { fieldName: 'ngay_dang_ky', displayName: 'Ngày đăng ký', dataType: 'date' },
-    { fieldName: 'von_dieu_le', displayName: 'Vốn điều lệ', dataType: 'number' },
-    { fieldName: 'trang_thai', displayName: 'Trạng thái', dataType: 'string' },
+    { fieldName: 'ma_so_thue',       displayName: 'M├ú sß╗æ thuß║┐',       dataType: 'string' },
+    { fieldName: 'ten_doanh_nghiep', displayName: 'T├¬n doanh nghiß╗çp', dataType: 'string' },
+    { fieldName: 'loai_hinh',        displayName: 'Loß║íi h├¼nh',        dataType: 'string' },
+    { fieldName: 'dia_chi',          displayName: '─Éß╗ïa chß╗ë',          dataType: 'string' },
+    { fieldName: 'nguoi_dai_dien',   displayName: 'Ng╞░ß╗¥i ─æß║íi diß╗çn',   dataType: 'string' },
+    { fieldName: 'ngay_dang_ky',     displayName: 'Ng├áy ─æ─âng k├╜',     dataType: 'date'   },
+    { fieldName: 'von_dieu_le',      displayName: 'Vß╗æn ─æiß╗üu lß╗ç',      dataType: 'number' },
+    { fieldName: 'trang_thai',       displayName: 'Trß║íng th├íi',       dataType: 'string' },
   ],
   tbl_ho_kinh_doanh: [
-    { fieldName: 'ma_dang_ky', displayName: 'Mã đăng ký', dataType: 'string' },
-    { fieldName: 'ten_ho_kd', displayName: 'Tên hộ KD', dataType: 'string' },
-    { fieldName: 'chu_ho', displayName: 'Chủ hộ', dataType: 'string' },
-    { fieldName: 'dia_chi', displayName: 'Địa chỉ', dataType: 'string' },
-    { fieldName: 'nganh_nghe', displayName: 'Ngành nghề', dataType: 'string' },
-    { fieldName: 'ngay_cap', displayName: 'Ngày cấp', dataType: 'date' },
+    { fieldName: 'ma_dang_ky', displayName: 'M├ú ─æ─âng k├╜', dataType: 'string' },
+    { fieldName: 'ten_ho_kd',  displayName: 'T├¬n hß╗Ö KD',  dataType: 'string' },
+    { fieldName: 'chu_ho',     displayName: 'Chß╗º hß╗Ö',     dataType: 'string' },
+    { fieldName: 'dia_chi',    displayName: '─Éß╗ïa chß╗ë',    dataType: 'string' },
+    { fieldName: 'nganh_nghe', displayName: 'Ng├ánh nghß╗ü', dataType: 'string' },
+    { fieldName: 'ngay_cap',   displayName: 'Ng├áy cß║Ñp',   dataType: 'date'   },
   ],
   tbl_giay_phep: [
-    { fieldName: 'so_giay_phep', displayName: 'Số giấy phép', dataType: 'string' },
-    { fieldName: 'ten_co_so', displayName: 'Tên cơ sở', dataType: 'string' },
-    { fieldName: 'loai_giay_phep', displayName: 'Loại giấy phép', dataType: 'string' },
-    { fieldName: 'ngay_cap', displayName: 'Ngày cấp', dataType: 'date' },
-    { fieldName: 'ngay_het_han', displayName: 'Ngày hết hạn', dataType: 'date' },
-    { fieldName: 'co_quan_cap', displayName: 'Cơ quan cấp', dataType: 'string' },
+    { fieldName: 'so_giay_phep',   displayName: 'Sß╗æ giß║Ñy ph├⌐p',   dataType: 'string' },
+    { fieldName: 'ten_co_so',      displayName: 'T├¬n c╞í sß╗ƒ',      dataType: 'string' },
+    { fieldName: 'loai_giay_phep', displayName: 'Loß║íi giß║Ñy ph├⌐p', dataType: 'string' },
+    { fieldName: 'ngay_cap',       displayName: 'Ng├áy cß║Ñp',       dataType: 'date'   },
+    { fieldName: 'ngay_het_han',   displayName: 'Ng├áy hß║┐t hß║ín',   dataType: 'date'   },
+    { fieldName: 'co_quan_cap',    displayName: 'C╞í quan cß║Ñp',    dataType: 'string' },
   ],
   tbl_ly_lich_tu_phap: [
-    { fieldName: 'so_phieu', displayName: 'Số phiếu LLTP', dataType: 'string' },
-    { fieldName: 'ho_ten', displayName: 'Họ và tên', dataType: 'string' },
-    { fieldName: 'ngay_sinh', displayName: 'Ngày sinh', dataType: 'date' },
-    { fieldName: 'so_cccd', displayName: 'Số CCCD', dataType: 'string' },
-    { fieldName: 'ket_qua', displayName: 'Kết quả', dataType: 'string' },
-    { fieldName: 'ngay_cap', displayName: 'Ngày cấp', dataType: 'date' },
+    { fieldName: 'so_phieu',  displayName: 'Sß╗æ phiß║┐u LLTP', dataType: 'string' },
+    { fieldName: 'ho_ten',    displayName: 'Hß╗ì v├á t├¬n',     dataType: 'string' },
+    { fieldName: 'ngay_sinh', displayName: 'Ng├áy sinh',     dataType: 'date'   },
+    { fieldName: 'so_cccd',   displayName: 'Sß╗æ CCCD',       dataType: 'string' },
+    { fieldName: 'ket_qua',   displayName: 'Kß║┐t quß║ú',       dataType: 'string' },
+    { fieldName: 'ngay_cap',  displayName: 'Ng├áy cß║Ñp',      dataType: 'date'   },
   ],
   tbl_an_tich: [
-    { fieldName: 'ma_an_tich', displayName: 'Mã án tích', dataType: 'string' },
-    { fieldName: 'ho_ten', displayName: 'Họ và tên', dataType: 'string' },
-    { fieldName: 'toi_danh', displayName: 'Tội danh', dataType: 'string' },
-    { fieldName: 'hinh_phat', displayName: 'Hình phạt', dataType: 'string' },
-    { fieldName: 'ngay_phat', displayName: 'Ngày phán xét', dataType: 'date' },
+    { fieldName: 'ma_an_tich', displayName: 'M├ú ├ín t├¡ch',    dataType: 'string' },
+    { fieldName: 'ho_ten',     displayName: 'Hß╗ì v├á t├¬n',     dataType: 'string' },
+    { fieldName: 'toi_danh',   displayName: 'Tß╗Öi danh',      dataType: 'string' },
+    { fieldName: 'hinh_phat',  displayName: 'H├¼nh phß║ít',     dataType: 'string' },
+    { fieldName: 'ngay_phat',  displayName: 'Ng├áy ph├ín x├⌐t', dataType: 'date'   },
   ],
   tbl_cong_chung: [
-    { fieldName: 'ma_giao_dich', displayName: 'Mã giao dịch', dataType: 'string' },
-    { fieldName: 'loai_hop_dong', displayName: 'Loại hợp đồng', dataType: 'string' },
-    { fieldName: 'to_chuc_cong_chung', displayName: 'Tổ chức công chứng', dataType: 'string' },
-    { fieldName: 'ngay_cong_chung', displayName: 'Ngày công chứng', dataType: 'date' },
-    { fieldName: 'ben_a', displayName: 'Bên A', dataType: 'string' },
-    { fieldName: 'ben_b', displayName: 'Bên B', dataType: 'string' },
+    { fieldName: 'ma_giao_dich',      displayName: 'M├ú giao dß╗ïch',       dataType: 'string' },
+    { fieldName: 'loai_hop_dong',     displayName: 'Loß║íi hß╗úp ─æß╗ông',      dataType: 'string' },
+    { fieldName: 'to_chuc_cong_chung',displayName: 'Tß╗ò chß╗⌐c c├┤ng chß╗⌐ng', dataType: 'string' },
+    { fieldName: 'ngay_cong_chung',   displayName: 'Ng├áy c├┤ng chß╗⌐ng',    dataType: 'date'   },
+    { fieldName: 'ben_a',             displayName: 'B├¬n A',               dataType: 'string' },
+    { fieldName: 'ben_b',             displayName: 'B├¬n B',               dataType: 'string' },
   ],
   tbl_luat_su: [
-    { fieldName: 'so_the', displayName: 'Số thẻ LS', dataType: 'string' },
-    { fieldName: 'ho_ten', displayName: 'Họ và tên', dataType: 'string' },
-    { fieldName: 'doan_luat_su', displayName: 'Đoàn luật sư', dataType: 'string' },
-    { fieldName: 'ngay_cap', displayName: 'Ngày cấp thẻ', dataType: 'date' },
-    { fieldName: 'trang_thai', displayName: 'Trạng thái', dataType: 'string' },
+    { fieldName: 'so_the',       displayName: 'Sß╗æ thß║╗ LS',    dataType: 'string' },
+    { fieldName: 'ho_ten',       displayName: 'Hß╗ì v├á t├¬n',    dataType: 'string' },
+    { fieldName: 'doan_luat_su', displayName: '─Éo├án luß║¡t s╞░', dataType: 'string' },
+    { fieldName: 'ngay_cap',     displayName: 'Ng├áy cß║Ñp thß║╗', dataType: 'date'   },
+    { fieldName: 'trang_thai',   displayName: 'Trß║íng th├íi',   dataType: 'string' },
   ],
   tbl_tro_giup: [
-    { fieldName: 'ma_ho_so', displayName: 'Mã hồ sơ', dataType: 'string' },
-    { fieldName: 'ho_ten', displayName: 'Họ và tên', dataType: 'string' },
-    { fieldName: 'loai_ho_tro', displayName: 'Loại hỗ trợ', dataType: 'string' },
-    { fieldName: 'ngay_tiep_nhan', displayName: 'Ngày tiếp nhận', dataType: 'date' },
-    { fieldName: 'trang_thai', displayName: 'Trạng thái', dataType: 'string' },
+    { fieldName: 'ma_ho_so',       displayName: 'M├ú hß╗ô s╞í',       dataType: 'string' },
+    { fieldName: 'ho_ten',         displayName: 'Hß╗ì v├á t├¬n',       dataType: 'string' },
+    { fieldName: 'loai_ho_tro',    displayName: 'Loß║íi hß╗ù trß╗ú',     dataType: 'string' },
+    { fieldName: 'ngay_tiep_nhan', displayName: 'Ng├áy tiß║┐p nhß║¡n',  dataType: 'date'   },
+    { fieldName: 'trang_thai',     displayName: 'Trß║íng th├íi',      dataType: 'string' },
   ],
 };
 
 const FIELD_DATA_TYPES: { value: FieldDataType; label: string }[] = [
-  { value: 'string', label: 'Chuỗi (String)' },
-  { value: 'number', label: 'Số (Number)' },
-  { value: 'date', label: 'Ngày (Date)' },
-  { value: 'datetime', label: 'Ngày giờ (DateTime)' },
-  { value: 'boolean', label: 'Logic (Boolean)' },
-  { value: 'text', label: 'Văn bản dài (Text)' },
-  { value: 'email', label: 'Email' },
-  { value: 'phone', label: 'Số điện thoại' },
-  { value: 'url', label: 'URL' },
+  { value: 'string',   label: 'Chuß╗ùi (String)' },
+  { value: 'number',   label: 'Sß╗æ (Number)' },
+  { value: 'date',     label: 'Ng├áy (Date)' },
+  { value: 'datetime', label: 'Ng├áy giß╗¥ (DateTime)' },
+  { value: 'boolean',  label: 'Logic (Boolean)' },
+  { value: 'text',     label: 'V─ân bß║ún d├ái (Text)' },
+  { value: 'email',    label: 'Email' },
+  { value: 'phone',    label: 'Sß╗æ ─æiß╗çn thoß║íi' },
+  { value: 'url',      label: 'URL' },
 ];
 
 interface AttributeForm {
@@ -294,7 +288,7 @@ interface AttributeForm {
   defaultValue?: string;
 }
 
-export interface WizardData {
+interface WizardData {
   // Step 1
   code?: string;
   name: string;
@@ -318,9 +312,9 @@ export interface WizardData {
 
   // Step 3
   mergeRules: string[];
-  // Step 3 — ánh xạ cột nguồn → thuộc tính (key thuộc tính → key sourceId → tên cột)
+  // Step 3 ΓÇö ├ính xß║í cß╗Öt nguß╗ôn ΓåÆ thuß╗Öc t├¡nh (key thuß╗Öc t├¡nh ΓåÆ key sourceId ΓåÆ t├¬n cß╗Öt)
   mapping: Record<string, Record<string, string>>;
-  // Step 3 — gom nguồn 1:n (key sourceId → key thuộc tính → GroupRule)
+  // Step 3 ΓÇö gom nguß╗ôn 1:n (key sourceId ΓåÆ key thuß╗Öc t├¡nh ΓåÆ GroupRule)
   groupRules: Record<string, Record<string, GroupRule>>;
 
   // Step 5
@@ -335,136 +329,100 @@ interface MasterDataWizardProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: WizardData) => void;
-  /** Khi truyền vào => chế độ chỉnh sửa: seed dữ liệu bước 1 từ thực thể đang sửa */
-  initialData?: Partial<WizardData> | null;
 }
 
 const MANAGING_UNITS = [
-  'Cục Hành chính tư pháp',
-  'Cục Bổ trợ tư pháp',
-  'Cục Phổ biến, GDPL và Trợ giúp pháp lý',
-  'Cục Đăng ký giao dịch bảo đảm và Bồi thường nhà nước',
-  'Cục Quản lý thi hành án dân sự',
-  'Cục Đăng ký kinh doanh',
-  'Cục Công nghệ thông tin',
-  'Vụ Pháp luật dân sự - Kinh tế',
-  'Vụ Pháp luật hình sự - Hành chính',
-  'Vụ Pháp luật quốc tế',
-  'Vụ Các vấn đề chung về xây dựng pháp luật',
-  'Vụ Kế hoạch - Tài chính',
-  'Văn phòng Bộ',
-  'Bộ Tư pháp',
-  'Bộ Nội vụ',
-  'Bộ Công an',
-  'Bộ Kế hoạch và Đầu tư',
+  'Cß╗Ñc H├ánh ch├¡nh t╞░ ph├íp',
+  'Cß╗Ñc Bß╗ò trß╗ú t╞░ ph├íp',
+  'Cß╗Ñc Phß╗ò biß║┐n, GDPL v├á Trß╗ú gi├║p ph├íp l├╜',
+  'Cß╗Ñc ─É─âng k├╜ giao dß╗ïch bß║úo ─æß║úm v├á Bß╗ôi th╞░ß╗¥ng nh├á n╞░ß╗¢c',
+  'Cß╗Ñc Quß║ún l├╜ thi h├ánh ├ín d├ón sß╗▒',
+  'Cß╗Ñc ─É─âng k├╜ kinh doanh',
+  'Cß╗Ñc C├┤ng nghß╗ç th├┤ng tin',
+  'Vß╗Ñ Ph├íp luß║¡t d├ón sß╗▒ - Kinh tß║┐',
+  'Vß╗Ñ Ph├íp luß║¡t h├¼nh sß╗▒ - H├ánh ch├¡nh',
+  'Vß╗Ñ Ph├íp luß║¡t quß╗æc tß║┐',
+  'Vß╗Ñ C├íc vß║Ñn ─æß╗ü chung vß╗ü x├óy dß╗▒ng ph├íp luß║¡t',
+  'Vß╗Ñ Kß║┐ hoß║ích - T├ái ch├¡nh',
+  'V─ân ph├▓ng Bß╗Ö',
+  'Bß╗Ö T╞░ ph├íp',
+  'Bß╗Ö Nß╗Öi vß╗Ñ',
+  'Bß╗Ö C├┤ng an',
+  'Bß╗Ö Kß║┐ hoß║ích v├á ─Éß║ºu t╞░',
 ];
 
 const MOCK_REVIEWERS = [
-  { id: 'rv-01', name: 'Nguyễn Văn An', title: 'Trưởng phòng CNTT' },
-  { id: 'rv-02', name: 'Trần Thị Bình', title: 'Phó Cục trưởng' },
-  { id: 'rv-03', name: 'Lê Văn Cường', title: 'Trưởng ban Quản lý dữ liệu' },
-  { id: 'rv-04', name: 'Phạm Thị Dung', title: 'Giám đốc Kho dữ liệu' },
-  { id: 'rv-05', name: 'Hoàng Văn Em', title: 'Trưởng phòng Pháp chế' },
+  { id: 'rv-01', name: 'Nguyß╗àn V─ân An', title: 'Tr╞░ß╗ƒng ph├▓ng CNTT' },
+  { id: 'rv-02', name: 'Trß║ºn Thß╗ï B├¼nh', title: 'Ph├│ Cß╗Ñc tr╞░ß╗ƒng' },
+  { id: 'rv-03', name: 'L├¬ V─ân C╞░ß╗¥ng', title: 'Tr╞░ß╗ƒng ban Quß║ún l├╜ dß╗» liß╗çu' },
+  { id: 'rv-04', name: 'Phß║ím Thß╗ï Dung', title: 'Gi├ím ─æß╗æc Kho dß╗» liß╗çu' },
+  { id: 'rv-05', name: 'Ho├áng V─ân Em', title: 'Tr╞░ß╗ƒng ph├▓ng Ph├íp chß║┐' },
 ];
 
 const WIZARD_MOCK_ENTITIES = [
-  { id: 'me-citizen', code: 'CITIZEN', name: 'Công dân' },
-  { id: 'me-org', code: 'ORG', name: 'Tổ chức' },
-  { id: 'me-authority', code: 'AUTHORITY', name: 'Cơ quan nhà nước' },
-  { id: 'me-address', code: 'ADDRESS', name: 'Địa chỉ hành chính' },
-  { id: 'me-land', code: 'LAND', name: 'Đất đai' },
-  { id: 'me-vehicle', code: 'VEHICLE', name: 'Phương tiện' },
-  { id: 'me-license', code: 'LICENSE', name: 'Giấy phép' },
+  { id: 'me-citizen',   code: 'CITIZEN',   name: 'C├┤ng d├ón' },
+  { id: 'me-org',       code: 'ORG',       name: 'Tß╗ò chß╗⌐c' },
+  { id: 'me-authority', code: 'AUTHORITY', name: 'C╞í quan nh├á n╞░ß╗¢c' },
+  { id: 'me-address',   code: 'ADDRESS',   name: '─Éß╗ïa chß╗ë h├ánh ch├¡nh' },
+  { id: 'me-land',      code: 'LAND',      name: '─Éß║Ñt ─æai' },
+  { id: 'me-vehicle',   code: 'VEHICLE',   name: 'Ph╞░╞íng tiß╗çn' },
+  { id: 'me-license',   code: 'LICENSE',   name: 'Giß║Ñy ph├⌐p' },
 ];
 
 const MATCH_METHOD_LABELS: Record<MatchMethod, string> = {
-  exact: 'Khớp tuyệt đối',
-  fuzzy: 'Khớp gần đúng',
-  normalized: 'Chuẩn hóa',
+  exact: 'Khß╗¢p tuyß╗çt ─æß╗æi',
+  fuzzy: 'Khß╗¢p gß║ºn ─æ├║ng',
+  normalized: 'Chuß║⌐n h├│a',
 };
 
 const FUZZY_ALGORITHMS: { value: FuzzyAlgorithm; label: string }[] = [
-  { value: 'jaro_winkler', label: 'Tương đồng chuỗi' },
-<<<<<<< HEAD
-  { value: 'levenshtein',  label: 'Khoảng cách chỉnh sửa' },
-  { value: 'phonetic',     label: 'Ngữ âm' },
-=======
-  { value: 'levenshtein', label: 'Khoảng cách chỉnh sửa' },
-  { value: 'phonetic', label: 'Phiên âm tên' },
->>>>>>> d0d4b0c898b5cf43e3568a8815a60624cbbd3882
+  { value: 'jaro_winkler', label: 'T╞░╞íng ─æß╗ông chuß╗ùi' },
+  { value: 'levenshtein',  label: 'Khoß║úng c├ích chß╗ënh sß╗¡a' },
+  { value: 'phonetic',     label: 'Ngß╗» ├óm' },
 ];
 
 const CONFLICT_STRATEGY_LABELS: Record<ConflictStrategy, string> = {
-  source: 'Theo nguồn',
-  priority: 'Độ ưu tiên',
+  source: 'Theo nguß╗ôn',
+  priority: '─Éß╗Ö ╞░u ti├¬n',
 };
 
-<<<<<<< HEAD
 const WIZARD_MOCK_SAMPLES = [
-  { id: 'sample-100',  label: '100 bản ghi - kiểm tra logic cơ bản' },
-  { id: 'sample-500',  label: '500 bản ghi - kiểm tra tỷ lệ khớp' },
-  { id: 'sample-1000', label: '1000 - kiểm tra toàn diện' },
+  { id: 'sample-100',  label: '100 bß║ún ghi - kiß╗âm tra logic c╞í bß║ún' },
+  { id: 'sample-500',  label: '500 bß║ún ghi - kiß╗âm tra tß╗╖ lß╗ç khß╗¢p' },
+  { id: 'sample-1000', label: '1000 - kiß╗âm tra to├án diß╗çn' },
 ];
 
 const MOCK_REVIEW_ITEMS = [
-  { id: 'rev-1', pair: 'HT-0451 ↔ CC-1123', score: 82, reason: 'Trùng họ tên và ngày sinh nhưng khác số định danh' },
-  { id: 'rev-2', pair: 'HT-0777 ↔ CC-2098', score: 78, reason: 'Tên tương đồng chuỗi nhưng địa chỉ khác nhau' },
-  { id: 'rev-3', pair: 'HT-0912 ↔ CC-3011', score: 85, reason: 'Trùng số CCCD nhưng họ tên thiếu tên đệm' },
-  { id: 'rev-4', pair: 'HT-1204 ↔ CC-4150', score: 76, reason: 'Trùng họ tên, ngày sinh nhưng khác tỉnh thành thường trú' },
-  { id: 'rev-5', pair: 'HT-1588 ↔ CC-5099', score: 80, reason: 'Số định danh gần đúng, khác ngày cấp CCCD' },
+  { id: 'rev-1', pair: 'HT-0451 Γåö CC-1123', score: 82, reason: 'Tr├╣ng hß╗ì t├¬n v├á ng├áy sinh nh╞░ng kh├íc sß╗æ ─æß╗ïnh danh' },
+  { id: 'rev-2', pair: 'HT-0777 Γåö CC-2098', score: 78, reason: 'T├¬n t╞░╞íng ─æß╗ông chuß╗ùi nh╞░ng ─æß╗ïa chß╗ë kh├íc nhau' },
+  { id: 'rev-3', pair: 'HT-0912 Γåö CC-3011', score: 85, reason: 'Tr├╣ng sß╗æ CCCD nh╞░ng hß╗ì t├¬n thiß║┐u t├¬n ─æß╗çm' },
+  { id: 'rev-4', pair: 'HT-1204 Γåö CC-4150', score: 76, reason: 'Tr├╣ng hß╗ì t├¬n, ng├áy sinh nh╞░ng kh├íc tß╗ënh th├ánh th╞░ß╗¥ng tr├║' },
+  { id: 'rev-5', pair: 'HT-1588 Γåö CC-5099', score: 80, reason: 'Sß╗æ ─æß╗ïnh danh gß║ºn ─æ├║ng, kh├íc ng├áy cß║Ñp CCCD' },
 ];
 
 const MOCK_UNMATCHED_ITEMS = [
-  { id: 'unmatch-1', record: 'HT-9901', sourceName: 'Hộ tịch', maxScore: 42, reason: 'Không tìm thấy bản ghi tương đồng vượt ngưỡng 75%', defaultAction: '' },
-  { id: 'unmatch-2', record: 'CC-8820', sourceName: 'CCCD', maxScore: 35, reason: 'Số định danh và thông tin cá nhân khác biệt hoàn toàn', defaultAction: '' },
-  { id: 'unmatch-3', record: 'HT-9945', sourceName: 'Hộ tịch', maxScore: 48, reason: 'Trùng ngày sinh nhưng thông tin tên không trùng khớp', defaultAction: '' },
-  { id: 'unmatch-4', record: 'CC-9102', sourceName: 'CCCD', maxScore: 28, reason: 'Bản ghi thiếu thông tin định danh tối thiểu', defaultAction: '' },
-  { id: 'unmatch-5', record: 'HT-9988', sourceName: 'Hộ tịch', maxScore: 50, reason: 'Điểm so khớp thấp hơn ngưỡng rà soát 75%', defaultAction: '' },
-=======
-const TEST_SIZE_TIERS: { key: TestSizeTier; label: string; count: number; description: string }[] = [
-  { key: 'fast', label: 'Nhanh', count: 100, description: 'Kiểm tra logic cơ bản, xem cấu hình có đúng chiều không' },
-  { key: 'standard', label: 'Tiêu chuẩn', count: 500, description: 'Kiểm tra tỷ lệ khớp, đủ để phát hiện vấn đề phổ biến' },
-  { key: 'comprehensive', label: 'Toàn diện', count: 2000, description: 'Kiểm tra trước khi lưu cấu hình chính thức' },
+  { id: 'unmatch-1', record: 'HT-9901', sourceName: 'Hß╗Ö tß╗ïch', maxScore: 42, reason: 'Kh├┤ng t├¼m thß║Ñy bß║ún ghi t╞░╞íng ─æß╗ông v╞░ß╗út ng╞░ß╗íng 75%', defaultAction: '' },
+  { id: 'unmatch-2', record: 'CC-8820', sourceName: 'CCCD', maxScore: 35, reason: 'Sß╗æ ─æß╗ïnh danh v├á th├┤ng tin c├í nh├ón kh├íc biß╗çt ho├án to├án', defaultAction: '' },
+  { id: 'unmatch-3', record: 'HT-9945', sourceName: 'Hß╗Ö tß╗ïch', maxScore: 48, reason: 'Tr├╣ng ng├áy sinh nh╞░ng th├┤ng tin t├¬n kh├┤ng tr├╣ng khß╗¢p', defaultAction: '' },
+  { id: 'unmatch-4', record: 'CC-9102', sourceName: 'CCCD', maxScore: 28, reason: 'Bß║ún ghi thiß║┐u th├┤ng tin ─æß╗ïnh danh tß╗æi thiß╗âu', defaultAction: '' },
+  { id: 'unmatch-5', record: 'HT-9988', sourceName: 'Hß╗Ö tß╗ïch', maxScore: 50, reason: '─Éiß╗âm so khß╗¢p thß║Ñp h╞ín ng╞░ß╗íng r├á so├ít 75%', defaultAction: '' },
 ];
 
-const SAMPLING_STRATEGIES: { key: SamplingStrategy; label: string; description: string }[] = [
-  { key: 'random', label: 'Lấy ngẫu nhiên', description: 'Phân phối đều, phù hợp kiểm tra tổng quát.' },
-  { key: 'targeted', label: 'Lấy có chủ đích', description: 'Ví dụ lấy các bản ghi có khả năng trùng cao (cùng họ tên, cùng năm sinh) để kiểm tra ngưỡng so khớp có hoạt động đúng không.' },
-  { key: 'time_range', label: 'Lấy theo khoảng thời gian', description: 'Ví dụ chỉ lấy dữ liệu nhập trong tháng gần nhất, phản ánh chất lượng dữ liệu hiện tại.' },
-];
+const WIZARD_SOURCE_OPTIONS = ['Hß╗Ö tß╗ïch', 'CCCD', '─ÉKKD', 'LLTP', 'Bß╗ò trß╗ú t╞░ ph├íp'];
 
-const TEST_TIME_RANGE_OPTIONS = [
-  { value: '30d', label: 'Tháng gần nhất (30 ngày)' },
-  { value: '90d', label: '3 tháng gần nhất' },
-  { value: '180d', label: '6 tháng gần nhất' },
->>>>>>> d0d4b0c898b5cf43e3568a8815a60624cbbd3882
-];
-
-const WIZARD_SOURCE_OPTIONS = ['Hộ tịch', 'CCCD', 'ĐKKD', 'LLTP', 'Bổ trợ tư pháp'];
-
-<<<<<<< HEAD
-// Ánh xạ tên nguồn đã đăng ký ở Bước 1 (wizardData.sources) sang id cơ sở dữ liệu DLDC tương ứng
+// ├ünh xß║í t├¬n nguß╗ôn ─æ├ú ─æ─âng k├╜ ß╗ƒ B╞░ß╗¢c 1 (wizardData.sources) sang id c╞í sß╗ƒ dß╗» liß╗çu DLDC t╞░╞íng ß╗⌐ng
 const SOURCE_NAME_TO_DB_ID: Record<string, string> = {
-  'Hộ tịch': 'hotich',
+  'Hß╗Ö tß╗ïch': 'hotich',
   'CCCD': 'cccd',
-  'ĐKKD': 'dkkd',
+  '─ÉKKD': 'dkkd',
   'LLTP': 'lltp',
-  'Bổ trợ tư pháp': 'btdp',
-=======
-// Ánh xạ tên nguồn đăng ký ở Bước 1 → CSDL + bảng chính tương ứng trong Kho DLDC
-const SOURCE_NAME_TO_DLDC_TABLE: Record<string, { dbId: string; tableId: string }> = {
-  'Hộ tịch': { dbId: 'hotich', tableId: 'tbl_khaisinh' },
-  'CCCD': { dbId: 'cccd', tableId: 'tbl_can_cuoc' },
-  'ĐKKD': { dbId: 'dkkd', tableId: 'tbl_doanhnghiep' },
-  'LLTP': { dbId: 'lltp', tableId: 'tbl_ly_lich_tu_phap' },
-  'Bổ trợ tư pháp': { dbId: 'btdp', tableId: 'tbl_cong_chung' },
->>>>>>> d0d4b0c898b5cf43e3568a8815a60624cbbd3882
+  'Bß╗ò trß╗ú t╞░ ph├íp': 'btdp',
 };
 
 const SOURCE_KIND_LABELS: Record<SourceKind, string> = {
-  table: 'Bảng',
+  table: 'Bß║úng',
   view: 'View',
-  query: 'Truy vấn',
+  query: 'Truy vß║Ñn',
 };
 
 const SOURCE_KIND_COLORS: Record<SourceKind, string> = {
@@ -478,8 +436,28 @@ const SOURCE_GRAIN_COLORS: Record<SourceGrain, string> = {
   '1:n': 'bg-emerald-50 text-emerald-700 border-emerald-200',
 };
 
-<<<<<<< HEAD
-// Tên cột mock để ánh xạ nguồn → thuộc tính
+const DATA_TYPE_LABELS: Record<DataType, string> = {
+  individual: 'Thß╗▒c thß╗â C├í nh├ón',
+  organization: 'Thß╗▒c thß╗â Tß╗ò chß╗⌐c',
+  legal: 'Thß╗▒c thß╗â V─ân bß║ún/Sß╗▒ kiß╗çn ph├íp l├╜',
+  asset: 'Thß╗▒c thß╗â T├ái sß║ún',
+};
+
+const SCOPE_TYPE_LABELS: Record<ScopeType, string> = {
+  national: 'Cß║Ñp quß╗æc gia',
+  ministry: 'Cß║Ñp bß╗Ö',
+  provincial: 'Cß║Ñp tß╗ënh/th├ánh',
+  internal: 'Nß╗Öi bß╗Ö',
+};
+
+const LIFECYCLE_STATUS_LABELS: Record<LifecycleStatus, string> = {
+  draft: '─Éang soß║ín thß║úo',
+  active: '─É├ú hiß╗çu lß╗▒c',
+  inactive: 'Ngß╗½ng sß╗¡ dß╗Ñng',
+  archived: '─É├ú l╞░u trß╗»',
+};
+
+// T├¬n cß╗Öt mock ─æß╗â ├ính xß║í nguß╗ôn ΓåÆ thuß╗Öc t├¡nh
 const MOCK_SOURCE_COLUMNS: { name: string; dataType: FieldDataType }[] = [
   { name: 'HoVaTen',     dataType: 'string' },
   { name: 'FullName',    dataType: 'string' },
@@ -495,7 +473,7 @@ const MOCK_SOURCE_COLUMNS: { name: string; dataType: FieldDataType }[] = [
   { name: 'UpdatedAt',   dataType: 'date' },
 ];
 
-// Nhóm kiểu dữ liệu tương thích — dùng để phát hiện lệch kiểu khi ánh xạ cột nguồn → thuộc tính
+// Nh├│m kiß╗âu dß╗» liß╗çu t╞░╞íng th├¡ch ΓÇö d├╣ng ─æß╗â ph├ít hiß╗çn lß╗çch kiß╗âu khi ├ính xß║í cß╗Öt nguß╗ôn ΓåÆ thuß╗Öc t├¡nh
 const DATA_TYPE_GROUP: Record<FieldDataType, string> = {
   string: 'text', text: 'text', email: 'text', phone: 'text', url: 'text',
   number: 'number',
@@ -503,20 +481,18 @@ const DATA_TYPE_GROUP: Record<FieldDataType, string> = {
   boolean: 'boolean',
 };
 
-=======
->>>>>>> d0d4b0c898b5cf43e3568a8815a60624cbbd3882
 const GROUP_RULE_LABELS: Record<GroupRuleType, string> = {
-  latest: 'Bản ghi mới nhất',
-  most_frequent: 'Xuất hiện nhiều nhất',
-  max: 'Lớn nhất',
-  min: 'Nhỏ nhất',
+  latest: 'Bß║ún ghi mß╗¢i nhß║Ñt',
+  most_frequent: 'Xuß║Ñt hiß╗çn nhiß╗üu nhß║Ñt',
+  max: 'Lß╗¢n nhß║Ñt',
+  min: 'Nhß╗Å nhß║Ñt',
 };
 
 const REL_TYPE_LABELS: Record<WizardRelType, string> = {
-  '1-1': '1 - 1 (Một - Một)',
-  '1-n': '1 - n (Một - Nhiều)',
-  'n-1': 'n - 1 (Nhiều - Một)',
-  'n-n': 'n - n (Nhiều - Nhiều)',
+  '1-1': '1 - 1 (Mß╗Öt - Mß╗Öt)',
+  '1-n': '1 - n (Mß╗Öt - Nhiß╗üu)',
+  'n-1': 'n - 1 (Nhiß╗üu - Mß╗Öt)',
+  'n-n': 'n - n (Nhiß╗üu - Nhiß╗üu)',
 };
 
 const REL_TYPE_COLORS: Record<WizardRelType, string> = {
@@ -527,10 +503,10 @@ const REL_TYPE_COLORS: Record<WizardRelType, string> = {
 };
 
 const BASE_TARGET_FIELDS = [
-  { name: 'id', label: 'ID định danh' },
-  { name: 'code', label: 'Mã định danh' },
-  { name: 'name', label: 'Tên/Tiêu đề' },
-  { name: 'status', label: 'Trạng thái' },
+  { name: 'id',     label: 'ID ─æß╗ïnh danh' },
+  { name: 'code',   label: 'M├ú ─æß╗ïnh danh' },
+  { name: 'name',   label: 'T├¬n/Ti├¬u ─æß╗ü' },
+  { name: 'status', label: 'Trß║íng th├íi' },
 ];
 
 const EMPTY_REL_FORM: RelFormData = {
@@ -539,41 +515,16 @@ const EMPTY_REL_FORM: RelFormData = {
 };
 
 const steps = [
-  { number: 1, title: 'Khởi tạo dữ liệu chủ', description: 'Thông tin cơ bản và nguồn dữ liệu' },
-  { number: 2, title: 'Tạo thuộc tính', description: 'Định nghĩa các trường dữ liệu' },
-  { number: 3, title: 'Quy tắc hợp nhất', description: 'Thiết lập quy tắc merge dữ liệu' },
-  { number: 4, title: 'Thiết lập quan hệ', description: 'Liên kết giữa các thực thể' },
-  { number: 5, title: 'Định danh duy nhất', description: 'Thiết lập quy tắc mã định danh' },
-  { number: 6, title: 'Phê duyệt', description: 'Xem lại và gửi phê duyệt' },
+  { number: 1, title: 'Khß╗ƒi tß║ío dß╗» liß╗çu chß╗º', description: 'Th├┤ng tin c╞í bß║ún v├á nguß╗ôn dß╗» liß╗çu' },
+  { number: 2, title: 'Tß║ío thuß╗Öc t├¡nh', description: '─Éß╗ïnh ngh─⌐a c├íc tr╞░ß╗¥ng dß╗» liß╗çu' },
+  { number: 3, title: 'Quy tß║»c hß╗úp nhß║Ñt', description: 'Thiß║┐t lß║¡p quy tß║»c merge dß╗» liß╗çu' },
+  { number: 4, title: 'Thiß║┐t lß║¡p quan hß╗ç', description: 'Li├¬n kß║┐t giß╗»a c├íc thß╗▒c thß╗â' },
+  { number: 5, title: '─Éß╗ïnh danh duy nhß║Ñt', description: 'Thiß║┐t lß║¡p quy tß║»c m├ú ─æß╗ïnh danh' },
+  { number: 6, title: 'Ph├¬ duyß╗çt', description: 'Xem lß║íi v├á gß╗¡i ph├¬ duyß╗çt' },
 ];
 
-const DEFAULT_WIZARD_DATA: WizardData = {
-  code: '',
-  name: '',
-  dataType: 'individual',
-  managingAgency: '',
-  scope: 'national',
-  description: '',
-  systemName: '',
-  lifecycleStatus: 'draft',
-  sources: [
-    { id: 'src-hotich', name: 'Hộ tịch', kind: 'table', grain: '1:1' },
-    { id: 'src-cccd', name: 'CCCD', kind: 'table', grain: '1:1' },
-  ],
-  dataSource: 'dldc',
-  dldcDatabase: '',
-  attributes: [],
-  mergeRules: [],
-  mapping: {},
-  groupRules: {},
-  relationships: [],
-  approvalReviewer: '',
-  approvalNotes: ''
-};
-
-export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: MasterDataWizardProps) {
+export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizardProps) {
   const [currentStep, setCurrentStep] = useState(1);
-<<<<<<< HEAD
   const [wizardData, setWizardData] = useState<WizardData>({
     code: '',
     name: '',
@@ -584,7 +535,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
     systemName: '',
     lifecycleStatus: 'draft',
     sources: [
-      { id: 'src-hotich', name: 'Hộ tịch', kind: 'table', grain: '1:1' },
+      { id: 'src-hotich', name: 'Hß╗Ö tß╗ïch', kind: 'table', grain: '1:1' },
       { id: 'src-cccd', name: 'CCCD', kind: 'table', grain: '1:1' },
     ],
     dataSource: 'dldc',
@@ -596,17 +547,6 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
     approvalReviewer: '',
     approvalNotes: ''
   });
-=======
-  const [wizardData, setWizardData] = useState<WizardData>(DEFAULT_WIZARD_DATA);
-
-  // Mở wizard: về bước 1; chế độ sửa (có initialData) seed dữ liệu, chế độ tạo mới reset về mặc định
-  useEffect(() => {
-    if (isOpen) {
-      setCurrentStep(1);
-      setWizardData(initialData ? { ...DEFAULT_WIZARD_DATA, ...initialData } : DEFAULT_WIZARD_DATA);
-    }
-  }, [isOpen, initialData]);
->>>>>>> d0d4b0c898b5cf43e3568a8815a60624cbbd3882
 
   const [currentAttribute, setCurrentAttribute] = useState<AttributeForm>({
     fieldName: '',
@@ -617,14 +557,14 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
     defaultValue: ''
   });
 
-  // Step 5 state — Thiết lập quan hệ
+  // Step 5 state ΓÇö Thiß║┐t lß║¡p quan hß╗ç
   const [relFormOpen, setRelFormOpen] = useState(false);
   const [editingRelId, setEditingRelId] = useState<string | null>(null);
   const [relFormData, setRelFormData] = useState<RelFormData>(EMPTY_REL_FORM);
   const [relFormError, setRelFormError] = useState('');
   const [relSearch, setRelSearch] = useState('');
 
-  // Step 2 state — Định danh duy nhất
+  // Step 2 state ΓÇö ─Éß╗ïnh danh duy nhß║Ñt
   const [identifierConfig, setIdentifierConfig] = useState<IdentifierConfig>({
     prefix: '',
     separator: '-',
@@ -635,7 +575,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
     checkDuplicate: true,
   });
 
-  // Step 3 (old step 2) state — Matching/Extraction/Merge
+  // Step 3 (old step 2) state ΓÇö Matching/Extraction/Merge
   const [matchingRules, setMatchingRules] = useState<MatchingRule[]>([]);
   const [extractionRules, setExtractionRules] = useState<ExtractionRule[]>([]);
   const [mergeConfig, setMergeConfig] = useState<MergeConfig>({
@@ -647,14 +587,11 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
     hardBlockFields: [],
   });
 
-  // Step 4 — sub-tabs + test simulation + hard-block input
+  // Step 4 ΓÇö sub-tabs + test simulation + hard-block input
   const [mergeSubTab, setMergeSubTab] = useState<MergeSubTab>('match');
   const [hardBlockInput, setHardBlockInput] = useState('');
-  const [testSizeTier, setTestSizeTier] = useState<TestSizeTier | ''>('');
-  const [samplingStrategy, setSamplingStrategy] = useState<SamplingStrategy | ''>('');
-  const [testTimeRange, setTestTimeRange] = useState(TEST_TIME_RANGE_OPTIONS[0].value);
+  const [testSample, setTestSample] = useState('');
   const [testRun, setTestRun] = useState(false);
-<<<<<<< HEAD
   const [reviewSelectedIds, setReviewSelectedIds] = useState<string[]>([]);
   const [reviewPage, setReviewPage] = useState<number>(1);
   const [unmatchedSelectedIds, setUnmatchedSelectedIds] = useState<string[]>([]);
@@ -676,11 +613,8 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
       setToastState(prev => ({ ...prev, show: false }));
     }, 3500);
   };
-=======
-  const canRunTest = !!testSizeTier && !!samplingStrategy;
->>>>>>> d0d4b0c898b5cf43e3568a8815a60624cbbd3882
 
-  // Step 1 — đăng ký nguồn dữ liệu (form thêm nguồn inline)
+  // Step 1 ΓÇö ─æ─âng k├╜ nguß╗ôn dß╗» liß╗çu (form th├¬m nguß╗ôn inline)
   const [sourceFormOpen, setSourceFormOpen] = useState(false);
   const [sourceForm, setSourceForm] = useState<{ name: string; kind: SourceKind; grain: SourceGrain }>({
     name: WIZARD_SOURCE_OPTIONS[0], kind: 'table', grain: '1:1',
@@ -701,7 +635,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
 
   const handleRemoveSource = (sourceId: string) => {
     setWizardData(prev => {
-      // dọn mapping & groupRules tham chiếu tới nguồn bị xóa
+      // dß╗ìn mapping & groupRules tham chiß║┐u tß╗¢i nguß╗ôn bß╗ï x├│a
       const nextMapping: Record<string, Record<string, string>> = {};
       Object.entries(prev.mapping).forEach(([attrKey, srcMap]) => {
         const { [sourceId]: _removed, ...rest } = srcMap;
@@ -710,14 +644,6 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
       const { [sourceId]: _rmGroup, ...nextGroupRules } = prev.groupRules;
       return { ...prev, sources: prev.sources.filter(s => s.id !== sourceId), mapping: nextMapping, groupRules: nextGroupRules };
     });
-    setDldcFieldRowsBySource(prev => {
-      const { [sourceId]: _removed, ...rest } = prev;
-      return rest;
-    });
-    if (activeSourceId === sourceId) {
-      setActiveSourceId('');
-      setDldcDatabase('');
-    }
   };
 
   const handleMappingChange = (attrKey: string, sourceId: string, column: string) => {
@@ -730,7 +656,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
     }));
   };
 
-  // Kiểm tra lệch nhóm kiểu dữ liệu giữa cột nguồn đã chọn và thuộc tính đích
+  // Kiß╗âm tra lß╗çch nh├│m kiß╗âu dß╗» liß╗çu giß╗»a cß╗Öt nguß╗ôn ─æ├ú chß╗ìn v├á thuß╗Öc t├¡nh ─æ├¡ch
   const isMappingMismatch = (targetType: FieldDataType, sourceColumn: string) => {
     if (!sourceColumn) return false;
     const sourceType = MOCK_SOURCE_COLUMNS.find(c => c.name === sourceColumn)?.dataType;
@@ -752,14 +678,13 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
     });
   };
 
-<<<<<<< HEAD
-  // DLDC step 2 state — chọn nhiều CSDL cùng lúc (chip đa lựa chọn)
+  // DLDC step 2 state ΓÇö chß╗ìn nhiß╗üu CSDL c├╣ng l├║c (chip ─æa lß╗▒a chß╗ìn)
   const [dldcSelectedDbIds, setDldcSelectedDbIds] = useState<string[]>([]);
   const [dldcFieldRows, setDldcFieldRows] = useState<DldcFieldRow[]>([]);
 
-  // Gộp trường của tất cả bảng thuộc các CSDL đang chọn; trùng tên trường giữa
-  // các bảng khác nhau được giữ lại như 2 dòng riêng (đánh dấu tên bảng để phân biệt)
-  // thay vì loại bỏ, vì cùng tên nhưng khác bảng có thể mang ngữ nghĩa khác nhau.
+  // Gß╗Öp tr╞░ß╗¥ng cß╗ºa tß║Ñt cß║ú bß║úng thuß╗Öc c├íc CSDL ─æang chß╗ìn; tr├╣ng t├¬n tr╞░ß╗¥ng giß╗»a
+  // c├íc bß║úng kh├íc nhau ─æ╞░ß╗úc giß╗» lß║íi nh╞░ 2 d├▓ng ri├¬ng (─æ├ính dß║Ñu t├¬n bß║úng ─æß╗â ph├ón biß╗çt)
+  // thay v├¼ loß║íi bß╗Å, v├¼ c├╣ng t├¬n nh╞░ng kh├íc bß║úng c├│ thß╗â mang ngß╗» ngh─⌐a kh├íc nhau.
   const buildDldcFieldRows = (dbIds: string[]): DldcFieldRow[] => {
     const entries = dbIds.flatMap(dbId => (DLDC_TABLES[dbId] || []).flatMap(table =>
       (DLDC_FIELDS[table.id] || []).map(f => ({ table, field: f }))
@@ -770,7 +695,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
       const isDup = nameCounts[field.fieldName] > 1;
       return {
         id: `fr-${table.id}-${field.fieldName}-${i}`,
-        shared: true,
+        shared: false,
         isPK: false,
         tableId: table.id,
         sourceJoinId: null,
@@ -778,6 +703,13 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
         displayName: isDup ? `${field.displayName} (${table.displayName})` : field.displayName,
         dataType: field.dataType,
       };
+    });
+  };
+
+  const handleToggleAllDldcShared = () => {
+    setDldcFieldRows(prev => {
+      const allShared = prev.length > 0 && prev.every(r => r.shared);
+      return prev.map(r => ({ ...r, shared: !allShared }));
     });
   };
 
@@ -791,46 +723,15 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
 
   const dldcAvailableTables = dldcSelectedDbIds.flatMap(id => DLDC_TABLES[id] || []);
 
-=======
-  // DLDC step 2 state — mỗi nguồn (Bước 1) lưu riêng danh sách trường đã chọn, không bị mất khi chuyển sang nguồn khác
-  const [dldcDatabase, setDldcDatabase] = useState('');
-  const [activeSourceId, setActiveSourceId] = useState('');
-  const [dldcFieldRowsBySource, setDldcFieldRowsBySource] = useState<Record<string, DldcFieldRow[]>>({});
-  const dldcFieldRows = dldcFieldRowsBySource[activeSourceId] || [];
-
-  const updateActiveFieldRows = (updater: (rows: DldcFieldRow[]) => DldcFieldRow[]) => {
-    if (!activeSourceId) return;
-    setDldcFieldRowsBySource(prev => ({ ...prev, [activeSourceId]: updater(prev[activeSourceId] || []) }));
-  };
-
-  const handleSelectRegisteredSource = (source: WizardSource) => {
-    const mapped = SOURCE_NAME_TO_DLDC_TABLE[source.name];
-    if (!mapped) return;
-    setDldcDatabase(mapped.dbId);
-    setActiveSourceId(source.id);
-    const fields = DLDC_FIELDS[mapped.tableId] || [];
-    setWizardData(prev => ({ ...prev, dldcDatabase: mapped.dbId, dldcTable: mapped.tableId, dldcColumns: fields.map(f => f.fieldName) }));
-    setDldcFieldRowsBySource(prev => {
-      if (prev[source.id]) return prev; // đã từng chọn nguồn này — giữ nguyên lựa chọn cũ
-      const rows: DldcFieldRow[] = fields.map((f, i) => ({
-        id: `fr-${source.id}-${i}`, shared: true, isPK: i === 0,
-        tableId: mapped.tableId,
-        columnName: f.fieldName, displayName: f.displayName, dataType: f.dataType,
-      }));
-      return { ...prev, [source.id]: rows };
-    });
-  };
-
->>>>>>> d0d4b0c898b5cf43e3568a8815a60624cbbd3882
   const handleDldcFieldToggle = (rowId: string, field: 'shared' | 'isPK') => {
-    updateActiveFieldRows(rows => rows.map(r => r.id === rowId ? { ...r, [field]: !r[field] } : r));
+    setDldcFieldRows(prev => prev.map(r => r.id === rowId ? { ...r, [field]: !r[field] } : r));
   };
 
   const handleDldcRemoveRow = (rowId: string) => {
-    updateActiveFieldRows(rows => rows.filter(r => r.id !== rowId));
+    setDldcFieldRows(prev => prev.filter(r => r.id !== rowId));
   };
 
-  // ── Step 5 handlers ──
+  // ΓöÇΓöÇ Step 5 handlers ΓöÇΓöÇ
   const handleOpenAddRel = () => {
     setEditingRelId(null);
     setRelFormData(EMPTY_REL_FORM);
@@ -860,14 +761,14 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
 
   const handleSaveRel = () => {
     setRelFormError('');
-    if (!relFormData.targetEntityId) { setRelFormError('Vui lòng chọn thực thể đích.'); return; }
+    if (!relFormData.targetEntityId) { setRelFormError('Vui l├▓ng chß╗ìn thß╗▒c thß╗â ─æ├¡ch.'); return; }
     if (relFormData.type === 'n-n') {
       if (!relFormData.mappingTable || !relFormData.sourceKey || !relFormData.targetKey) {
-        setRelFormError('Quan hệ n-n cần có đầy đủ: bảng liên kết, khóa ngoại nguồn và đích.'); return;
+        setRelFormError('Quan hß╗ç n-n cß║ºn c├│ ─æß║ºy ─æß╗º: bß║úng li├¬n kß║┐t, kh├│a ngoß║íi nguß╗ôn v├á ─æ├¡ch.'); return;
       }
     } else {
       if (!relFormData.sourceKey || !relFormData.targetKey) {
-        setRelFormError('Cần khai báo đầy đủ khóa nguồn và khóa đích.'); return;
+        setRelFormError('Cß║ºn khai b├ío ─æß║ºy ─æß╗º kh├│a nguß╗ôn v├á kh├│a ─æ├¡ch.'); return;
       }
     }
     const hasDuplicate = wizardData.relationships.some(r =>
@@ -875,15 +776,13 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
       r.targetEntityId === relFormData.targetEntityId &&
       r.type === relFormData.type
     );
-    if (hasDuplicate) { setRelFormError('Đã tồn tại quan hệ cùng loại với thực thể này.'); return; }
+    if (hasDuplicate) { setRelFormError('─É├ú tß╗ôn tß║íi quan hß╗ç c├╣ng loß║íi vß╗¢i thß╗▒c thß╗â n├áy.'); return; }
 
     const targetEntity = WIZARD_MOCK_ENTITIES.find(e => e.id === relFormData.targetEntityId);
     if (editingRelId) {
-      setWizardData({
-        ...wizardData, relationships: wizardData.relationships.map(r => r.id === editingRelId ? {
-          ...r, ...relFormData, targetEntityName: targetEntity?.name || relFormData.targetEntityName,
-        } : r)
-      });
+      setWizardData({ ...wizardData, relationships: wizardData.relationships.map(r => r.id === editingRelId ? {
+        ...r, ...relFormData, targetEntityName: targetEntity?.name || relFormData.targetEntityName,
+      } : r) });
     } else {
       const newRel: WizardRelationship = {
         id: `wr-${Date.now()}`,
@@ -906,21 +805,21 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
 
   if (!isOpen) return null;
 
-  // Step 1 — kiểm tra trùng Mã / Tên
+  // Step 1 ΓÇö kiß╗âm tra tr├╣ng M├ú / T├¬n
   const codeTrim = (wizardData.code || '').trim();
   const nameTrim = (wizardData.name || '').trim();
   const codeDuplicate = codeTrim.length > 0 && WIZARD_MOCK_ENTITIES.some(e => e.code.toLowerCase() === codeTrim.toLowerCase());
   const nameDuplicate = nameTrim.length > 0 && WIZARD_MOCK_ENTITIES.some(e => e.name.toLowerCase() === nameTrim.toLowerCase());
 
-  // Step 4 — tổng trọng số so khớp
+  // Step 4 ΓÇö tß╗òng trß╗ìng sß╗æ so khß╗¢p
   const totalWeight = matchingRules.reduce((sum, r) => sum + (Number(r.weight) || 0), 0);
 
-  // Nguồn đã đăng ký ở Bước 1
+  // Nguß╗ôn ─æ├ú ─æ─âng k├╜ ß╗ƒ B╞░ß╗¢c 1
   const registeredSources = wizardData.sources;
   const oneToManySources = registeredSources.filter(s => s.grain === '1:n');
-  // Chỉ hiện tab "Hợp nhất giá trị" khi có ≥2 nguồn
+  // Chß╗ë hiß╗çn tab "Hß╗úp nhß║Ñt gi├í trß╗ï" khi c├│ ΓëÑ2 nguß╗ôn
   const showSurvivorTab = registeredSources.length >= 2;
-  // Nếu tab survivor bị ẩn nhưng đang chọn → tự chuyển về 'match'
+  // Nß║┐u tab survivor bß╗ï ß║⌐n nh╞░ng ─æang chß╗ìn ΓåÆ tß╗▒ chuyß╗ân vß╗ü 'match'
   if (!showSurvivorTab && mergeSubTab === 'survivor') {
     setMergeSubTab('match');
   }
@@ -936,67 +835,46 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
     setMergeConfig(prev => ({ ...prev, hardBlockFields: prev.hardBlockFields.filter(f => f !== field) }));
   };
 
-  // Gộp trường đã chọn ("Chia sẻ") từ TẤT CẢ nguồn đã cấu hình ở "Chọn trường dữ liệu chia sẻ" (không chỉ nguồn đang xem)
-  const allSharedDldcFields = Array.from(
-    new Map(
-      Object.values(dldcFieldRowsBySource)
-        .flatMap(rows => rows.filter(r => r.shared))
-        .map(r => [r.columnName, r])
-    ).values()
-  );
-
   const availableFields = wizardData.dataSource === 'dldc'
-<<<<<<< HEAD
     ? dldcFieldRows.filter(r => r.shared).map(r => ({ fieldName: r.columnName, displayName: r.displayName, dataType: r.dataType }))
     : wizardData.attributes.map(a => ({ fieldName: a.fieldName, displayName: a.displayName, dataType: a.dataType }));
 
   const hasMappingMismatch = availableFields.some(attr =>
     registeredSources.some(src => isMappingMismatch(attr.dataType, wizardData.mapping[attr.fieldName]?.[src.id] || ''))
   );
-=======
-    ? allSharedDldcFields.map(r => ({ fieldName: r.columnName, displayName: r.displayName }))
-    : wizardData.attributes.map(a => ({ fieldName: a.fieldName, displayName: a.displayName }));
->>>>>>> d0d4b0c898b5cf43e3568a8815a60624cbbd3882
 
   const sourceEntityFields = [
     ...(wizardData.dataSource === 'dldc'
-      ? allSharedDldcFields.map(r => ({ name: r.columnName, label: r.displayName }))
+      ? dldcFieldRows.filter(r => r.shared).map(r => ({ name: r.columnName, label: r.displayName }))
       : wizardData.attributes.map(a => ({ name: a.fieldName, label: a.displayName }))),
-    ...(identifierConfig.prefix ? [{ name: 'identifier_code', label: 'Mã định danh' }] : []),
+    ...(identifierConfig.prefix ? [{ name: 'identifier_code', label: 'M├ú ─æß╗ïnh danh' }] : []),
   ];
 
-<<<<<<< HEAD
-=======
-  const availableSources: { id: string; label: string }[] = wizardData.dataSource === 'dldc'
-    ? [{ id: wizardData.dldcTable || 'primary', label: DLDC_TABLES[dldcDatabase]?.find(t => t.id === wizardData.dldcTable)?.displayName || 'Bảng chính' }]
-    : [{ id: 'manual', label: 'Nhập thủ công' }];
-
->>>>>>> d0d4b0c898b5cf43e3568a8815a60624cbbd3882
   const handleNext = () => {
     // Validation for each step
     if (currentStep === 1) {
       if (!wizardData.code?.trim() || !wizardData.name || !wizardData.managingAgency) {
-        alert('Vui lòng điền đầy đủ thông tin bắt buộc ở bước 1');
+        alert('Vui l├▓ng ─æiß╗ün ─æß║ºy ─æß╗º th├┤ng tin bß║»t buß╗Öc ß╗ƒ b╞░ß╗¢c 1');
         return;
       }
       if (codeDuplicate) {
-        alert('Mã thực thể đã tồn tại, vui lòng nhập giá trị khác.');
+        alert('M├ú thß╗▒c thß╗â ─æ├ú tß╗ôn tß║íi, vui l├▓ng nhß║¡p gi├í trß╗ï kh├íc.');
         return;
       }
       if (nameDuplicate) {
-        alert('Tên dữ liệu chủ đã tồn tại, vui lòng nhập giá trị khác.');
+        alert('T├¬n dß╗» liß╗çu chß╗º ─æ├ú tß╗ôn tß║íi, vui l├▓ng nhß║¡p gi├í trß╗ï kh├íc.');
         return;
       }
     }
     if (currentStep === 2) {
       if (wizardData.dataSource === 'dldc') {
         if (dldcFieldRows.filter(r => r.shared).length === 0) {
-          alert('Vui lòng chọn nguồn dữ liệu và ít nhất 1 trường chia sẻ');
+          alert('Vui l├▓ng chß╗ìn nguß╗ôn dß╗» liß╗çu v├á ├¡t nhß║Ñt 1 tr╞░ß╗¥ng chia sß║╗');
           return;
         }
       } else {
         if (wizardData.attributes.length === 0) {
-          alert('Vui lòng thêm ít nhất 1 thuộc tính');
+          alert('Vui l├▓ng th├¬m ├¡t nhß║Ñt 1 thuß╗Öc t├¡nh');
           return;
         }
       }
@@ -1016,11 +894,11 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
 
     if (currentStep === 3) {
       if (matchingRules.length > 0 && totalWeight !== 100) {
-        alert(`Tổng trọng số các quy tắc so khớp phải bằng 100%. Hiện tại: ${totalWeight}%.`);
+        alert(`Tß╗òng trß╗ìng sß╗æ c├íc quy tß║»c so khß╗¢p phß║úi bß║▒ng 100%. Hiß╗çn tß║íi: ${totalWeight}%.`);
         return;
       }
       if (mergeConfig.autoThreshold <= mergeConfig.reviewThreshold) {
-        alert('Ngưỡng tự động gộp phải lớn hơn ngưỡng cần rà soát.');
+        alert('Ng╞░ß╗íng tß╗▒ ─æß╗Öng gß╗Öp phß║úi lß╗¢n h╞ín ng╞░ß╗íng cß║ºn r├á so├ít.');
         return;
       }
     }
@@ -1038,7 +916,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
 
   const handleSubmitWizard = () => {
     if (!wizardData.approvalNotes) {
-      alert('Vui lòng nhập ghi chú phê duyệt');
+      alert('Vui l├▓ng nhß║¡p ghi ch├║ ph├¬ duyß╗çt');
       return;
     }
     onSubmit(wizardData);
@@ -1047,13 +925,13 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
 
   const handleAddAttribute = () => {
     if (!currentAttribute.fieldName || !currentAttribute.displayName) {
-      alert('Vui lòng điền tên trường và tên hiển thị');
+      alert('Vui l├▓ng ─æiß╗ün t├¬n tr╞░ß╗¥ng v├á t├¬n hiß╗ân thß╗ï');
       return;
     }
 
     // Check duplicate
     if (wizardData.attributes.some(a => a.fieldName === currentAttribute.fieldName)) {
-      alert('Tên trường đã tồn tại');
+      alert('T├¬n tr╞░ß╗¥ng ─æ├ú tß╗ôn tß║íi');
       return;
     }
 
@@ -1084,554 +962,314 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
     <Portal>
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
         <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[95vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300 ease-out">
-          {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-slate-200">
-            <div>
-              <h2 className="text-xl text-slate-900">Tạo mới dữ liệu chủ</h2>
-              <p className="text-[13px] text-slate-600 mt-1">Quy trình 6 bước</p>
-            </div>
-            <button onClick={onClose} className="p-1 hover:bg-slate-100 rounded" title="Đóng" aria-label="Đóng">
-              <X className="w-5 h-5" />
-            </button>
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-slate-200">
+          <div>
+            <h2 className="text-xl text-slate-900">Tß║ío mß╗¢i dß╗» liß╗çu chß╗º</h2>
+            <p className="text-[13px] text-slate-600 mt-1">Quy tr├¼nh 6 b╞░ß╗¢c</p>
           </div>
+          <button onClick={onClose} className="p-1 hover:bg-slate-100 rounded" title="─É├│ng" aria-label="─É├│ng">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
-          {/* Stepper */}
-          <div className="px-6 py-4 border-b border-slate-200 bg-slate-50">
-            <div className="flex items-center justify-between">
-              {steps.map((step, index) => (
-                <div key={step.number} className="flex items-center flex-1">
-                  <div className="flex flex-col items-center flex-1">
-                    <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center text-[13px] transition-colors ${currentStep > step.number
-                        ? 'bg-green-600 text-white'
-                        : currentStep === step.number
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-slate-200 text-slate-600'
-                        }`}
-                    >
-                      {currentStep > step.number ? <Check className="w-5 h-5" /> : step.number}
-                    </div>
-                    <p
-                      className={`text-[13px] mt-2 text-center ${currentStep === step.number ? 'text-blue-600' : 'text-slate-600'
-                        }`}
-                    >
-                      {step.title}
-                    </p>
+        {/* Stepper */}
+        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50">
+          <div className="flex items-center justify-between">
+            {steps.map((step, index) => (
+              <div key={step.number} className="flex items-center flex-1">
+                <div className="flex flex-col items-center flex-1">
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center text-[13px] transition-colors ${currentStep > step.number
+                      ? 'bg-green-600 text-white'
+                      : currentStep === step.number
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-slate-200 text-slate-600'
+                      }`}
+                  >
+                    {currentStep > step.number ? <Check className="w-5 h-5" /> : step.number}
                   </div>
-                  {index < steps.length - 1 && (
-                    <div className="flex-1 h-0.5 bg-slate-200 mx-2 mt-[-30px]" />
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Content */}
-          <div className="flex-1 overflow-y-auto p-6">
-            {/* Step 1: Khởi tạo dữ liệu chủ */}
-            {currentStep === 1 && (
-              <div className="space-y-4">
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                  <h3 className="text-[13px] font-semibold text-blue-900 mb-1">Bước 1: Khởi tạo dữ liệu chủ</h3>
-                  <p className="text-[13px] text-blue-700">
-                    Nhập thông tin cơ bản và cấu hình nguồn dữ liệu cho thực thể dữ liệu chủ
+                  <p
+                    className={`text-[13px] mt-2 text-center ${currentStep === step.number ? 'text-blue-600' : 'text-slate-600'
+                      }`}
+                  >
+                    {step.title}
                   </p>
                 </div>
+                {index < steps.length - 1 && (
+                  <div className="flex-1 h-0.5 bg-slate-200 mx-2 mt-[-30px]" />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
 
-                {/* Mã thực thể */}
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-6">
+          {/* Step 1: Khß╗ƒi tß║ío dß╗» liß╗çu chß╗º */}
+          {currentStep === 1 && (
+            <div className="space-y-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <h3 className="text-[13px] font-semibold text-blue-900 mb-1">B╞░ß╗¢c 1: Khß╗ƒi tß║ío dß╗» liß╗çu chß╗º</h3>
+                <p className="text-[13px] text-blue-700">
+                  Nhß║¡p th├┤ng tin c╞í bß║ún v├á cß║Ñu h├¼nh nguß╗ôn dß╗» liß╗çu cho thß╗▒c thß╗â dß╗» liß╗çu chß╗º
+                </p>
+              </div>
+
+              {/* M├ú thß╗▒c thß╗â */}
+              <div>
+                <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
+                  M├ú thß╗▒c thß╗â <span className="text-red-600">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={wizardData.code || ''}
+                  onChange={(e) => setWizardData({ ...wizardData, code: e.target.value })}
+                  placeholder="VD: MD-CITIZEN-001"
+                  className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700"
+                />
+                {codeTrim.length > 0 && (
+                  codeDuplicate ? (
+                    <p className="flex items-center gap-1 mt-1 text-[13px] text-red-600">
+                      <AlertCircle className="w-3.5 h-3.5" /> ─É├ú tß╗ôn tß║íi, vui l├▓ng nhß║¡p gi├í trß╗ï kh├íc
+                    </p>
+                  ) : (
+                    <p className="flex items-center gap-1 mt-1 text-[13px] text-green-600">
+                      <Check className="w-3.5 h-3.5" /> Hß╗úp lß╗ç, ch╞░a tr├╣ng
+                    </p>
+                  )
+                )}
+              </div>
+
+              {/* T├¬n dß╗» liß╗çu chß╗º */}
+              <div>
+                <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
+                  T├¬n dß╗» liß╗çu chß╗º <span className="text-red-600">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={wizardData.name}
+                  onChange={(e) => setWizardData({ ...wizardData, name: e.target.value })}
+                  placeholder="VD: Bß╗Ö dß╗» liß╗çu chß╗º C├┤ng d├ón"
+                  className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700"
+                />
+                {nameTrim.length > 0 && (
+                  nameDuplicate ? (
+                    <p className="flex items-center gap-1 mt-1 text-[13px] text-red-600">
+                      <AlertCircle className="w-3.5 h-3.5" /> ─É├ú tß╗ôn tß║íi, vui l├▓ng nhß║¡p gi├í trß╗ï kh├íc
+                    </p>
+                  ) : (
+                    <p className="flex items-center gap-1 mt-1 text-[13px] text-green-600">
+                      <Check className="w-3.5 h-3.5" /> Hß╗úp lß╗ç, ch╞░a tr├╣ng
+                    </p>
+                  )
+                )}
+              </div>
+
+              {/* Loß║íi thß╗▒c thß╗â + Phß║ím vi */}
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                    Mã thực thể <span className="text-red-600">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={wizardData.code || ''}
-                    onChange={(e) => setWizardData({ ...wizardData, code: e.target.value })}
-                    placeholder="VD: MD-CITIZEN-001"
-                    className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700"
-                  />
-                  {codeTrim.length > 0 && (
-                    codeDuplicate ? (
-                      <p className="flex items-center gap-1 mt-1 text-[13px] text-red-600">
-                        <AlertCircle className="w-3.5 h-3.5" /> Đã tồn tại, vui lòng nhập giá trị khác
-                      </p>
-                    ) : (
-                      <p className="flex items-center gap-1 mt-1 text-[13px] text-green-600">
-                        <Check className="w-3.5 h-3.5" /> Hợp lệ, chưa trùng
-                      </p>
-                    )
-                  )}
-                </div>
-
-                {/* Tên dữ liệu chủ */}
-                <div>
-                  <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                    Tên dữ liệu chủ <span className="text-red-600">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={wizardData.name}
-                    onChange={(e) => setWizardData({ ...wizardData, name: e.target.value })}
-                    placeholder="VD: Bộ dữ liệu chủ Công dân"
-                    className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700"
-                  />
-                  {nameTrim.length > 0 && (
-                    nameDuplicate ? (
-                      <p className="flex items-center gap-1 mt-1 text-[13px] text-red-600">
-                        <AlertCircle className="w-3.5 h-3.5" /> Đã tồn tại, vui lòng nhập giá trị khác
-                      </p>
-                    ) : (
-                      <p className="flex items-center gap-1 mt-1 text-[13px] text-green-600">
-                        <Check className="w-3.5 h-3.5" /> Hợp lệ, chưa trùng
-                      </p>
-                    )
-                  )}
-                </div>
-
-                {/* Đơn vị chủ quản */}
-                <div>
-                  <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                    Đơn vị chủ quản <span className="text-red-600">*</span>
-                  </label>
-                  <select
-                    value={wizardData.managingAgency}
-                    onChange={(e) => setWizardData({ ...wizardData, managingAgency: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 cursor-pointer"
-                  >
-                    <option value="">-- Chọn đơn vị chủ quản --</option>
-                    {MANAGING_UNITS.map(u => (
-                      <option key={u} value={u}>{u}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Tên cơ sở dữ liệu / Hệ thống */}
-                <div>
-                  <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                    Tên cơ sở dữ liệu / Hệ thống
-                  </label>
-                  <input
-                    type="text"
-                    value={wizardData.systemName || ''}
-                    onChange={(e) => setWizardData({ ...wizardData, systemName: e.target.value })}
-                    placeholder="VD: CSDL hộ tịch điện tử, Hệ thống TGPL..."
-                    className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700"
-                  />
-                </div>
-
-                {/* Loại thực thể + Phạm vi */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-<<<<<<< HEAD
-                    <h4 className="text-[13px] font-bold text-slate-900">Đăng ký nguồn dữ liệu</h4>
-                    <p className="text-[13px] text-slate-500 mt-0.5">Các nguồn đăng ký ở đây sẽ được dùng để ánh xạ ở Bước 2</p>
-=======
-                    <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                      Loại thực thể <span className="text-red-600">*</span>
-                    </label>
-                    <select
-                      value={wizardData.dataType}
-                      onChange={(e) => setWizardData({ ...wizardData, dataType: e.target.value as DataType })}
-                      className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 cursor-pointer"
-                    >
-                      <option value="individual">Thực thể Cá nhân</option>
-                      <option value="organization">Thực thể Tổ chức</option>
-                      <option value="legal">Thực thể Văn bản/Sự kiện pháp lý</option>
-                      <option value="asset">Thực thể Tài sản</option>
-                    </select>
->>>>>>> d0d4b0c898b5cf43e3568a8815a60624cbbd3882
-                  </div>
-                  <div>
-                    <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                      Phạm vi sử dụng <span className="text-red-600">*</span>
-                    </label>
-                    <select
-                      value={wizardData.scope}
-                      onChange={(e) => setWizardData({ ...wizardData, scope: e.target.value as ScopeType })}
-                      className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 cursor-pointer"
-                    >
-                      <option value="national">Cấp quốc gia</option>
-                      <option value="ministry">Cấp bộ</option>
-                      <option value="provincial">Cấp tỉnh/thành</option>
-                      <option value="internal">Nội bộ</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Mô tả đối tượng */}
-                <div>
-                  <label className="block text-[13px] font-medium text-slate-700 mb-1.5">Mô tả đối tượng</label>
-                  <textarea
-                    value={wizardData.description}
-                    onChange={(e) => setWizardData({ ...wizardData, description: e.target.value })}
-                    placeholder="Mô tả tóm tắt về đối tượng dữ liệu chủ này..."
-                    rows={3}
-                    className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 resize-none"
-                  />
-                </div>
-
-                {/* Trạng thái vòng đời */}
-                <div>
-                  <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                    Trạng thái vòng đời
+                    Loß║íi thß╗▒c thß╗â <span className="text-red-600">*</span>
                   </label>
                   <select
-                    value={wizardData.lifecycleStatus}
-                    onChange={(e) => setWizardData({ ...wizardData, lifecycleStatus: e.target.value as LifecycleStatus })}
+                    value={wizardData.dataType}
+                    onChange={(e) => setWizardData({ ...wizardData, dataType: e.target.value as DataType })}
                     className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 cursor-pointer"
                   >
-                    <option value="draft">Đang soạn thảo</option>
-                    <option value="active">Đã hiệu lực</option>
-                    <option value="inactive">Ngừng sử dụng</option>
-                    <option value="archived">Đã lưu trữ</option>
+                    <option value="individual">Thß╗▒c thß╗â C├í nh├ón</option>
+                    <option value="organization">Thß╗▒c thß╗â Tß╗ò chß╗⌐c</option>
+                    <option value="legal">Thß╗▒c thß╗â V─ân bß║ún/Sß╗▒ kiß╗çn ph├íp l├╜</option>
+                    <option value="asset">Thß╗▒c thß╗â T├ái sß║ún</option>
                   </select>
                 </div>
-
-                {/* Đăng ký nguồn dữ liệu (chip + grain) */}
-                <div className="pt-4 border-t border-slate-200">
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <h4 className="text-[13px] font-bold text-slate-900">Đăng ký nguồn dữ liệu</h4>
-                      <p className="text-[13px] text-slate-500 mt-0.5">Các nguồn đăng ký ở đây sẽ được dùng để ánh xạ ở Bước 3</p>
-                    </div>
-                    {!sourceFormOpen && (
-                      <button
-                        type="button"
-                        onClick={() => setSourceFormOpen(true)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-200 text-blue-600 text-[13px] font-medium rounded-lg hover:bg-blue-50 transition-colors"
-                      >
-                        <Plus className="w-3.5 h-3.5" /> Thêm nguồn
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Danh sách chip */}
-                  <div className="flex flex-wrap items-center gap-2">
-                    {wizardData.sources.length === 0 && (
-                      <span className="text-[13px] text-slate-400">Chưa đăng ký nguồn dữ liệu nào</span>
-                    )}
-                    {wizardData.sources.map(src => (
-                      <span
-                        key={src.id}
-                        className="inline-flex items-center gap-2 pl-3 pr-2 py-1.5 bg-white border border-slate-200 rounded-full text-[13px]"
-                      >
-                        <span className="font-medium text-slate-700">{src.name}</span>
-                        <span className={`px-1.5 py-0.5 rounded-full border text-[13px] font-medium ${SOURCE_KIND_COLORS[src.kind]}`}>
-                          {SOURCE_KIND_LABELS[src.kind]}
-                        </span>
-                        <span className={`px-1.5 py-0.5 rounded-full border text-[13px] font-medium ${SOURCE_GRAIN_COLORS[src.grain]}`}>
-                          {src.grain}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveSource(src.id)}
-                          className="text-slate-400 hover:text-red-500 transition-colors"
-                          title="Xóa nguồn"
-                          aria-label="Xóa nguồn"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Form thêm nguồn inline */}
-                  {sourceFormOpen && (
-                    <div className="mt-3 border border-blue-200 rounded-xl bg-blue-50/30 p-4">
-                      <div className="grid grid-cols-3 gap-3">
-                        <div>
-                          <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Tên nguồn</label>
-                          <select
-                            value={sourceForm.name}
-                            onChange={(e: ChangeEvent<HTMLSelectElement>) => setSourceForm(prev => ({ ...prev, name: e.target.value }))}
-                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
-                          >
-                            {WIZARD_SOURCE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Loại nguồn</label>
-                          <select
-                            value={sourceForm.kind}
-                            onChange={(e: ChangeEvent<HTMLSelectElement>) => setSourceForm(prev => ({ ...prev, kind: e.target.value as SourceKind }))}
-                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
-                          >
-                            <option value="table">Bảng</option>
-                            <option value="view">View</option>
-                            <option value="query">Truy vấn</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Độ mịn (Grain)</label>
-                          <select
-                            value={sourceForm.grain}
-                            onChange={(e: ChangeEvent<HTMLSelectElement>) => setSourceForm(prev => ({ ...prev, grain: e.target.value as SourceGrain }))}
-                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
-                          >
-                            <option value="1:1">1:1 (Một - Một)</option>
-                            <option value="1:n">1:n (Một - Nhiều)</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div className="flex justify-end gap-2 mt-3">
-                        <button
-                          type="button"
-                          onClick={() => { setSourceFormOpen(false); setSourceForm({ name: WIZARD_SOURCE_OPTIONS[0], kind: 'table', grain: '1:1' }); }}
-                          className="px-3 py-1.5 border border-slate-200 text-slate-700 rounded-lg text-[13px] font-medium hover:bg-slate-50 transition-colors"
-                        >
-                          Hủy
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleAddSource}
-                          className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-[13px] font-medium hover:bg-blue-700 transition-colors"
-                        >
-                          <Plus className="w-3.5 h-3.5" /> Thêm vào danh sách
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Cấu hình nguồn dữ liệu */}
-                <div className="pt-4 border-t border-slate-200">
-                  <h4 className="text-[13px] font-bold text-slate-900 mb-3">Cấu hình nguồn dữ liệu</h4>
-
-                  <div className="mb-4">
-                    <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                      Nguồn dữ liệu <span className="text-red-600">*</span>
-                    </label>
-                    <select
-                      value={wizardData.dataSource}
-                      onChange={(e) => setWizardData({ ...wizardData, dataSource: e.target.value as DataSourceType })}
-                      className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 cursor-pointer"
-                    >
-                      <option value="dldc">Từ Kho DLDC</option>
-                      <option value="manual">Nhập thủ công</option>
-                    </select>
-                  </div>
-
-                  {wizardData.dataSource === 'dldc' && (
-                    <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4">
-                      <p className="text-[13px] text-blue-700">
-                        ℹ️ Cấu hình cơ sở dữ liệu, bảng chính và các trường dữ liệu sẽ được thực hiện ở <strong>Bước 2</strong>.
-                      </p>
-                    </div>
-                  )}
-
-                  {wizardData.dataSource === 'manual' && (
-                    <div className="bg-amber-50/50 border border-amber-200/50 rounded-xl p-4">
-                      <p className="text-[13px] text-amber-800">
-                        ℹ️ Dữ liệu sẽ được nhập thủ công bởi người dùng có quyền. Không cần cấu hình nguồn tự động.
-                      </p>
-                    </div>
-                  )}
+                <div>
+                  <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
+                    Phß║ím vi sß╗¡ dß╗Ñng <span className="text-red-600">*</span>
+                  </label>
+                  <select
+                    value={wizardData.scope}
+                    onChange={(e) => setWizardData({ ...wizardData, scope: e.target.value as ScopeType })}
+                    className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 cursor-pointer"
+                  >
+                    <option value="national">Cß║Ñp quß╗æc gia</option>
+                    <option value="ministry">Cß║Ñp bß╗Ö</option>
+                    <option value="provincial">Cß║Ñp tß╗ënh/th├ánh</option>
+                    <option value="internal">Nß╗Öi bß╗Ö</option>
+                  </select>
                 </div>
               </div>
-            )}
 
-            {/* Step 2: Định danh duy nhất */}
-            {currentStep === 2 && (() => {
-              const sep = identifierConfig.separator === 'none' ? '' : identifierConfig.separator;
-              const paddedNum = String(identifierConfig.startFrom).padStart(identifierConfig.digits, '0');
-              const previewCode = [
-                identifierConfig.prefix,
-                paddedNum,
-                identifierConfig.suffix,
-              ].filter(Boolean).join(sep);
-              return (
-                <div className="space-y-6">
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <h3 className="text-[13px] font-semibold text-blue-900 mb-1">Bước 2: Định danh duy nhất</h3>
-                    <p className="text-[13px] text-blue-700">
-                      Thiết lập cấu trúc mã định danh toàn cục cho từng bản ghi của thực thể này
-                    </p>
+              {/* ─É╞ín vß╗ï chß╗º quß║ún */}
+              <div>
+                <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
+                  ─É╞ín vß╗ï chß╗º quß║ún <span className="text-red-600">*</span>
+                </label>
+                <select
+                  value={wizardData.managingAgency}
+                  onChange={(e) => setWizardData({ ...wizardData, managingAgency: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 cursor-pointer"
+                >
+                  <option value="">-- Chß╗ìn ─æ╞ín vß╗ï chß╗º quß║ún --</option>
+                  {MANAGING_UNITS.map(u => (
+                    <option key={u} value={u}>{u}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* M├┤ tß║ú ─æß╗æi t╞░ß╗úng */}
+              <div>
+                <label className="block text-[13px] font-medium text-slate-700 mb-1.5">M├┤ tß║ú ─æß╗æi t╞░ß╗úng</label>
+                <textarea
+                  value={wizardData.description}
+                  onChange={(e) => setWizardData({ ...wizardData, description: e.target.value })}
+                  placeholder="M├┤ tß║ú t├│m tß║»t vß╗ü ─æß╗æi t╞░ß╗úng dß╗» liß╗çu chß╗º n├áy..."
+                  rows={3}
+                  className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 resize-none"
+                />
+              </div>
+
+              {/* T├¬n c╞í sß╗ƒ dß╗» liß╗çu / Hß╗ç thß╗æng */}
+              <div>
+                <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
+                  T├¬n c╞í sß╗ƒ dß╗» liß╗çu / Hß╗ç thß╗æng
+                </label>
+                <input
+                  type="text"
+                  value={wizardData.systemName || ''}
+                  onChange={(e) => setWizardData({ ...wizardData, systemName: e.target.value })}
+                  placeholder="VD: CSDL hß╗Ö tß╗ïch ─æiß╗çn tß╗¡, Hß╗ç thß╗æng TGPL..."
+                  className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700"
+                />
+              </div>
+
+              {/* Trß║íng th├íi v├▓ng ─æß╗¥i */}
+              <div>
+                <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
+                  Trß║íng th├íi v├▓ng ─æß╗¥i
+                </label>
+                <select
+                  value={wizardData.lifecycleStatus}
+                  onChange={(e) => setWizardData({ ...wizardData, lifecycleStatus: e.target.value as LifecycleStatus })}
+                  className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 cursor-pointer"
+                >
+                  <option value="draft">─Éang soß║ín thß║úo</option>
+                  <option value="active">─É├ú hiß╗çu lß╗▒c</option>
+                  <option value="inactive">Ngß╗½ng sß╗¡ dß╗Ñng</option>
+                  <option value="archived">─É├ú l╞░u trß╗»</option>
+                </select>
+              </div>
+
+              {/* ─É─âng k├╜ nguß╗ôn dß╗» liß╗çu (chip + grain) */}
+              <div className="pt-4 border-t border-slate-200">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <h4 className="text-[13px] font-bold text-slate-900">─É─âng k├╜ nguß╗ôn dß╗» liß╗çu</h4>
+                    <p className="text-[13px] text-slate-500 mt-0.5">C├íc nguß╗ôn ─æ─âng k├╜ ß╗ƒ ─æ├óy sß║╜ ─æ╞░ß╗úc d├╣ng ─æß╗â ├ính xß║í ß╗ƒ B╞░ß╗¢c 2</p>
                   </div>
-
-                  <div className="grid grid-cols-2 gap-8">
-                    {/* Left — form */}
-                    <div className="space-y-5">
-                      <div className="border border-slate-200 rounded-xl p-5 space-y-5 bg-white">
-                        <h4 className="text-[13px] font-bold text-slate-800">Cấu trúc mã định danh</h4>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-[13px] font-medium text-slate-700 mb-2">Tiền tố (Prefix)</label>
-                            <input
-                              type="text"
-                              value={identifierConfig.prefix}
-                              onChange={(e: ChangeEvent<HTMLInputElement>) => setIdentifierConfig(prev => ({ ...prev, prefix: e.target.value.toUpperCase() }))}
-                              placeholder="VD: NDAN, ORG"
-                              className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 uppercase"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[13px] font-medium text-slate-700 mb-2">Hậu tố (Suffix)</label>
-                            <input
-                              type="text"
-                              value={identifierConfig.suffix}
-                              onChange={(e: ChangeEvent<HTMLInputElement>) => setIdentifierConfig(prev => ({ ...prev, suffix: e.target.value.toUpperCase() }))}
-                              placeholder="Để trống nếu không dùng"
-                              className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 uppercase"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-[13px] font-medium text-slate-700 mb-2">Ký tự phân cách</label>
-                            <select
-                              value={identifierConfig.separator}
-                              onChange={(e: ChangeEvent<HTMLSelectElement>) => setIdentifierConfig(prev => ({ ...prev, separator: e.target.value as SeparatorType }))}
-                              className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
-                            >
-                              <option value="none">Không dùng</option>
-                              <option value="-">Gạch ngang ( - )</option>
-                              <option value=".">Dấu chấm ( . )</option>
-                              <option value="/">Dấu gạch chéo ( / )</option>
-                            </select>
-                          </div>
-                          <div>
-                            <label className="block text-[13px] font-medium text-slate-700 mb-2">Độ dài số thứ tự</label>
-                            <input
-                              type="number" min={1} max={12}
-                              value={identifierConfig.digits}
-                              onChange={(e: ChangeEvent<HTMLInputElement>) => setIdentifierConfig(prev => ({ ...prev, digits: Number(e.target.value) }))}
-                              className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="border border-slate-200 rounded-xl p-5 space-y-5 bg-white">
-                        <h4 className="text-[13px] font-bold text-slate-800">Số tự tăng</h4>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-[13px] font-medium text-slate-700 mb-2">Bắt đầu từ</label>
-                            <input
-                              type="number" min={0}
-                              value={identifierConfig.startFrom}
-                              onChange={(e: ChangeEvent<HTMLInputElement>) => setIdentifierConfig(prev => ({ ...prev, startFrom: Number(e.target.value) }))}
-                              className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[13px] font-medium text-slate-700 mb-2">Bước tăng</label>
-                            <input
-                              type="number" min={1}
-                              value={identifierConfig.increment}
-                              onChange={(e: ChangeEvent<HTMLInputElement>) => setIdentifierConfig(prev => ({ ...prev, increment: Number(e.target.value) }))}
-                              className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      <label className="flex items-start gap-3 cursor-pointer select-none border border-slate-200 rounded-xl p-5 bg-white">
-                        <input
-                          type="checkbox"
-                          checked={identifierConfig.checkDuplicate}
-                          onChange={() => setIdentifierConfig(prev => ({ ...prev, checkDuplicate: !prev.checkDuplicate }))}
-                          className="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 cursor-pointer w-4 h-4 flex-shrink-0"
-                        />
-                        <div>
-                          <p className="text-[13px] font-medium text-slate-700">Kiểm tra trùng lặp khi tạo mới</p>
-                          <p className="text-[13px] text-slate-500 mt-1">Hệ thống từ chối tạo bản ghi nếu mã định danh đã tồn tại</p>
-                        </div>
-                      </label>
-                    </div>
-
-                    {/* Right — preview */}
-                    <div className="space-y-5">
-                      <div className="border border-blue-200 rounded-xl p-5 bg-blue-50 space-y-5">
-                        <h4 className="text-[13px] font-bold text-blue-900">Mẫu mã định danh</h4>
-
-                        <div className="bg-white border border-blue-200 rounded-lg px-6 py-7 text-center">
-                          {previewCode ? (
-                            <code className="text-2xl font-mono font-bold text-blue-700 tracking-widest">
-                              {previewCode}
-                            </code>
-                          ) : (
-                            <span className="text-[13px] text-slate-400">Nhập tiền tố để xem mẫu mã</span>
-                          )}
-                        </div>
-
-                        <div className="space-y-3 text-[13px]">
-                          <div className="flex justify-between items-center py-1.5 border-b border-blue-100">
-                            <span className="text-slate-600">Mã thứ 1:</span>
-                            <code className="font-mono font-semibold text-slate-800">
-                              {[identifierConfig.prefix, String(identifierConfig.startFrom).padStart(identifierConfig.digits, '0'), identifierConfig.suffix].filter(Boolean).join(sep) || '—'}
-                            </code>
-                          </div>
-                          <div className="flex justify-between items-center py-1.5 border-b border-blue-100">
-                            <span className="text-slate-600">Mã thứ 2:</span>
-                            <code className="font-mono font-semibold text-slate-800">
-                              {[identifierConfig.prefix, String(identifierConfig.startFrom + identifierConfig.increment).padStart(identifierConfig.digits, '0'), identifierConfig.suffix].filter(Boolean).join(sep) || '—'}
-                            </code>
-                          </div>
-                          <div className="flex justify-between items-center py-1.5">
-                            <span className="text-slate-600">Mã thứ 3:</span>
-                            <code className="font-mono font-semibold text-slate-800">
-                              {[identifierConfig.prefix, String(identifierConfig.startFrom + identifierConfig.increment * 2).padStart(identifierConfig.digits, '0'), identifierConfig.suffix].filter(Boolean).join(sep) || '—'}
-                            </code>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="border border-slate-200 rounded-xl p-5 bg-white space-y-3">
-                        <h4 className="text-[13px] font-bold text-slate-800">Tóm tắt cấu hình</h4>
-                        <div className="space-y-2.5 text-[13px]">
-                          <div className="flex justify-between items-center"><span className="text-slate-500">Tiền tố:</span><span className="font-medium text-slate-800">{identifierConfig.prefix || '(không có)'}</span></div>
-                          <div className="flex justify-between items-center"><span className="text-slate-500">Ký tự phân cách:</span><span className="font-medium text-slate-800">{identifierConfig.separator === 'none' ? 'Không dùng' : `"${identifierConfig.separator}"`}</span></div>
-                          <div className="flex justify-between items-center"><span className="text-slate-500">Độ dài số:</span><span className="font-medium text-slate-800">{identifierConfig.digits} chữ số</span></div>
-                          <div className="flex justify-between items-center"><span className="text-slate-500">Bắt đầu từ:</span><span className="font-medium text-slate-800">{identifierConfig.startFrom}</span></div>
-                          <div className="flex justify-between items-center"><span className="text-slate-500">Bước tăng:</span><span className="font-medium text-slate-800">{identifierConfig.increment}</span></div>
-                          <div className="flex justify-between items-center"><span className="text-slate-500">Kiểm tra trùng:</span><span className={`font-medium ${identifierConfig.checkDuplicate ? 'text-green-700' : 'text-slate-500'}`}>{identifierConfig.checkDuplicate ? 'Bật' : 'Tắt'}</span></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
-
-            {/* Step 3: Tạo thuộc tính */}
-            {currentStep === 3 && (
-              <div className="space-y-4">
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                  <h3 className="text-[13px] font-semibold text-blue-900 mb-1">Bước 3: Tạo thuộc tính</h3>
-                  <p className="text-[13px] text-blue-700">
-                    Định nghĩa các trường dữ liệu cho thực thể <strong>{wizardData.name || 'dữ liệu chủ'}</strong>
-                  </p>
+                  {!sourceFormOpen && (
+                    <button
+                      type="button"
+                      onClick={() => setSourceFormOpen(true)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-200 text-blue-600 text-[13px] font-medium rounded-lg hover:bg-blue-50 transition-colors"
+                    >
+                      <Plus className="w-3.5 h-3.5" /> Th├¬m nguß╗ôn
+                    </button>
+                  )}
                 </div>
 
-                {/* Chế độ định nghĩa thuộc tính */}
+                {/* Danh s├ích chip */}
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-[13px] font-medium text-slate-600">Cách định nghĩa thuộc tính:</span>
-                  <div className="inline-flex rounded-lg border border-slate-200 overflow-hidden">
-                    <button
-                      type="button"
-                      onClick={() => setWizardData({ ...wizardData, dataSource: 'dldc' })}
-                      className={`px-3 py-1.5 text-[13px] font-medium transition-colors ${wizardData.dataSource === 'dldc' ? 'bg-blue-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'}`}
+                  {wizardData.sources.length === 0 && (
+                    <span className="text-[13px] text-slate-400">Ch╞░a ─æ─âng k├╜ nguß╗ôn dß╗» liß╗çu n├áo</span>
+                  )}
+                  {wizardData.sources.map(src => (
+                    <span
+                      key={src.id}
+                      className="inline-flex items-center gap-2 pl-3 pr-2 py-1.5 bg-white border border-slate-200 rounded-full text-[13px]"
                     >
-                      Chọn trường từ Kho DLDC
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setWizardData({ ...wizardData, dataSource: 'manual' })}
-                      className={`px-3 py-1.5 text-[13px] font-medium border-l border-slate-200 transition-colors ${wizardData.dataSource === 'manual' ? 'bg-blue-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'}`}
-                    >
-                      Tự thêm mới từng trường
-                    </button>
+                      <span className="font-medium text-slate-700">{src.name}</span>
+                      <span className={`px-1.5 py-0.5 rounded-full border text-[13px] font-medium ${SOURCE_KIND_COLORS[src.kind]}`}>
+                        {SOURCE_KIND_LABELS[src.kind]}
+                      </span>
+                      <span className={`px-1.5 py-0.5 rounded-full border text-[13px] font-medium ${SOURCE_GRAIN_COLORS[src.grain]}`}>
+                        {src.grain}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveSource(src.id)}
+                        className="text-slate-400 hover:text-red-500 transition-colors"
+                        title="X├│a nguß╗ôn"
+                        aria-label="X├│a nguß╗ôn"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+
+                {/* Form th├¬m nguß╗ôn inline */}
+                {sourceFormOpen && (
+                  <div className="mt-3 border border-blue-200 rounded-xl bg-blue-50/30 p-4">
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-[13px] font-medium text-slate-600 mb-1.5">T├¬n nguß╗ôn</label>
+                        <select
+                          value={sourceForm.name}
+                          onChange={(e: ChangeEvent<HTMLSelectElement>) => setSourceForm(prev => ({ ...prev, name: e.target.value }))}
+                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
+                        >
+                          {WIZARD_SOURCE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Loß║íi nguß╗ôn</label>
+                        <select
+                          value={sourceForm.kind}
+                          onChange={(e: ChangeEvent<HTMLSelectElement>) => setSourceForm(prev => ({ ...prev, kind: e.target.value as SourceKind }))}
+                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
+                        >
+                          <option value="table">Bß║úng</option>
+                          <option value="view">View</option>
+                          <option value="query">Truy vß║Ñn</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[13px] font-medium text-slate-600 mb-1.5">─Éß╗Ö mß╗ïn (Grain)</label>
+                        <select
+                          value={sourceForm.grain}
+                          onChange={(e: ChangeEvent<HTMLSelectElement>) => setSourceForm(prev => ({ ...prev, grain: e.target.value as SourceGrain }))}
+                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
+                        >
+                          <option value="1:1">1:1 (Mß╗Öt - Mß╗Öt)</option>
+                          <option value="1:n">1:n (Mß╗Öt - Nhiß╗üu)</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2 mt-3">
+                      <button
+                        type="button"
+                        onClick={() => { setSourceFormOpen(false); setSourceForm({ name: WIZARD_SOURCE_OPTIONS[0], kind: 'table', grain: '1:1' }); }}
+                        className="px-3 py-1.5 border border-slate-200 text-slate-700 rounded-lg text-[13px] font-medium hover:bg-slate-50 transition-colors"
+                      >
+                        Hß╗ºy
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleAddSource}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-[13px] font-medium hover:bg-blue-700 transition-colors"
+                      >
+                        <Plus className="w-3.5 h-3.5" /> Th├¬m v├áo danh s├ích
+                      </button>
+                    </div>
                   </div>
-<<<<<<< HEAD
                 )}
               </div>
 
             </div>
           )}
 
-          {/* Step 5: Định danh duy nhất */}
+          {/* Step 5: ─Éß╗ïnh danh duy nhß║Ñt */}
           {currentStep === 5 && (() => {
             const sep = identifierConfig.separator === 'none' ? '' : identifierConfig.separator;
             const paddedNum = String(identifierConfig.startFrom).padStart(identifierConfig.digits, '0');
@@ -1643,21 +1281,21 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
             return (
               <div className="space-y-6">
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h3 className="text-[13px] font-semibold text-blue-900 mb-1">Bước 5: Định danh duy nhất</h3>
+                  <h3 className="text-[13px] font-semibold text-blue-900 mb-1">B╞░ß╗¢c 5: ─Éß╗ïnh danh duy nhß║Ñt</h3>
                   <p className="text-[13px] text-blue-700">
-                    Thiết lập cấu trúc mã định danh toàn cục cho từng bản ghi của thực thể này
+                    Thiß║┐t lß║¡p cß║Ñu tr├║c m├ú ─æß╗ïnh danh to├án cß╗Ñc cho tß╗½ng bß║ún ghi cß╗ºa thß╗▒c thß╗â n├áy
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-8">
-                  {/* Left — form */}
+                  {/* Left ΓÇö form */}
                   <div className="space-y-5">
                     <div className="border border-slate-200 rounded-xl p-5 space-y-5 bg-white">
-                      <h4 className="text-[13px] font-bold text-slate-800">Cấu trúc mã định danh</h4>
+                      <h4 className="text-[13px] font-bold text-slate-800">Cß║Ñu tr├║c m├ú ─æß╗ïnh danh</h4>
 
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-[13px] font-medium text-slate-700 mb-2">Tiền tố (Prefix)</label>
+                          <label className="block text-[13px] font-medium text-slate-700 mb-2">Tiß╗ün tß╗æ (Prefix)</label>
                           <input
                             type="text"
                             value={identifierConfig.prefix}
@@ -1667,194 +1305,65 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                           />
                         </div>
                         <div>
-                          <label className="block text-[13px] font-medium text-slate-700 mb-2">Hậu tố (Suffix)</label>
+                          <label className="block text-[13px] font-medium text-slate-700 mb-2">Hß║¡u tß╗æ (Suffix)</label>
                           <input
                             type="text"
                             value={identifierConfig.suffix}
                             onChange={(e: ChangeEvent<HTMLInputElement>) => setIdentifierConfig(prev => ({ ...prev, suffix: e.target.value.toUpperCase() }))}
-                            placeholder="Để trống nếu không dùng"
+                            placeholder="─Éß╗â trß╗æng nß║┐u kh├┤ng d├╣ng"
                             className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 uppercase"
                           />
-=======
-                </div>
-
-                {/* ── DLDC mode ── */}
-                {wizardData.dataSource === 'dldc' && (
-                  <div className="space-y-4">
-                    {/* Cấu hình nguồn dữ liệu card */}
-                    <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
-                      <div className="px-5 py-3.5 bg-blue-600 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Database className="w-4 h-4 text-white" />
-                          <p className="text-[13px] font-semibold text-white">Cấu hình nguồn dữ liệu</p>
->>>>>>> d0d4b0c898b5cf43e3568a8815a60624cbbd3882
                         </div>
                       </div>
 
-                      {/* Info row — shown after table selected */}
-                      {dldcDatabase && wizardData.dldcTable && (
-                        <div className="px-5 py-2.5 bg-blue-50 border-b border-blue-100 flex items-center gap-2">
-                          <Database className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
-                          <p className="text-[13px] text-blue-700">
-                            Kho dữ liệu: <span className="font-medium">{DLDC_DATABASES.find(d => d.id === dldcDatabase)?.label}</span>
-                            {' — '}
-                            <span className="font-medium">{DLDC_TABLES[dldcDatabase]?.find(t => t.id === wizardData.dldcTable)?.displayName}</span>
-                          </p>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[13px] font-medium text-slate-700 mb-2">K├╜ tß╗▒ ph├ón c├ích</label>
+                          <select
+                            value={identifierConfig.separator}
+                            onChange={(e: ChangeEvent<HTMLSelectElement>) => setIdentifierConfig(prev => ({ ...prev, separator: e.target.value as SeparatorType }))}
+                            className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
+                          >
+                            <option value="none">Kh├┤ng d├╣ng</option>
+                            <option value="-">Gß║ích ngang ( - )</option>
+                            <option value=".">Dß║Ñu chß║Ñm ( . )</option>
+                            <option value="/">Dß║Ñu gß║ích ch├⌐o ( / )</option>
+                          </select>
                         </div>
-                      )}
-
-                      <div className="p-5 space-y-4">
-                        {/* Nguồn dữ liệu chính — chọn từ danh sách đã đăng ký ở Bước 1 */}
-                        <div className="space-y-1.5">
-                          <label className="block text-[13px] font-medium text-slate-600">Nguồn dữ liệu chính <span className="text-red-500">*</span></label>
-                          {wizardData.sources.length === 0 ? (
-                            <div className="px-3 py-2.5 border border-amber-200 bg-amber-50 rounded-lg text-[13px] text-amber-700">
-                              Chưa có nguồn nào được đăng ký ở Bước 1. Vui lòng quay lại Bước 1 mục "Đăng ký nguồn dữ liệu" để thêm nguồn.
-                            </div>
-                          ) : (
-                            <div className="flex flex-wrap gap-2">
-                              {wizardData.sources.map(src => {
-                                const isActive = activeSourceId === src.id;
-                                return (
-                                  <button
-                                    key={src.id}
-                                    type="button"
-                                    onClick={() => handleSelectRegisteredSource(src)}
-                                    className={`inline-flex items-center gap-2 pl-3 pr-3 py-2 rounded-lg border text-[13px] transition-colors ${isActive ? 'border-blue-500 bg-blue-50 text-blue-700 font-medium' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}
-                                  >
-                                    <Database className="w-3.5 h-3.5" />
-                                    {src.name}
-                                    <span className={`px-1.5 py-0.5 rounded-full border text-[13px] font-medium ${SOURCE_KIND_COLORS[src.kind]}`}>
-                                      {SOURCE_KIND_LABELS[src.kind]}
-                                    </span>
-                                    <span className={`px-1.5 py-0.5 rounded-full border text-[13px] font-medium ${SOURCE_GRAIN_COLORS[src.grain]}`}>
-                                      {src.grain}
-                                    </span>
-                                    {isActive && <Check className="w-3.5 h-3.5 text-blue-600" />}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          )}
+                        <div>
+                          <label className="block text-[13px] font-medium text-slate-700 mb-2">─Éß╗Ö d├ái sß╗æ thß╗⌐ tß╗▒</label>
+                          <input
+                            type="number" min={1} max={12}
+                            value={identifierConfig.digits}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) => setIdentifierConfig(prev => ({ ...prev, digits: Number(e.target.value) }))}
+                            className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                          />
                         </div>
-
                       </div>
                     </div>
 
-                    {/* Field selection table */}
-                    {wizardData.dldcTable && (
-                      <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
-                        <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <FileText className="w-4 h-4 text-slate-500" />
-                            <p className="text-[13px] font-semibold text-slate-700">Chọn trường dữ liệu chia sẻ</p>
-                            <span className="text-[13px] px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">
-                              {dldcFieldRows.filter(r => r.shared).length}/{dldcFieldRows.length} trường được chọn
-                            </span>
-                          </div>
+                    <div className="border border-slate-200 rounded-xl p-5 space-y-5 bg-white">
+                      <h4 className="text-[13px] font-bold text-slate-800">Sß╗æ tß╗▒ t─âng</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[13px] font-medium text-slate-700 mb-2">Bß║»t ─æß║ºu tß╗½</label>
+                          <input
+                            type="number" min={0}
+                            value={identifierConfig.startFrom}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) => setIdentifierConfig(prev => ({ ...prev, startFrom: Number(e.target.value) }))}
+                            className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                          />
                         </div>
-                        <div className="overflow-x-auto">
-                          <table className="w-full text-left text-[13px]">
-                            <thead className="bg-slate-50 border-b border-slate-100">
-                              <tr>
-                                <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center w-16">Chia sẻ</th>
-                                <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center w-12">PK</th>
-                                <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Nguồn (Table)</th>
-                                <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Trường gốc (Column)</th>
-                                <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Tên hiển thị</th>
-                                <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Kiểu dữ liệu</th>
-                                <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center w-12">Xóa</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100 bg-white">
-                              {dldcFieldRows.length === 0 ? (
-                                <tr>
-                                  <td colSpan={7} className="px-5 py-8 text-center text-[13px] text-slate-400">
-                                    Chọn bảng dữ liệu để tải danh sách trường
-                                  </td>
-                                </tr>
-                              ) : (
-                                dldcFieldRows.map(row => (
-                                  <tr key={row.id} className={`transition-colors ${row.shared ? '' : 'opacity-40'}`}>
-                                    <td className="px-3 py-2.5 text-center">
-                                      <input
-                                        type="checkbox"
-                                        checked={row.shared}
-                                        onChange={() => handleDldcFieldToggle(row.id, 'shared')}
-                                        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 cursor-pointer"
-                                      />
-                                    </td>
-                                    <td className="px-3 py-2.5 text-center">
-                                      <input
-                                        type="checkbox"
-                                        checked={row.isPK}
-                                        onChange={() => handleDldcFieldToggle(row.id, 'isPK')}
-                                        className="rounded border-slate-300 text-amber-600 focus:ring-amber-500/20 cursor-pointer"
-                                      />
-                                    </td>
-                                    <td className="px-2 py-1.5">
-                                      <select
-                                        value={row.tableId}
-                                        onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-                                          const newTableId = e.target.value;
-                                          updateActiveFieldRows(rows => rows.map(r => r.id === row.id ? { ...r, tableId: newTableId, columnName: '' } : r));
-                                        }}
-                                        className="w-full text-[13px] border border-slate-200 rounded-lg px-2 py-1 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                                      >
-                                        {(DLDC_TABLES[dldcDatabase] || []).map(t => (
-                                          <option key={t.id} value={t.id}>{t.displayName}</option>
-                                        ))}
-                                      </select>
-                                    </td>
-                                    <td className="px-2 py-1.5">
-                                      <select
-                                        value={row.columnName}
-                                        onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-                                          const colName = e.target.value;
-                                          const fieldDef = (DLDC_FIELDS[row.tableId] || []).find(f => f.fieldName === colName);
-                                          updateActiveFieldRows(rows => rows.map(r => r.id === row.id ? { ...r, columnName: colName, dataType: fieldDef?.dataType || r.dataType } : r));
-                                        }}
-                                        className="w-full text-[13px] border border-slate-200 rounded-lg px-2 py-1 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                                      >
-                                        <option value="">-- Chọn --</option>
-                                        {(DLDC_FIELDS[row.tableId] || []).map(f => (
-                                          <option key={f.fieldName} value={f.fieldName}>{f.fieldName}</option>
-                                        ))}
-                                      </select>
-                                    </td>
-                                    <td className="px-2 py-1.5">
-                                      <input
-                                        type="text"
-                                        value={row.displayName}
-                                        onChange={(e: ChangeEvent<HTMLInputElement>) => updateActiveFieldRows(rows => rows.map(r => r.id === row.id ? { ...r, displayName: e.target.value } : r))}
-                                        className="w-full text-[13px] border border-slate-200 rounded-lg px-2 py-1 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                                        placeholder="Tên hiển thị"
-                                      />
-                                    </td>
-                                    <td className="px-2 py-1.5">
-                                      <select
-                                        value={row.dataType}
-                                        onChange={(e: ChangeEvent<HTMLSelectElement>) => updateActiveFieldRows(rows => rows.map(r => r.id === row.id ? { ...r, dataType: e.target.value as FieldDataType } : r))}
-                                        className="w-full text-[13px] border border-slate-200 rounded-lg px-2 py-1 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                                      >
-                                        {FIELD_DATA_TYPES.map(dt => (
-                                          <option key={dt.value} value={dt.value}>{dt.label}</option>
-                                        ))}
-                                      </select>
-                                    </td>
-                                    <td className="px-3 py-2.5 text-center">
-                                      <button type="button" onClick={() => handleDldcRemoveRow(row.id)} className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors">
-                                        <Trash2 className="w-3.5 h-3.5" />
-                                      </button>
-                                    </td>
-                                  </tr>
-                                ))
-                              )}
-                            </tbody>
-                          </table>
+                        <div>
+                          <label className="block text-[13px] font-medium text-slate-700 mb-2">B╞░ß╗¢c t─âng</label>
+                          <input
+                            type="number" min={1}
+                            value={identifierConfig.increment}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) => setIdentifierConfig(prev => ({ ...prev, increment: Number(e.target.value) }))}
+                            className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                          />
                         </div>
                       </div>
-<<<<<<< HEAD
                     </div>
 
                     <label className="flex items-start gap-3 cursor-pointer select-none border border-slate-200 rounded-xl p-5 bg-white">
@@ -1865,16 +1374,16 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                         className="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 cursor-pointer w-4 h-4 flex-shrink-0"
                       />
                       <div>
-                        <p className="text-[13px] font-medium text-slate-700">Kiểm tra trùng lặp khi tạo mới</p>
-                        <p className="text-[13px] text-slate-500 mt-1">Hệ thống từ chối tạo bản ghi nếu mã định danh đã tồn tại</p>
+                        <p className="text-[13px] font-medium text-slate-700">Kiß╗âm tra tr├╣ng lß║╖p khi tß║ío mß╗¢i</p>
+                        <p className="text-[13px] text-slate-500 mt-1">Hß╗ç thß╗æng tß╗½ chß╗æi tß║ío bß║ún ghi nß║┐u m├ú ─æß╗ïnh danh ─æ├ú tß╗ôn tß║íi</p>
                       </div>
                     </label>
                   </div>
 
-                  {/* Right — preview */}
+                  {/* Right ΓÇö preview */}
                   <div className="space-y-5">
                     <div className="border border-blue-200 rounded-xl p-5 bg-blue-50 space-y-5">
-                      <h4 className="text-[13px] font-bold text-blue-900">Mẫu mã định danh</h4>
+                      <h4 className="text-[13px] font-bold text-blue-900">Mß║½u m├ú ─æß╗ïnh danh</h4>
 
                       <div className="bg-white border border-blue-200 rounded-lg px-6 py-7 text-center">
                         {previewCode ? (
@@ -1882,41 +1391,41 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                             {previewCode}
                           </code>
                         ) : (
-                          <span className="text-[13px] text-slate-400">Nhập tiền tố để xem mẫu mã</span>
+                          <span className="text-[13px] text-slate-400">Nhß║¡p tiß╗ün tß╗æ ─æß╗â xem mß║½u m├ú</span>
                         )}
                       </div>
 
                       <div className="space-y-3 text-[13px]">
                         <div className="flex justify-between items-center py-1.5 border-b border-blue-100">
-                          <span className="text-slate-600">Mã thứ 1:</span>
+                          <span className="text-slate-600">M├ú thß╗⌐ 1:</span>
                           <code className="font-mono font-semibold text-slate-800">
-                            {[identifierConfig.prefix, String(identifierConfig.startFrom).padStart(identifierConfig.digits, '0'), identifierConfig.suffix].filter(Boolean).join(sep) || '—'}
+                            {[identifierConfig.prefix, String(identifierConfig.startFrom).padStart(identifierConfig.digits, '0'), identifierConfig.suffix].filter(Boolean).join(sep) || 'ΓÇö'}
                           </code>
                         </div>
                         <div className="flex justify-between items-center py-1.5 border-b border-blue-100">
-                          <span className="text-slate-600">Mã thứ 2:</span>
+                          <span className="text-slate-600">M├ú thß╗⌐ 2:</span>
                           <code className="font-mono font-semibold text-slate-800">
-                            {[identifierConfig.prefix, String(identifierConfig.startFrom + identifierConfig.increment).padStart(identifierConfig.digits, '0'), identifierConfig.suffix].filter(Boolean).join(sep) || '—'}
+                            {[identifierConfig.prefix, String(identifierConfig.startFrom + identifierConfig.increment).padStart(identifierConfig.digits, '0'), identifierConfig.suffix].filter(Boolean).join(sep) || 'ΓÇö'}
                           </code>
                         </div>
                         <div className="flex justify-between items-center py-1.5">
-                          <span className="text-slate-600">Mã thứ 3:</span>
+                          <span className="text-slate-600">M├ú thß╗⌐ 3:</span>
                           <code className="font-mono font-semibold text-slate-800">
-                            {[identifierConfig.prefix, String(identifierConfig.startFrom + identifierConfig.increment * 2).padStart(identifierConfig.digits, '0'), identifierConfig.suffix].filter(Boolean).join(sep) || '—'}
+                            {[identifierConfig.prefix, String(identifierConfig.startFrom + identifierConfig.increment * 2).padStart(identifierConfig.digits, '0'), identifierConfig.suffix].filter(Boolean).join(sep) || 'ΓÇö'}
                           </code>
                         </div>
                       </div>
                     </div>
 
                     <div className="border border-slate-200 rounded-xl p-5 bg-white space-y-3">
-                      <h4 className="text-[13px] font-bold text-slate-800">Tóm tắt cấu hình</h4>
+                      <h4 className="text-[13px] font-bold text-slate-800">T├│m tß║»t cß║Ñu h├¼nh</h4>
                       <div className="space-y-2.5 text-[13px]">
-                        <div className="flex justify-between items-center"><span className="text-slate-500">Tiền tố:</span><span className="font-medium text-slate-800">{identifierConfig.prefix || '(không có)'}</span></div>
-                        <div className="flex justify-between items-center"><span className="text-slate-500">Ký tự phân cách:</span><span className="font-medium text-slate-800">{identifierConfig.separator === 'none' ? 'Không dùng' : `"${identifierConfig.separator}"`}</span></div>
-                        <div className="flex justify-between items-center"><span className="text-slate-500">Độ dài số:</span><span className="font-medium text-slate-800">{identifierConfig.digits} chữ số</span></div>
-                        <div className="flex justify-between items-center"><span className="text-slate-500">Bắt đầu từ:</span><span className="font-medium text-slate-800">{identifierConfig.startFrom}</span></div>
-                        <div className="flex justify-between items-center"><span className="text-slate-500">Bước tăng:</span><span className="font-medium text-slate-800">{identifierConfig.increment}</span></div>
-                        <div className="flex justify-between items-center"><span className="text-slate-500">Kiểm tra trùng:</span><span className={`font-medium ${identifierConfig.checkDuplicate ? 'text-green-700' : 'text-slate-500'}`}>{identifierConfig.checkDuplicate ? 'Bật' : 'Tắt'}</span></div>
+                        <div className="flex justify-between items-center"><span className="text-slate-500">Tiß╗ün tß╗æ:</span><span className="font-medium text-slate-800">{identifierConfig.prefix || '(kh├┤ng c├│)'}</span></div>
+                        <div className="flex justify-between items-center"><span className="text-slate-500">K├╜ tß╗▒ ph├ón c├ích:</span><span className="font-medium text-slate-800">{identifierConfig.separator === 'none' ? 'Kh├┤ng d├╣ng' : `"${identifierConfig.separator}"`}</span></div>
+                        <div className="flex justify-between items-center"><span className="text-slate-500">─Éß╗Ö d├ái sß╗æ:</span><span className="font-medium text-slate-800">{identifierConfig.digits} chß╗» sß╗æ</span></div>
+                        <div className="flex justify-between items-center"><span className="text-slate-500">Bß║»t ─æß║ºu tß╗½:</span><span className="font-medium text-slate-800">{identifierConfig.startFrom}</span></div>
+                        <div className="flex justify-between items-center"><span className="text-slate-500">B╞░ß╗¢c t─âng:</span><span className="font-medium text-slate-800">{identifierConfig.increment}</span></div>
+                        <div className="flex justify-between items-center"><span className="text-slate-500">Kiß╗âm tra tr├╣ng:</span><span className={`font-medium ${identifierConfig.checkDuplicate ? 'text-green-700' : 'text-slate-500'}`}>{identifierConfig.checkDuplicate ? 'Bß║¡t' : 'Tß║»t'}</span></div>
                       </div>
                     </div>
                   </div>
@@ -1925,50 +1434,50 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
             );
           })()}
 
-          {/* Step 2: Tạo thuộc tính */}
+          {/* Step 2: Tß║ío thuß╗Öc t├¡nh */}
           {currentStep === 2 && (
             <div className="space-y-4">
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                <h3 className="text-[13px] font-semibold text-blue-900 mb-1">Bước 2: Tạo thuộc tính</h3>
+                <h3 className="text-[13px] font-semibold text-blue-900 mb-1">B╞░ß╗¢c 2: Tß║ío thuß╗Öc t├¡nh</h3>
                 <p className="text-[13px] text-blue-700">
-                  Định nghĩa các trường dữ liệu cho thực thể <strong>{wizardData.name || 'dữ liệu chủ'}</strong>
+                  ─Éß╗ïnh ngh─⌐a c├íc tr╞░ß╗¥ng dß╗» liß╗çu cho thß╗▒c thß╗â <strong>{wizardData.name || 'dß╗» liß╗çu chß╗º'}</strong>
                 </p>
               </div>
 
-              {/* Chế độ định nghĩa thuộc tính */}
+              {/* Chß║┐ ─æß╗Ö ─æß╗ïnh ngh─⌐a thuß╗Öc t├¡nh */}
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[13px] font-medium text-slate-600">Cách định nghĩa thuộc tính:</span>
+                <span className="text-[13px] font-medium text-slate-600">C├ích ─æß╗ïnh ngh─⌐a thuß╗Öc t├¡nh:</span>
                 <div className="inline-flex rounded-lg border border-slate-200 overflow-hidden">
                   <button
                     type="button"
                     onClick={() => setWizardData({ ...wizardData, dataSource: 'dldc' })}
                     className={`px-3 py-1.5 text-[13px] font-medium transition-colors ${wizardData.dataSource === 'dldc' ? 'bg-blue-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'}`}
                   >
-                    Chọn trường từ Kho DLDC
+                    Chß╗ìn tr╞░ß╗¥ng tß╗½ Kho DLDC
                   </button>
                   <button
                     type="button"
                     onClick={() => setWizardData({ ...wizardData, dataSource: 'manual' })}
                     className={`px-3 py-1.5 text-[13px] font-medium border-l border-slate-200 transition-colors ${wizardData.dataSource === 'manual' ? 'bg-blue-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'}`}
                   >
-                    Tự thêm mới từng trường
+                    Tß╗▒ th├¬m mß╗¢i tß╗½ng tr╞░ß╗¥ng
                   </button>
                 </div>
               </div>
 
-              {/* ── DLDC mode ── */}
+              {/* ΓöÇΓöÇ DLDC mode ΓöÇΓöÇ */}
               {wizardData.dataSource === 'dldc' && (
                 <div className="space-y-4">
-                  {/* Chọn bảng nguồn dữ liệu đã đăng ký ở Bước 1 */}
+                  {/* Chß╗ìn bß║úng nguß╗ôn dß╗» liß╗çu ─æ├ú ─æ─âng k├╜ ß╗ƒ B╞░ß╗¢c 1 */}
                   <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
                     <div className="px-5 py-3.5 bg-blue-600 flex items-center gap-2">
                       <Database className="w-4 h-4 text-white" />
-                      <p className="text-[13px] font-semibold text-white">Chọn bảng nguồn dữ liệu</p>
+                      <p className="text-[13px] font-semibold text-white">Chß╗ìn bß║úng nguß╗ôn dß╗» liß╗çu</p>
                     </div>
 
                     <div className="p-5 space-y-4">
                       {registeredSources.length === 0 ? (
-                        <p className="text-[13px] text-slate-400 text-center py-4">Chưa đăng ký nguồn dữ liệu nào ở Bước 1</p>
+                        <p className="text-[13px] text-slate-400 text-center py-4">Ch╞░a ─æ─âng k├╜ nguß╗ôn dß╗» liß╗çu n├áo ß╗ƒ B╞░ß╗¢c 1</p>
                       ) : (
                         <div className="flex flex-wrap gap-2">
                           {registeredSources.map(src => {
@@ -1995,504 +1504,77 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                         </div>
                       )}
 
-                      {/* Info row — hiển thị các CSDL đang chọn, trường sẽ được gộp từ mọi bảng thuộc các CSDL này */}
+                      {/* Info row ΓÇö hiß╗ân thß╗ï c├íc CSDL ─æang chß╗ìn, tr╞░ß╗¥ng sß║╜ ─æ╞░ß╗úc gß╗Öp tß╗½ mß╗ìi bß║úng thuß╗Öc c├íc CSDL n├áy */}
                       {dldcSelectedDbIds.length > 0 && (
                         <div className="px-4 py-2.5 bg-blue-50 border border-blue-100 rounded-lg flex items-center gap-2">
                           <Database className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
                           <p className="text-[13px] text-blue-700">
-                            Đã gộp trường từ: <span className="font-medium">{dldcSelectedDbIds.map(id => DLDC_DATABASES.find(d => d.id === id)?.label).join(', ')}</span>
+                            ─É├ú gß╗Öp tr╞░ß╗¥ng tß╗½: <span className="font-medium">{dldcSelectedDbIds.map(id => DLDC_DATABASES.find(d => d.id === id)?.label).join(', ')}</span>
                           </p>
-=======
-                    )}
-                  </div>
-                )}
-
-                {/* ── Manual mode ── */}
-                {wizardData.dataSource === 'manual' && (
-                  <div className="space-y-4">
-                    {/* Add Attribute Form */}
-                    <div className="border border-slate-200 rounded-xl p-4 bg-slate-50/50">
-                      <h4 className="text-[13px] font-bold text-slate-900 mb-3">Thêm thuộc tính mới</h4>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-[13px] font-medium text-slate-700 mb-1.5">Tên trường <span className="text-red-500">*</span></label>
-                          <input
-                            type="text"
-                            value={currentAttribute.fieldName}
-                            onChange={(e) => setCurrentAttribute({ ...currentAttribute, fieldName: e.target.value.toLowerCase() })}
-                            placeholder="citizen_id"
-                            className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
-                          />
                         </div>
-                        <div>
-                          <label className="block text-[13px] font-medium text-slate-700 mb-1.5">Tên hiển thị <span className="text-red-500">*</span></label>
-                          <input
-                            type="text"
-                            value={currentAttribute.displayName}
-                            onChange={(e) => setCurrentAttribute({ ...currentAttribute, displayName: e.target.value })}
-                            placeholder="Số CCCD"
-                            className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-[13px] font-medium text-slate-700 mb-1.5">Kiểu dữ liệu</label>
-                          <div className="relative">
-                            <select
-                              value={currentAttribute.dataType}
-                              onChange={(e) => setCurrentAttribute({ ...currentAttribute, dataType: e.target.value as FieldDataType })}
-                              className="w-full pl-3 pr-8 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 appearance-none cursor-pointer"
-                            >
-                              <option value="string">String</option>
-                              <option value="number">Number</option>
-                              <option value="date">Date</option>
-                              <option value="datetime">Datetime</option>
-                              <option value="boolean">Boolean</option>
-                              <option value="email">Email</option>
-                              <option value="phone">Phone</option>
-                            </select>
-                            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-[13px] font-medium text-slate-700 mb-1.5">Độ dài</label>
-                          <input
-                            type="number"
-                            value={currentAttribute.length || ''}
-                            onChange={(e) => setCurrentAttribute({ ...currentAttribute, length: parseInt(e.target.value) || undefined })}
-                            placeholder="255"
-                            className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
-                          />
->>>>>>> d0d4b0c898b5cf43e3568a8815a60624cbbd3882
-                        </div>
-                        <div>
-                          <label className="block text-[13px] font-medium text-slate-700 mb-1.5">Giá trị mặc định</label>
-                          <input
-                            type="text"
-                            value={currentAttribute.defaultValue || ''}
-                            onChange={(e) => setCurrentAttribute({ ...currentAttribute, defaultValue: e.target.value })}
-                            placeholder="VD: N/A"
-                            className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
-                          />
-                        </div>
-                      </div>
-                      <div className="flex gap-4 mt-3">
-                        <label className="flex items-center gap-2 text-[13px] cursor-pointer">
-                          <input type="checkbox" checked={currentAttribute.required}
-                            onChange={(e) => setCurrentAttribute({ ...currentAttribute, required: e.target.checked })}
-                            className="rounded border-slate-300 text-blue-600" />
-                          Bắt buộc
-                        </label>
-                        <label className="flex items-center gap-2 text-[13px] cursor-pointer">
-                          <input type="checkbox" checked={currentAttribute.isKey}
-                            onChange={(e) => setCurrentAttribute({ ...currentAttribute, isKey: e.target.checked })}
-                            className="rounded border-slate-300 text-blue-600" />
-                          <span className="flex items-center gap-1"><Key className="w-3.5 h-3.5 text-blue-600" /> Khóa (khóa chính)</span>
-                        </label>
-                      </div>
-                      <button
-                        onClick={handleAddAttribute}
-                        className="mt-3 flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg text-[13px] font-medium hover:bg-blue-700 transition-colors"
-                      >
-                        <Plus className="w-4 h-4" />
-                        Thêm thuộc tính
-                      </button>
-                    </div>
-
-                    {/* Attributes List */}
-                    <div className="border border-slate-200 rounded-xl overflow-hidden">
-                      <div className="px-5 py-3 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
-                        <FileText className="w-4 h-4 text-slate-500" />
-                        <p className="text-[13px] font-semibold text-slate-700">Danh sách thuộc tính</p>
-                        <span className="text-[13px] px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">{wizardData.attributes.length} trường</span>
-                      </div>
-                      {wizardData.attributes.length === 0 ? (
-                        <div className="p-8 text-center text-[13px] text-slate-400">
-                          Chưa có thuộc tính nào. Vui lòng thêm ít nhất 1 thuộc tính.
-                        </div>
-                      ) : (
-                        <table className="w-full text-[13px]">
-                          <thead className="bg-slate-50 border-b border-slate-100">
-                            <tr>
-                              <th className="text-left px-4 py-3 text-[13px] font-semibold text-slate-600">Tên trường</th>
-                              <th className="text-left px-4 py-3 text-[13px] font-semibold text-slate-600">Tên hiển thị</th>
-                              <th className="text-left px-4 py-3 text-[13px] font-semibold text-slate-600">Kiểu</th>
-                              <th className="text-left px-4 py-3 text-[13px] font-semibold text-slate-600">Độ dài</th>
-                              <th className="text-left px-4 py-3 text-[13px] font-semibold text-slate-600">Giá trị mặc định</th>
-                              <th className="text-left px-4 py-3 text-[13px] font-semibold text-slate-600">Ràng buộc</th>
-                              <th className="text-right px-4 py-3 text-[13px] font-semibold text-slate-600">Thao tác</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-100">
-                            {wizardData.attributes.map((attr, index) => (
-                              <tr key={index} className="hover:bg-slate-50/50">
-                                <td className="px-4 py-2.5">
-                                  <code className="text-[13px] bg-slate-100 px-2 py-0.5 rounded font-mono">{attr.fieldName}</code>
-                                </td>
-                                <td className="px-4 py-2.5 text-slate-700">{attr.displayName}</td>
-                                <td className="px-4 py-2.5">
-                                  <span className="text-[13px] px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded font-mono">{attr.dataType}</span>
-                                </td>
-                                <td className="px-4 py-2.5 text-slate-600">{attr.length ?? '—'}</td>
-                                <td className="px-4 py-2.5 text-slate-600">{attr.defaultValue || '—'}</td>
-                                <td className="px-4 py-2.5">
-                                  <div className="flex gap-1 flex-wrap">
-                                    {attr.required && <span className="text-[13px] px-1.5 py-0.5 bg-red-100 text-red-700 rounded">Bắt buộc</span>}
-                                    {attr.isKey && <span className="text-[13px] px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded inline-flex items-center gap-1"><Key className="w-3 h-3" /> Khóa</span>}
-                                    {!attr.required && !attr.isKey && <span className="text-slate-400">—</span>}
-                                  </div>
-                                </td>
-                                <td className="px-4 py-2.5 text-right">
-                                  <button onClick={() => handleDeleteAttribute(index)} className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors">
-                                    <Trash2 className="w-4 h-4" />
-                                  </button>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
                       )}
                     </div>
                   </div>
-                )}
 
-<<<<<<< HEAD
                   {/* Field selection table */}
                   {dldcFieldRows.length > 0 && (
                     <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
                       <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <FileText className="w-4 h-4 text-slate-500" />
-                          <p className="text-[13px] font-semibold text-slate-700">Chọn trường dữ liệu chia sẻ</p>
+                          <p className="text-[13px] font-semibold text-slate-700">Chß╗ìn tr╞░ß╗¥ng dß╗» liß╗çu chia sß║╗</p>
                           <span className="text-[13px] px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">
-                            {dldcFieldRows.filter(r => r.shared).length}/{dldcFieldRows.length} trường được chọn
+                            {dldcFieldRows.filter(r => r.shared).length}/{dldcFieldRows.length} tr╞░ß╗¥ng ─æ╞░ß╗úc chß╗ìn
                           </span>
                         </div>
                       </div>
                       <div className="overflow-x-auto">
                         <table className="w-full text-left text-[13px]">
-=======
-                {/* ── Khối: Ánh xạ cột nguồn → thuộc tính ── */}
-                <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
-                  <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <ArrowRight className="w-4 h-4 text-slate-500" />
-                      <p className="text-[13px] font-semibold text-slate-700">Ánh xạ cột nguồn → thuộc tính</p>
-                    </div>
-                    <span className="text-[13px] text-slate-500">{registeredSources.length} nguồn</span>
-                  </div>
-
-                  {registeredSources.length <= 1 && (
-                    <div className="px-5 py-2.5 bg-amber-50 border-b border-amber-100">
-                      <p className="text-[13px] text-amber-800">ℹ️ Chỉ 1 nguồn — ánh xạ trực tiếp</p>
-                    </div>
-                  )}
-
-                  <div className="p-4">
-                    {availableFields.length === 0 ? (
-                      <p className="text-[13px] text-slate-400 text-center py-6">Chưa có thuộc tính để ánh xạ — hãy chọn bảng/trường hoặc thêm thuộc tính ở trên</p>
-                    ) : registeredSources.length === 0 ? (
-                      <p className="text-[13px] text-slate-400 text-center py-6">Chưa đăng ký nguồn dữ liệu ở Bước 1</p>
-                    ) : (
-                      <div className="border border-slate-100 rounded-lg overflow-x-auto">
-                        <table className="w-full text-[13px]">
->>>>>>> d0d4b0c898b5cf43e3568a8815a60624cbbd3882
                           <thead className="bg-slate-50 border-b border-slate-100">
                             <tr>
-                              <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Thuộc tính</th>
-                              {registeredSources.map(src => (
-                                <th key={src.id} className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">{src.name}</th>
-                              ))}
+                              <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center w-16">
+                                <input
+                                  type="checkbox"
+                                  title="Chß╗ìn / Bß╗Å chß╗ìn tß║Ñt cß║ú"
+                                  checked={dldcFieldRows.length > 0 && dldcFieldRows.every(r => r.shared)}
+                                  onChange={handleToggleAllDldcShared}
+                                  className="rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 cursor-pointer"
+                                />
+                              </th>
+                              <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center w-12">PK</th>
+                              <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Nguß╗ôn (Table)</th>
+                              <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Tr╞░ß╗¥ng gß╗æc (Column)</th>
+                              <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">T├¬n hiß╗ân thß╗ï</th>
+                              <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Kiß╗âu dß╗» liß╗çu</th>
+                              <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center w-12">X├│a</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-50 bg-white">
-                            {availableFields.map(attr => (
-                              <tr key={attr.fieldName}>
-                                <td className="px-3 py-2">
-                                  <span className="text-[13px] font-medium text-slate-700">{attr.displayName}</span>
-                                  <code className="ml-1.5 text-[13px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{attr.fieldName}</code>
-                                </td>
-                                {registeredSources.map(src => (
-                                  <td key={src.id} className="px-2 py-1.5">
-                                    <select
-                                      value={wizardData.mapping[attr.fieldName]?.[src.id] || ''}
-                                      onChange={(e: ChangeEvent<HTMLSelectElement>) => handleMappingChange(attr.fieldName, src.id, e.target.value)}
-                                      className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                                    >
-                                      <option value="">—</option>
-                                      {availableFields.map(f => (
-                                        <option key={f.fieldName} value={f.fieldName}>{f.displayName} ({f.fieldName})</option>
-                                      ))}
-                                    </select>
-                                  </td>
-                                ))}
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* ── Khối: Gom nguồn 1:n ── (chỉ hiện ở chế độ Kho DLDC và có ≥1 nguồn grain 1:n) */}
-                {wizardData.dataSource === 'dldc' && oneToManySources.length > 0 && (
-                  <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
-                    <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Network className="w-4 h-4 text-slate-500" />
-                        <p className="text-[13px] font-semibold text-slate-700">Gom nguồn 1:n</p>
-                      </div>
-                      <span className="text-[13px] px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full font-medium">
-                        {oneToManySources.length} nguồn 1:n
-                      </span>
-                    </div>
-                    <div className="p-4 space-y-4">
-                      <p className="text-[13px] text-slate-500">Với nguồn có độ mịn 1:n, chọn quy tắc gom nhiều bản ghi thành một giá trị cho từng thuộc tính</p>
-                      {oneToManySources.map(src => {
-                        const fieldsForSource = (dldcFieldRowsBySource[src.id] || [])
-                          .filter(r => r.shared)
-                          .map(r => ({ fieldName: r.columnName, displayName: r.displayName }));
-                        return (
-                          <div key={src.id} className="border border-slate-200 rounded-xl overflow-hidden">
-                            <div className="px-4 py-2.5 bg-emerald-50 border-b border-emerald-100 flex items-center gap-2">
-                              <span className="text-[13px] font-semibold text-emerald-800">Nguồn (1:n): {src.name}</span>
-                            </div>
-                            {fieldsForSource.length === 0 ? (
-                              <p className="text-[13px] text-slate-400 text-center py-6">Chưa chọn trường nào của nguồn này ở bảng "Chọn trường dữ liệu chia sẻ"</p>
-                            ) : (
-                              <div className="overflow-x-auto">
-                                <table className="w-full text-[13px]">
-                                  <thead className="bg-slate-50 border-b border-slate-100">
-                                    <tr>
-                                      <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Thuộc tính</th>
-                                      <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Rule gom</th>
-                                      <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Cột mốc thời gian</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody className="divide-y divide-slate-50 bg-white">
-                                    {fieldsForSource.map(attr => {
-                                      const gr = wizardData.groupRules[src.id]?.[attr.fieldName];
-                                      return (
-                                        <tr key={attr.fieldName}>
-                                          <td className="px-3 py-2">
-                                            <span className="text-[13px] font-medium text-slate-700">{attr.displayName}</span>
-                                            <code className="ml-1.5 text-[13px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{attr.fieldName}</code>
-                                          </td>
-                                          <td className="px-2 py-1.5">
-                                            <select
-                                              value={gr?.ruleType || 'latest'}
-                                              onChange={(e: ChangeEvent<HTMLSelectElement>) => handleGroupRuleChange(src.id, attr.fieldName, { ruleType: e.target.value as GroupRuleType })}
-                                              className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                                            >
-                                              {(Object.entries(GROUP_RULE_LABELS) as [GroupRuleType, string][]).map(([val, label]) => (
-                                                <option key={val} value={val}>{label}</option>
-                                              ))}
-                                            </select>
-                                          </td>
-                                          <td className="px-2 py-1.5">
-                                            <select
-                                              value={gr?.timeColumn || ''}
-                                              onChange={(e: ChangeEvent<HTMLSelectElement>) => handleGroupRuleChange(src.id, attr.fieldName, { timeColumn: e.target.value })}
-                                              className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                                            >
-                                              <option value="">—</option>
-                                              {fieldsForSource.map(f => <option key={f.fieldName} value={f.fieldName}>{f.displayName} ({f.fieldName})</option>)}
-                                            </select>
-                                          </td>
-                                        </tr>
-                                      );
-                                    })}
-                                  </tbody>
-                                </table>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Step 4: Quy tắc hợp nhất */}
-            {currentStep === 4 && (
-              <div className="space-y-5">
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h3 className="text-[13px] font-semibold text-blue-900 mb-1">Bước 4: Quy tắc hợp nhất dữ liệu</h3>
-                  <p className="text-[13px] text-blue-700">
-                    Thiết lập quy tắc so khớp, hợp nhất giá trị và kiểm thử mô phỏng trên dữ liệu mẫu
-                  </p>
-                </div>
-
-                {!showSurvivorTab && (
-                  <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-2.5">
-                    <p className="text-[13px] text-amber-800">ℹ️ Chỉ 1 nguồn — không cần hợp nhất giá trị nhiều nguồn</p>
-                  </div>
-                )}
-
-                {/* Sub-tabs */}
-                <div className="flex items-center gap-1 border-b border-slate-200">
-                  {(([
-                    { key: 'match', label: 'So khớp' },
-                    { key: 'survivor', label: 'Hợp nhất giá trị' },
-                    { key: 'test', label: 'Kiểm thử' },
-                  ] as { key: MergeSubTab; label: string }[]).filter(t => t.key !== 'survivor' || showSurvivorTab)).map(t => (
-                    <button
-                      key={t.key}
-                      type="button"
-                      onClick={() => setMergeSubTab(t.key)}
-                      className={`px-4 py-2 text-[13px] font-medium border-b-2 -mb-px transition-colors ${mergeSubTab === t.key
-                        ? 'border-blue-600 text-blue-600'
-                        : 'border-transparent text-slate-500 hover:text-slate-700'
-                        }`}
-                    >
-                      {t.label}
-                    </button>
-                  ))}
-                </div>
-
-                {/* ── Tab 1: So khớp ── */}
-                {mergeSubTab === 'match' && (
-                  <div className="space-y-4">
-                    {/* Ngưỡng */}
-                    <div className="border border-slate-200 rounded-xl bg-white p-4 grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-[13px] font-medium text-slate-700 mb-1.5">Ngưỡng tự động gộp (≥)</label>
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="number" min={0} max={100}
-                            value={mergeConfig.autoThreshold}
-                            onChange={(e: ChangeEvent<HTMLInputElement>) => setMergeConfig(prev => ({ ...prev, autoThreshold: Number(e.target.value) }))}
-                            className="w-24 border border-slate-200 rounded-lg px-3 py-1.5 text-[13px] text-center focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                          />
-                          <span className="text-[13px] text-slate-500">%</span>
-                          <span className="text-[13px] text-slate-400">Điểm khớp từ ngưỡng này trở lên sẽ được gộp tự động</span>
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-[13px] font-medium text-slate-700 mb-1.5">Ngưỡng cần rà soát (≥)</label>
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="number" min={0} max={100}
-                            value={mergeConfig.reviewThreshold}
-                            onChange={(e: ChangeEvent<HTMLInputElement>) => setMergeConfig(prev => ({ ...prev, reviewThreshold: Number(e.target.value) }))}
-                            className="w-24 border border-slate-200 rounded-lg px-3 py-1.5 text-[13px] text-center focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                          />
-                          <span className="text-[13px] text-slate-500">%</span>
-                          <span className="text-[13px] text-slate-400">Điểm khớp trong khoảng này sẽ chuyển sang chờ rà soát</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Bảng matching rules */}
-                    <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
-                      <div className="px-4 py-3 border-b border-slate-100 bg-slate-50">
-                        <p className="text-[13px] font-semibold text-slate-700">Quy tắc so khớp</p>
-                        <p className="text-[13px] text-slate-500">Xác định khi nào hai bản ghi từ hai nguồn được coi là cùng một thực thể</p>
-                      </div>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-[13px]">
-                          <thead className="bg-slate-50 border-b border-slate-100">
-                            <tr>
-                              <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Trường đối chiếu</th>
-                              <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Kiểu so khớp</th>
-                              <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Thuật toán</th>
-                              <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Ngưỡng (%)</th>
-                              <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Trọng số (%)</th>
-                              <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-20">Chuẩn hóa</th>
-                              <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Điều kiện</th>
-                              <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-10"></th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-50 bg-white">
-                            {matchingRules.length === 0 ? (
+                          <tbody className="divide-y divide-slate-100 bg-white">
+                            {dldcFieldRows.length === 0 ? (
                               <tr>
-                                <td colSpan={8} className="px-4 py-6 text-center text-[13px] text-slate-400">
-                                  Chưa có quy tắc — nhấn "+ Thêm quy tắc so khớp" để bắt đầu
+                                <td colSpan={7} className="px-5 py-8 text-center text-[13px] text-slate-400">
+                                  Chß╗ìn bß║úng dß╗» liß╗çu ─æß╗â tß║úi danh s├ích tr╞░ß╗¥ng
                                 </td>
                               </tr>
                             ) : (
-                              matchingRules.map((rule, idx) => (
-                                <tr key={rule.id}>
-                                  <td className="px-2 py-1.5">
-                                    <select
-                                      value={rule.fieldName}
-                                      onChange={(e: ChangeEvent<HTMLSelectElement>) => setMatchingRules(prev => prev.map(r => r.id === rule.id ? { ...r, fieldName: e.target.value } : r))}
-                                      className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                                    >
-                                      <option value="">-- Chọn trường --</option>
-                                      {availableFields.map(f => (
-                                        <option key={f.fieldName} value={f.fieldName}>{f.displayName} ({f.fieldName})</option>
-                                      ))}
-                                    </select>
-                                  </td>
-                                  <td className="px-2 py-1.5">
-                                    <select
-                                      value={rule.method}
-                                      onChange={(e: ChangeEvent<HTMLSelectElement>) => setMatchingRules(prev => prev.map(r => r.id === rule.id ? { ...r, method: e.target.value as MatchMethod } : r))}
-                                      className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                                    >
-                                      <option value="exact">{MATCH_METHOD_LABELS.exact}</option>
-                                      <option value="fuzzy">{MATCH_METHOD_LABELS.fuzzy}</option>
-                                    </select>
-                                  </td>
-                                  <td className="px-2 py-1.5">
-                                    {rule.method === 'fuzzy' ? (
-                                      <select
-                                        value={rule.algorithm}
-                                        onChange={(e: ChangeEvent<HTMLSelectElement>) => setMatchingRules(prev => prev.map(r => r.id === rule.id ? { ...r, algorithm: e.target.value as FuzzyAlgorithm } : r))}
-                                        className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                                      >
-                                        {FUZZY_ALGORITHMS.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
-                                      </select>
-                                    ) : (
-                                      <span className="text-slate-400">—</span>
-                                    )}
-                                  </td>
-                                  <td className="px-2 py-1.5 text-center">
-                                    {rule.method === 'fuzzy' ? (
-                                      <input
-                                        type="number" min={0} max={100}
-                                        value={rule.fuzzyThreshold}
-                                        onChange={(e: ChangeEvent<HTMLInputElement>) => setMatchingRules(prev => prev.map(r => r.id === rule.id ? { ...r, fuzzyThreshold: Number(e.target.value) } : r))}
-                                        className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] text-center focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                                      />
-                                    ) : (
-                                      <span className="text-slate-400">—</span>
-                                    )}
-                                  </td>
-                                  <td className="px-2 py-1.5 text-center">
-                                    <input
-                                      type="number" min={0} max={100}
-                                      value={rule.weight}
-                                      onChange={(e: ChangeEvent<HTMLInputElement>) => setMatchingRules(prev => prev.map(r => r.id === rule.id ? { ...r, weight: Number(e.target.value) } : r))}
-                                      className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] text-center focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                                    />
-                                  </td>
-                                  <td className="px-2 py-1.5 text-center">
+                              dldcFieldRows.map(row => (
+                                <tr key={row.id} className={`transition-colors ${row.shared ? '' : 'opacity-40'}`}>
+                                  <td className="px-3 py-2.5 text-center">
                                     <input
                                       type="checkbox"
-                                      checked={rule.normalize}
-                                      onChange={() => setMatchingRules(prev => prev.map(r => r.id === rule.id ? { ...r, normalize: !r.normalize } : r))}
+                                      checked={row.shared}
+                                      onChange={() => handleDldcFieldToggle(row.id, 'shared')}
                                       className="rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 cursor-pointer"
                                     />
                                   </td>
-                                  <td className="px-2 py-1.5 text-center">
-                                    {idx < matchingRules.length - 1 ? (
-                                      <select
-                                        value={rule.operator}
-                                        onChange={(e: ChangeEvent<HTMLSelectElement>) => setMatchingRules(prev => prev.map(r => r.id === rule.id ? { ...r, operator: e.target.value as ConditionOperator } : r))}
-                                        className="w-full border border-slate-200 rounded-lg px-1 py-1 text-[13px] font-bold text-center focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                                      >
-                                        <option value="AND">AND</option>
-                                        <option value="OR">OR</option>
-                                      </select>
-                                    ) : (
-                                      <span className="text-slate-400">—</span>
-                                    )}
+                                  <td className="px-3 py-2.5 text-center">
+                                    <input
+                                      type="checkbox"
+                                      checked={row.isPK}
+                                      onChange={() => handleDldcFieldToggle(row.id, 'isPK')}
+                                      className="rounded border-slate-300 text-amber-600 focus:ring-amber-500/20 cursor-pointer"
+                                    />
                                   </td>
-<<<<<<< HEAD
                                   <td className="px-2 py-1.5">
                                     <select
                                       value={row.tableId}
@@ -2517,7 +1599,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                                       }}
                                       className="w-full text-[13px] border border-slate-200 rounded-lg px-2 py-1 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
                                     >
-                                      <option value="">-- Chọn --</option>
+                                      <option value="">-- Chß╗ìn --</option>
                                       {(DLDC_FIELDS[row.tableId] || []).map(f => (
                                         <option key={f.fieldName} value={f.fieldName}>{f.fieldName}</option>
                                       ))}
@@ -2529,7 +1611,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                                       value={row.displayName}
                                       onChange={(e: ChangeEvent<HTMLInputElement>) => setDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, displayName: e.target.value } : r))}
                                       className="w-full text-[13px] border border-slate-200 rounded-lg px-2 py-1 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                                      placeholder="Tên hiển thị"
+                                      placeholder="T├¬n hiß╗ân thß╗ï"
                                     />
                                   </td>
                                   <td className="px-2 py-1.5">
@@ -2545,10 +1627,6 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                                   </td>
                                   <td className="px-3 py-2.5 text-center">
                                     <button type="button" onClick={() => handleDldcRemoveRow(row.id)} className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors">
-=======
-                                  <td className="px-2 py-1.5 text-center">
-                                    <button type="button" onClick={() => setMatchingRules(prev => prev.filter(r => r.id !== rule.id))} className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors">
->>>>>>> d0d4b0c898b5cf43e3568a8815a60624cbbd3882
                                       <Trash2 className="w-3.5 h-3.5" />
                                     </button>
                                   </td>
@@ -2556,101 +1634,194 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                               ))
                             )}
                           </tbody>
-                          {matchingRules.length > 0 && (
-                            <tfoot className="border-t border-slate-200 bg-slate-50">
-                              <tr>
-                                <td colSpan={4} className="px-3 py-2 text-right text-[13px] font-medium text-slate-600">Tổng trọng số:</td>
-                                <td className="px-2 py-2 text-center">
-                                  <span className={`text-[13px] font-bold ${totalWeight === 100 ? 'text-green-700' : 'text-red-600'}`}>{totalWeight}%</span>
-                                </td>
-                                <td colSpan={3} className="px-3 py-2 text-[13px] text-slate-400">
-                                  {totalWeight === 100 ? 'Hợp lệ' : 'Tổng trọng số phải bằng 100%'}
-                                </td>
-                              </tr>
-                            </tfoot>
-                          )}
                         </table>
                       </div>
-                      <div className="p-3 border-t border-slate-100">
-                        <button
-                          type="button"
-                          onClick={() => setMatchingRules(prev => {
-                            const next = [...prev, { id: `mr-${Date.now()}`, fieldName: '', method: 'exact' as MatchMethod, fuzzyThreshold: 80, normalize: false, operator: 'AND' as ConditionOperator, weight: 0, algorithm: 'jaro_winkler' as FuzzyAlgorithm }];
-                            // Chia đều trọng số cho tất cả quy tắc
-                            const even = Math.floor(100 / next.length);
-                            const remainder = 100 - even * next.length;
-                            return next.map((r, i) => ({ ...r, weight: even + (i === 0 ? remainder : 0) }));
-                          })}
-                          className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-200 text-blue-600 text-[13px] font-medium rounded-lg hover:bg-blue-50 transition-colors"
-                        >
-                          <Plus className="w-3.5 h-3.5" />
-                          Thêm quy tắc so khớp
-                        </button>
-                      </div>
                     </div>
+                  )}
+                </div>
+              )}
 
-                    {/* Trường hard-block */}
-                    <div className="border border-slate-200 rounded-xl bg-white p-4 space-y-3">
+              {/* ΓöÇΓöÇ Manual mode ΓöÇΓöÇ */}
+              {wizardData.dataSource === 'manual' && (
+                <div className="space-y-4">
+                  {/* Add Attribute Form */}
+                  <div className="border border-slate-200 rounded-xl p-4 bg-slate-50/50">
+                    <h4 className="text-[13px] font-bold text-slate-900 mb-3">Th├¬m thuß╗Öc t├¡nh mß╗¢i</h4>
+                    <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <p className="text-[13px] font-semibold text-slate-700">Trường hard-block</p>
-                        <p className="text-[13px] text-slate-500">Nếu các trường này khác nhau, hai bản ghi chắc chắn KHÔNG phải cùng thực thể (loại khỏi so khớp)</p>
+                        <label className="block text-[13px] font-medium text-slate-700 mb-1.5">T├¬n tr╞░ß╗¥ng <span className="text-red-500">*</span></label>
+                        <input
+                          type="text"
+                          value={currentAttribute.fieldName}
+                          onChange={(e) => setCurrentAttribute({ ...currentAttribute, fieldName: e.target.value.toLowerCase() })}
+                          placeholder="citizen_id"
+                          className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                        />
                       </div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        {mergeConfig.hardBlockFields.map(f => (
-                          <span key={f} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-[13px] font-medium">
-                            {availableFields.find(af => af.fieldName === f)?.displayName || f}
-                            <button type="button" onClick={() => handleRemoveHardBlockField(f)} className="text-blue-400 hover:text-red-500 transition-colors">
-                              <X className="w-3.5 h-3.5" />
-                            </button>
-                          </span>
-                        ))}
-                        {mergeConfig.hardBlockFields.length === 0 && (
-                          <span className="text-[13px] text-slate-400">Chưa có trường hard-block nào</span>
-                        )}
+                      <div>
+                        <label className="block text-[13px] font-medium text-slate-700 mb-1.5">T├¬n hiß╗ân thß╗ï <span className="text-red-500">*</span></label>
+                        <input
+                          type="text"
+                          value={currentAttribute.displayName}
+                          onChange={(e) => setCurrentAttribute({ ...currentAttribute, displayName: e.target.value })}
+                          placeholder="Sß╗æ CCCD"
+                          className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                        />
                       </div>
-                      <div className="flex items-center gap-2">
-                        <select
-                          value={hardBlockInput}
-                          onChange={(e: ChangeEvent<HTMLSelectElement>) => setHardBlockInput(e.target.value)}
-                          className="flex-1 max-w-xs border border-slate-200 rounded-lg px-2 py-1.5 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                        >
-                          <option value="">-- Chọn trường để thêm --</option>
-                          {availableFields
-                            .filter(f => !mergeConfig.hardBlockFields.includes(f.fieldName))
-                            .map(f => <option key={f.fieldName} value={f.fieldName}>{f.displayName} ({f.fieldName})</option>)}
-                        </select>
-                        <button
-                          type="button"
-                          onClick={() => { handleAddHardBlockField(hardBlockInput); setHardBlockInput(''); }}
-                          disabled={!hardBlockInput}
-                          className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-200 text-blue-600 text-[13px] font-medium rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          <Plus className="w-3.5 h-3.5" /> Thêm
-                        </button>
+                      <div>
+                        <label className="block text-[13px] font-medium text-slate-700 mb-1.5">Kiß╗âu dß╗» liß╗çu</label>
+                        <div className="relative">
+                          <select
+                            value={currentAttribute.dataType}
+                            onChange={(e) => setCurrentAttribute({ ...currentAttribute, dataType: e.target.value as FieldDataType })}
+                            className="w-full pl-3 pr-8 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 appearance-none cursor-pointer"
+                          >
+                            <option value="string">String</option>
+                            <option value="number">Number</option>
+                            <option value="date">Date</option>
+                            <option value="datetime">Datetime</option>
+                            <option value="boolean">Boolean</option>
+                            <option value="email">Email</option>
+                            <option value="phone">Phone</option>
+                          </select>
+                          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-[13px] font-medium text-slate-700 mb-1.5">─Éß╗Ö d├ái</label>
+                        <input
+                          type="number"
+                          value={currentAttribute.length || ''}
+                          onChange={(e) => setCurrentAttribute({ ...currentAttribute, length: parseInt(e.target.value) || undefined })}
+                          placeholder="255"
+                          className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[13px] font-medium text-slate-700 mb-1.5">Gi├í trß╗ï mß║╖c ─æß╗ïnh</label>
+                        <input
+                          type="text"
+                          value={currentAttribute.defaultValue || ''}
+                          onChange={(e) => setCurrentAttribute({ ...currentAttribute, defaultValue: e.target.value })}
+                          placeholder="VD: N/A"
+                          className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                        />
                       </div>
                     </div>
+                    <div className="flex gap-4 mt-3">
+                      <label className="flex items-center gap-2 text-[13px] cursor-pointer">
+                        <input type="checkbox" checked={currentAttribute.required}
+                          onChange={(e) => setCurrentAttribute({ ...currentAttribute, required: e.target.checked })}
+                          className="rounded border-slate-300 text-blue-600" />
+                        Bß║»t buß╗Öc
+                      </label>
+                      <label className="flex items-center gap-2 text-[13px] cursor-pointer">
+                        <input type="checkbox" checked={currentAttribute.isKey}
+                          onChange={(e) => setCurrentAttribute({ ...currentAttribute, isKey: e.target.checked })}
+                          className="rounded border-slate-300 text-blue-600" />
+                        <span className="flex items-center gap-1"><Key className="w-3.5 h-3.5 text-blue-600" /> Kh├│a (kh├│a ch├¡nh)</span>
+                      </label>
+                    </div>
+                    <button
+                      onClick={handleAddAttribute}
+                      className="mt-3 flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg text-[13px] font-medium hover:bg-blue-700 transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Th├¬m thuß╗Öc t├¡nh
+                    </button>
+                  </div>
+
+                  {/* Attributes List */}
+                  <div className="border border-slate-200 rounded-xl overflow-hidden">
+                    <div className="px-5 py-3 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-slate-500" />
+                      <p className="text-[13px] font-semibold text-slate-700">Danh s├ích thuß╗Öc t├¡nh</p>
+                      <span className="text-[13px] px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">{wizardData.attributes.length} tr╞░ß╗¥ng</span>
+                    </div>
+                    {wizardData.attributes.length === 0 ? (
+                      <div className="p-8 text-center text-[13px] text-slate-400">
+                        Ch╞░a c├│ thuß╗Öc t├¡nh n├áo. Vui l├▓ng th├¬m ├¡t nhß║Ñt 1 thuß╗Öc t├¡nh.
+                      </div>
+                    ) : (
+                      <table className="w-full text-[13px]">
+                        <thead className="bg-slate-50 border-b border-slate-100">
+                          <tr>
+                            <th className="text-left px-4 py-3 text-[13px] font-semibold text-slate-600">T├¬n tr╞░ß╗¥ng</th>
+                            <th className="text-left px-4 py-3 text-[13px] font-semibold text-slate-600">T├¬n hiß╗ân thß╗ï</th>
+                            <th className="text-left px-4 py-3 text-[13px] font-semibold text-slate-600">Kiß╗âu</th>
+                            <th className="text-left px-4 py-3 text-[13px] font-semibold text-slate-600">─Éß╗Ö d├ái</th>
+                            <th className="text-left px-4 py-3 text-[13px] font-semibold text-slate-600">Gi├í trß╗ï mß║╖c ─æß╗ïnh</th>
+                            <th className="text-left px-4 py-3 text-[13px] font-semibold text-slate-600">R├áng buß╗Öc</th>
+                            <th className="text-right px-4 py-3 text-[13px] font-semibold text-slate-600">Thao t├íc</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {wizardData.attributes.map((attr, index) => (
+                            <tr key={index} className="hover:bg-slate-50/50">
+                              <td className="px-4 py-2.5">
+                                <code className="text-[13px] bg-slate-100 px-2 py-0.5 rounded font-mono">{attr.fieldName}</code>
+                              </td>
+                              <td className="px-4 py-2.5 text-slate-700">{attr.displayName}</td>
+                              <td className="px-4 py-2.5">
+                                <span className="text-[13px] px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded font-mono">{attr.dataType}</span>
+                              </td>
+                              <td className="px-4 py-2.5 text-slate-600">{attr.length ?? 'ΓÇö'}</td>
+                              <td className="px-4 py-2.5 text-slate-600">{attr.defaultValue || 'ΓÇö'}</td>
+                              <td className="px-4 py-2.5">
+                                <div className="flex gap-1 flex-wrap">
+                                  {attr.required && <span className="text-[13px] px-1.5 py-0.5 bg-red-100 text-red-700 rounded">Bß║»t buß╗Öc</span>}
+                                  {attr.isKey && <span className="text-[13px] px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded inline-flex items-center gap-1"><Key className="w-3 h-3" /> Kh├│a</span>}
+                                  {!attr.required && !attr.isKey && <span className="text-slate-400">ΓÇö</span>}
+                                </div>
+                              </td>
+                              <td className="px-4 py-2.5 text-right">
+                                <button onClick={() => handleDeleteAttribute(index)} className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors">
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* ΓöÇΓöÇ Khß╗æi: ├ünh xß║í cß╗Öt nguß╗ôn ΓåÆ thuß╗Öc t├¡nh ΓöÇΓöÇ */}
+              <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
+                <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ArrowRight className="w-4 h-4 text-slate-500" />
+                    <p className="text-[13px] font-semibold text-slate-700">├ünh xß║í cß╗Öt nguß╗ôn ΓåÆ thuß╗Öc t├¡nh</p>
+                  </div>
+                  <span className="text-[13px] text-slate-500">{registeredSources.length} nguß╗ôn</span>
+                </div>
+
+                {registeredSources.length <= 1 && (
+                  <div className="px-5 py-2.5 bg-amber-50 border-b border-amber-100">
+                    <p className="text-[13px] text-amber-800">Γä╣∩╕Å Chß╗ë 1 nguß╗ôn ΓÇö ├ính xß║í trß╗▒c tiß║┐p</p>
                   </div>
                 )}
 
-<<<<<<< HEAD
                 {hasMappingMismatch && (
                   <div className="px-5 py-2.5 bg-amber-50 border-b border-amber-200 flex items-center gap-2">
                     <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
-                    <p className="text-[13px] text-amber-800">Có ít nhất 1 ô ánh xạ lệch kiểu dữ liệu giữa nguồn và thuộc tính đích — vui lòng kiểm tra lại</p>
+                    <p className="text-[13px] text-amber-800">C├│ ├¡t nhß║Ñt 1 ├┤ ├ính xß║í lß╗çch kiß╗âu dß╗» liß╗çu giß╗»a nguß╗ôn v├á thuß╗Öc t├¡nh ─æ├¡ch ΓÇö vui l├▓ng kiß╗âm tra lß║íi</p>
                   </div>
                 )}
 
                 <div className="p-4">
                   {availableFields.length === 0 ? (
-                    <p className="text-[13px] text-slate-400 text-center py-6">Chưa có thuộc tính để ánh xạ — hãy chọn bảng/trường hoặc thêm thuộc tính ở trên</p>
+                    <p className="text-[13px] text-slate-400 text-center py-6">Ch╞░a c├│ thuß╗Öc t├¡nh ─æß╗â ├ính xß║í ΓÇö h├úy chß╗ìn bß║úng/tr╞░ß╗¥ng hoß║╖c th├¬m thuß╗Öc t├¡nh ß╗ƒ tr├¬n</p>
                   ) : registeredSources.length === 0 ? (
-                    <p className="text-[13px] text-slate-400 text-center py-6">Chưa đăng ký nguồn dữ liệu ở Bước 1</p>
+                    <p className="text-[13px] text-slate-400 text-center py-6">Ch╞░a ─æ─âng k├╜ nguß╗ôn dß╗» liß╗çu ß╗ƒ B╞░ß╗¢c 1</p>
                   ) : (
                     <div className="border border-slate-100 rounded-lg overflow-x-auto">
                       <table className="w-full text-[13px]">
                         <thead className="bg-slate-50 border-b border-slate-100">
                           <tr>
-                            <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Thuộc tính</th>
+                            <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Thuß╗Öc t├¡nh</th>
                             {registeredSources.map(src => (
                               <th key={src.id} className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">{src.name}</th>
                             ))}
@@ -2673,13 +1844,13 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                                       onChange={(e: ChangeEvent<HTMLSelectElement>) => handleMappingChange(attr.fieldName, src.id, e.target.value)}
                                       className={`w-full border rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 ${mismatch ? 'border-amber-400 focus:ring-amber-400/20' : 'border-slate-200 focus:ring-blue-500/20 focus:border-blue-400'}`}
                                     >
-                                      <option value="">—</option>
+                                      <option value="">ΓÇö</option>
                                       {MOCK_SOURCE_COLUMNS.map(col => <option key={col.name} value={col.name}>{col.name}</option>)}
                                     </select>
                                     {mismatch && (
                                       <div className="flex items-center gap-1 mt-1 text-[13px] text-amber-700">
                                         <AlertTriangle className="w-3 h-3 flex-shrink-0" />
-                                        <span>Kiểu nguồn ({MOCK_SOURCE_COLUMNS.find(c => c.name === selectedColumn)?.dataType}) ≠ Đích ({attr.dataType})</span>
+                                        <span>Kiß╗âu nguß╗ôn ({MOCK_SOURCE_COLUMNS.find(c => c.name === selectedColumn)?.dataType}) Γëá ─É├¡ch ({attr.dataType})</span>
                                       </div>
                                     )}
                                   </td>
@@ -2694,241 +1865,38 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                 </div>
               </div>
 
-              {/* ── Khối: Gom nguồn 1:n ── (chỉ hiện khi có ≥1 nguồn grain 1:n) */}
+              {/* ΓöÇΓöÇ Khß╗æi: Gom nguß╗ôn 1:n ΓöÇΓöÇ (chß╗ë hiß╗çn khi c├│ ΓëÑ1 nguß╗ôn grain 1:n) */}
               {oneToManySources.length > 0 && (
                 <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
                   <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Network className="w-4 h-4 text-slate-500" />
-                      <p className="text-[13px] font-semibold text-slate-700">Gom nguồn 1:n</p>
+                      <p className="text-[13px] font-semibold text-slate-700">Gom nguß╗ôn 1:n</p>
                     </div>
                     <span className="text-[13px] px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full font-medium">
-                      {oneToManySources.length} nguồn 1:n
+                      {oneToManySources.length} nguß╗ôn 1:n
                     </span>
                   </div>
                   <div className="p-4 space-y-4">
-                    <p className="text-[13px] text-slate-500">Với nguồn có độ mịn 1:n, chọn quy tắc gom nhiều bản ghi thành một giá trị cho từng thuộc tính</p>
+                    <p className="text-[13px] text-slate-500">Vß╗¢i nguß╗ôn c├│ ─æß╗Ö mß╗ïn 1:n, chß╗ìn quy tß║»c gom nhiß╗üu bß║ún ghi th├ánh mß╗Öt gi├í trß╗ï cho tß╗½ng thuß╗Öc t├¡nh</p>
                     {oneToManySources.map(src => (
                       <div key={src.id} className="border border-slate-200 rounded-xl overflow-hidden">
                         <div className="px-4 py-2.5 bg-emerald-50 border-b border-emerald-100 flex items-center gap-2">
-                          <span className="text-[13px] font-semibold text-emerald-800">Nguồn (1:n): {src.name}</span>
-=======
-                {/* ── Tab 2: Hợp nhất giá trị ── */}
-                {mergeSubTab === 'survivor' && (
-                  <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
-                    <div className="px-4 py-3 border-b border-slate-100 bg-slate-50">
-                      <p className="text-[13px] font-semibold text-slate-700">Hợp nhất giá trị (Survivorship)</p>
-                      <p className="text-[13px] text-slate-500">Với mỗi trường, chọn giá trị nào sẽ tồn tại trong bản ghi chủ cuối cùng</p>
-                    </div>
-                    <div className="p-4">
-                      {extractionRules.length === 0 ? (
-                        <p className="text-[13px] text-slate-400 text-center py-6">Hoàn tất Bước 3 để tự động nạp danh sách trường</p>
-                      ) : (
-                        <div className="border border-slate-100 rounded-lg overflow-x-auto">
-                          <table className="w-full text-[13px]">
-                            <thead className="bg-slate-50 border-b border-slate-100">
-                              <tr>
-                                <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Trường</th>
-                                <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Chiến lược</th>
-                                <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Nguồn dữ liệu</th>
-                                <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Xử lý trường rỗng</th>
-                                <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Xử lý khi vẫn trống</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-50 bg-white">
-                              {extractionRules.map(rule => (
-                                <tr key={rule.id}>
-                                  <td className="px-3 py-2 align-top">
-                                    <span className="text-[13px] font-medium text-slate-700">{availableFields.find(f => f.fieldName === rule.fieldName)?.displayName || rule.fieldName}</span>
-                                    <code className="ml-1.5 text-[13px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{rule.fieldName}</code>
-                                  </td>
-                                  <td className="px-2 py-1.5 align-top">
-                                    <select
-                                      value={rule.conflictStrategy}
-                                      onChange={(e: ChangeEvent<HTMLSelectElement>) => setExtractionRules(prev => prev.map(r => r.id === rule.id ? { ...r, conflictStrategy: e.target.value as ConflictStrategy } : r))}
-                                      className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                                    >
-                                      <option value="source">{CONFLICT_STRATEGY_LABELS.source}</option>
-                                      <option value="priority">{CONFLICT_STRATEGY_LABELS.priority}</option>
-                                    </select>
-                                  </td>
-                                  <td className="px-2 py-1.5 align-top">
-                                    {rule.conflictStrategy === 'source' ? (
-                                      <select
-                                        value={rule.primarySource}
-                                        onChange={(e: ChangeEvent<HTMLSelectElement>) => setExtractionRules(prev => prev.map(r => r.id === rule.id ? { ...r, primarySource: e.target.value } : r))}
-                                        className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                                      >
-                                        <option value="">-- Chọn nguồn --</option>
-                                        {registeredSources.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                                      </select>
-                                    ) : (
-                                      (() => {
-                                        const regIds = registeredSources.map(s => s.id);
-                                        const ordered = [...rule.priorityOrder.filter(id => regIds.includes(id)), ...regIds.filter(id => !rule.priorityOrder.includes(id))];
-                                        const apply = (arr: string[]) => setExtractionRules(prev => prev.map(r => r.id === rule.id ? { ...r, priorityOrder: arr } : r));
-                                        if (ordered.length === 0) return <span className="text-[13px] text-slate-400">Chưa có nguồn</span>;
-                                        return (
-                                          <div className="space-y-1 min-w-[190px]">
-                                            {ordered.map((sid, idx) => {
-                                              const s = registeredSources.find(x => x.id === sid);
-                                              return (
-                                                <div key={sid} className="flex items-center gap-1.5 border border-slate-200 rounded-lg px-2 py-1 bg-slate-50">
-                                                  <span className="w-4 text-[11px] font-semibold text-slate-400">{idx + 1}</span>
-                                                  <span className="flex-1 text-[13px] text-slate-700 truncate">{s?.name}</span>
-                                                  <button type="button" disabled={idx === 0} onClick={() => { const a = [...ordered];[a[idx - 1], a[idx]] = [a[idx], a[idx - 1]]; apply(a); }} className="p-0.5 text-slate-400 hover:text-blue-600 disabled:opacity-30 disabled:cursor-not-allowed" aria-label="Lên"><ChevronUp className="w-3.5 h-3.5" /></button>
-                                                  <button type="button" disabled={idx === ordered.length - 1} onClick={() => { const a = [...ordered];[a[idx + 1], a[idx]] = [a[idx], a[idx + 1]]; apply(a); }} className="p-0.5 text-slate-400 hover:text-blue-600 disabled:opacity-30 disabled:cursor-not-allowed" aria-label="Xuống"><ChevronDown className="w-3.5 h-3.5" /></button>
-                                                </div>
-                                              );
-                                            })}
-                                            <p className="text-[11px] text-slate-400">Thiếu ở nguồn đầu → lấy nguồn kế</p>
-                                          </div>
-                                        );
-                                      })()
-                                    )}
-                                  </td>
-                                  <td className="px-2 py-1.5">
-                                    <select
-                                      value={rule.nullHandling}
-                                      onChange={(e: ChangeEvent<HTMLSelectElement>) => setExtractionRules(prev => prev.map(r => r.id === rule.id ? { ...r, nullHandling: e.target.value as NullHandling } : r))}
-                                      className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                                    >
-                                      <option value="next">Nguồn kế</option>
-                                      <option value="skip">Bỏ qua</option>
-                                    </select>
-                                  </td>
-                                  <td className="px-2 py-1.5">
-                                    <select
-                                      value={rule.onEmpty}
-                                      onChange={(e: ChangeEvent<HTMLSelectElement>) => setExtractionRules(prev => prev.map(r => r.id === rule.id ? { ...r, onEmpty: e.target.value as OnEmpty } : r))}
-                                      className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                                    >
-                                      <option value="required">Bắt buộc</option>
-                                      <option value="warn">Cảnh báo</option>
-                                      <option value="allow">Cho phép trống</option>
-                                    </select>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
->>>>>>> d0d4b0c898b5cf43e3568a8815a60624cbbd3882
+                          <span className="text-[13px] font-semibold text-emerald-800">Nguß╗ôn (1:n): {src.name}</span>
                         </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* ── Tab 3: Kiểm thử ── */}
-                {mergeSubTab === 'test' && (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      {/* 1. Giới hạn số lượng */}
-                      <div className="border border-slate-200 rounded-xl bg-white p-4">
-                        <label className="block text-[13px] font-semibold text-slate-800 mb-1.5">1. Giới hạn số lượng bản ghi</label>
-                        <select
-                          value={testSizeTier}
-                          onChange={(e: ChangeEvent<HTMLSelectElement>) => { setTestSizeTier(e.target.value as TestSizeTier); setTestRun(false); }}
-                          className="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                        >
-                          <option value="">-- Chọn mức kiểm thử --</option>
-                          {TEST_SIZE_TIERS.map(tier => (
-                            <option key={tier.key} value={tier.key}>{tier.label} — {tier.count.toLocaleString('vi-VN')} bản ghi</option>
-                          ))}
-                        </select>
-                        {testSizeTier && (
-                          <p className="text-[13px] text-slate-500 mt-1.5">
-                            {TEST_SIZE_TIERS.find(t => t.key === testSizeTier)?.description}
-                          </p>
-                        )}
-                      </div>
-
-                      {/* 2. Chiến lược lấy mẫu */}
-                      <div className="border border-slate-200 rounded-xl bg-white p-4">
-                        <label className="block text-[13px] font-semibold text-slate-800 mb-1.5">2. Chiến lược lấy mẫu</label>
-                        <select
-                          value={samplingStrategy}
-                          onChange={(e: ChangeEvent<HTMLSelectElement>) => { setSamplingStrategy(e.target.value as SamplingStrategy); setTestRun(false); }}
-                          className="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                        >
-                          <option value="">-- Chọn chiến lược lấy mẫu --</option>
-                          {SAMPLING_STRATEGIES.map(strategy => (
-                            <option key={strategy.key} value={strategy.key}>{strategy.label}</option>
-                          ))}
-                        </select>
-                        {samplingStrategy && (
-                          <p className="text-[13px] text-slate-500 mt-1.5">
-                            {SAMPLING_STRATEGIES.find(s => s.key === samplingStrategy)?.description}
-                          </p>
-                        )}
-
-                        {samplingStrategy === 'time_range' && (
-                          <div className="mt-3 pt-3 border-t border-slate-100">
-                            <label className="block text-[13px] font-medium text-slate-700 mb-1.5">Khoảng thời gian lấy mẫu</label>
-                            <select
-                              value={testTimeRange}
-                              onChange={(e: ChangeEvent<HTMLSelectElement>) => { setTestTimeRange(e.target.value); setTestRun(false); }}
-                              className="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                            >
-                              {TEST_TIME_RANGE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                            </select>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Chạy thử — chỉ bật khi đã chọn đủ mức + chiến lược */}
-                    <div className="flex items-center justify-end">
-                      <button
-                        type="button"
-                        onClick={() => setTestRun(true)}
-                        disabled={!canRunTest}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-[13px] font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Chạy mô phỏng
-                      </button>
-                    </div>
-
-                    {!testRun ? (
-                      <div className="border border-dashed border-slate-200 rounded-xl bg-slate-50 p-8 text-center text-[13px] text-slate-400">
-                        Chọn mức giới hạn số lượng và chiến lược lấy mẫu, sau đó nhấn "Chạy mô phỏng" để xem kết quả kiểm thử
-                      </div>
-                    ) : (
-                      <>
-                        <div className="grid grid-cols-4 gap-3">
-                          <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
-                            <div className="text-[13px] text-emerald-700 mb-1">Golden hình thành</div>
-                            <div className="text-2xl font-bold text-emerald-800">312</div>
-                          </div>
-                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                            <div className="text-[13px] text-blue-700 mb-1">Auto-merge</div>
-                            <div className="text-2xl font-bold text-blue-800">268</div>
-                          </div>
-                          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                            <div className="text-[13px] text-amber-700 mb-1">Chờ rà soát</div>
-                            <div className="text-2xl font-bold text-amber-800">37</div>
-                          </div>
-                          <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
-                            <div className="text-[13px] text-slate-600 mb-1">Không khớp</div>
-                            <div className="text-2xl font-bold text-slate-800">183</div>
-                          </div>
-                        </div>
-
-                        <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
-                          <div className="px-4 py-3 border-b border-slate-100 bg-slate-50">
-                            <p className="text-[13px] font-semibold text-slate-700">Nghi ngờ cần xem lại</p>
-                          </div>
+                        {availableFields.length === 0 ? (
+                          <p className="text-[13px] text-slate-400 text-center py-6">Ch╞░a c├│ thuß╗Öc t├¡nh ─æß╗â cß║Ñu h├¼nh</p>
+                        ) : (
                           <div className="overflow-x-auto">
                             <table className="w-full text-[13px]">
                               <thead className="bg-slate-50 border-b border-slate-100">
                                 <tr>
-                                  <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Cặp bản ghi</th>
-                                  <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Điểm khớp</th>
-                                  <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Lý do</th>
+                                  <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Thuß╗Öc t├¡nh</th>
+                                  <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Rule gom</th>
+                                  <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Cß╗Öt mß╗æc thß╗¥i gian</th>
                                 </tr>
                               </thead>
                               <tbody className="divide-y divide-slate-50 bg-white">
-<<<<<<< HEAD
                                 {availableFields.map(attr => {
                                   const gr = wizardData.groupRules[src.id]?.[attr.fieldName];
                                   return (
@@ -2954,7 +1922,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                                           onChange={(e: ChangeEvent<HTMLSelectElement>) => handleGroupRuleChange(src.id, attr.fieldName, { timeColumn: e.target.value })}
                                           className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
                                         >
-                                          <option value="">—</option>
+                                          <option value="">ΓÇö</option>
                                           {MOCK_SOURCE_COLUMNS.map(col => <option key={col.name} value={col.name}>{col.name}</option>)}
                                         </select>
                                       </td>
@@ -2973,28 +1941,28 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
             </div>
           )}
 
-          {/* Step 3: Quy tắc hợp nhất */}
+          {/* Step 3: Quy tß║»c hß╗úp nhß║Ñt */}
           {currentStep === 3 && (
             <div className="space-y-5">
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 className="text-[13px] font-semibold text-blue-900 mb-1">Bước 3: Quy tắc hợp nhất dữ liệu</h3>
+                <h3 className="text-[13px] font-semibold text-blue-900 mb-1">B╞░ß╗¢c 3: Quy tß║»c hß╗úp nhß║Ñt dß╗» liß╗çu</h3>
                 <p className="text-[13px] text-blue-700">
-                  Thiết lập quy tắc so khớp, hợp nhất giá trị và kiểm thử mô phỏng trên dữ liệu mẫu
+                  Thiß║┐t lß║¡p quy tß║»c so khß╗¢p, hß╗úp nhß║Ñt gi├í trß╗ï v├á kiß╗âm thß╗¡ m├┤ phß╗Ång tr├¬n dß╗» liß╗çu mß║½u
                 </p>
               </div>
 
               {!showSurvivorTab && (
                 <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-2.5">
-                  <p className="text-[13px] text-amber-800">ℹ️ Chỉ 1 nguồn — không cần hợp nhất giá trị nhiều nguồn</p>
+                  <p className="text-[13px] text-amber-800">Γä╣∩╕Å Chß╗ë 1 nguß╗ôn ΓÇö kh├┤ng cß║ºn hß╗úp nhß║Ñt gi├í trß╗ï nhiß╗üu nguß╗ôn</p>
                 </div>
               )}
 
               {/* Sub-tabs */}
               <div className="flex items-center gap-1 border-b border-slate-200">
                 {(([
-                  { key: 'match',    label: 'So khớp' },
-                  { key: 'survivor', label: 'Hợp nhất giá trị' },
-                  { key: 'test',     label: 'Kiểm thử' },
+                  { key: 'match',    label: 'So khß╗¢p' },
+                  { key: 'survivor', label: 'Hß╗úp nhß║Ñt gi├í trß╗ï' },
+                  { key: 'test',     label: 'Kiß╗âm thß╗¡' },
                 ] as { key: MergeSubTab; label: string }[]).filter(t => t.key !== 'survivor' || showSurvivorTab)).map(t => (
                   <button
                     key={t.key}
@@ -3010,13 +1978,13 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                 ))}
               </div>
 
-              {/* ── Tab 1: So khớp ── */}
+              {/* ΓöÇΓöÇ Tab 1: So khß╗¢p ΓöÇΓöÇ */}
               {mergeSubTab === 'match' && (
                 <div className="space-y-4">
-                  {/* Ngưỡng */}
+                  {/* Ng╞░ß╗íng */}
                   <div className="border border-slate-200 rounded-xl bg-white p-4 grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[13px] font-medium text-slate-700 mb-1.5">Ngưỡng tự động gộp (≥)</label>
+                      <label className="block text-[13px] font-medium text-slate-700 mb-1.5">Ng╞░ß╗íng tß╗▒ ─æß╗Öng gß╗Öp (ΓëÑ)</label>
                       <div className="flex items-center gap-2">
                         <input
                           type="number" min={0} max={100}
@@ -3025,11 +1993,11 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                           className="w-24 border border-slate-200 rounded-lg px-3 py-1.5 text-[13px] text-center focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
                         />
                         <span className="text-[13px] text-slate-500">%</span>
-                        <span className="text-[13px] text-slate-400">Điểm khớp từ ngưỡng này trở lên sẽ được gộp tự động</span>
+                        <span className="text-[13px] text-slate-400">─Éiß╗âm khß╗¢p tß╗½ ng╞░ß╗íng n├áy trß╗ƒ l├¬n sß║╜ ─æ╞░ß╗úc gß╗Öp tß╗▒ ─æß╗Öng</span>
                       </div>
                     </div>
                     <div>
-                      <label className="block text-[13px] font-medium text-slate-700 mb-1.5">Ngưỡng cần rà soát (≥)</label>
+                      <label className="block text-[13px] font-medium text-slate-700 mb-1.5">Ng╞░ß╗íng cß║ºn r├á so├ít (ΓëÑ)</label>
                       <div className="flex items-center gap-2">
                         <input
                           type="number" min={0} max={100}
@@ -3038,28 +2006,28 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                           className="w-24 border border-slate-200 rounded-lg px-3 py-1.5 text-[13px] text-center focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
                         />
                         <span className="text-[13px] text-slate-500">%</span>
-                        <span className="text-[13px] text-slate-400">Điểm khớp trong khoảng này sẽ chuyển sang chờ rà soát</span>
+                        <span className="text-[13px] text-slate-400">─Éiß╗âm khß╗¢p trong khoß║úng n├áy sß║╜ chuyß╗ân sang chß╗¥ r├á so├ít</span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Bảng matching rules */}
+                  {/* Bß║úng matching rules */}
                   <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
                     <div className="px-4 py-3 border-b border-slate-100 bg-slate-50">
-                      <p className="text-[13px] font-semibold text-slate-700">Quy tắc so khớp</p>
-                      <p className="text-[13px] text-slate-500">Xác định khi nào hai bản ghi từ hai nguồn được coi là cùng một thực thể</p>
+                      <p className="text-[13px] font-semibold text-slate-700">Quy tß║»c so khß╗¢p</p>
+                      <p className="text-[13px] text-slate-500">X├íc ─æß╗ïnh khi n├áo hai bß║ún ghi tß╗½ hai nguß╗ôn ─æ╞░ß╗úc coi l├á c├╣ng mß╗Öt thß╗▒c thß╗â</p>
                     </div>
                     <div className="overflow-x-auto">
                       <table className="w-full text-[13px]">
                         <thead className="bg-slate-50 border-b border-slate-100">
                           <tr>
-                            <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Trường đối chiếu</th>
-                            <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Kiểu so khớp</th>
-                            <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Thuật toán</th>
-                            <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Ngưỡng (%)</th>
-                            <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Trọng số (%)</th>
-                            <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-20">Chuẩn hóa</th>
-                            <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Điều kiện</th>
+                            <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Tr╞░ß╗¥ng ─æß╗æi chiß║┐u</th>
+                            <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Kiß╗âu so khß╗¢p</th>
+                            <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Thuß║¡t to├ín</th>
+                            <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Ng╞░ß╗íng (%)</th>
+                            <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Trß╗ìng sß╗æ (%)</th>
+                            <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-20">Chuß║⌐n h├│a</th>
+                            <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">─Éiß╗üu kiß╗çn</th>
                             <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-10"></th>
                           </tr>
                         </thead>
@@ -3067,7 +2035,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                           {matchingRules.length === 0 ? (
                             <tr>
                               <td colSpan={8} className="px-4 py-6 text-center text-[13px] text-slate-400">
-                                Chưa có quy tắc — nhấn "+ Thêm quy tắc so khớp" để bắt đầu
+                                Ch╞░a c├│ quy tß║»c ΓÇö nhß║Ñn "+ Th├¬m quy tß║»c so khß╗¢p" ─æß╗â bß║»t ─æß║ºu
                               </td>
                             </tr>
                           ) : (
@@ -3079,7 +2047,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                                     onChange={(e: ChangeEvent<HTMLSelectElement>) => setMatchingRules(prev => prev.map(r => r.id === rule.id ? { ...r, fieldName: e.target.value } : r))}
                                     className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
                                   >
-                                    <option value="">-- Chọn trường --</option>
+                                    <option value="">-- Chß╗ìn tr╞░ß╗¥ng --</option>
                                     {availableFields.map(f => (
                                       <option key={f.fieldName} value={f.fieldName}>{f.displayName}</option>
                                     ))}
@@ -3105,7 +2073,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                                       {FUZZY_ALGORITHMS.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
                                     </select>
                                   ) : (
-                                    <span className="text-slate-400">—</span>
+                                    <span className="text-slate-400">ΓÇö</span>
                                   )}
                                 </td>
                                 <td className="px-2 py-1.5 text-center">
@@ -3117,7 +2085,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                                       className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] text-center focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                                     />
                                   ) : (
-                                    <span className="text-slate-400">—</span>
+                                    <span className="text-slate-400">ΓÇö</span>
                                   )}
                                 </td>
                                 <td className="px-2 py-1.5 text-center">
@@ -3147,7 +2115,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                                       <option value="OR">OR</option>
                                     </select>
                                   ) : (
-                                    <span className="text-slate-400">—</span>
+                                    <span className="text-slate-400">ΓÇö</span>
                                   )}
                                 </td>
                                 <td className="px-2 py-1.5 text-center">
@@ -3162,12 +2130,12 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                         {matchingRules.length > 0 && (
                           <tfoot className="border-t border-slate-200 bg-slate-50">
                             <tr>
-                              <td colSpan={4} className="px-3 py-2 text-right text-[13px] font-medium text-slate-600">Tổng trọng số:</td>
+                              <td colSpan={4} className="px-3 py-2 text-right text-[13px] font-medium text-slate-600">Tß╗òng trß╗ìng sß╗æ:</td>
                               <td className="px-2 py-2 text-center">
                                 <span className={`text-[13px] font-bold ${totalWeight === 100 ? 'text-green-700' : 'text-red-600'}`}>{totalWeight}%</span>
                               </td>
                               <td colSpan={3} className="px-3 py-2 text-[13px] text-slate-400">
-                                {totalWeight === 100 ? 'Hợp lệ' : 'Tổng trọng số phải bằng 100%'}
+                                {totalWeight === 100 ? 'Hß╗úp lß╗ç' : 'Tß╗òng trß╗ìng sß╗æ phß║úi bß║▒ng 100%'}
                               </td>
                             </tr>
                           </tfoot>
@@ -3179,7 +2147,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                         type="button"
                         onClick={() => setMatchingRules(prev => {
                           const next = [...prev, { id: `mr-${Date.now()}`, fieldName: '', method: 'exact' as MatchMethod, fuzzyThreshold: 80, normalize: false, operator: 'AND' as ConditionOperator, weight: 0, algorithm: 'jaro_winkler' as FuzzyAlgorithm }];
-                          // Chia đều trọng số cho tất cả quy tắc
+                          // Chia ─æß╗üu trß╗ìng sß╗æ cho tß║Ñt cß║ú quy tß║»c
                           const even = Math.floor(100 / next.length);
                           const remainder = 100 - even * next.length;
                           return next.map((r, i) => ({ ...r, weight: even + (i === 0 ? remainder : 0) }));
@@ -3187,16 +2155,16 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                         className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-200 text-blue-600 text-[13px] font-medium rounded-lg hover:bg-blue-50 transition-colors"
                       >
                         <Plus className="w-3.5 h-3.5" />
-                        Thêm quy tắc so khớp
+                        Th├¬m quy tß║»c so khß╗¢p
                       </button>
                     </div>
                   </div>
 
-                  {/* Trường hard-block */}
+                  {/* Tr╞░ß╗¥ng hard-block */}
                   <div className="border border-slate-200 rounded-xl bg-white p-4 space-y-3">
                     <div>
-                      <p className="text-[13px] font-semibold text-slate-700">Trường hard-block</p>
-                      <p className="text-[13px] text-slate-500">Nếu các trường này khác nhau, hai bản ghi chắc chắn KHÔNG phải cùng thực thể (loại khỏi so khớp)</p>
+                      <p className="text-[13px] font-semibold text-slate-700">Tr╞░ß╗¥ng hard-block</p>
+                      <p className="text-[13px] text-slate-500">Nß║┐u c├íc tr╞░ß╗¥ng n├áy kh├íc nhau, hai bß║ún ghi chß║»c chß║»n KH├öNG phß║úi c├╣ng thß╗▒c thß╗â (loß║íi khß╗Åi so khß╗¢p)</p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
                       {mergeConfig.hardBlockFields.map(f => (
@@ -3208,7 +2176,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                         </span>
                       ))}
                       {mergeConfig.hardBlockFields.length === 0 && (
-                        <span className="text-[13px] text-slate-400">Chưa có trường hard-block nào</span>
+                        <span className="text-[13px] text-slate-400">Ch╞░a c├│ tr╞░ß╗¥ng hard-block n├áo</span>
                       )}
                     </div>
                     <div className="flex items-center gap-2">
@@ -3217,7 +2185,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                         onChange={(e: ChangeEvent<HTMLSelectElement>) => setHardBlockInput(e.target.value)}
                         className="flex-1 max-w-xs border border-slate-200 rounded-lg px-2 py-1.5 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
                       >
-                        <option value="">-- Chọn trường để thêm --</option>
+                        <option value="">-- Chß╗ìn tr╞░ß╗¥ng ─æß╗â th├¬m --</option>
                         {availableFields
                           .filter(f => !mergeConfig.hardBlockFields.includes(f.fieldName))
                           .map(f => <option key={f.fieldName} value={f.fieldName}>{f.displayName}</option>)}
@@ -3228,33 +2196,33 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                         disabled={!hardBlockInput}
                         className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-200 text-blue-600 text-[13px] font-medium rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        <Plus className="w-3.5 h-3.5" /> Thêm
+                        <Plus className="w-3.5 h-3.5" /> Th├¬m
                       </button>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* ── Tab 2: Hợp nhất giá trị ── */}
+              {/* ΓöÇΓöÇ Tab 2: Hß╗úp nhß║Ñt gi├í trß╗ï ΓöÇΓöÇ */}
               {mergeSubTab === 'survivor' && (
                 <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
                   <div className="px-4 py-3 border-b border-slate-100 bg-slate-50">
-                    <p className="text-[13px] font-semibold text-slate-700">Hợp nhất giá trị (Survivorship)</p>
-                    <p className="text-[13px] text-slate-500">Với mỗi trường, chọn giá trị nào sẽ tồn tại trong bản ghi chủ cuối cùng</p>
+                    <p className="text-[13px] font-semibold text-slate-700">Hß╗úp nhß║Ñt gi├í trß╗ï (Survivorship)</p>
+                    <p className="text-[13px] text-slate-500">Vß╗¢i mß╗ùi tr╞░ß╗¥ng, chß╗ìn gi├í trß╗ï n├áo sß║╜ tß╗ôn tß║íi trong bß║ún ghi chß╗º cuß╗æi c├╣ng</p>
                   </div>
                   <div className="p-4">
                     {extractionRules.length === 0 ? (
-                      <p className="text-[13px] text-slate-400 text-center py-6">Hoàn tất Bước 2 để tự động nạp danh sách trường</p>
+                      <p className="text-[13px] text-slate-400 text-center py-6">Ho├án tß║Ñt B╞░ß╗¢c 2 ─æß╗â tß╗▒ ─æß╗Öng nß║íp danh s├ích tr╞░ß╗¥ng</p>
                     ) : (
                       <div className="border border-slate-100 rounded-lg overflow-x-auto">
                         <table className="w-full text-[13px]">
                           <thead className="bg-slate-50 border-b border-slate-100">
                             <tr>
-                              <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Trường</th>
-                              <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Chiến lược</th>
-                              <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Nguồn dữ liệu</th>
-                              <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Xử lý null</th>
-                              <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Khi hết vẫn trống</th>
+                              <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Tr╞░ß╗¥ng</th>
+                              <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Chiß║┐n l╞░ß╗úc</th>
+                              <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Nguß╗ôn dß╗» liß╗çu</th>
+                              <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Xß╗¡ l├╜ null</th>
+                              <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Khi hß║┐t vß║½n trß╗æng</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-50 bg-white">
@@ -3281,7 +2249,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                                       onChange={(e: ChangeEvent<HTMLSelectElement>) => setExtractionRules(prev => prev.map(r => r.id === rule.id ? { ...r, primarySource: e.target.value } : r))}
                                       className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
                                     >
-                                      <option value="">-- Chọn nguồn --</option>
+                                      <option value="">-- Chß╗ìn nguß╗ôn --</option>
                                       {registeredSources.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                                     </select>
                                   ) : (
@@ -3289,7 +2257,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                                       const regIds = registeredSources.map(s => s.id);
                                       const ordered = [...rule.priorityOrder.filter(id => regIds.includes(id)), ...regIds.filter(id => !rule.priorityOrder.includes(id))];
                                       const apply = (arr: string[]) => setExtractionRules(prev => prev.map(r => r.id === rule.id ? { ...r, priorityOrder: arr } : r));
-                                      if (ordered.length === 0) return <span className="text-[13px] text-slate-400">Chưa có nguồn</span>;
+                                      if (ordered.length === 0) return <span className="text-[13px] text-slate-400">Ch╞░a c├│ nguß╗ôn</span>;
                                       return (
                                         <div className="space-y-1 min-w-[190px]">
                                           {ordered.map((sid, idx) => {
@@ -3298,12 +2266,12 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                                               <div key={sid} className="flex items-center gap-1.5 border border-slate-200 rounded-lg px-2 py-1 bg-slate-50">
                                                 <span className="w-4 text-[11px] font-semibold text-slate-400">{idx + 1}</span>
                                                 <span className="flex-1 text-[13px] text-slate-700 truncate">{s?.name}</span>
-                                                <button type="button" disabled={idx === 0} onClick={() => { const a = [...ordered]; [a[idx - 1], a[idx]] = [a[idx], a[idx - 1]]; apply(a); }} className="p-0.5 text-slate-400 hover:text-blue-600 disabled:opacity-30 disabled:cursor-not-allowed" aria-label="Lên"><ChevronUp className="w-3.5 h-3.5" /></button>
-                                                <button type="button" disabled={idx === ordered.length - 1} onClick={() => { const a = [...ordered]; [a[idx + 1], a[idx]] = [a[idx], a[idx + 1]]; apply(a); }} className="p-0.5 text-slate-400 hover:text-blue-600 disabled:opacity-30 disabled:cursor-not-allowed" aria-label="Xuống"><ChevronDown className="w-3.5 h-3.5" /></button>
+                                                <button type="button" disabled={idx === 0} onClick={() => { const a = [...ordered]; [a[idx - 1], a[idx]] = [a[idx], a[idx - 1]]; apply(a); }} className="p-0.5 text-slate-400 hover:text-blue-600 disabled:opacity-30 disabled:cursor-not-allowed" aria-label="L├¬n"><ChevronUp className="w-3.5 h-3.5" /></button>
+                                                <button type="button" disabled={idx === ordered.length - 1} onClick={() => { const a = [...ordered]; [a[idx + 1], a[idx]] = [a[idx], a[idx + 1]]; apply(a); }} className="p-0.5 text-slate-400 hover:text-blue-600 disabled:opacity-30 disabled:cursor-not-allowed" aria-label="Xuß╗æng"><ChevronDown className="w-3.5 h-3.5" /></button>
                                               </div>
                                             );
                                           })}
-                                          <p className="text-[11px] text-slate-400">Thiếu ở nguồn đầu → lấy nguồn kế</p>
+                                          <p className="text-[11px] text-slate-400">Thiß║┐u ß╗ƒ nguß╗ôn ─æß║ºu ΓåÆ lß║Ñy nguß╗ôn kß║┐</p>
                                         </div>
                                       );
                                     })()
@@ -3315,8 +2283,8 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                                     onChange={(e: ChangeEvent<HTMLSelectElement>) => setExtractionRules(prev => prev.map(r => r.id === rule.id ? { ...r, nullHandling: e.target.value as NullHandling } : r))}
                                     className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
                                   >
-                                    <option value="next">Nguồn kế</option>
-                                    <option value="skip">Bỏ qua</option>
+                                    <option value="next">Nguß╗ôn kß║┐</option>
+                                    <option value="skip">Bß╗Å qua</option>
                                   </select>
                                 </td>
                                 <td className="px-2 py-1.5">
@@ -3325,9 +2293,9 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                                     onChange={(e: ChangeEvent<HTMLSelectElement>) => setExtractionRules(prev => prev.map(r => r.id === rule.id ? { ...r, onEmpty: e.target.value as OnEmpty } : r))}
                                     className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
                                   >
-                                    <option value="required">Bắt buộc</option>
-                                    <option value="warn">Cảnh báo</option>
-                                    <option value="allow">Cho phép trống</option>
+                                    <option value="required">Bß║»t buß╗Öc</option>
+                                    <option value="warn">Cß║únh b├ío</option>
+                                    <option value="allow">Cho ph├⌐p trß╗æng</option>
                                   </select>
                                 </td>
                               </tr>
@@ -3335,74 +2303,45 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                           </tbody>
                         </table>
                       </div>
-=======
-                                <tr>
-                                  <td className="px-3 py-2.5 text-slate-700"><code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono">HT-0451</code> ↔ <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono">CC-1123</code></td>
-                                  <td className="px-3 py-2.5 text-center"><span className="px-2 py-0.5 bg-amber-100 text-amber-700 rounded font-semibold">82%</span></td>
-                                  <td className="px-3 py-2.5 text-slate-600">Trùng họ tên và ngày sinh nhưng khác số định danh</td>
-                                </tr>
-                                <tr>
-                                  <td className="px-3 py-2.5 text-slate-700"><code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono">HT-0777</code> ↔ <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono">CC-2098</code></td>
-                                  <td className="px-3 py-2.5 text-center"><span className="px-2 py-0.5 bg-amber-100 text-amber-700 rounded font-semibold">78%</span></td>
-                                  <td className="px-3 py-2.5 text-slate-600">Tên gần đúng (Jaro-Winkler) nhưng địa chỉ thường trú khác nhau</td>
-                                </tr>
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                      </>
->>>>>>> d0d4b0c898b5cf43e3568a8815a60624cbbd3882
                     )}
                   </div>
-                )}
-              </div>
-            )}
-
-            {/* Step 5: Thiết lập quan hệ */}
-            {currentStep === 5 && (
-              <div className="space-y-5">
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h3 className="text-[13px] font-semibold text-blue-900 mb-1">Bước 5: Thiết lập quan hệ</h3>
-                  <p className="text-[13px] text-blue-700">Định nghĩa mối quan hệ giữa thực thể này với các thực thể dữ liệu chủ khác trong hệ thống</p>
                 </div>
+              )}
 
-                {/* Entity info + add button */}
-                <div className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-[13px] flex-shrink-0">
-                      {(wizardData.code || wizardData.name || 'E').charAt(0).toUpperCase()}
-                    </div>
+              {/* ΓöÇΓöÇ Tab 3: Kiß╗âm thß╗¡ ΓöÇΓöÇ */}
+              {mergeSubTab === 'test' && (
+                <div className="space-y-4">
+                  <div className="border border-slate-200 rounded-xl bg-white p-4 flex flex-wrap items-end gap-3">
                     <div>
-<<<<<<< HEAD
-                      <label className="block text-[13px] font-medium text-slate-700 mb-1.5">Chọn số lượng bản ghi chạy kiểm thử</label>
+                      <label className="block text-[13px] font-medium text-slate-700 mb-1.5">Chß╗ìn sß╗æ l╞░ß╗úng bß║ún ghi chß║íy kiß╗âm thß╗¡</label>
                       <select
                         value={testSample}
                         onChange={(e: ChangeEvent<HTMLSelectElement>) => { setTestSample(e.target.value); setTestRun(false); }}
                         className="w-80 border border-slate-200 rounded-lg px-2 py-1.5 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
                       >
-                        <option value="">-- Chọn số lượng bản ghi --</option>
+                        <option value="">-- Chß╗ìn sß╗æ l╞░ß╗úng bß║ún ghi --</option>
                         {WIZARD_MOCK_SAMPLES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
                       </select>
-=======
-                      <p className="text-[13px] text-slate-500">Thực thể đang cấu hình:</p>
-                      <p className="text-[13px] font-semibold text-slate-800">
-                        {wizardData.code && <code className="text-blue-600 bg-blue-50 px-1 rounded mr-1.5">{wizardData.code}</code>}
-                        {wizardData.name || '(Chưa đặt tên)'}
-                      </p>
->>>>>>> d0d4b0c898b5cf43e3568a8815a60624cbbd3882
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => setTestRun(true)}
+                      disabled={!testSample}
+                      className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-[13px] font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Chß║íy m├┤ phß╗Ång
+                    </button>
                   </div>
-<<<<<<< HEAD
 
                   {!testRun ? (
                     <div className="border border-dashed border-slate-200 rounded-xl bg-slate-50 p-8 text-center text-[13px] text-slate-400">
-                      Chọn dữ liệu mẫu và nhấn "Chạy mô phỏng" để xem kết quả kiểm thử
+                      Chß╗ìn dß╗» liß╗çu mß║½u v├á nhß║Ñn "Chß║íy m├┤ phß╗Ång" ─æß╗â xem kß║┐t quß║ú kiß╗âm thß╗¡
                     </div>
                   ) : (
                     <>
                       <div className="grid grid-cols-4 gap-3">
                         <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
-                          <div className="text-[13px] text-emerald-700 mb-1">Golden hình thành</div>
+                          <div className="text-[13px] text-emerald-700 mb-1">Golden h├¼nh th├ánh</div>
                           <div className="text-2xl font-bold text-emerald-800">312</div>
                         </div>
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
@@ -3410,51 +2349,51 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                           <div className="text-2xl font-bold text-blue-800">268</div>
                         </div>
                         <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                          <div className="text-[13px] text-amber-700 mb-1">Chờ rà soát</div>
+                          <div className="text-[13px] text-amber-700 mb-1">Chß╗¥ r├á so├ít</div>
                           <div className="text-2xl font-bold text-amber-800">37</div>
                         </div>
                         <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
-                          <div className="text-[13px] text-slate-600 mb-1">Không khớp</div>
+                          <div className="text-[13px] text-slate-600 mb-1">Kh├┤ng khß╗¢p</div>
                           <div className="text-2xl font-bold text-slate-800">183</div>
                         </div>
                       </div>
 
-                      {/* Bảng Các bản ghi chờ rà soát */}
+                      {/* Bß║úng C├íc bß║ún ghi chß╗¥ r├á so├ít */}
                       <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
                         <div className="px-4 py-3 border-b border-slate-100 bg-slate-50 flex items-center justify-between gap-3 flex-wrap min-h-[48px]">
                           <div className="flex items-center gap-2">
-                            <p className="text-[13px] font-semibold text-slate-800">Các bản ghi chờ rà soát</p>
+                            <p className="text-[13px] font-semibold text-slate-800">C├íc bß║ún ghi chß╗¥ r├á so├ít</p>
                             <span className="text-[12px] px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full font-medium">
-                              37 bản ghi
+                              37 bß║ún ghi
                             </span>
                           </div>
 
                           {reviewSelectedIds.length > 0 ? (
                             <div className="flex items-center gap-2">
                               <span className="text-[12px] font-medium text-slate-500 mr-1">
-                                Đã chọn <strong className="text-slate-800">{reviewSelectedIds.length}</strong>
+                                ─É├ú chß╗ìn <strong className="text-slate-800">{reviewSelectedIds.length}</strong>
                               </span>
                               <button
                                 type="button"
                                 onClick={() => {
                                   setReviewProcessedIds(prev => Array.from(new Set([...prev, ...reviewSelectedIds])));
                                   setReviewSelectedIds([]);
-                                  triggerToast('Gửi yêu cầu thành công', 'Đã lưu bản ghi mới thành công!');
+                                  triggerToast('Gß╗¡i y├¬u cß║ºu th├ánh c├┤ng', '─É├ú l╞░u bß║ún ghi mß╗¢i th├ánh c├┤ng!');
                                 }}
                                 className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[12px] font-medium transition-colors shadow-sm cursor-pointer"
                               >
-                                <GitMerge className="w-3.5 h-3.5" /> Hợp nhất
+                                <GitMerge className="w-3.5 h-3.5" /> Hß╗úp nhß║Ñt
                               </button>
                               <button
                                 type="button"
                                 onClick={() => {
                                   setReviewProcessedIds(prev => Array.from(new Set([...prev, ...reviewSelectedIds])));
                                   setReviewSelectedIds([]);
-                                  triggerToast('Gửi yêu cầu thành công', 'Đã lưu bản ghi mới thành công!');
+                                  triggerToast('Gß╗¡i y├¬u cß║ºu th├ánh c├┤ng', '─É├ú l╞░u bß║ún ghi mß╗¢i th├ánh c├┤ng!');
                                 }}
                                 className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-lg text-[12px] font-medium transition-colors cursor-pointer"
                               >
-                                <Split className="w-3.5 h-3.5 text-amber-600" /> Tách biệt
+                                <Split className="w-3.5 h-3.5 text-amber-600" /> T├ích biß╗çt
                               </button>
                               <button
                                 type="button"
@@ -3462,15 +2401,15 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                                   setReviewProcessedIds(prev => Array.from(new Set([...prev, ...reviewSelectedIds])));
                                   setReviewSentIds(prev => Array.from(new Set([...prev, ...reviewSelectedIds])));
                                   setReviewSelectedIds([]);
-                                  triggerToast('Gửi yêu cầu thành công', 'Đã lưu bản ghi mới thành công!');
+                                  triggerToast('Gß╗¡i y├¬u cß║ºu th├ánh c├┤ng', '─É├ú l╞░u bß║ún ghi mß╗¢i th├ánh c├┤ng!');
                                 }}
                                 className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[12px] font-medium transition-colors shadow-sm cursor-pointer"
                               >
-                                <Send className="w-3.5 h-3.5" /> Gửi duyệt
+                                <Send className="w-3.5 h-3.5" /> Gß╗¡i duyß╗çt
                               </button>
                             </div>
                           ) : (
-                            <span className="text-[12px] text-slate-400">Tích chọn các bản ghi để thực hiện thao tác hàng loạt</span>
+                            <span className="text-[12px] text-slate-400">T├¡ch chß╗ìn c├íc bß║ún ghi ─æß╗â thß╗▒c hiß╗çn thao t├íc h├áng loß║ít</span>
                           )}
                         </div>
 
@@ -3492,17 +2431,17 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                                     className="rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 cursor-pointer"
                                   />
                                 </th>
-                                <th className="px-3 py-2.5 text-left font-semibold text-slate-600">Cặp bản ghi</th>
-                                <th className="px-3 py-2.5 text-center font-semibold text-slate-600 w-28">Điểm khớp</th>
-                                <th className="px-3 py-2.5 text-left font-semibold text-slate-600">Lý do</th>
-                                <th className="px-3 py-2.5 text-center font-semibold text-slate-600 w-36">Thao tác</th>
+                                <th className="px-3 py-2.5 text-left font-semibold text-slate-600">Cß║╖p bß║ún ghi</th>
+                                <th className="px-3 py-2.5 text-center font-semibold text-slate-600 w-28">─Éiß╗âm khß╗¢p</th>
+                                <th className="px-3 py-2.5 text-left font-semibold text-slate-600">L├╜ do</th>
+                                <th className="px-3 py-2.5 text-center font-semibold text-slate-600 w-36">Thao t├íc</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 bg-white">
                               {MOCK_REVIEW_ITEMS.map(item => {
                                 const isProcessed = reviewProcessedIds.includes(item.id);
                                 const isSelected = reviewSelectedIds.includes(item.id);
-                                const parts = item.pair.split(' ↔ ');
+                                const parts = item.pair.split(' Γåö ');
                                 return (
                                   <tr
                                     key={item.id}
@@ -3529,7 +2468,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                                     </td>
                                     <td className={`px-3 py-2.5 font-medium ${isProcessed ? 'text-slate-400' : 'text-slate-700'}`}>
                                       <code className={`px-1.5 py-0.5 rounded font-mono ${isProcessed ? 'bg-slate-200/60 text-slate-500' : 'bg-slate-100 text-slate-700'}`}>{parts[0]}</code>
-                                      <span className="mx-1.5 text-slate-400">↔</span>
+                                      <span className="mx-1.5 text-slate-400">Γåö</span>
                                       <code className={`px-1.5 py-0.5 rounded font-mono ${isProcessed ? 'bg-slate-200/60 text-slate-500' : 'bg-slate-100 text-slate-700'}`}>{parts[1]}</code>
                                     </td>
                                     <td className="px-3 py-2.5 text-center">
@@ -3540,16 +2479,16 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                                     <td className={`px-3 py-2.5 ${isProcessed ? 'text-slate-400' : 'text-slate-600'}`}>{item.reason}</td>
                                     <td className="px-3 py-2.5 text-center">
                                       {isProcessed ? (
-                                        <span className="text-[11px] px-2 py-0.5 bg-slate-200 text-slate-600 rounded font-medium">Đã xử lý</span>
+                                        <span className="text-[11px] px-2 py-0.5 bg-slate-200 text-slate-600 rounded font-medium">─É├ú xß╗¡ l├╜</span>
                                       ) : (
                                         <div className="flex items-center justify-center gap-1">
                                           <button
                                             type="button"
-                                            title="Hợp nhất bản ghi"
+                                            title="Hß╗úp nhß║Ñt bß║ún ghi"
                                             onClick={() => {
                                               setReviewProcessedIds(prev => Array.from(new Set([...prev, item.id])));
                                               setReviewSelectedIds(prev => prev.filter(id => id !== item.id));
-                                              triggerToast('Gửi yêu cầu thành công', 'Đã lưu bản ghi mới thành công!');
+                                              triggerToast('Gß╗¡i y├¬u cß║ºu th├ánh c├┤ng', '─É├ú l╞░u bß║ún ghi mß╗¢i th├ánh c├┤ng!');
                                             }}
                                             className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
                                           >
@@ -3557,11 +2496,11 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                                           </button>
                                           <button
                                             type="button"
-                                            title="Tách biệt bản ghi"
+                                            title="T├ích biß╗çt bß║ún ghi"
                                             onClick={() => {
                                               setReviewProcessedIds(prev => Array.from(new Set([...prev, item.id])));
                                               setReviewSelectedIds(prev => prev.filter(id => id !== item.id));
-                                              triggerToast('Gửi yêu cầu thành công', 'Đã lưu bản ghi mới thành công!');
+                                              triggerToast('Gß╗¡i y├¬u cß║ºu th├ánh c├┤ng', '─É├ú l╞░u bß║ún ghi mß╗¢i th├ánh c├┤ng!');
                                             }}
                                             className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
                                           >
@@ -3569,12 +2508,12 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                                           </button>
                                           <button
                                             type="button"
-                                            title="Gửi duyệt"
+                                            title="Gß╗¡i duyß╗çt"
                                             onClick={() => {
                                               setReviewProcessedIds(prev => Array.from(new Set([...prev, item.id])));
                                               setReviewSentIds(prev => Array.from(new Set([...prev, item.id])));
                                               setReviewSelectedIds(prev => prev.filter(id => id !== item.id));
-                                              triggerToast('Gửi yêu cầu thành công', 'Đã lưu bản ghi mới thành công!');
+                                              triggerToast('Gß╗¡i y├¬u cß║ºu th├ánh c├┤ng', '─É├ú l╞░u bß║ún ghi mß╗¢i th├ánh c├┤ng!');
                                             }}
                                             className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
                                           >
@@ -3590,15 +2529,15 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                           </table>
                         </div>
 
-                        {/* Thanh phân trang */}
+                        {/* Thanh ph├ón trang */}
                         <div className="px-4 py-3 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
                           <div className="text-[13px] text-slate-500">
-                            Hiển thị <span className="font-medium text-slate-700">1 - 5</span> trong số <span className="font-medium text-slate-700">37</span> bản ghi
+                            Hiß╗ân thß╗ï <span className="font-medium text-slate-700">1 - 5</span> trong sß╗æ <span className="font-medium text-slate-700">37</span> bß║ún ghi
                           </div>
                           <div className="flex items-center gap-2">
                             <button type="button" disabled={reviewPage === 1} onClick={() => setReviewPage(prev => Math.max(1, prev - 1))}
                               className="px-2.5 py-1 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-600 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer">
-                              Trước
+                              Tr╞░ß╗¢c
                             </button>
                             <span className="text-[13px] text-slate-600 font-medium px-1">Trang {reviewPage} / 8</span>
                             <button type="button" disabled={reviewPage === 8} onClick={() => setReviewPage(prev => Math.min(8, prev + 1))}
@@ -3609,20 +2548,20 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                         </div>
                       </div>
 
-                      {/* Bảng Các bản ghi không khớp */}
+                      {/* Bß║úng C├íc bß║ún ghi kh├┤ng khß╗¢p */}
                       <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
                         <div className="px-4 py-3 border-b border-slate-100 bg-slate-50 flex items-center justify-between gap-3 flex-wrap min-h-[48px]">
                           <div className="flex items-center gap-2">
-                            <p className="text-[13px] font-semibold text-slate-800">Các bản ghi không khớp</p>
+                            <p className="text-[13px] font-semibold text-slate-800">C├íc bß║ún ghi kh├┤ng khß╗¢p</p>
                             <span className="text-[12px] px-2 py-0.5 bg-slate-100 text-slate-700 rounded-full font-medium">
-                              183 bản ghi
+                              183 bß║ún ghi
                             </span>
                           </div>
 
                           {unmatchedSelectedIds.length > 0 ? (
                             <div className="flex items-center gap-2">
                               <span className="text-[12px] font-medium text-slate-500 mr-1">
-                                Đã chọn <strong className="text-slate-800">{unmatchedSelectedIds.length}</strong>
+                                ─É├ú chß╗ìn <strong className="text-slate-800">{unmatchedSelectedIds.length}</strong>
                               </span>
                               <button
                                 type="button"
@@ -3634,11 +2573,11 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                                   });
                                   setUnmatchedProcessedIds(prev => Array.from(new Set([...prev, ...unmatchedSelectedIds])));
                                   setUnmatchedSelectedIds([]);
-                                  triggerToast('Gửi yêu cầu thành công', 'Đã lưu bản ghi mới thành công!');
+                                  triggerToast('Gß╗¡i y├¬u cß║ºu th├ánh c├┤ng', '─É├ú l╞░u bß║ún ghi mß╗¢i th├ánh c├┤ng!');
                                 }}
                                 className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[12px] font-medium transition-colors shadow-sm cursor-pointer"
                               >
-                                <PlusCircle className="w-3.5 h-3.5" /> Tạo bản ghi đơn nguồn
+                                <PlusCircle className="w-3.5 h-3.5" /> Tß║ío bß║ún ghi ─æ╞ín nguß╗ôn
                               </button>
                               <button
                                 type="button"
@@ -3650,15 +2589,15 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                                   });
                                   setUnmatchedProcessedIds(prev => Array.from(new Set([...prev, ...unmatchedSelectedIds])));
                                   setUnmatchedSelectedIds([]);
-                                  triggerToast('Gửi yêu cầu thành công', 'Đã lưu bản ghi mới thành công!');
+                                  triggerToast('Gß╗¡i y├¬u cß║ºu th├ánh c├┤ng', '─É├ú l╞░u bß║ún ghi mß╗¢i th├ánh c├┤ng!');
                                 }}
                                 className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-lg text-[12px] font-medium transition-colors cursor-pointer"
                               >
-                                <XCircle className="w-3.5 h-3.5 text-slate-500" /> Loại bỏ
+                                <XCircle className="w-3.5 h-3.5 text-slate-500" /> Loß║íi bß╗Å
                               </button>
                             </div>
                           ) : (
-                            <span className="text-[12px] text-slate-400">Tích chọn các bản ghi để thực hiện thao tác xử lý hàng loạt</span>
+                            <span className="text-[12px] text-slate-400">T├¡ch chß╗ìn c├íc bß║ún ghi ─æß╗â thß╗▒c hiß╗çn thao t├íc xß╗¡ l├╜ h├áng loß║ít</span>
                           )}
                         </div>
 
@@ -3680,10 +2619,10 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                                     className="rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 cursor-pointer"
                                   />
                                 </th>
-                                <th className="px-3 py-2.5 text-left font-semibold text-slate-600">Bản ghi nguồn</th>
-                                <th className="px-3 py-2.5 text-center font-semibold text-slate-600 w-36">Điểm khớp cao nhất</th>
-                                <th className="px-3 py-2.5 text-left font-semibold text-slate-600">Lý do không khớp</th>
-                                <th className="px-3 py-2.5 text-left font-semibold text-slate-600 w-56">Phương án xử lý</th>
+                                <th className="px-3 py-2.5 text-left font-semibold text-slate-600">Bß║ún ghi nguß╗ôn</th>
+                                <th className="px-3 py-2.5 text-center font-semibold text-slate-600 w-36">─Éiß╗âm khß╗¢p cao nhß║Ñt</th>
+                                <th className="px-3 py-2.5 text-left font-semibold text-slate-600">L├╜ do kh├┤ng khß╗¢p</th>
+                                <th className="px-3 py-2.5 text-left font-semibold text-slate-600 w-56">Ph╞░╞íng ├ín xß╗¡ l├╜</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 bg-white">
@@ -3730,7 +2669,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                                     <td className="px-3 py-2.5">
                                       {isProcessed ? (
                                         <span className="text-[11px] px-2 py-0.5 bg-slate-200 text-slate-600 rounded font-medium">
-                                          Đã xử lý
+                                          ─É├ú xß╗¡ l├╜
                                         </span>
                                       ) : (
                                         <select
@@ -3741,7 +2680,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                                             setUnmatchedActions(prev => ({ ...prev, [item.id]: val }));
                                             setUnmatchedProcessedIds(prev => Array.from(new Set([...prev, item.id])));
                                             setUnmatchedSelectedIds(prev => prev.filter(id => id !== item.id));
-                                            triggerToast('Gửi yêu cầu thành công', 'Đã lưu bản ghi mới thành công!');
+                                            triggerToast('Gß╗¡i y├¬u cß║ºu th├ánh c├┤ng', '─É├ú l╞░u bß║ún ghi mß╗¢i th├ánh c├┤ng!');
                                           }}
                                           className={`w-full text-[12px] border rounded-lg px-2.5 py-1 font-medium bg-white focus:outline-none cursor-pointer transition-colors ${
                                             currentAction === 'single_source'
@@ -3749,9 +2688,9 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                                               : 'border-slate-300 text-slate-600 bg-slate-50 cursor-pointer'
                                           }`}
                                         >
-                                          <option value="">-- Chọn phương án xử lý --</option>
-                                          <option value="single_source">Tạo bản ghi đơn nguồn</option>
-                                          <option value="discard">Loại bỏ</option>
+                                          <option value="">-- Chß╗ìn ph╞░╞íng ├ín xß╗¡ l├╜ --</option>
+                                          <option value="single_source">Tß║ío bß║ún ghi ─æ╞ín nguß╗ôn</option>
+                                          <option value="discard">Loß║íi bß╗Å</option>
                                         </select>
                                       )}
                                     </td>
@@ -3762,15 +2701,15 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                           </table>
                         </div>
 
-                        {/* Thanh phân trang */}
+                        {/* Thanh ph├ón trang */}
                         <div className="px-4 py-3 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
                           <div className="text-[13px] text-slate-500">
-                            Hiển thị <span className="font-medium text-slate-700">1 - 5</span> trong số <span className="font-medium text-slate-700">183</span> bản ghi
+                            Hiß╗ân thß╗ï <span className="font-medium text-slate-700">1 - 5</span> trong sß╗æ <span className="font-medium text-slate-700">183</span> bß║ún ghi
                           </div>
                           <div className="flex items-center gap-2">
                             <button type="button" disabled={unmatchedPage === 1} onClick={() => setUnmatchedPage(prev => Math.max(1, prev - 1))}
                               className="px-2.5 py-1 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-600 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer">
-                              Trước
+                              Tr╞░ß╗¢c
                             </button>
                             <span className="text-[13px] text-slate-600 font-medium px-1">Trang {unmatchedPage} / 37</span>
                             <button type="button" disabled={unmatchedPage === 37} onClick={() => setUnmatchedPage(prev => Math.min(37, prev + 1))}
@@ -3787,12 +2726,12 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
             </div>
           )}
 
-          {/* Step 4: Thiết lập quan hệ */}
+          {/* Step 4: Thiß║┐t lß║¡p quan hß╗ç */}
           {currentStep === 4 && (
             <div className="space-y-5">
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 className="text-[13px] font-semibold text-blue-900 mb-1">Bước 4: Thiết lập quan hệ</h3>
-                <p className="text-[13px] text-blue-700">Định nghĩa mối quan hệ giữa thực thể này với các thực thể dữ liệu chủ khác trong hệ thống</p>
+                <h3 className="text-[13px] font-semibold text-blue-900 mb-1">B╞░ß╗¢c 4: Thiß║┐t lß║¡p quan hß╗ç</h3>
+                <p className="text-[13px] text-blue-700">─Éß╗ïnh ngh─⌐a mß╗æi quan hß╗ç giß╗»a thß╗▒c thß╗â n├áy vß╗¢i c├íc thß╗▒c thß╗â dß╗» liß╗çu chß╗º kh├íc trong hß╗ç thß╗æng</p>
               </div>
 
               {/* Entity info + add button */}
@@ -3802,10 +2741,10 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                     {(wizardData.code || wizardData.name || 'E').charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <p className="text-[13px] text-slate-500">Thực thể đang cấu hình:</p>
+                    <p className="text-[13px] text-slate-500">Thß╗▒c thß╗â ─æang cß║Ñu h├¼nh:</p>
                     <p className="text-[13px] font-semibold text-slate-800">
                       {wizardData.code && <code className="text-blue-600 bg-blue-50 px-1 rounded mr-1.5">{wizardData.code}</code>}
-                      {wizardData.name || '(Chưa đặt tên)'}
+                      {wizardData.name || '(Ch╞░a ─æß║╖t t├¬n)'}
                     </p>
                   </div>
                 </div>
@@ -3815,7 +2754,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                       <input
                         type="text" value={relSearch}
                         onChange={(e: ChangeEvent<HTMLInputElement>) => setRelSearch(e.target.value)}
-                        placeholder="Tìm kiếm quan hệ..."
+                        placeholder="T├¼m kiß║┐m quan hß╗ç..."
                         className="h-9 pl-8 pr-3 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 w-52"
                       />
                       <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
@@ -3826,7 +2765,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                       type="button" onClick={handleOpenAddRel}
                       className="h-9 flex items-center gap-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-[13px] font-medium shadow-sm whitespace-nowrap"
                     >
-                      <Plus className="w-4 h-4" /> Thêm quan hệ
+                      <Plus className="w-4 h-4" /> Th├¬m quan hß╗ç
                     </button>
                   )}
                 </div>
@@ -3837,7 +2776,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                 <div className="border border-blue-200 rounded-xl bg-blue-50/30 overflow-hidden">
                   <div className="bg-blue-600 px-5 py-3 flex items-center justify-between">
                     <p className="text-[13px] font-semibold text-white">
-                      {editingRelId ? 'Chỉnh sửa quan hệ' : 'Thêm quan hệ mới'}
+                      {editingRelId ? 'Chß╗ënh sß╗¡a quan hß╗ç' : 'Th├¬m quan hß╗ç mß╗¢i'}
                     </p>
                     <button type="button" onClick={handleCancelRel} className="text-white/70 hover:text-white transition-colors">
                       <X className="w-4 h-4" />
@@ -3845,22 +2784,22 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                   </div>
 
                   <div className="p-5 space-y-5">
-                    {/* 1. Chọn thực thể */}
+                    {/* 1. Chß╗ìn thß╗▒c thß╗â */}
                     <div className="space-y-3">
-                      <h4 className="text-[13px] font-semibold text-slate-700 border-b border-slate-200 pb-2">1. Chọn thực thể liên kết</h4>
+                      <h4 className="text-[13px] font-semibold text-slate-700 border-b border-slate-200 pb-2">1. Chß╗ìn thß╗▒c thß╗â li├¬n kß║┐t</h4>
                       <div className="grid grid-cols-2 gap-6">
                         <div>
                           <label className="block text-[13px] font-medium text-slate-600 mb-1.5">
-                            Thực thể nguồn <span className="text-slate-400 font-normal">(thực thể đang tạo)</span>
+                            Thß╗▒c thß╗â nguß╗ôn <span className="text-slate-400 font-normal">(thß╗▒c thß╗â ─æang tß║ío)</span>
                           </label>
                           <div className="h-10 px-3 flex items-center border border-slate-200 rounded-lg bg-slate-50 text-[13px] text-slate-600">
                             {wizardData.code && <code className="text-blue-600 bg-blue-100 px-1 rounded mr-1.5 text-[13px]">{wizardData.code}</code>}
-                            {wizardData.name || '(Thực thể đang tạo)'}
+                            {wizardData.name || '(Thß╗▒c thß╗â ─æang tß║ío)'}
                           </div>
                         </div>
                         <div>
                           <label className="block text-[13px] font-medium text-slate-600 mb-1.5">
-                            Thực thể đích <span className="text-red-500">*</span>
+                            Thß╗▒c thß╗â ─æ├¡ch <span className="text-red-500">*</span>
                           </label>
                           <select
                             value={relFormData.targetEntityId}
@@ -3871,7 +2810,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                             }}
                             className="w-full h-10 px-3 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
                           >
-                            <option value="">-- Chọn thực thể đích --</option>
+                            <option value="">-- Chß╗ìn thß╗▒c thß╗â ─æ├¡ch --</option>
                             {WIZARD_MOCK_ENTITIES.map(e => <option key={e.id} value={e.id}>{e.code} - {e.name}</option>)}
                           </select>
                         </div>
@@ -3881,7 +2820,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                         <div className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-center gap-8">
                           <div className="flex flex-col items-center gap-1.5">
                             <div className="w-9 h-9 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-[13px]">A</div>
-                            <span className="text-[13px] font-semibold text-slate-800">{wizardData.name || '(Thực thể đang tạo)'}</span>
+                            <span className="text-[13px] font-semibold text-slate-800">{wizardData.name || '(Thß╗▒c thß╗â ─æang tß║ío)'}</span>
                           </div>
                           <ArrowRight className="w-5 h-5 text-slate-400 flex-shrink-0" />
                           <div className="flex flex-col items-center gap-1.5">
@@ -3892,9 +2831,9 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                       )}
                     </div>
 
-                    {/* 2. Loại quan hệ */}
+                    {/* 2. Loß║íi quan hß╗ç */}
                     <div className="space-y-3">
-                      <h4 className="text-[13px] font-semibold text-slate-700 border-b border-slate-200 pb-2">2. Loại quan hệ</h4>
+                      <h4 className="text-[13px] font-semibold text-slate-700 border-b border-slate-200 pb-2">2. Loß║íi quan hß╗ç</h4>
                       <select
                         value={relFormData.type}
                         onChange={(e: ChangeEvent<HTMLSelectElement>) => setRelFormData(prev => ({ ...prev, type: e.target.value as WizardRelType, sourceKey: '', targetKey: '', mappingTable: '' }))}
@@ -3907,21 +2846,21 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                       </select>
                     </div>
 
-                    {/* 3. Điều kiện liên kết */}
+                    {/* 3. ─Éiß╗üu kiß╗çn li├¬n kß║┐t */}
                     <div className="space-y-3">
                       <h4 className="text-[13px] font-semibold text-slate-700 border-b border-slate-200 pb-2 flex items-center justify-between">
-                        <span>3. Điều kiện liên kết</span>
+                        <span>3. ─Éiß╗üu kiß╗çn li├¬n kß║┐t</span>
                         {!relFormData.targetEntityId && (
-                          <span className="text-[13px] text-orange-600 bg-orange-50 font-normal px-2 py-0.5 rounded border border-orange-100">Chọn thực thể đích để tải danh sách trường</span>
+                          <span className="text-[13px] text-orange-600 bg-orange-50 font-normal px-2 py-0.5 rounded border border-orange-100">Chß╗ìn thß╗▒c thß╗â ─æ├¡ch ─æß╗â tß║úi danh s├ích tr╞░ß╗¥ng</span>
                         )}
                       </h4>
 
                       {relFormData.targetEntityId ? (
                         relFormData.type === 'n-n' ? (
                           <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 space-y-4">
-                            <p className="text-[13px] font-semibold text-purple-900">Bảng liên kết (Mapping Table)</p>
+                            <p className="text-[13px] font-semibold text-purple-900">Bß║úng li├¬n kß║┐t (Mapping Table)</p>
                             <div>
-                              <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Tên bảng liên kết <span className="text-red-500">*</span></label>
+                              <label className="block text-[13px] font-medium text-slate-600 mb-1.5">T├¬n bß║úng li├¬n kß║┐t <span className="text-red-500">*</span></label>
                               <input type="text" value={relFormData.mappingTable}
                                 onChange={(e: ChangeEvent<HTMLInputElement>) => setRelFormData(prev => ({ ...prev, mappingTable: e.target.value }))}
                                 placeholder="VD: tbl_map_entity_a_entity_b"
@@ -3930,18 +2869,18 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                             </div>
                             <div className="grid grid-cols-2 gap-6">
                               <div>
-                                <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Khoá ngoại Nguồn <span className="text-red-500">*</span></label>
+                                <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Kho├í ngoß║íi Nguß╗ôn <span className="text-red-500">*</span></label>
                                 <select value={relFormData.sourceKey} onChange={(e: ChangeEvent<HTMLSelectElement>) => setRelFormData(prev => ({ ...prev, sourceKey: e.target.value }))}
                                   className="w-full px-3 py-2 border border-slate-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono">
-                                  <option value="">-- Chọn trường Nguồn --</option>
-                                  {(sourceEntityFields.length > 0 ? sourceEntityFields : [{ name: 'id', label: 'ID định danh' }, { name: 'code', label: 'Mã định danh' }]).map(f => <option key={f.name} value={f.name}>{f.name} ({f.label})</option>)}
+                                  <option value="">-- Chß╗ìn tr╞░ß╗¥ng Nguß╗ôn --</option>
+                                  {(sourceEntityFields.length > 0 ? sourceEntityFields : [{ name: 'id', label: 'ID ─æß╗ïnh danh' }, { name: 'code', label: 'M├ú ─æß╗ïnh danh' }]).map(f => <option key={f.name} value={f.name}>{f.name} ({f.label})</option>)}
                                 </select>
                               </div>
                               <div>
-                                <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Khoá ngoại Đích <span className="text-red-500">*</span></label>
+                                <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Kho├í ngoß║íi ─É├¡ch <span className="text-red-500">*</span></label>
                                 <select value={relFormData.targetKey} onChange={(e: ChangeEvent<HTMLSelectElement>) => setRelFormData(prev => ({ ...prev, targetKey: e.target.value }))}
                                   className="w-full px-3 py-2 border border-slate-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono">
-                                  <option value="">-- Chọn trường Đích --</option>
+                                  <option value="">-- Chß╗ìn tr╞░ß╗¥ng ─É├¡ch --</option>
                                   {BASE_TARGET_FIELDS.map(f => <option key={f.name} value={f.name}>{f.name} ({f.label})</option>)}
                                 </select>
                               </div>
@@ -3951,35 +2890,35 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                           <div className="bg-blue-50/50 border border-blue-200 rounded-xl p-4 space-y-4">
                             <div className="flex items-center gap-2">
                               <Key className="w-4 h-4 text-blue-600" />
-                              <span className="text-[13px] font-semibold text-blue-900">Khóa ngoại (Foreign Key)</span>
+                              <span className="text-[13px] font-semibold text-blue-900">Kh├│a ngoß║íi (Foreign Key)</span>
                             </div>
                             <div className="grid grid-cols-2 gap-6">
                               <div>
-                                <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Khóa nguồn <span className="text-red-500">*</span></label>
+                                <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Kh├│a nguß╗ôn <span className="text-red-500">*</span></label>
                                 <select value={relFormData.sourceKey} onChange={(e: ChangeEvent<HTMLSelectElement>) => setRelFormData(prev => ({ ...prev, sourceKey: e.target.value }))}
                                   className="w-full px-3 py-2 border border-slate-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-mono">
-                                  <option value="">-- Chọn trường Nguồn --</option>
-                                  {(sourceEntityFields.length > 0 ? sourceEntityFields : [{ name: 'id', label: 'ID định danh' }, { name: 'code', label: 'Mã định danh' }]).map(f => <option key={f.name} value={f.name}>{f.name} ({f.label})</option>)}
+                                  <option value="">-- Chß╗ìn tr╞░ß╗¥ng Nguß╗ôn --</option>
+                                  {(sourceEntityFields.length > 0 ? sourceEntityFields : [{ name: 'id', label: 'ID ─æß╗ïnh danh' }, { name: 'code', label: 'M├ú ─æß╗ïnh danh' }]).map(f => <option key={f.name} value={f.name}>{f.name} ({f.label})</option>)}
                                 </select>
-                                <p className="text-[13px] text-slate-400 mt-1">Trường trong thực thể đang tạo</p>
+                                <p className="text-[13px] text-slate-400 mt-1">Tr╞░ß╗¥ng trong thß╗▒c thß╗â ─æang tß║ío</p>
                               </div>
                               <div>
-                                <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Khóa đích <span className="text-red-500">*</span></label>
+                                <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Kh├│a ─æ├¡ch <span className="text-red-500">*</span></label>
                                 <select value={relFormData.targetKey} onChange={(e: ChangeEvent<HTMLSelectElement>) => setRelFormData(prev => ({ ...prev, targetKey: e.target.value }))}
                                   className="w-full px-3 py-2 border border-slate-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-mono">
-                                  <option value="">-- Chọn trường Đích --</option>
+                                  <option value="">-- Chß╗ìn tr╞░ß╗¥ng ─É├¡ch --</option>
                                   {BASE_TARGET_FIELDS.map(f => <option key={f.name} value={f.name}>{f.name} ({f.label})</option>)}
                                 </select>
-                                <p className="text-[13px] text-slate-400 mt-1">Trường dùng để join (thường là ID/Code)</p>
+                                <p className="text-[13px] text-slate-400 mt-1">Tr╞░ß╗¥ng d├╣ng ─æß╗â join (th╞░ß╗¥ng l├á ID/Code)</p>
                               </div>
                             </div>
                             <div className="pt-3 border-t border-blue-100">
                               <label className="block text-[13px] font-medium text-emerald-700 mb-1.5">
-                                Trường hiển thị (Lookup Display) <span className="text-slate-400 font-normal">(Không bắt buộc)</span>
+                                Tr╞░ß╗¥ng hiß╗ân thß╗ï (Lookup Display) <span className="text-slate-400 font-normal">(Kh├┤ng bß║»t buß╗Öc)</span>
                               </label>
                               <select value={relFormData.displayField} onChange={(e: ChangeEvent<HTMLSelectElement>) => setRelFormData(prev => ({ ...prev, displayField: e.target.value }))}
                                 className="w-full max-w-xs px-3 py-2 border border-emerald-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-mono">
-                                <option value="">-- Không chọn --</option>
+                                <option value="">-- Kh├┤ng chß╗ìn --</option>
                                 {BASE_TARGET_FIELDS.map(f => <option key={f.name} value={f.name}>{f.name} ({f.label})</option>)}
                               </select>
                             </div>
@@ -3987,7 +2926,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                         )
                       ) : (
                         <div className="bg-slate-50 border border-dashed border-slate-200 rounded-lg p-6 text-center text-[13px] text-slate-400">
-                          Hãy chọn thực thể đích ở mục 1 để cấu hình khóa liên kết
+                          H├úy chß╗ìn thß╗▒c thß╗â ─æ├¡ch ß╗ƒ mß╗Ñc 1 ─æß╗â cß║Ñu h├¼nh kh├│a li├¬n kß║┐t
                         </div>
                       )}
                     </div>
@@ -4002,12 +2941,12 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                     <div className="flex justify-end gap-3 pt-2 border-t border-slate-100">
                       <button type="button" onClick={handleCancelRel}
                         className="px-4 py-2 border border-slate-200 text-slate-700 rounded-lg text-[13px] font-medium hover:bg-slate-50 transition-colors">
-                        Hủy
+                        Hß╗ºy
                       </button>
                       <button type="button" onClick={handleSaveRel}
                         className="px-4 py-2 bg-blue-600 text-white rounded-lg text-[13px] font-medium hover:bg-blue-700 transition-colors flex items-center gap-2">
                         <Check className="w-4 h-4" />
-                        {editingRelId ? 'Cập nhật quan hệ' : 'Lưu quan hệ'}
+                        {editingRelId ? 'Cß║¡p nhß║¡t quan hß╗ç' : 'L╞░u quan hß╗ç'}
                       </button>
                     </div>
                   </div>
@@ -4023,563 +2962,311 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData }: Mas
                 ).length === 0 ? (
                   <div className="py-12 flex flex-col items-center justify-center text-center">
                     <Network className="w-12 h-12 text-slate-300 mb-3 stroke-[1.5]" />
-                    <p className="text-[13px] font-semibold text-slate-700">Chưa có quan hệ nào</p>
-                    <p className="text-[13px] text-slate-500 mt-1 max-w-sm">Thực thể này chưa được cấu hình liên kết với thực thể dữ liệu chủ nào khác.</p>
-=======
-                  <div className="flex items-center gap-3">
-                    {!relFormOpen && wizardData.relationships.length > 0 && (
-                      <div className="relative">
-                        <input
-                          type="text" value={relSearch}
-                          onChange={(e: ChangeEvent<HTMLInputElement>) => setRelSearch(e.target.value)}
-                          placeholder="Tìm kiếm quan hệ..."
-                          className="h-9 pl-8 pr-3 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 w-52"
-                        />
-                        <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
-                      </div>
-                    )}
->>>>>>> d0d4b0c898b5cf43e3568a8815a60624cbbd3882
+                    <p className="text-[13px] font-semibold text-slate-700">Ch╞░a c├│ quan hß╗ç n├áo</p>
+                    <p className="text-[13px] text-slate-500 mt-1 max-w-sm">Thß╗▒c thß╗â n├áy ch╞░a ─æ╞░ß╗úc cß║Ñu h├¼nh li├¬n kß║┐t vß╗¢i thß╗▒c thß╗â dß╗» liß╗çu chß╗º n├áo kh├íc.</p>
                     {!relFormOpen && (
-                      <button
-                        type="button" onClick={handleOpenAddRel}
-                        className="h-9 flex items-center gap-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-[13px] font-medium shadow-sm whitespace-nowrap"
-                      >
-                        <Plus className="w-4 h-4" /> Thêm quan hệ
+                      <button type="button" onClick={handleOpenAddRel}
+                        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-[13px] font-medium flex items-center gap-1.5">
+                        <Plus className="w-4 h-4" /> Th├¬m quan hß╗ç
                       </button>
                     )}
                   </div>
-                </div>
-
-                {/* Inline add / edit form */}
-                {relFormOpen && (
-                  <div className="border border-blue-200 rounded-xl bg-blue-50/30 overflow-hidden">
-                    <div className="bg-blue-600 px-5 py-3 flex items-center justify-between">
-                      <p className="text-[13px] font-semibold text-white">
-                        {editingRelId ? 'Chỉnh sửa quan hệ' : 'Thêm quan hệ mới'}
-                      </p>
-                      <button type="button" onClick={handleCancelRel} className="text-white/70 hover:text-white transition-colors">
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-
-                    <div className="p-5 space-y-5">
-                      {/* 1. Chọn thực thể */}
-                      <div className="space-y-3">
-                        <h4 className="text-[13px] font-semibold text-slate-700 border-b border-slate-200 pb-2">1. Chọn thực thể liên kết</h4>
-                        <div className="grid grid-cols-2 gap-6">
-                          <div>
-                            <label className="block text-[13px] font-medium text-slate-600 mb-1.5">
-                              Thực thể nguồn <span className="text-slate-400 font-normal">(thực thể đang tạo)</span>
-                            </label>
-                            <div className="h-10 px-3 flex items-center border border-slate-200 rounded-lg bg-slate-50 text-[13px] text-slate-600">
-                              {wizardData.code && <code className="text-blue-600 bg-blue-100 px-1 rounded mr-1.5 text-[13px]">{wizardData.code}</code>}
-                              {wizardData.name || '(Thực thể đang tạo)'}
-                            </div>
-                          </div>
-                          <div>
-                            <label className="block text-[13px] font-medium text-slate-600 mb-1.5">
-                              Thực thể đích <span className="text-red-500">*</span>
-                            </label>
-                            <select
-                              value={relFormData.targetEntityId}
-                              onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-                                const ent = WIZARD_MOCK_ENTITIES.find(x => x.id === e.target.value);
-                                setRelFormData(prev => ({ ...prev, targetEntityId: e.target.value, targetEntityName: ent?.name || '', sourceKey: '', targetKey: '' }));
-                                setRelFormError('');
-                              }}
-                              className="w-full h-10 px-3 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
-                            >
-                              <option value="">-- Chọn thực thể đích --</option>
-                              {WIZARD_MOCK_ENTITIES.map(e => <option key={e.id} value={e.id}>{e.code} - {e.name}</option>)}
-                            </select>
-                          </div>
-                        </div>
-
-                        {relFormData.targetEntityId && (
-                          <div className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-center gap-8">
-                            <div className="flex flex-col items-center gap-1.5">
-                              <div className="w-9 h-9 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-[13px]">A</div>
-                              <span className="text-[13px] font-semibold text-slate-800">{wizardData.name || '(Thực thể đang tạo)'}</span>
-                            </div>
-                            <ArrowRight className="w-5 h-5 text-slate-400 flex-shrink-0" />
-                            <div className="flex flex-col items-center gap-1.5">
-                              <div className="w-9 h-9 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center font-bold text-[13px]">B</div>
-                              <span className="text-[13px] font-semibold text-slate-800">{WIZARD_MOCK_ENTITIES.find(e => e.id === relFormData.targetEntityId)?.name}</span>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* 2. Loại quan hệ */}
-                      <div className="space-y-3">
-                        <h4 className="text-[13px] font-semibold text-slate-700 border-b border-slate-200 pb-2">2. Loại quan hệ</h4>
-                        <select
-                          value={relFormData.type}
-                          onChange={(e: ChangeEvent<HTMLSelectElement>) => setRelFormData(prev => ({ ...prev, type: e.target.value as WizardRelType, sourceKey: '', targetKey: '', mappingTable: '' }))}
-                          className="w-64 px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
-                        >
-                          {(Object.entries(REL_TYPE_LABELS) as [WizardRelType, string][])
-                            .map(([val, label]) => (
-                              <option key={val} value={val}>{label}</option>
-                            ))}
-                        </select>
-                      </div>
-
-                      {/* 3. Điều kiện liên kết */}
-                      <div className="space-y-3">
-                        <h4 className="text-[13px] font-semibold text-slate-700 border-b border-slate-200 pb-2 flex items-center justify-between">
-                          <span>3. Điều kiện liên kết</span>
-                          {!relFormData.targetEntityId && (
-                            <span className="text-[13px] text-orange-600 bg-orange-50 font-normal px-2 py-0.5 rounded border border-orange-100">Chọn thực thể đích để tải danh sách trường</span>
-                          )}
-                        </h4>
-
-                        {relFormData.targetEntityId ? (
-                          relFormData.type === 'n-n' ? (
-                            <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 space-y-4">
-                              <p className="text-[13px] font-semibold text-purple-900">Bảng liên kết (Mapping Table)</p>
-                              <div>
-                                <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Tên bảng liên kết <span className="text-red-500">*</span></label>
-                                <input type="text" value={relFormData.mappingTable}
-                                  onChange={(e: ChangeEvent<HTMLInputElement>) => setRelFormData(prev => ({ ...prev, mappingTable: e.target.value }))}
-                                  placeholder="VD: tbl_map_entity_a_entity_b"
-                                  className="w-full px-3 py-2 border border-slate-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
-                                />
-                              </div>
-                              <div className="grid grid-cols-2 gap-6">
-                                <div>
-                                  <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Khoá ngoại Nguồn <span className="text-red-500">*</span></label>
-                                  <select value={relFormData.sourceKey} onChange={(e: ChangeEvent<HTMLSelectElement>) => setRelFormData(prev => ({ ...prev, sourceKey: e.target.value }))}
-                                    className="w-full px-3 py-2 border border-slate-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono">
-                                    <option value="">-- Chọn trường Nguồn --</option>
-                                    {(sourceEntityFields.length > 0 ? sourceEntityFields : [{ name: 'id', label: 'ID định danh' }, { name: 'code', label: 'Mã định danh' }]).map(f => <option key={f.name} value={f.name}>{f.name} ({f.label})</option>)}
-                                  </select>
-                                </div>
-                                <div>
-                                  <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Khoá ngoại Đích <span className="text-red-500">*</span></label>
-                                  <select value={relFormData.targetKey} onChange={(e: ChangeEvent<HTMLSelectElement>) => setRelFormData(prev => ({ ...prev, targetKey: e.target.value }))}
-                                    className="w-full px-3 py-2 border border-slate-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono">
-                                    <option value="">-- Chọn trường Đích --</option>
-                                    {BASE_TARGET_FIELDS.map(f => <option key={f.name} value={f.name}>{f.name} ({f.label})</option>)}
-                                  </select>
-                                </div>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="bg-blue-50/50 border border-blue-200 rounded-xl p-4 space-y-4">
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse text-left text-[13px]">
+                      <thead>
+                        <tr className="bg-slate-50 border-b border-slate-200">
+                          <th className="px-4 py-3 font-semibold text-slate-500 text-center w-12">STT</th>
+                          <th className="px-4 py-3 font-semibold text-slate-500">Thß╗▒c thß╗â ─æ├¡ch</th>
+                          <th className="px-4 py-3 font-semibold text-slate-500 text-center w-24">Loß║íi</th>
+                          <th className="px-4 py-3 font-semibold text-slate-500">Kh├│a nguß╗ôn</th>
+                          <th className="px-4 py-3 font-semibold text-slate-500">Kh├│a ─æ├¡ch</th>
+                          <th className="px-4 py-3 font-semibold text-slate-500">Tr╞░ß╗¥ng hiß╗ân thß╗ï / Bß║úng li├¬n kß║┐t</th>
+                          <th className="px-4 py-3 font-semibold text-slate-500 text-center w-20">Thao t├íc</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {wizardData.relationships.filter(r =>
+                          !relSearch || r.targetEntityName.toLowerCase().includes(relSearch.toLowerCase()) ||
+                          r.sourceKey.toLowerCase().includes(relSearch.toLowerCase()) ||
+                          r.targetKey.toLowerCase().includes(relSearch.toLowerCase())
+                        ).map((rel, idx) => (
+                          <tr key={rel.id} className="hover:bg-slate-50/50 transition-colors">
+                            <td className="px-4 py-3 text-center text-slate-500 font-medium">{idx + 1}</td>
+                            <td className="px-4 py-3">
                               <div className="flex items-center gap-2">
-                                <Key className="w-4 h-4 text-blue-600" />
-                                <span className="text-[13px] font-semibold text-blue-900">Khóa ngoại (Foreign Key)</span>
-                              </div>
-                              <div className="grid grid-cols-2 gap-6">
-                                <div>
-                                  <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Khóa nguồn <span className="text-red-500">*</span></label>
-                                  <select value={relFormData.sourceKey} onChange={(e: ChangeEvent<HTMLSelectElement>) => setRelFormData(prev => ({ ...prev, sourceKey: e.target.value }))}
-                                    className="w-full px-3 py-2 border border-slate-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-mono">
-                                    <option value="">-- Chọn trường Nguồn --</option>
-                                    {(sourceEntityFields.length > 0 ? sourceEntityFields : [{ name: 'id', label: 'ID định danh' }, { name: 'code', label: 'Mã định danh' }]).map(f => <option key={f.name} value={f.name}>{f.name} ({f.label})</option>)}
-                                  </select>
-                                  <p className="text-[13px] text-slate-400 mt-1">Trường trong thực thể đang tạo</p>
+                                <div className="w-7 h-7 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center font-bold text-[13px] flex-shrink-0">
+                                  {rel.targetEntityName.charAt(0)}
                                 </div>
-                                <div>
-                                  <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Khóa đích <span className="text-red-500">*</span></label>
-                                  <select value={relFormData.targetKey} onChange={(e: ChangeEvent<HTMLSelectElement>) => setRelFormData(prev => ({ ...prev, targetKey: e.target.value }))}
-                                    className="w-full px-3 py-2 border border-slate-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-mono">
-                                    <option value="">-- Chọn trường Đích --</option>
-                                    {BASE_TARGET_FIELDS.map(f => <option key={f.name} value={f.name}>{f.name} ({f.label})</option>)}
-                                  </select>
-                                  <p className="text-[13px] text-slate-400 mt-1">Trường dùng để join (thường là ID/Code)</p>
-                                </div>
+                                <span className="font-medium text-slate-800">{rel.targetEntityName}</span>
                               </div>
-                              <div className="pt-3 border-t border-blue-100">
-                                <label className="block text-[13px] font-medium text-emerald-700 mb-1.5">
-                                  Trường hiển thị (Lookup Display) <span className="text-slate-400 font-normal">(Không bắt buộc)</span>
-                                </label>
-                                <select value={relFormData.displayField} onChange={(e: ChangeEvent<HTMLSelectElement>) => setRelFormData(prev => ({ ...prev, displayField: e.target.value }))}
-                                  className="w-full max-w-xs px-3 py-2 border border-emerald-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-mono">
-                                  <option value="">-- Không chọn --</option>
-                                  {BASE_TARGET_FIELDS.map(f => <option key={f.name} value={f.name}>{f.name} ({f.label})</option>)}
-                                </select>
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              <span className={`px-2 py-0.5 rounded border text-[13px] font-semibold ${REL_TYPE_COLORS[rel.type]}`}>
+                                {rel.type}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 font-mono text-slate-600">{rel.sourceKey || 'ΓÇö'}</td>
+                            <td className="px-4 py-3 font-mono text-slate-600">{rel.targetKey || 'ΓÇö'}</td>
+                            <td className="px-4 py-3 text-slate-600">
+                              {rel.type === 'n-n' ? (
+                                rel.mappingTable ? <code className="text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded font-mono">{rel.mappingTable}</code> : <span className="text-slate-400">ΓÇö</span>
+                              ) : (
+                                rel.displayField ? <code className="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-mono">{rel.displayField}</code> : <span className="text-slate-400">ΓÇö</span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center justify-center gap-1.5">
+                                <button type="button" onClick={() => handleOpenEditRel(rel)}
+                                  className="p-1.5 border border-slate-200 bg-white text-slate-500 hover:text-blue-600 hover:border-blue-300 rounded-lg transition-colors" title="Chß╗ënh sß╗¡a">
+                                  <SquarePen className="w-3.5 h-3.5" />
+                                </button>
+                                <button type="button" onClick={() => handleDeleteRel(rel.id)}
+                                  className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="X├│a">
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
                               </div>
-                            </div>
-                          )
-                        ) : (
-                          <div className="bg-slate-50 border border-dashed border-slate-200 rounded-lg p-6 text-center text-[13px] text-slate-400">
-                            Hãy chọn thực thể đích ở mục 1 để cấu hình khóa liên kết
-                          </div>
-                        )}
-                      </div>
-
-                      {relFormError && (
-                        <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-                          <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
-                          <p className="text-[13px] text-red-600">{relFormError}</p>
-                        </div>
-                      )}
-
-                      <div className="flex justify-end gap-3 pt-2 border-t border-slate-100">
-                        <button type="button" onClick={handleCancelRel}
-                          className="px-4 py-2 border border-slate-200 text-slate-700 rounded-lg text-[13px] font-medium hover:bg-slate-50 transition-colors">
-                          Hủy
-                        </button>
-                        <button type="button" onClick={handleSaveRel}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-[13px] font-medium hover:bg-blue-700 transition-colors flex items-center gap-2">
-                          <Check className="w-4 h-4" />
-                          {editingRelId ? 'Cập nhật quan hệ' : 'Lưu quan hệ'}
-                        </button>
-                      </div>
-                    </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 )}
+              </div>
+            </div>
+          )}
 
-                {/* Sơ đồ quan hệ */}
-                <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
-                  <div className="px-4 py-3 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
-                    <Network className="w-4 h-4 text-slate-500" />
-                    <p className="text-[13px] font-semibold text-slate-700">Sơ đồ quan hệ</p>
-                  </div>
-                  <div className="p-4">
-                    {wizardData.relationships.length === 0 ? (
-                      <div className="py-8 text-center text-[13px] text-slate-400">
-                        Chưa có quan hệ để hiển thị sơ đồ
-                      </div>
-                    ) : (() => {
-                      const rels = wizardData.relationships;
-                      const rowH = 64;
-                      const topPad = 24;
-                      const svgH = topPad * 2 + Math.max(1, rels.length) * rowH;
-                      const centerY = svgH / 2;
-                      const leftX = 120;
-                      const rightX = 470;
-                      const centerLabel = wizardData.name || wizardData.code || 'Thực thể';
-                      return (
-                        <div className="overflow-x-auto">
-                          <svg viewBox={`0 0 760 ${svgH}`} className="w-full" style={{ minWidth: 640, height: svgH }} role="img" aria-label="Sơ đồ quan hệ thực thể">
-                            {/* Center node */}
-                            <g>
-                              <rect x={leftX - 70} y={centerY - 22} width={140} height={44} rx={10} fill="#eff6ff" stroke="#2563eb" strokeWidth={1.5} />
-                              <text x={leftX} y={centerY + 4} textAnchor="middle" fontSize={12} fontWeight={600} fill="#1e40af">
-                                {centerLabel.length > 16 ? centerLabel.slice(0, 15) + '…' : centerLabel}
-                              </text>
-                            </g>
-                            {rels.map((rel, i) => {
-                              const y = topPad + i * rowH + rowH / 2;
-                              const midX = (leftX + 70 + (rightX - 70)) / 2;
-                              return (
-                                <g key={rel.id}>
-                                  <line x1={leftX + 70} y1={centerY} x2={rightX - 70} y2={y} stroke="#94a3b8" strokeWidth={1.5} />
-                                  <rect x={midX - 46} y={(centerY + y) / 2 - 22} width={92} height={16} rx={4} fill="#f1f5f9" stroke="#e2e8f0" strokeWidth={1} />
-                                  <text x={midX} y={(centerY + y) / 2 - 10} textAnchor="middle" fontSize={10} fontWeight={600} fill="#475569">{rel.type}</text>
-                                  <text x={midX} y={(centerY + y) / 2 + 12} textAnchor="middle" fontSize={10} fill="#64748b">FK: {rel.sourceKey || '—'}</text>
-                                  <rect x={rightX - 70} y={y - 20} width={200} height={40} rx={10} fill="#ecfdf5" stroke="#059669" strokeWidth={1.5} />
-                                  <text x={rightX + 30} y={y + 4} textAnchor="middle" fontSize={12} fontWeight={600} fill="#047857">
-                                    {rel.targetEntityName.length > 22 ? rel.targetEntityName.slice(0, 21) + '…' : rel.targetEntityName}
-                                  </text>
-                                </g>
-                              );
-                            })}
-                          </svg>
-                        </div>
-                      );
-                    })()}
-                  </div>
+          {/* Step 6: Ph├¬ duyß╗çt */}
+          {currentStep === 6 && (
+            <div className="space-y-4">
+
+              {/* Reviewer + Notes */}
+              <div className="border border-blue-200 rounded-lg overflow-hidden">
+                <div className="bg-blue-50 px-4 py-2.5 border-b border-blue-200">
+                  <h4 className="text-[13px] font-semibold text-blue-900">Th├┤ng tin ph├¬ duyß╗çt</h4>
                 </div>
-
-                {/* Relationships table */}
-                <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
-                  {wizardData.relationships.filter(r =>
-                    !relSearch || r.targetEntityName.toLowerCase().includes(relSearch.toLowerCase()) ||
-                    r.sourceKey.toLowerCase().includes(relSearch.toLowerCase()) ||
-                    r.targetKey.toLowerCase().includes(relSearch.toLowerCase())
-                  ).length === 0 ? (
-                    <div className="py-12 flex flex-col items-center justify-center text-center">
-                      <Network className="w-12 h-12 text-slate-300 mb-3 stroke-[1.5]" />
-                      <p className="text-[13px] font-semibold text-slate-700">Chưa có quan hệ nào</p>
-                      <p className="text-[13px] text-slate-500 mt-1 max-w-sm">Thực thể này chưa được cấu hình liên kết với thực thể dữ liệu chủ nào khác.</p>
-                      {!relFormOpen && (
-                        <button type="button" onClick={handleOpenAddRel}
-                          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-[13px] font-medium flex items-center gap-1.5">
-                          <Plus className="w-4 h-4" /> Thêm quan hệ
-                        </button>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="overflow-x-auto">
-                      <table className="w-full border-collapse text-left text-[13px]">
-                        <thead>
-                          <tr className="bg-slate-50 border-b border-slate-200">
-                            <th className="px-4 py-3 font-semibold text-slate-500 text-center w-12">STT</th>
-                            <th className="px-4 py-3 font-semibold text-slate-500">Thực thể đích</th>
-                            <th className="px-4 py-3 font-semibold text-slate-500 text-center w-24">Loại</th>
-                            <th className="px-4 py-3 font-semibold text-slate-500">Khóa nguồn</th>
-                            <th className="px-4 py-3 font-semibold text-slate-500">Khóa đích</th>
-                            <th className="px-4 py-3 font-semibold text-slate-500">Trường hiển thị / Bảng liên kết</th>
-                            <th className="px-4 py-3 font-semibold text-slate-500 text-center w-20">Thao tác</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                          {wizardData.relationships.filter(r =>
-                            !relSearch || r.targetEntityName.toLowerCase().includes(relSearch.toLowerCase()) ||
-                            r.sourceKey.toLowerCase().includes(relSearch.toLowerCase()) ||
-                            r.targetKey.toLowerCase().includes(relSearch.toLowerCase())
-                          ).map((rel, idx) => (
-                            <tr key={rel.id} className="hover:bg-slate-50/50 transition-colors">
-                              <td className="px-4 py-3 text-center text-slate-500 font-medium">{idx + 1}</td>
-                              <td className="px-4 py-3">
-                                <div className="flex items-center gap-2">
-                                  <div className="w-7 h-7 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center font-bold text-[13px] flex-shrink-0">
-                                    {rel.targetEntityName.charAt(0)}
-                                  </div>
-                                  <span className="font-medium text-slate-800">{rel.targetEntityName}</span>
-                                </div>
-                              </td>
-                              <td className="px-4 py-3 text-center">
-                                <span className={`px-2 py-0.5 rounded border text-[13px] font-semibold ${REL_TYPE_COLORS[rel.type]}`}>
-                                  {rel.type}
-                                </span>
-                              </td>
-                              <td className="px-4 py-3 font-mono text-slate-600">{rel.sourceKey || '—'}</td>
-                              <td className="px-4 py-3 font-mono text-slate-600">{rel.targetKey || '—'}</td>
-                              <td className="px-4 py-3 text-slate-600">
-                                {rel.type === 'n-n' ? (
-                                  rel.mappingTable ? <code className="text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded font-mono">{rel.mappingTable}</code> : <span className="text-slate-400">—</span>
-                                ) : (
-                                  rel.displayField ? <code className="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-mono">{rel.displayField}</code> : <span className="text-slate-400">—</span>
-                                )}
-                              </td>
-                              <td className="px-4 py-3">
-                                <div className="flex items-center justify-center gap-1.5">
-                                  <button type="button" onClick={() => handleOpenEditRel(rel)}
-                                    className="p-1.5 border border-slate-200 bg-white text-slate-500 hover:text-blue-600 hover:border-blue-300 rounded-lg transition-colors" title="Chỉnh sửa">
-                                    <SquarePen className="w-3.5 h-3.5" />
-                                  </button>
-                                  <button type="button" onClick={() => handleDeleteRel(rel.id)}
-                                    className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Xóa">
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </button>
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
+                <div className="p-4 space-y-4">
+                  <div>
+                    <label className="block text-[13px] text-slate-700 mb-1.5">
+                      Chß╗ìn ng╞░ß╗¥i tr├¼nh duyß╗çt <span className="text-red-600">*</span>
+                    </label>
+                    <select
+                      value={wizardData.approvalReviewer}
+                      onChange={(e) => setWizardData({ ...wizardData, approvalReviewer: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    >
+                      <option value="">-- Chß╗ìn ng╞░ß╗¥i tr├¼nh duyß╗çt --</option>
+                      {MOCK_REVIEWERS.map(r => (
+                        <option key={r.id} value={r.id}>{r.name} ΓÇö {r.title}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[13px] text-slate-700 mb-1.5">
+                      Ghi ch├║ ph├¬ duyß╗çt
+                    </label>
+                    <textarea
+                      value={wizardData.approvalNotes}
+                      onChange={(e) => setWizardData({ ...wizardData, approvalNotes: e.target.value })}
+                      placeholder="Nhß║¡p l├╜ do v├á ghi ch├║ cho viß╗çc tß║ío dß╗» liß╗çu chß╗º n├áy..."
+                      rows={3}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
                 </div>
               </div>
-            )}
 
-            {/* Step 6: Phê duyệt */}
-            {currentStep === 6 && (
-              <div className="space-y-4">
-
-                {/* Reviewer + Notes */}
-                <div className="border border-blue-200 rounded-lg overflow-hidden">
-                  <div className="bg-blue-50 px-4 py-2.5 border-b border-blue-200">
-                    <h4 className="text-[13px] font-semibold text-blue-900">Thông tin phê duyệt</h4>
-                  </div>
-                  <div className="p-4 space-y-4">
-                    <div>
-                      <label className="block text-[13px] text-slate-700 mb-1.5">
-                        Chọn người trình duyệt <span className="text-red-600">*</span>
-                      </label>
-                      <select
-                        value={wizardData.approvalReviewer}
-                        onChange={(e) => setWizardData({ ...wizardData, approvalReviewer: e.target.value })}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                      >
-                        <option value="">-- Chọn người trình duyệt --</option>
-                        {MOCK_REVIEWERS.map(r => (
-                          <option key={r.id} value={r.id}>{r.name} — {r.title}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-[13px] text-slate-700 mb-1.5">
-                        Ghi chú phê duyệt
-                      </label>
-                      <textarea
-                        value={wizardData.approvalNotes}
-                        onChange={(e) => setWizardData({ ...wizardData, approvalNotes: e.target.value })}
-                        placeholder="Nhập lý do và ghi chú cho việc tạo dữ liệu chủ này..."
-                        rows={3}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                  </div>
+              {/* Review 1: Th├┤ng tin c╞í bß║ún */}
+              <div className="border border-blue-200 rounded-lg overflow-hidden">
+                <div className="bg-blue-50 px-4 py-2.5 border-b border-blue-200">
+                  <h4 className="text-[13px] font-semibold text-blue-900">Th├┤ng tin c╞í bß║ún</h4>
                 </div>
-
-                {/* Review 1: Thông tin cơ bản */}
-                <div className="border border-blue-200 rounded-lg overflow-hidden">
-                  <div className="bg-blue-50 px-4 py-2.5 border-b border-blue-200">
-                    <h4 className="text-[13px] font-semibold text-blue-900">Thông tin cơ bản</h4>
-                  </div>
-                  <div className="p-4 grid grid-cols-2 gap-x-8 gap-y-2 text-[13px]">
-                    <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Tên dữ liệu chủ:</span><span className="text-slate-900">{wizardData.name || '—'}</span></div>
-                    <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Mã:</span><span className="text-slate-900">{wizardData.code || '—'}</span></div>
-                    <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Loại dữ liệu:</span><span className="text-slate-900">{wizardData.dataType || '—'}</span></div>
-                    <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Phạm vi:</span><span className="text-slate-900">{wizardData.scope || '—'}</span></div>
-                    <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Cơ quan quản lý:</span><span className="text-slate-900">{wizardData.managingAgency || '—'}</span></div>
-                    <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Nguồn dữ liệu:</span><span className="text-slate-900">{wizardData.dataSource === 'dldc' ? 'DLDC' : wizardData.dataSource === 'api' ? 'API' : 'Thủ công'}</span></div>
-                  </div>
+                <div className="p-4 grid grid-cols-2 gap-x-8 gap-y-2 text-[13px]">
+                  <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">M├ú thß╗▒c thß╗â:</span><span className="text-slate-900">{wizardData.code || 'ΓÇö'}</span></div>
+                  <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">T├¬n dß╗» liß╗çu chß╗º:</span><span className="text-slate-900">{wizardData.name || 'ΓÇö'}</span></div>
+                  <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Loß║íi thß╗▒c thß╗â:</span><span className="text-slate-900">{DATA_TYPE_LABELS[wizardData.dataType] || 'ΓÇö'}</span></div>
+                  <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Phß║ím vi sß╗¡ dß╗Ñng:</span><span className="text-slate-900">{SCOPE_TYPE_LABELS[wizardData.scope] || 'ΓÇö'}</span></div>
+                  <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">─É╞ín vß╗ï chß╗º quß║ún:</span><span className="text-slate-900">{wizardData.managingAgency || 'ΓÇö'}</span></div>
+                  <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Trß║íng th├íi v├▓ng ─æß╗¥i:</span><span className="text-slate-900">{LIFECYCLE_STATUS_LABELS[wizardData.lifecycleStatus] || 'ΓÇö'}</span></div>
+                  <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">T├¬n CSDL/Hß╗ç thß╗æng:</span><span className="text-slate-900">{wizardData.systemName || 'ΓÇö'}</span></div>
+                  <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Nguß╗ôn dß╗» liß╗çu ─æ─âng k├╜:</span><span className="text-slate-900">{wizardData.sources.length > 0 ? wizardData.sources.map(s => s.name).join(', ') : 'ΓÇö'}</span></div>
+                  <div className="col-span-2 flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">M├┤ tß║ú ─æß╗æi t╞░ß╗úng:</span><span className="text-slate-900">{wizardData.description || 'ΓÇö'}</span></div>
                 </div>
+              </div>
 
-                {/* Review 2: Quy tắc định danh */}
-                <div className="border border-blue-200 rounded-lg overflow-hidden">
-                  <div className="bg-blue-50 px-4 py-2.5 border-b border-blue-200">
-                    <h4 className="text-[13px] font-semibold text-blue-900">Quy tắc định danh</h4>
-                  </div>
-                  <div className="p-4 grid grid-cols-2 gap-x-8 gap-y-2 text-[13px]">
-                    <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Tiền tố:</span><span className="text-slate-900">{identifierConfig.prefix || '(Không có)'}</span></div>
-                    <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Hậu tố:</span><span className="text-slate-900">{identifierConfig.suffix || '(Không có)'}</span></div>
-                    <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Ký tự phân cách:</span><span className="text-slate-900">{{ none: 'Không có', '-': 'Gạch ngang (-)', '.': 'Dấu chấm (.)', '/': 'Gạch chéo (/)' }[identifierConfig.separator]}</span></div>
-                    <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Độ dài số:</span><span className="text-slate-900">{identifierConfig.digits} chữ số</span></div>
-                    <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Bắt đầu từ:</span><span className="text-slate-900">{identifierConfig.startFrom}</span></div>
-                    <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Kiểm tra trùng:</span><span className="text-slate-900">{identifierConfig.checkDuplicate ? 'Có' : 'Không'}</span></div>
-                  </div>
+              {/* Review 2: C├íc tr╞░ß╗¥ng dß╗» liß╗çu ΓÇö dß╗▒a tr├¬n bß║úng ├ünh xß║í cß╗Öt nguß╗ôn ΓåÆ thuß╗Öc t├¡nh ß╗ƒ B╞░ß╗¢c 2 */}
+              <div className="border border-blue-200 rounded-lg overflow-hidden">
+                <div className="bg-blue-50 px-4 py-2.5 border-b border-blue-200 flex items-center justify-between">
+                  <h4 className="text-[13px] font-semibold text-blue-900">C├íc tr╞░ß╗¥ng dß╗» liß╗çu</h4>
+                  <span className="text-[13px] text-blue-600">{availableFields.length} tr╞░ß╗¥ng</span>
                 </div>
-
-                {/* Review 3: Các trường dữ liệu */}
-                <div className="border border-blue-200 rounded-lg overflow-hidden">
-                  <div className="bg-blue-50 px-4 py-2.5 border-b border-blue-200 flex items-center justify-between">
-                    <h4 className="text-[13px] font-semibold text-blue-900">Các trường dữ liệu</h4>
-                    <span className="text-[13px] text-blue-600">{availableFields.length} trường</span>
-                  </div>
-                  {availableFields.length === 0 ? (
-                    <div className="p-4 text-[13px] text-slate-500 text-center">Chưa có trường dữ liệu nào</div>
-                  ) : (
+                {availableFields.length === 0 ? (
+                  <div className="p-4 text-[13px] text-slate-500 text-center">Ch╞░a c├│ tr╞░ß╗¥ng dß╗» liß╗çu n├áo</div>
+                ) : (
+                  <div className="overflow-x-auto">
                     <table className="w-full text-[13px]">
                       <thead className="bg-slate-50 border-b border-slate-200">
                         <tr>
-                          <th className="px-4 py-2 text-left text-slate-600 font-medium">Tên trường</th>
-                          <th className="px-4 py-2 text-left text-slate-600 font-medium">Tên hiển thị</th>
+                          <th className="px-4 py-2 text-left text-slate-600 font-medium">Thuß╗Öc t├¡nh</th>
+                          {registeredSources.map(src => (
+                            <th key={src.id} className="px-4 py-2 text-left text-slate-600 font-medium">{src.name}</th>
+                          ))}
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
                         {availableFields.map((f, i) => (
                           <tr key={i} className="hover:bg-slate-50">
-                            <td className="px-4 py-2 font-mono text-slate-700">{f.fieldName}</td>
-                            <td className="px-4 py-2 text-slate-700">{f.displayName}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  )}
-                </div>
-
-                {/* Review 4: Quy tắc hợp nhất */}
-                <div className="border border-blue-200 rounded-lg overflow-hidden">
-                  <div className="bg-blue-50 px-4 py-2.5 border-b border-blue-200">
-                    <h4 className="text-[13px] font-semibold text-blue-900">Quy tắc hợp nhất</h4>
-                  </div>
-                  <div className="p-4 space-y-3 text-[13px]">
-                    <div className="grid grid-cols-3 gap-3">
-                      <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                        <div className="text-slate-500 mb-1">Quy tắc so khớp</div>
-                        <div className="text-xl font-semibold text-slate-900">{matchingRules.length}</div>
-                        <div className="text-[12px] text-slate-400">quy tắc</div>
-                      </div>
-                      <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                        <div className="text-slate-500 mb-1">Quy tắc trích rút</div>
-                        <div className="text-xl font-semibold text-slate-900">{extractionRules.length}</div>
-                        <div className="text-[12px] text-slate-400">quy tắc</div>
-                      </div>
-                      <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                        <div className="text-slate-500 mb-1">Ngưỡng so khớp</div>
-                        <div className="text-xl font-semibold text-slate-900">{mergeConfig.minMatchScore}%</div>
-                        <div className="text-[12px] text-slate-400">tối thiểu</div>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-x-8 gap-y-2">
-                      <div className="flex gap-2"><span className="text-slate-500 w-40 flex-shrink-0">Phương thức hợp nhất:</span><span className="text-slate-900">{mergeConfig.mergeTrigger === 'auto' ? 'Tự động' : 'Cần phê duyệt'}</span></div>
-                      <div className="flex gap-2"><span className="text-slate-500 w-40 flex-shrink-0">Lưu tham chiếu nguồn:</span><span className="text-slate-900">{mergeConfig.keepSourceRef ? 'Có' : 'Không'}</span></div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Review 5: Quan hệ đã thiết lập */}
-                <div className="border border-blue-200 rounded-lg overflow-hidden">
-                  <div className="bg-blue-50 px-4 py-2.5 border-b border-blue-200 flex items-center justify-between">
-                    <h4 className="text-[13px] font-semibold text-blue-900">Quan hệ đã thiết lập</h4>
-                    <span className="text-[13px] text-blue-600">{wizardData.relationships.length} quan hệ</span>
-                  </div>
-                  {wizardData.relationships.length === 0 ? (
-                    <div className="p-4 text-[13px] text-slate-500 text-center">Chưa thiết lập quan hệ nào</div>
-                  ) : (
-                    <table className="w-full text-[13px]">
-                      <thead className="bg-slate-50 border-b border-slate-200">
-                        <tr>
-                          <th className="px-4 py-2 text-left text-slate-600 font-medium">Thực thể liên kết</th>
-                          <th className="px-4 py-2 text-left text-slate-600 font-medium">Loại quan hệ</th>
-                          <th className="px-4 py-2 text-left text-slate-600 font-medium">Trường liên kết</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100">
-                        {wizardData.relationships.map((rel) => (
-                          <tr key={rel.id} className="hover:bg-slate-50">
-                            <td className="px-4 py-2 text-slate-700">{rel.targetEntityName}</td>
                             <td className="px-4 py-2">
-                              <span className={`px-2 py-0.5 rounded border text-[12px] ${REL_TYPE_COLORS[rel.type]}`}>
-                                {REL_TYPE_LABELS[rel.type]}
-                              </span>
+                              <span className="text-slate-900 font-medium">{f.displayName}</span>
+                              <code className="ml-1.5 text-[13px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{f.fieldName}</code>
                             </td>
-                            <td className="px-4 py-2 text-slate-500">{rel.sourceKey} → {rel.targetKey}</td>
+                            {registeredSources.map(src => {
+                              const selectedColumn = wizardData.mapping[f.fieldName]?.[src.id] || '';
+                              const mismatch = isMappingMismatch(f.dataType, selectedColumn);
+                              return (
+                                <td key={src.id} className="px-4 py-2">
+                                  <span className={mismatch ? 'text-amber-700 font-medium' : 'text-slate-700'}>{selectedColumn || 'ΓÇö'}</span>
+                                  {mismatch && <AlertTriangle className="inline w-3 h-3 ml-1 text-amber-600 align-text-top" />}
+                                </td>
+                              );
+                            })}
                           </tr>
                         ))}
                       </tbody>
                     </table>
-                  )}
-                </div>
+                  </div>
+                )}
+              </div>
 
-                {/* Info */}
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <div className="flex items-start gap-2">
-                    <AlertCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <div className="text-[13px] text-green-800">
-                      <p className="mb-1">Sau khi gửi, dữ liệu chủ sẽ ở trạng thái <strong>"Chờ phê duyệt"</strong>.</p>
-                      <p>Người phê duyệt sẽ xem xét và quyết định phê duyệt hoặc từ chối.</p>
+              {/* Review 3: Quy tß║»c ─æß╗ïnh danh */}
+              <div className="border border-blue-200 rounded-lg overflow-hidden">
+                <div className="bg-blue-50 px-4 py-2.5 border-b border-blue-200">
+                  <h4 className="text-[13px] font-semibold text-blue-900">Quy tß║»c ─æß╗ïnh danh</h4>
+                </div>
+                <div className="p-4 grid grid-cols-2 gap-x-8 gap-y-2 text-[13px]">
+                  <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Tiß╗ün tß╗æ:</span><span className="text-slate-900">{identifierConfig.prefix || '(Kh├┤ng c├│)'}</span></div>
+                  <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Hß║¡u tß╗æ:</span><span className="text-slate-900">{identifierConfig.suffix || '(Kh├┤ng c├│)'}</span></div>
+                  <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">K├╜ tß╗▒ ph├ón c├ích:</span><span className="text-slate-900">{{ none: 'Kh├┤ng c├│', '-': 'Gß║ích ngang (-)', '.': 'Dß║Ñu chß║Ñm (.)', '/': 'Gß║ích ch├⌐o (/)' }[identifierConfig.separator]}</span></div>
+                  <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">─Éß╗Ö d├ái sß╗æ:</span><span className="text-slate-900">{identifierConfig.digits} chß╗» sß╗æ</span></div>
+                  <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Bß║»t ─æß║ºu tß╗½:</span><span className="text-slate-900">{identifierConfig.startFrom}</span></div>
+                  <div className="flex gap-2"><span className="text-slate-500 w-36 flex-shrink-0">Kiß╗âm tra tr├╣ng:</span><span className="text-slate-900">{identifierConfig.checkDuplicate ? 'C├│' : 'Kh├┤ng'}</span></div>
+                </div>
+              </div>
+
+              {/* Review 4: Quy tß║»c hß╗úp nhß║Ñt */}
+              <div className="border border-blue-200 rounded-lg overflow-hidden">
+                <div className="bg-blue-50 px-4 py-2.5 border-b border-blue-200">
+                  <h4 className="text-[13px] font-semibold text-blue-900">Quy tß║»c hß╗úp nhß║Ñt</h4>
+                </div>
+                <div className="p-4 space-y-3 text-[13px]">
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                      <div className="text-slate-500 mb-1">Quy tß║»c so khß╗¢p</div>
+                      <div className="text-xl font-semibold text-slate-900">{matchingRules.length}</div>
+                      <div className="text-[12px] text-slate-400">quy tß║»c</div>
                     </div>
+                    <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                      <div className="text-slate-500 mb-1">Quy tß║»c tr├¡ch r├║t</div>
+                      <div className="text-xl font-semibold text-slate-900">{extractionRules.length}</div>
+                      <div className="text-[12px] text-slate-400">quy tß║»c</div>
+                    </div>
+                    <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                      <div className="text-slate-500 mb-1">Ng╞░ß╗íng so khß╗¢p</div>
+                      <div className="text-xl font-semibold text-slate-900">{mergeConfig.minMatchScore}%</div>
+                      <div className="text-[12px] text-slate-400">tß╗æi thiß╗âu</div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-x-8 gap-y-2">
+                    <div className="flex gap-2"><span className="text-slate-500 w-40 flex-shrink-0">Ph╞░╞íng thß╗⌐c hß╗úp nhß║Ñt:</span><span className="text-slate-900">{mergeConfig.mergeTrigger === 'auto' ? 'Tß╗▒ ─æß╗Öng' : 'Cß║ºn ph├¬ duyß╗çt'}</span></div>
+                    <div className="flex gap-2"><span className="text-slate-500 w-40 flex-shrink-0">L╞░u tham chiß║┐u nguß╗ôn:</span><span className="text-slate-900">{mergeConfig.keepSourceRef ? 'C├│' : 'Kh├┤ng'}</span></div>
                   </div>
                 </div>
               </div>
-            )}
-          </div>
 
-          {/* Footer Navigation */}
-          <div className="flex items-center justify-between p-6 border-t border-slate-200 bg-slate-50">
-            <button
-              onClick={handleBack}
-              disabled={currentStep === 1}
-              className="flex items-center gap-2 px-4 py-2 text-slate-700 hover:bg-slate-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              Quay lại
-            </button>
+              {/* Review 5: Quan hß╗ç ─æ├ú thiß║┐t lß║¡p */}
+              <div className="border border-blue-200 rounded-lg overflow-hidden">
+                <div className="bg-blue-50 px-4 py-2.5 border-b border-blue-200 flex items-center justify-between">
+                  <h4 className="text-[13px] font-semibold text-blue-900">Quan hß╗ç ─æ├ú thiß║┐t lß║¡p</h4>
+                  <span className="text-[13px] text-blue-600">{wizardData.relationships.length} quan hß╗ç</span>
+                </div>
+                {wizardData.relationships.length === 0 ? (
+                  <div className="p-4 text-[13px] text-slate-500 text-center">Ch╞░a thiß║┐t lß║¡p quan hß╗ç n├áo</div>
+                ) : (
+                  <table className="w-full text-[13px]">
+                    <thead className="bg-slate-50 border-b border-slate-200">
+                      <tr>
+                        <th className="px-4 py-2 text-left text-slate-600 font-medium">Thß╗▒c thß╗â li├¬n kß║┐t</th>
+                        <th className="px-4 py-2 text-left text-slate-600 font-medium">Loß║íi quan hß╗ç</th>
+                        <th className="px-4 py-2 text-left text-slate-600 font-medium">Tr╞░ß╗¥ng li├¬n kß║┐t</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {wizardData.relationships.map((rel) => (
+                        <tr key={rel.id} className="hover:bg-slate-50">
+                          <td className="px-4 py-2 text-slate-700">{rel.targetEntityName}</td>
+                          <td className="px-4 py-2">
+                            <span className={`px-2 py-0.5 rounded border text-[12px] ${REL_TYPE_COLORS[rel.type]}`}>
+                              {REL_TYPE_LABELS[rel.type]}
+                            </span>
+                          </td>
+                          <td className="px-4 py-2 text-slate-500">{rel.sourceKey} ΓåÆ {rel.targetKey}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
 
-            <div className="text-[13px] text-slate-600">
-              Bước {currentStep} / {steps.length}
+              {/* Info */}
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <div className="text-[13px] text-green-800">
+                    <p className="mb-1">Sau khi gß╗¡i, dß╗» liß╗çu chß╗º sß║╜ ß╗ƒ trß║íng th├íi <strong>"Chß╗¥ ph├¬ duyß╗çt"</strong>.</p>
+                    <p>Ng╞░ß╗¥i ph├¬ duyß╗çt sß║╜ xem x├⌐t v├á quyß║┐t ─æß╗ïnh ph├¬ duyß╗çt hoß║╖c tß╗½ chß╗æi.</p>
+                  </div>
+                </div>
+              </div>
             </div>
+          )}
+        </div>
 
-            {currentStep < 6 ? (
-              <button
-                onClick={handleNext}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Tiếp theo
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            ) : (
-              <button
-                onClick={handleSubmitWizard}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-              >
-                <Check className="w-4 h-4" />
-                Gửi phê duyệt
-              </button>
-            )}
+        {/* Footer Navigation */}
+        <div className="flex items-center justify-between p-6 border-t border-slate-200 bg-slate-50">
+          <button
+            onClick={handleBack}
+            disabled={currentStep === 1}
+            className="flex items-center gap-2 px-4 py-2 text-slate-700 hover:bg-slate-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            Quay lß║íi
+          </button>
+
+          <div className="text-[13px] text-slate-600">
+            B╞░ß╗¢c {currentStep} / {steps.length}
           </div>
+
+          {currentStep < 6 ? (
+            <button
+              onClick={handleNext}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Tiß║┐p theo
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          ) : (
+            <button
+              onClick={handleSubmitWizard}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              <Check className="w-4 h-4" />
+              Gß╗¡i ph├¬ duyß╗çt
+            </button>
+          )}
         </div>
       </div>
-    </Portal>
+    </div>
+  </Portal>
   );
 }
