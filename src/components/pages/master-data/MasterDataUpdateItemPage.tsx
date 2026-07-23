@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Search, Filter, Upload, Download, Send, Eye, Clock, CheckCircle2, XCircle, Globe, List, Lock, Check, Edit2, Copy, AlertTriangle, X, RotateCcw } from 'lucide-react';
+import { Search, Send, Eye, Clock, CheckCircle2, XCircle, Globe, List, Lock, Check, Edit2, Copy, AlertTriangle, X, RotateCcw, GitMerge, Split, HelpCircle, PlusCircle } from 'lucide-react';
 
-type ApprovalStatus = 'reviewing' | 'pending' | 'approved' | 'rejected';
+type ApprovalStatus = 'draft' | 'reviewing' | 'pending' | 'approved' | 'rejected';
 type PublicStatus = 'published' | 'unpublished';
 type DataCategory = 'enforcement' | 'civil-registry' | 'nationality' | 'individual' | 'organization' | 'legal-aid-object' | 'asset';
 
@@ -126,7 +126,7 @@ type Row = Record<string, string> & { id: string; approvalStatus: ApprovalStatus
 const MOCK_ENFORCEMENT: Row[] = [
   { id: '1', ma: 'QĐ-THADS-2026-00156', ngayBanHanh: '15/01/2026', hoTen: 'Nguyễn Văn Anh',   cccd: '001234567890', nghiaVu: 'Bồi thường 250.000.000đ',              coQuan: 'Cục THADS TP. Hà Nội',          approvalStatus: 'approved', publicStatus: 'published' },
   { id: '2', ma: 'QĐ-THADS-2026-00287', ngayBanHanh: '22/02/2026', hoTen: 'Nguyễn Văn Anh',   cccd: '079199001234', nghiaVu: 'Phạt cải tạo không giam giữ 12 tháng',  coQuan: '',                              approvalStatus: 'pending',  publicStatus: 'unpublished' },
-  { id: '3', ma: 'QĐ-THADS-2025-08456', ngayBanHanh: '10/11/2025', hoTen: 'Lê Minh Cường',    cccd: '036087003456', nghiaVu: 'Trả nợ 180.000.000đ và lãi suất',       coQuan: 'Cục THADS TP. Đà Nẵng',         approvalStatus: 'approved', publicStatus: 'published' },
+  { id: '3', ma: 'QĐ-THADS-2025-08456', ngayBanHanh: '10/11/2025', hoTen: 'Lê Minh Cường',    cccd: '036087003456', nghiaVu: 'Trả nợ 180.000.000đ và lãi suất',       coQuan: 'Cục THADS TP. Đà Nẵng',         approvalStatus: 'draft',    publicStatus: 'unpublished' },
   { id: '4', ma: 'QĐ-THADS-2026-00401', ngayBanHanh: '05/03/2026', hoTen: 'Phạm Quốc Dũng',   cccd: '031075004567', nghiaVu: 'Giao nộp tài sản theo bản án số 12/2025', coQuan: 'Chi Cục THADS TP. Cần Thơ',     approvalStatus: 'rejected', publicStatus: 'unpublished' },
   { id: '5', ma: 'QĐ-THADS-2026-00512', ngayBanHanh: '15/04/2026', hoTen: 'Hoàng Thị Lan',    cccd: '038079005678', nghiaVu: 'Bồi thường thiệt hại 75.000.000đ',       coQuan: 'Chi Cục THADS Q. Hải An, HN',  approvalStatus: 'pending',  publicStatus: 'unpublished' },
   { id: '6', ma: 'QĐ-THADS-2026-00623', ngayBanHanh: '28/05/2026', hoTen: 'Vũ Đức Thắng',     cccd: '026068006789', nghiaVu: 'Nộp tiền phạt 50.000.000đ',               coQuan: 'Chi Cục THADS Q. Sơn Trà, ĐN', approvalStatus: 'approved', publicStatus: 'published' },
@@ -137,7 +137,7 @@ const MOCK_CIVIL_REGISTRY: Row[] = [
   { id: '1', ma: '01/2026/ĐKKS',   ngayDangKy: '02/01/2026', noiDangKy: 'UBND P. Hàng Bông, HN',       hoTen: 'Trần Minh Khoa',    ngaySinh: '01/01/2026', quocTich: 'Việt Nam', approvalStatus: 'approved', publicStatus: 'published' },
   { id: '2', ma: '124/2026/ĐKKS',  ngayDangKy: '15/02/2026', noiDangKy: '',                            hoTen: 'Trần Minh Khoa',    ngaySinh: '14/02/2026', quocTich: 'Việt Nam', approvalStatus: 'approved', publicStatus: 'published' },
   { id: '3', ma: '2847/2025/ĐKKS', ngayDangKy: '10/12/2025', noiDangKy: 'UBND P. Hải Châu 1, ĐN',      hoTen: 'Lê Gia Bảo',        ngaySinh: '08/12/2025', quocTich: 'Việt Nam', approvalStatus: 'pending',  publicStatus: 'unpublished' },
-  { id: '4', ma: '298/2026/ĐKKS',  ngayDangKy: '05/03/2026', noiDangKy: 'UBND P. Lê Chân, Hải Phòng',  hoTen: 'Phạm Nhật Minh',    ngaySinh: '03/03/2026', quocTich: 'Việt Nam', approvalStatus: 'approved', publicStatus: 'published' },
+  { id: '4', ma: '298/2026/ĐKKS',  ngayDangKy: '05/03/2026', noiDangKy: 'UBND P. Lê Chân, Hải Phòng',  hoTen: 'Phạm Nhật Minh',    ngaySinh: '03/03/2026', quocTich: 'Việt Nam', approvalStatus: 'draft',    publicStatus: 'unpublished' },
   { id: '5', ma: '401/2026/ĐKKS',  ngayDangKy: '20/04/2026', noiDangKy: 'UBND P. An Hòa, Cần Thơ',     hoTen: 'Đinh Thị Yến Nhi',  ngaySinh: '18/04/2026', quocTich: 'Việt Nam', approvalStatus: 'pending',  publicStatus: 'unpublished' },
   { id: '6', ma: '512/2026/ĐKKS',  ngayDangKy: '10/05/2026', noiDangKy: 'UBND P. Vĩnh Phú, Bình Dương', hoTen: 'Trần Bình An',      ngaySinh: '08/05/2026', quocTich: 'Việt Nam', approvalStatus: 'rejected', publicStatus: 'unpublished' },
   { id: '7', ma: '099/2026/ĐKKS',  ngayDangKy: '12/05/2026', noiDangKy: 'UBND P. Cầu Giấy, HN',        hoTen: 'Bùi Văn Sơn',       ngaySinh: '01/01/2026', quocTich: 'Việt Nam', approvalStatus: 'reviewing', publicStatus: 'unpublished' },
@@ -147,7 +147,7 @@ const MOCK_NATIONALITY: Row[] = [
   { id: '1', ma: '385/QĐ-CTN-2025', hoTen: 'Nguyễn Thị Hương',    ngaySinh: '15/05/1985', noiSinh: 'Hà Nội',        gioiTinh: 'Nữ',  ngayQuyetDinh: '20/08/2025', approvalStatus: 'approved', publicStatus: 'published' },
   { id: '2', ma: '112/QĐ-CTN-2026', hoTen: 'Nguyễn Thị Hương',     ngaySinh: '10/03/1990', noiSinh: '',              gioiTinh: 'Nam', ngayQuyetDinh: '15/02/2026', approvalStatus: 'approved', publicStatus: 'published' },
   { id: '3', ma: '047/QĐ-CTN-2026', hoTen: 'Trần Thị Mai Ly',      ngaySinh: '22/11/1978', noiSinh: 'Đà Nẵng',       gioiTinh: 'Nữ',  ngayQuyetDinh: '10/01/2026', approvalStatus: 'pending',  publicStatus: 'unpublished' },
-  { id: '4', ma: '198/QĐ-CTN-2025', hoTen: 'Phạm Văn Tùng',        ngaySinh: '08/07/1965', noiSinh: 'Nghệ An',       gioiTinh: 'Nam', ngayQuyetDinh: '05/05/2025', approvalStatus: 'approved', publicStatus: 'published' },
+  { id: '4', ma: '198/QĐ-CTN-2025', hoTen: 'Phạm Văn Tùng',        ngaySinh: '08/07/1965', noiSinh: 'Nghệ An',       gioiTinh: 'Nam', ngayQuyetDinh: '05/05/2025', approvalStatus: 'draft',    publicStatus: 'unpublished' },
   { id: '5', ma: '256/QĐ-CTN-2026', hoTen: 'Hoàng Thị Bích Ngọc',  ngaySinh: '30/01/1992', noiSinh: 'Hải Phòng',     gioiTinh: 'Nữ',  ngayQuyetDinh: '28/03/2026', approvalStatus: 'rejected', publicStatus: 'unpublished' },
   { id: '6', ma: '311/QĐ-CTN-2026', hoTen: 'Vũ Đình Khương',        ngaySinh: '14/09/1988', noiSinh: 'Bắc Ninh',      gioiTinh: 'Nam', ngayQuyetDinh: '15/04/2026', approvalStatus: 'pending',  publicStatus: 'unpublished' },
   { id: '7', ma: '289/QĐ-CTN-2026', hoTen: 'Đỗ Thị Thanh Huyền',    ngaySinh: '02/02/1995', noiSinh: 'Thanh Hóa',     gioiTinh: 'Nữ',  ngayQuyetDinh: '10/06/2026', approvalStatus: 'reviewing', publicStatus: 'unpublished' },
@@ -157,7 +157,7 @@ const MOCK_INDIVIDUAL: Row[] = [
   { id: '1', ma: 'HN-LS-2019-00145',  hoTen: 'Nguyễn Thanh Hải',   ngaySinh: '15/04/1978', cccd: '001078001234', chucDanh: 'Luật sư',         soCCHN: 'CCHN-LS-0012345', linhVuc: 'Dân sự, Hình sự',       approvalStatus: 'approved', publicStatus: 'published' },
   { id: '2', ma: 'HCM-LS-2020-00892', hoTen: 'Nguyễn Thanh Hải',    ngaySinh: '22/08/1982', cccd: '079082002345', chucDanh: 'Luật sư',         soCCHN: '',                linhVuc: 'Kinh doanh thương mại', approvalStatus: 'approved', publicStatus: 'published' },
   { id: '3', ma: 'DN-CC-2021-00234',  hoTen: 'Lê Thị Thu Hà',       ngaySinh: '10/12/1985', cccd: '048085003456', chucDanh: 'Công chứng viên', soCCHN: 'CCHN-CC-0034567', linhVuc: 'Công chứng',            approvalStatus: 'pending',  publicStatus: 'unpublished' },
-  { id: '4', ma: 'HN-DGV-2018-00067', hoTen: 'Phạm Xuân Long',      ngaySinh: '05/03/1975', cccd: '001075004567', chucDanh: 'Đấu giá viên',    soCCHN: 'CCHN-DG-0045678', linhVuc: 'Đấu giá tài sản',      approvalStatus: 'approved', publicStatus: 'published' },
+  { id: '4', ma: 'HN-DGV-2018-00067', hoTen: 'Phạm Xuân Long',      ngaySinh: '05/03/1975', cccd: '001075004567', chucDanh: 'Đấu giá viên',    soCCHN: 'CCHN-DG-0045678', linhVuc: 'Đấu giá tài sản',      approvalStatus: 'draft',    publicStatus: 'unpublished' },
   { id: '5', ma: 'HP-QTV-2022-00189', hoTen: 'Hoàng Văn Bình',      ngaySinh: '18/06/1980', cccd: '031080005678', chucDanh: 'Quản tài viên',   soCCHN: 'CCHN-QT-0056789', linhVuc: 'Quản lý, thanh lý TS',  approvalStatus: 'rejected', publicStatus: 'unpublished' },
   { id: '6', ma: 'CT-GDVTP-2020-0045',hoTen: 'Vũ Thị Ngọc Lan',     ngaySinh: '27/09/1988', cccd: '087088006789', chucDanh: 'Giám định viên',  soCCHN: 'CCHN-GD-0067890', linhVuc: 'Tài chính kế toán',     approvalStatus: 'pending',  publicStatus: 'unpublished' },
   { id: '7', ma: 'HN-LS-2026-00312',  hoTen: 'Ngô Thanh Sơn',       ngaySinh: '30/01/1990', cccd: '001090008901', chucDanh: 'Luật sư',         soCCHN: 'CCHN-LS-0078901', linhVuc: 'Dân sự',                approvalStatus: 'reviewing', publicStatus: 'unpublished' },
@@ -167,7 +167,7 @@ const MOCK_ORGANIZATION: Row[] = [
   { id: '1', ma: 'TC-LS-HN-0001',  tenTochuc: 'Công ty Luật TNHH Việt Phát',              loaiHinh: 'Công ty TNHH',     soDKHD: '01012345/TP/ĐKHĐ-LS', diaChi: '12 Lý Thường Kiệt, Q. Hoàn Kiếm, HN',  nguoiDaiDien: 'Nguyễn Văn Thành', approvalStatus: 'approved', publicStatus: 'published' },
   { id: '2', ma: 'TC-LS-HCM-0089', tenTochuc: 'Công ty Luật TNHH Việt Phát',               loaiHinh: 'Văn phòng LS',     soDKHD: '01098765/TP/ĐKHĐ-LS', diaChi: '',                                       nguoiDaiDien: 'Trần Công Minh',   approvalStatus: 'approved', publicStatus: 'published' },
   { id: '3', ma: 'TC-CC-DN-0024',  tenTochuc: 'Văn phòng Công chứng Đà Nẵng',              loaiHinh: 'Văn phòng CC',     soDKHD: '02024680/TP/ĐKHĐ-CC', diaChi: '78 Trần Phú, Q. Hải Châu, ĐN',          nguoiDaiDien: 'Lê Thị Hồng',      approvalStatus: 'pending',  publicStatus: 'unpublished' },
-  { id: '4', ma: 'TC-DG-HP-0015',  tenTochuc: 'Công ty Đấu giá Hợp danh Hải Phòng',        loaiHinh: 'Công ty HD',       soDKHD: '03012345/TP/ĐKHĐ-DG', diaChi: '45 Điện Biên Phủ, Q. Lê Chân, HP',      nguoiDaiDien: 'Phạm Đức Hùng',    approvalStatus: 'approved', publicStatus: 'published' },
+  { id: '4', ma: 'TC-DG-HP-0015',  tenTochuc: 'Công ty Đấu giá Hợp danh Hải Phòng',        loaiHinh: 'Công ty HD',       soDKHD: '03012345/TP/ĐKHĐ-DG', diaChi: '45 Điện Biên Phủ, Q. Lê Chân, HP',      nguoiDaiDien: 'Phạm Đức Hùng',    approvalStatus: 'draft',    publicStatus: 'unpublished' },
   { id: '5', ma: 'TC-GD-HN-0008',  tenTochuc: 'Trung tâm Giám định Tư pháp Hà Nội',        loaiHinh: 'Trung tâm',        soDKHD: '04098765/TP/ĐKHĐ-GĐ', diaChi: '101 Trần Hưng Đạo, Q. Hoàn Kiếm, HN',  nguoiDaiDien: 'Hoàng Minh Tuấn',  approvalStatus: 'rejected', publicStatus: 'unpublished' },
   { id: '6', ma: 'TC-TT-HCM-0032', tenTochuc: 'Trung tâm Trọng tài Thương mại Phía Nam',   loaiHinh: 'Trung tâm',        soDKHD: '05024680/TP/ĐKHĐ-TT', diaChi: '200 Lê Lai, Q.1, TP.HCM',               nguoiDaiDien: 'Vũ Quang Huy',     approvalStatus: 'pending',  publicStatus: 'unpublished' },
   { id: '7', ma: 'TC-DG-CT-0087',  tenTochuc: 'Công ty Đấu giá Hợp danh Cần Thơ',         loaiHinh: 'Công ty HD',       soDKHD: '01087654/TP/ĐKHĐ-DG', diaChi: '15 Trần Hưng Đạo, Q. Ninh Kiều, CT',    nguoiDaiDien: 'Lâm Văn Đạt',      approvalStatus: 'reviewing', publicStatus: 'unpublished' },
@@ -177,7 +177,7 @@ const MOCK_LEGAL_AID_OBJECT: Row[] = [
   { id: '1', ma: 'TGPL-DN-2026-001234', loai: 'Người có công',      cccd: '001078001234', hoTen: 'Nguyễn Thị Bích',     dienTGPL: 'Thương binh hạng 2/4', tinh: 'Hà Nội',     approvalStatus: 'approved', publicStatus: 'published' },
   { id: '2', ma: 'TGPL-DN-2026-002345', loai: 'Hộ nghèo',           cccd: '079090002345', hoTen: 'Nguyễn Thị Bích',      dienTGPL: '',                     tinh: 'TP.HCM',     approvalStatus: 'approved', publicStatus: 'published' },
   { id: '3', ma: 'TGPL-DN-2025-098765', loai: 'Người dân tộc thiểu số', cccd: '038059003456', hoTen: 'Lý Thị Mai',      dienTGPL: 'DTTS cư trú vùng KK',  tinh: 'Đà Nẵng',    approvalStatus: 'pending',  publicStatus: 'unpublished' },
-  { id: '4', ma: 'TGPL-DN-2026-003456', loai: 'Người cao tuổi',     cccd: '031040004567', hoTen: 'Phạm Văn Cương',       dienTGPL: 'Trên 80 tuổi không lương', tinh: 'Hải Phòng', approvalStatus: 'approved', publicStatus: 'published' },
+  { id: '4', ma: 'TGPL-DN-2026-003456', loai: 'Người cao tuổi',     cccd: '031040004567', hoTen: 'Phạm Văn Cương',       dienTGPL: 'Trên 80 tuổi không lương', tinh: 'Hải Phòng', approvalStatus: 'draft',    publicStatus: 'unpublished' },
   { id: '5', ma: 'TGPL-DN-2026-004567', loai: 'Người khuyết tật',   cccd: '087072005678', hoTen: 'Hoàng Thị Linh',       dienTGPL: 'KT nặng theo hồ sơ',   tinh: 'Cần Thơ',    approvalStatus: 'rejected', publicStatus: 'unpublished' },
   { id: '6', ma: 'TGPL-DN-2026-005678', loai: 'Trẻ em',             cccd: '001018006789', hoTen: 'Vũ Minh Quân',          dienTGPL: 'Trẻ em (dưới 16 tuổi)', tinh: 'Bình Dương', approvalStatus: 'pending',  publicStatus: 'unpublished' },
   { id: '7', ma: 'TGPL-DN-2026-006789', loai: 'Người khuyết tật',   cccd: '079091009012', hoTen: 'Bùi Thị Cẩm Tú',        dienTGPL: 'KT nhẹ theo hồ sơ',      tinh: 'Hà Nội',     approvalStatus: 'reviewing', publicStatus: 'unpublished' },
@@ -188,7 +188,7 @@ const MOCK_ASSET: Row[] = [
   { id: '2', ma: 'TS-2026-000287', maHopDong: 'HĐ-TC-2026-002345', hieuluc: '15/02/2026 – 15/02/2029', soGCN: '',                  loaiTaiSan: 'Phương tiện ô tô',     benBaoDam: 'Nguyễn Văn Hùng',    approvalStatus: 'approved', publicStatus: 'published' },
   { id: '3', ma: 'TS-2025-008456', maHopDong: 'HĐ-TC-2025-003456', hieuluc: '20/11/2025 – 20/11/2028', soGCN: 'GCN-SHNO-003456789',loaiTaiSan: 'Nhà ở',                benBaoDam: 'Lê Minh Đức',         approvalStatus: 'pending',  publicStatus: 'unpublished' },
   { id: '4', ma: 'TS-2026-000401', maHopDong: 'HĐ-TC-2026-004567', hieuluc: '10/03/2026 – 10/03/2030', soGCN: 'GCN-MMTB-004567890',loaiTaiSan: 'Máy móc thiết bị',     benBaoDam: 'Phạm Quốc Khánh',    approvalStatus: 'rejected', publicStatus: 'unpublished' },
-  { id: '5', ma: 'TS-2026-000512', maHopDong: 'HĐ-TC-2026-005678', hieuluc: '25/04/2026 – 25/04/2028', soGCN: 'GCN-HHDV-005678901',loaiTaiSan: 'Hàng hóa trong kho',   benBaoDam: 'Hoàng Đức Lân',      approvalStatus: 'approved', publicStatus: 'published' },
+  { id: '5', ma: 'TS-2026-000512', maHopDong: 'HĐ-TC-2026-005678', hieuluc: '25/04/2026 – 25/04/2028', soGCN: 'GCN-HHDV-005678901',loaiTaiSan: 'Hàng hóa trong kho',   benBaoDam: 'Hoàng Đức Lân',      approvalStatus: 'draft',    publicStatus: 'unpublished' },
   { id: '6', ma: 'TS-2026-000623', maHopDong: 'HĐ-TC-2026-006789', hieuluc: '05/06/2026 – 05/06/2029', soGCN: 'GCN-QSD-006789012', loaiTaiSan: 'Tài sản hình thành trong tương lai', benBaoDam: 'Vũ Thị Hà',  approvalStatus: 'pending',  publicStatus: 'unpublished' },
   { id: '7', ma: 'TS-2026-000734', maHopDong: 'HĐ-TC-2026-007890', hieuluc: '12/06/2026 – 12/06/2030', soGCN: 'GCN-QSD-007890123', loaiTaiSan: 'Quyền sử dụng đất',    benBaoDam: 'Đặng Văn Kiên',  approvalStatus: 'reviewing', publicStatus: 'unpublished' },
 ];
@@ -261,6 +261,30 @@ function isRowIncomplete(row: Row, cols: ColDef[]): boolean {
   return cols.some(col => !row[col.key] || row[col.key].trim() === '');
 }
 
+// ─── Mock "Các bản ghi chờ rà soát" — giống mục Kiểm thử ở Bước 3 wizard Tạo mới dữ liệu chủ ──
+
+const MOCK_REVIEW_ITEMS = [
+  { id: 'rev-1', pair: 'HT-0451 ↔ CC-1123', score: 82, reason: 'Trùng họ tên và ngày sinh nhưng khác số định danh' },
+  { id: 'rev-2', pair: 'HT-0777 ↔ CC-2098', score: 78, reason: 'Tên tương đồng chuỗi nhưng địa chỉ khác nhau' },
+  { id: 'rev-3', pair: 'HT-0912 ↔ CC-3011', score: 85, reason: 'Trùng số CCCD nhưng họ tên thiếu tên đệm' },
+  { id: 'rev-4', pair: 'HT-1204 ↔ CC-4150', score: 76, reason: 'Trùng họ tên, ngày sinh nhưng khác tỉnh thành thường trú' },
+  { id: 'rev-5', pair: 'HT-1588 ↔ CC-5099', score: 80, reason: 'Số định danh gần đúng, khác ngày cấp CCCD' },
+];
+
+// ─── Mock "Các bản ghi không khớp" — giống mục Quy tắc hợp nhất ở Bước 3 wizard Tạo mới dữ liệu chủ ──
+
+const MOCK_UNMATCHED_ITEMS = [
+  { id: 'unmatch-1', record: 'HT-9901', sourceName: 'Hộ tịch', maxScore: 42, reason: 'Không tìm thấy bản ghi tương đồng vượt ngưỡng 75%', defaultAction: '' as const },
+  { id: 'unmatch-2', record: 'CC-8820', sourceName: 'CCCD', maxScore: 35, reason: 'Số định danh và thông tin cá nhân khác biệt hoàn toàn', defaultAction: '' as const },
+  { id: 'unmatch-3', record: 'HT-9945', sourceName: 'Hộ tịch', maxScore: 48, reason: 'Trùng ngày sinh nhưng thông tin tên không trùng khớp', defaultAction: '' as const },
+  { id: 'unmatch-4', record: 'CC-9102', sourceName: 'CCCD', maxScore: 28, reason: 'Bản ghi thiếu thông tin định danh tối thiểu', defaultAction: '' as const },
+  { id: 'unmatch-5', record: 'HT-9988', sourceName: 'Hộ tịch', maxScore: 50, reason: 'Điểm so khớp thấp hơn ngưỡng rà soát 75%', defaultAction: '' as const },
+];
+
+// ─── Tab rà soát trùng lặp: tự động gộp / chờ rà soát / không khớp ──
+
+type PairBucket = 'auto' | 'review' | 'mismatch';
+
 // ─── Status badges ────────────────────────────────────────────────────────────
 
 function ApprovalBadge({ status }: { status: ApprovalStatus }) {
@@ -269,8 +293,10 @@ function ApprovalBadge({ status }: { status: ApprovalStatus }) {
   if (status === 'pending')
     return <span className="px-3 py-1 bg-orange-50 text-orange-700 border border-orange-200 text-[12px] rounded-full whitespace-nowrap">Chờ phê duyệt</span>;
   if (status === 'reviewing')
-    return <span className="px-3 py-1 bg-indigo-50 text-indigo-700 border border-indigo-200 text-[12px] rounded-full whitespace-nowrap">Đang rà soát</span>;
-  return <span className="px-3 py-1 bg-red-50 text-red-700 border border-red-200 text-[12px] rounded-full whitespace-nowrap">Từ chối</span>;
+    return <span className="px-3 py-1 bg-indigo-50 text-indigo-700 border border-indigo-200 text-[12px] rounded-full whitespace-nowrap">Rà soát</span>;
+  if (status === 'rejected')
+    return <span className="px-3 py-1 bg-red-50 text-red-700 border border-red-200 text-[12px] rounded-full whitespace-nowrap">Từ chối</span>;
+  return <span className="px-3 py-1 bg-slate-100 text-slate-600 border border-slate-200 text-[12px] rounded-full whitespace-nowrap">Soạn thảo</span>;
 }
 
 function PublicBadge({ status }: { status: PublicStatus }) {
@@ -289,6 +315,8 @@ interface Props {
 export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
   const [activeTab, setActiveTab] = useState<'list' | 'approval' | 'publish' | 'history'>('list');
   const [searchQuery, setSearchQuery] = useState('');
+  const [listApprovalFilter, setListApprovalFilter] = useState<'all' | ApprovalStatus>('all');
+  const [selectedRecordIds, setSelectedRecordIds] = useState<string[]>([]);
   const [currentPageNum, setCurrentPageNum] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
@@ -319,13 +347,26 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
   const [editingRowId, setEditingRowId] = useState<string | null>(null);
   const [editFormData, setEditFormData] = useState<Record<string, string>>({});
 
-  const listData = allData.filter(r => {
-    if (!searchQuery) return true;
-    return Object.values(r).some(v => String(v).toLowerCase().includes(searchQuery.toLowerCase()));
-  });
+  // Thẻ đếm rà soát: tự động gộp / chờ rà soát / không khớp
+  const [activeReviewCard, setActiveReviewCard] = useState<PairBucket>('auto');
+  const [resolvedPairIds, setResolvedPairIds] = useState<string[]>([]);
+  const [reviewSelectedPairIds, setReviewSelectedPairIds] = useState<string[]>([]);
+  const [reviewPage, setReviewPage] = useState(1);
+  const [unmatchedSelectedIds, setUnmatchedSelectedIds] = useState<string[]>([]);
+  const [unmatchedProcessedIds, setUnmatchedProcessedIds] = useState<string[]>([]);
+  const [unmatchedActions, setUnmatchedActions] = useState<Record<string, 'single_source' | 'discard' | ''>>({});
+  const [unmatchedPage, setUnmatchedPage] = useState(1);
 
   const duplicateIds = computeDuplicateIds(allData, config.category);
   const incompleteIds = new Set(allData.filter(r => isRowIncomplete(r, cols)).map(r => r.id));
+
+  const reviewPairs = MOCK_REVIEW_ITEMS;
+
+  const listData = allData.filter(r => {
+    if (listApprovalFilter !== 'all' && r.approvalStatus !== listApprovalFilter) return false;
+    if (!searchQuery) return true;
+    return Object.values(r).some(v => String(v).toLowerCase().includes(searchQuery.toLowerCase()));
+  });
 
   const stats = {
     total:     allData.length,
@@ -448,6 +489,16 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
     alert('Đã gửi bản ghi đi phê duyệt. Trạng thái cập nhật thành "Chờ phê duyệt" và thông báo đã được gửi tới lãnh đạo nghiệp vụ.');
   };
 
+  // Chỉ bản ghi Soạn thảo/Rà soát/Từ chối mới cần (và có thể) gửi duyệt lại
+  const isSendableStatus = (status: ApprovalStatus) => status === 'draft' || status === 'reviewing' || status === 'rejected';
+
+  const handleBulkSendForApproval = () => {
+    if (selectedRecordIds.length === 0) return;
+    setRecordsData(prev => prev.map(r => selectedRecordIds.includes(r.id) ? { ...r, approvalStatus: 'pending' } : r));
+    alert(`Đã gửi ${selectedRecordIds.length} bản ghi đi phê duyệt. Trạng thái cập nhật thành "Chờ phê duyệt" và thông báo đã được gửi tới lãnh đạo nghiệp vụ.`);
+    setSelectedRecordIds([]);
+  };
+
   // ─── Công khai handlers ───────────────────────────────────────────────────
 
   const handleConfirmPublish = () => {
@@ -506,30 +557,364 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
       {/* ─── Tab: Dữ liệu ─── */}
       {activeTab === 'list' && (
         <>
-          {/* Gợi ý trùng lặp & cảnh báo thiếu dữ liệu */}
-          {(duplicateIds.size > 0 || incompleteIds.size > 0) && (
-            <div className="flex flex-col sm:flex-row gap-3">
-              {duplicateIds.size > 0 && (
-                <div className="flex-1 flex items-start gap-2 px-4 py-3 rounded-lg border bg-yellow-50 border-yellow-200 text-[13px]">
-                  <Copy className="w-4 h-4 mt-0.5 flex-shrink-0 text-yellow-600" />
-                  <div className="text-yellow-800">
-                    <p className="font-medium">Phát hiện {duplicateIds.size} bản ghi có thể trùng lặp</p>
-                    <p className="text-yellow-600 mt-0.5">Hệ thống tự động so khớp theo họ tên/tên tổ chức. Vui lòng kiểm tra và xử lý trước khi gửi phê duyệt.</p>
-                  </div>
+          {/* Tab rà soát trùng lặp: Gộp tự động / Chờ rà soát / Không khớp */}
+          <div className="inline-flex items-center gap-1 p-1 bg-slate-100 rounded-lg w-fit">
+            <button
+              type="button"
+              onClick={() => { setActiveReviewCard('auto'); setCurrentPageNum(1); }}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-[13px] font-medium transition-all cursor-pointer ${
+                activeReviewCard === 'auto'
+                  ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              <GitMerge className="w-4 h-4" />
+              Gộp tự động
+            </button>
+            <button
+              type="button"
+              onClick={() => { setActiveReviewCard('review'); setCurrentPageNum(1); }}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-[13px] font-medium transition-all cursor-pointer ${
+                activeReviewCard === 'review'
+                  ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              <Copy className="w-4 h-4" />
+              Chờ rà soát
+            </button>
+            <button
+              type="button"
+              onClick={() => { setActiveReviewCard('mismatch'); setCurrentPageNum(1); }}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-[13px] font-medium transition-all cursor-pointer ${
+                activeReviewCard === 'mismatch'
+                  ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              <HelpCircle className="w-4 h-4" />
+              Không khớp
+            </button>
+          </div>
+
+          {/* Danh sách tương ứng với thẻ đang chọn */}
+          {activeReviewCard === 'review' && (
+            <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
+              <div className="px-4 py-3 border-b border-slate-100 bg-slate-50 flex items-center justify-between gap-3 flex-wrap min-h-[48px]">
+                <div className="flex items-center gap-2">
+                  <p className="text-[13px] font-semibold text-slate-800">Các bản ghi chờ rà soát</p>
+                  <span className="text-[12px] px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full font-medium">
+                    37 bản ghi
+                  </span>
                 </div>
-              )}
-              {incompleteIds.size > 0 && (
-                <div className="flex-1 flex items-start gap-2 px-4 py-3 rounded-lg border bg-red-50 border-red-200 text-[13px]">
-                  <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0 text-red-600" />
-                  <div className="text-red-800">
-                    <p className="font-medium">Phát hiện {incompleteIds.size} bản ghi thiếu dữ liệu</p>
-                    <p className="text-red-600 mt-0.5">Một số trường bắt buộc còn trống. Vui lòng bổ sung đầy đủ thông tin.</p>
+                {reviewSelectedPairIds.length > 0 ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-[12px] font-medium text-slate-500 mr-1">
+                      Đã chọn <strong className="text-slate-800">{reviewSelectedPairIds.length}</strong>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setResolvedPairIds(prev => Array.from(new Set([...prev, ...reviewSelectedPairIds])));
+                        setReviewSelectedPairIds([]);
+                      }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[12px] font-medium transition-colors shadow-sm cursor-pointer"
+                    >
+                      <GitMerge className="w-3.5 h-3.5" /> Hợp nhất
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setResolvedPairIds(prev => Array.from(new Set([...prev, ...reviewSelectedPairIds])));
+                        setReviewSelectedPairIds([]);
+                      }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-lg text-[12px] font-medium transition-colors cursor-pointer"
+                    >
+                      <Split className="w-3.5 h-3.5 text-amber-600" /> Tách biệt
+                    </button>
                   </div>
+                ) : (
+                  <span className="text-[12px] text-slate-400">Tích chọn các bản ghi để thực hiện thao tác hàng loạt</span>
+                )}
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-[13px]">
+                  <thead className="bg-slate-50 border-b border-slate-100">
+                    <tr>
+                      <th className="px-3 py-2.5 text-center w-10">
+                        <input
+                          type="checkbox"
+                          checked={reviewSelectedPairIds.length > 0 && reviewSelectedPairIds.length === reviewPairs.filter(p => !resolvedPairIds.includes(p.id)).length}
+                          onChange={(e) => setReviewSelectedPairIds(e.target.checked ? reviewPairs.filter(p => !resolvedPairIds.includes(p.id)).map(p => p.id) : [])}
+                          className="rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 cursor-pointer"
+                        />
+                      </th>
+                      <th className="px-3 py-2.5 text-left font-semibold text-slate-600">Cặp bản ghi</th>
+                      <th className="px-3 py-2.5 text-center font-semibold text-slate-600 w-28">Điểm khớp</th>
+                      <th className="px-3 py-2.5 text-left font-semibold text-slate-600">Lý do</th>
+                      <th className="px-3 py-2.5 text-center font-semibold text-slate-600 w-36">Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 bg-white">
+                    {reviewPairs.length === 0 ? (
+                      <tr><td colSpan={5} className="px-4 py-8 text-center text-slate-400">Không còn bản ghi nào chờ rà soát</td></tr>
+                    ) : reviewPairs.map(item => {
+                      const isProcessed = resolvedPairIds.includes(item.id);
+                      const isSelected = reviewSelectedPairIds.includes(item.id);
+                      const parts = item.pair.split(' ↔ ');
+                      return (
+                        <tr
+                          key={item.id}
+                          className={`transition-colors ${
+                            isProcessed
+                              ? 'bg-slate-100/70 text-slate-400 opacity-60 grayscale cursor-not-allowed'
+                              : isSelected ? 'bg-blue-50/40' : 'hover:bg-slate-50/50'
+                          }`}
+                        >
+                          <td className="px-3 py-2.5 text-center">
+                            <input
+                              type="checkbox"
+                              disabled={isProcessed}
+                              checked={isSelected}
+                              onChange={() => setReviewSelectedPairIds(prev => isSelected ? prev.filter(id => id !== item.id) : [...prev, item.id])}
+                              className="rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 cursor-pointer disabled:cursor-not-allowed"
+                            />
+                          </td>
+                          <td className={`px-3 py-2.5 font-medium ${isProcessed ? 'text-slate-400' : 'text-slate-700'}`}>
+                            <code className={`px-1.5 py-0.5 rounded font-mono ${isProcessed ? 'bg-slate-200/60 text-slate-500' : 'bg-slate-100 text-slate-700'}`}>{parts[0]}</code>
+                            <span className="mx-1.5 text-slate-400">↔</span>
+                            <code className={`px-1.5 py-0.5 rounded font-mono ${isProcessed ? 'bg-slate-200/60 text-slate-500' : 'bg-slate-100 text-slate-700'}`}>{parts[1]}</code>
+                          </td>
+                          <td className="px-3 py-2.5 text-center">
+                            <span className={`px-2 py-0.5 rounded font-semibold text-[12px] ${isProcessed ? 'bg-slate-200 text-slate-500' : 'bg-amber-100 text-amber-800'}`}>
+                              {item.score}%
+                            </span>
+                          </td>
+                          <td className={`px-3 py-2.5 ${isProcessed ? 'text-slate-400' : 'text-slate-600'}`}>{item.reason}</td>
+                          <td className="px-3 py-2.5 text-center">
+                            {isProcessed ? (
+                              <span className="text-[11px] px-2 py-0.5 bg-slate-200 text-slate-600 rounded font-medium">Đã xử lý</span>
+                            ) : (
+                              <div className="flex items-center justify-center gap-1">
+                                <button
+                                  type="button"
+                                  title="Hợp nhất bản ghi"
+                                  onClick={() => { setResolvedPairIds(prev => Array.from(new Set([...prev, item.id]))); setReviewSelectedPairIds(prev => prev.filter(id => id !== item.id)); }}
+                                  className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                                >
+                                  <GitMerge className="w-4 h-4" />
+                                </button>
+                                <button
+                                  type="button"
+                                  title="Tách biệt bản ghi"
+                                  onClick={() => { setResolvedPairIds(prev => Array.from(new Set([...prev, item.id]))); setReviewSelectedPairIds(prev => prev.filter(id => id !== item.id)); }}
+                                  className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
+                                >
+                                  <Split className="w-4 h-4" />
+                                </button>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Thanh phân trang */}
+              <div className="px-4 py-3 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
+                <div className="text-[13px] text-slate-500">
+                  Hiển thị <span className="font-medium text-slate-700">1 - 5</span> trong số <span className="font-medium text-slate-700">37</span> bản ghi
                 </div>
-              )}
+                <div className="flex items-center gap-2">
+                  <button type="button" disabled={reviewPage === 1} onClick={() => setReviewPage(prev => Math.max(1, prev - 1))}
+                    className="px-2.5 py-1 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-600 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer">
+                    Trước
+                  </button>
+                  <span className="text-[13px] text-slate-600 font-medium px-1">Trang {reviewPage} / 8</span>
+                  <button type="button" disabled={reviewPage === 8} onClick={() => setReviewPage(prev => Math.min(8, prev + 1))}
+                    className="px-2.5 py-1 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-600 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer">
+                    Sau
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
+          {activeReviewCard === 'mismatch' && (
+            <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
+              <div className="px-4 py-3 border-b border-slate-100 bg-slate-50 flex items-center justify-between gap-3 flex-wrap min-h-[48px]">
+                <div className="flex items-center gap-2">
+                  <p className="text-[13px] font-semibold text-slate-800">Các bản ghi không khớp</p>
+                  <span className="text-[12px] px-2 py-0.5 bg-slate-100 text-slate-700 rounded-full font-medium">
+                    183 bản ghi
+                  </span>
+                </div>
+
+                {unmatchedSelectedIds.length > 0 ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-[12px] font-medium text-slate-500 mr-1">
+                      Đã chọn <strong className="text-slate-800">{unmatchedSelectedIds.length}</strong>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUnmatchedActions(prev => {
+                          const next = { ...prev };
+                          unmatchedSelectedIds.forEach(id => { next[id] = 'single_source'; });
+                          return next;
+                        });
+                        setUnmatchedProcessedIds(prev => Array.from(new Set([...prev, ...unmatchedSelectedIds])));
+                        setUnmatchedSelectedIds([]);
+                      }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[12px] font-medium transition-colors shadow-sm cursor-pointer"
+                    >
+                      <PlusCircle className="w-3.5 h-3.5" /> Tạo bản ghi đơn nguồn
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUnmatchedActions(prev => {
+                          const next = { ...prev };
+                          unmatchedSelectedIds.forEach(id => { next[id] = 'discard'; });
+                          return next;
+                        });
+                        setUnmatchedProcessedIds(prev => Array.from(new Set([...prev, ...unmatchedSelectedIds])));
+                        setUnmatchedSelectedIds([]);
+                      }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-lg text-[12px] font-medium transition-colors cursor-pointer"
+                    >
+                      <XCircle className="w-3.5 h-3.5 text-slate-500" /> Loại bỏ
+                    </button>
+                  </div>
+                ) : (
+                  <span className="text-[12px] text-slate-400">Tích chọn các bản ghi để thực hiện thao tác xử lý hàng loạt</span>
+                )}
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-[13px]">
+                  <thead className="bg-slate-50 border-b border-slate-100">
+                    <tr>
+                      <th className="px-3 py-2.5 text-center w-10">
+                        <input
+                          type="checkbox"
+                          checked={unmatchedSelectedIds.length > 0 && unmatchedSelectedIds.length === MOCK_UNMATCHED_ITEMS.filter(i => !unmatchedProcessedIds.includes(i.id)).length}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setUnmatchedSelectedIds(MOCK_UNMATCHED_ITEMS.filter(i => !unmatchedProcessedIds.includes(i.id)).map(item => item.id));
+                            } else {
+                              setUnmatchedSelectedIds([]);
+                            }
+                          }}
+                          className="rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 cursor-pointer"
+                        />
+                      </th>
+                      <th className="px-3 py-2.5 text-left font-semibold text-slate-600">Bản ghi nguồn</th>
+                      <th className="px-3 py-2.5 text-center font-semibold text-slate-600 w-36">Điểm khớp cao nhất</th>
+                      <th className="px-3 py-2.5 text-left font-semibold text-slate-600">Lý do không khớp</th>
+                      <th className="px-3 py-2.5 text-left font-semibold text-slate-600 w-56">Phương án xử lý</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 bg-white">
+                    {MOCK_UNMATCHED_ITEMS.map(item => {
+                      const isProcessed = unmatchedProcessedIds.includes(item.id);
+                      const isSelected = unmatchedSelectedIds.includes(item.id);
+                      const currentAction = unmatchedActions[item.id] || item.defaultAction;
+                      return (
+                        <tr
+                          key={item.id}
+                          className={`transition-colors ${
+                            isProcessed
+                              ? 'bg-slate-100/70 text-slate-400 opacity-60 grayscale cursor-not-allowed'
+                              : isSelected ? 'bg-blue-50/40' : 'hover:bg-slate-50/50'
+                          }`}
+                        >
+                          <td className="px-3 py-2.5 text-center">
+                            <input
+                              type="checkbox"
+                              disabled={isProcessed}
+                              checked={isSelected}
+                              onChange={() => {
+                                if (isSelected) {
+                                  setUnmatchedSelectedIds(prev => prev.filter(id => id !== item.id));
+                                } else {
+                                  setUnmatchedSelectedIds(prev => [...prev, item.id]);
+                                }
+                              }}
+                              className="rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 cursor-pointer disabled:cursor-not-allowed"
+                            />
+                          </td>
+                          <td className={`px-3 py-2.5 font-medium ${isProcessed ? 'text-slate-400' : 'text-slate-700'}`}>
+                            <code className={`px-1.5 py-0.5 rounded font-mono mr-1.5 ${isProcessed ? 'bg-slate-200/60 text-slate-500' : 'bg-slate-100 text-slate-800'}`}>{item.record}</code>
+                            <span className={`text-[12px] px-2 py-0.5 rounded-md font-normal ${isProcessed ? 'bg-slate-200/60 text-slate-500' : 'bg-slate-100 text-slate-600'}`}>
+                              {item.sourceName}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2.5 text-center">
+                            <span className={`px-2 py-0.5 rounded font-semibold text-[12px] ${isProcessed ? 'bg-slate-200 text-slate-500' : 'bg-slate-100 text-slate-700'}`}>
+                              {item.maxScore}%
+                            </span>
+                          </td>
+                          <td className={`px-3 py-2.5 ${isProcessed ? 'text-slate-400' : 'text-slate-600'}`}>{item.reason}</td>
+                          <td className="px-3 py-2.5">
+                            {isProcessed ? (
+                              <span className="text-[11px] px-2 py-0.5 bg-slate-200 text-slate-600 rounded font-medium">
+                                Đã xử lý
+                              </span>
+                            ) : (
+                              <select
+                                value={currentAction}
+                                onChange={(e) => {
+                                  const val = e.target.value as 'single_source' | 'discard' | '';
+                                  if (!val) return;
+                                  setUnmatchedActions(prev => ({ ...prev, [item.id]: val }));
+                                  setUnmatchedProcessedIds(prev => Array.from(new Set([...prev, item.id])));
+                                  setUnmatchedSelectedIds(prev => prev.filter(id => id !== item.id));
+                                }}
+                                className={`w-full text-[12px] border rounded-lg px-2.5 py-1 font-medium bg-white focus:outline-none cursor-pointer transition-colors ${
+                                  currentAction === 'single_source'
+                                    ? 'border-blue-300 text-blue-800 bg-blue-50/50 cursor-pointer'
+                                    : 'border-slate-300 text-slate-600 bg-slate-50 cursor-pointer'
+                                }`}
+                              >
+                                <option value="">-- Chọn phương án xử lý --</option>
+                                <option value="single_source">Tạo bản ghi đơn nguồn</option>
+                                <option value="discard">Loại bỏ</option>
+                              </select>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Thanh phân trang */}
+              <div className="px-4 py-3 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
+                <div className="text-[13px] text-slate-500">
+                  Hiển thị <span className="font-medium text-slate-700">1 - 5</span> trong số <span className="font-medium text-slate-700">183</span> bản ghi
+                </div>
+                <div className="flex items-center gap-2">
+                  <button type="button" disabled={unmatchedPage === 1} onClick={() => setUnmatchedPage(prev => Math.max(1, prev - 1))}
+                    className="px-2.5 py-1 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-600 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer">
+                    Trước
+                  </button>
+                  <span className="text-[13px] text-slate-600 font-medium px-1">Trang {unmatchedPage} / 37</span>
+                  <button type="button" disabled={unmatchedPage === 37} onClick={() => setUnmatchedPage(prev => Math.min(37, prev + 1))}
+                    className="px-2.5 py-1 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-600 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer">
+                    Sau
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Bảng dữ liệu chính — ẩn khi đang xem "Chờ rà soát"/"Không khớp" (chỉ hiện bảng cặp bản ghi tương ứng) */}
+          {activeReviewCard !== 'review' && activeReviewCard !== 'mismatch' && (
+          <>
           {/* Search & Action Bar */}
           <div className="flex flex-col md:flex-row items-center gap-3">
             <div className="flex-1 w-full relative">
@@ -542,27 +927,40 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
                 className="w-full pl-10 pr-4 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-400 bg-white hover:bg-slate-50/50 font-medium shadow-sm"
               />
             </div>
-            <div className="flex items-center gap-2 w-full md:w-auto">
+            <div className="flex items-center gap-2 flex-wrap w-full md:w-auto">
+              {[
+                { value: 'all' as const, label: 'Tất cả', activeClass: 'bg-slate-700 text-white border-slate-700' },
+                { value: 'draft' as const, label: 'Soạn thảo', activeClass: 'bg-slate-500 text-white border-slate-500' },
+                { value: 'reviewing' as const, label: 'Rà soát', activeClass: 'bg-indigo-600 text-white border-indigo-600' },
+                { value: 'pending' as const, label: 'Chờ phê duyệt', activeClass: 'bg-orange-500 text-white border-orange-500' },
+                { value: 'approved' as const, label: 'Đã phê duyệt', activeClass: 'bg-green-600 text-white border-green-600' },
+                { value: 'rejected' as const, label: 'Từ chối', activeClass: 'bg-red-500 text-white border-red-500' },
+              ].map(opt => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => { setListApprovalFilter(opt.value); setCurrentPageNum(1); }}
+                  className={`px-3 py-2 text-[13px] rounded-lg border transition-all font-medium cursor-pointer whitespace-nowrap ${
+                    listApprovalFilter === opt.value
+                      ? opt.activeClass
+                      : 'bg-white text-slate-600 border-slate-300 hover:border-slate-400 hover:bg-slate-50'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
               <button
                 type="button"
-                className="flex items-center gap-1.5 px-3 py-2.5 text-[13px] font-medium border border-slate-200 rounded-xl bg-white text-slate-700 hover:bg-slate-50 transition-all cursor-pointer active:scale-95"
+                onClick={() => selectedRecordIds.length > 0 && handleBulkSendForApproval()}
+                disabled={selectedRecordIds.length === 0}
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-[13px] font-medium transition-all active:scale-95 whitespace-nowrap ${
+                  selectedRecordIds.length > 0
+                    ? 'bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 cursor-pointer'
+                    : 'bg-slate-100 border border-slate-200 text-slate-400 cursor-not-allowed'
+                }`}
               >
-                <Filter className="w-4 h-4" />
-                Lọc
-              </button>
-              <button
-                type="button"
-                className="flex items-center gap-1.5 px-3 py-2.5 text-[13px] font-medium border border-slate-200 rounded-xl bg-white text-slate-700 hover:bg-slate-50 transition-all cursor-pointer active:scale-95"
-              >
-                <Upload className="w-4 h-4" />
-                Nhập
-              </button>
-              <button
-                type="button"
-                className="flex items-center gap-1.5 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl text-[13px] font-medium transition-all cursor-pointer active:scale-95 shadow-sm whitespace-nowrap"
-              >
-                <Download className="w-4 h-4" />
-                Xuất
+                <Send className="w-4 h-4" />
+                Gửi duyệt
               </button>
             </div>
           </div>
@@ -573,12 +971,29 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
               <table className="w-full text-left">
                 <thead className="bg-[#f8fafc] text-slate-700 border-b border-slate-200">
                   <tr>
+                    <th className="px-4 py-4 w-10 text-center">
+                      <input
+                        type="checkbox"
+                        title="Chọn tất cả bản ghi có thể gửi duyệt"
+                        checked={
+                          paginatedData.filter(r => isSendableStatus(r.approvalStatus)).length > 0 &&
+                          paginatedData.filter(r => isSendableStatus(r.approvalStatus)).every(r => selectedRecordIds.includes(r.id))
+                        }
+                        onChange={(e) => {
+                          const eligibleIds = paginatedData.filter(r => isSendableStatus(r.approvalStatus)).map(r => r.id);
+                          if (e.target.checked) {
+                            setSelectedRecordIds(prev => Array.from(new Set([...prev, ...eligibleIds])));
+                          } else {
+                            setSelectedRecordIds(prev => prev.filter(id => !eligibleIds.includes(id)));
+                          }
+                        }}
+                        className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                      />
+                    </th>
                     <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap w-14 text-center">STT</th>
-                    {cols.map(col => (
-                      <th key={col.key} className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">
-                        {col.label}
-                      </th>
-                    ))}
+                    <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">
+                      {cols[0].label}
+                    </th>
                     <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Phê duyệt</th>
                     <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Công khai</th>
                     <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-40">Thao tác</th>
@@ -596,12 +1011,24 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
                     const warningTooltip = warningParts.join(' • ');
                     return (
                     <tr key={row.id} className={`hover:bg-slate-50/50 transition-colors ${isIncomplete ? 'bg-red-50/40' : isDup ? 'bg-yellow-50/40' : ''}`}>
+                      <td className="px-4 py-4 text-center">
+                        {isSendableStatus(row.approvalStatus) ? (
+                          <input
+                            type="checkbox"
+                            title="Chọn bản ghi"
+                            checked={selectedRecordIds.includes(row.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) setSelectedRecordIds(prev => [...prev, row.id]);
+                              else setSelectedRecordIds(prev => prev.filter(id => id !== row.id));
+                            }}
+                            className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                          />
+                        ) : <span className="w-4 h-4 inline-block" />}
+                      </td>
                       <td className="px-6 py-4 text-[13px] text-slate-500 text-center">{(currentPageNum - 1) * pageSize + index + 1}</td>
-                      {cols.map(col => (
-                        <td key={col.key} className="px-6 py-4 text-[13px] text-slate-700 whitespace-nowrap max-w-[200px] truncate">
-                          {row[col.key] || <span className="text-slate-400 italic">(trống)</span>}
-                        </td>
-                      ))}
+                      <td className="px-6 py-4 text-[13px] text-slate-700 whitespace-nowrap max-w-[200px] truncate">
+                        {row[cols[0].key] || <span className="text-slate-400 italic">(trống)</span>}
+                      </td>
                       <td className="px-6 py-4 text-center"><ApprovalBadge status={row.approvalStatus} /></td>
                       <td className="px-6 py-4 text-center"><PublicBadge status={row.publicStatus} /></td>
                       <td className="px-6 py-4">
@@ -622,7 +1049,11 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
                               </button>
                             );
                           })()}
-                          <button className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer" title="Xem chi tiết">
+                          <button
+                            onClick={() => setDetailRow(row)}
+                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                            title="Xem chi tiết bản ghi"
+                          >
                             <Eye className="w-4 h-4" />
                           </button>
                           <button
@@ -634,10 +1065,10 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
                             <Edit2 className="w-4 h-4" />
                           </button>
                           <button
-                            disabled={row.approvalStatus !== 'reviewing' && row.approvalStatus !== 'rejected'}
-                            onClick={(row.approvalStatus === 'reviewing' || row.approvalStatus === 'rejected') ? () => handleSendForApproval(row) : undefined}
+                            disabled={row.approvalStatus !== 'draft' && row.approvalStatus !== 'reviewing' && row.approvalStatus !== 'rejected'}
+                            onClick={(row.approvalStatus === 'draft' || row.approvalStatus === 'reviewing' || row.approvalStatus === 'rejected') ? () => handleSendForApproval(row) : undefined}
                             className="p-1.5 rounded-lg transition-colors cursor-pointer text-indigo-600 hover:bg-indigo-50 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent"
-                            title={(row.approvalStatus === 'reviewing' || row.approvalStatus === 'rejected') ? 'Trình duyệt' : 'Chỉ có thể trình duyệt bản ghi đang rà soát hoặc bị từ chối'}
+                            title={(row.approvalStatus === 'draft' || row.approvalStatus === 'reviewing' || row.approvalStatus === 'rejected') ? 'Trình duyệt' : 'Chỉ có thể trình duyệt bản ghi soạn thảo, đang rà soát hoặc bị từ chối'}
                           >
                             <Send className="w-4 h-4" />
                           </button>
@@ -655,7 +1086,7 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
                   })}
                   {paginatedData.length === 0 && (
                     <tr>
-                      <td colSpan={cols.length + 4} className="px-6 py-16 text-center text-[13px] text-slate-400">
+                      <td colSpan={6} className="px-6 py-16 text-center text-[13px] text-slate-400">
                         Không tìm thấy dữ liệu phù hợp
                       </td>
                     </tr>
@@ -714,6 +1145,8 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
               </div>
             )}
           </div>
+          </>
+          )}
         </>
       )}
 

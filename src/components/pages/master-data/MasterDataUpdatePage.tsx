@@ -55,6 +55,7 @@ export function MasterDataUpdatePage() {
           items={MASTER_DATA_ITEMS}
           onSelectItem={setSelectedId}
           activeId={selectedId}
+          hideGroupHeaders
         />
       </div>
       <div className="flex-1 min-w-0">

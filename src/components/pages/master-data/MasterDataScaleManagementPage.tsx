@@ -11,7 +11,7 @@ import { Portal } from '../../common/Portal';
 
 type TabType = 'setup' | 'attributes' | 'merge-rules' | 'relationships' | 'identifier-rules' | 'approval';
 
-type LifecycleStatus = 'active' | 'draft' | 'inactive' | 'archived';
+type LifecycleStatus = 'draft' | 'pending' | 'approved' | 'rejected';
 type DataType = 'individual' | 'organization' | 'legal' | 'asset';
 type ScopeType = 'national' | 'ministry' | 'provincial' | 'internal';
 type DataSourceType = 'dldc' | 'manual';
@@ -85,7 +85,7 @@ const defaultEntities: MasterDataEntity[] = [
     managingAgency: 'Cục Hành chính tư pháp',
     scope: 'national',
     description: 'Dữ liệu chuẩn về công dân Việt Nam bao gồm thông tin cá nhân như họ tên, ngày sinh, số CCCD, nơi cư trú theo quy định của Luật CCCD 2023',
-    lifecycleStatus: 'active',
+    lifecycleStatus: 'approved',
     createdDate: '01/01/2024',
     updatedDate: '10/12/2024',
     createdBy: 'Nguyễn Văn A',
@@ -109,7 +109,7 @@ const defaultEntities: MasterDataEntity[] = [
     managingAgency: 'Cục Đăng ký kinh doanh',
     scope: 'national',
     description: 'Thông tin doanh nghiệp, tổ chức, cơ quan nhà nước bao gồm tên, mã số thuế, địa chỉ, người đại diện',
-    lifecycleStatus: 'active',
+    lifecycleStatus: 'pending',
     createdDate: '15/01/2024',
     updatedDate: '20/11/2024',
     createdBy: 'Trần Thị B',
@@ -126,7 +126,7 @@ const defaultEntities: MasterDataEntity[] = [
     managingAgency: 'Bộ Tư pháp',
     scope: 'national',
     description: 'Danh mục văn bản pháp luật, nghị định, thông tư, quyết định',
-    lifecycleStatus: 'active',
+    lifecycleStatus: 'draft',
     createdDate: '10/02/2024',
     updatedDate: '05/12/2024',
     createdBy: 'Lê Văn C',
@@ -136,23 +136,6 @@ const defaultEntities: MasterDataEntity[] = [
     dldcTable: 'tbl_legal_document'
   },
   {
-    id: '4',
-    code: 'MD-ADMIN-001',
-    name: 'Bộ dữ liệu chủ Đơn vị hành chính',
-    dataType: 'organization',
-    managingAgency: 'Bộ Nội vụ',
-    scope: 'national',
-    description: 'Danh mục 63 tỉnh/thành phố, quận/huyện, phường/xã của Việt Nam',
-    lifecycleStatus: 'active',
-    createdDate: '20/01/2024',
-    updatedDate: '15/10/2024',
-    createdBy: 'Phạm Thị D',
-    updatedBy: 'Phạm Thị D',
-    systemName: 'Hệ thống quản lý đơn vị hành chính',
-    dataSource: 'dldc',
-    dldcTable: 'tbl_administrative_unit'
-  },
-  {
     id: '5',
     code: 'MD-AGENCY-001',
     name: 'Bộ dữ liệu chủ Cơ quan nhà nước',
@@ -160,7 +143,7 @@ const defaultEntities: MasterDataEntity[] = [
     managingAgency: 'Bộ Nội vụ',
     scope: 'national',
     description: 'Danh sách các cơ quan nhà nước, bộ, ngành, sở, ban',
-    lifecycleStatus: 'draft',
+    lifecycleStatus: 'rejected',
     createdDate: '01/03/2024',
     updatedDate: '18/12/2024',
     createdBy: 'Hoàng Văn E',
@@ -187,10 +170,10 @@ const scopeLabels: Record<ScopeType, string> = {
 };
 
 const lifecycleLabels: Record<LifecycleStatus, { label: string; color: string }> = {
-  active: { label: 'Đã hiệu lực', color: 'bg-green-100 text-green-700' },
   draft: { label: 'Đang soạn thảo', color: 'bg-yellow-100 text-yellow-700' },
-  inactive: { label: 'Ngừng sử dụng', color: 'bg-red-100 text-red-700' },
-  archived: { label: 'Đã lưu trữ', color: 'bg-slate-100 text-slate-700' }
+  pending: { label: 'Chờ phê duyệt', color: 'bg-blue-100 text-blue-700' },
+  approved: { label: 'Đã phê duyệt', color: 'bg-green-100 text-green-700' },
+  rejected: { label: 'Từ chối', color: 'bg-red-100 text-red-700' }
 };
 
 const MANAGING_UNITS = [
@@ -397,9 +380,8 @@ export function MasterDataScaleManagementPage() {
         e.id === approvalEntity.id
           ? {
             ...e,
-            lifecycleStatus: 'active' as LifecycleStatus,
+            lifecycleStatus: 'pending' as LifecycleStatus,
             updatedDate: dateStr,
-            requestStatus: 'approved' as const,
             submissionContent: approvalNote || e.submissionContent
           }
           : e
@@ -534,7 +516,7 @@ export function MasterDataScaleManagementPage() {
           {activeTab === 'setup' && (
             <div className="space-y-4">
               {/* Statistics Cards */}
-              <div className="grid grid-cols-4 gap-4 mb-6">
+              <div className="grid grid-cols-5 gap-4 mb-6">
                 <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[13px] text-slate-500">Tổng số dữ liệu chủ</span>
@@ -553,18 +535,26 @@ export function MasterDataScaleManagementPage() {
 
                 <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[13px] text-slate-500">Đã hiệu lực</span>
-                    <CheckSquare className="w-5 h-5 text-green-600" />
+                    <span className="text-[13px] text-slate-500">Chờ phê duyệt</span>
+                    <Send className="w-5 h-5 text-blue-500" />
                   </div>
-                  <div className="text-2xl font-bold text-slate-900">{entities.filter(e => e.lifecycleStatus === 'active').length}</div>
+                  <div className="text-2xl font-bold text-slate-900">{entities.filter(e => e.lifecycleStatus === 'pending').length}</div>
                 </div>
 
                 <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[13px] text-slate-500">Ngừng sử dụng</span>
+                    <span className="text-[13px] text-slate-500">Đã phê duyệt</span>
+                    <CheckSquare className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div className="text-2xl font-bold text-slate-900">{entities.filter(e => e.lifecycleStatus === 'approved').length}</div>
+                </div>
+
+                <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[13px] text-slate-500">Từ chối</span>
                     <XCircle className="w-5 h-5 text-red-600" />
                   </div>
-                  <div className="text-2xl font-bold text-slate-900">{entities.filter(e => e.lifecycleStatus === 'inactive').length}</div>
+                  <div className="text-2xl font-bold text-slate-900">{entities.filter(e => e.lifecycleStatus === 'rejected').length}</div>
                 </div>
               </div>
 
@@ -622,10 +612,10 @@ export function MasterDataScaleManagementPage() {
                             className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium font-sans"
                           >
                             <option value="all">Tất cả trạng thái</option>
-                            <option value="active">Đã hiệu lực</option>
                             <option value="draft">Đang soạn thảo</option>
-                            <option value="inactive">Ngừng sử dụng</option>
-                            <option value="archived">Đã lưu trữ</option>
+                            <option value="pending">Chờ phê duyệt</option>
+                            <option value="approved">Đã phê duyệt</option>
+                            <option value="rejected">Từ chối</option>
                           </select>
                           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                         </div>
@@ -701,13 +691,13 @@ export function MasterDataScaleManagementPage() {
                             <td className="px-6 py-4 text-center">
                               <div className="flex justify-center">
                                 <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[13px] font-normal border whitespace-nowrap ${
-                                  entity.lifecycleStatus === 'active'
+                                  entity.lifecycleStatus === 'approved'
                                     ? 'bg-green-50 text-green-700 border-green-100'
-                                    : entity.lifecycleStatus === 'draft'
-                                      ? 'bg-yellow-50 text-yellow-700 border-yellow-100'
-                                      : entity.lifecycleStatus === 'inactive'
-                                        ? 'bg-red-50 text-red-700 border-red-100'
-                                        : 'bg-slate-50 text-slate-700 border-slate-200'
+                                    : entity.lifecycleStatus === 'pending'
+                                      ? 'bg-blue-50 text-blue-700 border-blue-100'
+                                      : entity.lifecycleStatus === 'draft'
+                                        ? 'bg-yellow-50 text-yellow-700 border-yellow-100'
+                                        : 'bg-red-50 text-red-700 border-red-100'
                                 }`}>
                                   {lifecycleLabels[entity.lifecycleStatus]?.label || entity.lifecycleStatus}
                                 </span>
@@ -902,9 +892,9 @@ export function MasterDataScaleManagementPage() {
                           className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 cursor-pointer"
                         >
                           <option value="draft">Đang soạn thảo</option>
-                          <option value="active">Đã hiệu lực</option>
-                          <option value="inactive">Ngừng sử dụng</option>
-                          <option value="archived">Đã lưu trữ</option>
+                          <option value="pending">Chờ phê duyệt</option>
+                          <option value="approved">Đã phê duyệt</option>
+                          <option value="rejected">Từ chối</option>
                         </select>
                       </div>
 

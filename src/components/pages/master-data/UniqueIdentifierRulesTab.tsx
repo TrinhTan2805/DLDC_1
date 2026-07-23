@@ -2,6 +2,9 @@ import { useState, useRef, useEffect } from 'react';
 import { Plus, Edit, Trash2, Save, Hash, ChevronDown, Check, AlertCircle, Send, Search } from 'lucide-react';
 import { BaseModal } from '../../common/BaseModal';
 
+// Tạm ẩn nút Chỉnh sửa/Xóa theo yêu cầu — chỉ ẩn giao diện, không xóa code/luồng xử lý
+const SHOW_EDIT_DELETE_ACTIONS = false;
+
 type SeparatorType = 'none' | '-' | '.' | '/';
 type RuleStatus = 'active' | 'inactive';
 
@@ -355,7 +358,7 @@ export function UniqueIdentifierRulesTab({ readOnly = false }: { readOnly?: bool
                 Đã tạo {currentRule.totalGenerated.toLocaleString()} mã định danh
               </p>
             </div>
-            {!readOnly && (
+            {!readOnly && SHOW_EDIT_DELETE_ACTIONS && (
             <div className="flex items-center gap-2 flex-shrink-0">
               <button
                 onClick={() => handleOpenEdit(currentRule)}

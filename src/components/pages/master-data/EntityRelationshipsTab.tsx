@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { Plus, Edit, Trash2, Save, Network, ArrowRight, Key, Link as LinkIcon, ChevronDown, AlertCircle, Send } from 'lucide-react';
 import { BaseModal } from '../../common/BaseModal';
 
+// Tạm ẩn nút Chỉnh sửa/Xóa theo yêu cầu — chỉ ẩn giao diện, không xóa code/luồng xử lý
+const SHOW_EDIT_DELETE_ACTIONS = false;
+
 type RelationType = 'one-to-many' | 'many-to-many' | 'one-to-one';
 type RelationStatus = 'active' | 'inactive';
 
@@ -367,7 +370,7 @@ export function EntityRelationshipsTab({ readOnly = false }: { readOnly?: boolea
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-center gap-2">
-                          {readOnly ? (
+                          {readOnly || !SHOW_EDIT_DELETE_ACTIONS ? (
                             <span className="text-slate-300">—</span>
                           ) : (
                             <>

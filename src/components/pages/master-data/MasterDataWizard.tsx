@@ -24,11 +24,18 @@ type SourceKind = 'table' | 'view' | 'query';
 type SourceGrain = '1:1' | '1:n';
 type GroupRuleType = 'latest' | 'most_frequent' | 'max' | 'min';
 
+interface SourceGroupRule {
+  fieldName: string;
+  ruleType: GroupRuleType;
+}
+
 interface WizardSource {
   id: string;
   name: string;
   kind: SourceKind;
   grain: SourceGrain;
+  grainKey?: string;
+  groupRules?: SourceGroupRule[];
 }
 
 interface GroupRule {
@@ -594,20 +601,58 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
 
   // Step 1 — đăng ký nguồn dữ liệu (form thêm nguồn inline)
   const [sourceFormOpen, setSourceFormOpen] = useState(false);
-  const [sourceForm, setSourceForm] = useState<{ name: string; kind: SourceKind; grain: SourceGrain }>({
-    name: WIZARD_SOURCE_OPTIONS[0], kind: 'table', grain: '1:1',
+  const [sourceForm, setSourceForm] = useState<{ name: string; grain: SourceGrain; grainKey: string }>({
+    name: WIZARD_SOURCE_OPTIONS[0], grain: '1:1', grainKey: '',
   });
+  const [sourceGroupRules, setSourceGroupRules] = useState<SourceGroupRule[]>([]);
+  const [sourceGroupRuleDraft, setSourceGroupRuleDraft] = useState<{ fieldName: string; ruleType: GroupRuleType }>({
+    fieldName: '', ruleType: 'latest',
+  });
+
+  // Union các trường từ mọi bảng thuộc kho DLDC ánh xạ với nguồn đang đăng ký
+  const getSourceFieldOptions = (sourceName: string) => {
+    const dbId = SOURCE_NAME_TO_DB_ID[sourceName] || '';
+    const tables = DLDC_TABLES[dbId] || [];
+    const seen = new Set<string>();
+    const options: { fieldName: string; displayName: string }[] = [];
+    tables.forEach(t => {
+      (DLDC_FIELDS[t.id] || []).forEach(f => {
+        if (!seen.has(f.fieldName)) {
+          seen.add(f.fieldName);
+          options.push(f);
+        }
+      });
+    });
+    return options;
+  };
+
+  const handleAddSourceGroupRule = () => {
+    if (!sourceGroupRuleDraft.fieldName) return;
+    setSourceGroupRules(prev => {
+      const withoutDup = prev.filter(r => r.fieldName !== sourceGroupRuleDraft.fieldName);
+      return [...withoutDup, { ...sourceGroupRuleDraft }];
+    });
+    setSourceGroupRuleDraft({ fieldName: '', ruleType: 'latest' });
+  };
+
+  const handleRemoveSourceGroupRule = (fieldName: string) => {
+    setSourceGroupRules(prev => prev.filter(r => r.fieldName !== fieldName));
+  };
 
   const handleAddSource = () => {
     if (!sourceForm.name) return;
     const newSource: WizardSource = {
       id: `src-${Date.now()}`,
       name: sourceForm.name,
-      kind: sourceForm.kind,
+      kind: 'table',
       grain: sourceForm.grain,
+      grainKey: sourceForm.grainKey || undefined,
+      groupRules: sourceGroupRules.length > 0 ? sourceGroupRules : undefined,
     };
     setWizardData(prev => ({ ...prev, sources: [...prev.sources, newSource] }));
-    setSourceForm({ name: WIZARD_SOURCE_OPTIONS[0], kind: 'table', grain: '1:1' });
+    setSourceForm({ name: WIZARD_SOURCE_OPTIONS[0], grain: '1:1', grainKey: '' });
+    setSourceGroupRules([]);
+    setSourceGroupRuleDraft({ fieldName: '', ruleType: 'latest' });
     setSourceFormOpen(false);
   };
 
@@ -1189,34 +1234,29 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
                 {/* Form thêm nguồn inline */}
                 {sourceFormOpen && (
                   <div className="mt-3 border border-blue-200 rounded-xl bg-blue-50/30 p-4">
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-2 gap-3">
                       <div>
                         <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Tên nguồn</label>
                         <select
                           value={sourceForm.name}
-                          onChange={(e: ChangeEvent<HTMLSelectElement>) => setSourceForm(prev => ({ ...prev, name: e.target.value }))}
+                          onChange={(e: ChangeEvent<HTMLSelectElement>) => setSourceForm(prev => ({ ...prev, name: e.target.value, grainKey: '' }))}
                           className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
                         >
                           {WIZARD_SOURCE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                         </select>
                       </div>
                       <div>
-                        <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Loại nguồn</label>
-                        <select
-                          value={sourceForm.kind}
-                          onChange={(e: ChangeEvent<HTMLSelectElement>) => setSourceForm(prev => ({ ...prev, kind: e.target.value as SourceKind }))}
-                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
-                        >
-                          <option value="table">Bảng</option>
-                          <option value="view">View</option>
-                          <option value="query">Truy vấn</option>
-                        </select>
-                      </div>
-                      <div>
                         <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Độ mịn (Grain)</label>
                         <select
                           value={sourceForm.grain}
-                          onChange={(e: ChangeEvent<HTMLSelectElement>) => setSourceForm(prev => ({ ...prev, grain: e.target.value as SourceGrain }))}
+                          onChange={(e: ChangeEvent<HTMLSelectElement>) => {
+                            const grain = e.target.value as SourceGrain;
+                            setSourceForm(prev => ({ ...prev, grain, grainKey: grain === '1:n' ? prev.grainKey : '' }));
+                            if (grain === '1:1') {
+                              setSourceGroupRules([]);
+                              setSourceGroupRuleDraft({ fieldName: '', ruleType: 'latest' });
+                            }
+                          }}
                           className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
                         >
                           <option value="1:1">1:1 (Một - Một)</option>
@@ -1224,10 +1264,96 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
                         </select>
                       </div>
                     </div>
+
+                    {sourceForm.grain === '1:n' && (
+                    <div className="mt-3">
+                      <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Khóa làm mịn</label>
+                      <select
+                        value={sourceForm.grainKey}
+                        onChange={(e: ChangeEvent<HTMLSelectElement>) => setSourceForm(prev => ({ ...prev, grainKey: e.target.value }))}
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
+                      >
+                        <option value="">-- Chọn trường --</option>
+                        {getSourceFieldOptions(sourceForm.name).map(f => (
+                          <option key={f.fieldName} value={f.fieldName}>{f.displayName} ({f.fieldName})</option>
+                        ))}
+                      </select>
+                    </div>
+                    )}
+
+                    {/* Quy tắc gom nguồn — chỉ áp dụng khi nguồn là 1:n */}
+                    {sourceForm.grain === '1:n' && (
+                    <div className="mt-4 pt-3 border-t border-blue-100">
+                      <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Quy tắc gom nguồn</label>
+                      {sourceGroupRules.length > 0 && (
+                        <div className="space-y-1.5 mb-2">
+                          {sourceGroupRules.map(r => (
+                            <div key={r.fieldName} className="flex items-center justify-between px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[13px]">
+                              <span className="text-slate-700">
+                                <span className="font-medium">{r.fieldName}</span>
+                                <span className="text-slate-400 mx-1.5">—</span>
+                                {GROUP_RULE_LABELS[r.ruleType]}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveSourceGroupRule(r.fieldName)}
+                                className="text-slate-400 hover:text-red-500 transition-colors"
+                                title="Xóa quy tắc"
+                                aria-label="Xóa quy tắc"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <div className="flex items-end gap-2">
+                        <div className="flex-1">
+                          <label className="block text-[12px] text-slate-500 mb-1">Thuộc tính</label>
+                          <select
+                            value={sourceGroupRuleDraft.fieldName}
+                            onChange={(e: ChangeEvent<HTMLSelectElement>) => setSourceGroupRuleDraft(prev => ({ ...prev, fieldName: e.target.value }))}
+                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
+                          >
+                            <option value="">-- Chọn trường --</option>
+                            {getSourceFieldOptions(sourceForm.name).map(f => (
+                              <option key={f.fieldName} value={f.fieldName}>{f.displayName} ({f.fieldName})</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="flex-1">
+                          <label className="block text-[12px] text-slate-500 mb-1">Rule gom</label>
+                          <select
+                            value={sourceGroupRuleDraft.ruleType}
+                            onChange={(e: ChangeEvent<HTMLSelectElement>) => setSourceGroupRuleDraft(prev => ({ ...prev, ruleType: e.target.value as GroupRuleType }))}
+                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
+                          >
+                            {(Object.entries(GROUP_RULE_LABELS) as [GroupRuleType, string][]).map(([val, label]) => (
+                              <option key={val} value={val}>{label}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleAddSourceGroupRule}
+                          disabled={!sourceGroupRuleDraft.fieldName}
+                          className="flex items-center gap-1.5 px-3 py-2 border border-blue-200 text-blue-600 text-[13px] font-medium rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <Plus className="w-3.5 h-3.5" /> Thêm
+                        </button>
+                      </div>
+                    </div>
+                    )}
+
                     <div className="flex justify-end gap-2 mt-3">
                       <button
                         type="button"
-                        onClick={() => { setSourceFormOpen(false); setSourceForm({ name: WIZARD_SOURCE_OPTIONS[0], kind: 'table', grain: '1:1' }); }}
+                        onClick={() => {
+                          setSourceFormOpen(false);
+                          setSourceForm({ name: WIZARD_SOURCE_OPTIONS[0], grain: '1:1', grainKey: '' });
+                          setSourceGroupRules([]);
+                          setSourceGroupRuleDraft({ fieldName: '', ruleType: 'latest' });
+                        }}
                         className="px-3 py-1.5 border border-slate-200 text-slate-700 rounded-lg text-[13px] font-medium hover:bg-slate-50 transition-colors"
                       >
                         Hủy

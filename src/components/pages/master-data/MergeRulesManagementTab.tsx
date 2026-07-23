@@ -3,6 +3,9 @@ import { Plus, Edit, Trash2, AlertCircle, AlertTriangle, Save, GitMerge, Chevron
 import { BaseModal } from '../../common/BaseModal';
 import { defaultAttributes } from './AttributesManagementTab';
 
+// Tạm ẩn nút Chỉnh sửa/Xóa theo yêu cầu — chỉ ẩn giao diện, không xóa code/luồng xử lý
+const SHOW_EDIT_DELETE_ACTIONS = false;
+
 type RuleStatus = 'active' | 'inactive' | 'testing';
 type DataSourceType = 'dldc' | 'lgsp' | 'ndxp' | 'manual';
 type MatchStrategy = 'exact' | 'fuzzy' | 'phonetic' | 'custom';
@@ -595,7 +598,7 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
                 {currentRule.lastApplied && <> · Lần áp dụng cuối: {currentRule.lastApplied}</>}
               </p>
             </div>
-            {!readOnly && (
+            {!readOnly && SHOW_EDIT_DELETE_ACTIONS && (
             <div className="flex items-center gap-2 flex-shrink-0">
               <button
                 onClick={() => handleRequestEdit(currentRule)}
