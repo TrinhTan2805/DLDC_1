@@ -7,6 +7,26 @@ interface VersionHistoryModalProps {
 
 const mockVersions = [
   {
+    id: 28,
+    version: 'v2.6.17',
+    date: '21/07/2026',
+    time: '17:15',
+    content: `1. Đồng bộ mã nguồn Git & Xử lý xung đột (upstream/main):
+- Đồng bộ toàn bộ thay đổi mới từ nhánh main (bao gồm các gói cập nhật từ nhánh nhalt8/kdlbtp_v1.3), xử lý triệt để xung đột merge tại AttributesManagementTab, MasterDataScaleManagementPage và nhật ký hệ thống log_update.md.
+
+2. Hệ thống Thông báo (Notification System):
+- Re-design hệ thống thông báo theo spec Noti.xlsx với 4 loại: Thành công (success), Cảnh báo (warning), Lỗi (error), và Thông báo (info).
+- Tích hợp danh mục notificationCatalog.ts dùng chung cho cả TopBar dropdown và trang Quản lý thông báo (NotificationPage).
+
+3. Phân hệ Dữ liệu chủ (Master Data):
+- Quy trình Thêm/Sửa thực thể: Loại bỏ luồng Thêm mới nhanh, yêu cầu toàn bộ thao tác thêm/sửa đi qua Wizard 6 bước với kiểm tra trùng mã/tên thực thể trực tiếp.
+- Chế độ chỉ đọc (View-only): Khóa phân quyền chỉ đọc cho 4 tab phụ (Thuộc tính, Quan hệ, Quy tắc hợp nhất, Quy tắc định danh).
+- Bổ sung trường Lý do từ chối bắt buộc khi Từ chối phê duyệt và thêm nút Hủy phê duyệt đối với bản ghi Đã phê duyệt.
+
+4. Phân hệ Cung cấp dữ liệu & Đối soát:
+- Chuẩn hóa nhãn & 4 thẻ tổng quan đối soát dữ liệu, redesign bảng Lịch sử đối soát với StatusTag và bổ sung thẻ thống kê động theo tab tại màn Cung cấp dữ liệu theo yêu cầu.`
+  },
+  {
     id: 27,
     version: 'v2.6.16',
     date: '15/07/2026',

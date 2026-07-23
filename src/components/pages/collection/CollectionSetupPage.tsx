@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Filter, RefreshCw, Search, Plus, Eye, Edit, Settings as SettingsIcon, Trash2, FileText, Activity, Settings, AlertCircle, AlertTriangle, X, Download, Send, ChevronLeft, ChevronRight, Calendar, Wrench, Power, Layers, Database, Eraser, CheckCircle } from "lucide-react";
+import { Filter, RefreshCw, Search, Plus, Eye, Edit, Settings as SettingsIcon, Trash2, FileText, Activity, Settings, AlertCircle, AlertTriangle, X, Download, Send, ChevronLeft, ChevronRight, Calendar, Wrench, Power, Layers, Database, Eraser, CheckCircle, MoreVertical } from "lucide-react";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from '../../ui/dropdown-menu';
 import { AddServiceModal, EditServiceModal, DeleteServiceModal, SettingsServiceModal } from './ServiceModals';
 import { ViewServiceModal } from './ViewServiceModal';
 import { LogManagement } from './LogManagement';
@@ -10,6 +11,15 @@ import { Portal } from '../../common/Portal';
 import { StatusTag } from '../../common/StatusTag';
 import { BaseModal } from '../../common/BaseModal';
 import { ConfirmModal } from '../../common/ConfirmModal';
+
+// Định dạng dung lượng dữ liệu suy ra từ số bản ghi (dùng khi dịch vụ chưa có sẵn dataSize)
+const formatDataSize = (records: number) => {
+  const bytes = (records || 0) * 1150; // ~1.15 KB/bản ghi
+  if (bytes >= 1e9) return `${(bytes / 1e9).toFixed(2)} GB`;
+  if (bytes >= 1e6) return `${(bytes / 1e6).toFixed(1)} MB`;
+  if (bytes >= 1e3) return `${(bytes / 1e3).toFixed(0)} KB`;
+  return `${bytes} B`;
+};
 
 interface CollectionSetupPageProps {
   onNavigate?: (pageId: string) => void;
@@ -408,15 +418,15 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
                   <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-[1]">
                     <tr>
                       <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-12 text-[13px]">STT</th>
-                      <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Tên dịch vụ</th>
-                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Loại nguồn</th>
+                      <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Mã / Tên dịch vụ</th>
                       <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Phương thức kết nối</th>
+                      <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Hệ thống nguồn</th>
+                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Kích thước dữ liệu</th>
                       <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-20 text-[13px]">Phiên bản</th>
-                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Hệ thống nguồn</th>
                       <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Ngày tạo</th>
                       <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái dịch vụ</th>
                       <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái dữ liệu</th>
-                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-64 text-[13px]">Thao tác</th>
+                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-32 text-[13px]">Thao tác</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -425,28 +435,33 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
                       .map((service, index) => (
                         <tr key={service.id} className="hover:bg-slate-50 transition-all group border-b border-slate-100">
                           <td className="px-4 py-3 text-center text-slate-500 font-medium text-[13px]">{index + 1}</td>
-                          <td className="px-4 py-3 text-left text-[13px]">
-                            <div className="max-w-xs">
-                              <div className="font-medium text-slate-950 leading-snug text-[13px]">{service.name}</div>
-                              {service.description && <div className="text-slate-500 mt-1 line-clamp-2 text-[13px]">{service.description}</div>}
+                          <td className="px-4 py-3 text-left text-[13px] min-w-[300px]">
+                            <div className="max-w-[440px]">
+                              <div className="font-medium text-slate-800 leading-snug break-words line-clamp-2 text-[13px]" title={service.name}>{service.name}</div>
+                              <div className="font-mono text-[13px] italic truncate leading-tight tracking-tight mt-1" style={{ color: '#94a3b8' }} title={service.code}>{service.code}</div>
+                              {service.description && <div className="text-slate-500 mt-1 line-clamp-2 text-[12px]">{service.description}</div>}
                             </div>
                           </td>
                           <td className="px-4 py-3 text-center">
-                            <StatusTag 
-                              label={service.source} 
-                              variant={service.source === 'Trong ngành' ? 'purple' : 'blue'} 
+                            <StatusTag
+                              label={service.type === 'SOAP' ? 'Cơ sở dữ liệu' : service.type === 'REST' ? 'API' : 'Tải file Excel'}
+                              variant={service.type === 'SOAP' ? 'indigo' : service.type === 'REST' ? 'emerald' : 'amber'}
                             />
                           </td>
-                          <td className="px-4 py-3 text-center">
-                            <StatusTag 
-                              label={service.type === 'SOAP' ? 'Cơ sở dữ liệu' : service.type === 'REST' ? 'API' : 'Tải file Excel'} 
-                              variant={service.type === 'SOAP' ? 'indigo' : service.type === 'REST' ? 'emerald' : 'amber'} 
-                            />
+                          <td className="px-4 py-3 text-left">
+                            <div className="max-w-[180px]">
+                              <div className="leading-snug text-slate-900 font-medium text-[13px]">{service.managingUnit}</div>
+                              <div className="flex items-center gap-1.5 mt-1">
+                                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${service.source === 'Trong ngành' ? 'bg-purple-500' : 'bg-blue-500'}`}></span>
+                                <span className="text-[12px] italic text-slate-400">{service.source}</span>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-center whitespace-nowrap text-[13px]">
+                            <div className="font-medium text-slate-800">{service.dataSize || formatDataSize(service.recordsReceived)}</div>
+                            <div className="font-medium text-slate-500 mt-0.5">{(service.recordCount ?? service.recordsReceived ?? 0).toLocaleString('vi-VN')} bản ghi</div>
                           </td>
                           <td className="px-4 py-3 text-center text-slate-600 font-medium font-mono text-[13px]">{service.version}</td>
-                          <td className="px-4 py-3 text-center text-slate-600 font-medium max-w-[120px] text-[13px]">
-                            <div className="leading-tight">{service.managingUnit}</div>
-                          </td>
                           <td className="px-4 py-3 text-center text-slate-500 font-medium font-mono whitespace-nowrap text-[13px]">
                             {service.updatedAt.split(' ').map((part: string, i: number) => (
                               <div key={i}>{part}</div>
@@ -474,10 +489,12 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
                               return <StatusTag label={label} variant={variant as any} />;
                             })()}
                           </td>
-                          <td className="px-4 py-4 text-center">
-                            <div className="flex items-center justify-center gap-1">
+                          <td className="px-4 py-4 text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              {/* Nút ngoài: Maping chi tiết, Quản lý */}
                               <button
                                 className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
+                                title="Maping chi tiết"
                                 onClick={() => {
                                   if (onNavigate) {
                                     onNavigate('data-info-civil-registry');
@@ -490,46 +507,6 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
                                 <Layers className="w-4 h-4" />
                               </button>
                               <button
-                                className="p-1.5 text-emerald-500 hover:bg-emerald-50 rounded-lg transition-all"
-                                title="Cập nhật dữ liệu"
-                                onClick={() => {
-                                  setSelectedService(service);
-                                  setShowUpdateSuccessModal(true);
-                                }}
-                              >
-                                <RefreshCw className="w-4 h-4" />
-                              </button>
-                              <button
-                                className="p-1.5 text-indigo-500 hover:bg-indigo-50 rounded-lg transition-all"
-                                title="Tích hợp mới"
-                                onClick={() => {
-                                  setSelectedService(service);
-                                  setShowIntegrateWarningModal(true);
-                                }}
-                              >
-                                <Plus className="w-4 h-4" />
-                              </button>
-                              <button
-                                className="p-1.5 text-amber-500 hover:bg-amber-50 rounded-[6px] transition-all"
-                                title="Ngừng hoạt động"
-                                onClick={() => {
-                                  setSelectedService(service);
-                                  setShowInactiveModal(true);
-                                }}
-                              >
-                                <Power className="w-4 h-4" />
-                              </button>
-                              <button
-                                className="p-1.5 text-orange-500 hover:bg-orange-50 rounded-[6px] transition-all"
-                                title="Xóa dữ liệu thu thập"
-                                onClick={() => {
-                                  setSelectedService(service);
-                                  setShowDeleteDataConfirmModal(true);
-                                }}
-                              >
-                                <Eraser className="w-4 h-4" />
-                              </button>
-                              <button
                                 className="p-1.5 text-slate-500 hover:text-[#2563eb] hover:bg-blue-50 rounded-[6px] transition-all"
                                 title="Quản lý"
                                 onClick={() => {
@@ -539,16 +516,70 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
                               >
                                 <Eye className="w-4 h-4" />
                               </button>
-                              <button
-                                className="p-1.5 text-red-500 hover:bg-red-50 rounded-[6px] transition-all"
-                                title="Xóa dịch vụ"
-                                onClick={() => {
-                                  setSelectedService(service);
-                                  setShowDeleteModal(true);
-                                }}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
+
+                              {/* Menu "..." chia 2 mục: Dữ liệu / Dịch vụ */}
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <button
+                                    className="p-1.5 text-slate-500 hover:bg-slate-100 rounded-[6px] transition-all focus:outline-none"
+                                    title="Thao tác khác"
+                                  >
+                                    <MoreVertical className="w-4 h-4" />
+                                  </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-56 text-[13px] bg-white border border-slate-200 shadow-[0_10px_25px_rgba(15,23,42,0.15)]">
+                                  <DropdownMenuLabel className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 px-2 py-1">Dữ liệu</DropdownMenuLabel>
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      setSelectedService(service);
+                                      setShowIntegrateWarningModal(true);
+                                    }}
+                                  >
+                                    <Plus className="w-4 h-4 text-indigo-500" />
+                                    Tích hợp mới
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      setSelectedService(service);
+                                      setShowUpdateSuccessModal(true);
+                                    }}
+                                  >
+                                    <RefreshCw className="w-4 h-4 text-emerald-500" />
+                                    Cập nhật dữ liệu
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="text-red-600 focus:text-red-600"
+                                    onClick={() => {
+                                      setSelectedService(service);
+                                      setShowDeleteDataConfirmModal(true);
+                                    }}
+                                  >
+                                    <Eraser className="w-4 h-4 text-orange-500" />
+                                    Xóa dữ liệu thu thập
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuLabel className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 px-2 py-1">Dịch vụ</DropdownMenuLabel>
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      setSelectedService(service);
+                                      setShowInactiveModal(true);
+                                    }}
+                                  >
+                                    <Power className="w-4 h-4 text-amber-500" />
+                                    Ngừng hoạt động
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="text-red-600 focus:text-red-600"
+                                    onClick={() => {
+                                      setSelectedService(service);
+                                      setShowDeleteModal(true);
+                                    }}
+                                  >
+                                    <Trash2 className="w-4 h-4 text-red-500" />
+                                    Xóa dịch vụ
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             </div>
                           </td>
                         </tr>

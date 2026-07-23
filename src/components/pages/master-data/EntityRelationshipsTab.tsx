@@ -85,7 +85,7 @@ const relationTypeIcons: Record<RelationType, string> = {
 const getSourceKey = (rel: EntityRelationship) => rel.relationType === 'many-to-many' ? rel.junctionSourceKey : rel.foreignKey;
 const getTargetKey = (rel: EntityRelationship) => rel.relationType === 'many-to-many' ? rel.junctionTargetKey : rel.referencedKey;
 
-export function EntityRelationshipsTab() {
+export function EntityRelationshipsTab({ readOnly = false }: { readOnly?: boolean } = {}) {
   const [relationships, setRelationships] = useState<EntityRelationship[]>(mockRelationships);
   const [showForm, setShowForm] = useState(false);
   const [editingRelationship, setEditingRelationship] = useState<EntityRelationship | null>(null);
@@ -243,13 +243,15 @@ export function EntityRelationshipsTab() {
             Quản trị hệ thống chọn 2 thực thể và định nghĩa liên kết giữa chúng (1-n, n-n)
           </p>
         </div>
-        <button
-          onClick={() => setShowForm(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Thêm quan hệ mới
-        </button>
+        {!readOnly && (
+          <button
+            onClick={() => setShowForm(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Thêm quan hệ mới
+          </button>
+        )}
       </div>
 
       {/* Entity Filter */}
@@ -318,20 +320,26 @@ export function EntityRelationshipsTab() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-center gap-2">
-                          <button
-                            onClick={() => handleEdit(relationship)}
-                            className="p-1 text-blue-600 hover:bg-blue-50 rounded"
-                            title="Chỉnh sửa"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(relationship.id)}
-                            className="p-1 text-red-600 hover:bg-red-50 rounded"
-                            title="Xóa"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          {readOnly ? (
+                            <span className="text-slate-300">—</span>
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => handleEdit(relationship)}
+                                className="p-1 text-blue-600 hover:bg-blue-50 rounded"
+                                title="Chỉnh sửa"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(relationship.id)}
+                                className="p-1 text-red-600 hover:bg-red-50 rounded"
+                                title="Xóa"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -490,7 +498,6 @@ export function EntityRelationshipsTab() {
                   className="w-64 px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
                 >
                   {Object.entries(relationTypeLabels)
-                    .filter(([value]) => value !== 'one-to-many')
                     .map(([value, label]) => (
                       <option key={value} value={value}>{label}</option>
                     ))}

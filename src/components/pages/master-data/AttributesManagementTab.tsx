@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, ChangeEvent } from 'react';
-import { Plus, Edit, Trash2, Search, History as HistoryIcon, Check, AlertCircle, ChevronDown, Database, X, FileText, Send } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, History as HistoryIcon, Check, AlertCircle, ChevronDown, Database, X, FileText, Send, Eye, ArrowRight, Network } from 'lucide-react';
 import { BaseModal } from '../../common/BaseModal';
 
 type FieldDataType = 'string' | 'number' | 'date' | 'datetime' | 'boolean' | 'text' | 'email' | 'phone' | 'url';
@@ -213,6 +213,85 @@ const DLDC_FIELDS: Record<string, { fieldName: string; displayName: string; data
   ],
 };
 
+const DLDC_ENTITY_DETAIL_CONFIGS: Record<string, {
+  sources: { id: string; name: string; kind: 'table' | 'view' | 'query'; grain: '1:1' | '1:n' }[];
+  mapping: Record<string, Record<string, string>>;
+  groupRules: Record<string, Record<string, { ruleType: string; timeColumn: string }>>;
+}> = {
+  '1': {
+    sources: [
+      { id: 'src-cccd', name: 'CCCD', kind: 'table', grain: '1:1' },
+      { id: 'src-hotich', name: 'Hộ tịch', kind: 'table', grain: '1:n' },
+    ],
+    mapping: {
+      'citizen_id': { 'src-cccd': 'so_cccd', 'src-hotich': 'ma_khai_sinh' },
+      'full_name': { 'src-cccd': 'ho_ten', 'src-hotich': 'ho_ten' },
+      'date_of_birth': { 'src-cccd': 'ngay_sinh', 'src-hotich': 'ngay_sinh' },
+      'gender': { 'src-cccd': 'gioi_tinh', 'src-hotich': 'gioi_tinh' },
+      'address': { 'src-cccd': 'thuong_tru', 'src-hotich': 'noi_sinh' },
+      'email': { 'src-cccd': 'email', 'src-hotich': '' },
+      'phone_number': { 'src-cccd': 'phone_number', 'src-hotich': '' },
+    },
+    groupRules: {
+      'src-hotich': {
+        'citizen_id': { ruleType: 'latest', timeColumn: 'ngay_sinh' },
+        'full_name': { ruleType: 'latest', timeColumn: 'ngay_sinh' },
+        'date_of_birth': { ruleType: 'latest', timeColumn: 'ngay_sinh' },
+        'gender': { ruleType: 'latest', timeColumn: 'ngay_sinh' },
+        'address': { ruleType: 'latest', timeColumn: 'ngay_sinh' },
+      }
+    }
+  },
+  '2': {
+    sources: [
+      { id: 'src-dkkd', name: 'ĐKKD', kind: 'table', grain: '1:1' },
+    ],
+    mapping: {
+      'org_id': { 'src-dkkd': 'org_id' },
+      'org_name': { 'src-dkkd': 'org_name' },
+      'tax_code': { 'src-dkkd': 'tax_code' },
+      'founded_date': { 'src-dkkd': 'founded_date' },
+      'address': { 'src-dkkd': 'address' },
+    },
+    groupRules: {}
+  },
+  '3': {
+    sources: [
+      { id: 'src-manual-3', name: 'Nhập thủ công', kind: 'table', grain: '1:1' },
+    ],
+    mapping: {
+      'doc_number': { 'src-manual-3': 'doc_number' },
+      'doc_title': { 'src-manual-3': 'doc_title' },
+      'issued_date': { 'src-manual-3': 'issued_date' },
+      'issuing_body': { 'src-manual-3': 'issuing_body' },
+      'doc_type': { 'src-manual-3': 'doc_type' },
+    },
+    groupRules: {}
+  },
+  '4': {
+    sources: [
+      { id: 'src-manual-4', name: 'Nhập thủ công', kind: 'table', grain: '1:1' },
+    ],
+    mapping: {
+      'unit_code': { 'src-manual-4': 'unit_code' },
+      'unit_name': { 'src-manual-4': 'unit_name' },
+      'parent_code': { 'src-manual-4': 'parent_code' },
+      'level': { 'src-manual-4': 'level' },
+    },
+    groupRules: {}
+  },
+  '5': {
+    sources: [
+      { id: 'src-lltp', name: 'LLTP', kind: 'table', grain: '1:1' },
+    ],
+    mapping: {
+      'agency_id': { 'src-lltp': 'ma_co_quan' },
+      'agency_name': { 'src-lltp': 'ten_co_quan' },
+    },
+    groupRules: {}
+  }
+};
+
 const MOCK_APPROVERS = [
   { id: 'a1', name: 'Nguyễn Văn An', position: 'Trưởng phòng', department: 'Phòng Quản lý dữ liệu' },
   { id: 'a2', name: 'Trần Thị Bình', position: 'Phó Cục trưởng', department: 'Cục Hành chính tư pháp' },
@@ -221,7 +300,17 @@ const MOCK_APPROVERS = [
   { id: 'a5', name: 'Hoàng Thị Lan', position: 'Trưởng phòng', department: 'Phòng Nghiệp vụ pháp lý' },
 ];
 
-export function AttributesManagementTab() {
+const getTableDisplayName = (tableId?: string, dataSource?: string) => {
+  if (dataSource === 'manual') return 'Nhập thủ công';
+  if (!tableId) return '—';
+  for (const dbId in DLDC_TABLES) {
+    const table = DLDC_TABLES[dbId].find(t => t.id === tableId);
+    if (table) return table.displayName;
+  }
+  return tableId;
+};
+
+export function AttributesManagementTab({ readOnly = false }: { readOnly?: boolean } = {}) {
   const [selectedEntity, setSelectedEntity] = useState<string>('1');
   const [attributes, setAttributes] = useState<Record<string, MasterDataAttribute[]>>(defaultAttributes);
   const [showForm, setShowForm] = useState(false);
@@ -249,6 +338,7 @@ export function AttributesManagementTab() {
   // Delete confirmation modal
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deletingAttr, setDeletingAttr] = useState<MasterDataAttribute | null>(null);
+  const [showDldcDetailModal, setShowDldcDetailModal] = useState(false);
 
   // Gửi trình duyệt modal (shown after add/edit)
   const [approvalAttribute, setApprovalAttribute] = useState<MasterDataAttribute | null>(null);
@@ -658,7 +748,7 @@ export function AttributesManagementTab() {
       )}
 
       {/* Add Button */}
-      {selectedEntityData && (
+      {selectedEntityData && !readOnly && (
         <div className="flex justify-end">
           <button
             onClick={() => selectedEntityData.dataSource === 'dldc' ? handleOpenDldcModal() : setShowForm(true)}
@@ -746,20 +836,35 @@ export function AttributesManagementTab() {
                     )}
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-center gap-1.5">
-                        <button
-                          onClick={() => selectedEntityData?.dataSource === 'dldc' ? handleOpenDldcModal() : handleEdit(attribute)}
-                          className="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 cursor-pointer transition-colors"
-                          title="Chỉnh sửa"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => selectedEntityData?.dataSource === 'dldc' ? handleOpenDeleteConfirm(attribute) : handleDelete(attribute.id)}
-                          className="p-1.5 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-50 cursor-pointer transition-colors"
-                          title="Xóa"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        {(selectedEntityData?.dataSource === 'dldc' || selectedEntityData?.dataSource === 'manual') && (
+                          <button
+                            onClick={() => setShowDldcDetailModal(true)}
+                            className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 cursor-pointer transition-colors"
+                            title="Xem chi tiết"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                        )}
+                        {readOnly ? (
+                          <span className="text-slate-300">—</span>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => selectedEntityData?.dataSource === 'dldc' ? handleOpenDldcModal() : handleEdit(attribute)}
+                              className="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 cursor-pointer transition-colors"
+                              title="Chỉnh sửa"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => selectedEntityData?.dataSource === 'dldc' ? handleOpenDeleteConfirm(attribute) : handleDelete(attribute.id)}
+                              className="p-1.5 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-50 cursor-pointer transition-colors"
+                              title="Xóa"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -841,6 +946,7 @@ export function AttributesManagementTab() {
             >
               <Check className="w-4 h-4" />
               Gửi duyệt thực thể
+
 
             </button>
           </>
@@ -1438,8 +1544,8 @@ export function AttributesManagementTab() {
                 onClick={handleConfirmDldcStructure}
                 disabled={!selectedApprover}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-[13px] transition-colors shadow-sm ${selectedApprover
-                    ? 'bg-indigo-600 text-white hover:bg-indigo-700 cursor-pointer'
-                    : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                  ? 'bg-indigo-600 text-white hover:bg-indigo-700 cursor-pointer'
+                  : 'bg-slate-200 text-slate-400 cursor-not-allowed'
                   }`}
               >
                 <Send className="w-4 h-4" />
@@ -1519,6 +1625,214 @@ export function AttributesManagementTab() {
             </div>
           ))}
         </div>
+      </BaseModal>
+      {/* DLDC Sync Detail Modal */}
+      <BaseModal
+        isOpen={showDldcDetailModal}
+        onClose={() => setShowDldcDetailModal(false)}
+        title={selectedEntityData?.dataSource === 'manual' ? "Chi tiết cấu hình nguồn tự cập nhật" : "Chi tiết cấu hình nguồn đồng bộ"}
+        subtitle={selectedEntityData?.dataSource === 'manual' ? "Danh sách trường và ánh xạ đối với nguồn tự cập nhật thủ công" : "Kho dữ liệu từ nguồn đồng bộ và cấu hình các trường"}
+        maxWidth="max-w-5xl"
+        customHeaderIcon={<Database className="w-5 h-5 text-blue-600 mr-3 flex-shrink-0" />}
+        footer={
+          <button
+            onClick={() => setShowDldcDetailModal(false)}
+            className="px-4 py-2 text-[13px] text-[#020817] bg-white border border-[#e2e8f0] rounded-[6px] hover:bg-slate-50 transition-colors cursor-pointer font-medium"
+          >
+            Đóng
+          </button>
+        }
+      >
+        {(() => {
+          const entityConfig = DLDC_ENTITY_DETAIL_CONFIGS[selectedEntity];
+          return (
+            <div className="space-y-4 text-left font-sans">
+              {/* Mapped Fields List */}
+              <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
+                <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-slate-500" />
+                    <p className="text-[13px] font-semibold text-slate-700">Các trường dữ liệu chia sẻ (Field Selection)</p>
+                    <span className="text-[13px] px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">
+                      {currentEntityAttributes.length}/{currentEntityAttributes.length} trường được chọn
+                    </span>
+                  </div>
+                </div>
+                <div className="overflow-x-auto max-h-[350px] overflow-y-auto">
+                  <table className="w-full text-left text-[13px]" style={{ tableLayout: 'fixed' }}>
+                    <colgroup>
+                      <col style={{ width: '24%' }} />
+                      <col style={{ width: '8%' }} />
+                      <col style={{ width: '24%' }} />
+                      <col style={{ width: '24%' }} />
+                      <col style={{ width: '20%' }} />
+                    </colgroup>
+                    <thead className="bg-slate-50 border-b border-slate-100 sticky top-0 z-[2]">
+                      <tr>
+                        <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Bảng gốc</th>
+                        <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center">PK</th>
+                        <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Trường gốc (Column)</th>
+                        <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Tên hiển thị</th>
+                        <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Kiểu dữ liệu</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 bg-white">
+                      {currentEntityAttributes.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="px-4 py-10 text-center text-[13px] text-slate-400">
+                            Chưa có trường nào được cấu hình.
+                          </td>
+                        </tr>
+                      ) : (
+                        currentEntityAttributes.map(attr => (
+                          <tr key={attr.id} className="hover:bg-slate-50/50 transition-colors">
+                            <td className="px-3 py-2.5 overflow-hidden text-slate-900 font-medium">
+                              {getTableDisplayName(attr.tableName || selectedEntityData?.primaryTableId, selectedEntityData?.dataSource)}
+                            </td>
+                            <td className="px-3 py-2.5 text-center overflow-hidden">
+                              <input type="checkbox" checked={attr.unique} disabled
+                                className="w-4 h-4 rounded text-amber-500 border-slate-300 cursor-not-allowed accent-amber-500" />
+                            </td>
+                            <td className="px-3 py-2.5 overflow-hidden">
+                              <code className="text-[13px] bg-slate-100 px-2 py-1 rounded text-slate-800 font-mono">{attr.fieldName}</code>
+                            </td>
+                            <td className="px-3 py-2.5 overflow-hidden text-slate-900 font-medium">
+                              {attr.displayName}
+                            </td>
+                            <td className="px-3 py-2.5 overflow-hidden text-slate-700">
+                              {fieldDataTypeLabels[attr.dataType]}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Ánh xạ cột nguồn → thuộc tính */}
+              <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
+                <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ArrowRight className="w-4 h-4 text-slate-500" />
+                    <p className="text-[13px] font-semibold text-slate-700">Ánh xạ cột nguồn → thuộc tính</p>
+                  </div>
+                  <span className="text-[13px] text-slate-500">{entityConfig?.sources.length || 0} nguồn</span>
+                </div>
+
+                {(entityConfig?.sources.length || 0) <= 1 && (
+                  <div className="px-5 py-2.5 bg-amber-50 border-b border-amber-100">
+                    <p className="text-[13px] text-amber-800">ℹ️ Chỉ 1 nguồn — ánh xạ trực tiếp</p>
+                  </div>
+                )}
+
+                <div className="p-4">
+                  {currentEntityAttributes.length === 0 ? (
+                    <p className="text-[13px] text-slate-400 text-center py-6">Chưa có thuộc tính để ánh xạ</p>
+                  ) : (
+                    <div className="border border-slate-100 rounded-lg overflow-x-auto">
+                      <table className="w-full text-[13px]">
+                        <thead className="bg-slate-50 border-b border-slate-100">
+                          <tr>
+                            <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Thuộc tính</th>
+                            {entityConfig?.sources.map(src => (
+                              <th key={src.id} className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">{src.name}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-50 bg-white">
+                          {currentEntityAttributes.map(attr => (
+                            <tr key={attr.fieldName} className="hover:bg-slate-50/50 transition-colors">
+                              <td className="px-3 py-2">
+                                <span className="text-[13px] font-medium text-slate-700">{attr.displayName}</span>
+                                <code className="ml-1.5 text-[13px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 font-mono">{attr.fieldName}</code>
+                              </td>
+                              {entityConfig?.sources.map(src => {
+                                const mappedCol = entityConfig.mapping[attr.fieldName]?.[src.id];
+                                return (
+                                  <td key={src.id} className="px-3 py-2 text-slate-600">
+                                    {mappedCol ? (
+                                      <code className="text-[13px] font-mono bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100 text-slate-800">
+                                        {mappedCol}
+                                      </code>
+                                    ) : (
+                                      <span className="text-slate-400">—</span>
+                                    )}
+                                  </td>
+                                );
+                              })}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Gom nguồn 1:n */}
+              {entityConfig && entityConfig.sources.filter(s => s.grain === '1:n').length > 0 && (
+                <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
+                  <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Network className="w-4 h-4 text-slate-500" />
+                      <p className="text-[13px] font-semibold text-slate-700">Gom nguồn 1:n</p>
+                    </div>
+                    <span className="text-[13px] px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full font-medium">
+                      {entityConfig.sources.filter(s => s.grain === '1:n').length} nguồn 1:n
+                    </span>
+                  </div>
+                  <div className="p-4 space-y-4">
+                    <p className="text-[13px] text-slate-500">Với nguồn có độ mịn 1:n, quy tắc gom nhiều bản ghi thành một giá trị cho từng thuộc tính</p>
+                    {entityConfig.sources.filter(s => s.grain === '1:n').map(src => {
+                      const rules = entityConfig.groupRules[src.id] || {};
+                      return (
+                        <div key={src.id} className="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                          <div className="px-4 py-2.5 bg-emerald-50 border-b border-emerald-100 flex items-center gap-2">
+                            <span className="text-[13px] font-semibold text-emerald-800">Nguồn (1:n): {src.name}</span>
+                          </div>
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-[13px]">
+                              <thead className="bg-slate-50 border-b border-slate-100">
+                                <tr>
+                                  <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Thuộc tính</th>
+                                  <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Rule gom</th>
+                                  <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Cột mốc thời gian</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-50 bg-white">
+                                {currentEntityAttributes.map(attr => {
+                                  const gr = rules[attr.fieldName];
+                                  if (!gr) return null;
+                                  return (
+                                    <tr key={attr.fieldName} className="hover:bg-slate-50/50 transition-colors">
+                                      <td className="px-3 py-2">
+                                        <span className="text-[13px] font-medium text-slate-700">{attr.displayName}</span>
+                                        <code className="ml-1.5 text-[13px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 font-mono">{attr.fieldName}</code>
+                                      </td>
+                                      <td className="px-3 py-2 text-slate-800">
+                                        <span className="font-medium text-slate-900 bg-slate-100 px-2 py-0.5 rounded text-[12px]">
+                                          {gr.ruleType === 'latest' ? 'Bản ghi mới nhất' : gr.ruleType === 'most_frequent' ? 'Xuất hiện nhiều nhất' : gr.ruleType === 'max' ? 'Lớn nhất' : gr.ruleType === 'min' ? 'Nhỏ nhất' : gr.ruleType}
+                                        </span>
+                                      </td>
+                                      <td className="px-3 py-2 text-slate-600 font-mono">
+                                        {gr.timeColumn ? <code className="bg-slate-50 border border-slate-100 px-1.5 py-0.5 rounded text-[13px]">{gr.timeColumn}</code> : '—'}
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })()}
       </BaseModal>
     </div>
   );

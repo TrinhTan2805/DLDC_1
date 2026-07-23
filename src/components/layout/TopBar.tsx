@@ -33,6 +33,7 @@ import {
   HardDrive,
   TrendingUp
 } from 'lucide-react';
+import { notificationCatalog, NotificationItem, subscribeToNotifications } from '../../data/notificationCatalog';
 
 interface TopBarProps {
   title: string;
@@ -40,63 +41,17 @@ interface TopBarProps {
   onUserMenuClick?: (action: 'profile' | 'change-password' | 'change-background' | 'access-history' | 'action-history' | 'logout') => void;
   currentPage?: string;
   breadcrumb?: string[];
+  onNavigate?: (page: string) => void;
 }
 
-interface Notification {
-  id: string;
-  type: 'error' | 'warning' | 'info' | 'success';
-  title: string;
-  message: string;
-  time: string;
-  isRead: boolean;
-}
+type Notification = NotificationItem;
 
-const mockNotifications: Notification[] = [
-  {
-    id: 'N001',
-    type: 'error',
-    title: 'Lỗi kết nối CSDL',
-    message: 'Không thể kết nối đến cơ sở dữ liệu chính',
-    time: '5 phút trước',
-    isRead: false
-  },
-  {
-    id: 'N002',
-    type: 'warning',
-    title: 'Cảnh báo dữ liệu',
-    message: 'Phát hiện 15 bản ghi trùng lặp cần xử lý',
-    time: '15 phút trước',
-    isRead: false
-  },
-  {
-    id: 'N003',
-    type: 'info',
-    title: 'Cập nhật hệ thống',
-    message: 'Bản cập nhật mới đã sẵn sàng để cài đặt',
-    time: '1 giờ trước',
-    isRead: true
-  },
-  {
-    id: 'N004',
-    type: 'success',
-    title: 'Xử lý hoàn tất',
-    message: 'Đã xử lý thành công 1,250 bản ghi dữ liệu',
-    time: '2 giờ trước',
-    isRead: true
-  },
-  {
-    id: 'N005',
-    type: 'warning',
-    title: 'API timeout',
-    message: 'API thu thập dữ liệu bị timeout sau 30s',
-    time: '3 giờ trước',
-    isRead: true
-  }
-];
+// 5 thông báo gần nhất trong danh mục — chỉ 3 loại: success/error/info (không phân theo mức độ ưu tiên)
+const mockNotifications: Notification[] = notificationCatalog.slice(0, 5);
 
 type SettingsModal = 'language' | 'theme' | 'format' | 'email' | 'sound' | '2fa' | 'session' | 'backup' | 'database' | 'logs' | null;
 
-export function TopBar({ title, description, onUserMenuClick, currentPage, breadcrumb }: TopBarProps) {
+export function TopBar({ title, description, onUserMenuClick, currentPage, breadcrumb, onNavigate }: TopBarProps) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -105,6 +60,11 @@ export function TopBar({ title, description, onUserMenuClick, currentPage, bread
   const menuRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
   const settingsRef = useRef<HTMLDivElement>(null);
+
+  // Cập nhật ngay khi có thông báo hệ thống mới được phát (Quản lý thông báo hệ thống)
+  useEffect(() => {
+    return subscribeToNotifications((newItem) => setNotifications(prev => [newItem, ...prev].slice(0, 5)));
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -135,7 +95,7 @@ export function TopBar({ title, description, onUserMenuClick, currentPage, bread
       case 'error':
         return <AlertTriangle className="w-5 h-5 text-red-600" />;
       case 'warning':
-        return <AlertCircle className="w-5 h-5 text-orange-600" />;
+        return <AlertCircle className="w-5 h-5 text-amber-600" />;
       case 'info':
         return <Info className="w-5 h-5 text-blue-600" />;
       case 'success':
@@ -148,7 +108,7 @@ export function TopBar({ title, description, onUserMenuClick, currentPage, bread
       case 'error':
         return 'bg-red-50';
       case 'warning':
-        return 'bg-orange-50';
+        return 'bg-amber-50';
       case 'info':
         return 'bg-blue-50';
       case 'success':
@@ -284,7 +244,10 @@ export function TopBar({ title, description, onUserMenuClick, currentPage, bread
               {/* Footer */}
               {notifications.length > 0 && (
                 <div className="px-4 py-3 border-t border-slate-200">
-                  <button className="w-full text-center text-sm text-blue-600 hover:text-blue-700">
+                  <button
+                    onClick={() => { setShowNotifications(false); onNavigate?.('notifications'); }}
+                    className="w-full text-center text-sm text-blue-600 hover:text-blue-700"
+                  >
                     Xem tất cả thông báo
                   </button>
                 </div>

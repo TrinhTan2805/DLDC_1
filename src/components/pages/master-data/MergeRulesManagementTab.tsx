@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Plus, Edit, Trash2, AlertCircle, Save, GitMerge, ChevronDown, X, Send } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Plus, Edit, Trash2, AlertCircle, Save, GitMerge, ChevronDown, X, Send, Search, Check } from 'lucide-react';
 import { BaseModal } from '../../common/BaseModal';
 
 type RuleStatus = 'active' | 'inactive' | 'testing';
@@ -148,7 +148,9 @@ const mockMergeRules: MergeRule[] = [
 const mockEntities = [
   { id: '1', code: 'MD-CITIZEN-001', name: 'Bộ dữ liệu chủ Công dân', version: 2 },
   { id: '2', code: 'MD-ORG-001', name: 'Bộ dữ liệu chủ Tổ chức', version: 2 },
-  { id: '3', code: 'MD-DOC-001', name: 'Bộ dữ liệu chủ Văn bản pháp luật', version: 1 }
+  { id: '3', code: 'MD-DOC-001', name: 'Bộ dữ liệu chủ Văn bản pháp luật', version: 1 },
+  { id: '4', code: 'MD-ADMIN-001', name: 'Bộ dữ liệu chủ Đơn vị hành chính', version: 1 },
+  { id: '5', code: 'MD-AGENCY-001', name: 'Bộ dữ liệu chủ Cơ quan nhà nước', version: 1 }
 ];
 
 const MOCK_APPROVERS = [
@@ -197,13 +199,35 @@ const mergeTriggerLabels: Record<MergeTrigger, string> = {
   approval: 'Chờ phê duyệt trước khi hợp nhất'
 };
 
-export function MergeRulesManagementTab() {
+export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boolean } = {}) {
   const [rules, setRules] = useState<MergeRule[]>(mockMergeRules);
 
   // Chọn thực thể dữ liệu chủ để xem/cấu hình quy tắc hợp nhất
-  const [selectedEntityFilter, setSelectedEntityFilter] = useState('');
+  const [selectedEntityFilter, setSelectedEntityFilter] = useState('1');
   const selectedFilterEntityData = mockEntities.find(e => e.id === selectedEntityFilter);
   const currentRule = selectedEntityFilter ? rules.find(rule => rule.entityId === selectedEntityFilter) : undefined;
+
+  // Combobox chọn thực thể (giống tab Quản lý thuộc tính dữ liệu chủ)
+  const [comboboxOpen, setComboboxOpen] = useState(false);
+  const [comboboxSearch, setComboboxSearch] = useState('');
+  const comboboxRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (comboboxRef.current && !comboboxRef.current.contains(event.target as Node)) {
+        setComboboxOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const filteredEntities = mockEntities.filter(entity =>
+    entity.name.toLowerCase().includes(comboboxSearch.toLowerCase()) ||
+    entity.code.toLowerCase().includes(comboboxSearch.toLowerCase())
+  );
 
   // Modal Thêm/Chỉnh sửa — giống Bước 4 "Quy tắc hợp nhất dữ liệu" trong wizard Tạo mới dữ liệu chủ
   const [showForm, setShowForm] = useState(false);
@@ -353,18 +377,74 @@ export function MergeRulesManagementTab() {
         <label className="block text-[13px] text-slate-700 mb-2">
           Xem theo thực thể dữ liệu chủ
         </label>
-        <div className="relative">
-          <select
-            value={selectedEntityFilter}
-            onChange={(e) => setSelectedEntityFilter(e.target.value)}
-            className="w-full pl-3 pr-8 py-2 border border-slate-300 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-[13px] appearance-none cursor-pointer"
+        <div ref={comboboxRef} className="relative">
+          <button
+            type="button"
+            className="w-full px-4 py-2 border border-slate-300 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-left text-[13px]"
+            onClick={() => setComboboxOpen(!comboboxOpen)}
           >
-            <option value="">-- Chọn thực thể dữ liệu chủ --</option>
-            {mockEntities.map(entity => (
-              <option key={entity.id} value={entity.id}>{entity.code} - {entity.name}</option>
-            ))}
-          </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
+            <div className="flex items-center justify-between">
+              <div>
+                {selectedFilterEntityData ? (
+                  <div>
+                    <span className="text-[13px] text-slate-900">{selectedFilterEntityData.code}</span>
+                    <span className="text-[13px] text-slate-600"> - {selectedFilterEntityData.name}</span>
+                  </div>
+                ) : (
+                  <span className="text-[13px] text-slate-500">Chọn thực thể dữ liệu chủ...</span>
+                )}
+              </div>
+              <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${comboboxOpen ? 'rotate-180' : ''}`} />
+            </div>
+          </button>
+          {comboboxOpen && (
+            <div className="absolute z-10 mt-1 w-full bg-white border border-slate-300 rounded-lg shadow-lg max-h-64 overflow-hidden flex flex-col">
+              <div className="p-2 border-b border-slate-200">
+                <div className="relative">
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    value={comboboxSearch}
+                    onChange={(e) => setComboboxSearch(e.target.value)}
+                    placeholder="Tìm kiếm theo mã hoặc tên..."
+                    className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    autoFocus
+                  />
+                </div>
+              </div>
+              <ul className="overflow-y-auto max-h-52">
+                {filteredEntities.length === 0 ? (
+                  <li className="px-4 py-8 text-center text-[13px] text-slate-500">
+                    Không tìm thấy thực thể phù hợp
+                  </li>
+                ) : (
+                  filteredEntities.map(entity => (
+                    <li key={entity.id}>
+                      <button
+                        type="button"
+                        className={`w-full px-4 py-2.5 text-left hover:bg-blue-50 transition-colors ${selectedEntityFilter === entity.id ? 'bg-blue-50' : ''}`}
+                        onClick={() => {
+                          setSelectedEntityFilter(entity.id);
+                          setComboboxOpen(false);
+                          setComboboxSearch('');
+                        }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="text-[13px] text-slate-900">{entity.code}</span>
+                            <span className="text-[13px] text-slate-600"> - {entity.name}</span>
+                          </div>
+                          {selectedEntityFilter === entity.id && (
+                            <Check className="w-4 h-4 text-blue-600" />
+                          )}
+                        </div>
+                      </button>
+                    </li>
+                  ))
+                )}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
 
@@ -382,13 +462,15 @@ export function MergeRulesManagementTab() {
           <p className="text-[13px] text-slate-500 mb-4">
             Chưa cấu hình quy tắc hợp nhất dữ liệu nào
           </p>
-          <button
-            onClick={handleOpenAdd}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-[13px] font-medium"
-          >
-            <Plus className="w-4 h-4" />
-            Thêm quy tắc hợp nhất
-          </button>
+          {!readOnly && (
+            <button
+              onClick={handleOpenAdd}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-[13px] font-medium"
+            >
+              <Plus className="w-4 h-4" />
+              Thêm quy tắc hợp nhất
+            </button>
+          )}
         </div>
       ) : (
         <div className="space-y-4">
@@ -406,6 +488,7 @@ export function MergeRulesManagementTab() {
                 {currentRule.lastApplied && <> · Lần áp dụng cuối: {currentRule.lastApplied}</>}
               </p>
             </div>
+            {!readOnly && (
             <div className="flex items-center gap-2 flex-shrink-0">
               <button
                 onClick={() => handleOpenEdit(currentRule)}
@@ -422,6 +505,7 @@ export function MergeRulesManagementTab() {
                 <Trash2 className="w-4 h-4" />
               </button>
             </div>
+            )}
           </div>
 
           {/* Lớp 1: Matching Rules */}
