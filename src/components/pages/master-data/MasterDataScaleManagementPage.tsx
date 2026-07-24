@@ -1303,34 +1303,34 @@ export function MasterDataScaleManagementPage() {
                           </colgroup>
                           <thead className="bg-slate-50 border-b border-slate-100">
                             <tr>
-                              <th className="text-center px-3 py-2.5">
+                              <th className="text-center px-3 py-2.5 text-[13px]">
                                 <input type="checkbox" checked disabled className="rounded border-slate-300 text-blue-600 cursor-not-allowed" />
                               </th>
-                              <th className="text-center px-3 py-2.5 font-semibold text-slate-600">PK</th>
-                              <th className="text-left px-4 py-2.5 font-semibold text-slate-600">Nguồn (Table)</th>
-                              <th className="text-left px-4 py-2.5 font-semibold text-slate-600">Trường gốc (Column)</th>
-                              <th className="text-left px-4 py-2.5 font-semibold text-slate-600">Tên cột</th>
-                              <th className="text-left px-4 py-2.5 font-semibold text-slate-600">Tên hiển thị</th>
-                              <th className="text-left px-4 py-2.5 font-semibold text-slate-600">Kiểu dữ liệu</th>
+                              <th className="text-center px-3 py-2.5 text-[13px] font-semibold text-slate-600">PK</th>
+                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Nguồn (Table)</th>
+                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Trường gốc (Column)</th>
+                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Tên cột</th>
+                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Tên hiển thị</th>
+                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Kiểu dữ liệu</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-100 bg-white">
                             {stepAttrs.map(attr => (
                               <tr key={attr.id}>
-                                <td className="text-center px-3 py-2">
+                                <td className="text-center px-3 py-2 text-[13px]">
                                   <input type="checkbox" checked disabled className="rounded border-slate-300 text-blue-600 cursor-not-allowed" />
                                 </td>
-                                <td className="text-center px-3 py-2">
+                                <td className="text-center px-3 py-2 text-[13px]">
                                   <input type="checkbox" checked={attr.unique} disabled
                                     className="w-4 h-4 rounded text-amber-500 border-slate-300 cursor-not-allowed accent-amber-500" />
                                 </td>
-                                <td className="px-4 py-2 text-slate-900 font-medium overflow-hidden">{attr.tableName || '—'}</td>
-                                <td className="px-4 py-2 overflow-hidden">
+                                <td className="px-4 py-2 text-[13px] text-slate-900 font-medium overflow-hidden">{attr.tableName || '—'}</td>
+                                <td className="px-4 py-2 text-[13px] overflow-hidden">
                                   <code className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700 font-mono text-[12px]">{attr.fieldName}</code>
                                 </td>
-                                <td className="px-4 py-2 text-slate-700 overflow-hidden">{attr.fieldName}</td>
-                                <td className="px-4 py-2 text-slate-900 font-medium overflow-hidden">{attr.displayName}</td>
-                                <td className="px-4 py-2 text-slate-600 overflow-hidden">{attr.dataType}</td>
+                                <td className="px-4 py-2 text-[13px] text-slate-700 overflow-hidden">{attr.fieldName}</td>
+                                <td className="px-4 py-2 text-[13px] text-slate-900 font-medium overflow-hidden">{attr.displayName}</td>
+                                <td className="px-4 py-2 text-[13px] text-slate-600 overflow-hidden">{attr.dataType}</td>
                               </tr>
                             ))}
                           </tbody>
@@ -1355,23 +1355,23 @@ export function MasterDataScaleManagementPage() {
                         <table className="w-full text-[13px]">
                           <thead className="bg-slate-50 border-b border-slate-100">
                             <tr>
-                              <th className="text-left px-4 py-2.5 font-semibold text-slate-600">Thuộc tính</th>
+                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Thuộc tính</th>
                               {stepSources.map(src => (
-                                <th key={src.id} className="text-left px-4 py-2.5 font-semibold text-slate-600">{src.name}</th>
+                                <th key={src.id} className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">{src.name}</th>
                               ))}
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-100 bg-white">
                             {stepAttrs.map(attr => (
                               <tr key={attr.id}>
-                                <td className="px-4 py-2">
+                                <td className="px-4 py-2 text-[13px]">
                                   <span className="text-slate-700 font-medium">{attr.displayName}</span>
                                   <code className="ml-1.5 bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 font-mono text-[12px]">{attr.fieldName}</code>
                                 </td>
                                 {stepSources.map(src => {
                                   const mappedCol = stepConfig?.mapping[attr.fieldName]?.[src.id];
                                   return (
-                                    <td key={src.id} className="px-4 py-2 text-slate-600">
+                                    <td key={src.id} className="px-4 py-2 text-[13px] text-slate-600">
                                       {mappedCol ? (
                                         <code className="font-mono bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100 text-slate-800 text-[12px]">{mappedCol}</code>
                                       ) : (
