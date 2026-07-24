@@ -450,15 +450,6 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
 
   // ─── Rà soát dữ liệu handlers ─────────────────────────────────────────────
 
-  const handleViewDuplicates = (row: Row) => {
-    const dupField = DUPLICATE_KEY_FIELD[config.category];
-    const others = allData.filter(r => r.id !== row.id && getDuplicateKeyValue(r, config.category) === getDuplicateKeyValue(row, config.category));
-    alert(
-      `Bản ghi "${row[dupField]}" (${row.ma}) có thể trùng lặp với:\n` +
-      others.map(r => `- ${r.ma} (${r[dupField]})`).join('\n')
-    );
-  };
-
   const handleOpenEdit = (row: Row) => {
     setEditingRowId(row.id);
     const initial: Record<string, string> = {};
@@ -558,14 +549,14 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
       {activeTab === 'list' && (
         <>
           {/* Tab rà soát trùng lặp: Gộp tự động / Chờ rà soát / Không khớp */}
-          <div className="inline-flex items-center gap-1 p-1 bg-slate-100 rounded-lg w-fit">
+          <div className="inline-flex items-center gap-1 p-1 bg-white border border-slate-200 rounded-lg w-fit">
             <button
               type="button"
               onClick={() => { setActiveReviewCard('auto'); setCurrentPageNum(1); }}
               className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-[13px] font-medium transition-all cursor-pointer ${
                 activeReviewCard === 'auto'
-                  ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
-                  : 'text-slate-500 hover:text-slate-700'
+                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                  : 'bg-white text-slate-500 hover:text-slate-700 border border-transparent'
               }`}
             >
               <GitMerge className="w-4 h-4" />
@@ -576,8 +567,8 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
               onClick={() => { setActiveReviewCard('review'); setCurrentPageNum(1); }}
               className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-[13px] font-medium transition-all cursor-pointer ${
                 activeReviewCard === 'review'
-                  ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
-                  : 'text-slate-500 hover:text-slate-700'
+                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                  : 'bg-white text-slate-500 hover:text-slate-700 border border-transparent'
               }`}
             >
               <Copy className="w-4 h-4" />
@@ -588,8 +579,8 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
               onClick={() => { setActiveReviewCard('mismatch'); setCurrentPageNum(1); }}
               className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-[13px] font-medium transition-all cursor-pointer ${
                 activeReviewCard === 'mismatch'
-                  ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
-                  : 'text-slate-500 hover:text-slate-700'
+                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                  : 'bg-white text-slate-500 hover:text-slate-700 border border-transparent'
               }`}
             >
               <HelpCircle className="w-4 h-4" />
@@ -1003,12 +994,6 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
                   {paginatedData.map((row, index) => {
                     const isDup = duplicateIds.has(row.id);
                     const isIncomplete = incompleteIds.has(row.id);
-                    const dupField = DUPLICATE_KEY_FIELD[config.category];
-                    const missingLabels = cols.filter(c => !row[c.key] || row[c.key].trim() === '').map(c => c.label);
-                    const warningParts: string[] = [];
-                    if (isDup) warningParts.push(`Có thể trùng lặp (trùng "${row[dupField]}" với bản ghi khác)`);
-                    if (isIncomplete) warningParts.push(`Thiếu dữ liệu: ${missingLabels.join(', ')}`);
-                    const warningTooltip = warningParts.join(' • ');
                     return (
                     <tr key={row.id} className={`hover:bg-slate-50/50 transition-colors ${isIncomplete ? 'bg-red-50/40' : isDup ? 'bg-yellow-50/40' : ''}`}>
                       <td className="px-4 py-4 text-center">
@@ -1033,22 +1018,6 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
                       <td className="px-6 py-4 text-center"><PublicBadge status={row.publicStatus} /></td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-center gap-1">
-                          {(() => {
-                            const hasWarning = isDup || isIncomplete;
-                            const canClick = hasWarning && isDup;
-                            return (
-                              <button
-                                disabled={!hasWarning}
-                                onClick={canClick ? () => handleViewDuplicates(row) : undefined}
-                                className={`p-1.5 rounded-lg transition-colors cursor-pointer disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent ${
-                                  isIncomplete ? 'text-red-500 hover:bg-red-50' : 'text-yellow-500 hover:bg-yellow-50'
-                                }`}
-                                title={hasWarning ? warningTooltip : 'Không có cảnh báo'}
-                              >
-                                <AlertTriangle className="w-4 h-4" />
-                              </button>
-                            );
-                          })()}
                           <button
                             onClick={() => setDetailRow(row)}
                             className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"

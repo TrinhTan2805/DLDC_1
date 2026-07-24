@@ -29,7 +29,7 @@ interface SourceGroupRule {
   ruleType: GroupRuleType;
 }
 
-interface WizardSource {
+export interface WizardSource {
   id: string;
   name: string;
   kind: SourceKind;
@@ -104,13 +104,14 @@ interface MergeConfig {
   hardBlockFields: string[];
 }
 
-interface DldcFieldRow {
+export interface DldcFieldRow {
   id: string;
   shared: boolean;
   isPK: boolean;
   tableId: string;
   sourceJoinId: string | null;
   columnName: string;
+  apiFieldName: string;
   displayName: string;
   dataType: FieldDataType;
 }
@@ -295,7 +296,7 @@ interface AttributeForm {
   defaultValue?: string;
 }
 
-interface WizardData {
+export interface WizardData {
   // Step 1
   code?: string;
   name: string;
@@ -336,6 +337,10 @@ interface MasterDataWizardProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: WizardData) => void;
+  // Cho phép nạp sẵn dữ liệu thực thể đang có (VD: mở nhanh từ tab Thiết lập thuộc tính)
+  initialData?: Partial<WizardData>;
+  initialDldcFieldRows?: DldcFieldRow[];
+  initialStep?: number;
 }
 
 const MANAGING_UNITS = [
@@ -509,8 +514,8 @@ const steps = [
   { number: 6, title: 'Phê duyệt', description: 'Xem lại và gửi phê duyệt' },
 ];
 
-export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizardProps) {
-  const [currentStep, setCurrentStep] = useState(1);
+export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData, initialDldcFieldRows, initialStep }: MasterDataWizardProps) {
+  const [currentStep, setCurrentStep] = useState(initialStep || 1);
   const [wizardData, setWizardData] = useState<WizardData>({
     code: '',
     name: '',
@@ -531,7 +536,8 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
     groupRules: {},
     relationships: [],
     approvalReviewer: '',
-    approvalNotes: ''
+    approvalNotes: '',
+    ...initialData,
   });
 
   const [currentAttribute, setCurrentAttribute] = useState<AttributeForm>({
@@ -575,6 +581,8 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
 
   // Step 4 — sub-tabs + test simulation + hard-block input
   const [mergeSubTab, setMergeSubTab] = useState<MergeSubTab>('match');
+  // Màn hình gợi ý ban đầu ở tab "So khớp" — ẩn khi đã có quy tắc hoặc người dùng bấm "Thêm mới quy tắc"
+  const [matchRulesStarted, setMatchRulesStarted] = useState(false);
   const [hardBlockInput, setHardBlockInput] = useState('');
   const [testSample, setTestSample] = useState('');
   const [testRun, setTestRun] = useState(false);
@@ -614,7 +622,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
     const dbId = SOURCE_NAME_TO_DB_ID[sourceName] || '';
     const tables = DLDC_TABLES[dbId] || [];
     const seen = new Set<string>();
-    const options: { fieldName: string; displayName: string }[] = [];
+    const options: { fieldName: string; displayName: string; dataType: FieldDataType }[] = [];
     tables.forEach(t => {
       (DLDC_FIELDS[t.id] || []).forEach(f => {
         if (!seen.has(f.fieldName)) {
@@ -687,47 +695,9 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
     return DATA_TYPE_GROUP[sourceType] !== DATA_TYPE_GROUP[targetType];
   };
 
-  const handleGroupRuleChange = (sourceId: string, attrKey: string, patch: Partial<GroupRule>) => {
-    setWizardData(prev => {
-      const forSource = prev.groupRules[sourceId] || {};
-      const current = forSource[attrKey] || { ruleType: 'latest' as GroupRuleType, timeColumn: '' };
-      return {
-        ...prev,
-        groupRules: {
-          ...prev.groupRules,
-          [sourceId]: { ...forSource, [attrKey]: { ...current, ...patch } },
-        },
-      };
-    });
-  };
-
-  // DLDC step 2 state — chọn nhiều CSDL cùng lúc (chip đa lựa chọn)
-  const [dldcSelectedDbIds, setDldcSelectedDbIds] = useState<string[]>([]);
-  const [dldcFieldRows, setDldcFieldRows] = useState<DldcFieldRow[]>([]);
-
-  // Gộp trường của tất cả bảng thuộc các CSDL đang chọn; trùng tên trường giữa
-  // các bảng khác nhau được giữ lại như 2 dòng riêng (đánh dấu tên bảng để phân biệt)
-  // thay vì loại bỏ, vì cùng tên nhưng khác bảng có thể mang ngữ nghĩa khác nhau.
-  const buildDldcFieldRows = (dbIds: string[]): DldcFieldRow[] => {
-    const entries = dbIds.flatMap(dbId => (DLDC_TABLES[dbId] || []).flatMap(table =>
-      (DLDC_FIELDS[table.id] || []).map(f => ({ table, field: f }))
-    ));
-    const nameCounts: Record<string, number> = {};
-    entries.forEach(({ field }) => { nameCounts[field.fieldName] = (nameCounts[field.fieldName] || 0) + 1; });
-    return entries.map(({ table, field }, i) => {
-      const isDup = nameCounts[field.fieldName] > 1;
-      return {
-        id: `fr-${table.id}-${field.fieldName}-${i}`,
-        shared: false,
-        isPK: false,
-        tableId: table.id,
-        sourceJoinId: null,
-        columnName: isDup ? `${field.fieldName}__${table.id}` : field.fieldName,
-        displayName: isDup ? `${field.displayName} (${table.displayName})` : field.displayName,
-        dataType: field.dataType,
-      };
-    });
-  };
+  // DLDC step 2 state — mọi nguồn đã đăng ký ở Bước 1 đều tự động được gộp trường,
+  // các chip nguồn chỉ hiển thị thông tin, không cho chọn/bỏ chọn nữa.
+  const [dldcFieldRows, setDldcFieldRows] = useState<DldcFieldRow[]>(initialDldcFieldRows || []);
 
   const handleToggleAllDldcShared = () => {
     setDldcFieldRows(prev => {
@@ -736,15 +706,9 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
     });
   };
 
-  const handleDldcDbToggle = (dbId: string) => {
-    const next = dldcSelectedDbIds.includes(dbId)
-      ? dldcSelectedDbIds.filter(id => id !== dbId)
-      : [...dldcSelectedDbIds, dbId];
-    setDldcSelectedDbIds(next);
-    setDldcFieldRows(buildDldcFieldRows(next));
-  };
-
-  const dldcAvailableTables = dldcSelectedDbIds.flatMap(id => DLDC_TABLES[id] || []);
+  const dldcSelectedDbIds = Array.from(new Set(
+    wizardData.sources.map(s => SOURCE_NAME_TO_DB_ID[s.name]).filter((id): id is string => !!id)
+  ));
 
   const handleDldcFieldToggle = (rowId: string, field: 'shared' | 'isPK') => {
     setDldcFieldRows(prev => prev.map(r => r.id === rowId ? { ...r, [field]: !r[field] } : r));
@@ -752,6 +716,21 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
 
   const handleDldcRemoveRow = (rowId: string) => {
     setDldcFieldRows(prev => prev.filter(r => r.id !== rowId));
+  };
+
+  // Thêm một dòng trống — người dùng chọn Nguồn (Table) và Trường gốc ngay trong bảng
+  const handleAddDldcFieldRow = () => {
+    setDldcFieldRows(prev => [...prev, {
+      id: `fr-${Date.now()}`,
+      shared: true,
+      isPK: false,
+      tableId: '',
+      sourceJoinId: null,
+      columnName: '',
+      apiFieldName: '',
+      displayName: '',
+      dataType: 'string',
+    }]);
   };
 
   // ── Step 5 handlers ──
@@ -839,7 +818,6 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
 
   // Nguồn đã đăng ký ở Bước 1
   const registeredSources = wizardData.sources;
-  const oneToManySources = registeredSources.filter(s => s.grain === '1:n');
   // Chỉ hiện tab "Hợp nhất giá trị" khi có ≥2 nguồn
   const showSurvivorTab = registeredSources.length >= 2;
   // Nếu tab survivor bị ẩn nhưng đang chọn → tự chuyển về 'match'
@@ -859,7 +837,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
   };
 
   const availableFields = wizardData.dataSource === 'dldc'
-    ? dldcFieldRows.filter(r => r.shared).map(r => ({ fieldName: r.columnName, displayName: r.displayName, dataType: r.dataType }))
+    ? dldcFieldRows.filter(r => r.shared && r.columnName).map(r => ({ fieldName: r.apiFieldName || r.columnName, displayName: r.displayName, dataType: r.dataType }))
     : wizardData.attributes.map(a => ({ fieldName: a.fieldName, displayName: a.displayName, dataType: a.dataType }));
 
   const hasMappingMismatch = availableFields.some(attr =>
@@ -868,7 +846,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
 
   const sourceEntityFields = [
     ...(wizardData.dataSource === 'dldc'
-      ? dldcFieldRows.filter(r => r.shared).map(r => ({ name: r.columnName, label: r.displayName }))
+      ? dldcFieldRows.filter(r => r.shared).map(r => ({ name: r.apiFieldName || r.columnName, label: r.displayName }))
       : wizardData.attributes.map(a => ({ name: a.fieldName, label: a.displayName }))),
     ...(identifierConfig.prefix ? [{ name: 'identifier_code', label: 'Mã định danh' }] : []),
   ];
@@ -942,7 +920,22 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
       alert('Vui lòng nhập ghi chú phê duyệt');
       return;
     }
-    onSubmit(wizardData);
+    // Chế độ DLDC không đồng bộ dldcFieldRows vào wizardData.attributes theo thời gian thực
+    // (khác chế độ thủ công) — gộp lại ở đây để onSubmit luôn trả về đủ danh sách thuộc tính.
+    const finalData: WizardData = wizardData.dataSource === 'dldc'
+      ? {
+          ...wizardData,
+          attributes: dldcFieldRows.filter(r => r.shared).map(r => ({
+            fieldName: r.apiFieldName || r.columnName,
+            displayName: r.displayName,
+            dataType: r.dataType,
+            required: false,
+            isKey: r.isPK,
+            defaultValue: undefined,
+          })),
+        }
+      : wizardData;
+    onSubmit(finalData);
     onClose();
   };
 
@@ -1584,31 +1577,25 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
                         <p className="text-[13px] text-slate-400 text-center py-4">Chưa đăng ký nguồn dữ liệu nào ở Bước 1</p>
                       ) : (
                         <div className="flex flex-wrap gap-2">
-                          {registeredSources.map(src => {
-                            const dbId = SOURCE_NAME_TO_DB_ID[src.name] || '';
-                            const isActive = !!dbId && dldcSelectedDbIds.includes(dbId);
-                            return (
-                              <button
-                                key={src.id}
-                                type="button"
-                                onClick={() => handleDldcDbToggle(dbId)}
-                                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border text-[13px] font-medium transition-colors ${isActive ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}
-                              >
-                                <Database className="w-3.5 h-3.5" />
-                                {src.name}
-                                <span className={`px-1.5 py-0.5 rounded-full border text-[13px] font-medium ${SOURCE_KIND_COLORS[src.kind]}`}>
-                                  {SOURCE_KIND_LABELS[src.kind]}
-                                </span>
-                                <span className={`px-1.5 py-0.5 rounded-full border text-[13px] font-medium ${SOURCE_GRAIN_COLORS[src.grain]}`}>
-                                  {src.grain}
-                                </span>
-                              </button>
-                            );
-                          })}
+                          {registeredSources.map(src => (
+                            <span
+                              key={src.id}
+                              className="flex items-center gap-2 px-3.5 py-2 rounded-xl border border-blue-600 bg-blue-50 text-blue-700 text-[13px] font-medium"
+                            >
+                              <Database className="w-3.5 h-3.5" />
+                              {src.name}
+                              <span className={`px-1.5 py-0.5 rounded-full border text-[13px] font-medium ${SOURCE_KIND_COLORS[src.kind]}`}>
+                                {SOURCE_KIND_LABELS[src.kind]}
+                              </span>
+                              <span className={`px-1.5 py-0.5 rounded-full border text-[13px] font-medium ${SOURCE_GRAIN_COLORS[src.grain]}`}>
+                                {src.grain}
+                              </span>
+                            </span>
+                          ))}
                         </div>
                       )}
 
-                      {/* Info row — hiển thị các CSDL đang chọn, trường sẽ được gộp từ mọi bảng thuộc các CSDL này */}
+                      {/* Info row — trường sẽ được gộp từ mọi bảng thuộc tất cả các nguồn đã đăng ký */}
                       {dldcSelectedDbIds.length > 0 && (
                         <div className="px-4 py-2.5 bg-blue-50 border border-blue-100 rounded-lg flex items-center gap-2">
                           <Database className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
@@ -1620,8 +1607,8 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
                     </div>
                   </div>
 
-                  {/* Field selection table */}
-                  {dldcFieldRows.length > 0 && (
+                  {/* Field selection table — bấm "Thêm trường" để thêm 1 dòng, chọn Nguồn/Trường gốc ngay trong bảng */}
+                  {registeredSources.length > 0 && (
                     <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
                       <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -1631,12 +1618,30 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
                             {dldcFieldRows.filter(r => r.shared).length}/{dldcFieldRows.length} trường được chọn
                           </span>
                         </div>
+                        <button
+                          type="button"
+                          onClick={handleAddDldcFieldRow}
+                          className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-200 text-blue-600 text-[13px] font-medium rounded-lg hover:bg-blue-50 transition-colors"
+                        >
+                          <Plus className="w-3.5 h-3.5" /> Thêm trường
+                        </button>
                       </div>
+
                       <div className="overflow-x-auto">
-                        <table className="w-full text-left text-[13px]">
+                        <table className="w-full text-left text-[13px]" style={{ tableLayout: 'fixed' }}>
+                          <colgroup>
+                            <col style={{ width: '36px' }} />
+                            <col style={{ width: '36px' }} />
+                            <col style={{ width: '16%' }} />
+                            <col style={{ width: '16%' }} />
+                            <col style={{ width: '14%' }} />
+                            <col style={{ width: '18%' }} />
+                            <col style={{ width: '110px' }} />
+                            <col style={{ width: '36px' }} />
+                          </colgroup>
                           <thead className="bg-slate-50 border-b border-slate-100">
                             <tr>
-                              <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center w-16">
+                              <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center">
                                 <input
                                   type="checkbox"
                                   title="Chọn / Bỏ chọn tất cả"
@@ -1645,19 +1650,20 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
                                   className="rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 cursor-pointer"
                                 />
                               </th>
-                              <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center w-12">PK</th>
-                              <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Nguồn (Table)</th>
-                              <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Trường gốc (Column)</th>
-                              <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Tên hiển thị</th>
-                              <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Kiểu dữ liệu</th>
-                              <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center w-12">Xóa</th>
+                              <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center">PK</th>
+                              <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 truncate">Nguồn (Table)</th>
+                              <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 truncate">Trường gốc (Column)</th>
+                              <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 truncate">Tên cột</th>
+                              <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 truncate">Tên hiển thị</th>
+                              <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Kiểu dữ liệu</th>
+                              <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center">Xóa</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-100 bg-white">
                             {dldcFieldRows.length === 0 ? (
                               <tr>
-                                <td colSpan={7} className="px-5 py-8 text-center text-[13px] text-slate-400">
-                                  Chọn bảng dữ liệu để tải danh sách trường
+                                <td colSpan={8} className="px-5 py-8 text-center text-[13px] text-slate-400">
+                                  Chưa có trường nào được thêm. Chọn bảng và trường ở trên rồi bấm "Thêm trường".
                                 </td>
                               </tr>
                             ) : (
@@ -1683,31 +1689,55 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
                                     <select
                                       value={row.tableId}
                                       onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-                                        const newTableId = e.target.value;
-                                        setDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, tableId: newTableId, columnName: '' } : r));
+                                        const newSourceId = e.target.value;
+                                        setDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, tableId: newSourceId, columnName: '', displayName: '' } : r));
                                       }}
                                       className="w-full text-[13px] border border-slate-200 rounded-lg px-2 py-1 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
                                     >
-                                      {dldcAvailableTables.map(t => (
-                                        <option key={t.id} value={t.id}>{t.displayName}</option>
+                                      <option value="">-- Chọn nguồn --</option>
+                                      {registeredSources.map(s => (
+                                        <option key={s.id} value={s.id}>{s.name}</option>
                                       ))}
                                     </select>
                                   </td>
                                   <td className="px-2 py-1.5">
-                                    <select
-                                      value={row.columnName}
-                                      onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-                                        const colName = e.target.value;
-                                        const fieldDef = (DLDC_FIELDS[row.tableId] || []).find(f => f.fieldName === colName);
-                                        setDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, columnName: colName, dataType: fieldDef?.dataType || r.dataType } : r));
-                                      }}
+                                    {(() => {
+                                      const rowSource = registeredSources.find(s => s.id === row.tableId);
+                                      const fieldOptions = rowSource ? getSourceFieldOptions(rowSource.name) : [];
+                                      return (
+                                        <select
+                                          value={row.columnName}
+                                          disabled={!rowSource}
+                                          onChange={(e: ChangeEvent<HTMLSelectElement>) => {
+                                            const colName = e.target.value;
+                                            const fieldDef = fieldOptions.find(f => f.fieldName === colName);
+                                            const isDup = dldcFieldRows.some(r => r.id !== row.id && r.columnName === colName);
+                                            setDldcFieldRows(prev => prev.map(r => r.id === row.id ? {
+                                              ...r,
+                                              columnName: colName,
+                                              apiFieldName: colName,
+                                              dataType: fieldDef?.dataType || r.dataType,
+                                              displayName: fieldDef ? (isDup && rowSource ? `${fieldDef.displayName} (${rowSource.name})` : fieldDef.displayName) : r.displayName,
+                                            } : r));
+                                          }}
+                                          className="w-full text-[13px] border border-slate-200 rounded-lg px-2 py-1 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 disabled:bg-slate-100 disabled:cursor-not-allowed"
+                                        >
+                                          <option value="">-- Chọn --</option>
+                                          {fieldOptions.map(f => (
+                                            <option key={f.fieldName} value={f.fieldName}>{f.displayName} ({f.fieldName})</option>
+                                          ))}
+                                        </select>
+                                      );
+                                    })()}
+                                  </td>
+                                  <td className="px-2 py-1.5">
+                                    <input
+                                      type="text"
+                                      value={row.apiFieldName}
+                                      onChange={(e: ChangeEvent<HTMLInputElement>) => setDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, apiFieldName: e.target.value } : r))}
                                       className="w-full text-[13px] border border-slate-200 rounded-lg px-2 py-1 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                                    >
-                                      <option value="">-- Chọn --</option>
-                                      {(DLDC_FIELDS[row.tableId] || []).map(f => (
-                                        <option key={f.fieldName} value={f.fieldName}>{f.fieldName}</option>
-                                      ))}
-                                    </select>
+                                      placeholder="Tên cột"
+                                    />
                                   </td>
                                   <td className="px-2 py-1.5">
                                     <input
@@ -1719,15 +1749,9 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
                                     />
                                   </td>
                                   <td className="px-2 py-1.5">
-                                    <select
-                                      value={row.dataType}
-                                      onChange={(e: ChangeEvent<HTMLSelectElement>) => setDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, dataType: e.target.value as FieldDataType } : r))}
-                                      className="w-full text-[13px] border border-slate-200 rounded-lg px-2 py-1 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                                    >
-                                      {FIELD_DATA_TYPES.map(dt => (
-                                        <option key={dt.value} value={dt.value}>{dt.label}</option>
-                                      ))}
-                                    </select>
+                                    <span className="inline-block w-full text-[13px] px-2 py-1 rounded-lg bg-slate-50 text-slate-600 border border-slate-100 whitespace-nowrap overflow-hidden text-ellipsis">
+                                      {FIELD_DATA_TYPES.find(dt => dt.value === row.dataType)?.label || row.dataType}
+                                    </span>
                                   </td>
                                   <td className="px-3 py-2.5 text-center">
                                     <button type="button" onClick={() => handleDldcRemoveRow(row.id)} className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors">
@@ -1915,133 +1939,58 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
                   </div>
                 )}
 
-                <div className="p-4">
-                  {availableFields.length === 0 ? (
-                    <p className="text-[13px] text-slate-400 text-center py-6">Chưa có thuộc tính để ánh xạ — hãy chọn bảng/trường hoặc thêm thuộc tính ở trên</p>
-                  ) : registeredSources.length === 0 ? (
-                    <p className="text-[13px] text-slate-400 text-center py-6">Chưa đăng ký nguồn dữ liệu ở Bước 1</p>
-                  ) : (
-                    <div className="border border-slate-100 rounded-lg overflow-x-auto">
-                      <table className="w-full text-[13px]">
-                        <thead className="bg-slate-50 border-b border-slate-100">
-                          <tr>
-                            <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Thuộc tính</th>
-                            {registeredSources.map(src => (
-                              <th key={src.id} className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">{src.name}</th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-50 bg-white">
-                          {availableFields.map(attr => (
-                            <tr key={attr.fieldName}>
-                              <td className="px-3 py-2">
-                                <span className="text-[13px] font-medium text-slate-700">{attr.displayName}</span>
-                                <code className="ml-1.5 text-[13px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{attr.fieldName}</code>
-                              </td>
-                              {registeredSources.map(src => {
-                                const selectedColumn = wizardData.mapping[attr.fieldName]?.[src.id] || '';
-                                const mismatch = isMappingMismatch(attr.dataType, selectedColumn);
-                                return (
-                                  <td key={src.id} className="px-2 py-1.5">
-                                    <select
-                                      value={selectedColumn}
-                                      onChange={(e: ChangeEvent<HTMLSelectElement>) => handleMappingChange(attr.fieldName, src.id, e.target.value)}
-                                      className={`w-full border rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 ${mismatch ? 'border-amber-400 focus:ring-amber-400/20' : 'border-slate-200 focus:ring-blue-500/20 focus:border-blue-400'}`}
-                                    >
-                                      <option value="">—</option>
-                                      {MOCK_SOURCE_COLUMNS.map(col => <option key={col.name} value={col.name}>{col.name}</option>)}
-                                    </select>
-                                    {mismatch && (
-                                      <div className="flex items-center gap-1 mt-1 text-[13px] text-amber-700">
-                                        <AlertTriangle className="w-3 h-3 flex-shrink-0" />
-                                        <span>Kiểu nguồn ({MOCK_SOURCE_COLUMNS.find(c => c.name === selectedColumn)?.dataType}) ≠ Đích ({attr.dataType})</span>
-                                      </div>
-                                    )}
-                                  </td>
-                                );
-                              })}
-                            </tr>
+                {availableFields.length === 0 ? (
+                  <p className="text-[13px] text-slate-400 text-center py-6 px-4">Chưa có thuộc tính để ánh xạ — hãy chọn bảng/trường hoặc thêm thuộc tính ở trên</p>
+                ) : registeredSources.length === 0 ? (
+                  <p className="text-[13px] text-slate-400 text-center py-6 px-4">Chưa đăng ký nguồn dữ liệu ở Bước 1</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-[13px]">
+                      <thead className="bg-slate-50 border-b border-slate-100">
+                        <tr>
+                          <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Thuộc tính</th>
+                          {registeredSources.map(src => (
+                            <th key={src.id} className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">{src.name}</th>
                           ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-50 bg-white">
+                        {availableFields.map(attr => (
+                          <tr key={attr.fieldName}>
+                            <td className="px-3 py-2">
+                              <span className="text-[13px] font-medium text-slate-700">{attr.displayName}</span>
+                              <code className="ml-1.5 text-[13px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{attr.fieldName}</code>
+                            </td>
+                            {registeredSources.map(src => {
+                              const selectedColumn = wizardData.mapping[attr.fieldName]?.[src.id] || '';
+                              const mismatch = isMappingMismatch(attr.dataType, selectedColumn);
+                              return (
+                                <td key={src.id} className="px-2 py-1.5">
+                                  <select
+                                    value={selectedColumn}
+                                    onChange={(e: ChangeEvent<HTMLSelectElement>) => handleMappingChange(attr.fieldName, src.id, e.target.value)}
+                                    className={`w-full border rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 ${mismatch ? 'border-amber-400 focus:ring-amber-400/20' : 'border-slate-200 focus:ring-blue-500/20 focus:border-blue-400'}`}
+                                  >
+                                    <option value="">—</option>
+                                    {MOCK_SOURCE_COLUMNS.map(col => <option key={col.name} value={col.name}>{col.name}</option>)}
+                                  </select>
+                                  {mismatch && (
+                                    <div className="flex items-center gap-1 mt-1 text-[13px] text-amber-700">
+                                      <AlertTriangle className="w-3 h-3 flex-shrink-0" />
+                                      <span>Kiểu nguồn ({MOCK_SOURCE_COLUMNS.find(c => c.name === selectedColumn)?.dataType}) ≠ Đích ({attr.dataType})</span>
+                                    </div>
+                                  )}
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
 
-              {/* ── Khối: Gom nguồn 1:n ── (chỉ hiện khi có ≥1 nguồn grain 1:n) */}
-              {oneToManySources.length > 0 && (
-                <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
-                  <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Network className="w-4 h-4 text-slate-500" />
-                      <p className="text-[13px] font-semibold text-slate-700">Gom nguồn 1:n</p>
-                    </div>
-                    <span className="text-[13px] px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full font-medium">
-                      {oneToManySources.length} nguồn 1:n
-                    </span>
-                  </div>
-                  <div className="p-4 space-y-4">
-                    <p className="text-[13px] text-slate-500">Với nguồn có độ mịn 1:n, chọn quy tắc gom nhiều bản ghi thành một giá trị cho từng thuộc tính</p>
-                    {oneToManySources.map(src => (
-                      <div key={src.id} className="border border-slate-200 rounded-xl overflow-hidden">
-                        <div className="px-4 py-2.5 bg-emerald-50 border-b border-emerald-100 flex items-center gap-2">
-                          <span className="text-[13px] font-semibold text-emerald-800">Nguồn (1:n): {src.name}</span>
-                        </div>
-                        {availableFields.length === 0 ? (
-                          <p className="text-[13px] text-slate-400 text-center py-6">Chưa có thuộc tính để cấu hình</p>
-                        ) : (
-                          <div className="overflow-x-auto">
-                            <table className="w-full text-[13px]">
-                              <thead className="bg-slate-50 border-b border-slate-100">
-                                <tr>
-                                  <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Thuộc tính</th>
-                                  <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Rule gom</th>
-                                  <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Cột mốc thời gian</th>
-                                </tr>
-                              </thead>
-                              <tbody className="divide-y divide-slate-50 bg-white">
-                                {availableFields.map(attr => {
-                                  const gr = wizardData.groupRules[src.id]?.[attr.fieldName];
-                                  return (
-                                    <tr key={attr.fieldName}>
-                                      <td className="px-3 py-2">
-                                        <span className="text-[13px] font-medium text-slate-700">{attr.displayName}</span>
-                                        <code className="ml-1.5 text-[13px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{attr.fieldName}</code>
-                                      </td>
-                                      <td className="px-2 py-1.5">
-                                        <select
-                                          value={gr?.ruleType || 'latest'}
-                                          onChange={(e: ChangeEvent<HTMLSelectElement>) => handleGroupRuleChange(src.id, attr.fieldName, { ruleType: e.target.value as GroupRuleType })}
-                                          className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                                        >
-                                          {(Object.entries(GROUP_RULE_LABELS) as [GroupRuleType, string][]).map(([val, label]) => (
-                                            <option key={val} value={val}>{label}</option>
-                                          ))}
-                                        </select>
-                                      </td>
-                                      <td className="px-2 py-1.5">
-                                        <select
-                                          value={gr?.timeColumn || ''}
-                                          onChange={(e: ChangeEvent<HTMLSelectElement>) => handleGroupRuleChange(src.id, attr.fieldName, { timeColumn: e.target.value })}
-                                          className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                                        >
-                                          <option value="">—</option>
-                                          {MOCK_SOURCE_COLUMNS.map(col => <option key={col.name} value={col.name}>{col.name}</option>)}
-                                        </select>
-                                      </td>
-                                    </tr>
-                                  );
-                                })}
-                              </tbody>
-                            </table>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           )}
 
@@ -2085,6 +2034,23 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
               {/* ── Tab 1: So khớp ── */}
               {mergeSubTab === 'match' && (
                 <div className="space-y-4">
+                {matchingRules.length === 0 && !matchRulesStarted ? (
+                  <div className="border border-slate-200 rounded-xl bg-white p-10 flex flex-col items-center text-center gap-3">
+                    <GitMerge className="w-10 h-10 text-slate-300" />
+                    <p className="text-[13px] text-slate-500 max-w-md">
+                      Chưa có quy tắc so khớp thuộc tính được tổng hợp từ nhiều nguồn, thêm mới ngay
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setMatchRulesStarted(true)}
+                      className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-[13px] font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Thêm mới quy tắc
+                    </button>
+                  </div>
+                ) : (
+                <>
                   {/* Ngưỡng */}
                   <div className="border border-slate-200 rounded-xl bg-white p-4 grid grid-cols-2 gap-4">
                     <div>
@@ -2304,6 +2270,8 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
                       </button>
                     </div>
                   </div>
+                </>
+                )}
                 </div>
               )}
 
@@ -2325,7 +2293,6 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
                               <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Trường</th>
                               <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Chiến lược</th>
                               <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Nguồn dữ liệu</th>
-                              <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Xử lý null</th>
                               <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Khi hết vẫn trống</th>
                             </tr>
                           </thead>
@@ -2380,16 +2347,6 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit }: MasterDataWizard
                                       );
                                     })()
                                   )}
-                                </td>
-                                <td className="px-2 py-1.5">
-                                  <select
-                                    value={rule.nullHandling}
-                                    onChange={(e: ChangeEvent<HTMLSelectElement>) => setExtractionRules(prev => prev.map(r => r.id === rule.id ? { ...r, nullHandling: e.target.value as NullHandling } : r))}
-                                    className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                                  >
-                                    <option value="next">Nguồn kế</option>
-                                    <option value="skip">Bỏ qua</option>
-                                  </select>
                                 </td>
                                 <td className="px-2 py-1.5">
                                   <select

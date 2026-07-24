@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Settings, Sliders, GitCompare, Network, Key, Plus, Edit, Trash2, X, Search, Filter, Circle, CheckSquare, ChevronDown, Eye, FileText, Clock, XCircle, Send } from 'lucide-react';
-import { AttributesManagementTab } from './AttributesManagementTab';
+import { Settings, Sliders, GitCompare, Network, Key, Plus, Edit, Trash2, X, Search, Filter, Circle, CheckSquare, ChevronDown, Eye, FileText, Clock, XCircle, Send, AlertCircle, Check, ArrowRight } from 'lucide-react';
+import { AttributesManagementTab, defaultAttributes, DLDC_ENTITY_DETAIL_CONFIGS } from './AttributesManagementTab';
 import { MasterDataWizard } from './MasterDataWizard';
 import { MergeRulesManagementTab } from './MergeRulesManagementTab';
 import { EntityRelationshipsTab } from './EntityRelationshipsTab';
@@ -175,6 +175,16 @@ const lifecycleLabels: Record<LifecycleStatus, { label: string; color: string }>
   approved: { label: 'Đã phê duyệt', color: 'bg-green-100 text-green-700' },
   rejected: { label: 'Từ chối', color: 'bg-red-100 text-red-700' }
 };
+
+// Quy trình 6 bước — giống hệt các bước của wizard Tạo mới/Chỉnh sửa dữ liệu chủ
+const VIEW_STEPS = [
+  { number: 1, title: 'Khởi tạo dữ liệu chủ' },
+  { number: 2, title: 'Tạo thuộc tính' },
+  { number: 3, title: 'Quy tắc hợp nhất' },
+  { number: 4, title: 'Thiết lập quan hệ' },
+  { number: 5, title: 'Định danh duy nhất' },
+  { number: 6, title: 'Phê duyệt' },
+];
 
 const MANAGING_UNITS = [
   'Cục Hành chính tư pháp',
@@ -355,6 +365,7 @@ export function MasterDataScaleManagementPage() {
   };
 
   const [viewingEntity, setViewingEntity] = useState<MasterDataEntity | null>(null);
+  const [viewStep, setViewStep] = useState(1);
 
   const [approvalEntity, setApprovalEntity] = useState<MasterDataEntity | null>(null);
   const [selectedApprover, setSelectedApprover] = useState('');
@@ -706,7 +717,7 @@ export function MasterDataScaleManagementPage() {
                             <td className="px-6 py-4">
                               <div className="flex items-center justify-center gap-1.5">
                                 <button
-                                  onClick={() => setViewingEntity(entity)}
+                                  onClick={() => { setViewingEntity(entity); setViewStep(1); }}
                                   className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 cursor-pointer transition-colors"
                                   title="Xem chi tiết"
                                 >
@@ -1135,7 +1146,39 @@ export function MasterDataScaleManagementPage() {
                 </button>
               </div>
 
+              {/* Stepper — giống quy trình 6 bước của Tạo mới/Chỉnh sửa */}
+              <div className="px-6 py-4 border-b border-slate-200 bg-slate-50 shrink-0">
+                <div className="flex items-center justify-between">
+                  {VIEW_STEPS.map((step, index) => (
+                    <div key={step.number} className="flex items-center flex-1">
+                      <div className="flex flex-col items-center flex-1">
+                        <button
+                          type="button"
+                          onClick={() => setViewStep(step.number)}
+                          className={`w-8 h-8 rounded-full flex items-center justify-center text-[12px] transition-colors cursor-pointer ${
+                            viewStep === step.number
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-green-600 text-white hover:bg-green-700'
+                          }`}
+                          title={step.title}
+                        >
+                          {viewStep === step.number ? step.number : <Check className="w-4 h-4" />}
+                        </button>
+                        <p className={`text-[12px] mt-1.5 text-center ${viewStep === step.number ? 'text-blue-600 font-medium' : 'text-slate-500'}`}>
+                          {step.title}
+                        </p>
+                      </div>
+                      {index < VIEW_STEPS.length - 1 && (
+                        <div className="flex-1 h-0.5 bg-slate-200 mx-1 mt-[-22px]" />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <div className="p-6 overflow-y-auto flex-1 space-y-4 text-[13px]">
+                {viewStep === 1 && (
+                <>
                 {/* Mã thực thể */}
                 <div>
                   <label className="block text-[13px] font-medium text-slate-500 mb-1">Mã thực thể</label>
@@ -1149,22 +1192,6 @@ export function MasterDataScaleManagementPage() {
                   <label className="block text-[13px] font-medium text-slate-500 mb-1">Tên dữ liệu chủ</label>
                   <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-800">
                     {viewingEntity.name}
-                  </div>
-                </div>
-
-                {/* Đơn vị chủ quản */}
-                <div>
-                  <label className="block text-[13px] font-medium text-slate-500 mb-1">Đơn vị chủ quản</label>
-                  <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-800">
-                    {viewingEntity.managingAgency || <span className="text-slate-400 font-normal italic">Chưa cập nhật</span>}
-                  </div>
-                </div>
-
-                {/* Tên cơ sở dữ liệu / Hệ thống */}
-                <div>
-                  <label className="block text-[13px] font-medium text-slate-500 mb-1">Tên cơ sở dữ liệu / Hệ thống</label>
-                  <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-800">
-                    {viewingEntity.systemName || <span className="text-slate-400 font-normal italic">Chưa cập nhật</span>}
                   </div>
                 </div>
 
@@ -1184,11 +1211,27 @@ export function MasterDataScaleManagementPage() {
                   </div>
                 </div>
 
+                {/* Đơn vị chủ quản */}
+                <div>
+                  <label className="block text-[13px] font-medium text-slate-500 mb-1">Đơn vị chủ quản</label>
+                  <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-800">
+                    {viewingEntity.managingAgency || <span className="text-slate-400 font-normal italic">Chưa cập nhật</span>}
+                  </div>
+                </div>
+
                 {/* Mô tả đối tượng */}
                 <div>
                   <label className="block text-[13px] font-medium text-slate-500 mb-1">Mô tả đối tượng</label>
                   <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] text-slate-800 min-h-[72px] whitespace-pre-wrap">
                     {viewingEntity.description || <span className="text-slate-400 italic">Chưa có mô tả</span>}
+                  </div>
+                </div>
+
+                {/* Tên cơ sở dữ liệu / Hệ thống */}
+                <div>
+                  <label className="block text-[13px] font-medium text-slate-500 mb-1">Tên cơ sở dữ liệu / Hệ thống</label>
+                  <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-800">
+                    {viewingEntity.systemName || <span className="text-slate-400 font-normal italic">Chưa cập nhật</span>}
                   </div>
                 </div>
 
@@ -1226,7 +1269,155 @@ export function MasterDataScaleManagementPage() {
                     </div>
                   )}
                 </div>
+                </>
+                )}
 
+                {/* Bước 2: Tạo thuộc tính */}
+                {viewStep === 2 && (() => {
+                  const stepAttrs = defaultAttributes[viewingEntity.id] || [];
+                  const stepConfig = DLDC_ENTITY_DETAIL_CONFIGS[viewingEntity.id];
+                  const stepSources = stepConfig?.sources || [];
+                  return (
+                  <>
+                  <div className="border border-slate-200 rounded-xl overflow-hidden">
+                    <div className="px-4 py-3 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-slate-500" />
+                      <p className="text-[13px] font-semibold text-slate-700">Danh sách thuộc tính</p>
+                      <span className="text-[12px] px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">
+                        {stepAttrs.length} trường
+                      </span>
+                    </div>
+                    {stepAttrs.length === 0 ? (
+                      <p className="text-[13px] text-slate-400 text-center py-8">Chưa có thuộc tính nào được cấu hình cho thực thể này</p>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-[13px]" style={{ tableLayout: 'fixed' }}>
+                          <colgroup>
+                            <col style={{ width: '6%' }} />
+                            <col style={{ width: '6%' }} />
+                            <col style={{ width: '16%' }} />
+                            <col style={{ width: '16%' }} />
+                            <col style={{ width: '16%' }} />
+                            <col style={{ width: '20%' }} />
+                            <col style={{ width: '20%' }} />
+                          </colgroup>
+                          <thead className="bg-slate-50 border-b border-slate-100">
+                            <tr>
+                              <th className="text-center px-3 py-2.5">
+                                <input type="checkbox" checked disabled className="rounded border-slate-300 text-blue-600 cursor-not-allowed" />
+                              </th>
+                              <th className="text-center px-3 py-2.5 font-semibold text-slate-600">PK</th>
+                              <th className="text-left px-4 py-2.5 font-semibold text-slate-600">Nguồn (Table)</th>
+                              <th className="text-left px-4 py-2.5 font-semibold text-slate-600">Trường gốc (Column)</th>
+                              <th className="text-left px-4 py-2.5 font-semibold text-slate-600">Tên cột</th>
+                              <th className="text-left px-4 py-2.5 font-semibold text-slate-600">Tên hiển thị</th>
+                              <th className="text-left px-4 py-2.5 font-semibold text-slate-600">Kiểu dữ liệu</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 bg-white">
+                            {stepAttrs.map(attr => (
+                              <tr key={attr.id}>
+                                <td className="text-center px-3 py-2">
+                                  <input type="checkbox" checked disabled className="rounded border-slate-300 text-blue-600 cursor-not-allowed" />
+                                </td>
+                                <td className="text-center px-3 py-2">
+                                  <input type="checkbox" checked={attr.unique} disabled
+                                    className="w-4 h-4 rounded text-amber-500 border-slate-300 cursor-not-allowed accent-amber-500" />
+                                </td>
+                                <td className="px-4 py-2 text-slate-900 font-medium overflow-hidden">{attr.tableName || '—'}</td>
+                                <td className="px-4 py-2 overflow-hidden">
+                                  <code className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700 font-mono text-[12px]">{attr.fieldName}</code>
+                                </td>
+                                <td className="px-4 py-2 text-slate-700 overflow-hidden">{attr.fieldName}</td>
+                                <td className="px-4 py-2 text-slate-900 font-medium overflow-hidden">{attr.displayName}</td>
+                                <td className="px-4 py-2 text-slate-600 overflow-hidden">{attr.dataType}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Ánh xạ cột nguồn → thuộc tính — giống mục Tạo thuộc tính ở Tạo mới/Chỉnh sửa dữ liệu chủ */}
+                  <div className="border border-slate-200 rounded-xl overflow-hidden mt-4">
+                    <div className="px-4 py-3 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <ArrowRight className="w-4 h-4 text-slate-500" />
+                        <p className="text-[13px] font-semibold text-slate-700">Ánh xạ cột nguồn</p>
+                      </div>
+                      <span className="text-[13px] text-slate-500">{stepSources.length} nguồn</span>
+                    </div>
+                    {stepAttrs.length === 0 || stepSources.length === 0 ? (
+                      <p className="text-[13px] text-slate-400 text-center py-8">Chưa có ánh xạ nguồn dữ liệu nào được cấu hình cho thực thể này</p>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-[13px]">
+                          <thead className="bg-slate-50 border-b border-slate-100">
+                            <tr>
+                              <th className="text-left px-4 py-2.5 font-semibold text-slate-600">Thuộc tính</th>
+                              {stepSources.map(src => (
+                                <th key={src.id} className="text-left px-4 py-2.5 font-semibold text-slate-600">{src.name}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 bg-white">
+                            {stepAttrs.map(attr => (
+                              <tr key={attr.id}>
+                                <td className="px-4 py-2">
+                                  <span className="text-slate-700 font-medium">{attr.displayName}</span>
+                                  <code className="ml-1.5 bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 font-mono text-[12px]">{attr.fieldName}</code>
+                                </td>
+                                {stepSources.map(src => {
+                                  const mappedCol = stepConfig?.mapping[attr.fieldName]?.[src.id];
+                                  return (
+                                    <td key={src.id} className="px-4 py-2 text-slate-600">
+                                      {mappedCol ? (
+                                        <code className="font-mono bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100 text-slate-800 text-[12px]">{mappedCol}</code>
+                                      ) : (
+                                        <span className="text-slate-400">—</span>
+                                      )}
+                                    </td>
+                                  );
+                                })}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                  </>
+                  );
+                })()}
+
+                {/* Bước 3: Quy tắc hợp nhất */}
+                {viewStep === 3 && (
+                  <div className="border border-slate-200 rounded-xl bg-slate-50 p-6 text-center">
+                    <GitCompare className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                    <p className="text-[13px] text-slate-500">Xem chi tiết quy tắc hợp nhất tại tab "Thiết lập quy tắc hợp nhất" trong Mô hình dữ liệu chủ.</p>
+                  </div>
+                )}
+
+                {/* Bước 4: Thiết lập quan hệ */}
+                {viewStep === 4 && (
+                  <div className="border border-slate-200 rounded-xl bg-slate-50 p-6 text-center">
+                    <Network className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                    <p className="text-[13px] text-slate-500">Xem chi tiết quan hệ thực thể tại tab "Thiết lập quan hệ thực thể" trong Mô hình dữ liệu chủ.</p>
+                  </div>
+                )}
+
+                {/* Bước 5: Định danh duy nhất */}
+                {viewStep === 5 && (
+                  <div className="border border-slate-200 rounded-xl bg-slate-50 p-6 text-center">
+                    <Key className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                    <p className="text-[13px] text-slate-500">Xem chi tiết quy tắc định danh tại tab "Quy tắc định danh duy nhất" trong Mô hình dữ liệu chủ.</p>
+                  </div>
+                )}
+
+                {/* Bước 6: Phê duyệt */}
+                {viewStep === 6 && (
+                <>
                 {/* Nội dung trình duyệt */}
                 <div>
                   <label className="block text-[13px] font-medium text-slate-500 mb-1">Nội dung trình duyệt</label>
@@ -1270,6 +1461,8 @@ export function MasterDataScaleManagementPage() {
                     </div>
                   </div>
                 </div>
+                </>
+                )}
               </div>
 
               <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl flex justify-end gap-3 shrink-0">
@@ -1351,59 +1544,51 @@ export function MasterDataScaleManagementPage() {
               </div>
 
               <div className="p-6 space-y-4">
-                <div>
-                  <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                    Chọn người duyệt <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    value={selectedApprover}
-                    onChange={e => setSelectedApprover(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 focus:border-indigo-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all cursor-pointer"
-                  >
-                    <option value="">-- Chọn người duyệt --</option>
-                    {MOCK_APPROVERS.map(u => (
-                      <option key={u.id} value={u.id}>
-                        {u.name} - {u.position} ({u.department})
-                      </option>
-                    ))}
-                  </select>
+                {/* Thông tin phê duyệt */}
+                <div className="border border-blue-200 rounded-lg overflow-hidden">
+                  <div className="bg-blue-50 px-4 py-2.5 border-b border-blue-200">
+                    <h4 className="text-[13px] font-semibold text-blue-900">Thông tin phê duyệt</h4>
+                  </div>
+                  <div className="p-4 space-y-4">
+                    <div>
+                      <label className="block text-[13px] text-slate-700 mb-1.5">
+                        Chọn người trình duyệt <span className="text-red-600">*</span>
+                      </label>
+                      <select
+                        value={selectedApprover}
+                        onChange={e => setSelectedApprover(e.target.value)}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
+                      >
+                        <option value="">-- Chọn người trình duyệt --</option>
+                        {MOCK_APPROVERS.map(u => (
+                          <option key={u.id} value={u.id}>
+                            {u.name} - {u.position} ({u.department})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[13px] text-slate-700 mb-1.5">
+                        Ghi chú phê duyệt
+                      </label>
+                      <textarea
+                        value={approvalNote}
+                        onChange={e => setApprovalNote(e.target.value)}
+                        rows={3}
+                        placeholder="Nhập lý do và ghi chú cho việc gửi trình duyệt này..."
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                    Nội dung yêu cầu
-                  </label>
-                  <textarea
-                    value={approvalNote}
-                    onChange={e => setApprovalNote(e.target.value)}
-                    rows={4}
-                    placeholder="Nhập nội dung gửi kèm (nếu có)..."
-                    className="w-full px-3 py-2 border border-slate-200 focus:border-indigo-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all resize-none"
-                  />
-                </div>
-
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                  <h4 className="text-[13px] font-semibold text-slate-700 mb-3">Thông tin bản ghi</h4>
-                  <div className="space-y-2 text-[13px]">
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Mã dữ liệu chủ:</span>
-                      <code className="px-2 py-0.5 bg-white border border-slate-200 text-indigo-700 rounded text-[12px]">
-                        {approvalEntity.code}
-                      </code>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Loại thực thể:</span>
-                      <span className="text-slate-800 font-medium">
-                        {dataTypeLabels[approvalEntity.dataType]}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Cơ quan quản lý:</span>
-                      <span className="text-slate-800 font-medium">{approvalEntity.managingAgency}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Người tạo:</span>
-                      <span className="text-slate-800">{approvalEntity.createdBy}</span>
+                {/* Info */}
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <div className="text-[13px] text-green-800">
+                      <p className="mb-1">Sau khi gửi, dữ liệu chủ sẽ ở trạng thái <strong>"Chờ phê duyệt"</strong>.</p>
+                      <p>Người phê duyệt sẽ xem xét và quyết định phê duyệt hoặc từ chối.</p>
                     </div>
                   </div>
                 </div>
