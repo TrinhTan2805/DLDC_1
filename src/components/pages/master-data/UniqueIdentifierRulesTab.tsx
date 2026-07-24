@@ -8,7 +8,7 @@ const SHOW_EDIT_DELETE_ACTIONS = false;
 type SeparatorType = 'none' | '-' | '.' | '/';
 type RuleStatus = 'active' | 'inactive';
 
-interface IdentifierRule {
+export interface IdentifierRule {
   id: string;
   entityId: string;
   entityName: string;
@@ -24,7 +24,7 @@ interface IdentifierRule {
   totalGenerated: number;
 }
 
-const mockIdentifierRules: IdentifierRule[] = [
+export const mockIdentifierRules: IdentifierRule[] = [
   {
     id: 'rule-1',
     entityId: '1',
@@ -95,7 +95,7 @@ interface PreviewInput {
   digits: number;
 }
 
-const buildCode = (cfg: PreviewInput, number: number) => {
+export const buildCode = (cfg: PreviewInput, number: number) => {
   const sep = cfg.separator === 'none' ? '' : cfg.separator;
   const padded = String(number).padStart(cfg.digits, '0');
   return [cfg.prefix, padded, cfg.suffix].filter(Boolean).join(sep);

@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { Settings, Sliders, GitCompare, Network, Key, Plus, Edit, Trash2, X, Search, Filter, Circle, CheckSquare, ChevronDown, Eye, FileText, Clock, XCircle, Send, AlertCircle, Check, ArrowRight, SquarePen } from 'lucide-react';
 import { AttributesManagementTab, defaultAttributes, DLDC_ENTITY_DETAIL_CONFIGS } from './AttributesManagementTab';
 import { MasterDataWizard } from './MasterDataWizard';
-import { MergeRulesManagementTab } from './MergeRulesManagementTab';
-import { EntityRelationshipsTab } from './EntityRelationshipsTab';
-import { UniqueIdentifierRulesTab } from './UniqueIdentifierRulesTab';
+import { MergeRulesManagementTab, mockMergeRules, matchMethodLabels, fuzzyAlgorithmLabels, conflictStrategyLabels, onEmptyLabels } from './MergeRulesManagementTab';
+import { EntityRelationshipsTab, mockRelationships, relationTypeLabels, getSourceKey, getTargetKey } from './EntityRelationshipsTab';
+import { UniqueIdentifierRulesTab, mockIdentifierRules, buildCode } from './UniqueIdentifierRulesTab';
 import { ApprovalTab } from './ApprovalTab';
 import { ReviewResultCard } from '../category/components/modals/ReviewResultCard';
 import { Portal } from '../../common/Portal';
@@ -1392,28 +1392,300 @@ export function MasterDataScaleManagementPage() {
                 })()}
 
                 {/* Bước 3: Quy tắc hợp nhất */}
-                {viewStep === 3 && (
-                  <div className="border border-slate-200 rounded-xl bg-slate-50 p-6 text-center">
-                    <GitCompare className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                    <p className="text-[13px] text-slate-500">Xem chi tiết quy tắc hợp nhất tại tab "Thiết lập quy tắc hợp nhất" trong Mô hình dữ liệu chủ.</p>
-                  </div>
-                )}
+                {viewStep === 3 && (() => {
+                  const entityRule = mockMergeRules.find(r => r.entityId === viewingEntity.id);
+                  const entityAttrs = defaultAttributes[viewingEntity.id] || [];
+                  const fieldLabel = (fieldName: string) => entityAttrs.find(af => af.fieldName === fieldName)?.displayName || fieldName;
+
+                  if (!entityRule) {
+                    return (
+                      <div className="border border-slate-200 rounded-xl bg-slate-50 p-6 text-center">
+                        <GitCompare className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                        <p className="text-[13px] text-slate-500">Chưa cấu hình quy tắc hợp nhất cho thực thể này. Xem/thiết lập tại tab "Thiết lập quy tắc hợp nhất" trong Mô hình dữ liệu chủ.</p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <>
+                    {/* Lớp 1: Matching Rules */}
+                    <div className="border border-blue-200 rounded-xl overflow-hidden">
+                      <div className="bg-blue-50 px-4 py-3 flex items-center gap-3 border-b border-blue-200">
+                        <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-[13px] font-bold flex items-center justify-center flex-shrink-0">1</span>
+                        <div>
+                          <p className="text-[13px] font-semibold text-blue-800">Lớp 1 — Quy tắc so khớp (Matching Rules)</p>
+                          <p className="text-[13px] text-blue-500">Xác định khi nào hai bản ghi từ hai nguồn khác nhau được coi là cùng một thực thể</p>
+                        </div>
+                      </div>
+                      <div className="p-4 space-y-3 bg-white">
+                        <div className="grid grid-cols-2 gap-4">
+                          <p className="text-[13px] text-slate-600">
+                            Ngưỡng tự động gộp (≥):{' '}
+                            <span className="font-semibold text-slate-900">{entityRule.autoThreshold ?? '-'}%</span>
+                          </p>
+                          <p className="text-[13px] text-slate-600">
+                            Ngưỡng cần rà soát (≥):{' '}
+                            <span className="font-semibold text-slate-900">{entityRule.reviewThreshold ?? '-'}%</span>
+                          </p>
+                        </div>
+                        <div className="border border-slate-100 rounded-lg overflow-hidden">
+                          <table className="w-full text-[13px]">
+                            <thead className="bg-slate-50 border-b border-slate-100">
+                              <tr>
+                                <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Trường đối chiếu</th>
+                                <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Kiểu so khớp</th>
+                                <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Thuật toán</th>
+                                <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Ngưỡng (%)</th>
+                                <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Trọng số (%)</th>
+                                <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-24">Chuẩn hóa</th>
+                                <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Điều kiện</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-50 bg-white">
+                              {!entityRule.matchingRulesDetail || entityRule.matchingRulesDetail.length === 0 ? (
+                                <tr>
+                                  <td colSpan={7} className="px-4 py-6 text-center text-[13px] text-slate-400">
+                                    Chưa cấu hình quy tắc so khớp
+                                  </td>
+                                </tr>
+                              ) : (
+                                entityRule.matchingRulesDetail.map(rule => (
+                                  <tr key={rule.id}>
+                                    <td className="px-3 py-2 text-[13px] text-slate-700">{fieldLabel(rule.fieldName)}</td>
+                                    <td className="px-3 py-2 text-[13px] text-slate-700">{matchMethodLabels[rule.method]}</td>
+                                    <td className="px-3 py-2 text-[13px] text-slate-700">
+                                      {rule.method === 'fuzzy' ? fuzzyAlgorithmLabels[rule.algorithm] : <span className="text-slate-400">—</span>}
+                                    </td>
+                                    <td className="px-3 py-2 text-[13px] text-center text-slate-700">
+                                      {rule.method === 'fuzzy' ? `${rule.fuzzyThreshold ?? '-'}%` : <span className="text-slate-400">—</span>}
+                                    </td>
+                                    <td className="px-3 py-2 text-[13px] text-center text-slate-700">{rule.weight}</td>
+                                    <td className="px-3 py-2 text-[13px] text-center text-slate-700">{rule.normalize ? 'Có' : 'Không'}</td>
+                                    <td className="px-3 py-2 text-[13px] text-center text-slate-700">
+                                      {rule.operator ?? <span className="text-slate-400">—</span>}
+                                    </td>
+                                  </tr>
+                                ))
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Trường hard-block */}
+                    <div className="border border-slate-200 rounded-xl bg-white p-4 space-y-3">
+                      <div>
+                        <p className="text-[13px] font-semibold text-slate-700">Trường hard-block</p>
+                        <p className="text-[13px] text-slate-500">Nếu các trường này khác nhau, hai bản ghi chắc chắn KHÔNG phải cùng thực thể (loại khỏi so khớp)</p>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        {!entityRule.hardBlockFields || entityRule.hardBlockFields.length === 0 ? (
+                          <span className="text-[13px] text-slate-400">Chưa có trường hard-block nào</span>
+                        ) : (
+                          entityRule.hardBlockFields.map(f => (
+                            <span key={f} className="inline-flex items-center px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-[13px] font-medium">
+                              {fieldLabel(f)}
+                            </span>
+                          ))
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Lớp 2: Hợp nhất giá trị (Survivorship) */}
+                    <div className="border border-blue-200 rounded-xl overflow-hidden">
+                      <div className="bg-blue-50 px-4 py-3 flex items-center gap-3 border-b border-blue-200">
+                        <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-[13px] font-bold flex items-center justify-center flex-shrink-0">2</span>
+                        <div>
+                          <p className="text-[13px] font-semibold text-blue-800">Lớp 2 — Hợp nhất giá trị (Survivorship)</p>
+                          <p className="text-[13px] text-blue-500">Với mỗi trường, giá trị nào sẽ tồn tại trong bản ghi chủ cuối cùng</p>
+                        </div>
+                      </div>
+                      <div className="p-4 bg-white">
+                        {!entityRule.extractionRulesDetail || entityRule.extractionRulesDetail.length === 0 ? (
+                          <p className="text-[13px] text-slate-400 text-center py-6">Chưa cấu hình quy tắc hợp nhất giá trị</p>
+                        ) : (
+                          <div className="border border-slate-100 rounded-lg overflow-hidden">
+                            <table className="w-full text-[13px]">
+                              <thead className="bg-slate-50 border-b border-slate-100">
+                                <tr>
+                                  <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Trường</th>
+                                  <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Chiến lược</th>
+                                  <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Nguồn dữ liệu</th>
+                                  <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Khi hết vẫn trống</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-50 bg-white">
+                                {entityRule.extractionRulesDetail.map(rule => (
+                                  <tr key={rule.id}>
+                                    <td className="px-3 py-2 text-[13px] text-slate-700">{fieldLabel(rule.fieldName)}</td>
+                                    <td className="px-3 py-2 text-[13px] text-slate-700">{conflictStrategyLabels[rule.conflictStrategy]}</td>
+                                    <td className="px-3 py-2 text-[13px] text-slate-700">
+                                      {rule.conflictStrategy === 'source' ? rule.primarySource : rule.priorityOrder.join(' → ')}
+                                    </td>
+                                    <td className="px-3 py-2 text-[13px] text-slate-700">{onEmptyLabels[rule.onEmpty]}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    </>
+                  );
+                })()}
 
                 {/* Bước 4: Thiết lập quan hệ */}
-                {viewStep === 4 && (
-                  <div className="border border-slate-200 rounded-xl bg-slate-50 p-6 text-center">
-                    <Network className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                    <p className="text-[13px] text-slate-500">Xem chi tiết quan hệ thực thể tại tab "Thiết lập quan hệ thực thể" trong Mô hình dữ liệu chủ.</p>
-                  </div>
-                )}
+                {viewStep === 4 && (() => {
+                  const entityRelationships = mockRelationships.filter(
+                    r => r.sourceEntityId === viewingEntity.id || r.targetEntityId === viewingEntity.id
+                  );
+
+                  if (entityRelationships.length === 0) {
+                    return (
+                      <div className="border border-slate-200 rounded-xl bg-slate-50 p-6 text-center">
+                        <Network className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                        <p className="text-[13px] text-slate-500">Chưa cấu hình quan hệ nào cho thực thể này. Xem/thiết lập tại tab "Thiết lập quan hệ thực thể" trong Mô hình dữ liệu chủ.</p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="border border-slate-200 rounded-xl overflow-hidden">
+                      <div className="px-4 py-3 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
+                        <Network className="w-4 h-4 text-slate-500" />
+                        <p className="text-[13px] font-semibold text-slate-700">Quan hệ thực thể</p>
+                        <span className="text-[12px] px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">
+                          {entityRelationships.length} quan hệ
+                        </span>
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-[13px]">
+                          <thead className="bg-slate-50 border-b border-slate-100">
+                            <tr>
+                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Thực thể nguồn</th>
+                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Khóa nguồn</th>
+                              <th className="text-center px-4 py-2.5 text-[13px] font-semibold text-slate-600">Loại quan hệ</th>
+                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Thực thể đích</th>
+                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Khóa đích</th>
+                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Bảng trung gian / Trường hiển thị</th>
+                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Mô tả</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 bg-white">
+                            {entityRelationships.map(rel => (
+                              <tr key={rel.id}>
+                                <td className="px-4 py-2 text-[13px] text-slate-900 font-medium overflow-hidden">{rel.sourceEntityName}</td>
+                                <td className="px-4 py-2 text-[13px] font-mono text-slate-600 overflow-hidden">{getSourceKey(rel) || '—'}</td>
+                                <td className="px-4 py-2 text-[13px] text-center text-slate-700 overflow-hidden">{relationTypeLabels[rel.relationType]}</td>
+                                <td className="px-4 py-2 text-[13px] text-slate-900 font-medium overflow-hidden">{rel.targetEntityName}</td>
+                                <td className="px-4 py-2 text-[13px] font-mono text-slate-600 overflow-hidden">{getTargetKey(rel) || '—'}</td>
+                                <td className="px-4 py-2 text-[13px] text-slate-600 overflow-hidden">
+                                  {rel.relationType === 'many-to-many' ? (rel.junctionTable || '—') : (rel.displayField || '—')}
+                                </td>
+                                <td className="px-4 py-2 text-[13px] text-slate-600 overflow-hidden">{rel.description || '—'}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 {/* Bước 5: Định danh duy nhất */}
-                {viewStep === 5 && (
-                  <div className="border border-slate-200 rounded-xl bg-slate-50 p-6 text-center">
-                    <Key className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                    <p className="text-[13px] text-slate-500">Xem chi tiết quy tắc định danh tại tab "Quy tắc định danh duy nhất" trong Mô hình dữ liệu chủ.</p>
-                  </div>
-                )}
+                {viewStep === 5 && (() => {
+                  const entityRule = mockIdentifierRules.find(r => r.entityId === viewingEntity.id);
+
+                  if (!entityRule) {
+                    return (
+                      <div className="border border-slate-200 rounded-xl bg-slate-50 p-6 text-center">
+                        <Key className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                        <p className="text-[13px] text-slate-500">Chưa cấu hình quy tắc định danh cho thực thể này. Xem/thiết lập tại tab "Quy tắc định danh duy nhất" trong Mô hình dữ liệu chủ.</p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="grid grid-cols-2 gap-6">
+                      {/* Left */}
+                      <div className="space-y-4">
+                        <div className="border border-slate-200 rounded-xl p-5 space-y-4 bg-white">
+                          <h4 className="text-[13px] font-bold text-slate-800">Cấu trúc mã định danh</h4>
+                          <div className="grid grid-cols-2 gap-4 text-[13px]">
+                            <div>
+                              <span className="block text-slate-500 mb-1">Tiền tố (Prefix)</span>
+                              <span className="font-medium text-slate-800">{entityRule.prefix || '(không có)'}</span>
+                            </div>
+                            <div>
+                              <span className="block text-slate-500 mb-1">Hậu tố (Suffix)</span>
+                              <span className="font-medium text-slate-800">{entityRule.suffix || '(không có)'}</span>
+                            </div>
+                            <div>
+                              <span className="block text-slate-500 mb-1">Ký tự phân cách</span>
+                              <span className="font-medium text-slate-800">{entityRule.separator === 'none' ? 'Không dùng' : `"${entityRule.separator}"`}</span>
+                            </div>
+                            <div>
+                              <span className="block text-slate-500 mb-1">Độ dài số thứ tự</span>
+                              <span className="font-medium text-slate-800">{entityRule.digits} chữ số</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="border border-slate-200 rounded-xl p-5 space-y-4 bg-white">
+                          <h4 className="text-[13px] font-bold text-slate-800">Số tự tăng</h4>
+                          <div className="grid grid-cols-2 gap-4 text-[13px]">
+                            <div>
+                              <span className="block text-slate-500 mb-1">Bắt đầu từ</span>
+                              <span className="font-medium text-slate-800">{entityRule.startFrom}</span>
+                            </div>
+                            <div>
+                              <span className="block text-slate-500 mb-1">Bước tăng</span>
+                              <span className="font-medium text-slate-800">{entityRule.increment}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="border border-slate-200 rounded-xl p-5 bg-white flex items-start gap-3">
+                          <div className={`mt-0.5 w-4 h-4 rounded flex-shrink-0 flex items-center justify-center ${entityRule.checkDuplicate ? 'bg-blue-600' : 'bg-slate-200'}`}>
+                            {entityRule.checkDuplicate && <Check className="w-3 h-3 text-white" />}
+                          </div>
+                          <div>
+                            <p className="text-[13px] font-medium text-slate-700">Kiểm tra trùng lặp khi tạo mới</p>
+                            <p className="text-[13px] text-slate-500 mt-1">Hệ thống từ chối tạo bản ghi nếu mã định danh đã tồn tại</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right — preview */}
+                      <div className="space-y-4">
+                        <div className="border border-blue-200 rounded-xl p-5 bg-blue-50 space-y-4">
+                          <h4 className="text-[13px] font-bold text-blue-900">Mẫu mã định danh</h4>
+                          <div className="bg-white border border-blue-200 rounded-lg px-6 py-7 text-center">
+                            <code className="text-2xl font-mono font-bold text-blue-700 tracking-widest">
+                              {buildCode(entityRule, entityRule.startFrom)}
+                            </code>
+                          </div>
+                          <div className="space-y-3 text-[13px]">
+                            <div className="flex justify-between items-center py-1.5 border-b border-blue-100">
+                              <span className="text-slate-600">Mã thứ 1:</span>
+                              <code className="font-mono font-semibold text-slate-800">{buildCode(entityRule, entityRule.startFrom)}</code>
+                            </div>
+                            <div className="flex justify-between items-center py-1.5 border-b border-blue-100">
+                              <span className="text-slate-600">Mã thứ 2:</span>
+                              <code className="font-mono font-semibold text-slate-800">{buildCode(entityRule, entityRule.startFrom + entityRule.increment)}</code>
+                            </div>
+                            <div className="flex justify-between items-center py-1.5">
+                              <span className="text-slate-600">Mã thứ 3:</span>
+                              <code className="font-mono font-semibold text-slate-800">{buildCode(entityRule, entityRule.startFrom + entityRule.increment * 2)}</code>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 {/* Bước 6: Phê duyệt */}
                 {viewStep === 6 && (

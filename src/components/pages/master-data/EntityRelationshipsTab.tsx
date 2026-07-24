@@ -8,7 +8,7 @@ const SHOW_EDIT_DELETE_ACTIONS = false;
 type RelationType = 'one-to-many' | 'many-to-many' | 'one-to-one';
 type RelationStatus = 'active' | 'inactive';
 
-interface EntityRelationship {
+export interface EntityRelationship {
   id: string;
   sourceEntityId: string;
   sourceEntityName: string;
@@ -26,7 +26,7 @@ interface EntityRelationship {
   createdDate: string;
 }
 
-const mockRelationships: EntityRelationship[] = [
+export const mockRelationships: EntityRelationship[] = [
   {
     id: 'rel-1',
     sourceEntityId: '1',
@@ -120,7 +120,7 @@ const MOCK_APPROVERS = [
   { id: 'a5', name: 'Hoàng Thị Lan', position: 'Trưởng phòng', department: 'Phòng Nghiệp vụ pháp lý' }
 ];
 
-const relationTypeLabels: Record<RelationType, string> = {
+export const relationTypeLabels: Record<RelationType, string> = {
   'one-to-many': '1 - n (Một - Nhiều)',
   'many-to-many': 'n - n (Nhiều - Nhiều)',
   'one-to-one': '1 - 1 (Một - Một)'
@@ -132,8 +132,8 @@ const relationTypeIcons: Record<RelationType, string> = {
   'one-to-one': '1-1'
 };
 
-const getSourceKey = (rel: EntityRelationship) => rel.relationType === 'many-to-many' ? rel.junctionSourceKey : rel.foreignKey;
-const getTargetKey = (rel: EntityRelationship) => rel.relationType === 'many-to-many' ? rel.junctionTargetKey : rel.referencedKey;
+export const getSourceKey = (rel: EntityRelationship) => rel.relationType === 'many-to-many' ? rel.junctionSourceKey : rel.foreignKey;
+export const getTargetKey = (rel: EntityRelationship) => rel.relationType === 'many-to-many' ? rel.junctionTargetKey : rel.referencedKey;
 
 export function EntityRelationshipsTab({ readOnly = false }: { readOnly?: boolean } = {}) {
   const [relationships, setRelationships] = useState<EntityRelationship[]>(mockRelationships);

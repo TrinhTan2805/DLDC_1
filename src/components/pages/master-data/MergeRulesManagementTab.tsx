@@ -40,7 +40,7 @@ interface ExtractionRuleDetail {
   onEmpty: OnEmpty;
 }
 
-interface MergeRule {
+export interface MergeRule {
   id: string;
   name: string;
   entityId: string;
@@ -83,7 +83,7 @@ interface ExtractRuleConfig {
   transformation?: string;
 }
 
-const mockMergeRules: MergeRule[] = [
+export const mockMergeRules: MergeRule[] = [
   {
     id: 'rule-1',
     name: 'Hợp nhất dữ liệu công dân từ CCCD và Hộ tịch',
@@ -182,7 +182,7 @@ const MOCK_APPROVERS = [
   { id: 'a5', name: 'Hoàng Thị Lan', position: 'Trưởng phòng', department: 'Phòng Nghiệp vụ pháp lý' }
 ];
 
-const dataSourceLabels: Record<DataSourceType, string> = {
+export const dataSourceLabels: Record<DataSourceType, string> = {
   dldc: 'Kho DLDC',
   lgsp: 'API LGSP',
   ndxp: 'API NDXP',
@@ -203,28 +203,28 @@ const mergeStrategyLabels: Record<MergeStrategy, string> = {
   manual: 'Thủ công'
 };
 
-const matchMethodLabels: Record<MatchMethod, string> = {
+export const matchMethodLabels: Record<MatchMethod, string> = {
   exact: 'Khớp tuyệt đối',
   fuzzy: 'Khớp gần đúng'
 };
 
-const fuzzyAlgorithmLabels: Record<FuzzyAlgorithm, string> = {
+export const fuzzyAlgorithmLabels: Record<FuzzyAlgorithm, string> = {
   jaro_winkler: 'Tương đồng chuỗi',
   levenshtein: 'Khoảng cách chỉnh sửa',
   phonetic: 'Ngữ âm'
 };
 
-const conflictStrategyLabels: Record<ConflictStrategy, string> = {
+export const conflictStrategyLabels: Record<ConflictStrategy, string> = {
   source: 'Theo nguồn',
   priority: 'Độ ưu tiên'
 };
 
-const nullHandlingLabels: Record<NullHandling, string> = {
+export const nullHandlingLabels: Record<NullHandling, string> = {
   next: 'Nguồn kế',
   skip: 'Bỏ qua'
 };
 
-const onEmptyLabels: Record<OnEmpty, string> = {
+export const onEmptyLabels: Record<OnEmpty, string> = {
   required: 'Bắt buộc',
   warn: 'Cảnh báo',
   allow: 'Cho phép trống'
