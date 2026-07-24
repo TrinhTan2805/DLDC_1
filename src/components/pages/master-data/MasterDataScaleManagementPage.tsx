@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Settings, Sliders, GitCompare, Network, Key, Plus, Edit, Trash2, X, Search, Filter, Circle, CheckSquare, ChevronDown, Eye, FileText, Clock, XCircle, Send, AlertCircle, Check, ArrowRight } from 'lucide-react';
+import { Settings, Sliders, GitCompare, Network, Key, Plus, Edit, Trash2, X, Search, Filter, Circle, CheckSquare, ChevronDown, Eye, FileText, Clock, XCircle, Send, AlertCircle, Check, ArrowRight, SquarePen } from 'lucide-react';
 import { AttributesManagementTab, defaultAttributes, DLDC_ENTITY_DETAIL_CONFIGS } from './AttributesManagementTab';
 import { MasterDataWizard } from './MasterDataWizard';
 import { MergeRulesManagementTab } from './MergeRulesManagementTab';
@@ -740,7 +740,7 @@ export function MasterDataScaleManagementPage() {
                                   className="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 cursor-pointer transition-colors"
                                   title="Chỉnh sửa"
                                 >
-                                  <Edit className="w-4 h-4" />
+                                  <SquarePen className="w-4 h-4" />
                                 </button>
                                 <button
                                   onClick={() => handleDelete(entity.id)}
