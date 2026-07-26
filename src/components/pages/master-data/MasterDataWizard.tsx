@@ -95,6 +95,17 @@ interface IdentifierConfig {
   checkDuplicate: boolean;
 }
 
+type VersionFormatType = 'increment' | 'yearIncrement' | 'custom';
+
+interface VersioningConfig {
+  // Trường nào khi thay đổi giá trị sẽ tạo phiên bản mới (fieldName -> bật/tắt)
+  triggerFields: Record<string, boolean>;
+  autoVersionOnSync: boolean;
+  versionFormat: VersionFormatType;
+  customPrefix: string;
+  startFrom: string;
+}
+
 interface MergeConfig {
   keepSourceRef: boolean;
   mergeTrigger: MergeTrigger;
@@ -511,7 +522,8 @@ const steps = [
   { number: 3, title: 'Quy tắc hợp nhất', description: 'Thiết lập quy tắc merge dữ liệu' },
   { number: 4, title: 'Thiết lập quan hệ', description: 'Liên kết giữa các thực thể' },
   { number: 5, title: 'Định danh duy nhất', description: 'Thiết lập quy tắc mã định danh' },
-  { number: 6, title: 'Phê duyệt', description: 'Xem lại và gửi phê duyệt' },
+  { number: 6, title: 'Quy tắc đánh phiên bản', description: 'Điều kiện và định dạng tạo phiên bản mới' },
+  { number: 7, title: 'Phê duyệt', description: 'Xem lại và gửi phê duyệt' },
 ];
 
 export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData, initialDldcFieldRows, initialStep }: MasterDataWizardProps) {
@@ -565,6 +577,15 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData, initi
     increment: 1,
     suffix: '',
     checkDuplicate: true,
+  });
+
+  // Step 6 state — Quy tắc đánh phiên bản
+  const [versioningConfig, setVersioningConfig] = useState<VersioningConfig>({
+    triggerFields: {},
+    autoVersionOnSync: true,
+    versionFormat: 'increment',
+    customPrefix: 'VER',
+    startFrom: 'V1',
   });
 
   // Step 3 (old step 2) state — Matching/Extraction/Merge
@@ -904,7 +925,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData, initi
       }
     }
 
-    if (currentStep < 6) {
+    if (currentStep < 7) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -982,7 +1003,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData, initi
         <div className="flex items-center justify-between p-6 border-b border-slate-200">
           <div>
             <h2 className="text-xl text-slate-900">Tạo mới dữ liệu chủ</h2>
-            <p className="text-[13px] text-slate-600 mt-1">Quy trình 6 bước</p>
+            <p className="text-[13px] text-slate-600 mt-1">Quy trình 7 bước</p>
           </div>
           <button onClick={onClose} className="p-1 hover:bg-slate-100 rounded" title="Đóng" aria-label="Đóng">
             <X className="w-5 h-5" />
@@ -991,12 +1012,12 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData, initi
 
         {/* Stepper */}
         <div className="px-6 py-4 border-b border-slate-200 bg-slate-50">
-          <div className="flex items-center justify-between">
+          <div className="flex items-start justify-between">
             {steps.map((step, index) => (
-              <div key={step.number} className="flex items-center flex-1">
+              <div key={step.number} className="flex items-start flex-1">
                 <div className="flex flex-col items-center flex-1">
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center text-[13px] transition-colors ${currentStep > step.number
+                    className={`w-10 h-10 rounded-full flex items-center justify-center text-[13px] transition-colors flex-shrink-0 ${currentStep > step.number
                       ? 'bg-green-600 text-white'
                       : currentStep === step.number
                         ? 'bg-blue-600 text-white'
@@ -1013,7 +1034,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData, initi
                   </p>
                 </div>
                 {index < steps.length - 1 && (
-                  <div className="flex-1 h-0.5 bg-slate-200 mx-2 mt-[-30px]" />
+                  <div className="flex-1 h-0.5 bg-slate-200 mx-2 mt-5" />
                 )}
               </div>
             ))}
@@ -3073,8 +3094,162 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData, initi
             </div>
           )}
 
-          {/* Step 6: Phê duyệt */}
-          {currentStep === 6 && (
+          {/* Step 6: Quy tắc đánh phiên bản */}
+          {currentStep === 6 && (() => {
+            const allFieldsChecked = availableFields.length > 0 && availableFields.every(f => versioningConfig.triggerFields[f.fieldName] ?? true);
+            const toggleTriggerField = (fieldName: string) => {
+              setVersioningConfig(prev => ({
+                ...prev,
+                triggerFields: { ...prev.triggerFields, [fieldName]: !(prev.triggerFields[fieldName] ?? true) },
+              }));
+            };
+            const toggleAllTriggerFields = () => {
+              const next = !allFieldsChecked;
+              const triggerFields: Record<string, boolean> = {};
+              availableFields.forEach(f => { triggerFields[f.fieldName] = next; });
+              setVersioningConfig(prev => ({ ...prev, triggerFields }));
+            };
+            const VERSION_FORMAT_OPTIONS: { value: VersionFormatType; label: string; example: string }[] = [
+              { value: 'increment',     label: 'Số tăng dần',        example: 'V1 → V2 → V3' },
+              { value: 'yearIncrement', label: 'Năm + số tăng dần',  example: '2024.1 → 2024.2 → 2025.1' },
+              { value: 'custom',        label: 'Tùy chỉnh',          example: '[Prefix] + [Số tự tăng]' },
+            ];
+            return (
+              <div className="space-y-6">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h3 className="text-[13px] font-semibold text-blue-900 mb-1">Bước 6: Quy tắc đánh phiên bản</h3>
+                  <p className="text-[13px] text-blue-700">
+                    Thiết lập điều kiện tạo phiên bản mới và định dạng số phiên bản cho bản ghi của thực thể này
+                  </p>
+                </div>
+
+                {/* Phần 1 — Điều kiện tạo version mới */}
+                <div className="space-y-3">
+                  <h4 className="text-[13px] font-bold text-slate-800">Phần 1 — Điều kiện tạo version mới</h4>
+                  <p className="text-[13px] text-slate-500">
+                    Cho phép Cán bộ chọn trường nào khi thay đổi sẽ tạo version mới. Hiển thị danh sách thuộc tính của thực thể, mỗi trường có toggle bật/tắt:
+                  </p>
+
+                  <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
+                    <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+                      <h5 className="text-[13px] font-semibold text-slate-700">Chọn trường kích hoạt tạo phiên bản mới</h5>
+                      <FileText className="w-4 h-4 text-slate-400" />
+                    </div>
+                    <div className="divide-y divide-slate-100">
+                      {availableFields.length === 0 ? (
+                        <p className="px-5 py-6 text-center text-[13px] text-slate-400">Chưa có thuộc tính nào được định nghĩa ở Bước 2</p>
+                      ) : (
+                        availableFields.map(f => {
+                          const checked = versioningConfig.triggerFields[f.fieldName] ?? true;
+                          return (
+                            <label key={f.fieldName} className="flex items-center justify-between gap-4 px-5 py-3 cursor-pointer hover:bg-slate-50/60 transition-colors">
+                              <div className="flex items-center gap-3">
+                                <input
+                                  type="checkbox"
+                                  checked={checked}
+                                  onChange={() => toggleTriggerField(f.fieldName)}
+                                  className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 cursor-pointer flex-shrink-0"
+                                />
+                                <span className="text-[13px] font-medium text-slate-700">{f.displayName}</span>
+                              </div>
+                              <span className={`text-[13px] whitespace-nowrap ${checked ? 'text-blue-600' : 'text-slate-400'}`}>
+                                {checked ? 'Thay đổi giá trị → tạo version mới' : 'Không tạo version (chỉ ghi log)'}
+                              </span>
+                            </label>
+                          );
+                        })
+                      )}
+                    </div>
+                    {availableFields.length > 0 && (
+                      <label className="flex items-center justify-between gap-4 px-5 py-3 border-t border-slate-200 bg-slate-50 cursor-pointer">
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="checkbox"
+                            checked={allFieldsChecked}
+                            onChange={toggleAllTriggerFields}
+                            className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 cursor-pointer flex-shrink-0"
+                          />
+                          <span className="text-[13px] font-bold text-slate-700">Bất kỳ trường nào thay đổi</span>
+                        </div>
+                        <span className="text-[13px] font-medium text-blue-600 whitespace-nowrap">Tạo version mới (chọn tất cả)</span>
+                      </label>
+                    )}
+                  </div>
+
+                  <label className="flex items-start gap-3 cursor-pointer select-none border border-slate-200 rounded-xl p-5 bg-white">
+                    <input
+                      type="checkbox"
+                      checked={versioningConfig.autoVersionOnSync}
+                      onChange={() => setVersioningConfig(prev => ({ ...prev, autoVersionOnSync: !prev.autoVersionOnSync }))}
+                      className="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 cursor-pointer w-4 h-4 flex-shrink-0"
+                    />
+                    <div>
+                      <p className="text-[13px] font-medium text-slate-700">Tự động tạo phiên bản khi đồng bộ từ hệ thống nguồn (re-merge)</p>
+                      <p className="text-[13px] text-slate-500 mt-1">Thay đổi thủ công của Cán bộ luôn cần qua phê duyệt trước khi tạo phiên bản mới.</p>
+                    </div>
+                  </label>
+                </div>
+
+                {/* Phần 2 — Định dạng số phiên bản */}
+                <div className="space-y-3">
+                  <h4 className="text-[13px] font-bold text-slate-800">Phần 2 — Định dạng số phiên bản</h4>
+
+                  <div className="border border-slate-200 rounded-xl p-5 space-y-4 bg-white">
+                    <h5 className="text-[13px] font-semibold text-slate-700">Định dạng phiên bản</h5>
+                    <div className="space-y-2">
+                      {VERSION_FORMAT_OPTIONS.map(opt => (
+                        <label
+                          key={opt.value}
+                          className={`flex items-center justify-between gap-4 border rounded-lg px-4 py-3 cursor-pointer transition-colors ${
+                            versioningConfig.versionFormat === opt.value ? 'border-blue-400 bg-blue-50/50' : 'border-slate-200 hover:bg-slate-50'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="radio"
+                              name="versionFormat"
+                              checked={versioningConfig.versionFormat === opt.value}
+                              onChange={() => setVersioningConfig(prev => ({ ...prev, versionFormat: opt.value }))}
+                              className="w-4 h-4 text-blue-600 focus:ring-blue-500/20 cursor-pointer flex-shrink-0"
+                            />
+                            <span className="text-[13px] font-medium text-slate-700">{opt.label}</span>
+                          </div>
+                          <code className="text-[12px] text-slate-500 font-mono whitespace-nowrap">{opt.example}</code>
+                        </label>
+                      ))}
+                    </div>
+
+                    {versioningConfig.versionFormat === 'custom' && (
+                      <div>
+                        <label className="block text-[13px] font-medium text-slate-700 mb-2">Tiền tố (Prefix)</label>
+                        <input
+                          type="text"
+                          value={versioningConfig.customPrefix}
+                          onChange={(e: ChangeEvent<HTMLInputElement>) => setVersioningConfig(prev => ({ ...prev, customPrefix: e.target.value.toUpperCase() }))}
+                          placeholder="VD: VER"
+                          className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 uppercase"
+                        />
+                        <p className="text-[12px] text-slate-400 mt-1">Ví dụ: {versioningConfig.customPrefix || 'VER'}-001</p>
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="block text-[13px] font-medium text-slate-700 mb-2">Bắt đầu từ</label>
+                      <input
+                        type="text"
+                        value={versioningConfig.startFrom}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => setVersioningConfig(prev => ({ ...prev, startFrom: e.target.value }))}
+                        className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Step 7: Phê duyệt */}
+          {currentStep === 7 && (
             <div className="space-y-4">
 
               {/* Reviewer + Notes */}
@@ -3142,7 +3317,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData, initi
             Bước {currentStep} / {steps.length}
           </div>
 
-          {currentStep < 6 ? (
+          {currentStep < 7 ? (
             <button
               onClick={handleNext}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"

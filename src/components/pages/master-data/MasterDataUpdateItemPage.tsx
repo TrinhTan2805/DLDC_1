@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Search, Send, Eye, Clock, CheckCircle2, XCircle, Globe, List, Lock, Check, Edit2, Copy, AlertTriangle, X, RotateCcw, GitMerge, Split, HelpCircle, PlusCircle, SquarePen, Link2, Download, ArrowLeft, Trash2 } from 'lucide-react';
+import { Search, Send, Eye, Clock, CheckCircle2, XCircle, Globe, List, Lock, Check, Edit2, Copy, AlertTriangle, X, RotateCcw, GitMerge, Split, HelpCircle, PlusCircle, SquarePen, Link2, Download, ArrowLeft, Trash2, RefreshCw, ChevronDown, GitCompare, MoreVertical, Filter } from 'lucide-react';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '../../ui/dropdown-menu';
 
 type ApprovalStatus = 'draft' | 'reviewing' | 'pending' | 'approved' | 'rejected' | 'deleted';
 type PublicStatus = 'published' | 'unpublished';
@@ -133,6 +134,7 @@ const MOCK_ENFORCEMENT: Row[] = [
   { id: '7', ma: 'QĐ-THADS-2026-00734', ngayBanHanh: '02/06/2026', hoTen: 'Đặng Thị Kim Oanh', cccd: '034082007890', nghiaVu: 'Bồi thường 45.000.000đ',                  coQuan: 'Chi Cục THADS Q. Cầu Giấy, HN', approvalStatus: 'reviewing', publicStatus: 'unpublished' },
   { id: '8', ma: 'QĐ-THADS-2026-00845', ngayBanHanh: '18/06/2026', hoTen: 'Bùi Văn Thành',     cccd: '045085008901', nghiaVu: 'Bồi thường 120.000.000đ',                 coQuan: 'Cục THADS TP. Hà Nội',          approvalStatus: 'approved', publicStatus: 'unpublished' },
   { id: '9', ma: 'QĐ-THADS-2026-00902', ngayBanHanh: '25/06/2026', hoTen: 'Trịnh Thị Hoa',     cccd: '052090009012', nghiaVu: 'Truy thu thuế 60.000.000đ',               coQuan: 'Chi Cục THADS TP. Vinh',        approvalStatus: 'approved', publicStatus: 'unpublished' },
+  { id: '10', ma: 'QĐ-THADS-2026-00967', ngayBanHanh: '30/06/2026', hoTen: 'Vũ Đức Thắng',    cccd: '026068009999', nghiaVu: 'Nộp tiền phạt 15.000.000đ',              coQuan: 'Chi Cục THADS Q. Sơn Trà, ĐN',  approvalStatus: 'pending',  publicStatus: 'unpublished' },
 ];
 
 const MOCK_CIVIL_REGISTRY: Row[] = [
@@ -259,6 +261,17 @@ function computeDuplicateIds(rows: Row[], category: DataCategory): Set<string> {
   return dupIds;
 }
 
+// Nhóm các bản ghi trùng lặp — mỗi nhóm có thể có nhiều hơn 2 bản ghi
+function computeDuplicateGroups(rows: Row[], category: DataCategory): Row[][] {
+  const groups: Record<string, Row[]> = {};
+  rows.forEach(r => {
+    const key = getDuplicateKeyValue(r, category);
+    if (!key) return;
+    (groups[key] = groups[key] || []).push(r);
+  });
+  return Object.values(groups).filter(group => group.length > 1);
+}
+
 function isRowIncomplete(row: Row, cols: ColDef[]): boolean {
   return cols.some(col => !row[col.key] || row[col.key].trim() === '');
 }
@@ -284,9 +297,9 @@ function buildRecordVersionHistory(row: Row, cols: ColDef[]): RecordVersion[] {
   const reviewedValues = { ...currentValues };
 
   return [
-    { version: 1, updatedAt: '8 tháng trước',  updatedBy: 'Hệ thống nguồn (đồng bộ tự động)', action: 'Khởi tạo bản ghi',              values: initialValues },
-    { version: 2, updatedAt: '2 tháng trước',  updatedBy: 'Cán bộ nghiệp vụ',                  action: 'Bổ sung, chỉnh sửa dữ liệu',     values: reviewedValues },
-    { version: 3, updatedAt: '3 ngày trước',   updatedBy: 'Cán bộ nghiệp vụ',                  action: 'Cập nhật gần nhất (hiện tại)',   values: currentValues },
+    { version: 1, updatedAt: '26:11:2025 08:00', updatedBy: 'Hệ thống nguồn (đồng bộ tự động)', action: 'Khởi tạo bản ghi',              values: initialValues },
+    { version: 2, updatedAt: '26:05:2026 14:30', updatedBy: 'Cán bộ nghiệp vụ',                  action: 'Bổ sung, chỉnh sửa dữ liệu',     values: reviewedValues },
+    { version: 3, updatedAt: '23:07:2026 09:15', updatedBy: 'Cán bộ nghiệp vụ',                  action: 'Cập nhật gần nhất (hiện tại)',   values: currentValues },
   ];
 }
 
@@ -344,6 +357,12 @@ function PublicBadge({ status }: { status: PublicStatus }) {
   return <span className="px-3 py-1 bg-slate-100 text-slate-500 border border-slate-200 text-[12px] rounded-full whitespace-nowrap">Chưa công khai</span>;
 }
 
+function DataStatusBadge({ status }: { status: 'new' | 'updated' }) {
+  if (status === 'new')
+    return <span className="px-3 py-1 bg-indigo-50 text-indigo-700 border border-indigo-200 text-[12px] rounded-full whitespace-nowrap">Mới</span>;
+  return <span className="px-3 py-1 bg-teal-50 text-teal-700 border border-teal-200 text-[12px] rounded-full whitespace-nowrap">Cập nhật</span>;
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 interface Props {
@@ -352,9 +371,32 @@ interface Props {
 }
 
 export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
-  const [activeTab, setActiveTab] = useState<'list' | 'approval' | 'history'>('list');
+  const [activeTab, setActiveTab] = useState<'list' | 'approval'>('list');
+  // Lịch sử đồng bộ — modal mở từ nút cạnh "Đồng bộ dữ liệu" trong tab Dữ liệu
+  const [showSyncHistoryModal, setShowSyncHistoryModal] = useState(false);
+  // Chọn 1 lần đồng bộ để xem chi tiết bản ghi theo 3 nhóm kết quả
+  const [syncHistorySelectedId, setSyncHistorySelectedId] = useState<string | null>(null);
+  // Đóng/mở từng khối kết quả (thành công / trùng lặp / thiếu dữ liệu) khi xem chi tiết 1 lần đồng bộ
+  const [syncDetailCollapsed, setSyncDetailCollapsed] = useState<{ success: boolean; duplicate: boolean; incomplete: boolean }>({ success: false, duplicate: false, incomplete: false });
+  // Mở/đóng từng nhóm bản ghi trùng lặp (1 nhóm có thể có nhiều hơn 2 bản ghi)
+  const [expandedDuplicateGroups, setExpandedDuplicateGroups] = useState<Set<number>>(new Set());
+  const toggleDuplicateGroup = (idx: number) => {
+    setExpandedDuplicateGroups(prev => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx); else next.add(idx);
+      return next;
+    });
+  };
   const [searchQuery, setSearchQuery] = useState('');
-  const [listApprovalFilter, setListApprovalFilter] = useState<'all' | ApprovalStatus>('all');
+  // Đang hoạt động / Đã xóa — tách bản ghi đã xóa mềm (approvalStatus === 'deleted') khỏi danh sách chính
+  const [listViewMode, setListViewMode] = useState<'active' | 'trash'>('active');
+  // Bộ lọc nâng cao: trạng thái phê duyệt / trạng thái công khai / trạng thái dữ liệu
+  const [showFilters, setShowFilters] = useState(false);
+  const [approvalFilter, setApprovalFilter] = useState<'all' | Exclude<ApprovalStatus, 'deleted'>>('all');
+  const [publicFilterState, setPublicFilterState] = useState<'all' | PublicStatus>('all');
+  const [dataStatusFilter, setDataStatusFilter] = useState<'all' | 'new' | 'updated'>('all');
+  // Đồng bộ dữ liệu (UC1 — nguồn phát sinh bản ghi Mới/Cập nhật, theo quy tắc ở Mô hình dữ liệu chủ)
+  const [showSyncModal, setShowSyncModal] = useState(false);
   const [selectedRecordIds, setSelectedRecordIds] = useState<string[]>([]);
   const [currentPageNum, setCurrentPageNum] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -368,7 +410,7 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
   const allData = recordsData;
 
   // Phê duyệt (giống tab Phê duyệt tại Biên tập danh mục)
-  const [approvalStatusFilter, setApprovalStatusFilter] = useState<'pending' | 'approved' | 'rejected'>('pending');
+  const [approvalStatusFilter, setApprovalStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending');
   const [selectedApprovalIds, setSelectedApprovalIds] = useState<string[]>([]);
   // UC492 — modal lý do từ chối & xem chi tiết bản ghi
   const [rejectModal, setRejectModal] = useState<{ open: boolean; ids: string[]; reason: string }>({ open: false, ids: [], reason: '' });
@@ -380,12 +422,73 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
   const [detailTab, setDetailTab] = useState<'values' | 'history' | 'related' | 'warnings'>('values');
   const [compareVersionIdx, setCompareVersionIdx] = useState(0);
   const [historyView, setHistoryView] = useState<'list' | 'compare'>('list');
+  // Mở từ tab "Dữ liệu" chỉ hiện Giá trị dữ liệu chủ; mở từ tab "Phê duyệt" vẫn giữ đủ các tab
+  const [detailRowContext, setDetailRowContext] = useState<'list' | 'approval'>('list');
 
-  const handleOpenDetail = (row: Row) => {
+  const handleOpenDetail = (row: Row, context: 'list' | 'approval' = 'list') => {
     setDetailRow(row);
     setDetailTab('values');
     setCompareVersionIdx(0);
     setHistoryView('list');
+    setDetailRowContext(context);
+  };
+
+  // Mở từ tab "Phiên bản" (báo cáo lịch sử thay đổi gộp mọi bản ghi) — modal riêng, chỉ có nội dung so sánh
+  // Chỉ 1 modal phiên bản hiển thị tại 1 thời điểm: mở modal mới sẽ đóng modal trước đó,
+  // và "returnToRowReport" ghi nhớ modal báo cáo riêng-1-bản-ghi để "Quay lại" mở lại đúng chỗ.
+  const [versionCompareModal, setVersionCompareModal] = useState<{ row: Row; versionIdx: number; returnToRowReport: Row | null } | null>(null);
+  const handleOpenVersionCompare = (row: Row, versionIdx: number, returnToRowReport: Row | null = null) => {
+    setRowVersionReportRow(null);
+    setVersionSnapshot(null);
+    setVersionCompareModal({ row, versionIdx, returnToRowReport });
+  };
+  const closeVersionCompareModal = () => {
+    const returnRow = versionCompareModal?.returnToRowReport ?? null;
+    setVersionCompareModal(null);
+    if (returnRow) setRowVersionReportRow(returnRow);
+  };
+
+  // Xem chi tiết dữ liệu của một phiên bản cụ thể (snapshot, không so sánh)
+  const [versionSnapshot, setVersionSnapshot] = useState<{ row: Row; version: RecordVersion; returnToRowReport: Row | null } | null>(null);
+  const openVersionSnapshot = (row: Row, version: RecordVersion, returnToRowReport: Row | null = null) => {
+    setRowVersionReportRow(null);
+    setVersionCompareModal(null);
+    setVersionSnapshot({ row, version, returnToRowReport });
+  };
+  const closeVersionSnapshot = () => {
+    const returnRow = versionSnapshot?.returnToRowReport ?? null;
+    setVersionSnapshot(null);
+    if (returnRow) setRowVersionReportRow(returnRow);
+  };
+
+  // Báo cáo lịch sử phiên bản của riêng 1 bản ghi — mở từ nút "Phiên bản" ở tab Dữ liệu
+  const [rowVersionReportRow, setRowVersionReportRow] = useState<Row | null>(null);
+  const openRowVersionReport = (row: Row) => {
+    setVersionSnapshot(null);
+    setVersionCompareModal(null);
+    setRowVersionReportRow(row);
+  };
+
+  // Báo cáo lịch sử phiên bản của riêng 1 bản ghi
+  const handleDownloadRowChangeReport = (row: Row) => {
+    const lines: string[] = [];
+    lines.push('Mã bản ghi;Phiên bản;Người cập nhật;Ngày phát hành;Trạng thái');
+    const history = buildRecordVersionHistory(row, cols);
+    const latest = history[history.length - 1];
+    history.slice().reverse().forEach(v => {
+      const status = v.version === latest.version ? 'Hiệu lực' : 'Lưu trữ';
+      lines.push(`${row[cols[0].key]};v${v.version};${v.updatedBy};${v.updatedAt};${status}`);
+    });
+    const csv = '﻿' + lines.join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bao-cao-lich-su-thay-doi-${row[cols[0].key]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   // Rà soát dữ liệu — gợi ý trùng lặp & cảnh báo thiếu dữ liệu (giao dịch 2), chỉnh sửa/đánh dấu đang rà soát (giao dịch 3)
@@ -411,11 +514,85 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
 
   const duplicateIds = computeDuplicateIds(allData, config.category);
   const incompleteIds = new Set(allData.filter(r => isRowIncomplete(r, cols)).map(r => r.id));
+  const duplicateGroups = computeDuplicateGroups(allData, config.category);
+  const duplicateGroupIndexById = new Map<string, number>();
+  duplicateGroups.forEach((group, idx) => group.forEach(r => duplicateGroupIndexById.set(r.id, idx + 1)));
 
   const reviewPairs = MOCK_REVIEW_ITEMS;
 
-  const listData = allData.filter(r => {
-    if (listApprovalFilter !== 'all' && r.approvalStatus !== listApprovalFilter) return false;
+  // Lịch sử đồng bộ (UC1) — mỗi lần đồng bộ chia bản ghi thành 3 nhóm kết quả theo quy tắc đã cấu hình
+  const syncSuccessIds = allData.filter(r => r.approvalStatus !== 'deleted' && !duplicateIds.has(r.id) && !incompleteIds.has(r.id)).map(r => r.id);
+  const syncDuplicateIds = Array.from(duplicateIds);
+  const syncIncompleteIds = Array.from(incompleteIds);
+
+  const syncHistoryEntries: {
+    id: string;
+    syncedAt: string;
+    performedBy: string;
+    approvalStatus: 'pending' | 'approved' | 'archived';
+    newCount: number;
+    updatedCount: number;
+    unchangedCount: number;
+    duration: string;
+    previousSyncedAt: string;
+    successIds: string[];
+    duplicateIds: string[];
+    incompleteIds: string[];
+  }[] = [
+    {
+      id: 'sync-1',
+      syncedAt: '24/12/2024 08:30',
+      performedBy: 'Hệ thống',
+      approvalStatus: 'pending',
+      newCount: 3,
+      updatedCount: 4,
+      unchangedCount: 3,
+      duration: '1 phút 42 giây',
+      previousSyncedAt: '15/12/2024 09:00',
+      successIds: syncSuccessIds,
+      duplicateIds: syncDuplicateIds,
+      incompleteIds: syncIncompleteIds,
+    },
+    {
+      id: 'sync-2',
+      syncedAt: '15/12/2024 09:00',
+      performedBy: 'Hệ thống',
+      approvalStatus: 'approved',
+      newCount: 5,
+      updatedCount: 2,
+      unchangedCount: 3,
+      duration: '1 phút 18 giây',
+      previousSyncedAt: '05/12/2024 08:00',
+      successIds: syncSuccessIds,
+      duplicateIds: syncDuplicateIds,
+      incompleteIds: syncIncompleteIds,
+    },
+    {
+      id: 'sync-3',
+      syncedAt: '05/12/2024 08:00',
+      performedBy: 'Hệ thống',
+      approvalStatus: 'archived',
+      newCount: 6,
+      updatedCount: 1,
+      unchangedCount: 3,
+      duration: '58 giây',
+      previousSyncedAt: '—',
+      successIds: syncSuccessIds,
+      duplicateIds: syncDuplicateIds,
+      incompleteIds: syncIncompleteIds,
+    },
+  ];
+
+  const syncHistorySelected = syncHistoryEntries.find(s => s.id === syncHistorySelectedId) || null;
+
+  const activeData = allData.filter(r => r.approvalStatus !== 'deleted');
+  const trashData = allData.filter(r => r.approvalStatus === 'deleted');
+  // Giới hạn số bản ghi mock hiển thị ở báo cáo "Phiên bản" cho gọn
+
+  const listData = (listViewMode === 'active' ? activeData : trashData).filter(r => {
+    if (approvalFilter !== 'all' && r.approvalStatus !== approvalFilter) return false;
+    if (publicFilterState !== 'all' && r.publicStatus !== publicFilterState) return false;
+    if (dataStatusFilter !== 'all' && getDataStatus(r) !== dataStatusFilter) return false;
     if (!searchQuery) return true;
     return Object.values(r).some(v => String(v).toLowerCase().includes(searchQuery.toLowerCase()));
   });
@@ -431,13 +608,12 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
   const tabs = [
     { id: 'list' as const,     label: 'Dữ liệu',        icon: List },
     { id: 'approval' as const, label: 'Phê duyệt',      icon: CheckCircle2 },
-    { id: 'history' as const,  label: 'Lịch sử xử lý',  icon: Clock },
   ];
 
   // ─── Phê duyệt handlers ───────────────────────────────────────────────────
 
   const approvalFilteredData = allData.filter(r => {
-    const matchesStatus = r.approvalStatus === approvalStatusFilter;
+    const matchesStatus = approvalStatusFilter === 'all' || r.approvalStatus === approvalStatusFilter;
     const q = searchQuery.trim().toLowerCase();
     const matchesSearch = !q || Object.values(r).some(v => String(v).toLowerCase().includes(q));
     return matchesStatus && matchesSearch;
@@ -506,6 +682,17 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
     setRecordsData(prev => prev.map(r => r.id === id ? { ...r, approvalStatus: 'reviewing' } : r));
   };
 
+  // Đồng bộ dữ liệu (UC1 — nguồn phát sinh bản ghi Mới/Cập nhật, theo quy tắc ở Mô hình dữ liệu chủ)
+  const handleConfirmSync = () => {
+    setShowSyncModal(false);
+    const newCount = Math.max(1, Math.round(cols.length / 3));
+    const updatedCount = Math.max(1, Math.round(cols.length / 4));
+    alert(
+      `Đang đồng bộ… hoàn tất: ${newCount} bản ghi Mới, ${updatedCount} bản ghi Cập nhật đã vào danh sách với trạng thái "Chưa phê duyệt" để rà soát.` +
+      (duplicateIds.size > 0 ? ` ${duplicateIds.size} bản ghi nghi trùng lặp cần kiểm tra thủ công.` : '')
+    );
+  };
+
   const handleBulkApprove = () => {
     if (selectedApprovalIds.length === 0) {
       alert('Vui lòng chọn ít nhất một bản ghi để phê duyệt');
@@ -548,6 +735,9 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
   // Chỉ bản ghi Soạn thảo/Rà soát/Từ chối mới cần (và có thể) gửi duyệt lại
   const isSendableStatus = (status: ApprovalStatus) => status === 'draft' || status === 'reviewing' || status === 'rejected';
 
+  // Trạng thái dữ liệu: Mới (chưa từng chỉnh sửa từ khi đồng bộ) / Cập nhật (đã có chỉnh sửa)
+  const getDataStatus = (row: Row): 'new' | 'updated' => Number(row.id) % 3 === 0 ? 'new' : 'updated';
+
   // Mở modal "Gửi phê duyệt" — dùng chung cho gửi từng dòng và gửi hàng loạt
   const handleOpenSendApproval = (ids: string[]) => {
     const rows = recordsData.filter(r => ids.includes(r.id));
@@ -588,6 +778,19 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
     alert('Hủy công khai dữ liệu thành công.');
   };
 
+  // Công khai / Hủy công khai hàng loạt theo các bản ghi đang được chọn
+  const handleBulkPublish = (ids: string[]) => {
+    setRecordsData(prev => prev.map(r => ids.includes(r.id) && r.approvalStatus === 'approved' ? { ...r, publicStatus: 'published' } : r));
+    alert('Công khai dữ liệu chủ thành công.');
+    setSelectedRecordIds([]);
+  };
+
+  const handleBulkUnpublish = (ids: string[]) => {
+    setRecordsData(prev => prev.map(r => ids.includes(r.id) ? { ...r, publicStatus: 'unpublished' } : r));
+    alert('Hủy công khai dữ liệu thành công.');
+    setSelectedRecordIds([]);
+  };
+
   const totalPages = Math.max(1, Math.ceil(listData.length / pageSize));
   const paginatedData = listData.slice((currentPageNum - 1) * pageSize, currentPageNum * pageSize);
 
@@ -625,398 +828,27 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
       {/* ─── Tab: Dữ liệu ─── */}
       {activeTab === 'list' && (
         <>
-          {/* Tab rà soát trùng lặp: Gộp tự động / Chờ rà soát / Không khớp */}
-          <div className="inline-flex items-center gap-1 p-1 bg-white border border-slate-200 rounded-lg w-fit">
-            <button
-              type="button"
-              onClick={() => { setActiveReviewCard('auto'); setCurrentPageNum(1); }}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-[13px] font-medium transition-all cursor-pointer ${
-                activeReviewCard === 'auto'
-                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                  : 'bg-white text-slate-500 hover:text-slate-700 border border-transparent'
-              }`}
-            >
-              <GitMerge className="w-4 h-4" />
-              Gộp tự động
-            </button>
-            <button
-              type="button"
-              onClick={() => { setActiveReviewCard('review'); setCurrentPageNum(1); }}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-[13px] font-medium transition-all cursor-pointer ${
-                activeReviewCard === 'review'
-                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                  : 'bg-white text-slate-500 hover:text-slate-700 border border-transparent'
-              }`}
-            >
-              <Copy className="w-4 h-4" />
-              Chờ rà soát
-            </button>
-            <button
-              type="button"
-              onClick={() => { setActiveReviewCard('mismatch'); setCurrentPageNum(1); }}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-[13px] font-medium transition-all cursor-pointer ${
-                activeReviewCard === 'mismatch'
-                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                  : 'bg-white text-slate-500 hover:text-slate-700 border border-transparent'
-              }`}
-            >
-              <HelpCircle className="w-4 h-4" />
-              Không khớp
-            </button>
-          </div>
-
-          {/* Danh sách tương ứng với thẻ đang chọn */}
-          {activeReviewCard === 'review' && (
-            <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
-              <div className="px-4 py-3 border-b border-slate-100 bg-slate-50 flex items-center justify-between gap-3 flex-wrap min-h-[48px]">
-                <div className="flex items-center gap-2">
-                  <p className="text-[13px] font-semibold text-slate-800">Các bản ghi chờ rà soát</p>
-                  <span className="text-[12px] px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full font-medium">
-                    37 bản ghi
-                  </span>
-                </div>
-                {reviewSelectedPairIds.length > 0 ? (
-                  <div className="flex items-center gap-2">
-                    <span className="text-[12px] font-medium text-slate-500 mr-1">
-                      Đã chọn <strong className="text-slate-800">{reviewSelectedPairIds.length}</strong>
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setResolvedPairIds(prev => Array.from(new Set([...prev, ...reviewSelectedPairIds])));
-                        setReviewSelectedPairIds([]);
-                      }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[12px] font-medium transition-colors shadow-sm cursor-pointer"
-                    >
-                      <GitMerge className="w-3.5 h-3.5" /> Hợp nhất
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setResolvedPairIds(prev => Array.from(new Set([...prev, ...reviewSelectedPairIds])));
-                        setReviewSelectedPairIds([]);
-                      }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-lg text-[12px] font-medium transition-colors cursor-pointer"
-                    >
-                      <Split className="w-3.5 h-3.5 text-amber-600" /> Tách biệt
-                    </button>
-                  </div>
-                ) : (
-                  <span className="text-[12px] text-slate-400">Tích chọn các bản ghi để thực hiện thao tác hàng loạt</span>
-                )}
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-[13px]">
-                  <thead className="bg-slate-50 border-b border-slate-100">
-                    <tr>
-                      <th className="px-3 py-2.5 text-center w-10">
-                        <input
-                          type="checkbox"
-                          checked={reviewSelectedPairIds.length > 0 && reviewSelectedPairIds.length === reviewPairs.filter(p => !resolvedPairIds.includes(p.id)).length}
-                          onChange={(e) => setReviewSelectedPairIds(e.target.checked ? reviewPairs.filter(p => !resolvedPairIds.includes(p.id)).map(p => p.id) : [])}
-                          className="rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 cursor-pointer"
-                        />
-                      </th>
-                      <th className="px-3 py-2.5 text-left font-semibold text-slate-600">Cặp bản ghi</th>
-                      <th className="px-3 py-2.5 text-center font-semibold text-slate-600 w-28">Điểm khớp</th>
-                      <th className="px-3 py-2.5 text-left font-semibold text-slate-600">Lý do</th>
-                      <th className="px-3 py-2.5 text-center font-semibold text-slate-600 w-36">Thao tác</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 bg-white">
-                    {reviewPairs.length === 0 ? (
-                      <tr><td colSpan={5} className="px-4 py-8 text-center text-slate-400">Không còn bản ghi nào chờ rà soát</td></tr>
-                    ) : reviewPairs.map(item => {
-                      const isProcessed = resolvedPairIds.includes(item.id);
-                      const isSelected = reviewSelectedPairIds.includes(item.id);
-                      const parts = item.pair.split(' ↔ ');
-                      return (
-                        <tr
-                          key={item.id}
-                          className={`transition-colors ${
-                            isProcessed
-                              ? 'bg-slate-100/70 text-slate-400 opacity-60 grayscale cursor-not-allowed'
-                              : isSelected ? 'bg-blue-50/40' : 'hover:bg-slate-50/50'
-                          }`}
-                        >
-                          <td className="px-3 py-2.5 text-center">
-                            <input
-                              type="checkbox"
-                              disabled={isProcessed}
-                              checked={isSelected}
-                              onChange={() => setReviewSelectedPairIds(prev => isSelected ? prev.filter(id => id !== item.id) : [...prev, item.id])}
-                              className="rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 cursor-pointer disabled:cursor-not-allowed"
-                            />
-                          </td>
-                          <td className={`px-3 py-2.5 font-medium ${isProcessed ? 'text-slate-400' : 'text-slate-700'}`}>
-                            <code className={`px-1.5 py-0.5 rounded font-mono ${isProcessed ? 'bg-slate-200/60 text-slate-500' : 'bg-slate-100 text-slate-700'}`}>{parts[0]}</code>
-                            <span className="mx-1.5 text-slate-400">↔</span>
-                            <code className={`px-1.5 py-0.5 rounded font-mono ${isProcessed ? 'bg-slate-200/60 text-slate-500' : 'bg-slate-100 text-slate-700'}`}>{parts[1]}</code>
-                          </td>
-                          <td className="px-3 py-2.5 text-center">
-                            <span className={`px-2 py-0.5 rounded font-semibold text-[12px] ${isProcessed ? 'bg-slate-200 text-slate-500' : 'bg-amber-100 text-amber-800'}`}>
-                              {item.score}%
-                            </span>
-                          </td>
-                          <td className={`px-3 py-2.5 ${isProcessed ? 'text-slate-400' : 'text-slate-600'}`}>{item.reason}</td>
-                          <td className="px-3 py-2.5 text-center">
-                            {isProcessed ? (
-                              <span className="text-[11px] px-2 py-0.5 bg-slate-200 text-slate-600 rounded font-medium">Đã xử lý</span>
-                            ) : (
-                              <div className="flex items-center justify-center gap-1">
-                                <button
-                                  type="button"
-                                  title="Hợp nhất bản ghi"
-                                  onClick={() => { setResolvedPairIds(prev => Array.from(new Set([...prev, item.id]))); setReviewSelectedPairIds(prev => prev.filter(id => id !== item.id)); }}
-                                  className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
-                                >
-                                  <GitMerge className="w-4 h-4" />
-                                </button>
-                                <button
-                                  type="button"
-                                  title="Tách biệt bản ghi"
-                                  onClick={() => { setResolvedPairIds(prev => Array.from(new Set([...prev, item.id]))); setReviewSelectedPairIds(prev => prev.filter(id => id !== item.id)); }}
-                                  className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
-                                >
-                                  <Split className="w-4 h-4" />
-                                </button>
-                              </div>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Thanh phân trang */}
-              <div className="px-4 py-3 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
-                <div className="text-[13px] text-slate-500">
-                  Hiển thị <span className="font-medium text-slate-700">1 - 5</span> trong số <span className="font-medium text-slate-700">37</span> bản ghi
-                </div>
-                <div className="flex items-center gap-2">
-                  <button type="button" disabled={reviewPage === 1} onClick={() => setReviewPage(prev => Math.max(1, prev - 1))}
-                    className="px-2.5 py-1 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-600 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer">
-                    Trước
-                  </button>
-                  <span className="text-[13px] text-slate-600 font-medium px-1">Trang {reviewPage} / 8</span>
-                  <button type="button" disabled={reviewPage === 8} onClick={() => setReviewPage(prev => Math.min(8, prev + 1))}
-                    className="px-2.5 py-1 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-600 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer">
-                    Sau
-                  </button>
-                </div>
-              </div>
+          {/* Segmented: Đang hoạt động / Đã xóa + Action Buttons cùng hàng */}
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-1 bg-slate-100 rounded-xl p-1 w-fit text-[13px] font-medium shrink-0">
+              <button
+                type="button"
+                onClick={() => { setListViewMode('active'); setCurrentPageNum(1); }}
+                className={`px-4 py-2 rounded-lg transition-all cursor-pointer ${listViewMode === 'active' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+              >
+                Đang hoạt động <span className="text-slate-400">({activeData.length})</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => { setListViewMode('trash'); setCurrentPageNum(1); }}
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg transition-all cursor-pointer ${listViewMode === 'trash' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Đã xóa <span className="text-slate-400">({trashData.length})</span>
+              </button>
             </div>
-          )}
-
-          {activeReviewCard === 'mismatch' && (
-            <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
-              <div className="px-4 py-3 border-b border-slate-100 bg-slate-50 flex items-center justify-between gap-3 flex-wrap min-h-[48px]">
-                <div className="flex items-center gap-2">
-                  <p className="text-[13px] font-semibold text-slate-800">Các bản ghi không khớp</p>
-                  <span className="text-[12px] px-2 py-0.5 bg-slate-100 text-slate-700 rounded-full font-medium">
-                    183 bản ghi
-                  </span>
-                </div>
-
-                {unmatchedSelectedIds.length > 0 ? (
-                  <div className="flex items-center gap-2">
-                    <span className="text-[12px] font-medium text-slate-500 mr-1">
-                      Đã chọn <strong className="text-slate-800">{unmatchedSelectedIds.length}</strong>
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setUnmatchedActions(prev => {
-                          const next = { ...prev };
-                          unmatchedSelectedIds.forEach(id => { next[id] = 'single_source'; });
-                          return next;
-                        });
-                        setUnmatchedProcessedIds(prev => Array.from(new Set([...prev, ...unmatchedSelectedIds])));
-                        setUnmatchedSelectedIds([]);
-                      }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[12px] font-medium transition-colors shadow-sm cursor-pointer"
-                    >
-                      <PlusCircle className="w-3.5 h-3.5" /> Tạo bản ghi đơn nguồn
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setUnmatchedActions(prev => {
-                          const next = { ...prev };
-                          unmatchedSelectedIds.forEach(id => { next[id] = 'discard'; });
-                          return next;
-                        });
-                        setUnmatchedProcessedIds(prev => Array.from(new Set([...prev, ...unmatchedSelectedIds])));
-                        setUnmatchedSelectedIds([]);
-                      }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-lg text-[12px] font-medium transition-colors cursor-pointer"
-                    >
-                      <XCircle className="w-3.5 h-3.5 text-slate-500" /> Loại bỏ
-                    </button>
-                  </div>
-                ) : (
-                  <span className="text-[12px] text-slate-400">Tích chọn các bản ghi để thực hiện thao tác xử lý hàng loạt</span>
-                )}
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-[13px]">
-                  <thead className="bg-slate-50 border-b border-slate-100">
-                    <tr>
-                      <th className="px-3 py-2.5 text-center w-10">
-                        <input
-                          type="checkbox"
-                          checked={unmatchedSelectedIds.length > 0 && unmatchedSelectedIds.length === MOCK_UNMATCHED_ITEMS.filter(i => !unmatchedProcessedIds.includes(i.id)).length}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setUnmatchedSelectedIds(MOCK_UNMATCHED_ITEMS.filter(i => !unmatchedProcessedIds.includes(i.id)).map(item => item.id));
-                            } else {
-                              setUnmatchedSelectedIds([]);
-                            }
-                          }}
-                          className="rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 cursor-pointer"
-                        />
-                      </th>
-                      <th className="px-3 py-2.5 text-left font-semibold text-slate-600">Bản ghi nguồn</th>
-                      <th className="px-3 py-2.5 text-center font-semibold text-slate-600 w-36">Điểm khớp cao nhất</th>
-                      <th className="px-3 py-2.5 text-left font-semibold text-slate-600">Lý do không khớp</th>
-                      <th className="px-3 py-2.5 text-left font-semibold text-slate-600 w-56">Phương án xử lý</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 bg-white">
-                    {MOCK_UNMATCHED_ITEMS.map(item => {
-                      const isProcessed = unmatchedProcessedIds.includes(item.id);
-                      const isSelected = unmatchedSelectedIds.includes(item.id);
-                      const currentAction = unmatchedActions[item.id] || item.defaultAction;
-                      return (
-                        <tr
-                          key={item.id}
-                          className={`transition-colors ${
-                            isProcessed
-                              ? 'bg-slate-100/70 text-slate-400 opacity-60 grayscale cursor-not-allowed'
-                              : isSelected ? 'bg-blue-50/40' : 'hover:bg-slate-50/50'
-                          }`}
-                        >
-                          <td className="px-3 py-2.5 text-center">
-                            <input
-                              type="checkbox"
-                              disabled={isProcessed}
-                              checked={isSelected}
-                              onChange={() => {
-                                if (isSelected) {
-                                  setUnmatchedSelectedIds(prev => prev.filter(id => id !== item.id));
-                                } else {
-                                  setUnmatchedSelectedIds(prev => [...prev, item.id]);
-                                }
-                              }}
-                              className="rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 cursor-pointer disabled:cursor-not-allowed"
-                            />
-                          </td>
-                          <td className={`px-3 py-2.5 font-medium ${isProcessed ? 'text-slate-400' : 'text-slate-700'}`}>
-                            <code className={`px-1.5 py-0.5 rounded font-mono mr-1.5 ${isProcessed ? 'bg-slate-200/60 text-slate-500' : 'bg-slate-100 text-slate-800'}`}>{item.record}</code>
-                            <span className={`text-[12px] px-2 py-0.5 rounded-md font-normal ${isProcessed ? 'bg-slate-200/60 text-slate-500' : 'bg-slate-100 text-slate-600'}`}>
-                              {item.sourceName}
-                            </span>
-                          </td>
-                          <td className="px-3 py-2.5 text-center">
-                            <span className={`px-2 py-0.5 rounded font-semibold text-[12px] ${isProcessed ? 'bg-slate-200 text-slate-500' : 'bg-slate-100 text-slate-700'}`}>
-                              {item.maxScore}%
-                            </span>
-                          </td>
-                          <td className={`px-3 py-2.5 ${isProcessed ? 'text-slate-400' : 'text-slate-600'}`}>{item.reason}</td>
-                          <td className="px-3 py-2.5">
-                            {isProcessed ? (
-                              <span className="text-[11px] px-2 py-0.5 bg-slate-200 text-slate-600 rounded font-medium">
-                                Đã xử lý
-                              </span>
-                            ) : (
-                              <select
-                                value={currentAction}
-                                onChange={(e) => {
-                                  const val = e.target.value as 'single_source' | 'discard' | '';
-                                  if (!val) return;
-                                  setUnmatchedActions(prev => ({ ...prev, [item.id]: val }));
-                                  setUnmatchedProcessedIds(prev => Array.from(new Set([...prev, item.id])));
-                                  setUnmatchedSelectedIds(prev => prev.filter(id => id !== item.id));
-                                }}
-                                className={`w-full text-[12px] border rounded-lg px-2.5 py-1 font-medium bg-white focus:outline-none cursor-pointer transition-colors ${
-                                  currentAction === 'single_source'
-                                    ? 'border-blue-300 text-blue-800 bg-blue-50/50 cursor-pointer'
-                                    : 'border-slate-300 text-slate-600 bg-slate-50 cursor-pointer'
-                                }`}
-                              >
-                                <option value="">-- Chọn phương án xử lý --</option>
-                                <option value="single_source">Tạo bản ghi đơn nguồn</option>
-                                <option value="discard">Loại bỏ</option>
-                              </select>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Thanh phân trang */}
-              <div className="px-4 py-3 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
-                <div className="text-[13px] text-slate-500">
-                  Hiển thị <span className="font-medium text-slate-700">1 - 5</span> trong số <span className="font-medium text-slate-700">183</span> bản ghi
-                </div>
-                <div className="flex items-center gap-2">
-                  <button type="button" disabled={unmatchedPage === 1} onClick={() => setUnmatchedPage(prev => Math.max(1, prev - 1))}
-                    className="px-2.5 py-1 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-600 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer">
-                    Trước
-                  </button>
-                  <span className="text-[13px] text-slate-600 font-medium px-1">Trang {unmatchedPage} / 37</span>
-                  <button type="button" disabled={unmatchedPage === 37} onClick={() => setUnmatchedPage(prev => Math.min(37, prev + 1))}
-                    className="px-2.5 py-1 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-600 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer">
-                    Sau
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Bảng dữ liệu chính — ẩn khi đang xem "Chờ rà soát"/"Không khớp" (chỉ hiện bảng cặp bản ghi tương ứng) */}
-          {activeReviewCard !== 'review' && activeReviewCard !== 'mismatch' && (
-          <>
-          {/* Search & Action Bar */}
-          <div className="flex flex-col md:flex-row items-center gap-3">
-            <div className="flex-1 w-full relative">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Tìm kiếm..."
-                value={searchQuery}
-                onChange={e => { setSearchQuery(e.target.value); setCurrentPageNum(1); }}
-                className="w-full pl-10 pr-4 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-400 bg-white hover:bg-slate-50/50 font-medium shadow-sm"
-              />
-            </div>
-            <div className="flex items-center gap-2 flex-wrap w-full md:w-auto">
-              {[
-                { value: 'all' as const, label: 'Tất cả', activeClass: 'bg-slate-700 text-white border-slate-700' },
-                { value: 'draft' as const, label: 'Soạn thảo', activeClass: 'bg-slate-500 text-white border-slate-500' },
-                { value: 'reviewing' as const, label: 'Rà soát', activeClass: 'bg-indigo-600 text-white border-indigo-600' },
-                { value: 'pending' as const, label: 'Chờ phê duyệt', activeClass: 'bg-orange-500 text-white border-orange-500' },
-                { value: 'approved' as const, label: 'Đã phê duyệt', activeClass: 'bg-green-600 text-white border-green-600' },
-                { value: 'rejected' as const, label: 'Từ chối', activeClass: 'bg-red-500 text-white border-red-500' },
-              ].map(opt => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => { setListApprovalFilter(opt.value); setCurrentPageNum(1); }}
-                  className={`px-3 py-2 text-[13px] rounded-lg border transition-all font-medium cursor-pointer whitespace-nowrap ${
-                    listApprovalFilter === opt.value
-                      ? opt.activeClass
-                      : 'bg-white text-slate-600 border-slate-300 hover:border-slate-400 hover:bg-slate-50'
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              ))}
+            {listViewMode === 'active' && (
+            <div className="flex items-center gap-2 flex-nowrap justify-end overflow-x-auto">
               <button
                 type="button"
                 onClick={() => selectedRecordIds.length > 0 && handleOpenSendApproval(selectedRecordIds)}
@@ -1030,8 +862,131 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
                 <Send className="w-4 h-4" />
                 Gửi duyệt
               </button>
+              <button
+                type="button"
+                onClick={() => selectedRecordIds.length > 0 && handleBulkPublish(selectedRecordIds)}
+                disabled={selectedRecordIds.length === 0}
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-[13px] font-medium transition-all active:scale-95 whitespace-nowrap ${
+                  selectedRecordIds.length > 0
+                    ? 'bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 cursor-pointer'
+                    : 'bg-slate-100 border border-slate-200 text-slate-400 cursor-not-allowed'
+                }`}
+              >
+                <Globe className="w-4 h-4" />
+                Công khai
+              </button>
+              <button
+                type="button"
+                onClick={() => selectedRecordIds.length > 0 && handleBulkUnpublish(selectedRecordIds)}
+                disabled={selectedRecordIds.length === 0}
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-[13px] font-medium transition-all active:scale-95 whitespace-nowrap ${
+                  selectedRecordIds.length > 0
+                    ? 'bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 cursor-pointer'
+                    : 'bg-slate-100 border border-slate-200 text-slate-400 cursor-not-allowed'
+                }`}
+              >
+                <Lock className="w-4 h-4" />
+                Hủy công khai
+              </button>
             </div>
+            )}
           </div>
+
+          {/* Search & Action Bar */}
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 flex-1 min-w-[280px]">
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm..."
+                  value={searchQuery}
+                  onChange={e => { setSearchQuery(e.target.value); setCurrentPageNum(1); }}
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                />
+              </div>
+              <button
+                type="button"
+                className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center"
+              >
+                <Search className="w-5 h-5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowFilters(!showFilters)}
+                className={`p-2 rounded-lg transition-colors shadow-sm flex items-center justify-center border ${showFilters ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-[#e2e8f0] text-slate-600 hover:bg-slate-50'}`}
+                title="Bộ lọc"
+              >
+                {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
+              </button>
+            </div>
+            {listViewMode === 'active' && (
+            <div className="flex items-center gap-2 flex-nowrap justify-end shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowSyncModal(true)}
+                className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[13px] font-medium transition-all cursor-pointer active:scale-95 whitespace-nowrap"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Đồng bộ dữ liệu
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowSyncHistoryModal(true)}
+                className="flex items-center gap-1.5 px-4 py-2 bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 rounded-lg text-[13px] font-medium transition-all cursor-pointer active:scale-95 whitespace-nowrap"
+              >
+                <Clock className="w-4 h-4" />
+                Lịch sử đồng bộ
+              </button>
+            </div>
+            )}
+          </div>
+
+          {/* Bộ lọc nâng cao (Collapsible) */}
+          {showFilters && (
+            <div className="bg-slate-50 p-5 rounded-lg border border-slate-200 grid grid-cols-3 gap-4 animate-in slide-in-from-top-2 duration-200 shadow-sm relative">
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-slate-700">Trạng thái phê duyệt</label>
+                <select
+                  value={approvalFilter}
+                  onChange={e => { setApprovalFilter(e.target.value as typeof approvalFilter); setCurrentPageNum(1); }}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                >
+                  <option value="all">Tất cả trạng thái</option>
+                  <option value="draft">Soạn thảo</option>
+                  <option value="reviewing">Rà soát</option>
+                  <option value="pending">Chờ phê duyệt</option>
+                  <option value="approved">Đã phê duyệt</option>
+                  <option value="rejected">Từ chối</option>
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-slate-700">Trạng thái công khai</label>
+                <select
+                  value={publicFilterState}
+                  onChange={e => { setPublicFilterState(e.target.value as typeof publicFilterState); setCurrentPageNum(1); }}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                >
+                  <option value="all">Tất cả trạng thái</option>
+                  <option value="published">Đã công khai</option>
+                  <option value="unpublished">Chưa công khai</option>
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-slate-700">Trạng thái dữ liệu</label>
+                <select
+                  value={dataStatusFilter}
+                  onChange={e => { setDataStatusFilter(e.target.value as typeof dataStatusFilter); setCurrentPageNum(1); }}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                >
+                  <option value="all">Tất cả trạng thái</option>
+                  <option value="new">Mới</option>
+                  <option value="updated">Cập nhật</option>
+                </select>
+              </div>
+            </div>
+          )}
 
           {/* Grid Table + Pagination */}
           <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
@@ -1059,12 +1014,15 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
                       />
                     </th>
                     <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap w-14 text-center">STT</th>
-                    <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">
-                      {cols[0].label}
-                    </th>
+                    {cols.slice(0, 3).map(col => (
+                      <th key={col.key} className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">
+                        {col.label}
+                      </th>
+                    ))}
+                    <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Trạng thái dữ liệu</th>
                     <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Phê duyệt</th>
                     <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Công khai</th>
-                    <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-40">Thao tác</th>
+                    <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-20">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 bg-white">
@@ -1072,7 +1030,7 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
                     const isDup = duplicateIds.has(row.id);
                     const isIncomplete = incompleteIds.has(row.id);
                     return (
-                    <tr key={row.id} className={`hover:bg-slate-50/50 transition-colors ${isIncomplete ? 'bg-red-50/40' : isDup ? 'bg-yellow-50/40' : ''}`}>
+                    <tr key={row.id} className="hover:bg-slate-50/50 transition-colors">
                       <td className="px-4 py-4 text-center">
                         {isSendableStatus(row.approvalStatus) ? (
                           <input
@@ -1088,53 +1046,16 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
                         ) : <span className="w-4 h-4 inline-block" />}
                       </td>
                       <td className="px-6 py-4 text-[13px] text-slate-500 text-center">{(currentPageNum - 1) * pageSize + index + 1}</td>
-                      <td className="px-6 py-4 text-[13px] text-slate-700 whitespace-nowrap max-w-[200px] truncate">
-                        {row[cols[0].key] || <span className="text-slate-400 italic">(trống)</span>}
-                      </td>
+                      {cols.slice(0, 3).map(col => (
+                        <td key={col.key} className="px-6 py-4 text-[13px] text-slate-700 whitespace-nowrap max-w-[200px] truncate">
+                          {row[col.key] || <span className="text-slate-400 italic">(trống)</span>}
+                        </td>
+                      ))}
+                      <td className="px-6 py-4 text-center"><DataStatusBadge status={getDataStatus(row)} /></td>
                       <td className="px-6 py-4 text-center"><ApprovalBadge status={row.approvalStatus} /></td>
                       <td className="px-6 py-4 text-center"><PublicBadge status={row.publicStatus} /></td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-center gap-1">
-                          <button
-                            onClick={() => handleOpenDetail(row)}
-                            className="p-1.5 text-slate-900 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
-                            title="Xem chi tiết bản ghi"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleOpenEdit(row)}
-                            className="p-1.5 rounded-lg text-slate-900 hover:bg-slate-100 cursor-pointer transition-colors"
-                            title="Rà soát bản ghi dữ liệu chủ"
-                          >
-                            <SquarePen className="w-4 h-4" />
-                          </button>
-                          <button
-                            disabled={row.approvalStatus !== 'draft' && row.approvalStatus !== 'reviewing' && row.approvalStatus !== 'rejected'}
-                            onClick={(row.approvalStatus === 'draft' || row.approvalStatus === 'reviewing' || row.approvalStatus === 'rejected') ? () => handleOpenSendApproval([row.id]) : undefined}
-                            className="p-1.5 rounded-lg transition-colors cursor-pointer text-slate-900 hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent"
-                            title={(row.approvalStatus === 'draft' || row.approvalStatus === 'reviewing' || row.approvalStatus === 'rejected') ? 'Trình duyệt' : 'Chỉ có thể trình duyệt bản ghi soạn thảo, đang rà soát hoặc bị từ chối'}
-                          >
-                            <Send className="w-4 h-4" />
-                          </button>
-                          {row.publicStatus === 'published' ? (
-                            <button
-                              onClick={() => handleUnpublishRecord(row.id)}
-                              className="p-1.5 rounded-lg transition-colors cursor-pointer text-slate-900 hover:bg-slate-100"
-                              title="Hủy công khai"
-                            >
-                              <Lock className="w-4 h-4" />
-                            </button>
-                          ) : (
-                            <button
-                              disabled={row.approvalStatus !== 'approved'}
-                              onClick={row.approvalStatus === 'approved' ? () => handlePublishRecord(row.id) : undefined}
-                              className="p-1.5 rounded-lg transition-colors cursor-pointer text-slate-900 hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent"
-                              title={row.approvalStatus === 'approved' ? 'Công khai' : 'Chỉ có thể công khai bản ghi đã phê duyệt và chưa công khai'}
-                            >
-                              <Globe className="w-4 h-4" />
-                            </button>
-                          )}
                           {row.approvalStatus === 'deleted' ? (
                             <button
                               onClick={() => handleRestoreDeleted(row.id)}
@@ -1144,13 +1065,65 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
                               <RotateCcw className="w-4 h-4" />
                             </button>
                           ) : (
-                            <button
-                              onClick={() => openDeleteModal(row.id)}
-                              className="p-1.5 rounded-lg transition-colors cursor-pointer text-slate-900 hover:bg-slate-100"
-                              title="Xóa bản ghi"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
+                            <>
+                              <button
+                                onClick={() => handleOpenDetail(row)}
+                                className="p-1.5 text-slate-900 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                                title="Xem chi tiết bản ghi"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <button
+                                    className="p-1.5 text-slate-900 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer focus:outline-none"
+                                    title="Thao tác khác"
+                                  >
+                                    <MoreVertical className="w-4 h-4" />
+                                  </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-56 text-[13px] bg-white border border-slate-200 shadow-[0_10px_25px_rgba(15,23,42,0.15)]">
+                                  <DropdownMenuItem className="text-[13px]" onClick={() => openRowVersionReport(row)}>
+                                    <Clock className="w-4 h-4 text-slate-500" />
+                                    Phiên bản
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="text-[13px]" onClick={() => handleOpenEdit(row)}>
+                                    <SquarePen className="w-4 h-4 text-slate-500" />
+                                    Rà soát bản ghi dữ liệu chủ
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="text-[13px]"
+                                    disabled={row.approvalStatus !== 'draft' && row.approvalStatus !== 'reviewing' && row.approvalStatus !== 'rejected'}
+                                    onClick={() => handleOpenSendApproval([row.id])}
+                                  >
+                                    <Send className="w-4 h-4 text-indigo-500" />
+                                    Trình duyệt
+                                  </DropdownMenuItem>
+                                  {row.publicStatus === 'published' ? (
+                                    <DropdownMenuItem className="text-[13px]" onClick={() => handleUnpublishRecord(row.id)}>
+                                      <Lock className="w-4 h-4 text-slate-500" />
+                                      Hủy công khai
+                                    </DropdownMenuItem>
+                                  ) : (
+                                    <DropdownMenuItem
+                                      className="text-[13px]"
+                                      disabled={row.approvalStatus !== 'approved'}
+                                      onClick={() => handlePublishRecord(row.id)}
+                                    >
+                                      <Globe className="w-4 h-4 text-emerald-500" />
+                                      Công khai
+                                    </DropdownMenuItem>
+                                  )}
+                                  <DropdownMenuItem
+                                    className="text-[13px] text-red-600 focus:text-red-600"
+                                    onClick={() => openDeleteModal(row.id)}
+                                  >
+                                    <Trash2 className="w-4 h-4 text-red-500" />
+                                    Xóa bản ghi
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </>
                           )}
                         </div>
                       </td>
@@ -1159,7 +1132,7 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
                   })}
                   {paginatedData.length === 0 && (
                     <tr>
-                      <td colSpan={6} className="px-6 py-16 text-center text-[13px] text-slate-400">
+                      <td colSpan={9} className="px-6 py-16 text-center text-[13px] text-slate-400">
                         Không tìm thấy dữ liệu phù hợp
                       </td>
                     </tr>
@@ -1218,8 +1191,6 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
               </div>
             )}
           </div>
-          </>
-          )}
         </>
       )}
 
@@ -1256,15 +1227,15 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
           </div>
 
           {/* Stat Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 border border-indigo-200 rounded-lg p-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
-                  <Edit2 className="w-5 h-5 text-white" />
+                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <List className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm text-indigo-700">Đang rà soát</p>
-                  <p className="text-2xl text-indigo-900">{stats.reviewing}</p>
+                  <p className="text-sm text-blue-700">Tổng yêu cầu</p>
+                  <p className="text-2xl text-blue-900">{stats.total}</p>
                 </div>
               </div>
             </div>
@@ -1304,18 +1275,6 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
                 </div>
               </div>
             </div>
-
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <List className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <p className="text-sm text-blue-700">Tổng yêu cầu</p>
-                  <p className="text-2xl text-blue-900">{stats.total}</p>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Tìm kiếm + Bộ lọc trạng thái */}
@@ -1334,6 +1293,7 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
               </div>
               <div className="flex items-center gap-2 flex-wrap">
                 {[
+                  { value: 'all' as const, label: 'Tất cả', activeClass: 'bg-slate-800 text-white border-slate-800' },
                   { value: 'pending' as const, label: 'Chờ phê duyệt', activeClass: 'bg-orange-500 text-white border-orange-500' },
                   { value: 'approved' as const, label: 'Đã phê duyệt', activeClass: 'bg-green-600 text-white border-green-600' },
                   { value: 'rejected' as const, label: 'Đã từ chối', activeClass: 'bg-red-500 text-white border-red-500' },
@@ -1403,7 +1363,7 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
                       <td className="px-6 py-3">
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={() => handleOpenDetail(row)}
+                            onClick={() => handleOpenDetail(row, 'approval')}
                             className="p-1 text-blue-600 hover:bg-blue-50 rounded cursor-pointer transition-colors"
                             title="Xem chi tiết"
                           >
@@ -1457,31 +1417,6 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
                 </tbody>
               </table>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* ─── Tab: Lịch sử xử lý ─── */}
-      {activeTab === 'history' && (
-        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm p-6">
-          <div className="space-y-3">
-            {[
-              { date: '02/07/2026 09:12', user: 'Nguyễn Thanh Hải', action: 'Phê duyệt',   count: 2, color: 'text-green-600 bg-green-50' },
-              { date: '01/07/2026 16:45', user: 'Trần Minh Phúc',    action: 'Gửi duyệt',  count: 3, color: 'text-blue-600 bg-blue-50' },
-              { date: '30/06/2026 14:23', user: 'Hệ thống',           action: 'Nhập dữ liệu', count: 6, color: 'text-slate-600 bg-slate-100' },
-              { date: '28/06/2026 10:08', user: 'Lê Thị Thu Hà',     action: 'Từ chối',    count: 1, color: 'text-red-600 bg-red-50' },
-              { date: '25/06/2026 08:30', user: 'Phạm Xuân Long',    action: 'Công khai',  count: 2, color: 'text-indigo-600 bg-indigo-50' },
-            ].map((item, i) => (
-              <div key={i} className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
-                <div className="text-[12px] text-slate-400 whitespace-nowrap w-36">{item.date}</div>
-                <div className={`px-2.5 py-1 rounded-full text-[11px] font-semibold whitespace-nowrap ${item.color}`}>
-                  {item.action}
-                </div>
-                <div className="text-[13px] text-slate-700">
-                  <span className="font-medium">{item.user}</span> — {item.action.toLowerCase()} {item.count} bản ghi
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       )}
@@ -1713,6 +1648,588 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
         </div>
       )}
 
+      {/* Modal Lịch sử đồng bộ */}
+      {showSyncHistoryModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-7xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+              <h3 className="text-[18px] font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                <Clock className="w-5 h-5 text-blue-600" />
+                Lịch sử đồng bộ
+              </h3>
+              <button
+                onClick={() => { setShowSyncHistoryModal(false); setSyncHistorySelectedId(null); }}
+                className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                title="Đóng"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 text-[13px] overflow-y-auto">
+              {!syncHistorySelected ? (
+                <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                      <thead className="bg-[#f8fafc] text-slate-700 border-b border-slate-200">
+                        <tr>
+                          <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap w-14 text-center">STT</th>
+                          <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Thời gian đồng bộ</th>
+                          <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Người thực hiện</th>
+                          <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Số bản ghi đồng bộ</th>
+                          <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Thêm mới</th>
+                          <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Cập nhật</th>
+                          <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Không đổi</th>
+                          <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Thời gian thực hiện</th>
+                          <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Thời gian đồng bộ lần cuối</th>
+                          <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Trạng thái phê duyệt</th>
+                          <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-24">Thao tác</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 bg-white">
+                        {syncHistoryEntries.map((entry, index) => (
+                          <tr key={entry.id} className="hover:bg-slate-50/50 transition-colors">
+                            <td className="px-6 py-4 text-[13px] text-slate-500 text-center">{index + 1}</td>
+                            <td className="px-6 py-4 text-[13px] text-slate-700 whitespace-nowrap">{entry.syncedAt}</td>
+                            <td className="px-6 py-4 text-[13px] text-slate-700 whitespace-nowrap">{entry.performedBy}</td>
+                            <td className="px-6 py-4 text-[13px] text-slate-700 text-center">
+                              {entry.successIds.length + entry.duplicateIds.length + entry.incompleteIds.length} bản ghi
+                            </td>
+                            <td className="px-6 py-4 text-[13px] text-slate-700 text-center">{entry.newCount}</td>
+                            <td className="px-6 py-4 text-[13px] text-slate-700 text-center">{entry.updatedCount}</td>
+                            <td className="px-6 py-4 text-[13px] text-slate-700 text-center">{entry.unchangedCount}</td>
+                            <td className="px-6 py-4 text-[13px] text-slate-700 text-center whitespace-nowrap">{entry.duration}</td>
+                            <td className="px-6 py-4 text-[13px] text-slate-700 whitespace-nowrap">{entry.previousSyncedAt}</td>
+                            <td className="px-6 py-4 text-center">
+                              <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-medium whitespace-nowrap ${
+                                entry.approvalStatus === 'pending' ? 'bg-orange-100 text-orange-700' :
+                                entry.approvalStatus === 'approved' ? 'bg-green-100 text-green-700' :
+                                'bg-slate-100 text-slate-600'
+                              }`}>
+                                {entry.approvalStatus === 'pending' ? 'Chờ phê duyệt' : entry.approvalStatus === 'approved' ? 'Đã phê duyệt' : 'Lưu trữ'}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-center">
+                              <button
+                                onClick={() => setSyncHistorySelectedId(entry.id)}
+                                className="p-1.5 text-slate-900 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                                title="Xem chi tiết"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <p className="text-[13px] text-slate-500">
+                    Đồng bộ lúc <span className="font-medium text-slate-700">{syncHistorySelected.syncedAt}</span> bởi <span className="font-medium text-slate-700">{syncHistorySelected.performedBy}</span>
+                  </p>
+
+                  {/* Section 1: Bản ghi hợp nhất/đồng bộ tự động thành công */}
+                  <div className="border border-green-200 rounded-xl overflow-hidden">
+                    <button
+                      type="button"
+                      onClick={() => setSyncDetailCollapsed(prev => ({ ...prev, success: !prev.success }))}
+                      className="w-full bg-green-50 px-4 py-3 flex items-center gap-2 border-b border-green-200 cursor-pointer"
+                    >
+                      <CheckCircle2 className="w-4 h-4 text-green-600" />
+                      <p className="text-[13px] font-semibold text-green-800">Bản ghi hợp nhất/đồng bộ tự động thành công</p>
+                      <span className="text-[12px] px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-medium">{syncHistorySelected.successIds.length} bản ghi</span>
+                      <ChevronDown className={`w-4 h-4 text-green-600 ml-auto transition-transform ${syncDetailCollapsed.success ? '-rotate-90' : ''}`} />
+                    </button>
+                    {!syncDetailCollapsed.success && (
+                      <div className="overflow-x-auto max-h-64 overflow-y-auto">
+                        <table className="w-full text-left text-[13px]">
+                          <thead className="bg-slate-50 border-b border-slate-100">
+                            <tr>
+                              <th className="px-4 py-2.5 text-[13px] text-center w-14">STT</th>
+                              {approvalListCols.map(col => (
+                                <th key={col.key} className="px-4 py-2.5 text-[13px] text-left whitespace-nowrap">{col.label}</th>
+                              ))}
+                              <th className="px-4 py-2.5 text-[13px] text-center">Trạng thái duyệt</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 bg-white">
+                            {syncHistorySelected.successIds.length === 0 ? (
+                              <tr><td colSpan={approvalListCols.length + 2} className="px-4 py-6 text-[13px] text-center text-slate-400">Không có bản ghi</td></tr>
+                            ) : (
+                              syncHistorySelected.successIds.map((id, i) => {
+                                const row = allData.find(r => r.id === id);
+                                if (!row) return null;
+                                return (
+                                  <tr key={id}>
+                                    <td className="px-4 py-2 text-[13px] text-center text-slate-500">{i + 1}</td>
+                                    {approvalListCols.map(col => (
+                                      <td key={col.key} className="px-4 py-2 text-[13px] text-slate-700 whitespace-nowrap">{row[col.key] || '—'}</td>
+                                    ))}
+                                    <td className="px-4 py-2 text-center"><ApprovalBadge status="pending" /></td>
+                                  </tr>
+                                );
+                              })
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Section 2: Bản ghi trùng lặp */}
+                  <div className="border border-yellow-200 rounded-xl overflow-hidden">
+                    <button
+                      type="button"
+                      onClick={() => setSyncDetailCollapsed(prev => ({ ...prev, duplicate: !prev.duplicate }))}
+                      className="w-full bg-yellow-50 px-4 py-3 flex items-center gap-2 border-b border-yellow-200 cursor-pointer"
+                    >
+                      <Copy className="w-4 h-4 text-yellow-600" />
+                      <p className="text-[13px] font-semibold text-yellow-800">Bản ghi trùng lặp</p>
+                      <span className="text-[12px] px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded-full font-medium">{syncHistorySelected.duplicateIds.length} bản ghi</span>
+                      <ChevronDown className={`w-4 h-4 text-yellow-600 ml-auto transition-transform ${syncDetailCollapsed.duplicate ? '-rotate-90' : ''}`} />
+                    </button>
+                    {!syncDetailCollapsed.duplicate && (
+                      <div className="max-h-96 overflow-y-auto divide-y divide-yellow-100">
+                        {duplicateGroups.length === 0 ? (
+                          <p className="px-4 py-6 text-center text-[13px] text-slate-400">Không có bản ghi</p>
+                        ) : (
+                          duplicateGroups.map((group, groupIdx0) => {
+                            const groupIdx = groupIdx0 + 1;
+                            const isOpen = expandedDuplicateGroups.has(groupIdx);
+                            return (
+                              <div key={groupIdx}>
+                                <button
+                                  type="button"
+                                  onClick={() => toggleDuplicateGroup(groupIdx)}
+                                  className="w-full px-4 py-2.5 flex items-center gap-2 bg-white hover:bg-yellow-50/60 transition-colors cursor-pointer"
+                                >
+                                  <span className="text-[13px] font-bold text-slate-700">Nhóm {groupIdx}</span>
+                                  <span className="text-[12px] px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded-full font-medium">{group.length} bản ghi</span>
+                                  <ChevronDown className={`w-4 h-4 text-slate-400 ml-auto transition-transform ${isOpen ? '' : '-rotate-90'}`} />
+                                </button>
+                                {isOpen && (
+                                  <div className="overflow-x-auto bg-slate-50/50">
+                                    <table className="w-full text-left text-[13px]">
+                                      <thead className="bg-slate-50 border-y border-slate-100">
+                                        <tr>
+                                          <th className="px-4 py-2 text-[13px] text-center w-14">STT</th>
+                                          {approvalListCols.map(col => (
+                                            <th key={col.key} className="px-4 py-2 text-[13px] text-left whitespace-nowrap">{col.label}</th>
+                                          ))}
+                                          <th className="px-4 py-2 text-[13px] text-center">Trạng thái duyệt</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody className="divide-y divide-slate-100 bg-white">
+                                        {group.map((row, i) => (
+                                          <tr key={row.id}>
+                                            <td className="px-4 py-2 text-[13px] text-center text-slate-500">{i + 1}</td>
+                                            {approvalListCols.map(col => (
+                                              <td key={col.key} className="px-4 py-2 text-[13px] text-slate-700 whitespace-nowrap">{row[col.key] || '—'}</td>
+                                            ))}
+                                            <td className="px-4 py-2 text-center"><ApprovalBadge status="pending" /></td>
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Section 3: Bản ghi bị thiếu dữ liệu */}
+                  <div className="border border-red-200 rounded-xl overflow-hidden">
+                    <button
+                      type="button"
+                      onClick={() => setSyncDetailCollapsed(prev => ({ ...prev, incomplete: !prev.incomplete }))}
+                      className="w-full bg-red-50 px-4 py-3 flex items-center gap-2 border-b border-red-200 cursor-pointer"
+                    >
+                      <AlertTriangle className="w-4 h-4 text-red-600" />
+                      <p className="text-[13px] font-semibold text-red-800">Bản ghi bị thiếu dữ liệu</p>
+                      <span className="text-[12px] px-2 py-0.5 bg-red-100 text-red-700 rounded-full font-medium">{syncHistorySelected.incompleteIds.length} bản ghi</span>
+                      <ChevronDown className={`w-4 h-4 text-red-600 ml-auto transition-transform ${syncDetailCollapsed.incomplete ? '-rotate-90' : ''}`} />
+                    </button>
+                    {!syncDetailCollapsed.incomplete && (
+                      <div className="overflow-x-auto max-h-64 overflow-y-auto">
+                        <table className="w-full text-left text-[13px]">
+                          <thead className="bg-slate-50 border-b border-slate-100">
+                            <tr>
+                              <th className="px-4 py-2.5 text-[13px] text-center w-14">STT</th>
+                              {approvalListCols.map(col => (
+                                <th key={col.key} className="px-4 py-2.5 text-[13px] text-left whitespace-nowrap">{col.label}</th>
+                              ))}
+                              <th className="px-4 py-2.5 text-[13px] text-left">Trường còn thiếu</th>
+                              <th className="px-4 py-2.5 text-[13px] text-center">Trạng thái duyệt</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 bg-white">
+                            {syncHistorySelected.incompleteIds.length === 0 ? (
+                              <tr><td colSpan={approvalListCols.length + 3} className="px-4 py-6 text-[13px] text-center text-slate-400">Không có bản ghi</td></tr>
+                            ) : (
+                              syncHistorySelected.incompleteIds.map((id, i) => {
+                                const row = allData.find(r => r.id === id);
+                                if (!row) return null;
+                                const missingLabels = cols.filter(c => !row[c.key] || row[c.key].trim() === '').map(c => c.label);
+                                return (
+                                  <tr key={id}>
+                                    <td className="px-4 py-2 text-[13px] text-center text-slate-500">{i + 1}</td>
+                                    {approvalListCols.map(col => (
+                                      <td key={col.key} className="px-4 py-2 text-[13px] text-slate-700 whitespace-nowrap">{row[col.key] || '—'}</td>
+                                    ))}
+                                    <td className="px-4 py-2 text-[13px] text-red-600">{missingLabels.join(', ')}</td>
+                                    <td className="px-4 py-2 text-center"><ApprovalBadge status="pending" /></td>
+                                  </tr>
+                                );
+                              })
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
+              {syncHistorySelected ? (
+                <button
+                  onClick={() => setSyncHistorySelectedId(null)}
+                  className="flex items-center gap-1.5 px-4 py-2 border border-slate-300 text-slate-700 bg-white rounded-lg hover:bg-slate-50 font-medium text-[13px] transition-colors cursor-pointer active:scale-95"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Quay lại
+                </button>
+              ) : (
+                <button
+                  onClick={() => setShowSyncHistoryModal(false)}
+                  className="px-4 py-2 border border-slate-300 text-slate-700 bg-white rounded-lg hover:bg-slate-50 font-medium text-[13px] transition-colors cursor-pointer active:scale-95"
+                >
+                  Đóng
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Đồng bộ dữ liệu (UC1) */}
+      {showSyncModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+              <h3 className="text-[18px] font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                <RefreshCw className="w-5 h-5 text-blue-600" />
+                Đồng bộ dữ liệu chủ
+              </h3>
+              <button onClick={() => setShowSyncModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer" title="Đóng">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4 text-[13px] overflow-y-auto">
+              <p className="text-[13px] text-slate-500">
+                <span className="font-medium text-slate-700">{masterLabel}</span> — áp dụng quy tắc đã thiết lập tại <b>Mô hình dữ liệu chủ</b>
+              </p>
+              <div>
+                <div className="text-[13px] font-semibold uppercase tracking-wide text-slate-400 mb-2">Nguồn dữ liệu</div>
+                <div className="border border-slate-200 rounded-lg overflow-hidden">
+                  <table className="w-full text-left text-[13px]">
+                    <thead className="bg-slate-50">
+                      <tr><th className="px-4 py-2 text-[13px] font-medium text-slate-600">Hệ thống nguồn</th><th className="px-4 py-2 text-[13px] font-medium text-slate-600">Đồng bộ gần nhất</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr><td className="px-4 py-2 text-[13px] font-medium text-slate-800">{config.system}</td><td className="px-4 py-2 text-[13px] text-slate-500">08:00, {new Date().toLocaleDateString('vi-VN')}</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div>
+                <div className="text-[13px] font-semibold uppercase tracking-wide text-slate-400 mb-2">Quy tắc áp dụng (theo Mô hình dữ liệu chủ)</div>
+                <div className="grid grid-cols-1 gap-2">
+                  <div className="flex justify-between gap-4 border border-slate-200 rounded-lg px-3 py-2">
+                    <span className="text-[13px] text-slate-500">Ánh xạ thuộc tính</span>
+                    <span className="text-[13px] font-medium text-slate-800 text-right">{cols.length}/{cols.length} trường đã ánh xạ đầy đủ</span>
+                  </div>
+                  <div className="flex justify-between gap-4 border border-slate-200 rounded-lg px-3 py-2">
+                    <span className="text-[13px] text-slate-500">Quy tắc hợp nhất</span>
+                    <span className="text-[13px] font-medium text-slate-800 text-right">Ưu tiên giữ dữ liệu mới nhất theo thời gian đồng bộ</span>
+                  </div>
+                  <div className="flex justify-between gap-4 border border-slate-200 rounded-lg px-3 py-2">
+                    <span className="text-[13px] text-slate-500">Quy tắc so khớp</span>
+                    <span className="text-[13px] font-medium text-slate-800 text-right">Khớp chính xác theo {cols[0].label}</span>
+                  </div>
+                  <div className="flex justify-between gap-4 border border-slate-200 rounded-lg px-3 py-2">
+                    <span className="text-[13px] text-slate-500">Quy tắc định danh duy nhất</span>
+                    <span className="text-[13px] font-medium text-slate-800 text-right">{cols[0].label}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-start gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800">
+                <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                <p className="text-[13px]">
+                  Dự kiến sau khi đối chiếu khóa định danh duy nhất <b>{cols[0].label}</b>: sẽ có bản ghi <b>Mới</b> và bản ghi <b>Cập nhật</b> vào danh sách với trạng thái duyệt "Chưa phê duyệt" để rà soát
+                  {duplicateIds.size > 0 ? <> ; <b>{duplicateIds.size} bản ghi nghi trùng lặp</b> sẽ được đánh dấu cần kiểm tra thủ công.</> : '.'}
+                </p>
+              </div>
+            </div>
+            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
+              <button onClick={() => setShowSyncModal(false)} className="px-4 py-2 border border-slate-300 text-slate-700 bg-white rounded-lg hover:bg-slate-50 font-medium text-[13px] transition-colors cursor-pointer active:scale-95">
+                Hủy
+              </button>
+              <button onClick={handleConfirmSync} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-[13px] transition-colors cursor-pointer active:scale-95 flex items-center gap-1.5">
+                <RefreshCw className="w-4 h-4" />
+                Bắt đầu đồng bộ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal xem chi tiết dữ liệu của một phiên bản cụ thể (snapshot) */}
+      {versionSnapshot && (
+        <div className="fixed inset-0 flex items-center justify-center z-[10000] p-4 animate-in fade-in duration-200" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                <Eye className="w-5 h-5 text-blue-600" />
+                Chi tiết phiên bản v{versionSnapshot.version.version}
+              </h3>
+              <button onClick={() => setVersionSnapshot(null)} className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer" title="Đóng">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4 text-[13px] overflow-y-auto">
+              <div className="flex items-center gap-4 flex-wrap text-[13px]">
+                <span className="text-slate-500">Mã bản ghi: <span className="font-semibold text-slate-800">{versionSnapshot.row[cols[0].key]}</span></span>
+                <span className="text-slate-500">Người cập nhật: <span className="font-medium text-slate-800">{versionSnapshot.version.updatedBy}</span></span>
+                <span className="text-slate-500">Ngày phát hành: <span className="font-medium text-slate-800">{versionSnapshot.version.updatedAt}</span></span>
+              </div>
+              <div className="border border-slate-200 rounded-lg divide-y divide-slate-100">
+                {cols.map(col => (
+                  <div key={col.key} className="flex px-3 py-2 text-[13px]">
+                    <span className="w-40 shrink-0 text-slate-500">{col.label}</span>
+                    <span className="flex-1 text-slate-800 font-medium break-words">{versionSnapshot.version.values[col.key] || <span className="text-slate-400 italic">(trống)</span>}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end">
+              <button onClick={closeVersionSnapshot} className="flex items-center gap-1.5 px-4 py-2 border border-slate-300 text-slate-700 bg-white rounded-lg hover:bg-slate-50 font-medium text-[13px] transition-colors cursor-pointer active:scale-95">
+                <ArrowLeft className="w-4 h-4" />
+                Quay lại
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Báo cáo lịch sử phiên bản thay đổi — của riêng 1 bản ghi, mở từ nút "Phiên bản" ở tab Dữ liệu */}
+      {rowVersionReportRow && (() => {
+        const row = rowVersionReportRow;
+        const history = buildRecordVersionHistory(row, cols);
+        const latest = history[history.length - 1];
+        return (
+          <div className="fixed inset-0 flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]">
+              <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+                <h3 className="text-[18px] font-bold text-slate-800 flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-blue-600" />
+                  Báo cáo lịch sử phiên bản thay đổi
+                </h3>
+                <button onClick={() => setRowVersionReportRow(null)} className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer" title="Đóng">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="p-6 space-y-3 overflow-y-auto">
+                <div className="flex items-center justify-between">
+                  <p className="text-[13px] text-slate-500">Bản ghi: <span className="font-semibold text-slate-800">{row[cols[0].key]}</span></p>
+                  <button
+                    onClick={() => handleDownloadRowChangeReport(row)}
+                    className="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 rounded-lg text-[13px] font-medium transition-all cursor-pointer active:scale-95 shadow-sm"
+                  >
+                    <Download className="w-4 h-4 text-blue-600" />
+                    Kết xuất báo cáo thay đổi
+                  </button>
+                </div>
+                <div className="border border-slate-200 rounded-xl overflow-hidden">
+                <table className="w-full text-left border-collapse text-[13px]">
+                  <thead>
+                    <tr className="border-b border-slate-100 bg-slate-50/75 text-slate-500 text-[13px] uppercase font-semibold tracking-wider">
+                      <th className="px-4 py-3">Mã bản ghi</th>
+                      <th className="px-4 py-3 text-center">Phiên bản</th>
+                      <th className="px-4 py-3">Người cập nhật</th>
+                      <th className="px-4 py-3">Ngày phát hành</th>
+                      <th className="px-4 py-3 text-center">Trạng thái</th>
+                      <th className="px-4 py-3 text-center">Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {history.slice().reverse().map(v => {
+                      const isEffective = v.version === latest.version;
+                      return (
+                        <tr key={v.version} className="hover:bg-slate-50/50 transition-colors">
+                          <td className="px-4 py-3 text-[13px] text-slate-900 font-semibold">{row[cols[0].key]}</td>
+                          <td className="px-4 py-3 text-center">
+                            <span className="px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-[6px] text-[13px] font-semibold">v{v.version}</span>
+                          </td>
+                          <td className="px-4 py-3 text-[13px] text-slate-700">{v.updatedBy}</td>
+                          <td className="px-4 py-3 text-[13px] text-slate-500">{v.updatedAt}</td>
+                          <td className="px-4 py-3 text-center">
+                            <span className={`px-2.5 py-0.5 rounded-full text-[13px] font-semibold whitespace-nowrap ${
+                              isEffective
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                                : 'bg-slate-100 text-slate-600 border border-slate-200'
+                            }`}>
+                              {isEffective ? 'Hiệu lực' : 'Lưu trữ'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center justify-center gap-1">
+                              <button
+                                onClick={() => openVersionSnapshot(row, v, row)}
+                                className="p-1.5 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                                title="Xem chi tiết dữ liệu của phiên bản này"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleOpenVersionCompare(row, history.indexOf(v), row)}
+                                className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                                title="So sánh với bản ghi trước"
+                              >
+                                <GitCompare className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+                </div>
+              </div>
+              <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end">
+                <button onClick={() => setRowVersionReportRow(null)} className="px-4 py-2 border border-slate-300 text-slate-700 bg-white rounded-lg hover:bg-slate-50 font-medium text-[13px] transition-colors cursor-pointer active:scale-95">
+                  Đóng
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Modal So sánh phiên bản dữ liệu chủ — chỉ nội dung so sánh, không có thanh tab */}
+      {versionCompareModal && (() => {
+        const history = buildRecordVersionHistory(versionCompareModal.row, cols);
+        const latestVersion = history[history.length - 1];
+        const selectedVersion = history[versionCompareModal.versionIdx];
+        return (
+          <div className="fixed inset-0 flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]">
+              <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+                <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                  <GitCompare className="w-5 h-5 text-blue-600" />
+                  So sánh phiên bản dữ liệu chủ
+                </h3>
+                <button onClick={() => setVersionCompareModal(null)} className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer" title="Đóng">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="p-6 space-y-4 text-[13px] overflow-y-auto">
+                <div className="border border-slate-200 rounded-xl p-4 bg-slate-50/50 flex flex-col items-center text-center gap-2">
+                  <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-wider">Bản ghi được so sánh</div>
+                  <div className="text-[13px] font-bold text-slate-900">{versionCompareModal.row[cols[0].key]}</div>
+                  <div className="flex items-center gap-3 bg-white border border-slate-200 rounded-lg px-4 py-2 shadow-sm">
+                    <div className="flex flex-col items-center">
+                      <span className="text-[13px] text-slate-400 font-bold uppercase">Phiên bản cũ</span>
+                      <span className="text-[13px] font-bold text-slate-600 mt-0.5">v{selectedVersion.version}</span>
+                    </div>
+                    <span className="text-slate-300">→</span>
+                    <div className="flex flex-col items-center">
+                      <span className="text-[13px] text-slate-400 font-bold uppercase">Phiên bản mới</span>
+                      <span className="text-[13px] font-bold text-blue-600 mt-0.5">v{latestVersion.version}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border border-slate-200 rounded-xl overflow-hidden">
+                  <table className="w-full text-left border-collapse text-[13px]">
+                    <thead>
+                      <tr className="border-b border-slate-200 bg-slate-50 font-semibold text-slate-700">
+                        <th colSpan={2} className="px-4 py-3 border-r border-slate-200">
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-slate-800">PHIÊN BẢN CŨ (v{selectedVersion.version})</span>
+                            <span className="px-2 py-0.5 bg-slate-100 text-slate-600 border border-slate-200 rounded text-[13px] font-bold">Trước cập nhật</span>
+                          </div>
+                        </th>
+                        <th colSpan={2} className="px-4 py-3">
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-blue-900">PHIÊN BẢN MỚI (v{latestVersion.version})</span>
+                            <span className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-100 rounded text-[13px] font-bold">Sau cập nhật</span>
+                          </div>
+                        </th>
+                      </tr>
+                      <tr className="border-b border-slate-200 bg-slate-100/50 text-[13px] text-slate-500 font-bold uppercase">
+                        <th className="px-4 py-2 border-r border-slate-200">Trường thuộc tính</th>
+                        <th className="px-4 py-2 border-r border-slate-200">Giá trị</th>
+                        <th className="px-4 py-2 border-r border-slate-200">Trường thuộc tính</th>
+                        <th className="px-4 py-2">Giá trị</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 font-medium">
+                      {cols.map(col => {
+                        const oldVal = selectedVersion.values[col.key] || '';
+                        const newVal = latestVersion.values[col.key] || '';
+                        const changed = oldVal !== newVal;
+                        return (
+                          <tr key={col.key} className="hover:bg-slate-50/50">
+                            <td className="px-4 py-2.5 border-r border-slate-200 text-[13px] text-slate-700">{col.label}</td>
+                            <td className={`px-4 py-2.5 border-r border-slate-200 text-[13px] ${changed ? 'bg-amber-50/50 text-slate-600' : 'text-slate-600'}`}>
+                              {oldVal || <span className="text-slate-400 italic">(trống)</span>}
+                            </td>
+                            <td className="px-4 py-2.5 border-r border-slate-200 text-[13px] text-slate-700">{col.label}</td>
+                            <td className={`px-4 py-2.5 text-[13px] ${changed ? 'bg-blue-50/40 text-blue-700 font-semibold' : 'text-slate-600'}`}>
+                              {newVal || <span className="text-slate-400 italic">(trống)</span>}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => alert(`Khôi phục bản ghi về phiên bản v${selectedVersion.version} thành công!`)}
+                    className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-[13px] transition-all active:scale-95 shadow-sm cursor-pointer flex items-center gap-1.5"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    Khôi phục phiên bản
+                  </button>
+                  <button
+                    onClick={() => alert(`Đã tải xuống dữ liệu phiên bản v${selectedVersion.version}!`)}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[13px] transition-all active:scale-95 shadow-sm cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Download className="w-4 h-4" />
+                    Tải về
+                  </button>
+                </div>
+              </div>
+              <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end">
+                <button onClick={closeVersionCompareModal} className="flex items-center gap-1.5 px-4 py-2 border border-slate-300 text-slate-700 bg-white rounded-lg hover:bg-slate-50 font-medium text-[13px] transition-colors cursor-pointer active:scale-95">
+                  <ArrowLeft className="w-4 h-4" />
+                  Quay lại
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {deleteModal.open && (
         <div className="fixed inset-0 flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-md overflow-hidden">
@@ -1768,31 +2285,14 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
         const hasUnapproveWarning = detailRow.approvalStatus === 'pending' && !!detailRow.unapproveReason;
         const hasWarnings = missingCols.length > 0 || isDetailDup || (detailRow.approvalStatus === 'rejected' && !!detailRow.rejectReason) || hasUnapproveWarning;
 
-        const DETAIL_TABS = [
+        const ALL_DETAIL_TABS = [
           { id: 'values' as const,   label: 'Giá trị dữ liệu chủ',  icon: List },
           { id: 'history' as const,  label: 'Lịch sử',              icon: Clock },
           { id: 'related' as const,  label: 'Thông tin liên quan',  icon: Link2 },
           { id: 'warnings' as const, label: 'Cảnh báo lỗi',         icon: AlertTriangle },
         ];
-
-        const handleDownloadChangeReport = () => {
-          const lines: string[] = [];
-          lines.push('Mã bản ghi;Phiên bản;Người cập nhật;Ngày phát hành;Trạng thái');
-          versionHistory.slice().reverse().forEach(v => {
-            const status = v.version === latestVersion.version ? 'Kích hoạt' : 'Lưu trữ';
-            lines.push(`${detailRow[cols[0].key]};v${v.version};${v.updatedBy};${v.updatedAt};${status}`);
-          });
-          const csv = '﻿' + lines.join('\n');
-          const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `bao-cao-lich-su-thay-doi-${detailRow[cols[0].key]}.csv`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-        };
+        // Mở từ tab "Dữ liệu" chỉ giữ tab Giá trị dữ liệu chủ; mở từ tab "Phê duyệt" giữ đủ 4 tab
+        const DETAIL_TABS = detailRowContext === 'approval' ? ALL_DETAIL_TABS : ALL_DETAIL_TABS.filter(tab => tab.id === 'values');
 
         return (
         <div className="fixed inset-0 flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
@@ -1859,155 +2359,30 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
 
               {detailTab === 'history' && historyView === 'list' && (
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <p className="font-semibold text-slate-800">Báo cáo lịch sử thay đổi</p>
-                    <button
-                      onClick={handleDownloadChangeReport}
-                      className="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 rounded-lg text-[12px] font-medium transition-all cursor-pointer active:scale-95 shadow-sm"
-                    >
-                      <Download className="w-4 h-4 text-blue-600" />
-                      Kết xuất báo cáo thay đổi
-                    </button>
-                  </div>
-                  <div className="border border-slate-200 rounded-xl overflow-hidden">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="border-b border-slate-100 bg-slate-50/75 text-slate-500 text-[12px] uppercase font-semibold tracking-wider">
-                        <th className="px-4 py-3">Mã bản ghi</th>
-                        <th className="px-4 py-3 text-center">Phiên bản</th>
-                        <th className="px-4 py-3">Người cập nhật</th>
-                        <th className="px-4 py-3">Ngày phát hành</th>
-                        <th className="px-4 py-3 text-center">Trạng thái</th>
-                        <th className="px-4 py-3 text-center">So sánh phiên bản</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {versionHistory.slice().reverse().map(v => (
-                        <tr key={v.version} className="hover:bg-slate-50/50 transition-colors">
-                          <td className="px-4 py-3 text-slate-900 font-semibold">{detailRow[cols[0].key]}</td>
-                          <td className="px-4 py-3 text-center">
-                            <span className="px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-[6px] text-[12px] font-semibold">v{v.version}</span>
-                          </td>
-                          <td className="px-4 py-3 text-slate-700">{v.updatedBy}</td>
-                          <td className="px-4 py-3 text-slate-500">{v.updatedAt}</td>
-                          <td className="px-4 py-3 text-center">
-                            <span className={`px-2.5 py-0.5 rounded-full text-[12px] font-semibold ${
-                              v.version === latestVersion.version
-                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
-                                : 'bg-slate-100 text-slate-600 border border-slate-200'
-                            }`}>
-                              {v.version === latestVersion.version ? 'Kích hoạt' : 'Lưu trữ'}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 text-center">
-                            {v.version === latestVersion.version ? (
-                              <span className="text-[12px] text-slate-400 italic">Phiên bản hiện tại</span>
-                            ) : (
-                              <button
-                                onClick={() => { setCompareVersionIdx(versionHistory.indexOf(v)); setHistoryView('compare'); }}
-                                className="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 rounded-lg text-[12px] transition-all cursor-pointer active:scale-95 shadow-sm"
-                              >
-                                Xem chi tiết
-                              </button>
+                  <div className="border border-slate-200 rounded-xl p-5 bg-white">
+                    <p className="text-[13px] font-bold text-slate-800 mb-4">Lịch sử chỉnh sửa bản ghi này</p>
+                    <div className="space-y-4">
+                      {[
+                        { dotClass: 'bg-green-500', action: 'Phê duyệt', time: '09:12, 02/07/2026', version: 'v1.1 → v1.2', description: 'Phê duyệt cập nhật thông tin bản ghi.', actor: 'Nguyễn Thanh Hải' },
+                        { dotClass: 'bg-blue-500',  action: 'Chỉnh sửa', time: '16:40, 01/07/2026', version: null,          description: 'Bổ sung, chỉnh sửa một số trường dữ liệu.', actor: 'Trần Minh Phúc' },
+                        { dotClass: 'bg-slate-400', action: 'Tạo mới',   time: '08:00, 10/01/2026', version: 'v1.0',        description: 'Khởi tạo bản ghi từ đồng bộ dữ liệu.', actor: 'Hệ thống' },
+                      ].map((item, i, arr) => (
+                        <div key={i} className={i < arr.length - 1 ? 'pb-4 border-b border-slate-100' : ''}>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className={`w-2 h-2 rounded-full flex-shrink-0 ${item.dotClass}`} />
+                            <span className="text-[13px] font-bold text-slate-800">{item.action}</span>
+                            <span className="text-[13px] text-slate-400">{item.time}</span>
+                            {item.version && (
+                              <span className="px-2 py-0.5 bg-slate-100 text-slate-600 border border-slate-200 rounded-full text-[12px] font-medium">{item.version}</span>
                             )}
-                          </td>
-                        </tr>
+                          </div>
+                          <p className="text-[13px] text-slate-600 mt-1 ml-4">{item.description}</p>
+                          <p className="text-[13px] text-slate-400 mt-1 ml-4">{item.actor}</p>
+                        </div>
                       ))}
-                    </tbody>
-                  </table>
-                  </div>
-                </div>
-              )}
-
-              {detailTab === 'history' && historyView === 'compare' && (
-                <div className="space-y-4">
-                  <div className="border border-slate-200 rounded-xl p-4 bg-slate-50/50 flex flex-col items-center text-center gap-2">
-                    <div className="text-[12px] font-semibold text-slate-500 uppercase tracking-wider">Bản ghi được so sánh</div>
-                    <div className="text-[13px] font-bold text-slate-900">{detailRow[cols[0].key]}</div>
-                    <div className="flex items-center gap-3 bg-white border border-slate-200 rounded-lg px-4 py-2 shadow-sm">
-                      <div className="flex flex-col items-center">
-                        <span className="text-[11px] text-slate-400 font-bold uppercase">Phiên bản cũ</span>
-                        <span className="text-[13px] font-bold text-slate-600 mt-0.5">v{selectedVersion.version}</span>
-                      </div>
-                      <span className="text-slate-300">→</span>
-                      <div className="flex flex-col items-center">
-                        <span className="text-[11px] text-slate-400 font-bold uppercase">Phiên bản mới</span>
-                        <span className="text-[13px] font-bold text-blue-600 mt-0.5">v{latestVersion.version}</span>
-                      </div>
                     </div>
                   </div>
 
-                  <div className="border border-slate-200 rounded-xl overflow-hidden">
-                    <table className="w-full text-left border-collapse">
-                      <thead>
-                        <tr className="border-b border-slate-200 bg-slate-50 font-semibold text-slate-700">
-                          <th colSpan={2} className="px-4 py-3 border-r border-slate-200">
-                            <div className="flex items-center justify-between">
-                              <span className="font-bold text-slate-800">PHIÊN BẢN CŨ (v{selectedVersion.version})</span>
-                              <span className="px-2 py-0.5 bg-slate-100 text-slate-600 border border-slate-200 rounded text-[11px] font-bold">Trước cập nhật</span>
-                            </div>
-                          </th>
-                          <th colSpan={2} className="px-4 py-3">
-                            <div className="flex items-center justify-between">
-                              <span className="font-bold text-blue-900">PHIÊN BẢN MỚI (v{latestVersion.version})</span>
-                              <span className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-100 rounded text-[11px] font-bold">Sau cập nhật</span>
-                            </div>
-                          </th>
-                        </tr>
-                        <tr className="border-b border-slate-200 bg-slate-100/50 text-[11px] text-slate-500 font-bold uppercase">
-                          <th className="px-4 py-2 border-r border-slate-200">Trường thuộc tính</th>
-                          <th className="px-4 py-2 border-r border-slate-200">Giá trị</th>
-                          <th className="px-4 py-2 border-r border-slate-200">Trường thuộc tính</th>
-                          <th className="px-4 py-2">Giá trị</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100 font-medium">
-                        {cols.map(col => {
-                          const oldVal = selectedVersion.values[col.key] || '';
-                          const newVal = latestVersion.values[col.key] || '';
-                          const changed = oldVal !== newVal;
-                          return (
-                            <tr key={col.key} className="hover:bg-slate-50/50">
-                              <td className="px-4 py-2.5 border-r border-slate-200 text-slate-700">{col.label}</td>
-                              <td className={`px-4 py-2.5 border-r border-slate-200 ${changed ? 'bg-amber-50/50 text-slate-600' : 'text-slate-600'}`}>
-                                {oldVal || <span className="text-slate-400 italic">(trống)</span>}
-                              </td>
-                              <td className="px-4 py-2.5 border-r border-slate-200 text-slate-700">{col.label}</td>
-                              <td className={`px-4 py-2.5 ${changed ? 'bg-blue-50/40 text-blue-700 font-semibold' : 'text-slate-600'}`}>
-                                {newVal || <span className="text-slate-400 italic">(trống)</span>}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-1">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => alert(`Khôi phục bản ghi về phiên bản v${selectedVersion.version} thành công!`)}
-                        className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-[12px] transition-all active:scale-95 shadow-sm cursor-pointer flex items-center gap-1.5"
-                      >
-                        <RotateCcw className="w-4 h-4" />
-                        Khôi phục phiên bản
-                      </button>
-                      <button
-                        onClick={() => alert(`Đã tải xuống dữ liệu phiên bản v${selectedVersion.version}!`)}
-                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[12px] transition-all active:scale-95 shadow-sm cursor-pointer flex items-center gap-1.5"
-                      >
-                        <Download className="w-4 h-4" />
-                        Tải về
-                      </button>
-                    </div>
-                    <button
-                      onClick={() => setHistoryView('list')}
-                      className="px-4 py-2 bg-white border border-slate-200 text-slate-800 hover:bg-slate-50 rounded-lg text-[12px] transition-all active:scale-95 shadow-sm cursor-pointer flex items-center gap-1.5"
-                    >
-                      <ArrowLeft className="w-4 h-4" />
-                      Quay lại
-                    </button>
-                  </div>
                 </div>
               )}
 
@@ -2047,7 +2422,7 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
                                 <td className="px-3 py-2"><ApprovalBadge status={r.approvalStatus} /></td>
                                 <td className="px-3 py-2 text-right">
                                   <button
-                                    onClick={() => handleOpenDetail(r)}
+                                    onClick={() => handleOpenDetail(r, 'approval')}
                                     className="text-blue-600 hover:underline cursor-pointer text-[12px]"
                                   >
                                     Xem chi tiết

@@ -183,8 +183,28 @@ const VIEW_STEPS = [
   { number: 3, title: 'Quy tắc hợp nhất' },
   { number: 4, title: 'Thiết lập quan hệ' },
   { number: 5, title: 'Định danh duy nhất' },
-  { number: 6, title: 'Phê duyệt' },
+  { number: 6, title: 'Quy tắc đánh phiên bản' },
+  { number: 7, title: 'Phê duyệt' },
 ];
+
+// Quy tắc đánh phiên bản (Bước 6) — điều kiện tạo version mới & định dạng số phiên bản
+const mockVersioningRules: {
+  entityId: string;
+  disabledFields: string[];
+  autoVersionOnSync: boolean;
+  versionFormat: 'increment' | 'yearIncrement' | 'custom';
+  customPrefix: string;
+  startFrom: string;
+}[] = [
+  { entityId: '1', disabledFields: ['full_name', 'phone_number'], autoVersionOnSync: true, versionFormat: 'increment', customPrefix: '', startFrom: 'V1' },
+  { entityId: '2', disabledFields: ['org_name'], autoVersionOnSync: false, versionFormat: 'yearIncrement', customPrefix: '', startFrom: '2025.1' },
+];
+
+const VERSION_FORMAT_LABELS: Record<string, { label: string; example: string }> = {
+  increment: { label: 'Số tăng dần', example: 'V1 → V2 → V3' },
+  yearIncrement: { label: 'Năm + số tăng dần', example: '2024.1 → 2024.2 → 2025.1' },
+  custom: { label: 'Tùy chỉnh', example: '[Prefix] + [Số tự tăng]' },
+};
 
 const MANAGING_UNITS = [
   'Cục Hành chính tư pháp',
@@ -1135,7 +1155,7 @@ export function MasterDataScaleManagementPage() {
       {viewingEntity && (
         <Portal>
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-slate-200">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-slate-200">
               <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-white shrink-0">
                 <h3 className="text-[16px] font-bold text-slate-900">Xem chi tiết thực thể dữ liệu chủ</h3>
                 <button
@@ -1148,14 +1168,14 @@ export function MasterDataScaleManagementPage() {
 
               {/* Stepper — giống quy trình 6 bước của Tạo mới/Chỉnh sửa */}
               <div className="px-6 py-4 border-b border-slate-200 bg-slate-50 shrink-0">
-                <div className="flex items-center justify-between">
+                <div className="flex items-start justify-between">
                   {VIEW_STEPS.map((step, index) => (
-                    <div key={step.number} className="flex items-center flex-1">
+                    <div key={step.number} className="flex items-start flex-1">
                       <div className="flex flex-col items-center flex-1">
                         <button
                           type="button"
                           onClick={() => setViewStep(step.number)}
-                          className={`w-8 h-8 rounded-full flex items-center justify-center text-[12px] transition-colors cursor-pointer ${
+                          className={`w-8 h-8 rounded-full flex items-center justify-center text-[12px] transition-colors cursor-pointer flex-shrink-0 ${
                             viewStep === step.number
                               ? 'bg-blue-600 text-white'
                               : 'bg-green-600 text-white hover:bg-green-700'
@@ -1169,7 +1189,7 @@ export function MasterDataScaleManagementPage() {
                         </p>
                       </div>
                       {index < VIEW_STEPS.length - 1 && (
-                        <div className="flex-1 h-0.5 bg-slate-200 mx-1 mt-[-22px]" />
+                        <div className="flex-1 h-0.5 bg-slate-200 mx-1 mt-4" />
                       )}
                     </div>
                   ))}
@@ -1687,8 +1707,87 @@ export function MasterDataScaleManagementPage() {
                   );
                 })()}
 
-                {/* Bước 6: Phê duyệt */}
-                {viewStep === 6 && (
+                {/* Bước 6: Quy tắc đánh phiên bản */}
+                {viewStep === 6 && (() => {
+                  const entityRule = mockVersioningRules.find(r => r.entityId === viewingEntity.id);
+                  const entityAttrs = defaultAttributes[viewingEntity.id] || [];
+
+                  if (!entityRule) {
+                    return (
+                      <div className="border border-slate-200 rounded-xl bg-slate-50 p-6 text-center">
+                        <Clock className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                        <p className="text-[13px] text-slate-500">Chưa cấu hình quy tắc đánh phiên bản cho thực thể này. Xem/thiết lập tại tab "Mô hình dữ liệu chủ".</p>
+                      </div>
+                    );
+                  }
+
+                  const formatInfo = VERSION_FORMAT_LABELS[entityRule.versionFormat];
+
+                  return (
+                    <div className="space-y-4">
+                      {/* Phần 1 — Điều kiện tạo version mới */}
+                      <div className="border border-slate-200 rounded-xl overflow-hidden">
+                        <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50">
+                          <h4 className="text-[13px] font-bold text-slate-800">Phần 1 — Điều kiện tạo version mới</h4>
+                        </div>
+                        <div className="divide-y divide-slate-100">
+                          {entityAttrs.length === 0 ? (
+                            <p className="px-5 py-6 text-center text-[13px] text-slate-400">Chưa có thuộc tính nào được cấu hình cho thực thể này</p>
+                          ) : (
+                            entityAttrs.map(attr => {
+                              const enabled = !entityRule.disabledFields.includes(attr.fieldName);
+                              return (
+                                <div key={attr.id} className="flex items-center justify-between gap-4 px-5 py-3">
+                                  <span className="text-[13px] font-medium text-slate-700">{attr.displayName}</span>
+                                  <span className={`text-[13px] whitespace-nowrap ${enabled ? 'text-blue-600' : 'text-slate-400'}`}>
+                                    {enabled ? 'Thay đổi giá trị → tạo version mới' : 'Không tạo version (chỉ ghi log)'}
+                                  </span>
+                                </div>
+                              );
+                            })
+                          )}
+                        </div>
+                        <div className="px-5 py-3 border-t border-slate-200 bg-white flex items-start gap-3">
+                          <div className={`mt-0.5 w-4 h-4 rounded flex-shrink-0 flex items-center justify-center ${entityRule.autoVersionOnSync ? 'bg-blue-600' : 'bg-slate-200'}`}>
+                            {entityRule.autoVersionOnSync && <Check className="w-3 h-3 text-white" />}
+                          </div>
+                          <div>
+                            <p className="text-[13px] font-medium text-slate-700">Tự động tạo phiên bản khi đồng bộ từ hệ thống nguồn (re-merge)</p>
+                            <p className="text-[13px] text-slate-500 mt-1">Thay đổi thủ công của Cán bộ luôn cần qua phê duyệt trước khi tạo phiên bản mới.</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Phần 2 — Định dạng số phiên bản */}
+                      <div className="border border-slate-200 rounded-xl p-5 bg-white space-y-3">
+                        <h4 className="text-[13px] font-bold text-slate-800">Phần 2 — Định dạng số phiên bản</h4>
+                        <div className="grid grid-cols-2 gap-4 text-[13px]">
+                          <div>
+                            <span className="block text-slate-500 mb-1">Định dạng phiên bản</span>
+                            <span className="font-medium text-slate-800">{formatInfo.label}</span>
+                          </div>
+                          <div>
+                            <span className="block text-slate-500 mb-1">Ví dụ</span>
+                            <code className="font-mono text-slate-800">{formatInfo.example}</code>
+                          </div>
+                          {entityRule.versionFormat === 'custom' && (
+                            <div>
+                              <span className="block text-slate-500 mb-1">Tiền tố (Prefix)</span>
+                              <span className="font-medium text-slate-800">{entityRule.customPrefix || '(không có)'}</span>
+                            </div>
+                          )}
+                          <div>
+                            <span className="block text-slate-500 mb-1">Bắt đầu từ</span>
+                            <span className="font-medium text-slate-800">{entityRule.startFrom}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Bước 7: Phê duyệt */}
+                {viewStep === 7 && (
                 <>
                 {/* Nội dung trình duyệt */}
                 <div>
@@ -1747,10 +1846,23 @@ export function MasterDataScaleManagementPage() {
                 </button>
                 <button
                   onClick={() => setViewingEntity(null)}
-                  className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg font-medium text-[13px] transition-colors cursor-pointer shadow-sm"
+                  className={`px-4 py-2 rounded-lg font-medium text-[13px] transition-colors cursor-pointer shadow-sm ${
+                    viewStep < 7
+                      ? 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
                 >
                   Đóng
                 </button>
+                {viewStep < 7 && (
+                  <button
+                    onClick={() => setViewStep(viewStep + 1)}
+                    className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg font-medium text-[13px] flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
+                  >
+                    Tiếp theo
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             </div>
           </div>
