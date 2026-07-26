@@ -7,6 +7,37 @@ interface VersionHistoryModalProps {
 
 const mockVersions = [
   {
+    id: 29,
+    version: 'v2.6.18',
+    date: '26/07/2026',
+    time: '18:00',
+    content: `1. Đồng bộ mã nguồn & môi trường phát triển:
+- Đồng bộ mã nguồn mới nhất từ nhánh upstream/main, xử lý xung đột merge tại các màn hình Thuộc tính, Mô hình dữ liệu chủ và Quy tắc hợp nhất.
+
+2. Phân hệ Dữ liệu chủ — Wizard "Tạo mới dữ liệu chủ" & Mô hình dữ liệu chủ:
+- Bổ sung bước "Quy tắc đánh phiên bản" (điều kiện tạo phiên bản mới + định dạng số phiên bản) vào cả wizard 7 bước và modal xem chi tiết thực thể tại Mô hình dữ liệu chủ.
+- Đồng bộ dữ liệu thực từ Quy tắc hợp nhất, Thiết lập quan hệ vào các bước xem chi tiết thay vì dữ liệu mẫu tĩnh; chuẩn hóa cỡ chữ 13px cho toàn bộ modal xem chi tiết.
+- Sửa lỗi căn chỉnh hàng ngang của thanh bước (stepper) khi tiêu đề bước xuống nhiều dòng; tăng kích thước modal xem chi tiết; bổ sung nút "Tiếp theo" ở chân từng bước.
+
+3. Phân hệ Dữ liệu chủ — Cập nhật dữ liệu chủ (tab Dữ liệu):
+- Bỏ inner-tab Gộp tự động/Chờ rà soát/Không khớp; gộp "Lịch sử đồng bộ" thành nút mở modal thay vì tách tab riêng, bổ sung thêm các trường dữ liệu (số bản ghi mới/cập nhật/không đổi, thời lượng, lần đồng bộ trước) cho bảng lịch sử.
+- Hiển thị các bản ghi nghi trùng lặp trong Lịch sử đồng bộ dạng bảng phẳng kèm nút đóng/mở theo từng nhóm bản ghi trùng.
+- Bổ sung cột "Trạng thái dữ liệu" (Mới/Cập nhật), rút gọn còn 3 trường nghiệp vụ hiển thị ngoài danh sách; cột Thao tác chuyển sang icon Xem chi tiết + menu 3 chấm (Phiên bản, Rà soát, Trình duyệt, Công khai/Hủy công khai, Xóa).
+- Bổ sung bộ lọc nâng cao (Trạng thái phê duyệt, Trạng thái công khai, Trạng thái dữ liệu) dạng panel ẩn/hiện qua icon phễu, dàn cùng 1 hàng với thanh tìm kiếm.
+- Sắp xếp lại các nút thao tác hàng loạt: Đồng bộ dữ liệu/Lịch sử đồng bộ chuyển lên cùng hàng thanh tìm kiếm; Gửi duyệt/Công khai/Hủy công khai (mới bổ sung, áp dụng hàng loạt theo bản ghi được chọn) chuyển lên cùng hàng với tab Đang hoạt động/Đã xóa.
+- Bỏ hẳn tab "Phiên bản" (báo cáo lịch sử thay đổi tổng hợp); giữ lại modal xem lịch sử phiên bản/so sánh phiên bản theo từng bản ghi với cơ chế đóng modal trước khi mở modal kế tiếp và nút Quay lại về modal trước đó.
+
+4. Phân hệ Dữ liệu chủ — Cập nhật dữ liệu chủ (tab Phê duyệt):
+- Bỏ thẻ thống kê "Đang rà soát", đưa thẻ "Tổng yêu cầu" lên vị trí đầu tiên.
+- Bổ sung trạng thái lọc "Tất cả" hiển thị toàn bộ bản ghi không phân biệt trạng thái phê duyệt.
+- Đổi nhãn trạng thái "Soạn thảo" thành "Chưa phê duyệt" trên toàn bộ badge và bộ lọc trạng thái phê duyệt, áp dụng đồng bộ cả tab Dữ liệu và Tra cứu dữ liệu chủ.
+- Bổ sung cơ chế "Liên kết chéo thực thể" tại tab Thông tin liên quan trong modal Chi tiết bản ghi: xác định các bản ghi ở loại dữ liệu chủ khác cùng chủ thể (khớp CCCD), thay thế cách gợi ý trùng lặp theo tên trong cùng 1 loại dữ liệu trước đây.
+
+5. Phân hệ Dữ liệu chủ — Báo cáo tìm kiếm dữ liệu chủ:
+- Làm lại tab "Báo cáo sử dụng dữ liệu chủ" theo mẫu thiết kế "Báo cáo tình trạng khai thác danh mục": bộ lọc multi-select thực thể dữ liệu chủ + khoảng thời gian thống kê, nút Truy xuất báo cáo/Xuất File, trạng thái rỗng trước khi truy xuất, biểu đồ AreaChart theo thời gian và bảng hệ thống/cổng dịch vụ kết nối kèm trạng thái + lượt truy cập gần nhất.
+- Tab "Tra cứu dữ liệu chủ": gộp 2 ô lọc Mã/Tên thành 1 ô tìm theo mã hoặc tên bản ghi; đổi bộ lọc Trạng thái thành Trạng thái phê duyệt (dùng chung dữ liệu với Cập nhật dữ liệu chủ); nút Xem chi tiết chuyển sang icon con mắt, mở modal chi tiết bản ghi đồng bộ giao diện với Cập nhật dữ liệu chủ.`
+  },
+  {
     id: 28,
     version: 'v2.6.17',
     date: '21/07/2026',

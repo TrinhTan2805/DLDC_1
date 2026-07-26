@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Search, Send, Eye, Clock, CheckCircle2, XCircle, Globe, List, Lock, Check, Edit2, Copy, AlertTriangle, X, RotateCcw, GitMerge, Split, HelpCircle, PlusCircle, SquarePen, Link2, Download, ArrowLeft, Trash2, RefreshCw, ChevronDown, GitCompare, MoreVertical, Filter } from 'lucide-react';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '../../ui/dropdown-menu';
 
-type ApprovalStatus = 'draft' | 'reviewing' | 'pending' | 'approved' | 'rejected' | 'deleted';
+export type ApprovalStatus = 'draft' | 'reviewing' | 'pending' | 'approved' | 'rejected' | 'deleted';
 type PublicStatus = 'published' | 'unpublished';
 type DataCategory = 'enforcement' | 'civil-registry' | 'nationality' | 'individual' | 'organization' | 'legal-aid-object' | 'asset';
 
@@ -229,6 +229,64 @@ function getMockData(masterId: string, category: DataCategory): Row[] {
   return base;
 }
 
+// ─── Liên kết chéo thực thể: cùng một chủ thể (CCCD) xuất hiện ở nhiều loại dữ liệu chủ khác nhau ──
+const CATEGORY_LABELS: Record<DataCategory, string> = {
+  'enforcement':      'Thi hành án dân sự',
+  'civil-registry':   'Hộ tịch',
+  'nationality':      'Quốc tịch',
+  'individual':       'Cá nhân hành nghề bổ trợ tư pháp',
+  'organization':     'Tổ chức hành nghề bổ trợ tư pháp',
+  'legal-aid-object': 'Đối tượng trợ giúp pháp lý',
+  'asset':            'Tài sản bảo đảm',
+};
+
+// Chỉ khai báo cho category nào thực sự có trường CCCD trong dữ liệu.
+// 'civil-registry', 'nationality', 'organization', 'asset' chưa có trường này nên chưa tham gia liên kết.
+const CROSS_ENTITY_LINK_FIELD: Partial<Record<DataCategory, string>> = {
+  'enforcement':      'cccd',
+  'individual':        'cccd',
+  'legal-aid-object':  'cccd',
+};
+
+function normalizeIdentifier(value: string): string {
+  return (value || '').replace(/\D/g, ''); // chỉ giữ chữ số, bỏ khoảng trắng/gạch nối
+}
+
+interface CrossEntityLink {
+  category: DataCategory;
+  categoryLabel: string;
+  row: Row;
+}
+
+function buildCrossEntityIndex(dataByCategory: Record<DataCategory, Row[]>): Map<string, CrossEntityLink[]> {
+  const index = new Map<string, CrossEntityLink[]>();
+  (Object.keys(dataByCategory) as DataCategory[]).forEach(category => {
+    const linkField = CROSS_ENTITY_LINK_FIELD[category];
+    if (!linkField) return;
+    dataByCategory[category].forEach(row => {
+      const key = normalizeIdentifier(row[linkField]);
+      if (!key) return;
+      const entry: CrossEntityLink = { category, categoryLabel: CATEGORY_LABELS[category], row };
+      index.set(key, [...(index.get(key) ?? []), entry]);
+    });
+  });
+  return index;
+}
+
+// Xây 1 lần từ dữ liệu mock gốc — trong hệ thống thật nên build từ nguồn dữ liệu tổng hợp,
+// không build lại mỗi lần mở modal.
+const CROSS_ENTITY_INDEX = buildCrossEntityIndex(MOCK_BY_CATEGORY);
+
+function getCrossEntityLinks(row: Row, category: DataCategory): CrossEntityLink[] {
+  const linkField = CROSS_ENTITY_LINK_FIELD[category];
+  if (!linkField) return [];
+  const key = normalizeIdentifier(row[linkField]);
+  if (!key) return [];
+  return (CROSS_ENTITY_INDEX.get(key) ?? []).filter(
+    e => !(e.category === category && e.row.id === row.id)
+  );
+}
+
 // ─── Rà soát: gợi ý trùng lặp & cảnh báo thiếu dữ liệu ────────────────────────
 
 // Trường dùng để so khớp trùng lặp theo từng loại dữ liệu
@@ -337,7 +395,7 @@ type PairBucket = 'auto' | 'review' | 'mismatch';
 
 // ─── Status badges ────────────────────────────────────────────────────────────
 
-function ApprovalBadge({ status }: { status: ApprovalStatus }) {
+export function ApprovalBadge({ status }: { status: ApprovalStatus }) {
   if (status === 'approved')
     return <span className="px-3 py-1 bg-green-50 text-green-700 border border-green-200 text-[12px] rounded-full whitespace-nowrap">Đã phê duyệt</span>;
   if (status === 'pending')
@@ -348,7 +406,7 @@ function ApprovalBadge({ status }: { status: ApprovalStatus }) {
     return <span className="px-3 py-1 bg-red-50 text-red-700 border border-red-200 text-[12px] rounded-full whitespace-nowrap">Từ chối</span>;
   if (status === 'deleted')
     return <span className="px-3 py-1 bg-slate-200 text-slate-600 border border-slate-300 text-[12px] rounded-full whitespace-nowrap">Đã xóa</span>;
-  return <span className="px-3 py-1 bg-slate-100 text-slate-600 border border-slate-200 text-[12px] rounded-full whitespace-nowrap">Soạn thảo</span>;
+  return <span className="px-3 py-1 bg-slate-100 text-slate-600 border border-slate-200 text-[12px] rounded-full whitespace-nowrap">Chưa phê duyệt</span>;
 }
 
 function PublicBadge({ status }: { status: PublicStatus }) {
@@ -952,7 +1010,7 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
                   className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                 >
                   <option value="all">Tất cả trạng thái</option>
-                  <option value="draft">Soạn thảo</option>
+                  <option value="draft">Chưa phê duyệt</option>
                   <option value="reviewing">Rà soát</option>
                   <option value="pending">Chờ phê duyệt</option>
                   <option value="approved">Đã phê duyệt</option>
@@ -2280,6 +2338,15 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
         const relatedRecords = detailDupKey
           ? allData.filter(r => r.id !== detailRow.id && getDuplicateKeyValue(r, config.category) === detailDupKey)
           : [];
+        // Liên kết chéo thực thể: các bản ghi ở LOẠI DỮ LIỆU KHÁC cùng chủ thể (khớp CCCD)
+        const crossEntityLinks = getCrossEntityLinks(detailRow, config.category);
+        const crossEntityGroups = Object.values(
+          crossEntityLinks.reduce((acc, link) => {
+            if (!acc[link.category]) acc[link.category] = { categoryLabel: link.categoryLabel, links: [] as CrossEntityLink[] };
+            acc[link.category].links.push(link);
+            return acc;
+          }, {} as Record<string, { categoryLabel: string; links: CrossEntityLink[] }>)
+        );
         const missingCols = cols.filter(col => !detailRow[col.key] || detailRow[col.key].trim() === '');
         const isDetailDup = duplicateIds.has(detailRow.id);
         const hasUnapproveWarning = detailRow.approvalStatus === 'pending' && !!detailRow.unapproveReason;
@@ -2400,38 +2467,52 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
                   </div>
 
                   <div>
-                    <p className="text-slate-600 mb-2">Các bản ghi khác cùng chủ thể ({relatedRecords.length})</p>
-                    {relatedRecords.length === 0 ? (
+                    <p className="text-slate-600 mb-2">
+                      Liên kết chéo thực thể — cùng chủ thể (CCCD) tại loại dữ liệu chủ khác ({crossEntityLinks.length})
+                    </p>
+                    {!CROSS_ENTITY_LINK_FIELD[config.category] ? (
                       <div className="border border-slate-200 rounded-lg p-4 text-center text-slate-400">
-                        Không có bản ghi liên quan nào khác
+                        Loại dữ liệu này chưa có trường CCCD nên chưa hỗ trợ liên kết chéo thực thể
+                      </div>
+                    ) : crossEntityGroups.length === 0 ? (
+                      <div className="border border-slate-200 rounded-lg p-4 text-center text-slate-400">
+                        Không tìm thấy bản ghi nào ở loại dữ liệu khác cùng CCCD
                       </div>
                     ) : (
-                      <div className="border border-slate-200 rounded-lg overflow-hidden">
-                        <table className="w-full">
-                          <thead>
-                            <tr className="bg-slate-50 border-b border-slate-200">
-                              <th className="px-3 py-2 text-left text-[12px] font-medium text-slate-600">{cols[0].label}</th>
-                              <th className="px-3 py-2 text-left text-[12px] font-medium text-slate-600">Trạng thái</th>
-                              <th className="px-3 py-2 text-left text-[12px] font-medium text-slate-600"></th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {relatedRecords.map(r => (
-                              <tr key={r.id} className="border-b border-slate-100 last:border-0">
-                                <td className="px-3 py-2 text-slate-700">{r[cols[0].key]}</td>
-                                <td className="px-3 py-2"><ApprovalBadge status={r.approvalStatus} /></td>
-                                <td className="px-3 py-2 text-right">
-                                  <button
-                                    onClick={() => handleOpenDetail(r, 'approval')}
-                                    className="text-blue-600 hover:underline cursor-pointer text-[12px]"
-                                  >
-                                    Xem chi tiết
-                                  </button>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                      <div className="space-y-3">
+                        {crossEntityGroups.map(group => (
+                          <div key={group.categoryLabel} className="border border-slate-200 rounded-lg overflow-hidden">
+                            <div className="px-3 py-2 bg-slate-50 border-b border-slate-200 text-[12px] font-semibold text-slate-700 flex items-center justify-between">
+                              <span>{group.categoryLabel}</span>
+                              <span className="text-slate-400 font-normal">{group.links.length} bản ghi</span>
+                            </div>
+                            <table className="w-full">
+                              <thead>
+                                <tr className="bg-slate-50 border-b border-slate-200">
+                                  <th className="px-3 py-2 text-left text-[12px] font-medium text-slate-600">{COLUMNS[group.links[0].category][0].label}</th>
+                                  <th className="px-3 py-2 text-left text-[12px] font-medium text-slate-600">Trạng thái</th>
+                                  <th className="px-3 py-2 text-left text-[12px] font-medium text-slate-600"></th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {group.links.map(link => (
+                                  <tr key={`${link.category}-${link.row.id}`} className="border-b border-slate-100 last:border-0">
+                                    <td className="px-3 py-2 text-slate-700">{link.row[COLUMNS[link.category][0].key]}</td>
+                                    <td className="px-3 py-2"><ApprovalBadge status={link.row.approvalStatus} /></td>
+                                    <td className="px-3 py-2 text-right">
+                                      <button
+                                        onClick={() => alert(`Chuyển sang xem bản ghi tại danh mục "${link.categoryLabel}" (mã: ${link.row.id}).`)}
+                                        className="text-blue-600 hover:underline cursor-pointer text-[12px]"
+                                      >
+                                        Xem chi tiết
+                                      </button>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
