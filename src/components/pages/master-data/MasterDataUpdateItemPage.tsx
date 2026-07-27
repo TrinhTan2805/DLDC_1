@@ -480,6 +480,7 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
   const [detailTab, setDetailTab] = useState<'values' | 'history' | 'related' | 'warnings'>('values');
   const [compareVersionIdx, setCompareVersionIdx] = useState(0);
   const [historyView, setHistoryView] = useState<'list' | 'compare'>('list');
+  const [showOriginalData, setShowOriginalData] = useState(false);
   // Mở từ tab "Dữ liệu" chỉ hiện Giá trị dữ liệu chủ; mở từ tab "Phê duyệt" vẫn giữ đủ các tab
   const [detailRowContext, setDetailRowContext] = useState<'list' | 'approval'>('list');
 
@@ -2260,22 +2261,6 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
                   </table>
                 </div>
 
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => alert(`Khôi phục bản ghi về phiên bản v${selectedVersion.version} thành công!`)}
-                    className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-[13px] transition-all active:scale-95 shadow-sm cursor-pointer flex items-center gap-1.5"
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                    Khôi phục phiên bản
-                  </button>
-                  <button
-                    onClick={() => alert(`Đã tải xuống dữ liệu phiên bản v${selectedVersion.version}!`)}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[13px] transition-all active:scale-95 shadow-sm cursor-pointer flex items-center gap-1.5"
-                  >
-                    <Download className="w-4 h-4" />
-                    Tải về
-                  </button>
-                </div>
               </div>
               <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end">
                 <button onClick={closeVersionCompareModal} className="flex items-center gap-1.5 px-4 py-2 border border-slate-300 text-slate-700 bg-white rounded-lg hover:bg-slate-50 font-medium text-[13px] transition-colors cursor-pointer active:scale-95">
@@ -2358,8 +2343,8 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
           { id: 'related' as const,  label: 'Thông tin liên quan',  icon: Link2 },
           { id: 'warnings' as const, label: 'Cảnh báo lỗi',         icon: AlertTriangle },
         ];
-        // Mở từ tab "Dữ liệu" chỉ giữ tab Giá trị dữ liệu chủ; mở từ tab "Phê duyệt" giữ đủ 4 tab
-        const DETAIL_TABS = detailRowContext === 'approval' ? ALL_DETAIL_TABS : ALL_DETAIL_TABS.filter(tab => tab.id === 'values');
+        // Mở từ tab "Dữ liệu" giữ tab Giá trị dữ liệu chủ và Lịch sử; mở từ tab "Phê duyệt" giữ đủ 4 tab
+        const DETAIL_TABS = detailRowContext === 'approval' ? ALL_DETAIL_TABS : ALL_DETAIL_TABS.filter(tab => tab.id === 'values' || tab.id === 'history');
 
         return (
         <div className="fixed inset-0 flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
@@ -2401,9 +2386,19 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
             <div className="p-6 space-y-3 text-[13px] overflow-y-auto">
               {detailTab === 'values' && (
                 <>
-                  <div className="flex items-center gap-2">
-                    <span className="text-slate-500">Trạng thái:</span>
-                    <ApprovalBadge status={detailRow.approvalStatus} />
+                  <div className="flex items-center gap-4 flex-wrap">
+                    <div className="flex items-center gap-2">
+                      <span className="text-slate-500">Trạng thái:</span>
+                      <ApprovalBadge status={detailRow.approvalStatus} />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-slate-500">Trạng thái dữ liệu:</span>
+                      <DataStatusBadge status={getDataStatus(detailRow)} />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-slate-500">Trạng thái công khai:</span>
+                      <PublicBadge status={detailRow.publicStatus} />
+                    </div>
                   </div>
                   {detailRow.approvalStatus === 'rejected' && detailRow.rejectReason && (
                     <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 flex items-start gap-2">
@@ -2448,6 +2443,37 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
                         </div>
                       ))}
                     </div>
+                  </div>
+
+                  <div className="border border-slate-200 rounded-xl p-5 bg-white">
+                    <button
+                      onClick={() => setShowOriginalData(v => !v)}
+                      className="flex items-center gap-1.5 text-[13px] font-bold text-slate-800 cursor-pointer"
+                    >
+                      <ChevronDown className={`w-4 h-4 transition-transform ${showOriginalData ? 'rotate-180' : ''}`} />
+                      Xem dữ liệu gốc
+                    </button>
+                    {showOriginalData && (() => {
+                      const originalValues = versionHistory[0].values;
+                      const hasChanges = cols.some(col => (originalValues[col.key] || '') !== (latestVersion.values[col.key] || ''));
+                      if (!hasChanges) {
+                        return (
+                          <p className="text-[13px] text-slate-500 mt-3">Không có chỉnh sửa so với dữ liệu gốc</p>
+                        );
+                      }
+                      return (
+                        <div className="border border-slate-200 rounded-lg divide-y divide-slate-100 mt-3">
+                          {cols.map(col => (
+                            <div key={col.key} className="flex px-3 py-2">
+                              <span className="w-40 shrink-0 text-slate-500">{col.label}</span>
+                              <span className="flex-1 text-slate-800 font-medium break-words">
+                                {originalValues[col.key] || <span className="text-slate-400 italic">(trống)</span>}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
                   </div>
 
                 </div>
