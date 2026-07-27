@@ -2058,66 +2058,6 @@ export function AttributesManagementTab({ readOnly = false }: { readOnly?: boole
                 )}
               </div>
 
-              {/* Gom nguồn 1:n */}
-              {entityConfig && entityConfig.sources.filter(s => s.grain === '1:n').length > 0 && (
-                <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
-                  <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Network className="w-4 h-4 text-slate-500" />
-                      <p className="text-[13px] font-semibold text-slate-700">Gom nguồn 1:n</p>
-                    </div>
-                    <span className="text-[13px] px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full font-medium">
-                      {entityConfig.sources.filter(s => s.grain === '1:n').length} nguồn 1:n
-                    </span>
-                  </div>
-                  <div className="p-4 space-y-4">
-                    <p className="text-[13px] text-slate-500">Với nguồn có độ mịn 1:n, quy tắc gom nhiều bản ghi thành một giá trị cho từng thuộc tính</p>
-                    {entityConfig.sources.filter(s => s.grain === '1:n').map(src => {
-                      const rules = entityConfig.groupRules[src.id] || {};
-                      return (
-                        <div key={src.id} className="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                          <div className="px-4 py-2.5 bg-emerald-50 border-b border-emerald-100 flex items-center gap-2">
-                            <span className="text-[13px] font-semibold text-emerald-800">Nguồn (1:n): {src.name}</span>
-                          </div>
-                          <div className="overflow-x-auto">
-                            <table className="w-full text-[13px]">
-                              <thead className="bg-slate-50 border-b border-slate-100">
-                                <tr>
-                                  <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Thuộc tính</th>
-                                  <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Rule gom</th>
-                                  <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Cột mốc thời gian</th>
-                                </tr>
-                              </thead>
-                              <tbody className="divide-y divide-slate-50 bg-white">
-                                {currentEntityAttributes.map(attr => {
-                                  const gr = rules[attr.fieldName];
-                                  if (!gr) return null;
-                                  return (
-                                    <tr key={attr.fieldName} className="hover:bg-slate-50/50 transition-colors">
-                                      <td className="px-3 py-2">
-                                        <span className="text-[13px] font-medium text-slate-700">{attr.displayName}</span>
-                                        <code className="ml-1.5 text-[13px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 font-mono">{attr.fieldName}</code>
-                                      </td>
-                                      <td className="px-3 py-2 text-slate-800">
-                                        <span className="font-medium text-slate-900 bg-slate-100 px-2 py-0.5 rounded text-[12px]">
-                                          {gr.ruleType === 'latest' ? 'Bản ghi mới nhất' : gr.ruleType === 'most_frequent' ? 'Xuất hiện nhiều nhất' : gr.ruleType === 'max' ? 'Lớn nhất' : gr.ruleType === 'min' ? 'Nhỏ nhất' : gr.ruleType}
-                                        </span>
-                                      </td>
-                                      <td className="px-3 py-2 text-slate-600 font-mono">
-                                        {gr.timeColumn ? <code className="bg-slate-50 border border-slate-100 px-1.5 py-0.5 rounded text-[13px]">{gr.timeColumn}</code> : '—'}
-                                      </td>
-                                    </tr>
-                                  );
-                                })}
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
             </div>
           );
         })()}

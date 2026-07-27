@@ -331,11 +331,6 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
       return;
     }
 
-    if (autoThreshold <= reviewThreshold) {
-      alert('Ngưỡng tự động gộp phải lớn hơn ngưỡng cần rà soát.');
-      return;
-    }
-
     const now = new Date();
     const dateStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
 
@@ -628,14 +623,10 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
               </div>
             </div>
             <div className="p-4 space-y-3 bg-white">
-              <div className="grid grid-cols-2 gap-4">
+              <div>
                 <p className="text-[13px] text-slate-600">
                   Ngưỡng tự động gộp (≥):{' '}
                   <span className="font-semibold text-slate-900">{currentRule.autoThreshold ?? '-'}%</span>
-                </p>
-                <p className="text-[13px] text-slate-600">
-                  Ngưỡng cần rà soát (≥):{' '}
-                  <span className="font-semibold text-slate-900">{currentRule.reviewThreshold ?? '-'}%</span>
                 </p>
               </div>
               <div className="border border-slate-100 rounded-lg overflow-hidden">
@@ -647,14 +638,13 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
                       <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Thuật toán</th>
                       <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Ngưỡng (%)</th>
                       <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Trọng số (%)</th>
-                      <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-24">Chuẩn hóa</th>
                       <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Điều kiện</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50 bg-white">
                     {!currentRule.matchingRulesDetail || currentRule.matchingRulesDetail.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="px-4 py-6 text-center text-[13px] text-slate-400">
+                        <td colSpan={6} className="px-4 py-6 text-center text-[13px] text-slate-400">
                           Chưa cấu hình quy tắc so khớp
                         </td>
                       </tr>
@@ -670,7 +660,6 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
                             {rule.method === 'fuzzy' ? `${rule.fuzzyThreshold ?? '-'}%` : <span className="text-slate-400">—</span>}
                           </td>
                           <td className="px-3 py-2 text-center text-slate-700">{rule.weight}</td>
-                          <td className="px-3 py-2 text-center text-slate-700">{rule.normalize ? 'Có' : 'Không'}</td>
                           <td className="px-3 py-2 text-center text-slate-700">
                             {rule.operator ?? <span className="text-slate-400">—</span>}
                           </td>
@@ -785,7 +774,7 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
               </div>
             </div>
             <div className="p-4 space-y-4 bg-white">
-              <div className="grid grid-cols-2 gap-4">
+              <div>
                 <div>
                   <label className="block text-[13px] font-medium text-slate-700 mb-1.5">Ngưỡng tự động gộp (≥)</label>
                   <div className="flex items-center gap-2">
@@ -793,18 +782,6 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
                       type="number" min={0} max={100}
                       value={autoThreshold}
                       onChange={(e) => setAutoThreshold(Number(e.target.value))}
-                      className="w-24 border border-slate-200 rounded-lg px-3 py-1.5 text-[13px] text-center focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                    />
-                    <span className="text-[13px] text-slate-500">%</span>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-[13px] font-medium text-slate-700 mb-1.5">Ngưỡng cần rà soát (≥)</label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="number" min={0} max={100}
-                      value={reviewThreshold}
-                      onChange={(e) => setReviewThreshold(Number(e.target.value))}
                       className="w-24 border border-slate-200 rounded-lg px-3 py-1.5 text-[13px] text-center focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
                     />
                     <span className="text-[13px] text-slate-500">%</span>
@@ -821,7 +798,6 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
                       <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Thuật toán</th>
                       <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Ngưỡng (%)</th>
                       <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Trọng số (%)</th>
-                      <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-20">Chuẩn hóa</th>
                       <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Điều kiện</th>
                       <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-10"></th>
                     </tr>
@@ -829,7 +805,7 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
                   <tbody className="divide-y divide-slate-50 bg-white">
                     {matchingRules.length === 0 ? (
                       <tr>
-                        <td colSpan={8} className="px-4 py-6 text-center text-[13px] text-slate-400">
+                        <td colSpan={7} className="px-4 py-6 text-center text-[13px] text-slate-400">
                           Chưa có quy tắc — nhấn "+ Thêm quy tắc so khớp" để bắt đầu
                         </td>
                       </tr>
@@ -891,14 +867,6 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
                               value={rule.weight}
                               onChange={(e) => setMatchingRules(prev => prev.map(r => r.id === rule.id ? { ...r, weight: Number(e.target.value) } : r))}
                               className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] text-center focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                            />
-                          </td>
-                          <td className="px-2 py-1.5 text-center">
-                            <input
-                              type="checkbox"
-                              checked={rule.normalize}
-                              onChange={() => setMatchingRules(prev => prev.map(r => r.id === rule.id ? { ...r, normalize: !r.normalize } : r))}
-                              className="rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 cursor-pointer"
                             />
                           </td>
                           <td className="px-2 py-1.5 text-center">

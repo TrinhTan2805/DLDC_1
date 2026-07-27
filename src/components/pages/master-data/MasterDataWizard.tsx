@@ -1,5 +1,5 @@
 import { useState, ChangeEvent } from 'react';
-import { X, Check, ChevronRight, ChevronLeft, AlertCircle, AlertTriangle, CheckCircle2, Plus, Trash2, Database, FileText, ChevronDown, ChevronUp, Network, ArrowRight, Key, Search, SquarePen, GitMerge, Split, PlusCircle, XCircle } from 'lucide-react';
+import { X, Check, ChevronRight, ChevronLeft, AlertCircle, AlertTriangle, CheckCircle2, Plus, Trash2, Database, FileText, ChevronDown, ChevronUp, Network, ArrowRight, Key, Search, SquarePen, GitMerge } from 'lucide-react';
 import { Portal } from '../../common/Portal';
 
 type LifecycleStatus = 'active' | 'draft' | 'inactive' | 'archived';
@@ -348,6 +348,8 @@ interface MasterDataWizardProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: WizardData) => void;
+  // Lưu tạm dữ liệu đang nhập ở trạng thái nháp, không yêu cầu điền đủ 7 bước
+  onSaveDraft?: (data: WizardData) => void;
   // Cho phép nạp sẵn dữ liệu thực thể đang có (VD: mở nhanh từ tab Thiết lập thuộc tính)
   initialData?: Partial<WizardData>;
   initialDldcFieldRows?: DldcFieldRow[];
@@ -410,17 +412,9 @@ const CONFLICT_STRATEGY_LABELS: Record<ConflictStrategy, string> = {
 };
 
 const WIZARD_MOCK_SAMPLES = [
-  { id: 'sample-100',  label: '100 bản ghi - kiểm tra logic cơ bản' },
-  { id: 'sample-500',  label: '500 bản ghi - kiểm tra tỷ lệ khớp' },
-  { id: 'sample-1000', label: '1000 - kiểm tra toàn diện' },
-];
-
-const MOCK_REVIEW_ITEMS = [
-  { id: 'rev-1', pair: 'HT-0451 ↔ CC-1123', score: 82, reason: 'Trùng họ tên và ngày sinh nhưng khác số định danh' },
-  { id: 'rev-2', pair: 'HT-0777 ↔ CC-2098', score: 78, reason: 'Tên tương đồng chuỗi nhưng địa chỉ khác nhau' },
-  { id: 'rev-3', pair: 'HT-0912 ↔ CC-3011', score: 85, reason: 'Trùng số CCCD nhưng họ tên thiếu tên đệm' },
-  { id: 'rev-4', pair: 'HT-1204 ↔ CC-4150', score: 76, reason: 'Trùng họ tên, ngày sinh nhưng khác tỉnh thành thường trú' },
-  { id: 'rev-5', pair: 'HT-1588 ↔ CC-5099', score: 80, reason: 'Số định danh gần đúng, khác ngày cấp CCCD' },
+  { id: 'sample-100',  label: '100 bản ghi' },
+  { id: 'sample-500',  label: '500 bản ghi' },
+  { id: 'sample-1000', label: '1000 bản ghi' },
 ];
 
 const MOCK_UNMATCHED_ITEMS = [
@@ -526,7 +520,7 @@ const steps = [
   { number: 7, title: 'Phê duyệt', description: 'Xem lại và gửi phê duyệt' },
 ];
 
-export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData, initialDldcFieldRows, initialStep }: MasterDataWizardProps) {
+export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initialData, initialDldcFieldRows, initialStep }: MasterDataWizardProps) {
   const [currentStep, setCurrentStep] = useState(initialStep || 1);
   const [wizardData, setWizardData] = useState<WizardData>({
     code: '',
@@ -607,26 +601,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData, initi
   const [hardBlockInput, setHardBlockInput] = useState('');
   const [testSample, setTestSample] = useState('');
   const [testRun, setTestRun] = useState(false);
-  const [reviewSelectedIds, setReviewSelectedIds] = useState<string[]>([]);
-  const [reviewPage, setReviewPage] = useState<number>(1);
-  const [unmatchedSelectedIds, setUnmatchedSelectedIds] = useState<string[]>([]);
-  const [unmatchedActions, setUnmatchedActions] = useState<Record<string, 'single_source' | 'discard' | ''>>({});
   const [unmatchedPage, setUnmatchedPage] = useState<number>(1);
-  const [reviewProcessedIds, setReviewProcessedIds] = useState<string[]>([]);
-  const [unmatchedProcessedIds, setUnmatchedProcessedIds] = useState<string[]>([]);
-
-  const [toastState, setToastState] = useState<{
-    show: boolean;
-    title: string;
-    message: string;
-  }>({ show: false, title: '', message: '' });
-
-  const triggerToast = (title: string, message: string) => {
-    setToastState({ show: true, title, message });
-    setTimeout(() => {
-      setToastState(prev => ({ ...prev, show: false }));
-    }, 3500);
-  };
 
   // Step 1 — đăng ký nguồn dữ liệu (form thêm nguồn inline)
   const [sourceFormOpen, setSourceFormOpen] = useState(false);
@@ -936,27 +911,42 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData, initi
     }
   };
 
+  // Chế độ DLDC không đồng bộ dldcFieldRows vào wizardData.attributes theo thời gian thực
+  // (khác chế độ thủ công) — gộp lại ở đây để onSubmit/onSaveDraft luôn trả về đủ danh sách thuộc tính.
+  const buildFinalWizardData = (): WizardData => wizardData.dataSource === 'dldc'
+    ? {
+        ...wizardData,
+        attributes: dldcFieldRows.filter(r => r.shared).map(r => ({
+          fieldName: r.apiFieldName || r.columnName,
+          displayName: r.displayName,
+          dataType: r.dataType,
+          required: false,
+          isKey: r.isPK,
+          defaultValue: undefined,
+        })),
+      }
+    : wizardData;
+
   const handleSubmitWizard = () => {
     if (!wizardData.approvalNotes) {
       alert('Vui lòng nhập ghi chú phê duyệt');
       return;
     }
-    // Chế độ DLDC không đồng bộ dldcFieldRows vào wizardData.attributes theo thời gian thực
-    // (khác chế độ thủ công) — gộp lại ở đây để onSubmit luôn trả về đủ danh sách thuộc tính.
-    const finalData: WizardData = wizardData.dataSource === 'dldc'
-      ? {
-          ...wizardData,
-          attributes: dldcFieldRows.filter(r => r.shared).map(r => ({
-            fieldName: r.apiFieldName || r.columnName,
-            displayName: r.displayName,
-            dataType: r.dataType,
-            required: false,
-            isKey: r.isPK,
-            defaultValue: undefined,
-          })),
-        }
-      : wizardData;
-    onSubmit(finalData);
+    onSubmit(buildFinalWizardData());
+    onClose();
+  };
+
+  const handleSaveDraft = () => {
+    if (!wizardData.code || !wizardData.name) {
+      alert('Vui lòng nhập ít nhất Mã thực thể và Tên dữ liệu chủ trước khi lưu nháp');
+      return;
+    }
+    const draftData: WizardData = { ...buildFinalWizardData(), lifecycleStatus: 'draft' };
+    if (onSaveDraft) {
+      onSaveDraft(draftData);
+    } else {
+      onSubmit(draftData);
+    }
     onClose();
   };
 
@@ -2073,7 +2063,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData, initi
                 ) : (
                 <>
                   {/* Ngưỡng */}
-                  <div className="border border-slate-200 rounded-xl bg-white p-4 grid grid-cols-2 gap-4">
+                  <div className="border border-slate-200 rounded-xl bg-white p-4">
                     <div>
                       <label className="block text-[13px] font-medium text-slate-700 mb-1.5">Ngưỡng tự động gộp (≥)</label>
                       <div className="flex items-center gap-2">
@@ -2085,19 +2075,6 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData, initi
                         />
                         <span className="text-[13px] text-slate-500">%</span>
                         <span className="text-[13px] text-slate-400">Điểm khớp từ ngưỡng này trở lên sẽ được gộp tự động</span>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-[13px] font-medium text-slate-700 mb-1.5">Ngưỡng cần rà soát (≥)</label>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="number" min={0} max={100}
-                          value={mergeConfig.reviewThreshold}
-                          onChange={(e: ChangeEvent<HTMLInputElement>) => setMergeConfig(prev => ({ ...prev, reviewThreshold: Number(e.target.value) }))}
-                          className="w-24 border border-slate-200 rounded-lg px-3 py-1.5 text-[13px] text-center focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                        />
-                        <span className="text-[13px] text-slate-500">%</span>
-                        <span className="text-[13px] text-slate-400">Điểm khớp trong khoảng này sẽ chuyển sang chờ rà soát</span>
                       </div>
                     </div>
                   </div>
@@ -2117,7 +2094,6 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData, initi
                             <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Thuật toán</th>
                             <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Ngưỡng (%)</th>
                             <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Trọng số (%)</th>
-                            <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-20">Chuẩn hóa</th>
                             <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Điều kiện</th>
                             <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-10"></th>
                           </tr>
@@ -2125,7 +2101,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData, initi
                         <tbody className="divide-y divide-slate-50 bg-white">
                           {matchingRules.length === 0 ? (
                             <tr>
-                              <td colSpan={8} className="px-4 py-6 text-center text-[13px] text-slate-400">
+                              <td colSpan={7} className="px-4 py-6 text-center text-[13px] text-slate-400">
                                 Chưa có quy tắc — nhấn "+ Thêm quy tắc so khớp" để bắt đầu
                               </td>
                             </tr>
@@ -2185,14 +2161,6 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData, initi
                                     value={rule.weight}
                                     onChange={(e: ChangeEvent<HTMLInputElement>) => setMatchingRules(prev => prev.map(r => r.id === rule.id ? { ...r, weight: Number(e.target.value) } : r))}
                                     className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] text-center focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                                  />
-                                </td>
-                                <td className="px-2 py-1.5 text-center">
-                                  <input
-                                    type="checkbox"
-                                    checked={rule.normalize}
-                                    onChange={() => setMatchingRules(prev => prev.map(r => r.id === rule.id ? { ...r, normalize: !r.normalize } : r))}
-                                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 cursor-pointer"
                                   />
                                 </td>
                                 <td className="px-2 py-1.5 text-center">
@@ -2421,18 +2389,14 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData, initi
                     </div>
                   ) : (
                     <>
-                      <div className="grid grid-cols-4 gap-3">
+                      <div className="grid grid-cols-3 gap-3">
                         <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
                           <div className="text-[13px] text-emerald-700 mb-1">Golden hình thành</div>
                           <div className="text-2xl font-bold text-emerald-800">312</div>
                         </div>
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                          <div className="text-[13px] text-blue-700 mb-1">Auto-merge</div>
+                          <div className="text-[13px] text-blue-700 mb-1">Tự động hợp nhất</div>
                           <div className="text-2xl font-bold text-blue-800">268</div>
-                        </div>
-                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                          <div className="text-[13px] text-amber-700 mb-1">Chờ rà soát</div>
-                          <div className="text-2xl font-bold text-amber-800">37</div>
                         </div>
                         <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
                           <div className="text-[13px] text-slate-600 mb-1">Không khớp</div>
@@ -2440,320 +2404,43 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData, initi
                         </div>
                       </div>
 
-                      {/* Bảng Các bản ghi chờ rà soát */}
-                      <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
-                        <div className="px-4 py-3 border-b border-slate-100 bg-slate-50 flex items-center justify-between gap-3 flex-wrap min-h-[48px]">
-                          <div className="flex items-center gap-2">
-                            <p className="text-[13px] font-semibold text-slate-800">Các bản ghi chờ rà soát</p>
-                            <span className="text-[12px] px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full font-medium">
-                              37 bản ghi
-                            </span>
-                          </div>
-
-                          {reviewSelectedIds.length > 0 ? (
-                            <div className="flex items-center gap-2">
-                              <span className="text-[12px] font-medium text-slate-500 mr-1">
-                                Đã chọn <strong className="text-slate-800">{reviewSelectedIds.length}</strong>
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setReviewProcessedIds(prev => Array.from(new Set([...prev, ...reviewSelectedIds])));
-                                  setReviewSelectedIds([]);
-                                  triggerToast('Gửi yêu cầu thành công', 'Đã lưu bản ghi mới thành công!');
-                                }}
-                                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[12px] font-medium transition-colors shadow-sm cursor-pointer"
-                              >
-                                <GitMerge className="w-3.5 h-3.5" /> Hợp nhất
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setReviewProcessedIds(prev => Array.from(new Set([...prev, ...reviewSelectedIds])));
-                                  setReviewSelectedIds([]);
-                                  triggerToast('Gửi yêu cầu thành công', 'Đã lưu bản ghi mới thành công!');
-                                }}
-                                className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-lg text-[12px] font-medium transition-colors cursor-pointer"
-                              >
-                                <Split className="w-3.5 h-3.5 text-amber-600" /> Tách biệt
-                              </button>
-                            </div>
-                          ) : (
-                            <span className="text-[12px] text-slate-400">Tích chọn các bản ghi để thực hiện thao tác hàng loạt</span>
-                          )}
-                        </div>
-
-                        <div className="overflow-x-auto">
-                          <table className="w-full text-[13px]">
-                            <thead className="bg-slate-50 border-b border-slate-100">
-                              <tr>
-                                <th className="px-3 py-2.5 text-center w-10">
-                                  <input
-                                    type="checkbox"
-                                    checked={reviewSelectedIds.length > 0 && reviewSelectedIds.length === MOCK_REVIEW_ITEMS.filter(i => !reviewProcessedIds.includes(i.id)).length}
-                                    onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                                      if (e.target.checked) {
-                                        setReviewSelectedIds(MOCK_REVIEW_ITEMS.filter(i => !reviewProcessedIds.includes(i.id)).map(item => item.id));
-                                      } else {
-                                        setReviewSelectedIds([]);
-                                      }
-                                    }}
-                                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 cursor-pointer"
-                                  />
-                                </th>
-                                <th className="px-3 py-2.5 text-left font-semibold text-slate-600">Cặp bản ghi</th>
-                                <th className="px-3 py-2.5 text-center font-semibold text-slate-600 w-28">Điểm khớp</th>
-                                <th className="px-3 py-2.5 text-left font-semibold text-slate-600">Lý do</th>
-                                <th className="px-3 py-2.5 text-center font-semibold text-slate-600 w-36">Thao tác</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100 bg-white">
-                              {MOCK_REVIEW_ITEMS.map(item => {
-                                const isProcessed = reviewProcessedIds.includes(item.id);
-                                const isSelected = reviewSelectedIds.includes(item.id);
-                                const parts = item.pair.split(' ↔ ');
-                                return (
-                                  <tr
-                                    key={item.id}
-                                    className={`transition-colors ${
-                                      isProcessed
-                                        ? 'bg-slate-100/70 text-slate-400 opacity-60 grayscale cursor-not-allowed'
-                                        : isSelected ? 'bg-blue-50/40' : 'hover:bg-slate-50/50'
-                                    }`}
-                                  >
-                                    <td className="px-3 py-2.5 text-center">
-                                      <input
-                                        type="checkbox"
-                                        disabled={isProcessed}
-                                        checked={isSelected}
-                                        onChange={() => {
-                                          if (isSelected) {
-                                            setReviewSelectedIds(prev => prev.filter(id => id !== item.id));
-                                          } else {
-                                            setReviewSelectedIds(prev => [...prev, item.id]);
-                                          }
-                                        }}
-                                        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 cursor-pointer disabled:cursor-not-allowed"
-                                      />
-                                    </td>
-                                    <td className={`px-3 py-2.5 font-medium ${isProcessed ? 'text-slate-400' : 'text-slate-700'}`}>
-                                      <code className={`px-1.5 py-0.5 rounded font-mono ${isProcessed ? 'bg-slate-200/60 text-slate-500' : 'bg-slate-100 text-slate-700'}`}>{parts[0]}</code>
-                                      <span className="mx-1.5 text-slate-400">↔</span>
-                                      <code className={`px-1.5 py-0.5 rounded font-mono ${isProcessed ? 'bg-slate-200/60 text-slate-500' : 'bg-slate-100 text-slate-700'}`}>{parts[1]}</code>
-                                    </td>
-                                    <td className="px-3 py-2.5 text-center">
-                                      <span className={`px-2 py-0.5 rounded font-semibold text-[12px] ${isProcessed ? 'bg-slate-200 text-slate-500' : 'bg-amber-100 text-amber-800'}`}>
-                                        {item.score}%
-                                      </span>
-                                    </td>
-                                    <td className={`px-3 py-2.5 ${isProcessed ? 'text-slate-400' : 'text-slate-600'}`}>{item.reason}</td>
-                                    <td className="px-3 py-2.5 text-center">
-                                      {isProcessed ? (
-                                        <span className="text-[11px] px-2 py-0.5 bg-slate-200 text-slate-600 rounded font-medium">Đã xử lý</span>
-                                      ) : (
-                                        <div className="flex items-center justify-center gap-1">
-                                          <button
-                                            type="button"
-                                            title="Hợp nhất bản ghi"
-                                            onClick={() => {
-                                              setReviewProcessedIds(prev => Array.from(new Set([...prev, item.id])));
-                                              setReviewSelectedIds(prev => prev.filter(id => id !== item.id));
-                                              triggerToast('Gửi yêu cầu thành công', 'Đã lưu bản ghi mới thành công!');
-                                            }}
-                                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
-                                          >
-                                            <GitMerge className="w-4 h-4" />
-                                          </button>
-                                          <button
-                                            type="button"
-                                            title="Tách biệt bản ghi"
-                                            onClick={() => {
-                                              setReviewProcessedIds(prev => Array.from(new Set([...prev, item.id])));
-                                              setReviewSelectedIds(prev => prev.filter(id => id !== item.id));
-                                              triggerToast('Gửi yêu cầu thành công', 'Đã lưu bản ghi mới thành công!');
-                                            }}
-                                            className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
-                                          >
-                                            <Split className="w-4 h-4" />
-                                          </button>
-                                        </div>
-                                      )}
-                                    </td>
-                                  </tr>
-                                );
-                              })}
-                            </tbody>
-                          </table>
-                        </div>
-
-                        {/* Thanh phân trang */}
-                        <div className="px-4 py-3 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
-                          <div className="text-[13px] text-slate-500">
-                            Hiển thị <span className="font-medium text-slate-700">1 - 5</span> trong số <span className="font-medium text-slate-700">37</span> bản ghi
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <button type="button" disabled={reviewPage === 1} onClick={() => setReviewPage(prev => Math.max(1, prev - 1))}
-                              className="px-2.5 py-1 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-600 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer">
-                              Trước
-                            </button>
-                            <span className="text-[13px] text-slate-600 font-medium px-1">Trang {reviewPage} / 8</span>
-                            <button type="button" disabled={reviewPage === 8} onClick={() => setReviewPage(prev => Math.min(8, prev + 1))}
-                              className="px-2.5 py-1 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-600 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer">
-                              Sau
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-
                       {/* Bảng Các bản ghi không khớp */}
                       <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
-                        <div className="px-4 py-3 border-b border-slate-100 bg-slate-50 flex items-center justify-between gap-3 flex-wrap min-h-[48px]">
+                        <div className="px-4 py-3 border-b border-slate-100 bg-slate-50 flex items-center gap-3 flex-wrap min-h-[48px]">
                           <div className="flex items-center gap-2">
                             <p className="text-[13px] font-semibold text-slate-800">Các bản ghi không khớp</p>
                             <span className="text-[12px] px-2 py-0.5 bg-slate-100 text-slate-700 rounded-full font-medium">
                               183 bản ghi
                             </span>
                           </div>
-
-                          {unmatchedSelectedIds.length > 0 ? (
-                            <div className="flex items-center gap-2">
-                              <span className="text-[12px] font-medium text-slate-500 mr-1">
-                                Đã chọn <strong className="text-slate-800">{unmatchedSelectedIds.length}</strong>
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setUnmatchedActions(prev => {
-                                    const next = { ...prev };
-                                    unmatchedSelectedIds.forEach(id => { next[id] = 'single_source'; });
-                                    return next;
-                                  });
-                                  setUnmatchedProcessedIds(prev => Array.from(new Set([...prev, ...unmatchedSelectedIds])));
-                                  setUnmatchedSelectedIds([]);
-                                  triggerToast('Gửi yêu cầu thành công', 'Đã lưu bản ghi mới thành công!');
-                                }}
-                                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[12px] font-medium transition-colors shadow-sm cursor-pointer"
-                              >
-                                <PlusCircle className="w-3.5 h-3.5" /> Tạo bản ghi đơn nguồn
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setUnmatchedActions(prev => {
-                                    const next = { ...prev };
-                                    unmatchedSelectedIds.forEach(id => { next[id] = 'discard'; });
-                                    return next;
-                                  });
-                                  setUnmatchedProcessedIds(prev => Array.from(new Set([...prev, ...unmatchedSelectedIds])));
-                                  setUnmatchedSelectedIds([]);
-                                  triggerToast('Gửi yêu cầu thành công', 'Đã lưu bản ghi mới thành công!');
-                                }}
-                                className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-lg text-[12px] font-medium transition-colors cursor-pointer"
-                              >
-                                <XCircle className="w-3.5 h-3.5 text-slate-500" /> Loại bỏ
-                              </button>
-                            </div>
-                          ) : (
-                            <span className="text-[12px] text-slate-400">Tích chọn các bản ghi để thực hiện thao tác xử lý hàng loạt</span>
-                          )}
                         </div>
 
                         <div className="overflow-x-auto">
                           <table className="w-full text-[13px]">
                             <thead className="bg-slate-50 border-b border-slate-100">
                               <tr>
-                                <th className="px-3 py-2.5 text-center w-10">
-                                  <input
-                                    type="checkbox"
-                                    checked={unmatchedSelectedIds.length > 0 && unmatchedSelectedIds.length === MOCK_UNMATCHED_ITEMS.filter(i => !unmatchedProcessedIds.includes(i.id)).length}
-                                    onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                                      if (e.target.checked) {
-                                        setUnmatchedSelectedIds(MOCK_UNMATCHED_ITEMS.filter(i => !unmatchedProcessedIds.includes(i.id)).map(item => item.id));
-                                      } else {
-                                        setUnmatchedSelectedIds([]);
-                                      }
-                                    }}
-                                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 cursor-pointer"
-                                  />
-                                </th>
                                 <th className="px-3 py-2.5 text-left font-semibold text-slate-600">Bản ghi nguồn</th>
                                 <th className="px-3 py-2.5 text-center font-semibold text-slate-600 w-36">Điểm khớp cao nhất</th>
                                 <th className="px-3 py-2.5 text-left font-semibold text-slate-600">Lý do không khớp</th>
-                                <th className="px-3 py-2.5 text-left font-semibold text-slate-600 w-56">Phương án xử lý</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 bg-white">
-                              {MOCK_UNMATCHED_ITEMS.map(item => {
-                                const isProcessed = unmatchedProcessedIds.includes(item.id);
-                                const isSelected = unmatchedSelectedIds.includes(item.id);
-                                const currentAction = unmatchedActions[item.id] || item.defaultAction;
-                                return (
-                                  <tr
-                                    key={item.id}
-                                    className={`transition-colors ${
-                                      isProcessed
-                                        ? 'bg-slate-100/70 text-slate-400 opacity-60 grayscale cursor-not-allowed'
-                                        : isSelected ? 'bg-blue-50/40' : 'hover:bg-slate-50/50'
-                                    }`}
-                                  >
-                                    <td className="px-3 py-2.5 text-center">
-                                      <input
-                                        type="checkbox"
-                                        disabled={isProcessed}
-                                        checked={isSelected}
-                                        onChange={() => {
-                                          if (isSelected) {
-                                            setUnmatchedSelectedIds(prev => prev.filter(id => id !== item.id));
-                                          } else {
-                                            setUnmatchedSelectedIds(prev => [...prev, item.id]);
-                                          }
-                                        }}
-                                        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 cursor-pointer disabled:cursor-not-allowed"
-                                      />
-                                    </td>
-                                    <td className={`px-3 py-2.5 font-medium ${isProcessed ? 'text-slate-400' : 'text-slate-700'}`}>
-                                      <code className={`px-1.5 py-0.5 rounded font-mono mr-1.5 ${isProcessed ? 'bg-slate-200/60 text-slate-500' : 'bg-slate-100 text-slate-800'}`}>{item.record}</code>
-                                      <span className={`text-[12px] px-2 py-0.5 rounded-md font-normal ${isProcessed ? 'bg-slate-200/60 text-slate-500' : 'bg-slate-100 text-slate-600'}`}>
-                                        {item.sourceName}
-                                      </span>
-                                    </td>
-                                    <td className="px-3 py-2.5 text-center">
-                                      <span className={`px-2 py-0.5 rounded font-semibold text-[12px] ${isProcessed ? 'bg-slate-200 text-slate-500' : 'bg-slate-100 text-slate-700'}`}>
-                                        {item.maxScore}%
-                                      </span>
-                                    </td>
-                                    <td className={`px-3 py-2.5 ${isProcessed ? 'text-slate-400' : 'text-slate-600'}`}>{item.reason}</td>
-                                    <td className="px-3 py-2.5">
-                                      {isProcessed ? (
-                                        <span className="text-[11px] px-2 py-0.5 bg-slate-200 text-slate-600 rounded font-medium">
-                                          Đã xử lý
-                                        </span>
-                                      ) : (
-                                        <select
-                                          value={currentAction}
-                                          onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-                                            const val = e.target.value as 'single_source' | 'discard' | '';
-                                            if (!val) return;
-                                            setUnmatchedActions(prev => ({ ...prev, [item.id]: val }));
-                                            setUnmatchedProcessedIds(prev => Array.from(new Set([...prev, item.id])));
-                                            setUnmatchedSelectedIds(prev => prev.filter(id => id !== item.id));
-                                            triggerToast('Gửi yêu cầu thành công', 'Đã lưu bản ghi mới thành công!');
-                                          }}
-                                          className={`w-full text-[12px] border rounded-lg px-2.5 py-1 font-medium bg-white focus:outline-none cursor-pointer transition-colors ${
-                                            currentAction === 'single_source'
-                                              ? 'border-blue-300 text-blue-800 bg-blue-50/50 cursor-pointer'
-                                              : 'border-slate-300 text-slate-600 bg-slate-50 cursor-pointer'
-                                          }`}
-                                        >
-                                          <option value="">-- Chọn phương án xử lý --</option>
-                                          <option value="single_source">Tạo bản ghi đơn nguồn</option>
-                                          <option value="discard">Loại bỏ</option>
-                                        </select>
-                                      )}
-                                    </td>
-                                  </tr>
-                                );
-                              })}
+                              {MOCK_UNMATCHED_ITEMS.map(item => (
+                                <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
+                                  <td className="px-3 py-2.5 font-medium text-slate-700">
+                                    <code className="px-1.5 py-0.5 rounded font-mono mr-1.5 bg-slate-100 text-slate-800">{item.record}</code>
+                                    <span className="text-[12px] px-2 py-0.5 rounded-md font-normal bg-slate-100 text-slate-600">
+                                      {item.sourceName}
+                                    </span>
+                                  </td>
+                                  <td className="px-3 py-2.5 text-center">
+                                    <span className="px-2 py-0.5 rounded font-semibold text-[12px] bg-slate-100 text-slate-700">
+                                      {item.maxScore}%
+                                    </span>
+                                  </td>
+                                  <td className="px-3 py-2.5 text-slate-600">{item.reason}</td>
+                                </tr>
+                              ))}
                             </tbody>
                           </table>
                         </div>
@@ -3051,12 +2738,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData, initi
                           <tr key={rel.id} className="hover:bg-slate-50/50 transition-colors">
                             <td className="px-4 py-3 text-center text-slate-500 font-medium">{idx + 1}</td>
                             <td className="px-4 py-3">
-                              <div className="flex items-center gap-2">
-                                <div className="w-7 h-7 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center font-bold text-[13px] flex-shrink-0">
-                                  {rel.targetEntityName.charAt(0)}
-                                </div>
-                                <span className="font-medium text-slate-800">{rel.targetEntityName}</span>
-                              </div>
+                              <span className="font-medium text-slate-800">{rel.targetEntityName}</span>
                             </td>
                             <td className="px-4 py-3 text-center">
                               <span className={`px-2 py-0.5 rounded border text-[13px] font-semibold ${REL_TYPE_COLORS[rel.type]}`}>
@@ -3317,23 +2999,31 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, initialData, initi
             Bước {currentStep} / {steps.length}
           </div>
 
-          {currentStep < 7 ? (
+          <div className="flex items-center gap-2">
             <button
-              onClick={handleNext}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              onClick={handleSaveDraft}
+              className="flex items-center gap-2 px-4 py-2 text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors"
             >
-              Tiếp theo
-              <ChevronRight className="w-4 h-4" />
+              Lưu nháp
             </button>
-          ) : (
-            <button
-              onClick={handleSubmitWizard}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-            >
-              <Check className="w-4 h-4" />
-              Gửi phê duyệt
-            </button>
-          )}
+            {currentStep < 7 ? (
+              <button
+                onClick={handleNext}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Tiếp theo
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            ) : (
+              <button
+                onClick={handleSubmitWizard}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              >
+                <Check className="w-4 h-4" />
+                Gửi phê duyệt
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
