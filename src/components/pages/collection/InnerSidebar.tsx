@@ -12,16 +12,17 @@ interface InnerSidebarProps {
   items: InnerSidebarItem[];
   onSelectItem: (id: string) => void;
   activeId?: string;
+  hideGroupHeaders?: boolean;
 }
 
-export function InnerSidebar({ title, items, onSelectItem, activeId }: InnerSidebarProps) {
+export function InnerSidebar({ title, items, onSelectItem, activeId, hideGroupHeaders = false }: InnerSidebarProps) {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredItems = items.filter(item =>
     item.label.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const hasGroups = items.some(i => i.group);
+  const hasGroups = !hideGroupHeaders && items.some(i => i.group);
 
   const renderItem = (item: InnerSidebarItem, index: number) => (
     <button

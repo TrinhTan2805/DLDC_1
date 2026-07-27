@@ -1,17 +1,17 @@
-import { useState, useMemo } from 'react';
-import { Settings, Sliders, GitCompare, Network, Key, Plus, Edit, Trash2, X, Search, Filter, Circle, CheckSquare, ChevronDown, Eye, FileText, Clock, XCircle, Send } from 'lucide-react';
-import { AttributesManagementTab } from './AttributesManagementTab';
-import { MasterDataWizard, WizardData } from './MasterDataWizard';
-import { MergeRulesManagementTab } from './MergeRulesManagementTab';
-import { EntityRelationshipsTab } from './EntityRelationshipsTab';
-import { UniqueIdentifierRulesTab } from './UniqueIdentifierRulesTab';
+import { useState } from 'react';
+import { Settings, Sliders, GitCompare, Network, Key, Plus, Edit, Trash2, X, Search, Filter, Circle, CheckSquare, ChevronDown, Eye, FileText, Clock, XCircle, Send, AlertCircle, Check, ArrowRight, SquarePen } from 'lucide-react';
+import { AttributesManagementTab, defaultAttributes, DLDC_ENTITY_DETAIL_CONFIGS } from './AttributesManagementTab';
+import { MasterDataWizard } from './MasterDataWizard';
+import { MergeRulesManagementTab, mockMergeRules, matchMethodLabels, fuzzyAlgorithmLabels, conflictStrategyLabels, onEmptyLabels } from './MergeRulesManagementTab';
+import { EntityRelationshipsTab, mockRelationships, relationTypeLabels, getSourceKey, getTargetKey } from './EntityRelationshipsTab';
+import { UniqueIdentifierRulesTab, mockIdentifierRules, buildCode } from './UniqueIdentifierRulesTab';
 import { ApprovalTab } from './ApprovalTab';
 import { ReviewResultCard } from '../category/components/modals/ReviewResultCard';
 import { Portal } from '../../common/Portal';
 
 type TabType = 'setup' | 'attributes' | 'merge-rules' | 'relationships' | 'identifier-rules' | 'approval';
 
-type LifecycleStatus = 'active' | 'draft' | 'inactive' | 'archived';
+type LifecycleStatus = 'draft' | 'pending' | 'approved' | 'rejected';
 type DataType = 'individual' | 'organization' | 'legal' | 'asset';
 type ScopeType = 'national' | 'ministry' | 'provincial' | 'internal';
 type DataSourceType = 'dldc' | 'manual';
@@ -85,7 +85,7 @@ const defaultEntities: MasterDataEntity[] = [
     managingAgency: 'Cục Hành chính tư pháp',
     scope: 'national',
     description: 'Dữ liệu chuẩn về công dân Việt Nam bao gồm thông tin cá nhân như họ tên, ngày sinh, số CCCD, nơi cư trú theo quy định của Luật CCCD 2023',
-    lifecycleStatus: 'active',
+    lifecycleStatus: 'approved',
     createdDate: '01/01/2024',
     updatedDate: '10/12/2024',
     createdBy: 'Nguyễn Văn A',
@@ -109,7 +109,7 @@ const defaultEntities: MasterDataEntity[] = [
     managingAgency: 'Cục Đăng ký kinh doanh',
     scope: 'national',
     description: 'Thông tin doanh nghiệp, tổ chức, cơ quan nhà nước bao gồm tên, mã số thuế, địa chỉ, người đại diện',
-    lifecycleStatus: 'active',
+    lifecycleStatus: 'pending',
     createdDate: '15/01/2024',
     updatedDate: '20/11/2024',
     createdBy: 'Trần Thị B',
@@ -126,7 +126,7 @@ const defaultEntities: MasterDataEntity[] = [
     managingAgency: 'Bộ Tư pháp',
     scope: 'national',
     description: 'Danh mục văn bản pháp luật, nghị định, thông tư, quyết định',
-    lifecycleStatus: 'active',
+    lifecycleStatus: 'draft',
     createdDate: '10/02/2024',
     updatedDate: '05/12/2024',
     createdBy: 'Lê Văn C',
@@ -136,23 +136,6 @@ const defaultEntities: MasterDataEntity[] = [
     dldcTable: 'tbl_legal_document'
   },
   {
-    id: '4',
-    code: 'MD-ADMIN-001',
-    name: 'Bộ dữ liệu chủ Đơn vị hành chính',
-    dataType: 'organization',
-    managingAgency: 'Bộ Nội vụ',
-    scope: 'national',
-    description: 'Danh mục 63 tỉnh/thành phố, quận/huyện, phường/xã của Việt Nam',
-    lifecycleStatus: 'active',
-    createdDate: '20/01/2024',
-    updatedDate: '15/10/2024',
-    createdBy: 'Phạm Thị D',
-    updatedBy: 'Phạm Thị D',
-    systemName: 'Hệ thống quản lý đơn vị hành chính',
-    dataSource: 'dldc',
-    dldcTable: 'tbl_administrative_unit'
-  },
-  {
     id: '5',
     code: 'MD-AGENCY-001',
     name: 'Bộ dữ liệu chủ Cơ quan nhà nước',
@@ -160,7 +143,7 @@ const defaultEntities: MasterDataEntity[] = [
     managingAgency: 'Bộ Nội vụ',
     scope: 'national',
     description: 'Danh sách các cơ quan nhà nước, bộ, ngành, sở, ban',
-    lifecycleStatus: 'draft',
+    lifecycleStatus: 'rejected',
     createdDate: '01/03/2024',
     updatedDate: '18/12/2024',
     createdBy: 'Hoàng Văn E',
@@ -187,10 +170,40 @@ const scopeLabels: Record<ScopeType, string> = {
 };
 
 const lifecycleLabels: Record<LifecycleStatus, { label: string; color: string }> = {
-  active: { label: 'Đã hiệu lực', color: 'bg-green-100 text-green-700' },
   draft: { label: 'Đang soạn thảo', color: 'bg-yellow-100 text-yellow-700' },
-  inactive: { label: 'Ngừng sử dụng', color: 'bg-red-100 text-red-700' },
-  archived: { label: 'Đã lưu trữ', color: 'bg-slate-100 text-slate-700' }
+  pending: { label: 'Chờ phê duyệt', color: 'bg-blue-100 text-blue-700' },
+  approved: { label: 'Đã phê duyệt', color: 'bg-green-100 text-green-700' },
+  rejected: { label: 'Từ chối', color: 'bg-red-100 text-red-700' }
+};
+
+// Quy trình 6 bước — giống hệt các bước của wizard Tạo mới/Chỉnh sửa dữ liệu chủ
+const VIEW_STEPS = [
+  { number: 1, title: 'Khởi tạo dữ liệu chủ' },
+  { number: 2, title: 'Tạo thuộc tính' },
+  { number: 3, title: 'Quy tắc hợp nhất' },
+  { number: 4, title: 'Thiết lập quan hệ' },
+  { number: 5, title: 'Định danh duy nhất' },
+  { number: 6, title: 'Quy tắc đánh phiên bản' },
+  { number: 7, title: 'Phê duyệt' },
+];
+
+// Quy tắc đánh phiên bản (Bước 6) — điều kiện tạo version mới & định dạng số phiên bản
+const mockVersioningRules: {
+  entityId: string;
+  disabledFields: string[];
+  autoVersionOnSync: boolean;
+  versionFormat: 'increment' | 'yearIncrement' | 'custom';
+  customPrefix: string;
+  startFrom: string;
+}[] = [
+  { entityId: '1', disabledFields: ['full_name', 'phone_number'], autoVersionOnSync: true, versionFormat: 'increment', customPrefix: '', startFrom: 'V1' },
+  { entityId: '2', disabledFields: ['org_name'], autoVersionOnSync: false, versionFormat: 'yearIncrement', customPrefix: '', startFrom: '2025.1' },
+];
+
+const VERSION_FORMAT_LABELS: Record<string, { label: string; example: string }> = {
+  increment: { label: 'Số tăng dần', example: 'V1 → V2 → V3' },
+  yearIncrement: { label: 'Năm + số tăng dần', example: '2024.1 → 2024.2 → 2025.1' },
+  custom: { label: 'Tùy chỉnh', example: '[Prefix] + [Số tự tăng]' },
 };
 
 const MANAGING_UNITS = [
@@ -360,31 +373,6 @@ export function MasterDataScaleManagementPage() {
     setShowWizard(true);
   };
 
-  // Dữ liệu seed cho Wizard khi ở chế độ sửa (memo để không reset input khi đang nhập)
-  const wizardInitial = useMemo<Partial<WizardData> | null>(() => {
-    if (!editingEntity) return null;
-    const e = editingEntity;
-    return {
-      code: e.code,
-      name: e.name,
-      dataType: e.dataType,
-      managingAgency: e.managingAgency,
-      scope: e.scope,
-      description: e.description,
-      systemName: e.systemName,
-      lifecycleStatus: e.lifecycleStatus,
-      dataSource: e.dataSource ?? 'dldc',
-      dldcTable: e.dldcTable,
-      dldcColumns: e.dldcColumns,
-      apiSystem: e.apiSystem,
-      apiManagingUnit: e.apiManagingUnit,
-      apiEndpoint: e.apiEndpoint,
-      apiMethod: e.apiMethod,
-      updateStrategy: e.updateStrategy,
-      syncFrequency: e.syncFrequency,
-    } as Partial<WizardData>;
-  }, [editingEntity]);
-
   const handleDelete = (id: string) => {
     setDeleteConfirmId(id);
   };
@@ -397,6 +385,7 @@ export function MasterDataScaleManagementPage() {
   };
 
   const [viewingEntity, setViewingEntity] = useState<MasterDataEntity | null>(null);
+  const [viewStep, setViewStep] = useState(1);
 
   const [approvalEntity, setApprovalEntity] = useState<MasterDataEntity | null>(null);
   const [selectedApprover, setSelectedApprover] = useState('');
@@ -422,9 +411,8 @@ export function MasterDataScaleManagementPage() {
         e.id === approvalEntity.id
           ? {
             ...e,
-            lifecycleStatus: 'active' as LifecycleStatus,
+            lifecycleStatus: 'pending' as LifecycleStatus,
             updatedDate: dateStr,
-            requestStatus: 'approved' as const,
             submissionContent: approvalNote || e.submissionContent
           }
           : e
@@ -559,7 +547,7 @@ export function MasterDataScaleManagementPage() {
           {activeTab === 'setup' && (
             <div className="space-y-4">
               {/* Statistics Cards */}
-              <div className="grid grid-cols-4 gap-4 mb-6">
+              <div className="grid grid-cols-5 gap-4 mb-6">
                 <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[13px] text-slate-500">Tổng số dữ liệu chủ</span>
@@ -578,18 +566,26 @@ export function MasterDataScaleManagementPage() {
 
                 <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[13px] text-slate-500">Đã hiệu lực</span>
-                    <CheckSquare className="w-5 h-5 text-green-600" />
+                    <span className="text-[13px] text-slate-500">Chờ phê duyệt</span>
+                    <Send className="w-5 h-5 text-blue-500" />
                   </div>
-                  <div className="text-2xl font-bold text-slate-900">{entities.filter(e => e.lifecycleStatus === 'active').length}</div>
+                  <div className="text-2xl font-bold text-slate-900">{entities.filter(e => e.lifecycleStatus === 'pending').length}</div>
                 </div>
 
                 <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[13px] text-slate-500">Ngừng sử dụng</span>
+                    <span className="text-[13px] text-slate-500">Đã phê duyệt</span>
+                    <CheckSquare className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div className="text-2xl font-bold text-slate-900">{entities.filter(e => e.lifecycleStatus === 'approved').length}</div>
+                </div>
+
+                <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[13px] text-slate-500">Từ chối</span>
                     <XCircle className="w-5 h-5 text-red-600" />
                   </div>
-                  <div className="text-2xl font-bold text-slate-900">{entities.filter(e => e.lifecycleStatus === 'inactive').length}</div>
+                  <div className="text-2xl font-bold text-slate-900">{entities.filter(e => e.lifecycleStatus === 'rejected').length}</div>
                 </div>
               </div>
 
@@ -647,10 +643,10 @@ export function MasterDataScaleManagementPage() {
                             className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium font-sans"
                           >
                             <option value="all">Tất cả trạng thái</option>
-                            <option value="active">Đã hiệu lực</option>
                             <option value="draft">Đang soạn thảo</option>
-                            <option value="inactive">Ngừng sử dụng</option>
-                            <option value="archived">Đã lưu trữ</option>
+                            <option value="pending">Chờ phê duyệt</option>
+                            <option value="approved">Đã phê duyệt</option>
+                            <option value="rejected">Từ chối</option>
                           </select>
                           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                         </div>
@@ -726,13 +722,13 @@ export function MasterDataScaleManagementPage() {
                             <td className="px-6 py-4 text-center">
                               <div className="flex justify-center">
                                 <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[13px] font-normal border whitespace-nowrap ${
-                                  entity.lifecycleStatus === 'active'
+                                  entity.lifecycleStatus === 'approved'
                                     ? 'bg-green-50 text-green-700 border-green-100'
-                                    : entity.lifecycleStatus === 'draft'
-                                      ? 'bg-yellow-50 text-yellow-700 border-yellow-100'
-                                      : entity.lifecycleStatus === 'inactive'
-                                        ? 'bg-red-50 text-red-700 border-red-100'
-                                        : 'bg-slate-50 text-slate-700 border-slate-200'
+                                    : entity.lifecycleStatus === 'pending'
+                                      ? 'bg-blue-50 text-blue-700 border-blue-100'
+                                      : entity.lifecycleStatus === 'draft'
+                                        ? 'bg-yellow-50 text-yellow-700 border-yellow-100'
+                                        : 'bg-red-50 text-red-700 border-red-100'
                                 }`}>
                                   {lifecycleLabels[entity.lifecycleStatus]?.label || entity.lifecycleStatus}
                                 </span>
@@ -741,7 +737,7 @@ export function MasterDataScaleManagementPage() {
                             <td className="px-6 py-4">
                               <div className="flex items-center justify-center gap-1.5">
                                 <button
-                                  onClick={() => setViewingEntity(entity)}
+                                  onClick={() => { setViewingEntity(entity); setViewStep(1); }}
                                   className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 cursor-pointer transition-colors"
                                   title="Xem chi tiết"
                                 >
@@ -764,7 +760,7 @@ export function MasterDataScaleManagementPage() {
                                   className="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 cursor-pointer transition-colors"
                                   title="Chỉnh sửa"
                                 >
-                                  <Edit className="w-4 h-4" />
+                                  <SquarePen className="w-4 h-4" />
                                 </button>
                                 <button
                                   onClick={() => handleDelete(entity.id)}
@@ -927,9 +923,9 @@ export function MasterDataScaleManagementPage() {
                           className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 cursor-pointer"
                         >
                           <option value="draft">Đang soạn thảo</option>
-                          <option value="active">Đã hiệu lực</option>
-                          <option value="inactive">Ngừng sử dụng</option>
-                          <option value="archived">Đã lưu trữ</option>
+                          <option value="pending">Chờ phê duyệt</option>
+                          <option value="approved">Đã phê duyệt</option>
+                          <option value="rejected">Từ chối</option>
                         </select>
                       </div>
 
@@ -1134,19 +1130,19 @@ export function MasterDataScaleManagementPage() {
           )}
 
           {activeTab === 'attributes' && (
-            <AttributesManagementTab readOnly />
+            <AttributesManagementTab />
           )}
 
           {activeTab === 'merge-rules' && (
-            <MergeRulesManagementTab readOnly />
+            <MergeRulesManagementTab />
           )}
 
           {activeTab === 'relationships' && (
-            <EntityRelationshipsTab readOnly />
+            <EntityRelationshipsTab />
           )}
 
           {activeTab === 'identifier-rules' && (
-            <UniqueIdentifierRulesTab readOnly />
+            <UniqueIdentifierRulesTab />
           )}
 
           {activeTab === 'approval' && (
@@ -1159,7 +1155,7 @@ export function MasterDataScaleManagementPage() {
       {viewingEntity && (
         <Portal>
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-slate-200">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-slate-200">
               <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-white shrink-0">
                 <h3 className="text-[16px] font-bold text-slate-900">Xem chi tiết thực thể dữ liệu chủ</h3>
                 <button
@@ -1170,7 +1166,39 @@ export function MasterDataScaleManagementPage() {
                 </button>
               </div>
 
+              {/* Stepper — giống quy trình 6 bước của Tạo mới/Chỉnh sửa */}
+              <div className="px-6 py-4 border-b border-slate-200 bg-slate-50 shrink-0">
+                <div className="flex items-start justify-between">
+                  {VIEW_STEPS.map((step, index) => (
+                    <div key={step.number} className="flex items-start flex-1">
+                      <div className="flex flex-col items-center flex-1">
+                        <button
+                          type="button"
+                          onClick={() => setViewStep(step.number)}
+                          className={`w-8 h-8 rounded-full flex items-center justify-center text-[12px] transition-colors cursor-pointer flex-shrink-0 ${
+                            viewStep === step.number
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-green-600 text-white hover:bg-green-700'
+                          }`}
+                          title={step.title}
+                        >
+                          {viewStep === step.number ? step.number : <Check className="w-4 h-4" />}
+                        </button>
+                        <p className={`text-[12px] mt-1.5 text-center ${viewStep === step.number ? 'text-blue-600 font-medium' : 'text-slate-500'}`}>
+                          {step.title}
+                        </p>
+                      </div>
+                      {index < VIEW_STEPS.length - 1 && (
+                        <div className="flex-1 h-0.5 bg-slate-200 mx-1 mt-4" />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <div className="p-6 overflow-y-auto flex-1 space-y-4 text-[13px]">
+                {viewStep === 1 && (
+                <>
                 {/* Mã thực thể */}
                 <div>
                   <label className="block text-[13px] font-medium text-slate-500 mb-1">Mã thực thể</label>
@@ -1184,22 +1212,6 @@ export function MasterDataScaleManagementPage() {
                   <label className="block text-[13px] font-medium text-slate-500 mb-1">Tên dữ liệu chủ</label>
                   <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-800">
                     {viewingEntity.name}
-                  </div>
-                </div>
-
-                {/* Đơn vị chủ quản */}
-                <div>
-                  <label className="block text-[13px] font-medium text-slate-500 mb-1">Đơn vị chủ quản</label>
-                  <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-800">
-                    {viewingEntity.managingAgency || <span className="text-slate-400 font-normal italic">Chưa cập nhật</span>}
-                  </div>
-                </div>
-
-                {/* Tên cơ sở dữ liệu / Hệ thống */}
-                <div>
-                  <label className="block text-[13px] font-medium text-slate-500 mb-1">Tên cơ sở dữ liệu / Hệ thống</label>
-                  <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-800">
-                    {viewingEntity.systemName || <span className="text-slate-400 font-normal italic">Chưa cập nhật</span>}
                   </div>
                 </div>
 
@@ -1219,11 +1231,27 @@ export function MasterDataScaleManagementPage() {
                   </div>
                 </div>
 
+                {/* Đơn vị chủ quản */}
+                <div>
+                  <label className="block text-[13px] font-medium text-slate-500 mb-1">Đơn vị chủ quản</label>
+                  <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-800">
+                    {viewingEntity.managingAgency || <span className="text-slate-400 font-normal italic">Chưa cập nhật</span>}
+                  </div>
+                </div>
+
                 {/* Mô tả đối tượng */}
                 <div>
                   <label className="block text-[13px] font-medium text-slate-500 mb-1">Mô tả đối tượng</label>
                   <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] text-slate-800 min-h-[72px] whitespace-pre-wrap">
                     {viewingEntity.description || <span className="text-slate-400 italic">Chưa có mô tả</span>}
+                  </div>
+                </div>
+
+                {/* Tên cơ sở dữ liệu / Hệ thống */}
+                <div>
+                  <label className="block text-[13px] font-medium text-slate-500 mb-1">Tên cơ sở dữ liệu / Hệ thống</label>
+                  <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-800">
+                    {viewingEntity.systemName || <span className="text-slate-400 font-normal italic">Chưa cập nhật</span>}
                   </div>
                 </div>
 
@@ -1261,7 +1289,506 @@ export function MasterDataScaleManagementPage() {
                     </div>
                   )}
                 </div>
+                </>
+                )}
 
+                {/* Bước 2: Tạo thuộc tính */}
+                {viewStep === 2 && (() => {
+                  const stepAttrs = defaultAttributes[viewingEntity.id] || [];
+                  const stepConfig = DLDC_ENTITY_DETAIL_CONFIGS[viewingEntity.id];
+                  const stepSources = stepConfig?.sources || [];
+                  return (
+                  <>
+                  <div className="border border-slate-200 rounded-xl overflow-hidden">
+                    <div className="px-4 py-3 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-slate-500" />
+                      <p className="text-[13px] font-semibold text-slate-700">Danh sách thuộc tính</p>
+                      <span className="text-[12px] px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">
+                        {stepAttrs.length} trường
+                      </span>
+                    </div>
+                    {stepAttrs.length === 0 ? (
+                      <p className="text-[13px] text-slate-400 text-center py-8">Chưa có thuộc tính nào được cấu hình cho thực thể này</p>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-[13px]" style={{ tableLayout: 'fixed' }}>
+                          <colgroup>
+                            <col style={{ width: '6%' }} />
+                            <col style={{ width: '6%' }} />
+                            <col style={{ width: '16%' }} />
+                            <col style={{ width: '16%' }} />
+                            <col style={{ width: '16%' }} />
+                            <col style={{ width: '20%' }} />
+                            <col style={{ width: '20%' }} />
+                          </colgroup>
+                          <thead className="bg-slate-50 border-b border-slate-100">
+                            <tr>
+                              <th className="text-center px-3 py-2.5 text-[13px]">
+                                <input type="checkbox" checked disabled className="rounded border-slate-300 text-blue-600 cursor-not-allowed" />
+                              </th>
+                              <th className="text-center px-3 py-2.5 text-[13px] font-semibold text-slate-600">PK</th>
+                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Nguồn (Table)</th>
+                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Trường gốc (Column)</th>
+                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Tên cột</th>
+                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Tên hiển thị</th>
+                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Kiểu dữ liệu</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 bg-white">
+                            {stepAttrs.map(attr => (
+                              <tr key={attr.id}>
+                                <td className="text-center px-3 py-2 text-[13px]">
+                                  <input type="checkbox" checked disabled className="rounded border-slate-300 text-blue-600 cursor-not-allowed" />
+                                </td>
+                                <td className="text-center px-3 py-2 text-[13px]">
+                                  <input type="checkbox" checked={attr.unique} disabled
+                                    className="w-4 h-4 rounded text-amber-500 border-slate-300 cursor-not-allowed accent-amber-500" />
+                                </td>
+                                <td className="px-4 py-2 text-[13px] text-slate-900 font-medium overflow-hidden">{attr.tableName || '—'}</td>
+                                <td className="px-4 py-2 text-[13px] overflow-hidden">
+                                  <code className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700 font-mono text-[12px]">{attr.fieldName}</code>
+                                </td>
+                                <td className="px-4 py-2 text-[13px] text-slate-700 overflow-hidden">{attr.fieldName}</td>
+                                <td className="px-4 py-2 text-[13px] text-slate-900 font-medium overflow-hidden">{attr.displayName}</td>
+                                <td className="px-4 py-2 text-[13px] text-slate-600 overflow-hidden">{attr.dataType}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Ánh xạ cột nguồn → thuộc tính — giống mục Tạo thuộc tính ở Tạo mới/Chỉnh sửa dữ liệu chủ */}
+                  <div className="border border-slate-200 rounded-xl overflow-hidden mt-4">
+                    <div className="px-4 py-3 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <ArrowRight className="w-4 h-4 text-slate-500" />
+                        <p className="text-[13px] font-semibold text-slate-700">Ánh xạ cột nguồn</p>
+                      </div>
+                      <span className="text-[13px] text-slate-500">{stepSources.length} nguồn</span>
+                    </div>
+                    {stepAttrs.length === 0 || stepSources.length === 0 ? (
+                      <p className="text-[13px] text-slate-400 text-center py-8">Chưa có ánh xạ nguồn dữ liệu nào được cấu hình cho thực thể này</p>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-[13px]">
+                          <thead className="bg-slate-50 border-b border-slate-100">
+                            <tr>
+                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Thuộc tính</th>
+                              {stepSources.map(src => (
+                                <th key={src.id} className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">{src.name}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 bg-white">
+                            {stepAttrs.map(attr => (
+                              <tr key={attr.id}>
+                                <td className="px-4 py-2 text-[13px]">
+                                  <span className="text-slate-700 font-medium">{attr.displayName}</span>
+                                  <code className="ml-1.5 bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 font-mono text-[12px]">{attr.fieldName}</code>
+                                </td>
+                                {stepSources.map(src => {
+                                  const mappedCol = stepConfig?.mapping[attr.fieldName]?.[src.id];
+                                  return (
+                                    <td key={src.id} className="px-4 py-2 text-[13px] text-slate-600">
+                                      {mappedCol ? (
+                                        <code className="font-mono bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100 text-slate-800 text-[12px]">{mappedCol}</code>
+                                      ) : (
+                                        <span className="text-slate-400">—</span>
+                                      )}
+                                    </td>
+                                  );
+                                })}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                  </>
+                  );
+                })()}
+
+                {/* Bước 3: Quy tắc hợp nhất */}
+                {viewStep === 3 && (() => {
+                  const entityRule = mockMergeRules.find(r => r.entityId === viewingEntity.id);
+                  const entityAttrs = defaultAttributes[viewingEntity.id] || [];
+                  const fieldLabel = (fieldName: string) => entityAttrs.find(af => af.fieldName === fieldName)?.displayName || fieldName;
+
+                  if (!entityRule) {
+                    return (
+                      <div className="border border-slate-200 rounded-xl bg-slate-50 p-6 text-center">
+                        <GitCompare className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                        <p className="text-[13px] text-slate-500">Chưa cấu hình quy tắc hợp nhất cho thực thể này. Xem/thiết lập tại tab "Thiết lập quy tắc hợp nhất" trong Mô hình dữ liệu chủ.</p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <>
+                    {/* Lớp 1: Matching Rules */}
+                    <div className="border border-blue-200 rounded-xl overflow-hidden">
+                      <div className="bg-blue-50 px-4 py-3 flex items-center gap-3 border-b border-blue-200">
+                        <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-[13px] font-bold flex items-center justify-center flex-shrink-0">1</span>
+                        <div>
+                          <p className="text-[13px] font-semibold text-blue-800">Lớp 1 — Quy tắc so khớp (Matching Rules)</p>
+                          <p className="text-[13px] text-blue-500">Xác định khi nào hai bản ghi từ hai nguồn khác nhau được coi là cùng một thực thể</p>
+                        </div>
+                      </div>
+                      <div className="p-4 space-y-3 bg-white">
+                        <div className="grid grid-cols-2 gap-4">
+                          <p className="text-[13px] text-slate-600">
+                            Ngưỡng tự động gộp (≥):{' '}
+                            <span className="font-semibold text-slate-900">{entityRule.autoThreshold ?? '-'}%</span>
+                          </p>
+                          <p className="text-[13px] text-slate-600">
+                            Ngưỡng cần rà soát (≥):{' '}
+                            <span className="font-semibold text-slate-900">{entityRule.reviewThreshold ?? '-'}%</span>
+                          </p>
+                        </div>
+                        <div className="border border-slate-100 rounded-lg overflow-hidden">
+                          <table className="w-full text-[13px]">
+                            <thead className="bg-slate-50 border-b border-slate-100">
+                              <tr>
+                                <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Trường đối chiếu</th>
+                                <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Kiểu so khớp</th>
+                                <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Thuật toán</th>
+                                <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Ngưỡng (%)</th>
+                                <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Trọng số (%)</th>
+                                <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-24">Chuẩn hóa</th>
+                                <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Điều kiện</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-50 bg-white">
+                              {!entityRule.matchingRulesDetail || entityRule.matchingRulesDetail.length === 0 ? (
+                                <tr>
+                                  <td colSpan={7} className="px-4 py-6 text-center text-[13px] text-slate-400">
+                                    Chưa cấu hình quy tắc so khớp
+                                  </td>
+                                </tr>
+                              ) : (
+                                entityRule.matchingRulesDetail.map(rule => (
+                                  <tr key={rule.id}>
+                                    <td className="px-3 py-2 text-[13px] text-slate-700">{fieldLabel(rule.fieldName)}</td>
+                                    <td className="px-3 py-2 text-[13px] text-slate-700">{matchMethodLabels[rule.method]}</td>
+                                    <td className="px-3 py-2 text-[13px] text-slate-700">
+                                      {rule.method === 'fuzzy' ? fuzzyAlgorithmLabels[rule.algorithm] : <span className="text-slate-400">—</span>}
+                                    </td>
+                                    <td className="px-3 py-2 text-[13px] text-center text-slate-700">
+                                      {rule.method === 'fuzzy' ? `${rule.fuzzyThreshold ?? '-'}%` : <span className="text-slate-400">—</span>}
+                                    </td>
+                                    <td className="px-3 py-2 text-[13px] text-center text-slate-700">{rule.weight}</td>
+                                    <td className="px-3 py-2 text-[13px] text-center text-slate-700">{rule.normalize ? 'Có' : 'Không'}</td>
+                                    <td className="px-3 py-2 text-[13px] text-center text-slate-700">
+                                      {rule.operator ?? <span className="text-slate-400">—</span>}
+                                    </td>
+                                  </tr>
+                                ))
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Trường hard-block */}
+                    <div className="border border-slate-200 rounded-xl bg-white p-4 space-y-3">
+                      <div>
+                        <p className="text-[13px] font-semibold text-slate-700">Trường hard-block</p>
+                        <p className="text-[13px] text-slate-500">Nếu các trường này khác nhau, hai bản ghi chắc chắn KHÔNG phải cùng thực thể (loại khỏi so khớp)</p>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        {!entityRule.hardBlockFields || entityRule.hardBlockFields.length === 0 ? (
+                          <span className="text-[13px] text-slate-400">Chưa có trường hard-block nào</span>
+                        ) : (
+                          entityRule.hardBlockFields.map(f => (
+                            <span key={f} className="inline-flex items-center px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-[13px] font-medium">
+                              {fieldLabel(f)}
+                            </span>
+                          ))
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Lớp 2: Hợp nhất giá trị (Survivorship) */}
+                    <div className="border border-blue-200 rounded-xl overflow-hidden">
+                      <div className="bg-blue-50 px-4 py-3 flex items-center gap-3 border-b border-blue-200">
+                        <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-[13px] font-bold flex items-center justify-center flex-shrink-0">2</span>
+                        <div>
+                          <p className="text-[13px] font-semibold text-blue-800">Lớp 2 — Hợp nhất giá trị (Survivorship)</p>
+                          <p className="text-[13px] text-blue-500">Với mỗi trường, giá trị nào sẽ tồn tại trong bản ghi chủ cuối cùng</p>
+                        </div>
+                      </div>
+                      <div className="p-4 bg-white">
+                        {!entityRule.extractionRulesDetail || entityRule.extractionRulesDetail.length === 0 ? (
+                          <p className="text-[13px] text-slate-400 text-center py-6">Chưa cấu hình quy tắc hợp nhất giá trị</p>
+                        ) : (
+                          <div className="border border-slate-100 rounded-lg overflow-hidden">
+                            <table className="w-full text-[13px]">
+                              <thead className="bg-slate-50 border-b border-slate-100">
+                                <tr>
+                                  <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Trường</th>
+                                  <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Chiến lược</th>
+                                  <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Nguồn dữ liệu</th>
+                                  <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Khi hết vẫn trống</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-50 bg-white">
+                                {entityRule.extractionRulesDetail.map(rule => (
+                                  <tr key={rule.id}>
+                                    <td className="px-3 py-2 text-[13px] text-slate-700">{fieldLabel(rule.fieldName)}</td>
+                                    <td className="px-3 py-2 text-[13px] text-slate-700">{conflictStrategyLabels[rule.conflictStrategy]}</td>
+                                    <td className="px-3 py-2 text-[13px] text-slate-700">
+                                      {rule.conflictStrategy === 'source' ? rule.primarySource : rule.priorityOrder.join(' → ')}
+                                    </td>
+                                    <td className="px-3 py-2 text-[13px] text-slate-700">{onEmptyLabels[rule.onEmpty]}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    </>
+                  );
+                })()}
+
+                {/* Bước 4: Thiết lập quan hệ */}
+                {viewStep === 4 && (() => {
+                  const entityRelationships = mockRelationships.filter(
+                    r => r.sourceEntityId === viewingEntity.id || r.targetEntityId === viewingEntity.id
+                  );
+
+                  if (entityRelationships.length === 0) {
+                    return (
+                      <div className="border border-slate-200 rounded-xl bg-slate-50 p-6 text-center">
+                        <Network className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                        <p className="text-[13px] text-slate-500">Chưa cấu hình quan hệ nào cho thực thể này. Xem/thiết lập tại tab "Thiết lập quan hệ thực thể" trong Mô hình dữ liệu chủ.</p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="border border-slate-200 rounded-xl overflow-hidden">
+                      <div className="px-4 py-3 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
+                        <Network className="w-4 h-4 text-slate-500" />
+                        <p className="text-[13px] font-semibold text-slate-700">Quan hệ thực thể</p>
+                        <span className="text-[12px] px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">
+                          {entityRelationships.length} quan hệ
+                        </span>
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-[13px]">
+                          <thead className="bg-slate-50 border-b border-slate-100">
+                            <tr>
+                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Thực thể nguồn</th>
+                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Khóa nguồn</th>
+                              <th className="text-center px-4 py-2.5 text-[13px] font-semibold text-slate-600">Loại quan hệ</th>
+                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Thực thể đích</th>
+                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Khóa đích</th>
+                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Bảng trung gian / Trường hiển thị</th>
+                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Mô tả</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 bg-white">
+                            {entityRelationships.map(rel => (
+                              <tr key={rel.id}>
+                                <td className="px-4 py-2 text-[13px] text-slate-900 font-medium overflow-hidden">{rel.sourceEntityName}</td>
+                                <td className="px-4 py-2 text-[13px] font-mono text-slate-600 overflow-hidden">{getSourceKey(rel) || '—'}</td>
+                                <td className="px-4 py-2 text-[13px] text-center text-slate-700 overflow-hidden">{relationTypeLabels[rel.relationType]}</td>
+                                <td className="px-4 py-2 text-[13px] text-slate-900 font-medium overflow-hidden">{rel.targetEntityName}</td>
+                                <td className="px-4 py-2 text-[13px] font-mono text-slate-600 overflow-hidden">{getTargetKey(rel) || '—'}</td>
+                                <td className="px-4 py-2 text-[13px] text-slate-600 overflow-hidden">
+                                  {rel.relationType === 'many-to-many' ? (rel.junctionTable || '—') : (rel.displayField || '—')}
+                                </td>
+                                <td className="px-4 py-2 text-[13px] text-slate-600 overflow-hidden">{rel.description || '—'}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Bước 5: Định danh duy nhất */}
+                {viewStep === 5 && (() => {
+                  const entityRule = mockIdentifierRules.find(r => r.entityId === viewingEntity.id);
+
+                  if (!entityRule) {
+                    return (
+                      <div className="border border-slate-200 rounded-xl bg-slate-50 p-6 text-center">
+                        <Key className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                        <p className="text-[13px] text-slate-500">Chưa cấu hình quy tắc định danh cho thực thể này. Xem/thiết lập tại tab "Quy tắc định danh duy nhất" trong Mô hình dữ liệu chủ.</p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="grid grid-cols-2 gap-6">
+                      {/* Left */}
+                      <div className="space-y-4">
+                        <div className="border border-slate-200 rounded-xl p-5 space-y-4 bg-white">
+                          <h4 className="text-[13px] font-bold text-slate-800">Cấu trúc mã định danh</h4>
+                          <div className="grid grid-cols-2 gap-4 text-[13px]">
+                            <div>
+                              <span className="block text-slate-500 mb-1">Tiền tố (Prefix)</span>
+                              <span className="font-medium text-slate-800">{entityRule.prefix || '(không có)'}</span>
+                            </div>
+                            <div>
+                              <span className="block text-slate-500 mb-1">Hậu tố (Suffix)</span>
+                              <span className="font-medium text-slate-800">{entityRule.suffix || '(không có)'}</span>
+                            </div>
+                            <div>
+                              <span className="block text-slate-500 mb-1">Ký tự phân cách</span>
+                              <span className="font-medium text-slate-800">{entityRule.separator === 'none' ? 'Không dùng' : `"${entityRule.separator}"`}</span>
+                            </div>
+                            <div>
+                              <span className="block text-slate-500 mb-1">Độ dài số thứ tự</span>
+                              <span className="font-medium text-slate-800">{entityRule.digits} chữ số</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="border border-slate-200 rounded-xl p-5 space-y-4 bg-white">
+                          <h4 className="text-[13px] font-bold text-slate-800">Số tự tăng</h4>
+                          <div className="grid grid-cols-2 gap-4 text-[13px]">
+                            <div>
+                              <span className="block text-slate-500 mb-1">Bắt đầu từ</span>
+                              <span className="font-medium text-slate-800">{entityRule.startFrom}</span>
+                            </div>
+                            <div>
+                              <span className="block text-slate-500 mb-1">Bước tăng</span>
+                              <span className="font-medium text-slate-800">{entityRule.increment}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="border border-slate-200 rounded-xl p-5 bg-white flex items-start gap-3">
+                          <div className={`mt-0.5 w-4 h-4 rounded flex-shrink-0 flex items-center justify-center ${entityRule.checkDuplicate ? 'bg-blue-600' : 'bg-slate-200'}`}>
+                            {entityRule.checkDuplicate && <Check className="w-3 h-3 text-white" />}
+                          </div>
+                          <div>
+                            <p className="text-[13px] font-medium text-slate-700">Kiểm tra trùng lặp khi tạo mới</p>
+                            <p className="text-[13px] text-slate-500 mt-1">Hệ thống từ chối tạo bản ghi nếu mã định danh đã tồn tại</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right — preview */}
+                      <div className="space-y-4">
+                        <div className="border border-blue-200 rounded-xl p-5 bg-blue-50 space-y-4">
+                          <h4 className="text-[13px] font-bold text-blue-900">Mẫu mã định danh</h4>
+                          <div className="bg-white border border-blue-200 rounded-lg px-6 py-7 text-center">
+                            <code className="text-2xl font-mono font-bold text-blue-700 tracking-widest">
+                              {buildCode(entityRule, entityRule.startFrom)}
+                            </code>
+                          </div>
+                          <div className="space-y-3 text-[13px]">
+                            <div className="flex justify-between items-center py-1.5 border-b border-blue-100">
+                              <span className="text-slate-600">Mã thứ 1:</span>
+                              <code className="font-mono font-semibold text-slate-800">{buildCode(entityRule, entityRule.startFrom)}</code>
+                            </div>
+                            <div className="flex justify-between items-center py-1.5 border-b border-blue-100">
+                              <span className="text-slate-600">Mã thứ 2:</span>
+                              <code className="font-mono font-semibold text-slate-800">{buildCode(entityRule, entityRule.startFrom + entityRule.increment)}</code>
+                            </div>
+                            <div className="flex justify-between items-center py-1.5">
+                              <span className="text-slate-600">Mã thứ 3:</span>
+                              <code className="font-mono font-semibold text-slate-800">{buildCode(entityRule, entityRule.startFrom + entityRule.increment * 2)}</code>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Bước 6: Quy tắc đánh phiên bản */}
+                {viewStep === 6 && (() => {
+                  const entityRule = mockVersioningRules.find(r => r.entityId === viewingEntity.id);
+                  const entityAttrs = defaultAttributes[viewingEntity.id] || [];
+
+                  if (!entityRule) {
+                    return (
+                      <div className="border border-slate-200 rounded-xl bg-slate-50 p-6 text-center">
+                        <Clock className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                        <p className="text-[13px] text-slate-500">Chưa cấu hình quy tắc đánh phiên bản cho thực thể này. Xem/thiết lập tại tab "Mô hình dữ liệu chủ".</p>
+                      </div>
+                    );
+                  }
+
+                  const formatInfo = VERSION_FORMAT_LABELS[entityRule.versionFormat];
+
+                  return (
+                    <div className="space-y-4">
+                      {/* Phần 1 — Điều kiện tạo version mới */}
+                      <div className="border border-slate-200 rounded-xl overflow-hidden">
+                        <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50">
+                          <h4 className="text-[13px] font-bold text-slate-800">Phần 1 — Điều kiện tạo version mới</h4>
+                        </div>
+                        <div className="divide-y divide-slate-100">
+                          {entityAttrs.length === 0 ? (
+                            <p className="px-5 py-6 text-center text-[13px] text-slate-400">Chưa có thuộc tính nào được cấu hình cho thực thể này</p>
+                          ) : (
+                            entityAttrs.map(attr => {
+                              const enabled = !entityRule.disabledFields.includes(attr.fieldName);
+                              return (
+                                <div key={attr.id} className="flex items-center justify-between gap-4 px-5 py-3">
+                                  <span className="text-[13px] font-medium text-slate-700">{attr.displayName}</span>
+                                  <span className={`text-[13px] whitespace-nowrap ${enabled ? 'text-blue-600' : 'text-slate-400'}`}>
+                                    {enabled ? 'Thay đổi giá trị → tạo version mới' : 'Không tạo version (chỉ ghi log)'}
+                                  </span>
+                                </div>
+                              );
+                            })
+                          )}
+                        </div>
+                        <div className="px-5 py-3 border-t border-slate-200 bg-white flex items-start gap-3">
+                          <div className={`mt-0.5 w-4 h-4 rounded flex-shrink-0 flex items-center justify-center ${entityRule.autoVersionOnSync ? 'bg-blue-600' : 'bg-slate-200'}`}>
+                            {entityRule.autoVersionOnSync && <Check className="w-3 h-3 text-white" />}
+                          </div>
+                          <div>
+                            <p className="text-[13px] font-medium text-slate-700">Tự động tạo phiên bản khi đồng bộ từ hệ thống nguồn (re-merge)</p>
+                            <p className="text-[13px] text-slate-500 mt-1">Thay đổi thủ công của Cán bộ luôn cần qua phê duyệt trước khi tạo phiên bản mới.</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Phần 2 — Định dạng số phiên bản */}
+                      <div className="border border-slate-200 rounded-xl p-5 bg-white space-y-3">
+                        <h4 className="text-[13px] font-bold text-slate-800">Phần 2 — Định dạng số phiên bản</h4>
+                        <div className="grid grid-cols-2 gap-4 text-[13px]">
+                          <div>
+                            <span className="block text-slate-500 mb-1">Định dạng phiên bản</span>
+                            <span className="font-medium text-slate-800">{formatInfo.label}</span>
+                          </div>
+                          <div>
+                            <span className="block text-slate-500 mb-1">Ví dụ</span>
+                            <code className="font-mono text-slate-800">{formatInfo.example}</code>
+                          </div>
+                          {entityRule.versionFormat === 'custom' && (
+                            <div>
+                              <span className="block text-slate-500 mb-1">Tiền tố (Prefix)</span>
+                              <span className="font-medium text-slate-800">{entityRule.customPrefix || '(không có)'}</span>
+                            </div>
+                          )}
+                          <div>
+                            <span className="block text-slate-500 mb-1">Bắt đầu từ</span>
+                            <span className="font-medium text-slate-800">{entityRule.startFrom}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Bước 7: Phê duyệt */}
+                {viewStep === 7 && (
+                <>
                 {/* Nội dung trình duyệt */}
                 <div>
                   <label className="block text-[13px] font-medium text-slate-500 mb-1">Nội dung trình duyệt</label>
@@ -1305,6 +1832,8 @@ export function MasterDataScaleManagementPage() {
                     </div>
                   </div>
                 </div>
+                </>
+                )}
               </div>
 
               <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl flex justify-end gap-3 shrink-0">
@@ -1317,10 +1846,23 @@ export function MasterDataScaleManagementPage() {
                 </button>
                 <button
                   onClick={() => setViewingEntity(null)}
-                  className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg font-medium text-[13px] transition-colors cursor-pointer shadow-sm"
+                  className={`px-4 py-2 rounded-lg font-medium text-[13px] transition-colors cursor-pointer shadow-sm ${
+                    viewStep < 7
+                      ? 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
                 >
                   Đóng
                 </button>
+                {viewStep < 7 && (
+                  <button
+                    onClick={() => setViewStep(viewStep + 1)}
+                    className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg font-medium text-[13px] flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
+                  >
+                    Tiếp theo
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -1386,59 +1928,51 @@ export function MasterDataScaleManagementPage() {
               </div>
 
               <div className="p-6 space-y-4">
-                <div>
-                  <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                    Chọn người duyệt <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    value={selectedApprover}
-                    onChange={e => setSelectedApprover(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 focus:border-indigo-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all cursor-pointer"
-                  >
-                    <option value="">-- Chọn người duyệt --</option>
-                    {MOCK_APPROVERS.map(u => (
-                      <option key={u.id} value={u.id}>
-                        {u.name} - {u.position} ({u.department})
-                      </option>
-                    ))}
-                  </select>
+                {/* Thông tin phê duyệt */}
+                <div className="border border-blue-200 rounded-lg overflow-hidden">
+                  <div className="bg-blue-50 px-4 py-2.5 border-b border-blue-200">
+                    <h4 className="text-[13px] font-semibold text-blue-900">Thông tin phê duyệt</h4>
+                  </div>
+                  <div className="p-4 space-y-4">
+                    <div>
+                      <label className="block text-[13px] text-slate-700 mb-1.5">
+                        Chọn người trình duyệt <span className="text-red-600">*</span>
+                      </label>
+                      <select
+                        value={selectedApprover}
+                        onChange={e => setSelectedApprover(e.target.value)}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
+                      >
+                        <option value="">-- Chọn người trình duyệt --</option>
+                        {MOCK_APPROVERS.map(u => (
+                          <option key={u.id} value={u.id}>
+                            {u.name} - {u.position} ({u.department})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[13px] text-slate-700 mb-1.5">
+                        Ghi chú phê duyệt
+                      </label>
+                      <textarea
+                        value={approvalNote}
+                        onChange={e => setApprovalNote(e.target.value)}
+                        rows={3}
+                        placeholder="Nhập lý do và ghi chú cho việc gửi trình duyệt này..."
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                    Nội dung yêu cầu
-                  </label>
-                  <textarea
-                    value={approvalNote}
-                    onChange={e => setApprovalNote(e.target.value)}
-                    rows={4}
-                    placeholder="Nhập nội dung gửi kèm (nếu có)..."
-                    className="w-full px-3 py-2 border border-slate-200 focus:border-indigo-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all resize-none"
-                  />
-                </div>
-
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                  <h4 className="text-[13px] font-semibold text-slate-700 mb-3">Thông tin bản ghi</h4>
-                  <div className="space-y-2 text-[13px]">
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Mã dữ liệu chủ:</span>
-                      <code className="px-2 py-0.5 bg-white border border-slate-200 text-indigo-700 rounded text-[12px]">
-                        {approvalEntity.code}
-                      </code>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Loại thực thể:</span>
-                      <span className="text-slate-800 font-medium">
-                        {dataTypeLabels[approvalEntity.dataType]}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Cơ quan quản lý:</span>
-                      <span className="text-slate-800 font-medium">{approvalEntity.managingAgency}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Người tạo:</span>
-                      <span className="text-slate-800">{approvalEntity.createdBy}</span>
+                {/* Info */}
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <div className="text-[13px] text-green-800">
+                      <p className="mb-1">Sau khi gửi, dữ liệu chủ sẽ ở trạng thái <strong>"Chờ phê duyệt"</strong>.</p>
+                      <p>Người phê duyệt sẽ xem xét và quyết định phê duyệt hoặc từ chối.</p>
                     </div>
                   </div>
                 </div>
@@ -1472,7 +2006,6 @@ export function MasterDataScaleManagementPage() {
       {/* Wizard Modal */}
       <MasterDataWizard
         isOpen={showWizard}
-        initialData={wizardInitial}
         onClose={() => { setShowWizard(false); setEditingEntity(null); }}
         onSubmit={(wizardData) => {
           const now = new Date();
@@ -1490,8 +2023,6 @@ export function MasterDataScaleManagementPage() {
               systemName: wizardData.systemName,
               updatedDate: dateStr,
               dataSource: wizardData.dataSource,
-              dldcTable: wizardData.dldcTable,
-              dldcColumns: wizardData.dldcColumns,
               apiSystem: wizardData.apiSystem,
               apiManagingUnit: wizardData.apiManagingUnit,
               apiEndpoint: wizardData.apiEndpoint,
@@ -1520,8 +2051,6 @@ export function MasterDataScaleManagementPage() {
             updatedDate: dateStr,
             createdBy: 'Người dùng hiện tại',
             dataSource: wizardData.dataSource,
-            dldcTable: wizardData.dldcTable,
-            dldcColumns: wizardData.dldcColumns,
             apiSystem: wizardData.apiSystem,
             apiManagingUnit: wizardData.apiManagingUnit,
             apiEndpoint: wizardData.apiEndpoint,

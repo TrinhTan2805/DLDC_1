@@ -2,10 +2,13 @@ import { useState } from 'react';
 import { Plus, Edit, Trash2, Save, Network, ArrowRight, Key, Link as LinkIcon, ChevronDown, AlertCircle, Send } from 'lucide-react';
 import { BaseModal } from '../../common/BaseModal';
 
+// Tạm ẩn nút Chỉnh sửa/Xóa theo yêu cầu — chỉ ẩn giao diện, không xóa code/luồng xử lý
+const SHOW_EDIT_DELETE_ACTIONS = false;
+
 type RelationType = 'one-to-many' | 'many-to-many' | 'one-to-one';
 type RelationStatus = 'active' | 'inactive';
 
-interface EntityRelationship {
+export interface EntityRelationship {
   id: string;
   sourceEntityId: string;
   sourceEntityName: string;
@@ -23,7 +26,7 @@ interface EntityRelationship {
   createdDate: string;
 }
 
-const mockRelationships: EntityRelationship[] = [
+export const mockRelationships: EntityRelationship[] = [
   {
     id: 'rel-1',
     sourceEntityId: '1',
@@ -62,6 +65,53 @@ const mockEntities = [
   { id: '5', code: 'MD-ADDR-001', name: 'Bộ dữ liệu chủ Địa chỉ', version: 1 }
 ];
 
+// Trường thực tế của thực thể nguồn — giống "sourceEntityFields" trong wizard Tạo mới dữ liệu chủ
+const ENTITY_FIELDS: Record<string, { name: string; label: string }[]> = {
+  '1': [
+    { name: 'citizen_id', label: 'Số CCCD' },
+    { name: 'full_name', label: 'Họ và tên' },
+    { name: 'date_of_birth', label: 'Ngày sinh' },
+    { name: 'gender', label: 'Giới tính' },
+    { name: 'address', label: 'Địa chỉ thường trú' },
+    { name: 'email', label: 'Email' },
+    { name: 'phone_number', label: 'Số điện thoại' },
+  ],
+  '2': [
+    { name: 'org_id', label: 'Mã tổ chức' },
+    { name: 'org_name', label: 'Tên tổ chức' },
+    { name: 'tax_code', label: 'Mã số thuế' },
+    { name: 'founded_date', label: 'Ngày thành lập' },
+    { name: 'address', label: 'Địa chỉ trụ sở' },
+  ],
+  '3': [
+    { name: 'doc_number', label: 'Số hiệu văn bản' },
+    { name: 'doc_title', label: 'Tiêu đề văn bản' },
+    { name: 'issued_date', label: 'Ngày ban hành' },
+    { name: 'issuing_body', label: 'Cơ quan ban hành' },
+    { name: 'doc_type', label: 'Loại văn bản' },
+  ],
+  '4': [
+    { name: 'authority_id', label: 'Mã cơ quan' },
+    { name: 'authority_name', label: 'Tên cơ quan' },
+    { name: 'address', label: 'Địa chỉ' },
+  ],
+  '5': [
+    { name: 'address_id', label: 'Mã địa chỉ' },
+    { name: 'address_line', label: 'Số nhà, đường' },
+    { name: 'ward', label: 'Phường/Xã' },
+    { name: 'district', label: 'Quận/Huyện' },
+    { name: 'province', label: 'Tỉnh/Thành phố' },
+  ],
+};
+
+// Trường chung phía thực thể đích — giống "BASE_TARGET_FIELDS" trong wizard (chưa biết trước schema thực thể đích)
+const BASE_TARGET_FIELDS = [
+  { name: 'id', label: 'ID định danh' },
+  { name: 'code', label: 'Mã định danh' },
+  { name: 'name', label: 'Tên/Tiêu đề' },
+  { name: 'status', label: 'Trạng thái' },
+];
+
 const MOCK_APPROVERS = [
   { id: 'a1', name: 'Nguyễn Văn An', position: 'Trưởng phòng', department: 'Phòng Quản lý dữ liệu' },
   { id: 'a2', name: 'Trần Thị Bình', position: 'Phó Cục trưởng', department: 'Cục Hành chính tư pháp' },
@@ -70,7 +120,7 @@ const MOCK_APPROVERS = [
   { id: 'a5', name: 'Hoàng Thị Lan', position: 'Trưởng phòng', department: 'Phòng Nghiệp vụ pháp lý' }
 ];
 
-const relationTypeLabels: Record<RelationType, string> = {
+export const relationTypeLabels: Record<RelationType, string> = {
   'one-to-many': '1 - n (Một - Nhiều)',
   'many-to-many': 'n - n (Nhiều - Nhiều)',
   'one-to-one': '1 - 1 (Một - Một)'
@@ -82,8 +132,8 @@ const relationTypeIcons: Record<RelationType, string> = {
   'one-to-one': '1-1'
 };
 
-const getSourceKey = (rel: EntityRelationship) => rel.relationType === 'many-to-many' ? rel.junctionSourceKey : rel.foreignKey;
-const getTargetKey = (rel: EntityRelationship) => rel.relationType === 'many-to-many' ? rel.junctionTargetKey : rel.referencedKey;
+export const getSourceKey = (rel: EntityRelationship) => rel.relationType === 'many-to-many' ? rel.junctionSourceKey : rel.foreignKey;
+export const getTargetKey = (rel: EntityRelationship) => rel.relationType === 'many-to-many' ? rel.junctionTargetKey : rel.referencedKey;
 
 export function EntityRelationshipsTab({ readOnly = false }: { readOnly?: boolean } = {}) {
   const [relationships, setRelationships] = useState<EntityRelationship[]>(mockRelationships);
@@ -91,7 +141,7 @@ export function EntityRelationshipsTab({ readOnly = false }: { readOnly?: boolea
   const [editingRelationship, setEditingRelationship] = useState<EntityRelationship | null>(null);
 
   // Xem theo thực thể dữ liệu chủ
-  const [selectedEntityFilter, setSelectedEntityFilter] = useState('');
+  const [selectedEntityFilter, setSelectedEntityFilter] = useState(mockEntities[0].id);
 
   // Pagination
   const [pageSize, setPageSize] = useState(10);
@@ -296,7 +346,7 @@ export function EntityRelationshipsTab({ readOnly = false }: { readOnly?: boolea
                   <td colSpan={8} className="px-4 py-16 text-center">
                     <Network className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                     <p className="text-slate-500">
-                      Nội dung chức năng Thiết lập quan hệ giữa thực thể
+                      Thực thể dữ liệu chủ chưa có quan hệ nào, thêm mới quan hệ
                     </p>
                   </td>
                 </tr>
@@ -320,7 +370,7 @@ export function EntityRelationshipsTab({ readOnly = false }: { readOnly?: boolea
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-center gap-2">
-                          {readOnly ? (
+                          {readOnly || !SHOW_EDIT_DELETE_ACTIONS ? (
                             <span className="text-slate-300">—</span>
                           ) : (
                             <>
@@ -536,26 +586,32 @@ export function EntityRelationshipsTab({ readOnly = false }: { readOnly?: boolea
                           <label className="block text-[13px] font-medium text-slate-600 mb-1.5">
                             Khoá ngoại Nguồn <span className="text-red-500">*</span>
                           </label>
-                          <input
-                            type="text"
+                          <select
                             value={formData.junctionSourceKey}
                             onChange={(e) => setFormData({ ...formData, junctionSourceKey: e.target.value })}
-                            placeholder="VD: citizen_id"
                             className="w-full px-3 py-2 border border-slate-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono"
-                          />
+                          >
+                            <option value="">-- Chọn trường Nguồn --</option>
+                            {(ENTITY_FIELDS[formData.sourceEntityId || ''] ?? BASE_TARGET_FIELDS).map(f => (
+                              <option key={f.name} value={f.name}>{f.name} ({f.label})</option>
+                            ))}
+                          </select>
                         </div>
 
                         <div>
                           <label className="block text-[13px] font-medium text-slate-600 mb-1.5">
                             Khoá ngoại Đích <span className="text-red-500">*</span>
                           </label>
-                          <input
-                            type="text"
+                          <select
                             value={formData.junctionTargetKey}
                             onChange={(e) => setFormData({ ...formData, junctionTargetKey: e.target.value })}
-                            placeholder="VD: organization_id"
                             className="w-full px-3 py-2 border border-slate-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono"
-                          />
+                          >
+                            <option value="">-- Chọn trường Đích --</option>
+                            {BASE_TARGET_FIELDS.map(f => (
+                              <option key={f.name} value={f.name}>{f.name} ({f.label})</option>
+                            ))}
+                          </select>
                         </div>
                       </div>
                     </div>
@@ -577,16 +633,10 @@ export function EntityRelationshipsTab({ readOnly = false }: { readOnly?: boolea
                             onChange={(e) => setFormData({ ...formData, foreignKey: e.target.value })}
                             className="w-full px-3 py-2 border border-slate-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-mono"
                           >
-                            <option value="">-- Chọn trường --</option>
-                            <option value="id">id</option>
-                            <option value="citizen_id">citizen_id</option>
-                            <option value="organization_id">organization_id</option>
-                            <option value="document_id">document_id</option>
-                            <option value="issuing_authority_id">issuing_authority_id</option>
-                            <option value="parent_organization_id">parent_organization_id</option>
-                            <option value="author_id">author_id</option>
-                            <option value="created_by">created_by</option>
-                            <option value="modified_by">modified_by</option>
+                            <option value="">-- Chọn trường Nguồn --</option>
+                            {(ENTITY_FIELDS[formData.sourceEntityId || ''] ?? BASE_TARGET_FIELDS).map(f => (
+                              <option key={f.name} value={f.name}>{f.name} ({f.label})</option>
+                            ))}
                           </select>
                           <p className="text-[13px] text-slate-400 mt-1">Trường trong thực thể nguồn</p>
                         </div>
@@ -600,15 +650,10 @@ export function EntityRelationshipsTab({ readOnly = false }: { readOnly?: boolea
                             onChange={(e) => setFormData({ ...formData, referencedKey: e.target.value })}
                             className="w-full px-3 py-2 border border-slate-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-mono"
                           >
-                            <option value="">-- Chọn trường --</option>
-                            <option value="id">id</option>
-                            <option value="citizen_id">citizen_id</option>
-                            <option value="organization_id">organization_id</option>
-                            <option value="authority_id">authority_id</option>
-                            <option value="document_id">document_id</option>
-                            <option value="unit_id">unit_id</option>
-                            <option value="code">code</option>
-                            <option value="primary_key">primary_key</option>
+                            <option value="">-- Chọn trường Đích --</option>
+                            {BASE_TARGET_FIELDS.map(f => (
+                              <option key={f.name} value={f.name}>{f.name} ({f.label})</option>
+                            ))}
                           </select>
                           <p className="text-[13px] text-slate-400 mt-1">Trường dùng để join (thường là ID/Code)</p>
                         </div>
@@ -618,13 +663,16 @@ export function EntityRelationshipsTab({ readOnly = false }: { readOnly?: boolea
                         <label className="block text-[13px] font-medium text-emerald-700 mb-1.5">
                           Trường hiển thị (Lookup Display) <span className="text-slate-400 font-normal">(Không bắt buộc)</span>
                         </label>
-                        <input
-                          type="text"
+                        <select
                           value={formData.displayField || ''}
                           onChange={(e) => setFormData({ ...formData, displayField: e.target.value })}
-                          placeholder="VD: authority_name"
                           className="w-full max-w-xs px-3 py-2 border border-emerald-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-mono"
-                        />
+                        >
+                          <option value="">-- Không chọn --</option>
+                          {BASE_TARGET_FIELDS.map(f => (
+                            <option key={f.name} value={f.name}>{f.name} ({f.label})</option>
+                          ))}
+                        </select>
                       </div>
                     </div>
                   )

@@ -1,5 +1,76 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+<<<<<<< HEAD
+## Cập nhật giao diện (Ngày thực hiện: 22/07/2026)
+
+**Màn hình:** Dữ liệu chủ → Wizard tạo Master Data (`MasterDataWizard.tsx`).
+
+**Nội dung thay đổi — Cập nhật Wizard tạo Master Data (`MasterDataWizard.tsx`):**
+1. **Thay thế khối "Cấu hình nguồn dữ liệu" ở Bước Tạo thuộc tính**:
+   - Loại bỏ khối cấu hình cơ sở dữ liệu / bảng dữ liệu chính / liên kết bảng (Join) cũ.
+   - Thay bằng danh sách các bảng nguồn dữ liệu đã được chọn/đăng ký ở Bước 1 (`wizardData.sources`), hiển thị dạng thẻ/nút bấm chọn (không chứa nút "Thêm nguồn").
+2. **Đồng bộ bảng "Chọn trường dữ liệu chia sẻ"**:
+   - Khi bấm chọn một bảng nguồn dữ liệu trong danh sách, bảng "Chọn trường dữ liệu chia sẻ" phía dưới hiển thị danh sách các trường tương ứng của bảng nguồn đang được chọn.
+3. **Thiết kế khối "Ánh xạ cột nguồn → thuộc tính"**:
+   - Chuẩn hóa giao diện giống hệt khối "Danh sách thuộc tính": gỡ bỏ viền/padding `p-4` lồng nhau, đưa thẻ `<table className="w-full text-left text-[13px]">` hiển thị dính liền trực tiếp ngay dưới thanh tiêu đề card header (`bg-slate-50 border-b border-slate-100`).
+   - Badge đếm số nguồn đổi sang style đồng bộ: `px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium`.
+4. **Điều chỉnh thứ tự các bước quy trình (Wizard Stepper)**:
+   - Chuyển tab **Định danh duy nhất** xuống sau bước **Thiết lập quan hệ**.
+   - Thứ tự 6 bước mới: 1. Khởi tạo dữ liệu chủ → 2. Tạo thuộc tính → 3. Quy tắc hợp nhất → 4. Thiết lập quan hệ → 5. Định danh duy nhất → 6. Phê duyệt.
+5. **Loại bỏ khối "Cấu hình nguồn dữ liệu" ở Bước 1 (Khởi tạo dữ liệu chủ)**:
+   - Loại bỏ khối dropdown chọn loại nguồn dữ liệu và thông báo hướng dẫn ở cuối Bước 1.
+   - Vẫn giữ nút chuyển đổi "Cách định nghĩa thuộc tính" ("Chọn trường từ Kho DLDC" / "Tự thêm mới từng trường") ở Bước 2 (Tạo thuộc tính).
+6. **Cập nhật nhãn trường Thuật toán (Fuzzy Algorithms)**:
+   - Gỡ bỏ tên tiếng Anh trong các tùy chọn thuật toán so khớp, chỉ giữ tên tiếng Việt thuần túy:
+     - `Jaro-Winkler (tương đồng chuỗi)` → **`Tương đồng chuỗi`**
+     - `Levenshtein (khoảng cách chỉnh sửa)` → **`Khoảng cách chỉnh sửa`**
+     - `Ngữ âm (phiên âm tên)` → **`Ngữ âm`**
+7. **Cập nhật hiển thị trường đối chiếu (Trường so khớp / Hard-block)**:
+   - Loại bỏ phần tên kỹ thuật trong ngoặc `(fieldName)`, chỉ hiển thị Tên hiển thị (`displayName`) của thuộc tính trong các ô chọn/dropdown chọn trường đối chiếu.
+8. **Loại bỏ ràng buộc hard-block bắt buộc**:
+   - Gỡ bỏ câu điều kiện kiểm tra bắt buộc phải có ít nhất 1 trường hard-block khi chuyển từ Bước Quy tắc hợp nhất sang bước tiếp theo.
+9. **Thêm cảnh báo không khớp kiểu dữ liệu tại bảng Ánh xạ cột nguồn → thuộc tính**:
+   - Tự động kiểm tra và so sánh kiểu dữ liệu của cột nguồn được chọn với kiểu dữ liệu của thuộc tính đích (`attr.dataType`).
+   - Nếu phát hiện không cùng nhóm kiểu dữ liệu (ví dụ: đích là `date` nhưng nguồn chọn cột `string` / `integer`), ô chọn sẽ chuyển sang màu viền vàng nổi bật kèm thẻ cảnh báo: `<AlertTriangle> Kiểu nguồn (sourceType) ≠ Đích (targetType)`.
+   - Nếu kiểu dữ liệu khớp, giao diện giữ nguyên bình thường không hiển thị thẻ thông báo.
+   - Hiển thị thêm thanh cảnh báo tổng hợp ở đầu bảng khi có ít nhất 1 ô ánh xạ không tương thích.
+   - Bổ sung bộ dữ liệu mẫu ban đầu (`wizardData.mapping`) gồm cả trường hợp khớp và lệch kiểu dữ liệu để thể hiện trực tiếp trên bản Demo prototype:
+     - `ngay_sinh` (Đích `date`): Nguồn *CCCD* chọn `FullName` (`string`) ➔ Cảnh báo lệch kiểu!
+     - `so_dinh_danh` (Đích `string`): Nguồn *CCCD* chọn `DOB` (`date`) ➔ Cảnh báo lệch kiểu!
+10. **Loại bỏ Sơ đồ quan hệ tại Bước 4 (Thiết lập quan hệ)**:
+   - Gỡ bỏ khối card "Sơ đồ quan hệ" (biểu đồ SVG minh họa liên kết giữa các thực thể) theo yêu cầu.
+11. **Loại bỏ nút "+ Thêm trường" ở Bước 2 (Chọn trường dữ liệu chia sẻ)**:
+   - Gỡ bỏ nút bấm "+ Thêm trường" trên tiêu đề bảng "Chọn trường dữ liệu chia sẻ" theo yêu cầu.
+12. **Cập nhật dropdown chọn số lượng bản ghi kiểm thử (Tab Kiểm thử - Bước 3)**:
+   - Đổi tên nhãn dropdown: **`Chọn số lượng bản ghi chạy kiểm thử`**.
+   - Cập nhật các tùy chọn dữ liệu kiểm thử:
+     - `100 bản ghi - kiểm tra logic cơ bản`
+     - `500 bản ghi - kiểm tra tỷ lệ khớp`
+     - `1000 - kiểm tra toàn diện`
+13. **Nâng cấp bảng kết quả rà soát (Tab Kiểm thử - Bước 3)**:
+   - Đổi tên bảng từ `Nghi ngờ cần xem lại` thành **`Các bản ghi chờ rà soát`**.
+   - Bổ sung ô tích chọn Checkbox trước mỗi dòng (kèm ô chọn tất cả trên header).
+   - Khi chọn ít nhất 1 dòng bản ghi, thanh header tự động hiển thị 3 nút bấm thao tác hàng loạt: **Hợp nhất** (`GitMerge`), **Tách biệt** (`Split`), **Gửi duyệt** (`Send`).
+   - Thêm cột **Thao tác** ở cuối bảng với 3 icon button tương ứng cho từng bản ghi riêng lẻ.
+   - Thêm thanh phân trang ở cuối bảng (`Hiển thị 1 - 5 trong số 37 bản ghi`, nút Trước/Sau).
+14. **Bổ sung bảng Các bản ghi không khớp (Tab Kiểm thử - Bước 3)**:
+   - Thêm bảng **`Các bản ghi không khớp`** nằm ngay phía dưới bảng Các bản ghi chờ rà soát.
+   - Thêm cột **Phương án xử lý** cho phép người dùng chọn 1 trong 2 phương án: **Tạo bản ghi đơn nguồn** (vẫn tạo Golden Record từ bản ghi đó) hoặc **Loại bỏ** (không cần cột thao tác riêng lẻ).
+   - Thêm ô tích chọn Checkbox trước mỗi dòng cùng các nút thao tác hàng loạt trên header khi chọn nhiều dòng: **Tạo bản ghi đơn nguồn** (`PlusCircle`) và **Loại bỏ** (`XCircle`).
+   - Thêm thanh phân trang ở cuối bảng (`Hiển thị 1 - 5 trong số 183 bản ghi`, nút Trước/Sau).
+15. **Disable dòng đã xử lý & Hiển thị thông báo Toast góc màn hình**:
+   - Thêm tùy chọn mặc định **`-- Chọn phương án xử lý --`** vào đầu dropdown cột Phương án xử lý tại bảng Các bản ghi không khớp.
+   - Khi người dùng thực hiện xử lý dòng bản ghi (chọn phương án từ dropdown hoặc thực hiện thao tác hàng loạt), dòng đã xử lý sẽ chuyển sang màu xám nhạt (`bg-slate-100/70 text-slate-400 opacity-60 grayscale`), vô hiệu hóa ô checkbox (`disabled`), đồng thời hiển thị badge nhãn **`Đã xử lý`** tại cột *Phương án xử lý* đồng bộ với bảng Các bản ghi chờ rà soát.
+   - Kích hoạt thông báo Toast thành công ở góc trên bên phải màn hình:
+     - Header: **`Gửi yêu cầu thành công`**
+     - Nội dung: **`Đã lưu bản ghi mới thành công!`**
+     - Tùy chọn đóng thủ công hoặc tự động ẩn sau 3.5 giây.
+16. **Mã nguồn bị ảnh hưởng**:
+   - `src/components/pages/master-data/MasterDataWizard.tsx`
+
+---
+
+=======
 ## Sửa cột danh sách + bộ lọc — Danh sách danh mục dữ liệu mở (Ngày thực hiện: 22/07/2026)
 
 **Màn hình:** Dữ liệu mở → Biên tập danh mục → **Danh sách danh mục dữ liệu mở** (`open-data-category/components/tabs/OpenDataCategoryGrid.tsx`, `open-data-category/components/OpenDataCategoryFilters.tsx`).
@@ -191,6 +262,7 @@ Rà soát UI phân hệ Dữ liệu chủ theo `Usecae_DuLieuChu.xlsx` (UC485–
 
 **File bị ảnh hưởng:** `EntityRelationshipsTab.tsx`, `MasterDataScaleManagementPage.tsx`, `MasterDataUpdateItemPage.tsx`.
 
+>>>>>>> d0d4b0c898b5cf43e3568a8815a60624cbbd3882
 ## Cập nhật giao diện (Ngày thực hiện: 15/07/2026)
 
 **Màn hình:** Cung cấp dữ liệu → Quy trình đối soát dữ liệu → Chi tiết đối soát (`ProvisionReconciliationPage`, UC-664 và các tiến trình khác).

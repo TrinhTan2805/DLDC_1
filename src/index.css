@@ -5566,6 +5566,14 @@ table.dldc-summary-table tbody td {
   font-size: 13px !important;
 }
 
+/* Ghi đè 13px cho các bảng trong modal Chi tiết dữ liệu chủ (tab Phê duyệt) */
+table.approval-detail-table th,
+table.approval-detail-table thead th,
+table.approval-detail-table td,
+table.approval-detail-table tbody td {
+  font-size: 13px !important;
+}
+
 .collection-pagination,
 .collection-pagination span,
 .collection-pagination select,
