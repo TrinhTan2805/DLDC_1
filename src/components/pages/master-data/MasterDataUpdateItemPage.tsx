@@ -526,6 +526,8 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
   const [showOriginalData, setShowOriginalData] = useState(false);
   // Mở từ tab "Dữ liệu" chỉ hiện Giá trị dữ liệu chủ; mở từ tab "Phê duyệt" vẫn giữ đủ các tab
   const [detailRowContext, setDetailRowContext] = useState<'list' | 'approval'>('list');
+  // Xem toàn bộ trường dữ liệu của bản ghi liên kết chéo thực thể (mục "Thông tin liên quan")
+  const [viewingLinkedRecord, setViewingLinkedRecord] = useState<CrossEntityLink | null>(null);
 
   const handleOpenDetail = (row: Row, context: 'list' | 'approval' = 'list') => {
     setDetailRow(row);
@@ -2558,20 +2560,20 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
                             <table className="w-full">
                               <thead>
                                 <tr className="bg-slate-50 border-b border-slate-200">
-                                  <th className="px-3 py-2 text-left text-[12px] font-medium text-slate-600">{COLUMNS[group.links[0].category][0].label}</th>
-                                  <th className="px-3 py-2 text-left text-[12px] font-medium text-slate-600">Trạng thái</th>
-                                  <th className="px-3 py-2 text-left text-[12px] font-medium text-slate-600"></th>
+                                  <th className="px-3 py-2 text-left text-[13px] font-medium text-slate-600">{COLUMNS[group.links[0].category][0].label}</th>
+                                  <th className="px-3 py-2 text-left text-[13px] font-medium text-slate-600">Trạng thái</th>
+                                  <th className="px-3 py-2 text-left text-[13px] font-medium text-slate-600"></th>
                                 </tr>
                               </thead>
                               <tbody>
                                 {group.links.map(link => (
                                   <tr key={`${link.category}-${link.row.id}`} className="border-b border-slate-100 last:border-0">
-                                    <td className="px-3 py-2 text-slate-700">{link.row[COLUMNS[link.category][0].key]}</td>
+                                    <td className="px-3 py-2 text-[13px] text-slate-700">{link.row[COLUMNS[link.category][0].key]}</td>
                                     <td className="px-3 py-2"><ApprovalBadge status={link.row.approvalStatus} /></td>
                                     <td className="px-3 py-2 text-right">
                                       <button
-                                        onClick={() => alert(`Chuyển sang xem bản ghi tại danh mục "${link.categoryLabel}" (mã: ${link.row.id}).`)}
-                                        className="text-blue-600 hover:underline cursor-pointer text-[12px]"
+                                        onClick={() => setViewingLinkedRecord(link)}
+                                        className="text-blue-600 hover:underline cursor-pointer text-[13px]"
                                       >
                                         Xem chi tiết
                                       </button>
@@ -2634,6 +2636,51 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
             </div>
           </div>
         </div>
+        );
+      })()}
+
+      {/* Modal xem toàn bộ trường dữ liệu của bản ghi liên kết chéo thực thể */}
+      {viewingLinkedRecord && (() => {
+        const link = viewingLinkedRecord;
+        const linkedCols = COLUMNS[link.category];
+        return (
+          <div className="fixed inset-0 flex items-center justify-center z-[10000] p-4 animate-in fade-in duration-200" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+              <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+                <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                  <Link2 className="w-5 h-5 text-blue-600" />
+                  Chi tiết bản ghi — {link.categoryLabel}
+                </h3>
+                <button onClick={() => setViewingLinkedRecord(null)} className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer" title="Đóng">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="p-6 space-y-3 text-[13px] overflow-y-auto">
+                <div className="flex items-center gap-2">
+                  <span className="text-slate-500">Trạng thái:</span>
+                  <ApprovalBadge status={link.row.approvalStatus} />
+                </div>
+                <div className="border border-slate-200 rounded-lg divide-y divide-slate-100">
+                  {linkedCols.map(col => (
+                    <div key={col.key} className="flex px-3 py-2 text-[13px]">
+                      <span className="w-40 shrink-0 text-slate-500">{col.label}</span>
+                      <span className="flex-1 text-slate-800 font-medium break-words">
+                        {link.row[col.key] || <span className="text-slate-400 italic">(trống)</span>}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end">
+                <button
+                  onClick={() => setViewingLinkedRecord(null)}
+                  className="px-4 py-2 border border-slate-300 text-slate-700 bg-white rounded-lg hover:bg-slate-50 font-medium text-[13px] transition-colors cursor-pointer active:scale-95"
+                >
+                  Đóng
+                </button>
+              </div>
+            </div>
+          </div>
         );
       })()}
     </div>
