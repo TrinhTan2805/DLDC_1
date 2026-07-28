@@ -1,6 +1,20 @@
 import { useState } from 'react';
 import { Globe, Share2, Eye, Download, RefreshCw, CheckCircle, Link } from 'lucide-react';
 
+export type PublishStatus = 'published' | 'draft' | 'updating';
+
+export const PUBLISH_STATUS_LABELS: Record<PublishStatus, string> = {
+  published: 'Đã công bố',
+  draft: 'Bản nháp',
+  updating: 'Đang cập nhật',
+};
+
+export const PUBLISH_STATUS_STYLES: Record<PublishStatus, string> = {
+  published: 'bg-green-100 text-green-700 border-green-200',
+  draft: 'bg-slate-100 text-slate-600 border-slate-200',
+  updating: 'bg-amber-100 text-amber-700 border-amber-200',
+};
+
 interface PublishedDataset {
   id: string;
   code: string;
@@ -11,7 +25,7 @@ interface PublishedDataset {
   format: string[];
   downloadCount: number;
   viewCount: number;
-  status: 'published' | 'draft' | 'updating';
+  status: PublishStatus;
   apiUrl: string;
 }
 
@@ -66,23 +80,11 @@ export function OpenDataPublishPage() {
     ? mockDatasets
     : mockDatasets.filter(d => d.status === filterStatus);
 
-  const getStatusBadge = (status: string) => {
-    const styles = {
-      published: 'bg-green-100 text-green-700 border-green-200',
-      draft: 'bg-slate-100 text-slate-600 border-slate-200',
-      updating: 'bg-amber-100 text-amber-700 border-amber-200'
-    };
-    const labels = {
-      published: 'Đã công bố',
-      draft: 'Bản nháp',
-      updating: 'Đang cập nhật'
-    };
-    return (
-      <span className={`px-2 py-1 text-xs border rounded-full ${styles[status as keyof typeof styles]}`}>
-        {labels[status as keyof typeof labels]}
-      </span>
-    );
-  };
+  const getStatusBadge = (status: PublishStatus) => (
+    <span className={`px-2 py-1 text-xs border rounded-full ${PUBLISH_STATUS_STYLES[status]}`}>
+      {PUBLISH_STATUS_LABELS[status]}
+    </span>
+  );
 
   const stats = {
     total: mockDatasets.length,

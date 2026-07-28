@@ -10,6 +10,15 @@ import { initialSourceSystems } from './mockSourceSystems';
 import { Portal } from '../../common/Portal';
 import { StatusTag } from '../../common/StatusTag';
 
+// Định dạng dung lượng dữ liệu suy ra từ số bản ghi (dùng khi dịch vụ chưa có sẵn dataSize)
+const formatDataSize = (records: number) => {
+  const bytes = (records || 0) * 1150; // ~1.15 KB/bản ghi
+  if (bytes >= 1e9) return `${(bytes / 1e9).toFixed(2)} GB`;
+  if (bytes >= 1e6) return `${(bytes / 1e6).toFixed(1)} MB`;
+  if (bytes >= 1e3) return `${(bytes / 1e3).toFixed(0)} KB`;
+  return `${bytes} B`;
+};
+
 interface ViewServiceModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -246,6 +255,15 @@ function TabGeneral({ service, sourceSystem, onEdit }: any) {
                   'red';
                 return <StatusTag label={label} variant={variant as any} />;
               })()}
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Kích thước dữ liệu</div>
+            <div className="text-[13px] text-slate-900 font-medium leading-relaxed flex items-center gap-2">
+              <span>{service.dataSize || formatDataSize(service.recordsReceived)}</span>
+              <span className="text-slate-300">|</span>
+              <span>{(service.recordCount ?? service.recordsReceived ?? 0).toLocaleString('vi-VN')} bản ghi</span>
             </div>
           </div>
 

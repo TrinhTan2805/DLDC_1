@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
-import { Search, Filter, Download, FileText, BarChart3, PieChart, TrendingUp, Calendar, Building2, Tag, FileType, Shield, Eye, MousePointer, ArrowUpDown, ChevronUp, ChevronDown, Bell, Settings } from 'lucide-react';
+import { Search, Filter, Download, FileText, BarChart3, PieChart, TrendingUp, Calendar, Building2, Tag, FileType, Shield, Eye, MousePointer, ArrowUpDown, ChevronUp, ChevronDown, Bell, Settings, X, Layers } from 'lucide-react';
 import { BarChart, Bar, PieChart as RechartsPieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { initialTargetDatabases } from '../processing/mockTargetDatabases';
+import { mockPublishedCategories } from '../open-data-category/OpenDataCategorySetupPage';
+import { PUBLISH_STATUS_LABELS, PUBLISH_STATUS_STYLES, type PublishStatus } from '../open-data/OpenDataPublishPage';
 
 const XAxisAny = XAxis as any;
 const YAxisAny = YAxis as any;
@@ -20,12 +22,15 @@ interface OpenDataReportPageProps {
 const mockDatasets = [
   {
     id: 'DS001',
+    catalogCode: 'ODCAT001',
     name: 'Danh sách văn bản quy phạm pháp luật 2024',
+    description: 'Tổng hợp văn bản quy phạm pháp luật do Bộ Tư pháp ban hành trong năm 2024.',
     category: 'Văn bản pháp luật',
     agency: 'Bộ Tư pháp',
     format: 'JSON',
     license: 'CC BY 4.0',
     publishedDate: '2024-01-15',
+    status: 'published' as PublishStatus,
     views: 1250,
     downloads: 340,
     source: 'CSDL Kho DLDC',
@@ -33,12 +38,15 @@ const mockDatasets = [
   },
   {
     id: 'DS002',
+    catalogCode: 'ODCAT002',
     name: 'Dữ liệu đăng ký kinh doanh Q1/2024',
+    description: 'Danh sách doanh nghiệp đăng ký kinh doanh mới trong quý 1/2024.',
     category: 'Đăng ký kinh doanh',
     agency: 'Cục Đăng ký kinh doanh',
     format: 'Excel',
     license: 'ODC-BY',
     publishedDate: '2024-02-10',
+    status: 'published' as PublishStatus,
     views: 890,
     downloads: 220,
     source: 'CSDL Phân tích số liệu',
@@ -46,12 +54,15 @@ const mockDatasets = [
   },
   {
     id: 'DS003',
+    catalogCode: 'ODCAT006',
     name: 'Thống kê công chứng viên 2024',
+    description: 'Số liệu thống kê đội ngũ công chứng viên đang hành nghề trên toàn quốc.',
     category: 'Công chứng',
     agency: 'Cục Công chứng',
     format: 'CSV',
     license: 'CC BY 4.0',
     publishedDate: '2024-03-05',
+    status: 'updating' as PublishStatus,
     views: 670,
     downloads: 180,
     source: 'CSDL Kho DLDC',
@@ -59,12 +70,15 @@ const mockDatasets = [
   },
   {
     id: 'DS004',
+    catalogCode: 'ODCAT001',
     name: 'Danh sách trung tâm TGPL',
+    description: 'Danh mục các trung tâm trợ giúp pháp lý nhà nước theo địa phương.',
     category: 'Trợ giúp pháp lý',
     agency: 'Cục TGPL',
     format: 'JSON',
     license: 'ODbL',
     publishedDate: '2024-01-20',
+    status: 'draft' as PublishStatus,
     views: 550,
     downloads: 140,
     source: 'CSDL Lưu trữ lịch sử',
@@ -142,6 +156,11 @@ const mockAlertLogs = [
 ];
 
 const COLORS = ['#0ea5e9', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
+
+// Tên danh mục dữ liệu mở lấy từ màn "Thiết lập danh mục dữ liệu mở" (mockPublishedCategories) theo Mã danh mục
+function getCatalogName(catalogCode: string): string {
+  return mockPublishedCategories.find(c => c.code === catalogCode)?.name ?? '—';
+}
 
 const categoryOptions = statsByCategory.map(c => c.name);
 const agencyOptions = statsByAgency.map(a => a.name);
@@ -258,6 +277,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
   const [filterAgency, setFilterAgency] = useState('all');
   const [filterFormat, setFilterFormat] = useState('all');
   const [filterLicense, setFilterLicense] = useState('all');
+  const [showSearchFilters, setShowSearchFilters] = useState(false);
   
   // Statistics States
   const [statsGroupBy, setStatsGroupBy] = useState<'agency' | 'category' | 'license' | 'time'>('category');
@@ -372,8 +392,6 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
     if (appliedGroupBy === 'time') entries.sort(([a], [b]) => a.localeCompare(b));
     return entries.map(([name, count]) => ({ name, count }));
   })();
-
-  const computedTotal = computedStatsData.reduce((s, i) => s + i.count, 0);
 
   const computedClassData = (() => {
     if (!classReportReady) return [] as { name: string; count: number; views: number; downloads: number }[];
@@ -535,172 +553,144 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
 
       {/* Tab Content */}
       <div className="flex-1 overflow-auto p-6">
-        {/* Tab 1: Tìm kiếm và lọc */}
+        {/* Tab 1: Tìm kiếm và lọc (UC481) */}
         {activeTab === 'search' && (
-          <div className="space-y-6">
-            {/* Filter Panel */}
-            <div className="bg-white border border-slate-200 rounded-lg p-6">
-              <h3 className="text-slate-900 mb-4 flex items-center gap-2">
-                <Filter className="w-5 h-5 text-blue-600" />
-                Bộ lọc tìm kiếm
-              </h3>
-              
-              <div className="grid grid-cols-3 gap-4 mb-4">
-                <div>
-                  <label className="block text-[13px] text-slate-700 mb-2">Từ khóa</label>
+          <div className="space-y-4">
+            {/* Toolbar: tìm kiếm + bật/tắt bộ lọc + xuất dữ liệu — theo mẫu chuẩn của Thiết lập dịch vụ */}
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex-1 flex items-center gap-3">
+                <div className="relative flex-1">
                   <input
                     type="text"
-                    placeholder="Nhập từ khóa..."
+                    placeholder="Tìm theo từ khóa, tên dataset..."
                     value={searchKeyword}
                     onChange={(e) => setSearchKeyword(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                   />
                 </div>
-                
-                <div>
-                  <label className="block text-[13px] text-slate-700 mb-2">Chủ đề</label>
+                <button className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center">
+                  <Search className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setShowSearchFilters(!showSearchFilters)}
+                  className={`p-2 rounded-lg transition-colors shadow-sm flex items-center justify-center border ${showSearchFilters ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+                  title="Bộ lọc"
+                >
+                  {showSearchFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
+                </button>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <ExportDropdown onExportExcel={handleExportExcel} onExportPDF={handleExportPDF} />
+              </div>
+            </div>
+
+            {/* Bộ lọc (thu gọn/mở rộng) */}
+            {showSearchFilters && (
+              <div className="bg-slate-50 p-5 rounded-lg border border-slate-200 grid grid-cols-4 gap-4 shadow-sm">
+                <div className="space-y-1.5">
+                  <label className="text-[13px] font-medium text-slate-700">Chủ đề</label>
                   <select
                     value={filterCategory}
                     onChange={(e) => setFilterCategory(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                   >
-                    <option value="all">Tất cả</option>
+                    <option value="all">Tất cả chủ đề</option>
                     <option value="Văn bản pháp luật">Văn bản pháp luật</option>
                     <option value="Đăng ký kinh doanh">Đăng ký kinh doanh</option>
                     <option value="Công chứng">Công chứng</option>
                     <option value="Trợ giúp pháp lý">Trợ giúp pháp lý</option>
                   </select>
                 </div>
-                
-                <div>
-                  <label className="block text-[13px] text-slate-700 mb-2">Cơ quan công bố</label>
+
+                <div className="space-y-1.5">
+                  <label className="text-[13px] font-medium text-slate-700">Cơ quan công bố</label>
                   <select
                     value={filterAgency}
                     onChange={(e) => setFilterAgency(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                   >
-                    <option value="all">Tất cả</option>
+                    <option value="all">Tất cả cơ quan</option>
                     <option value="Bộ Tư pháp">Bộ Tư pháp</option>
                     <option value="Cục Đăng ký kinh doanh">Cục Đăng ký kinh doanh</option>
                     <option value="Cục Công chứng">Cục Công chứng</option>
                     <option value="Cục TGPL">Cục TGPL</option>
                   </select>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-[13px] text-slate-700 mb-2">Định dạng</label>
+                <div className="space-y-1.5">
+                  <label className="text-[13px] font-medium text-slate-700">Định dạng</label>
                   <select
                     value={filterFormat}
                     onChange={(e) => setFilterFormat(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                   >
-                    <option value="all">Tất cả</option>
+                    <option value="all">Tất cả định dạng</option>
                     <option value="JSON">JSON</option>
                     <option value="Excel">Excel</option>
                     <option value="CSV">CSV</option>
                     <option value="XML">XML</option>
                   </select>
                 </div>
-                
-                <div>
-                  <label className="block text-[13px] text-slate-700 mb-2">Giấy phép</label>
+
+                <div className="space-y-1.5">
+                  <label className="text-[13px] font-medium text-slate-700">Giấy phép</label>
                   <select
                     value={filterLicense}
                     onChange={(e) => setFilterLicense(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                   >
-                    <option value="all">Tất cả</option>
+                    <option value="all">Tất cả giấy phép</option>
                     <option value="CC BY 4.0">CC BY 4.0</option>
                     <option value="ODC-BY">ODC-BY</option>
                     <option value="ODbL">ODbL</option>
                   </select>
                 </div>
-
-                <div className="flex items-end gap-2">
-                  <button className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 text-[13px]">
-                    <Search className="w-4 h-4" />
-                    Tìm kiếm
-                  </button>
-                  <button 
-                    onClick={() => {
-                      setSearchKeyword('');
-                      setFilterCategory('all');
-                      setFilterAgency('all');
-                      setFilterFormat('all');
-                      setFilterLicense('all');
-                    }}
-                    className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 text-[13px]"
-                  >
-                    Đặt lại
-                  </button>
-                </div>
               </div>
-            </div>
+            )}
 
-            {/* Results Summary */}
-            <div className="bg-white border border-slate-200 rounded-lg p-4">
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-slate-600">
-                  Tìm thấy <span className="text-blue-600">{filteredDatasets.length}</span> kết quả
-                </div>
-                <div className="flex items-center gap-2">
-                  <button 
-                    onClick={handleExportExcel}
-                    className="px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2 text-[13px]"
-                  >
-                    <Download className="w-4 h-4" />
-                    Xuất Excel
-                  </button>
-                  <button 
-                    onClick={handleExportPDF}
-                    className="px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2 text-[13px]"
-                  >
-                    <FileText className="w-4 h-4" />
-                    Xuất PDF
-                  </button>
-                </div>
-              </div>
-            </div>
+            <p className="text-[13px] text-slate-500">
+              Tìm thấy <span className="font-medium text-blue-600">{filteredDatasets.length}</span> kết quả
+            </p>
 
-            {/* Results Table */}
+            {/* Results Table — chỉ hiển thị đúng các trường theo UC481 (tên, mô tả, chủ đề, định dạng, trạng thái công bố) */}
             <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
-                      <th className="px-4 py-3 text-left text-[13px] text-slate-600 cursor-pointer select-none hover:bg-slate-100" onClick={() => handleSort('id')}>Mã Dataset<SortIcon col="id" /></th>
-                      <th className="px-4 py-3 text-left text-[13px] text-slate-600 cursor-pointer select-none hover:bg-slate-100" onClick={() => handleSort('name')}>Tên Dataset<SortIcon col="name" /></th>
+                      <th className="px-4 py-3 text-left text-[13px] text-slate-600 cursor-pointer select-none hover:bg-slate-100" onClick={() => handleSort('catalogCode')}>Mã danh mục<SortIcon col="catalogCode" /></th>
+                      <th className="px-4 py-3 text-left text-[13px] text-slate-600">Tên danh mục</th>
+                      <th className="px-4 py-3 text-left text-[13px] text-slate-600 cursor-pointer select-none hover:bg-slate-100" onClick={() => handleSort('name')}>Tên &amp; mô tả<SortIcon col="name" /></th>
                       <th className="px-4 py-3 text-left text-[13px] text-slate-600 cursor-pointer select-none hover:bg-slate-100" onClick={() => handleSort('category')}>Chủ đề<SortIcon col="category" /></th>
-                      <th className="px-4 py-3 text-left text-[13px] text-slate-600 cursor-pointer select-none hover:bg-slate-100" onClick={() => handleSort('agency')}>Cơ quan<SortIcon col="agency" /></th>
                       <th className="px-4 py-3 text-left text-[13px] text-slate-600 cursor-pointer select-none hover:bg-slate-100" onClick={() => handleSort('format')}>Định dạng<SortIcon col="format" /></th>
-                      <th className="px-4 py-3 text-left text-[13px] text-slate-600 cursor-pointer select-none hover:bg-slate-100" onClick={() => handleSort('license')}>Giấy phép<SortIcon col="license" /></th>
-                      <th className="px-4 py-3 text-left text-[13px] text-slate-600 cursor-pointer select-none hover:bg-slate-100" onClick={() => handleSort('publishedDate')}>Ngày công bố<SortIcon col="publishedDate" /></th>
-                      <th className="px-4 py-3 text-right text-[13px] text-slate-600 cursor-pointer select-none hover:bg-slate-100" onClick={() => handleSort('views')}>Lượt xem<SortIcon col="views" /></th>
-                      <th className="px-4 py-3 text-right text-[13px] text-slate-600 cursor-pointer select-none hover:bg-slate-100" onClick={() => handleSort('downloads')}>Lượt tải<SortIcon col="downloads" /></th>
+                      <th className="px-4 py-3 text-left text-[13px] text-slate-600 cursor-pointer select-none hover:bg-slate-100" onClick={() => handleSort('status')}>Trạng thái công bố<SortIcon col="status" /></th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200">
                     {sortedDatasets.slice((searchPage - 1) * pageSize, searchPage * pageSize).map((dataset) => (
                       <tr key={dataset.id} className="hover:bg-slate-50">
-                        <td className="px-4 py-3 text-[13px] text-slate-900">{dataset.id}</td>
-                        <td className="px-4 py-3 text-[13px] text-slate-900">{dataset.name}</td>
+                        <td className="px-4 py-3 text-[13px] text-slate-900 whitespace-nowrap">{dataset.catalogCode}</td>
+                        <td className="px-4 py-3 text-[13px] text-slate-700 whitespace-nowrap">{getCatalogName(dataset.catalogCode)}</td>
+                        <td className="px-4 py-3 text-[13px] max-w-[360px]">
+                          <div className="text-slate-900">{dataset.name}</div>
+                          <div className="text-slate-500 mt-0.5">{dataset.description}</div>
+                        </td>
                         <td className="px-4 py-3 text-[13px]">
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-[13px] bg-blue-50 text-blue-700">
                             {dataset.category}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-[13px] text-slate-600">{dataset.agency}</td>
                         <td className="px-4 py-3 text-[13px]">
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-[13px] bg-slate-100 text-slate-700">
                             {dataset.format}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-[13px] text-slate-600">{dataset.license}</td>
-                        <td className="px-4 py-3 text-[13px] text-slate-600">{dataset.publishedDate}</td>
-                        <td className="px-4 py-3 text-[13px] text-slate-900 text-right">{dataset.views.toLocaleString()}</td>
-                        <td className="px-4 py-3 text-[13px] text-slate-900 text-right">{dataset.downloads.toLocaleString()}</td>
+                        <td className="px-4 py-3 text-[13px]">
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-[13px] border ${PUBLISH_STATUS_STYLES[dataset.status]}`}>
+                            {PUBLISH_STATUS_LABELS[dataset.status]}
+                          </span>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -715,7 +705,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
         {activeTab === 'statistics' && (
           <div className="space-y-6">
             {/* Summary Cards */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-4 gap-4">
               <div className="bg-white border border-slate-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm text-slate-600">Tổng Dataset</span>
@@ -737,15 +727,17 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                 </div>
                 <div className="text-2xl text-slate-900">{new Set(mockDatasets.map(d => d.category)).size}</div>
               </div>
+              <div className="bg-white border border-slate-200 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-slate-600">Giấy phép</span>
+                  <Shield className="w-5 h-5 text-purple-600" />
+                </div>
+                <div className="text-2xl text-slate-900">{new Set(mockDatasets.map(d => d.license)).size}</div>
+              </div>
             </div>
 
             {/* Filter Panel */}
             <div className="bg-white border border-slate-200 rounded-lg p-6">
-              <h3 className="text-slate-900 mb-4 flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-blue-600" />
-                Thiết lập báo cáo
-              </h3>
-              
               <div className={`grid gap-4 ${statsGroupBy === 'time' ? 'grid-cols-4' : 'grid-cols-3'}`}>
                 <div>
                   <label className="block text-[13px] text-slate-700 mb-2">Nhóm theo</label>
@@ -783,7 +775,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                       />
                     </div>
                     <div className="flex items-end gap-2">
-                      <button onClick={() => { setAppliedGroupBy(statsGroupBy); setAppliedFromDate(statsFromDate); setAppliedToDate(statsToDate); setStatsReportReady(true); setStatsPage(1); }} className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 text-[13px]">
+                      <button onClick={() => { setAppliedGroupBy(statsGroupBy); setAppliedFromDate(statsFromDate); setAppliedToDate(statsToDate); setStatsReportReady(true); setStatsPage(1); }} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 text-[13px] whitespace-nowrap">
                         <BarChart3 className="w-4 h-4" />
                         Tạo báo cáo
                       </button>
@@ -813,7 +805,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                       }}
                     />
                     <div className="flex items-end gap-2">
-                      <button onClick={() => { setAppliedGroupBy(statsGroupBy); setAppliedCategories(selectedCategories); setAppliedAgencies(selectedAgencies); setAppliedLicenses(selectedLicenses); setStatsReportReady(true); setStatsPage(1); }} className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 text-[13px]">
+                      <button onClick={() => { setAppliedGroupBy(statsGroupBy); setAppliedCategories(selectedCategories); setAppliedAgencies(selectedAgencies); setAppliedLicenses(selectedLicenses); setStatsReportReady(true); setStatsPage(1); }} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 text-[13px] whitespace-nowrap">
                         <BarChart3 className="w-4 h-4" />
                         Tạo báo cáo
                       </button>
@@ -843,7 +835,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                       <YAxisAny allowDecimals={false} />
                       <TooltipAny />
                       <LegendAny />
-                      <BarAny dataKey="count" name="Số lượng Dataset" fill="#3b82f6" />
+                      <BarAny dataKey="count" name="Số lượng Dataset" fill="#3b82f6" maxBarSize={56} radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -861,7 +853,6 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                             {appliedGroupBy === 'category' ? 'Chủ đề' : appliedGroupBy === 'agency' ? 'Cơ quan' : appliedGroupBy === 'license' ? 'Giấy phép' : 'Tháng'}
                           </th>
                           <th className="px-4 py-3 text-right text-[13px] text-slate-600">Số lượng Dataset</th>
-                          <th className="px-4 py-3 text-right text-[13px] text-slate-600">Tỷ lệ (%)</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-200">
@@ -869,9 +860,6 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                           <tr key={index} className="hover:bg-slate-50">
                             <td className="px-4 py-3 text-[13px] text-slate-900">{item.name}</td>
                             <td className="px-4 py-3 text-[13px] text-slate-900 text-right">{item.count}</td>
-                            <td className="px-4 py-3 text-[13px] text-slate-900 text-right">
-                              {computedTotal > 0 ? (item.count / computedTotal * 100).toFixed(1) : '0.0'}%
-                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -897,47 +885,42 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
               <div className="bg-white border border-slate-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm text-slate-600">Tổng Dataset</span>
-                  <FileText className="w-5 h-5 text-emerald-600" />
+                  <FileText className="w-5 h-5 text-blue-600" />
                 </div>
                 <div className="text-2xl text-slate-900">{mockDatasets.length}</div>
               </div>
               <div className="bg-white border border-slate-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-600">{classifyBy === 'source' ? 'Nguồn cung cấp' : classifyBy === 'category' ? 'Chủ đề' : 'Định dạng chia sẻ'}</span>
-                  <Tag className="w-5 h-5 text-emerald-600" />
+                  <span className="text-sm text-slate-600">Nguồn cung cấp</span>
+                  <FileType className="w-5 h-5 text-blue-600" />
                 </div>
-                <div className="text-2xl text-slate-900">{new Set(mockDatasets.map(d => classifyBy === 'source' ? d.source : classifyBy === 'category' ? d.category : d.shareFormat)).size}</div>
+                <div className="text-2xl text-slate-900">{new Set(mockDatasets.map(d => d.source)).size}</div>
               </div>
               <div className="bg-white border border-slate-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-600">Tổng lượt xem</span>
-                  <Eye className="w-5 h-5 text-blue-600" />
+                  <span className="text-sm text-slate-600">Chủ đề</span>
+                  <Tag className="w-5 h-5 text-amber-600" />
                 </div>
-                <div className="text-2xl text-slate-900">{mockDatasets.reduce((s, d) => s + d.views, 0).toLocaleString()}</div>
+                <div className="text-2xl text-slate-900">{new Set(mockDatasets.map(d => d.category)).size}</div>
               </div>
               <div className="bg-white border border-slate-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-600">Tổng lượt tải</span>
-                  <Download className="w-5 h-5 text-purple-600" />
+                  <span className="text-sm text-slate-600">Định dạng</span>
+                  <Layers className="w-5 h-5 text-emerald-600" />
                 </div>
-                <div className="text-2xl text-slate-900">{mockDatasets.reduce((s, d) => s + d.downloads, 0).toLocaleString()}</div>
+                <div className="text-2xl text-slate-900">{new Set(mockDatasets.map(d => d.format)).size}</div>
               </div>
             </div>
 
             {/* Filter Panel */}
             <div className="bg-white border border-slate-200 rounded-lg p-6">
-              <h3 className="text-slate-900 mb-4 flex items-center gap-2">
-                <PieChart className="w-5 h-5 text-emerald-600" />
-                Thiết lập phân loại
-              </h3>
-
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="block text-[13px] text-slate-700 mb-2">Phân loại theo</label>
                   <select
                     value={classifyBy}
                     onChange={(e) => { setClassifyBy(e.target.value as any); setSelectedClassFilters([]); setClassReportReady(false); }}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="source">Theo nguồn cung cấp</option>
                     <option value="category">Theo chủ đề</option>
@@ -955,7 +938,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                 <div className="flex items-end gap-2">
                   <button
                     onClick={() => { setAppliedClassifyBy(classifyBy); setAppliedClassFilters(selectedClassFilters); setClassReportReady(true); setClassPage(1); }}
-                    className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 flex items-center justify-center gap-2 text-[13px]"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 text-[13px] whitespace-nowrap"
                   >
                     <PieChart className="w-4 h-4" />
                     Tạo báo cáo
@@ -967,9 +950,9 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
 
             {classReportReady ? (
               <>
-                {/* Charts Grid */}
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="bg-white border border-slate-200 rounded-lg p-6">
+                {/* Charts Grid — biểu đồ tròn hẹp hơn biểu đồ cột */}
+                <div className="grid grid-cols-5 gap-6">
+                  <div className="col-span-2 bg-white border border-slate-200 rounded-lg p-6">
                     <h3 className="text-slate-900 mb-4">
                       Biểu đồ phân bố theo {appliedClassifyBy === 'source' ? 'nguồn cung cấp' : appliedClassifyBy === 'category' ? 'chủ đề' : 'định dạng chia sẻ'}
                     </h3>
@@ -981,7 +964,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                           cy="50%"
                           labelLine={false}
                           label={({ name, percent }: any) => `${name} (${(percent * 100).toFixed(0)}%)`}
-                          outerRadius={100}
+                          outerRadius={90}
                           fill="#8884d8"
                           dataKey="value"
                         >
@@ -994,7 +977,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                     </ResponsiveContainer>
                   </div>
 
-                  <div className="bg-white border border-slate-200 rounded-lg p-6">
+                  <div className="col-span-3 bg-white border border-slate-200 rounded-lg p-6">
                     <h3 className="text-slate-900 mb-4">Thống kê số lượng Dataset</h3>
                     <ResponsiveContainer width="100%" height={300}>
                       <BarChart data={computedClassPieData}>
@@ -1002,7 +985,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                         <XAxisAny dataKey="name" />
                         <YAxisAny allowDecimals={false} />
                         <TooltipAny />
-                        <BarAny dataKey="value" name="Số lượng" fill="#0ea5e9" />
+                        <BarAny dataKey="value" name="Số lượng" fill="#0ea5e9" maxBarSize={56} radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -1022,8 +1005,6 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                           </th>
                           <th className="px-4 py-3 text-right text-[13px] text-slate-600">Số lượng</th>
                           <th className="px-4 py-3 text-right text-[13px] text-slate-600">Tỷ lệ (%)</th>
-                          <th className="px-4 py-3 text-right text-[13px] text-slate-600">Lượt xem</th>
-                          <th className="px-4 py-3 text-right text-[13px] text-slate-600">Lượt tải</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-200">
@@ -1034,8 +1015,6 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                             <td className="px-4 py-3 text-[13px] text-slate-900 text-right">
                               {computedClassTotal > 0 ? (item.count / computedClassTotal * 100).toFixed(1) : '0.0'}%
                             </td>
-                            <td className="px-4 py-3 text-[13px] text-slate-900 text-right">{item.views.toLocaleString()}</td>
-                            <td className="px-4 py-3 text-[13px] text-slate-900 text-right">{item.downloads.toLocaleString()}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -1047,7 +1026,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
             ) : (
               <div className="bg-white border border-slate-200 rounded-lg p-12 flex flex-col items-center justify-center text-center">
                 <PieChart className="w-12 h-12 text-slate-300 mb-3" />
-                <p className="text-[13px] text-slate-500">Vui lòng thiết lập bộ lọc và nhấn <span className="font-semibold text-emerald-600">Tạo báo cáo</span> để xem kết quả.</p>
+                <p className="text-[13px] text-slate-500">Vui lòng thiết lập bộ lọc và nhấn <span className="font-semibold text-blue-600">Tạo báo cáo</span> để xem kết quả.</p>
               </div>
             )}
           </div>
@@ -1090,11 +1069,6 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
 
             {/* Filter Panel */}
             <div className="bg-white border border-slate-200 rounded-lg p-6">
-              <h3 className="text-slate-900 mb-4 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-blue-600" />
-                Thiết lập báo cáo truy cập
-              </h3>
-
               <div className={`grid gap-4 ${accessGroupBy === 'time' ? 'grid-cols-4' : 'grid-cols-3'}`}>
                 <div>
                   <label className="block text-[13px] text-slate-700 mb-2">Nhóm theo</label>
@@ -1134,7 +1108,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                     <div className="flex items-end gap-2">
                       <button
                         onClick={() => { setAppliedAccessGroupBy(accessGroupBy); setAppliedAccessFromMonth(accessFromMonth); setAppliedAccessToMonth(accessToMonth); setAccessReportReady(true); setAccessPage(1); }}
-                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 text-[13px]"
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 text-[13px] whitespace-nowrap"
                       >
                         <TrendingUp className="w-4 h-4" />
                         Tạo báo cáo
@@ -1159,7 +1133,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                     <div className="flex items-end gap-2">
                       <button
                         onClick={() => { setAppliedAccessGroupBy(accessGroupBy); setAppliedAccessFilters(selectedAccessFilters); setAccessReportReady(true); setAccessPage(1); }}
-                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 text-[13px]"
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 text-[13px] whitespace-nowrap"
                       >
                         <TrendingUp className="w-4 h-4" />
                         Tạo báo cáo
@@ -1202,8 +1176,8 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                         <YAxisAny />
                         <TooltipAny />
                         <LegendAny />
-                        <BarAny dataKey="views" name="Lượt xem" fill="#0ea5e9" />
-                        <BarAny dataKey="downloads" name="Lượt tải" fill="#3b82f6" />
+                        <BarAny dataKey="views" name="Lượt xem" fill="#0ea5e9" maxBarSize={32} radius={[4, 4, 0, 0]} />
+                        <BarAny dataKey="downloads" name="Lượt tải" fill="#3b82f6" maxBarSize={32} radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   )}
