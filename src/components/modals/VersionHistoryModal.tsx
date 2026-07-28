@@ -7,6 +7,27 @@ interface VersionHistoryModalProps {
 
 const mockVersions = [
   {
+    id: 30,
+    version: 'v2.6.19',
+    date: '27/07/2026',
+    time: '16:30',
+    content: `1. Phân hệ Dữ liệu chủ — Cập nhật dữ liệu chủ (modal Chi tiết bản ghi, mở từ tab Dữ liệu):
+- Bổ sung tab "Lịch sử" (trước đây chỉ hiển thị khi mở từ tab Phê duyệt), giữ nguyên tab "Giá trị dữ liệu chủ".
+- Tại tab "Giá trị dữ liệu chủ": bổ sung hiển thị "Trạng thái dữ liệu" (Mới/Cập nhật) và "Trạng thái công khai" cạnh "Trạng thái" (phê duyệt).
+- Tại tab "Lịch sử": bổ sung mục "Xem dữ liệu gốc" (thu/mở) hiển thị dữ liệu gốc khi vừa đồng bộ; nếu bản ghi chưa từng chỉnh sửa so với dữ liệu gốc thì hiển thị thông báo "Không có chỉnh sửa so với dữ liệu gốc".
+
+2. Phân hệ Dữ liệu chủ — Modal "So sánh phiên bản dữ liệu chủ" (tab Dữ liệu):
+- Bỏ 2 nút "Khôi phục phiên bản" và "Tải về" khỏi khối so sánh phiên bản.
+
+3. Phân hệ Dữ liệu chủ — Cơ chế "Liên kết chéo thực thể" (tab Thông tin liên quan trong modal Chi tiết bản ghi):
+- Chuyển cơ chế xác định liên kết chéo từ hard-code 1 trường CCCD cố định theo từng danh mục sang cấu hình quan hệ giữa các danh mục (danh sách quan hệ khai báo danh mục nguồn/đích, trường khóa liên kết mỗi bên, loại quan hệ 1-1/1-n/n-n, trạng thái hoạt động) — cùng nguyên lý với mục "Thiết lập quan hệ giữa thực thể".
+- Đổi nhãn hiển thị "Liên kết chéo thực thể — cùng chủ thể (CCCD) tại loại dữ liệu chủ khác (N)" thành "Liên kết chéo thực thể (N)"; đổi thông báo rỗng (chưa cấu hình quan hệ / không có bản ghi liên kết) thành "Thực thể dữ liệu chưa được thiết lập quan hệ với thực thể khác".
+- Bổ sung dữ liệu mẫu minh họa: đồng bộ CCCD của bản ghi thi hành án "QĐ-THADS-2026-00287" với 1 bản ghi "Cá nhân hành nghề bổ trợ tư pháp" và 1 bản ghi "Đối tượng trợ giúp pháp lý" để thể hiện trực quan liên kết chéo hoạt động đúng.
+
+4. Mã nguồn bị ảnh hưởng:
+- \`src/components/pages/master-data/MasterDataUpdateItemPage.tsx\``
+  },
+  {
     id: 29,
     version: 'v2.6.18',
     date: '26/07/2026',

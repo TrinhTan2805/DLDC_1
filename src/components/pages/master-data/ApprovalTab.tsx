@@ -1254,19 +1254,12 @@ export function ApprovalTab() {
               {detailTab === 'merge' && (
                 <div className="space-y-4">
                   {/* Ngưỡng — chỉ xem, không cấu hình */}
-                  <div className="border border-slate-200 rounded-lg bg-white p-4 grid grid-cols-2 gap-4">
+                  <div className="border border-slate-200 rounded-lg bg-white p-4">
                     <div>
                       <p className="text-[13px] font-medium text-slate-700 mb-1.5">Ngưỡng tự động gộp (≥)</p>
                       <div className="flex items-center gap-2">
                         <span className="text-[13px] font-semibold text-slate-900">{selectedRecord.mergeSummary.autoThreshold}%</span>
                         <span className="text-[13px] text-slate-400">Điểm khớp từ ngưỡng này trở lên sẽ được gộp tự động</span>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-[13px] font-medium text-slate-700 mb-1.5">Ngưỡng cần rà soát (≥)</p>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[13px] font-semibold text-slate-900">{selectedRecord.mergeSummary.reviewThreshold}%</span>
-                        <span className="text-[13px] text-slate-400">Điểm khớp trong khoảng này sẽ chuyển sang chờ rà soát</span>
                       </div>
                     </div>
                   </div>
@@ -1286,14 +1279,13 @@ export function ApprovalTab() {
                             <th className="px-3 py-2 text-left text-[13px] font-medium text-slate-600">Thuật toán</th>
                             <th className="px-3 py-2 text-center text-[13px] font-medium text-slate-600">Ngưỡng (%)</th>
                             <th className="px-3 py-2 text-center text-[13px] font-medium text-slate-600">Trọng số (%)</th>
-                            <th className="px-3 py-2 text-center text-[13px] font-medium text-slate-600">Chuẩn hóa</th>
                             <th className="px-3 py-2 text-center text-[13px] font-medium text-slate-600">Điều kiện</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                           {selectedRecord.matchingRules.length === 0 ? (
                             <tr>
-                              <td colSpan={7} className="px-4 py-6 text-center text-[13px] text-slate-400">Chưa có quy tắc so khớp</td>
+                              <td colSpan={6} className="px-4 py-6 text-center text-[13px] text-slate-400">Chưa có quy tắc so khớp</td>
                             </tr>
                           ) : (
                             selectedRecord.matchingRules.map(rule => {
@@ -1305,7 +1297,6 @@ export function ApprovalTab() {
                                   <td className="px-3 py-2 text-[13px] text-slate-700">{rule.method === 'fuzzy' && rule.algorithm ? fuzzyAlgorithmLabels[rule.algorithm] : '—'}</td>
                                   <td className="px-3 py-2 text-center text-[13px] text-slate-700">{rule.method === 'fuzzy' ? rule.fuzzyThreshold : '—'}</td>
                                   <td className="px-3 py-2 text-center text-[13px] text-slate-700">{rule.weight}</td>
-                                  <td className="px-3 py-2 text-center text-[13px] text-slate-700">{rule.normalize ? 'Có' : 'Không'}</td>
                                   <td className="px-3 py-2 text-center text-[13px] text-slate-500">{rule.operator || '—'}</td>
                                 </tr>
                               );

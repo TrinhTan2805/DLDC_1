@@ -159,7 +159,7 @@ const MOCK_NATIONALITY: Row[] = [
 
 const MOCK_INDIVIDUAL: Row[] = [
   { id: '1', ma: 'HN-LS-2019-00145',  hoTen: 'Nguyễn Thanh Hải',   ngaySinh: '15/04/1978', cccd: '001078001234', chucDanh: 'Luật sư',         soCCHN: 'CCHN-LS-0012345', linhVuc: 'Dân sự, Hình sự',       approvalStatus: 'approved', publicStatus: 'published' },
-  { id: '2', ma: 'HCM-LS-2020-00892', hoTen: 'Nguyễn Thanh Hải',    ngaySinh: '22/08/1982', cccd: '079082002345', chucDanh: 'Luật sư',         soCCHN: '',                linhVuc: 'Kinh doanh thương mại', approvalStatus: 'approved', publicStatus: 'published' },
+  { id: '2', ma: 'HCM-LS-2020-00892', hoTen: 'Nguyễn Văn Anh',    ngaySinh: '22/08/1982', cccd: '079199001234', chucDanh: 'Luật sư',         soCCHN: '',                linhVuc: 'Kinh doanh thương mại', approvalStatus: 'approved', publicStatus: 'published' },
   { id: '3', ma: 'DN-CC-2021-00234',  hoTen: 'Lê Thị Thu Hà',       ngaySinh: '10/12/1985', cccd: '048085003456', chucDanh: 'Công chứng viên', soCCHN: 'CCHN-CC-0034567', linhVuc: 'Công chứng',            approvalStatus: 'pending',  publicStatus: 'unpublished' },
   { id: '4', ma: 'HN-DGV-2018-00067', hoTen: 'Phạm Xuân Long',      ngaySinh: '05/03/1975', cccd: '001075004567', chucDanh: 'Đấu giá viên',    soCCHN: 'CCHN-DG-0045678', linhVuc: 'Đấu giá tài sản',      approvalStatus: 'draft',    publicStatus: 'unpublished' },
   { id: '5', ma: 'HP-QTV-2022-00189', hoTen: 'Hoàng Văn Bình',      ngaySinh: '18/06/1980', cccd: '031080005678', chucDanh: 'Quản tài viên',   soCCHN: 'CCHN-QT-0056789', linhVuc: 'Quản lý, thanh lý TS',  approvalStatus: 'rejected', publicStatus: 'unpublished' },
@@ -179,7 +179,7 @@ const MOCK_ORGANIZATION: Row[] = [
 
 const MOCK_LEGAL_AID_OBJECT: Row[] = [
   { id: '1', ma: 'TGPL-DN-2026-001234', loai: 'Người có công',      cccd: '001078001234', hoTen: 'Nguyễn Thị Bích',     dienTGPL: 'Thương binh hạng 2/4', tinh: 'Hà Nội',     approvalStatus: 'approved', publicStatus: 'published' },
-  { id: '2', ma: 'TGPL-DN-2026-002345', loai: 'Hộ nghèo',           cccd: '079090002345', hoTen: 'Nguyễn Thị Bích',      dienTGPL: '',                     tinh: 'TP.HCM',     approvalStatus: 'approved', publicStatus: 'published' },
+  { id: '2', ma: 'TGPL-DN-2026-002345', loai: 'Hộ nghèo',           cccd: '079199001234', hoTen: 'Nguyễn Văn Anh',      dienTGPL: '',                     tinh: 'TP.HCM',     approvalStatus: 'approved', publicStatus: 'published' },
   { id: '3', ma: 'TGPL-DN-2025-098765', loai: 'Người dân tộc thiểu số', cccd: '038059003456', hoTen: 'Lý Thị Mai',      dienTGPL: 'DTTS cư trú vùng KK',  tinh: 'Đà Nẵng',    approvalStatus: 'pending',  publicStatus: 'unpublished' },
   { id: '4', ma: 'TGPL-DN-2026-003456', loai: 'Người cao tuổi',     cccd: '031040004567', hoTen: 'Phạm Văn Cương',       dienTGPL: 'Trên 80 tuổi không lương', tinh: 'Hải Phòng', approvalStatus: 'draft',    publicStatus: 'unpublished' },
   { id: '5', ma: 'TGPL-DN-2026-004567', loai: 'Người khuyết tật',   cccd: '087072005678', hoTen: 'Hoàng Thị Linh',       dienTGPL: 'KT nặng theo hồ sơ',   tinh: 'Cần Thơ',    approvalStatus: 'rejected', publicStatus: 'unpublished' },
@@ -240,16 +240,34 @@ const CATEGORY_LABELS: Record<DataCategory, string> = {
   'asset':            'Tài sản bảo đảm',
 };
 
-// Chỉ khai báo cho category nào thực sự có trường CCCD trong dữ liệu.
-// 'civil-registry', 'nationality', 'organization', 'asset' chưa có trường này nên chưa tham gia liên kết.
-const CROSS_ENTITY_LINK_FIELD: Partial<Record<DataCategory, string>> = {
-  'enforcement':      'cccd',
-  'individual':        'cccd',
-  'legal-aid-object':  'cccd',
-};
-
 function normalizeIdentifier(value: string): string {
   return (value || '').replace(/\D/g, ''); // chỉ giữ chữ số, bỏ khoảng trắng/gạch nối
+}
+
+// Cấu hình quan hệ giữa các danh mục dữ liệu chủ — giống mục "Thiết lập quan hệ giữa thực thể"
+// (chọn 2 thực thể, khai báo khóa liên kết). Liên kết chéo thực thể ở màn Chi tiết bản ghi
+// được xác định dựa trên các quan hệ khai báo tại đây, không hard-code cố định 1 trường cho từng danh mục.
+type CategoryRelationType = 'one-to-one' | 'one-to-many' | 'many-to-many';
+
+interface CategoryRelationship {
+  id: string;
+  categoryA: DataCategory;
+  fieldA: string; // Khóa liên kết phía categoryA
+  categoryB: DataCategory;
+  fieldB: string; // Khóa liên kết phía categoryB
+  relationType: CategoryRelationType;
+  description: string;
+  status: 'active' | 'inactive';
+}
+
+const CATEGORY_RELATIONSHIPS: CategoryRelationship[] = [
+  { id: 'rel-enf-ind',   categoryA: 'enforcement', fieldA: 'cccd', categoryB: 'individual',       fieldB: 'cccd', relationType: 'many-to-many', description: 'Đương sự trong quyết định THA có thể đồng thời là cá nhân hành nghề bổ trợ tư pháp', status: 'active' },
+  { id: 'rel-enf-legal', categoryA: 'enforcement', fieldA: 'cccd', categoryB: 'legal-aid-object', fieldB: 'cccd', relationType: 'many-to-many', description: 'Đương sự trong quyết định THA có thể đồng thời là đối tượng trợ giúp pháp lý',        status: 'active' },
+  { id: 'rel-ind-legal', categoryA: 'individual',  fieldA: 'cccd', categoryB: 'legal-aid-object', fieldB: 'cccd', relationType: 'many-to-many', description: 'Cá nhân hành nghề bổ trợ tư pháp có thể đồng thời là đối tượng trợ giúp pháp lý',       status: 'active' },
+];
+
+function categoryHasCrossEntityConfig(category: DataCategory): boolean {
+  return CATEGORY_RELATIONSHIPS.some(rel => rel.status === 'active' && (rel.categoryA === category || rel.categoryB === category));
 }
 
 interface CrossEntityLink {
@@ -258,33 +276,58 @@ interface CrossEntityLink {
   row: Row;
 }
 
-function buildCrossEntityIndex(dataByCategory: Record<DataCategory, Row[]>): Map<string, CrossEntityLink[]> {
-  const index = new Map<string, CrossEntityLink[]>();
-  (Object.keys(dataByCategory) as DataCategory[]).forEach(category => {
-    const linkField = CROSS_ENTITY_LINK_FIELD[category];
-    if (!linkField) return;
+interface CategoryRelationshipIndexEntry {
+  relationship: CategoryRelationship;
+  mapA: Map<string, Row[]>;
+  mapB: Map<string, Row[]>;
+}
+
+function buildCategoryRelationshipIndex(
+  relationships: CategoryRelationship[],
+  dataByCategory: Record<DataCategory, Row[]>
+): CategoryRelationshipIndexEntry[] {
+  const buildKeyMap = (category: DataCategory, field: string) => {
+    const map = new Map<string, Row[]>();
     dataByCategory[category].forEach(row => {
-      const key = normalizeIdentifier(row[linkField]);
+      const key = normalizeIdentifier(row[field]);
       if (!key) return;
-      const entry: CrossEntityLink = { category, categoryLabel: CATEGORY_LABELS[category], row };
-      index.set(key, [...(index.get(key) ?? []), entry]);
+      map.set(key, [...(map.get(key) ?? []), row]);
     });
-  });
-  return index;
+    return map;
+  };
+  return relationships
+    .filter(rel => rel.status === 'active')
+    .map(rel => ({
+      relationship: rel,
+      mapA: buildKeyMap(rel.categoryA, rel.fieldA),
+      mapB: buildKeyMap(rel.categoryB, rel.fieldB),
+    }));
 }
 
 // Xây 1 lần từ dữ liệu mock gốc — trong hệ thống thật nên build từ nguồn dữ liệu tổng hợp,
 // không build lại mỗi lần mở modal.
-const CROSS_ENTITY_INDEX = buildCrossEntityIndex(MOCK_BY_CATEGORY);
+const CATEGORY_RELATIONSHIP_INDEX = buildCategoryRelationshipIndex(CATEGORY_RELATIONSHIPS, MOCK_BY_CATEGORY);
 
 function getCrossEntityLinks(row: Row, category: DataCategory): CrossEntityLink[] {
-  const linkField = CROSS_ENTITY_LINK_FIELD[category];
-  if (!linkField) return [];
-  const key = normalizeIdentifier(row[linkField]);
-  if (!key) return [];
-  return (CROSS_ENTITY_INDEX.get(key) ?? []).filter(
-    e => !(e.category === category && e.row.id === row.id)
-  );
+  const links: CrossEntityLink[] = [];
+  CATEGORY_RELATIONSHIP_INDEX.forEach(({ relationship, mapA, mapB }) => {
+    const isSideA = relationship.categoryA === category;
+    const isSideB = relationship.categoryB === category;
+    if (!isSideA && !isSideB) return;
+
+    const ownField = isSideA ? relationship.fieldA : relationship.fieldB;
+    const otherCategory = isSideA ? relationship.categoryB : relationship.categoryA;
+    const otherMap = isSideA ? mapB : mapA;
+
+    const key = normalizeIdentifier(row[ownField]);
+    if (!key) return;
+
+    (otherMap.get(key) ?? []).forEach(otherRow => {
+      if (otherCategory === category && otherRow.id === row.id) return;
+      links.push({ category: otherCategory, categoryLabel: CATEGORY_LABELS[otherCategory], row: otherRow });
+    });
+  });
+  return links;
 }
 
 // ─── Rà soát: gợi ý trùng lặp & cảnh báo thiếu dữ liệu ────────────────────────
@@ -483,6 +526,8 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
   const [showOriginalData, setShowOriginalData] = useState(false);
   // Mở từ tab "Dữ liệu" chỉ hiện Giá trị dữ liệu chủ; mở từ tab "Phê duyệt" vẫn giữ đủ các tab
   const [detailRowContext, setDetailRowContext] = useState<'list' | 'approval'>('list');
+  // Xem toàn bộ trường dữ liệu của bản ghi liên kết chéo thực thể (mục "Thông tin liên quan")
+  const [viewingLinkedRecord, setViewingLinkedRecord] = useState<CrossEntityLink | null>(null);
 
   const handleOpenDetail = (row: Row, context: 'list' | 'approval' = 'list') => {
     setDetailRow(row);
@@ -2494,15 +2539,15 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
 
                   <div>
                     <p className="text-slate-600 mb-2">
-                      Liên kết chéo thực thể — cùng chủ thể (CCCD) tại loại dữ liệu chủ khác ({crossEntityLinks.length})
+                      Liên kết chéo thực thể ({crossEntityLinks.length})
                     </p>
-                    {!CROSS_ENTITY_LINK_FIELD[config.category] ? (
+                    {!categoryHasCrossEntityConfig(config.category) ? (
                       <div className="border border-slate-200 rounded-lg p-4 text-center text-slate-400">
-                        Loại dữ liệu này chưa có trường CCCD nên chưa hỗ trợ liên kết chéo thực thể
+                        Thực thể dữ liệu chưa được thiết lập quan hệ với thực thể khác
                       </div>
                     ) : crossEntityGroups.length === 0 ? (
                       <div className="border border-slate-200 rounded-lg p-4 text-center text-slate-400">
-                        Không tìm thấy bản ghi nào ở loại dữ liệu khác cùng CCCD
+                        Thực thể dữ liệu chưa được thiết lập quan hệ với thực thể khác
                       </div>
                     ) : (
                       <div className="space-y-3">
@@ -2515,20 +2560,20 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
                             <table className="w-full">
                               <thead>
                                 <tr className="bg-slate-50 border-b border-slate-200">
-                                  <th className="px-3 py-2 text-left text-[12px] font-medium text-slate-600">{COLUMNS[group.links[0].category][0].label}</th>
-                                  <th className="px-3 py-2 text-left text-[12px] font-medium text-slate-600">Trạng thái</th>
-                                  <th className="px-3 py-2 text-left text-[12px] font-medium text-slate-600"></th>
+                                  <th className="px-3 py-2 text-left text-[13px] font-medium text-slate-600">{COLUMNS[group.links[0].category][0].label}</th>
+                                  <th className="px-3 py-2 text-left text-[13px] font-medium text-slate-600">Trạng thái</th>
+                                  <th className="px-3 py-2 text-left text-[13px] font-medium text-slate-600"></th>
                                 </tr>
                               </thead>
                               <tbody>
                                 {group.links.map(link => (
                                   <tr key={`${link.category}-${link.row.id}`} className="border-b border-slate-100 last:border-0">
-                                    <td className="px-3 py-2 text-slate-700">{link.row[COLUMNS[link.category][0].key]}</td>
+                                    <td className="px-3 py-2 text-[13px] text-slate-700">{link.row[COLUMNS[link.category][0].key]}</td>
                                     <td className="px-3 py-2"><ApprovalBadge status={link.row.approvalStatus} /></td>
                                     <td className="px-3 py-2 text-right">
                                       <button
-                                        onClick={() => alert(`Chuyển sang xem bản ghi tại danh mục "${link.categoryLabel}" (mã: ${link.row.id}).`)}
-                                        className="text-blue-600 hover:underline cursor-pointer text-[12px]"
+                                        onClick={() => setViewingLinkedRecord(link)}
+                                        className="text-blue-600 hover:underline cursor-pointer text-[13px]"
                                       >
                                         Xem chi tiết
                                       </button>
@@ -2591,6 +2636,51 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
             </div>
           </div>
         </div>
+        );
+      })()}
+
+      {/* Modal xem toàn bộ trường dữ liệu của bản ghi liên kết chéo thực thể */}
+      {viewingLinkedRecord && (() => {
+        const link = viewingLinkedRecord;
+        const linkedCols = COLUMNS[link.category];
+        return (
+          <div className="fixed inset-0 flex items-center justify-center z-[10000] p-4 animate-in fade-in duration-200" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+              <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+                <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                  <Link2 className="w-5 h-5 text-blue-600" />
+                  Chi tiết bản ghi — {link.categoryLabel}
+                </h3>
+                <button onClick={() => setViewingLinkedRecord(null)} className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer" title="Đóng">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="p-6 space-y-3 text-[13px] overflow-y-auto">
+                <div className="flex items-center gap-2">
+                  <span className="text-slate-500">Trạng thái:</span>
+                  <ApprovalBadge status={link.row.approvalStatus} />
+                </div>
+                <div className="border border-slate-200 rounded-lg divide-y divide-slate-100">
+                  {linkedCols.map(col => (
+                    <div key={col.key} className="flex px-3 py-2 text-[13px]">
+                      <span className="w-40 shrink-0 text-slate-500">{col.label}</span>
+                      <span className="flex-1 text-slate-800 font-medium break-words">
+                        {link.row[col.key] || <span className="text-slate-400 italic">(trống)</span>}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end">
+                <button
+                  onClick={() => setViewingLinkedRecord(null)}
+                  className="px-4 py-2 border border-slate-300 text-slate-700 bg-white rounded-lg hover:bg-slate-50 font-medium text-[13px] transition-colors cursor-pointer active:scale-95"
+                >
+                  Đóng
+                </button>
+              </div>
+            </div>
+          </div>
         );
       })()}
     </div>

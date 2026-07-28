@@ -11,20 +11,22 @@ interface DataRecord {
   syncedCount: number;
   lastSync: string;
   status: 'success' | 'warning' | 'error';
+  dataSizeLabel?: string;
 }
 
 const detailedData: { [key: string]: DataRecord[] } = {
+  // Tham khảo từ mockCollectionServices (Thiết lập thu thập)
   'Thu thập': [
-    { id: '1', name: 'CSDL A', source: 'Hệ thống A', syncedCount: 1245832, lastSync: '11/12/2024 14:30', status: 'success' },
-    { id: '2', name: 'CSDL B', source: 'Hệ thống B', syncedCount: 892456, lastSync: '11/12/2024 14:25', status: 'success' },
-    { id: '3', name: 'CSDL C', source: 'Hệ thống C', syncedCount: 567234, lastSync: '11/12/2024 14:20', status: 'warning' },
-    { id: '4', name: 'Biên tập danh mục A', source: 'Đơn vị A', syncedCount: 423189, lastSync: '11/12/2024 14:15', status: 'success' },
-    { id: '5', name: 'Danh mục B', source: 'Đơn vị B', syncedCount: 356890, lastSync: '11/12/2024 14:10', status: 'success' },
-    { id: '6', name: 'Danh mục C', source: 'Đơn vị C', syncedCount: 289345, lastSync: '11/12/2024 14:05', status: 'error' },
-    { id: '7', name: 'Dịch vụ A', source: 'Hệ thống A', syncedCount: 234567, lastSync: '11/12/2024 14:00', status: 'success' },
-    { id: '8', name: 'Dịch vụ B', source: 'Hệ thống B', syncedCount: 198734, lastSync: '11/12/2024 13:55', status: 'success' },
-    { id: '9', name: 'Dịch vụ C', source: 'Hệ thống C', syncedCount: 156892, lastSync: '11/12/2024 13:50', status: 'success' },
-    { id: '10', name: 'TGPL A', source: 'Đơn vị A', syncedCount: 67842, lastSync: '11/12/2024 13:45', status: 'success' },
+    { id: '1', name: 'Thu thập Thông tin Bản án, quyết định có hiệu lực pháp luật từ Tòa án nhân dân tối cao', source: 'TAND Tối cao', syncedCount: 8625999, dataSizeLabel: '9.48 GB', lastSync: '19/12/2025 15:30:00', status: 'success' },
+    { id: '2', name: 'Thu thập dữ liệu Diện người được trợ giúp pháp lý theo quy định pháp luật', source: 'Bộ Nội vụ', syncedCount: 1980450, dataSizeLabel: '2.13 GB', lastSync: '15/12/2025 08:00:00', status: 'error' },
+    { id: '3', name: 'Thu thập Danh mục và mã các dân tộc Việt Nam từ Ủy ban Dân tộc', source: 'Ủy ban Dân tộc', syncedCount: 460320, dataSizeLabel: '512 MB', lastSync: '14/12/2025 09:15:00', status: 'error' },
+    { id: '4', name: 'Thu thập Danh mục Quốc gia và Quốc tịch trên thế giới từ Bộ Ngoại giao', source: 'Bộ Ngoại giao', syncedCount: 79210, dataSizeLabel: '88 MB', lastSync: '14/12/2025 09:30:00', status: 'warning' },
+    { id: '5', name: 'Thu thập dữ liệu đối tượng đang hưởng trợ giúp xã hội hàng tháng tại cộng đồng', source: 'Bộ LĐTBXH', syncedCount: 14200000, dataSizeLabel: '15.60 GB', lastSync: '18/12/2025 14:20:00', status: 'error' },
+    { id: '6', name: 'Thu thập danh sách hộ nghèo, hộ cận nghèo theo chuẩn nghèo đa chiều', source: 'Bộ LĐTBXH', syncedCount: 6120500, dataSizeLabel: '6.72 GB', lastSync: '17/12/2025 16:45:00', status: 'warning' },
+    { id: '7', name: 'Thu thập Thông tin người nhiễm HIV đang được quản lý điều trị', source: 'Bộ Y tế', syncedCount: 305600, dataSizeLabel: '340 MB', lastSync: '16/12/2025 10:00:00', status: 'success' },
+    { id: '8', name: 'Thu thập Thông tin người khuyết tật đã được cấp giấy xác nhận khuyết tật', source: 'Bộ LĐTBXH', syncedCount: 951200, dataSizeLabel: '1.05 GB', lastSync: '18/12/2025 11:30:00', status: 'success' },
+    { id: '9', name: 'Thu thập hồ sơ đăng ký khai sinh từ Hệ thống hộ tịch điện tử', source: 'Cục Hành chính tư pháp', syncedCount: 22560000, dataSizeLabel: '24.80 GB', lastSync: '19/12/2025 18:30:00', status: 'success' },
+    { id: '10', name: 'Thu thập hồ sơ đăng ký kết hôn từ Hệ thống hộ tịch điện tử', source: 'Cục Hành chính tư pháp', syncedCount: 16700000, dataSizeLabel: '18.30 GB', lastSync: '19/12/2025 18:35:00', status: 'success' },
   ],
   'Xử lý': [
     { id: '1', name: 'CSDL A - Đã làm sạch', source: 'Quy trình xử lý', syncedCount: 1208945, lastSync: '11/12/2024 15:00', status: 'success' },
@@ -175,6 +177,17 @@ export function DashboardHome() {
   const currentData = selectedKPI ? detailedData[selectedKPI] || [] : [];
   const totalSynced = currentData.reduce((sum, record) => sum + record.syncedCount, 0);
 
+  const formatDataSize = (value: number) => {
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    let size = value;
+    let unitIndex = 0;
+    while (size >= 1024 && unitIndex < units.length - 1) {
+      size /= 1024;
+      unitIndex++;
+    }
+    return `${size.toLocaleString('vi-VN', { maximumFractionDigits: 2 })} ${units[unitIndex]}`;
+  };
+
   const getStatusBadge = (status: 'success' | 'warning' | 'error') => {
     const styles = {
       success: 'bg-green-100 text-green-700 border-green-200',
@@ -187,8 +200,23 @@ export function DashboardHome() {
       error: 'Lỗi'
     };
     return (
-      <span className={`px-2 py-1 text-xs border rounded-full ${styles[status]}`}>
+      <span className={`px-2 py-1 text-[13px] border rounded-full ${styles[status]}`}>
         {labels[status]}
+      </span>
+    );
+  };
+
+  const getDataStatusBadge = (status: 'success' | 'warning' | 'error') => {
+    const isActive = status === 'success';
+    return (
+      <span
+        className={`px-2 py-1 text-[13px] border rounded-full ${
+          isActive
+            ? 'bg-green-100 text-green-700 border-green-200'
+            : 'bg-slate-200 text-slate-600 border-slate-300'
+        }`}
+      >
+        {isActive ? 'Hoạt động' : 'Ngưng hoạt động'}
       </span>
     );
   };
@@ -561,7 +589,9 @@ export function DashboardHome() {
             {/* Modal Header */}
             <div className="flex items-center justify-between p-6 border-b border-slate-200">
               <div>
-                <h2 className="text-slate-900">Chi tiết {selectedKPI}</h2>
+                <h2 className="text-[18px] text-slate-900">
+                  {selectedKPI === 'Thu thập' ? 'Báo cáo thu thập dữ liệu' : `Chi tiết ${selectedKPI}`}
+                </h2>
                 <p className="text-sm text-slate-600 mt-1">
                   Danh sách dữ liệu đã thu thập và đồng bộ
                 </p>
@@ -580,25 +610,33 @@ export function DashboardHome() {
               <div className="bg-white rounded-lg p-4 border border-slate-200">
                 <div className="flex items-center gap-2 mb-2">
                   <Database className="w-4 h-4 text-blue-600" />
-                  <span className="text-xs text-slate-600">Tổng nguồn</span>
+                  <span className="text-[16px] text-slate-600">
+                    {selectedKPI === 'Thu thập' ? 'Tổng số dịch vụ' : 'Tổng nguồn'}
+                  </span>
                 </div>
-                <div className="text-2xl text-slate-900">{currentData.length}</div>
+                <div className="text-[16px] text-slate-900">{currentData.length}</div>
               </div>
 
               <div className="bg-white rounded-lg p-4 border border-slate-200">
                 <div className="flex items-center gap-2 mb-2">
                   <Hash className="w-4 h-4 text-green-600" />
-                  <span className="text-xs text-slate-600">Tổng đồng bộ</span>
+                  <span className="text-[16px] text-slate-600">
+                    {selectedKPI === 'Thu thập' ? 'Kích thước dữ liệu đồng bộ' : 'Tổng đồng bộ'}
+                  </span>
                 </div>
-                <div className="text-2xl text-slate-900">{totalSynced.toLocaleString()}</div>
+                <div className="text-[16px] text-slate-900">
+                  {selectedKPI === 'Thu thập' ? formatDataSize(totalSynced) : totalSynced.toLocaleString()}
+                </div>
               </div>
 
               <div className="bg-white rounded-lg p-4 border border-slate-200">
                 <div className="flex items-center gap-2 mb-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  <span className="text-xs text-slate-600">Thành công</span>
+                  <span className="text-[16px] text-slate-600">
+                    {selectedKPI === 'Thu thập' ? 'Hoạt động' : 'Thành công'}
+                  </span>
                 </div>
-                <div className="text-2xl text-slate-900">
+                <div className="text-[16px] text-slate-900">
                   {currentData.filter(r => r.status === 'success').length}
                 </div>
               </div>
@@ -606,9 +644,11 @@ export function DashboardHome() {
               <div className="bg-white rounded-lg p-4 border border-slate-200">
                 <div className="flex items-center gap-2 mb-2">
                   <AlertTriangle className="w-4 h-4 text-amber-600" />
-                  <span className="text-xs text-slate-600">Cảnh báo/Lỗi</span>
+                  <span className="text-[16px] text-slate-600">
+                    {selectedKPI === 'Thu thập' ? 'Ngưng hoạt động' : 'Cảnh báo/Lỗi'}
+                  </span>
                 </div>
-                <div className="text-2xl text-slate-900">
+                <div className="text-[16px] text-slate-900">
                   {currentData.filter(r => r.status !== 'success').length}
                 </div>
               </div>
@@ -616,57 +656,74 @@ export function DashboardHome() {
 
             {/* Data Table */}
             <div className="flex-1 overflow-y-auto p-6">
-              <table className="w-full">
-                <thead className="sticky top-0 bg-white z-10 border-b-2 border-slate-200">
-                  <tr>
-                    <th className="text-left py-3 px-4 text-slate-900 font-semibold">STT</th>
-                    <th className="text-left py-3 px-4 text-slate-900 font-semibold">Tên dữ liệu</th>
-                    <th className="text-left py-3 px-4 text-slate-900 font-semibold">Nguồn</th>
-                    <th className="text-right py-3 px-4 text-slate-900 font-semibold">Số lượng đồng bộ</th>
-                    <th className="text-left py-3 px-4 text-slate-900 font-semibold">Lần đồng bộ cuối</th>
-                    <th className="text-center py-3 px-4 text-slate-900 font-semibold">Trạng thái</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentData.map((record, index) => (
-                    <tr
-                      key={record.id}
-                      className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
-                    >
-                      <td className="py-3 px-4 text-sm text-slate-600">{index + 1}</td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-2">
-                          <FileText className="w-4 h-4 text-slate-400" />
-                          <span className="text-sm text-slate-900">{record.name}</span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <span className="text-sm text-slate-600">{record.source}</span>
-                      </td>
-                      <td className="py-3 px-4 text-right">
-                        <span className="text-sm text-slate-900">
-                          {record.syncedCount.toLocaleString()}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-1.5">
-                          <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                          <span className="text-xs text-slate-600">{record.lastSync}</span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        {getStatusBadge(record.status)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              {currentData.length === 0 && (
-                <div className="text-center py-12 text-slate-500">
-                  Không có dữ liệu chi tiết
+              <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse text-[13px]">
+                    <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-[1]">
+                      <tr>
+                        <th className="text-left py-3 px-4 text-[13px] text-slate-500 font-bold whitespace-nowrap">STT</th>
+                        <th className="text-left py-3 px-4 text-[13px] text-slate-500 font-bold whitespace-nowrap">
+                          {selectedKPI === 'Thu thập' ? 'Tên dịch vụ' : 'Tên dữ liệu'}
+                        </th>
+                        <th className="text-left py-3 px-4 text-[13px] text-slate-500 font-bold whitespace-nowrap">
+                          {selectedKPI === 'Thu thập' ? 'Hệ thống nguồn' : 'Nguồn'}
+                        </th>
+                        <th className="text-right py-3 px-4 text-[13px] text-slate-500 font-bold whitespace-nowrap">
+                          {selectedKPI === 'Thu thập' ? 'Kích thước dữ liệu' : 'Số lượng đồng bộ'}
+                        </th>
+                        <th className="text-left py-3 px-4 text-[13px] text-slate-500 font-bold whitespace-nowrap">Lần đồng bộ cuối</th>
+                        <th className="text-center py-3 px-4 text-[13px] text-slate-500 font-bold whitespace-nowrap">Trạng thái</th>
+                        {selectedKPI === 'Thu thập' && (
+                          <th className="text-center py-3 px-4 text-[13px] text-slate-500 font-bold whitespace-nowrap">Trạng thái dữ liệu</th>
+                        )}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {currentData.map((record, index) => (
+                        <tr key={record.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="py-3 px-4 text-[13px] text-slate-600">{index + 1}</td>
+                          <td className="py-3 px-4">
+                            <div className="flex items-center gap-2">
+                              <FileText className="w-4 h-4 text-slate-400" />
+                              <span className="text-[13px] text-slate-900">{record.name}</span>
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="text-[13px] text-slate-600">{record.source}</span>
+                          </td>
+                          <td className="py-3 px-4 text-right">
+                            <span className="text-[13px] text-slate-900">
+                              {selectedKPI === 'Thu thập'
+                                ? record.dataSizeLabel || formatDataSize(record.syncedCount)
+                                : record.syncedCount.toLocaleString()}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex items-center gap-1.5">
+                              <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                              <span className="text-[13px] text-slate-600">{record.lastSync}</span>
+                            </div>
+                          </td>
+                          <td className="py-3 px-4 text-center">
+                            {getStatusBadge(record.status)}
+                          </td>
+                          {selectedKPI === 'Thu thập' && (
+                            <td className="py-3 px-4 text-center">
+                              {getDataStatusBadge(record.status)}
+                            </td>
+                          )}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              )}
+
+                {currentData.length === 0 && (
+                  <div className="text-center py-12 text-slate-500">
+                    Không có dữ liệu chi tiết
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Modal Footer */}

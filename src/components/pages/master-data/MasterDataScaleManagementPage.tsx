@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Settings, Sliders, GitCompare, Network, Key, Plus, Edit, Trash2, X, Search, Filter, Circle, CheckSquare, ChevronDown, Eye, FileText, Clock, XCircle, Send, AlertCircle, Check, ArrowRight, SquarePen } from 'lucide-react';
+import { Settings, Sliders, GitCompare, Network, Key, Plus, Edit, Trash2, X, Search, Filter, Circle, CheckSquare, ChevronDown, ChevronLeft, Eye, FileText, Clock, XCircle, Send, AlertCircle, Check, ArrowRight, SquarePen } from 'lucide-react';
 import { AttributesManagementTab, defaultAttributes, DLDC_ENTITY_DETAIL_CONFIGS } from './AttributesManagementTab';
 import { MasterDataWizard } from './MasterDataWizard';
 import { MergeRulesManagementTab, mockMergeRules, matchMethodLabels, fuzzyAlgorithmLabels, conflictStrategyLabels, onEmptyLabels } from './MergeRulesManagementTab';
@@ -1438,14 +1438,10 @@ export function MasterDataScaleManagementPage() {
                         </div>
                       </div>
                       <div className="p-4 space-y-3 bg-white">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div>
                           <p className="text-[13px] text-slate-600">
                             Ngưỡng tự động gộp (≥):{' '}
                             <span className="font-semibold text-slate-900">{entityRule.autoThreshold ?? '-'}%</span>
-                          </p>
-                          <p className="text-[13px] text-slate-600">
-                            Ngưỡng cần rà soát (≥):{' '}
-                            <span className="font-semibold text-slate-900">{entityRule.reviewThreshold ?? '-'}%</span>
                           </p>
                         </div>
                         <div className="border border-slate-100 rounded-lg overflow-hidden">
@@ -1457,14 +1453,13 @@ export function MasterDataScaleManagementPage() {
                                 <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Thuật toán</th>
                                 <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Ngưỡng (%)</th>
                                 <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Trọng số (%)</th>
-                                <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-24">Chuẩn hóa</th>
                                 <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Điều kiện</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-50 bg-white">
                               {!entityRule.matchingRulesDetail || entityRule.matchingRulesDetail.length === 0 ? (
                                 <tr>
-                                  <td colSpan={7} className="px-4 py-6 text-center text-[13px] text-slate-400">
+                                  <td colSpan={6} className="px-4 py-6 text-center text-[13px] text-slate-400">
                                     Chưa cấu hình quy tắc so khớp
                                   </td>
                                 </tr>
@@ -1480,7 +1475,6 @@ export function MasterDataScaleManagementPage() {
                                       {rule.method === 'fuzzy' ? `${rule.fuzzyThreshold ?? '-'}%` : <span className="text-slate-400">—</span>}
                                     </td>
                                     <td className="px-3 py-2 text-[13px] text-center text-slate-700">{rule.weight}</td>
-                                    <td className="px-3 py-2 text-[13px] text-center text-slate-700">{rule.normalize ? 'Có' : 'Không'}</td>
                                     <td className="px-3 py-2 text-[13px] text-center text-slate-700">
                                       {rule.operator ?? <span className="text-slate-400">—</span>}
                                     </td>
@@ -1844,6 +1838,15 @@ export function MasterDataScaleManagementPage() {
                   <Edit className="w-4 h-4" />
                   Chỉnh sửa
                 </button>
+                {viewStep > 1 && (
+                  <button
+                    onClick={() => setViewStep(viewStep - 1)}
+                    className="bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-lg font-medium text-[13px] flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    Quay lại
+                  </button>
+                )}
                 <button
                   onClick={() => setViewingEntity(null)}
                   className={`px-4 py-2 rounded-lg font-medium text-[13px] transition-colors cursor-pointer shadow-sm ${
@@ -2062,6 +2065,61 @@ export function MasterDataScaleManagementPage() {
           setEntities([...entities, newEntity]);
           setShowWizard(false);
           alert(`✅ Tạo thành công "${wizardData.name}" với ${wizardData.attributes.length} thuộc tính!\n\nĐã gửi yêu cầu phê duyệt.`);
+        }}
+        onSaveDraft={(wizardData) => {
+          const now = new Date();
+          const dateStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+
+          if (editingEntity) {
+            setEntities(entities.map(e => e.id === editingEntity.id ? {
+              ...e,
+              name: wizardData.name,
+              dataType: wizardData.dataType,
+              managingAgency: wizardData.managingAgency,
+              scope: wizardData.scope,
+              description: wizardData.description,
+              systemName: wizardData.systemName,
+              updatedDate: dateStr,
+              dataSource: wizardData.dataSource,
+              apiSystem: wizardData.apiSystem,
+              apiManagingUnit: wizardData.apiManagingUnit,
+              apiEndpoint: wizardData.apiEndpoint,
+              apiMethod: wizardData.apiMethod,
+              updateStrategy: wizardData.updateStrategy,
+              syncFrequency: wizardData.syncFrequency,
+            } : e));
+            setShowWizard(false);
+            setEditingEntity(null);
+            alert(`💾 Đã lưu nháp thực thể "${wizardData.name}".`);
+            return;
+          }
+
+          const draftEntity: MasterDataEntity = {
+            id: String(entities.length + 1),
+            code: wizardData.code || generateCode(wizardData.dataType),
+            name: wizardData.name,
+            dataType: wizardData.dataType,
+            managingAgency: wizardData.managingAgency,
+            scope: wizardData.scope,
+            description: wizardData.description,
+            systemName: wizardData.systemName,
+            sources: wizardData.sources,
+            lifecycleStatus: 'draft',
+            createdDate: dateStr,
+            updatedDate: dateStr,
+            createdBy: 'Người dùng hiện tại',
+            dataSource: wizardData.dataSource,
+            apiSystem: wizardData.apiSystem,
+            apiManagingUnit: wizardData.apiManagingUnit,
+            apiEndpoint: wizardData.apiEndpoint,
+            apiMethod: wizardData.apiMethod,
+            updateStrategy: wizardData.updateStrategy,
+            syncFrequency: wizardData.syncFrequency
+          };
+
+          setEntities([...entities, draftEntity]);
+          setShowWizard(false);
+          alert(`💾 Đã lưu nháp "${wizardData.name}". Bạn có thể tiếp tục chỉnh sửa sau.`);
         }}
       />
     </div>
