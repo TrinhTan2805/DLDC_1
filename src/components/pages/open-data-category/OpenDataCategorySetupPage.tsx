@@ -24,7 +24,7 @@ interface ApprovalRequest {
   description?: string;
 }
 
-interface PublishedCategory {
+export interface PublishedCategory {
   id: string;
   code: string;
   name: string;
@@ -101,7 +101,7 @@ const mockApprovalRequests: ApprovalRequest[] = [
   },
 ];
 
-const mockPublishedCategories: PublishedCategory[] = [
+export const mockPublishedCategories: PublishedCategory[] = [
   {
     id: '1',
     code: 'ODCAT001',

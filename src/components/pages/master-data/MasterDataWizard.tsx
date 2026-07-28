@@ -95,15 +95,19 @@ interface IdentifierConfig {
   checkDuplicate: boolean;
 }
 
-type VersionFormatType = 'increment' | 'yearIncrement' | 'custom';
+type VersionFormatType = 'increment' | 'yearIncrement' | 'custom' | 'semver';
+type SemverIncrementPart = 'major' | 'minor' | 'patch';
 
 interface VersioningConfig {
-  // Trường nào khi thay đổi giá trị sẽ tạo phiên bản mới (fieldName -> bật/tắt)
-  triggerFields: Record<string, boolean>;
-  autoVersionOnSync: boolean;
   versionFormat: VersionFormatType;
   customPrefix: string;
   startFrom: string;
+  // Định dạng 3 chữ số (Semver): Major.Minor.Patch
+  semverPrefix: string;
+  semverMajor: string;
+  semverMinor: string;
+  semverPatch: string;
+  semverIncrementPart: SemverIncrementPart;
 }
 
 interface MergeConfig {
@@ -575,11 +579,14 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
 
   // Step 6 state — Quy tắc đánh phiên bản
   const [versioningConfig, setVersioningConfig] = useState<VersioningConfig>({
-    triggerFields: {},
-    autoVersionOnSync: true,
     versionFormat: 'increment',
     customPrefix: 'VER',
     startFrom: 'V1',
+    semverPrefix: 'Ver',
+    semverMajor: '1',
+    semverMinor: '0',
+    semverPatch: '0',
+    semverIncrementPart: 'patch',
   });
 
   // Step 3 (old step 2) state — Matching/Extraction/Merge
@@ -606,7 +613,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
   // Step 1 — đăng ký nguồn dữ liệu (form thêm nguồn inline)
   const [sourceFormOpen, setSourceFormOpen] = useState(false);
   const [sourceForm, setSourceForm] = useState<{ name: string; grain: SourceGrain; grainKey: string }>({
-    name: WIZARD_SOURCE_OPTIONS[0], grain: '1:1', grainKey: '',
+    name: WIZARD_SOURCE_OPTIONS[0], grain: '1:n', grainKey: '',
   });
   const [sourceGroupRules, setSourceGroupRules] = useState<SourceGroupRule[]>([]);
   const [sourceGroupRuleDraft, setSourceGroupRuleDraft] = useState<{ fieldName: string; ruleType: GroupRuleType }>({
@@ -654,7 +661,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
       groupRules: sourceGroupRules.length > 0 ? sourceGroupRules : undefined,
     };
     setWizardData(prev => ({ ...prev, sources: [...prev.sources, newSource] }));
-    setSourceForm({ name: WIZARD_SOURCE_OPTIONS[0], grain: '1:1', grainKey: '' });
+    setSourceForm({ name: WIZARD_SOURCE_OPTIONS[0], grain: '1:n', grainKey: '' });
     setSourceGroupRules([]);
     setSourceGroupRuleDraft({ fieldName: '', ruleType: 'latest' });
     setSourceFormOpen(false);
@@ -1170,23 +1177,6 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                 />
               </div>
 
-              {/* Trạng thái vòng đời */}
-              <div>
-                <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                  Trạng thái vòng đời
-                </label>
-                <select
-                  value={wizardData.lifecycleStatus}
-                  onChange={(e) => setWizardData({ ...wizardData, lifecycleStatus: e.target.value as LifecycleStatus })}
-                  className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 cursor-pointer"
-                >
-                  <option value="draft">Đang soạn thảo</option>
-                  <option value="active">Đã hiệu lực</option>
-                  <option value="inactive">Ngừng sử dụng</option>
-                  <option value="archived">Đã lưu trữ</option>
-                </select>
-              </div>
-
               {/* Đăng ký nguồn dữ liệu (chip + grain) */}
               <div className="pt-4 border-t border-slate-200">
                 <div className="flex items-center justify-between mb-3">
@@ -1238,38 +1228,17 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                 {/* Form thêm nguồn inline */}
                 {sourceFormOpen && (
                   <div className="mt-3 border border-blue-200 rounded-xl bg-blue-50/30 p-4">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Tên nguồn</label>
-                        <select
-                          value={sourceForm.name}
-                          onChange={(e: ChangeEvent<HTMLSelectElement>) => setSourceForm(prev => ({ ...prev, name: e.target.value, grainKey: '' }))}
-                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
-                        >
-                          {WIZARD_SOURCE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Độ mịn (Grain)</label>
-                        <select
-                          value={sourceForm.grain}
-                          onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-                            const grain = e.target.value as SourceGrain;
-                            setSourceForm(prev => ({ ...prev, grain, grainKey: grain === '1:n' ? prev.grainKey : '' }));
-                            if (grain === '1:1') {
-                              setSourceGroupRules([]);
-                              setSourceGroupRuleDraft({ fieldName: '', ruleType: 'latest' });
-                            }
-                          }}
-                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
-                        >
-                          <option value="1:1">1:1 (Một - Một)</option>
-                          <option value="1:n">1:n (Một - Nhiều)</option>
-                        </select>
-                      </div>
+                    <div>
+                      <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Tên nguồn</label>
+                      <select
+                        value={sourceForm.name}
+                        onChange={(e: ChangeEvent<HTMLSelectElement>) => setSourceForm(prev => ({ ...prev, name: e.target.value, grainKey: '' }))}
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
+                      >
+                        {WIZARD_SOURCE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                      </select>
                     </div>
 
-                    {sourceForm.grain === '1:n' && (
                     <div className="mt-3">
                       <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Khóa làm mịn</label>
                       <select
@@ -1283,10 +1252,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                         ))}
                       </select>
                     </div>
-                    )}
 
-                    {/* Quy tắc gom nguồn — chỉ áp dụng khi nguồn là 1:n */}
-                    {sourceForm.grain === '1:n' && (
                     <div className="mt-4 pt-3 border-t border-blue-100">
                       <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Quy tắc gom nguồn</label>
                       {sourceGroupRules.length > 0 && (
@@ -1347,14 +1313,13 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                         </button>
                       </div>
                     </div>
-                    )}
 
                     <div className="flex justify-end gap-2 mt-3">
                       <button
                         type="button"
                         onClick={() => {
                           setSourceFormOpen(false);
-                          setSourceForm({ name: WIZARD_SOURCE_OPTIONS[0], grain: '1:1', grainKey: '' });
+                          setSourceForm({ name: WIZARD_SOURCE_OPTIONS[0], grain: '1:n', grainKey: '' });
                           setSourceGroupRules([]);
                           setSourceGroupRuleDraft({ fieldName: '', ruleType: 'latest' });
                         }}
@@ -2778,104 +2743,33 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
 
           {/* Step 6: Quy tắc đánh phiên bản */}
           {currentStep === 6 && (() => {
-            const allFieldsChecked = availableFields.length > 0 && availableFields.every(f => versioningConfig.triggerFields[f.fieldName] ?? true);
-            const toggleTriggerField = (fieldName: string) => {
-              setVersioningConfig(prev => ({
-                ...prev,
-                triggerFields: { ...prev.triggerFields, [fieldName]: !(prev.triggerFields[fieldName] ?? true) },
-              }));
-            };
-            const toggleAllTriggerFields = () => {
-              const next = !allFieldsChecked;
-              const triggerFields: Record<string, boolean> = {};
-              availableFields.forEach(f => { triggerFields[f.fieldName] = next; });
-              setVersioningConfig(prev => ({ ...prev, triggerFields }));
-            };
             const VERSION_FORMAT_OPTIONS: { value: VersionFormatType; label: string; example: string }[] = [
               { value: 'increment',     label: 'Số tăng dần',        example: 'V1 → V2 → V3' },
               { value: 'yearIncrement', label: 'Năm + số tăng dần',  example: '2024.1 → 2024.2 → 2025.1' },
+              { value: 'semver',        label: '3 chữ số (Major.Minor.Patch)', example: 'Ver 1.0.0 → Ver 1.0.1' },
               { value: 'custom',        label: 'Tùy chỉnh',          example: '[Prefix] + [Số tự tăng]' },
             ];
+            const semverNext = { ...versioningConfig };
+            if (semverNext.semverIncrementPart === 'major') {
+              semverNext.semverMajor = String((parseInt(versioningConfig.semverMajor, 10) || 0) + 1);
+              semverNext.semverMinor = '0';
+              semverNext.semverPatch = '0';
+            } else if (semverNext.semverIncrementPart === 'minor') {
+              semverNext.semverMinor = String((parseInt(versioningConfig.semverMinor, 10) || 0) + 1);
+              semverNext.semverPatch = '0';
+            } else {
+              semverNext.semverPatch = String((parseInt(versioningConfig.semverPatch, 10) || 0) + 1);
+            }
             return (
               <div className="space-y-6">
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <h3 className="text-[13px] font-semibold text-blue-900 mb-1">Bước 6: Quy tắc đánh phiên bản</h3>
                   <p className="text-[13px] text-blue-700">
-                    Thiết lập điều kiện tạo phiên bản mới và định dạng số phiên bản cho bản ghi của thực thể này
+                    Thiết lập định dạng số phiên bản cho bản ghi của thực thể này
                   </p>
                 </div>
 
-                {/* Phần 1 — Điều kiện tạo version mới */}
                 <div className="space-y-3">
-                  <h4 className="text-[13px] font-bold text-slate-800">Phần 1 — Điều kiện tạo version mới</h4>
-                  <p className="text-[13px] text-slate-500">
-                    Cho phép Cán bộ chọn trường nào khi thay đổi sẽ tạo version mới. Hiển thị danh sách thuộc tính của thực thể, mỗi trường có toggle bật/tắt:
-                  </p>
-
-                  <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
-                    <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
-                      <h5 className="text-[13px] font-semibold text-slate-700">Chọn trường kích hoạt tạo phiên bản mới</h5>
-                      <FileText className="w-4 h-4 text-slate-400" />
-                    </div>
-                    <div className="divide-y divide-slate-100">
-                      {availableFields.length === 0 ? (
-                        <p className="px-5 py-6 text-center text-[13px] text-slate-400">Chưa có thuộc tính nào được định nghĩa ở Bước 2</p>
-                      ) : (
-                        availableFields.map(f => {
-                          const checked = versioningConfig.triggerFields[f.fieldName] ?? true;
-                          return (
-                            <label key={f.fieldName} className="flex items-center justify-between gap-4 px-5 py-3 cursor-pointer hover:bg-slate-50/60 transition-colors">
-                              <div className="flex items-center gap-3">
-                                <input
-                                  type="checkbox"
-                                  checked={checked}
-                                  onChange={() => toggleTriggerField(f.fieldName)}
-                                  className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 cursor-pointer flex-shrink-0"
-                                />
-                                <span className="text-[13px] font-medium text-slate-700">{f.displayName}</span>
-                              </div>
-                              <span className={`text-[13px] whitespace-nowrap ${checked ? 'text-blue-600' : 'text-slate-400'}`}>
-                                {checked ? 'Thay đổi giá trị → tạo version mới' : 'Không tạo version (chỉ ghi log)'}
-                              </span>
-                            </label>
-                          );
-                        })
-                      )}
-                    </div>
-                    {availableFields.length > 0 && (
-                      <label className="flex items-center justify-between gap-4 px-5 py-3 border-t border-slate-200 bg-slate-50 cursor-pointer">
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="checkbox"
-                            checked={allFieldsChecked}
-                            onChange={toggleAllTriggerFields}
-                            className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 cursor-pointer flex-shrink-0"
-                          />
-                          <span className="text-[13px] font-bold text-slate-700">Bất kỳ trường nào thay đổi</span>
-                        </div>
-                        <span className="text-[13px] font-medium text-blue-600 whitespace-nowrap">Tạo version mới (chọn tất cả)</span>
-                      </label>
-                    )}
-                  </div>
-
-                  <label className="flex items-start gap-3 cursor-pointer select-none border border-slate-200 rounded-xl p-5 bg-white">
-                    <input
-                      type="checkbox"
-                      checked={versioningConfig.autoVersionOnSync}
-                      onChange={() => setVersioningConfig(prev => ({ ...prev, autoVersionOnSync: !prev.autoVersionOnSync }))}
-                      className="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 cursor-pointer w-4 h-4 flex-shrink-0"
-                    />
-                    <div>
-                      <p className="text-[13px] font-medium text-slate-700">Tự động tạo phiên bản khi đồng bộ từ hệ thống nguồn (re-merge)</p>
-                      <p className="text-[13px] text-slate-500 mt-1">Thay đổi thủ công của Cán bộ luôn cần qua phê duyệt trước khi tạo phiên bản mới.</p>
-                    </div>
-                  </label>
-                </div>
-
-                {/* Phần 2 — Định dạng số phiên bản */}
-                <div className="space-y-3">
-                  <h4 className="text-[13px] font-bold text-slate-800">Phần 2 — Định dạng số phiên bản</h4>
-
                   <div className="border border-slate-200 rounded-xl p-5 space-y-4 bg-white">
                     <h5 className="text-[13px] font-semibold text-slate-700">Định dạng phiên bản</h5>
                     <div className="space-y-2">
@@ -2915,15 +2809,104 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                       </div>
                     )}
 
-                    <div>
-                      <label className="block text-[13px] font-medium text-slate-700 mb-2">Bắt đầu từ</label>
-                      <input
-                        type="text"
-                        value={versioningConfig.startFrom}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => setVersioningConfig(prev => ({ ...prev, startFrom: e.target.value }))}
-                        className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                      />
-                    </div>
+                    {versioningConfig.versionFormat === 'semver' && (
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-[13px] font-medium text-slate-700 mb-2">Tiền tố (Prefix)</label>
+                          <input
+                            type="text"
+                            value={versioningConfig.semverPrefix}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) => setVersioningConfig(prev => ({ ...prev, semverPrefix: e.target.value }))}
+                            placeholder="VD: Ver"
+                            className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[13px] font-medium text-slate-700 mb-2">Bắt đầu từ (Major.Minor.Patch)</label>
+                          <div className="grid grid-cols-3 gap-3">
+                            <div>
+                              <label className="block text-[12px] text-slate-500 mb-1">Major</label>
+                              <input
+                                type="number"
+                                min={0}
+                                value={versioningConfig.semverMajor}
+                                onChange={(e: ChangeEvent<HTMLInputElement>) => setVersioningConfig(prev => ({ ...prev, semverMajor: e.target.value }))}
+                                className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[12px] text-slate-500 mb-1">Minor</label>
+                              <input
+                                type="number"
+                                min={0}
+                                value={versioningConfig.semverMinor}
+                                onChange={(e: ChangeEvent<HTMLInputElement>) => setVersioningConfig(prev => ({ ...prev, semverMinor: e.target.value }))}
+                                className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[12px] text-slate-500 mb-1">Patch</label>
+                              <input
+                                type="number"
+                                min={0}
+                                value={versioningConfig.semverPatch}
+                                onChange={(e: ChangeEvent<HTMLInputElement>) => setVersioningConfig(prev => ({ ...prev, semverPatch: e.target.value }))}
+                                className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[13px] font-medium text-slate-700 mb-2">Khi có thay đổi, tự động tăng</label>
+                          <div className="flex gap-2">
+                            {([
+                              { value: 'major', label: 'Major' },
+                              { value: 'minor', label: 'Minor' },
+                              { value: 'patch', label: 'Patch' },
+                            ] as { value: SemverIncrementPart; label: string }[]).map(opt => (
+                              <label
+                                key={opt.value}
+                                className={`flex-1 text-center px-3 py-2 border rounded-lg text-[13px] font-medium cursor-pointer transition-colors ${
+                                  versioningConfig.semverIncrementPart === opt.value ? 'border-blue-400 bg-blue-50/50 text-blue-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                                }`}
+                              >
+                                <input
+                                  type="radio"
+                                  name="semverIncrementPart"
+                                  checked={versioningConfig.semverIncrementPart === opt.value}
+                                  onChange={() => setVersioningConfig(prev => ({ ...prev, semverIncrementPart: opt.value }))}
+                                  className="sr-only"
+                                />
+                                {opt.label}
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 flex items-center justify-between text-[13px]">
+                          <span className="text-slate-500">Phiên bản hiện tại → phiên bản kế tiếp</span>
+                          <code className="font-mono text-slate-700">
+                            {versioningConfig.semverPrefix} {versioningConfig.semverMajor}.{versioningConfig.semverMinor}.{versioningConfig.semverPatch}
+                            {' → '}
+                            {semverNext.semverPrefix} {semverNext.semverMajor}.{semverNext.semverMinor}.{semverNext.semverPatch}
+                          </code>
+                        </div>
+                      </div>
+                    )}
+
+                    {versioningConfig.versionFormat !== 'semver' && (
+                      <div>
+                        <label className="block text-[13px] font-medium text-slate-700 mb-2">Bắt đầu từ</label>
+                        <input
+                          type="text"
+                          value={versioningConfig.startFrom}
+                          onChange={(e: ChangeEvent<HTMLInputElement>) => setVersioningConfig(prev => ({ ...prev, startFrom: e.target.value }))}
+                          className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
