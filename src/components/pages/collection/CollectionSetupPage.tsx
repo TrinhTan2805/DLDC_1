@@ -421,7 +421,6 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
                       <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Mã / Tên dịch vụ</th>
                       <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Phương thức kết nối</th>
                       <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Hệ thống nguồn</th>
-                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Kích thước dữ liệu</th>
                       <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-20 text-[13px]">Phiên bản</th>
                       <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Ngày tạo</th>
                       <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái dịch vụ</th>
@@ -456,10 +455,6 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
                                 <span className="text-[12px] italic text-slate-400">{service.source}</span>
                               </div>
                             </div>
-                          </td>
-                          <td className="px-4 py-3 text-center whitespace-nowrap text-[13px]">
-                            <div className="font-medium text-slate-800">{service.dataSize || formatDataSize(service.recordsReceived)}</div>
-                            <div className="font-medium text-slate-500 mt-0.5">{(service.recordCount ?? service.recordsReceived ?? 0).toLocaleString('vi-VN')} bản ghi</div>
                           </td>
                           <td className="px-4 py-3 text-center text-slate-600 font-medium font-mono text-[13px]">{service.version}</td>
                           <td className="px-4 py-3 text-center text-slate-500 font-medium font-mono whitespace-nowrap text-[13px]">
