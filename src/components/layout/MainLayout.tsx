@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import { DashboardHome } from '../dashboard/DashboardHome';
+import { DashboardReportPage } from '../dashboard/DashboardReportPage';
 import { DataCollectionPage } from '../pages/DataCollectionPage';
 import { ExternalDataPage } from '../pages/collection/ExternalDataPage';
 import { InternalDataPage } from '../pages/collection/InternalDataPage';
@@ -375,6 +376,10 @@ const pageConfig: Record<string, { title: string; description: string }> = {
   'target-database-detail': {
     title: 'Chi tiết CSDL đích',
     description: 'Xem chi tiết thông tin và cấu trúc của cơ sở dữ liệu đích'
+  },
+  'dashboard-report': {
+    title: 'Báo cáo thu thập dữ liệu',
+    description: 'Danh sách dữ liệu đã thu thập và đồng bộ'
   }
 };
 
@@ -402,7 +407,11 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
   // User role - for demo purposes, set to 'leader' to show publish tab
   const userRole: 'leader' | 'staff' | 'admin' = 'leader';
 
-  const basePage = currentPage.startsWith('target-database-detail-') ? 'target-database-detail' : currentPage;
+  const basePage = currentPage.startsWith('target-database-detail-')
+    ? 'target-database-detail'
+    : currentPage.startsWith('dashboard-report-')
+    ? 'dashboard-report'
+    : currentPage;
   const currentPageConfig = pageConfig[basePage] || pageConfig.dashboard;
 
   useEffect(() => {
@@ -462,6 +471,9 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
         <main className="flex-1 overflow-y-auto">
           <div className="max-w-[1600px] mx-auto p-6">
             {currentPage === 'dashboard' && <DashboardHome />}
+            {currentPage.startsWith('dashboard-report-') && (
+              <DashboardReportPage kpiSlug={currentPage.replace('dashboard-report-', '')} />
+            )}
             {currentPage === 'collection-dashboard' && <CollectionDashboard />}
             {currentPage === 'screen-flow-diagram' && <ScreenFlowDiagram />}
             {currentPage === 'collection' && <DataCollectionPage />}
@@ -1132,6 +1144,10 @@ const getBreadcrumbPath = (pageId: string, search: string = ''): string[] => {
 
   if (pageId.startsWith('target-database-detail-')) {
     return ['Quản trị & vận hành', 'Quản lý CSDL đích', 'Chi tiết CSDL đích'];
+  }
+
+  if (pageId.startsWith('dashboard-report-')) {
+    return ['Tổng quan hệ thống', 'Báo cáo thu thập dữ liệu'];
   }
 
   return breadcrumbMap[pageId] || [pageConfig[pageId]?.title || 'Trang chủ'];
