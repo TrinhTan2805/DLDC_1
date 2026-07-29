@@ -1,10 +1,13 @@
-import { Database, CheckCircle, Share2, LayoutDashboard, TrendingUp, Users, Search } from 'lucide-react';
+import { useState } from 'react';
+import { Database, CheckCircle, Share2, LayoutDashboard, TrendingUp, Users, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { PageHeader } from '../common/PageHeader';
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ComposedChart } from 'recharts';
+import { BarChart, Bar, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ComposedChart } from 'recharts';
 import systemModelImage from 'figma:asset/a1c7c66a8943342e8de3958c64b5c85a2ed3b446.png';
 import { KPI_LABEL_TO_SLUG } from './kpiReportData';
 
 export function DashboardHome() {
+  const [publishedModelPage, setPublishedModelPage] = useState(0);
+
   const goToKpiReport = (kpiId: string) => {
     const slug = KPI_LABEL_TO_SLUG[kpiId];
     if (typeof (window as any).navigateToPage === 'function') {
@@ -51,40 +54,6 @@ export function DashboardHome() {
     },
   ];
 
-  // Data for Thu thập chart (Line Chart - 7 days)
-  const collectionData = [
-    { day: 'T2', value: 625000 },
-    { day: 'T3', value: 638000 },
-    { day: 'T4', value: 642000 },
-    { day: 'T5', value: 655000 },
-    { day: 'T6', value: 668000 },
-    { day: 'T7', value: 672000 },
-    { day: 'CN', value: 633000 },
-  ];
-
-  // Data for Xử lý chart (Bar Chart - Processing stages)
-  const processingData = [
-    { id: 'processing-1', stage: 'Làm sạch', count: 1208945, color: '#22c55e' },
-    { id: 'processing-2', stage: 'Chuẩn hóa', count: 1186734, color: '#3b82f6' },
-    { id: 'processing-3', stage: 'Biến đổi', count: 903066, color: '#8b5cf6' },
-  ];
-
-  // Data for Chia sẻ chart (Pie Chart - Share methods)
-  const shareData = [
-    { id: 'share-1', name: 'API', value: 112411, color: '#8b5cf6' },
-    { id: 'share-2', name: 'Export', value: 28134, color: '#06b6d4' },
-    { id: 'share-3', name: 'Đồng bộ', value: 16347, color: '#f59e0b' },
-  ];
-
-  // Data for Dịch vụ chia sẻ (Bar Chart - Top services)
-  const serviceShareData = [
-    { name: 'Hộ tịch', internal: 45230, external: 12340 },
-    { name: 'Quốc tịch', internal: 38940, external: 9870 },
-    { name: 'Công chứng', internal: 32150, external: 15620 },
-    { name: 'TGPL', internal: 28670, external: 8450 },
-    { name: 'ĐKKD', internal: 22340, external: 11230 },
-  ];
-
   // Data for Danh mục dùng chung (Horizontal Bar Chart)
   const commonCategoryData = [
     { category: 'Giới tính', count: 3, color: '#3b82f6' },
@@ -104,6 +73,34 @@ export function DashboardHome() {
     { month: 'T5', total: 4050000, quality: 97.3 },
     { month: 'T6', total: 4298745, quality: 97.8 },
   ];
+
+  // Top 5 mô hình dữ liệu chủ có dung lượng lớn nhất
+  const topMasterDataModelsBySize = [
+    { name: 'Danh mục Đơn vị hành chính', sizeGB: 4.8 },
+    { name: 'Danh mục Ngành nghề kinh doanh', sizeGB: 3.2 },
+    { name: 'Danh mục Quốc gia và Quốc tịch', sizeGB: 2.1 },
+    { name: 'Danh mục Dân tộc', sizeGB: 1.6 },
+    { name: 'Danh mục Chức danh, học hàm học vị', sizeGB: 0.9 },
+  ];
+  const maxMasterDataModelSize = Math.max(...topMasterDataModelsBySize.map(m => m.sizeGB));
+
+  // Danh sách mô hình dữ liệu chủ có bản ghi được công khai trên Cổng dữ liệu mở
+  const masterDataPublishedOnOpenData = [
+    { name: 'Danh mục Đơn vị hành chính', records: 63, publishedAt: '15/07/2026' },
+    { name: 'Danh mục Ngành nghề kinh doanh', records: 342, publishedAt: '12/07/2026' },
+    { name: 'Danh mục Quốc gia và Quốc tịch', records: 195, publishedAt: '02/07/2026' },
+    { name: 'Danh mục Chức danh, học hàm học vị', records: 87, publishedAt: '28/06/2026' },
+    { name: 'Danh mục Dân tộc', records: 54, publishedAt: '20/06/2026' },
+    { name: 'Danh mục Quan hệ gia đình', records: 18, publishedAt: '15/06/2026' },
+    { name: 'Danh mục Tôn giáo', records: 15, publishedAt: '05/06/2026' },
+    { name: 'Danh mục Giới tính', records: 3, publishedAt: '01/06/2026' },
+  ];
+  const PUBLISHED_MODEL_PAGE_SIZE = 5;
+  const publishedModelTotalPages = Math.ceil(masterDataPublishedOnOpenData.length / PUBLISHED_MODEL_PAGE_SIZE);
+  const publishedModelPageItems = masterDataPublishedOnOpenData.slice(
+    publishedModelPage * PUBLISHED_MODEL_PAGE_SIZE,
+    publishedModelPage * PUBLISHED_MODEL_PAGE_SIZE + PUBLISHED_MODEL_PAGE_SIZE
+  );
 
   // Data for Dữ liệu mở (Stacked Bar Chart - By category)
   const openDataData = [
@@ -203,171 +200,114 @@ export function DashboardHome() {
         })}
       </div>
 
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Thu thập Chart */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <div className="mb-4">
-            <h3 className="text-slate-900 font-semibold mb-1">Xu hướng Thu thập</h3>
-            <p className="text-sm text-slate-600">7 ngày qua</p>
-          </div>
-          <ResponsiveContainer width="100%" height={240}>
-            <LineChart data={collectionData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis dataKey="day" stroke="#64748b" style={{ fontSize: '12px' }} />
-              <YAxis stroke="#64748b" style={{ fontSize: '12px' }} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#fff',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
-                  fontSize: '12px'
-                }}
-                formatter={(value: number) => value.toLocaleString()}
-              />
-              <Line
-                type="monotone"
-                dataKey="value"
-                stroke="#3b82f6"
-                strokeWidth={3}
-                dot={{ fill: '#3b82f6', r: 4 }}
-                activeDot={{ r: 6 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Xử lý Chart */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <div className="mb-4">
-            <h3 className="text-slate-900 font-semibold mb-1">Quy trình Xử lý</h3>
-            <p className="text-sm text-slate-600">Phân bố theo giai đoạn</p>
-          </div>
-          <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={processingData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis dataKey="stage" stroke="#64748b" style={{ fontSize: '12px' }} />
-              <YAxis stroke="#64748b" style={{ fontSize: '12px' }} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#fff',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
-                  fontSize: '12px'
-                }}
-                formatter={(value: number) => value.toLocaleString()}
-              />
-              <Bar dataKey="count" radius={[8, 8, 0, 0]}>
-                {processingData.map((entry, index) => (
-                  <Cell key={`processing-cell-${entry.stage}-${index}`} fill={entry.color} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Chia sẻ Chart */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <div className="mb-4">
-            <h3 className="text-slate-900 font-semibold mb-1">Phương thức Chia sẻ</h3>
-            <p className="text-sm text-slate-600">Phân bố theo loại</p>
-          </div>
-          <ResponsiveContainer width="100%" height={240}>
-            <PieChart>
-              <Pie
-                data={shareData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, percent }: { name: string; percent: number }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                {shareData.map((entry, index) => (
-                  <Cell key={`share-cell-${entry.name}-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#fff',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
-                  fontSize: '12px'
-                }}
-                formatter={(value: number) => value.toLocaleString()}
-              />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
       {/* Additional Charts Section - Row 2 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Dịch vụ chia sẻ Chart */}
+      <div className="grid grid-cols-1 gap-6">
+        {/* Thống kê dữ liệu chủ */}
         <div className="bg-white rounded-xl border border-slate-200 p-6">
           <div className="mb-4">
-            <h3 className="text-slate-900 font-semibold mb-1">Top 5 Dịch vụ chia sẻ</h3>
-            <p className="text-sm text-slate-600">Phân bố trong/ngoài ngành</p>
+            <h3 className="text-slate-900 font-semibold mb-1">Thống kê dữ liệu chủ</h3>
+            <p className="text-sm text-slate-600">Tổng hợp mô hình, dung lượng và mức độ công khai dữ liệu chủ</p>
           </div>
-          <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={serviceShareData} layout="horizontal">
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis type="number" stroke="#64748b" style={{ fontSize: '12px' }} />
-              <YAxis dataKey="name" type="category" stroke="#64748b" style={{ fontSize: '12px' }} width={80} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#fff',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
-                  fontSize: '12px'
-                }}
-                formatter={(value: number) => value.toLocaleString()}
-              />
-              <Legend />
-              <Bar dataKey="internal" fill="#3b82f6" radius={[0, 4, 4, 0]} name="Trong ngành" />
-              <Bar dataKey="external" fill="#8b5cf6" radius={[0, 4, 4, 0]} name="Ngoài ngành" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
 
-        {/* Dữ liệu chủ Chart */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <div className="mb-4">
-            <h3 className="text-slate-900 font-semibold mb-1">Xu hướng Dữ liệu chủ</h3>
-            <p className="text-sm text-slate-600">6 tháng gần đây</p>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="border border-slate-200 rounded-lg p-4">
+              <h4 className="text-slate-800 font-medium mb-1">Xu hướng hình thành mô hình dữ liệu chủ trong 6 tháng qua</h4>
+              <ResponsiveContainer width="100%" height={260}>
+                <AreaChart data={masterDataTrendData}>
+                  <defs>
+                    <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                  <XAxis dataKey="month" stroke="#64748b" style={{ fontSize: '12px' }} />
+                  <YAxis stroke="#64748b" style={{ fontSize: '12px' }} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#fff',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      fontSize: '12px'
+                    }}
+                    formatter={(value: number) => value.toLocaleString()}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="total"
+                    stroke="#22c55e"
+                    strokeWidth={3}
+                    fillOpacity={1}
+                    fill="url(#colorTotal)"
+                    name="Tổng bản ghi"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="border border-slate-200 rounded-lg p-4">
+              <h4 className="text-slate-800 font-medium mb-3">Top 5 mô hình dữ liệu chủ có dung lượng lớn nhất</h4>
+              <div className="space-y-4">
+                {topMasterDataModelsBySize.map((model, i) => {
+                  const percent = (model.sizeGB / maxMasterDataModelSize) * 100;
+                  const colors = ['#6366f1', '#a855f7', '#ec4899', '#f59e0b', '#22c55e'];
+                  const color = colors[i % colors.length];
+                  return (
+                    <div key={model.name}>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[12px] font-bold flex-shrink-0"
+                            style={{ backgroundColor: color }}
+                          >
+                            {i + 1}
+                          </span>
+                          <span className="text-[13px] font-semibold text-slate-900">{model.name}</span>
+                        </div>
+                        <span className="text-[13px] text-slate-500 whitespace-nowrap">{model.sizeGB.toLocaleString('vi-VN')} GB</span>
+                      </div>
+                      <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                        <div className="h-full rounded-full" style={{ width: `${percent}%`, backgroundColor: color }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="border border-slate-200 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-slate-800 font-medium">Mô hình dữ liệu chủ công khai trên Cổng dữ liệu mở</h4>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setPublishedModelPage(p => Math.max(0, p - 1))}
+                    disabled={publishedModelPage === 0}
+                    className="p-1 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setPublishedModelPage(p => Math.min(publishedModelTotalPages - 1, p + 1))}
+                    disabled={publishedModelPage >= publishedModelTotalPages - 1}
+                    className="p-1 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+              <div className="space-y-2.5">
+                {publishedModelPageItems.map(model => (
+                  <div key={model.name} className="border border-slate-100 rounded-lg p-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[13px] font-semibold text-slate-900">{model.name}</span>
+                      <span className="text-[13px] text-slate-500 whitespace-nowrap">{model.records.toLocaleString('vi-VN')} bản ghi</span>
+                    </div>
+                    <p className="text-[12px] text-slate-400 mt-1">Công khai: {model.publishedAt}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-          <ResponsiveContainer width="100%" height={280}>
-            <AreaChart data={masterDataTrendData}>
-              <defs>
-                <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis dataKey="month" stroke="#64748b" style={{ fontSize: '12px' }} />
-              <YAxis stroke="#64748b" style={{ fontSize: '12px' }} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#fff',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
-                  fontSize: '12px'
-                }}
-                formatter={(value: number) => value.toLocaleString()}
-              />
-              <Area
-                type="monotone"
-                dataKey="total"
-                stroke="#22c55e"
-                strokeWidth={3}
-                fillOpacity={1}
-                fill="url(#colorTotal)"
-                name="Tổng bản ghi"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
         </div>
       </div>
 
