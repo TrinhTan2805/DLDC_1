@@ -114,6 +114,8 @@ const SOURCE_FINAL_TOTALS: { source: string; records: number; dataSizeMB: number
   { source: 'Cục Bổ trợ tư pháp', records: 2600000, dataSizeMB: 2.1 * 1024, services: 17 },
   { source: 'Vụ Hợp tác quốc tế', records: 180000, dataSizeMB: 210, services: 8 },
   { source: 'Cục Kế hoạch - Tài chính', records: 950000, dataSizeMB: 780, services: 13 },
+  { source: 'TTDLQG', records: 3250000, dataSizeMB: 2.8 * 1024, services: 10 },
+  { source: 'Tòa án', records: 4120000, dataSizeMB: 3.6 * 1024, services: 15 },
 ];
 
 export const SOURCE_TREND_LIST = SOURCE_FINAL_TOTALS.map(t => t.source);

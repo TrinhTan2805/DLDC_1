@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, Database, Hash, CheckCircle2, AlertTriangle, XCircle, FileEdit, FileText, Calendar, ChevronLeft, ChevronRight, ArrowUpDown, ChevronUp, ChevronDown, Settings2, Wand2, Shuffle, Layers, TrendingUp, Zap, Send, Clock, Eye } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Database, Hash, CheckCircle2, AlertTriangle, XCircle, FileEdit, FileText, Calendar, ChevronLeft, ChevronRight, ArrowUpDown, ChevronUp, ChevronDown, Settings2, Wand2, Shuffle, Layers, TrendingUp, Zap, Send, Clock, Eye } from 'lucide-react';
 import { BarChart, Bar, LineChart, Line, RadialBarChart, RadialBar, PolarAngleAxis, ReferenceLine, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import {
   KPI_SLUG_TO_LABEL,
@@ -13,7 +13,7 @@ import {
 
 const SOURCE_LINE_COLORS = [
   '#3b82f6', '#22c55e', '#8b5cf6', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899',
-  '#84cc16', '#6366f1', '#14b8a6', '#f97316', '#a855f7', '#0ea5e9',
+  '#84cc16', '#6366f1', '#14b8a6', '#f97316', '#a855f7', '#0ea5e9', '#eab308', '#64748b',
 ];
 
 const formatRawMetricValue = (metric: SourceTrendMetric, raw: number) => {
@@ -181,8 +181,8 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
 
   const [selectedSources, setSelectedSources] = useState<string[]>(SOURCE_TREND_LIST);
   const [barMetric, setBarMetric] = useState<SourceTrendMetric>('records');
-  const [dateFrom, setDateFrom] = useState(() => new Date().toISOString().slice(0, 10));
-  const [dateTo, setDateTo] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState(() => new Date().toISOString().slice(0, 10));
   const [errorPage, setErrorPage] = useState(0);
   const [volumeTrendGranularity, setVolumeTrendGranularity] = useState<VolumeTrendGranularity>('month30');
   const [volumeTrendYear, setVolumeTrendYear] = useState(new Date().getFullYear());
@@ -636,92 +636,128 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
         <div className="flex flex-col gap-3">
           <button
             onClick={() => setActiveShareCard('apiConfig')}
-            className={`w-full h-[80px] text-left bg-white rounded-lg border-l border-r border-b border-l-slate-200 border-r-slate-200 border-b-slate-200 border-t-4 border-t-cyan-500 p-3 transition-shadow ${
+            className={`w-full h-[94px] text-left bg-white rounded-lg border-l border-r border-b border-l-slate-200 border-r-slate-200 border-b-slate-200 border-t-4 border-t-cyan-500 p-3 flex flex-col justify-between transition-shadow ${
               activeShareCard === 'apiConfig' ? 'ring-2 ring-cyan-400 shadow-md' : 'hover:shadow-md'
             }`}
           >
-            <div className="flex items-center gap-2 mb-1">
-              <Settings2 className="w-4 h-4 text-cyan-600" />
-              <span className="text-[12px] font-semibold uppercase tracking-wide text-slate-500">
-                API đã cấu hình
-              </span>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <Settings2 className="w-4 h-4 text-cyan-600" />
+                <span className="text-[12px] font-semibold uppercase tracking-wide text-slate-500">
+                  API đã cấu hình
+                </span>
+              </div>
+              <div className="text-2xl font-bold text-slate-900">{total}</div>
             </div>
-            <div className="text-2xl font-bold text-slate-900">{total}</div>
+            <div className="flex items-center justify-end gap-1 text-[11px] font-normal text-cyan-600">
+              Xem chi tiết
+              <ArrowRight className="w-3 h-3" />
+            </div>
           </button>
 
           <button
             onClick={() => setActiveShareCard('apiCalls')}
-            className={`w-full h-[80px] text-left bg-white rounded-lg border-l border-r border-b border-l-slate-200 border-r-slate-200 border-b-slate-200 border-t-4 border-t-green-500 p-3 transition-shadow ${
+            className={`w-full h-[94px] text-left bg-white rounded-lg border-l border-r border-b border-l-slate-200 border-r-slate-200 border-b-slate-200 border-t-4 border-t-green-500 p-3 flex flex-col justify-between transition-shadow ${
               activeShareCard === 'apiCalls' ? 'ring-2 ring-green-400 shadow-md' : 'hover:shadow-md'
             }`}
           >
-            <div className="flex items-center gap-2 mb-1">
-              <Zap className="w-4 h-4 text-green-600" />
-              <span className="text-[12px] font-semibold uppercase tracking-wide text-slate-500">
-                Lượt truy cập API
-              </span>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <Zap className="w-4 h-4 text-green-600" />
+                <span className="text-[12px] font-semibold uppercase tracking-wide text-slate-500">
+                  Lượt truy cập API
+                </span>
+              </div>
+              <div className="text-2xl font-bold text-slate-900">{totalSynced.toLocaleString('vi-VN')}</div>
             </div>
-            <div className="text-2xl font-bold text-slate-900">{totalSynced.toLocaleString('vi-VN')}</div>
+            <div className="flex items-center justify-end gap-1 text-[11px] font-normal text-green-600">
+              Xem chi tiết
+              <ArrowRight className="w-3 h-3" />
+            </div>
           </button>
 
           <button
             onClick={() => setActiveShareCard('volume')}
-            className={`w-full h-[80px] text-left bg-white rounded-lg border-l border-r border-b border-l-slate-200 border-r-slate-200 border-b-slate-200 border-t-4 border-t-purple-500 p-3 transition-shadow ${
+            className={`w-full h-[94px] text-left bg-white rounded-lg border-l border-r border-b border-l-slate-200 border-r-slate-200 border-b-slate-200 border-t-4 border-t-purple-500 p-3 flex flex-col justify-between transition-shadow ${
               activeShareCard === 'volume' ? 'ring-2 ring-purple-400 shadow-md' : 'hover:shadow-md'
             }`}
           >
-            <div className="flex items-center gap-2 mb-1">
-              <Database className="w-4 h-4 text-purple-600" />
-              <span className="text-[12px] font-semibold uppercase tracking-wide text-slate-500">
-                Dung lượng chia sẻ
-              </span>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <Database className="w-4 h-4 text-purple-600" />
+                <span className="text-[12px] font-semibold uppercase tracking-wide text-slate-500">
+                  Dung lượng chia sẻ
+                </span>
+              </div>
+              <div className="text-2xl font-bold text-slate-900">{formatDataSize(totalSynced * 1150)}</div>
             </div>
-            <div className="text-2xl font-bold text-slate-900">{formatDataSize(totalSynced * 1150)}</div>
+            <div className="flex items-center justify-end gap-1 text-[11px] font-normal text-purple-600">
+              Xem chi tiết
+              <ArrowRight className="w-3 h-3" />
+            </div>
           </button>
 
           <button
             onClick={() => setActiveShareCard('requests')}
-            className={`w-full h-[80px] text-left bg-white rounded-lg border-l border-r border-b border-l-slate-200 border-r-slate-200 border-b-slate-200 border-t-4 border-t-blue-500 p-3 transition-shadow ${
+            className={`w-full h-[94px] text-left bg-white rounded-lg border-l border-r border-b border-l-slate-200 border-r-slate-200 border-b-slate-200 border-t-4 border-t-blue-500 p-3 flex flex-col justify-between transition-shadow ${
               activeShareCard === 'requests' ? 'ring-2 ring-blue-400 shadow-md' : 'hover:shadow-md'
             }`}
           >
-            <div className="flex items-center gap-2 mb-1">
-              <Send className="w-4 h-4 text-blue-600" />
-              <span className="text-[12px] font-semibold uppercase tracking-wide text-slate-500">
-                Số lượng yêu cầu chia sẻ
-              </span>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <Send className="w-4 h-4 text-blue-600" />
+                <span className="text-[12px] font-semibold uppercase tracking-wide text-slate-500">
+                  Số lượng yêu cầu chia sẻ
+                </span>
+              </div>
+              <div className="text-2xl font-bold text-slate-900">{requestsReceived.toLocaleString('vi-VN')}</div>
             </div>
-            <div className="text-2xl font-bold text-slate-900">{requestsReceived.toLocaleString('vi-VN')}</div>
+            <div className="flex items-center justify-end gap-1 text-[11px] font-normal text-blue-600">
+              Xem chi tiết
+              <ArrowRight className="w-3 h-3" />
+            </div>
           </button>
 
           <button
             onClick={() => setActiveShareCard('responseTime')}
-            className={`w-full h-[80px] text-left bg-white rounded-lg border-l border-r border-b border-l-slate-200 border-r-slate-200 border-b-slate-200 border-t-4 border-t-teal-500 p-3 transition-shadow ${
+            className={`w-full h-[94px] text-left bg-white rounded-lg border-l border-r border-b border-l-slate-200 border-r-slate-200 border-b-slate-200 border-t-4 border-t-teal-500 p-3 flex flex-col justify-between transition-shadow ${
               activeShareCard === 'responseTime' ? 'ring-2 ring-teal-400 shadow-md' : 'hover:shadow-md'
             }`}
           >
-            <div className="flex items-center gap-2 mb-1">
-              <Clock className="w-4 h-4 text-teal-600" />
-              <span className="text-[12px] font-semibold uppercase tracking-wide text-slate-500">
-                Thời gian phản hồi TB
-              </span>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <Clock className="w-4 h-4 text-teal-600" />
+                <span className="text-[12px] font-semibold uppercase tracking-wide text-slate-500">
+                  Thời gian phản hồi TB
+                </span>
+              </div>
+              <div className="text-2xl font-bold text-slate-900">299 ms</div>
             </div>
-            <div className="text-2xl font-bold text-slate-900">299 ms</div>
+            <div className="flex items-center justify-end gap-1 text-[11px] font-normal text-teal-600">
+              Xem chi tiết
+              <ArrowRight className="w-3 h-3" />
+            </div>
           </button>
 
           <button
             onClick={() => setActiveShareCard('errorRate')}
-            className={`w-full h-[80px] text-left bg-white rounded-lg border-l border-r border-b border-l-slate-200 border-r-slate-200 border-b-slate-200 border-t-4 border-t-red-500 p-3 transition-shadow ${
+            className={`w-full h-[94px] text-left bg-white rounded-lg border-l border-r border-b border-l-slate-200 border-r-slate-200 border-b-slate-200 border-t-4 border-t-red-500 p-3 flex flex-col justify-between transition-shadow ${
               activeShareCard === 'errorRate' ? 'ring-2 ring-red-400 shadow-md' : 'hover:shadow-md'
             }`}
           >
-            <div className="flex items-center gap-2 mb-1">
-              <AlertTriangle className="w-4 h-4 text-red-500" />
-              <span className="text-[12px] font-semibold uppercase tracking-wide text-slate-500">
-                API cần theo dõi
-              </span>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <AlertTriangle className="w-4 h-4 text-red-500" />
+                <span className="text-[12px] font-semibold uppercase tracking-wide text-slate-500">
+                  API cần theo dõi
+                </span>
+              </div>
+              <div className="text-2xl font-bold text-slate-900">8</div>
             </div>
-            <div className="text-2xl font-bold text-slate-900">8</div>
+            <div className="flex items-center justify-end gap-1 text-[11px] font-normal text-red-600">
+              Xem chi tiết
+              <ArrowRight className="w-3 h-3" />
+            </div>
           </button>
         </div>
 
@@ -831,7 +867,20 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
           ) : activeShareCard === 'requests' ? (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               <div className="bg-white rounded-lg border border-slate-200 p-5 flex flex-col">
-                <h3 className="text-slate-900 font-semibold mb-1">Yêu cầu chia sẻ dữ liệu đang chờ xử lý</h3>
+                <div className="flex items-start justify-between gap-2 mb-1">
+                  <h3 className="text-slate-900 font-semibold">Yêu cầu chia sẻ dữ liệu đang chờ xử lý</h3>
+                  <button
+                    onClick={() => {
+                      if (typeof (window as any).navigateToPage === 'function') {
+                        (window as any).navigateToPage('provisioning-data-request');
+                      }
+                    }}
+                    className="flex-shrink-0 flex items-center gap-1 text-[12px] font-semibold text-blue-600 hover:text-blue-700 whitespace-nowrap"
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    Xem chi tiết
+                  </button>
+                </div>
                 <p className="text-[13px] text-slate-500 mb-3">5 yêu cầu mới nhất</p>
                 <div className="space-y-2.5">
                   {PENDING_SHARE_REQUESTS.map(req => (
@@ -843,15 +892,9 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
                         </span>
                       </div>
                       <p className="text-[12px] text-slate-500 mb-2">{req.dataType}</p>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1 text-[11px] text-slate-400">
-                          <Calendar className="w-3 h-3" />
-                          {req.requestedAt}
-                        </div>
-                        <button className="flex items-center gap-1 text-[12px] font-semibold text-blue-600 hover:text-blue-700">
-                          <Eye className="w-3.5 h-3.5" />
-                          Xem chi tiết
-                        </button>
+                      <div className="flex items-center gap-1 text-[11px] text-slate-400">
+                        <Calendar className="w-3 h-3" />
+                        {req.requestedAt}
                       </div>
                     </div>
                   ))}
