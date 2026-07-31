@@ -7,6 +7,39 @@ interface VersionHistoryModalProps {
 
 const mockVersions = [
   {
+    id: 31,
+    version: 'v2.6.20',
+    date: '31/07/2026',
+    time: '10:00',
+    content: `1. Trang Tổng quan (DashboardHome.tsx) — 3 thẻ KPI (Thu thập/Xử lý/Chia sẻ):
+- Bổ sung nút "Xem chi tiết →" điều hướng sang trang báo cáo tương ứng; thêm dung lượng ước tính cạnh số bản ghi (nhỏ hơn, không in đậm); bổ sung chú thích "So với tháng trước" dưới badge phần trăm tăng trưởng.
+
+2. Trang Tổng quan — Thống kê dữ liệu chủ:
+- Bỏ mục "Top 5 mô hình dữ liệu chủ có dung lượng lớn nhất"; tăng kích thước (chiều ngang, chiều cao) biểu đồ xu hướng.
+- Đổi biểu đồ "Xu hướng hình thành mô hình dữ liệu chủ" thành "Xu hướng thay đổi dữ liệu chủ trong 6 tháng qua" (LineChart 3 đường: Tổng thay đổi, Thay đổi từ nguồn, Thay đổi thủ công).
+- Cập nhật mock data "Mô hình dữ liệu chủ công khai trên Cổng dữ liệu mở" theo đúng 27 tập dữ liệu tại Phụ lục II — Quyết định 1634/QĐ-BTP ngày 30/6/2026.
+
+3. Trang Tổng quan — Danh mục dùng chung:
+- Thay biểu đồ "Số lượng theo loại" bằng bộ 24 danh mục dùng chung thực tế theo Phụ lục I, mục I.2 (Quyết định 1634/QĐ-BTP); gộp 2 biểu đồ "hình thành"/"chia sẻ" thành 1 danh sách xếp hạng (ranked list) với 2 thanh tiến trình màu pastel và đơn vị "bản ghi".
+
+4. Trang Tổng quan — Dữ liệu mở:
+- Thay biểu đồ cột "Đã công bố/Đang chờ" bằng: (a) các thẻ tỷ lệ xử lý theo từng bước phê duyệt/công bố dạng gauge tròn (donut nhỏ), (b) danh sách xếp hạng "Lượt chia sẻ theo API của danh mục đã công bố" (thử nghiệm Treemap trước khi đổi sang ranked list theo phản hồi).
+
+5. Trang Tổng quan — Thống kê người dùng hệ thống (component mới):
+- Bỏ 2 biểu đồ "Tài khoản người dùng" và "Tần suất tra cứu dịch vụ"; thay bằng: 8 thẻ số liệu (tổng tài khoản, phân bổ theo đơn vị, thời gian làm việc TB/phiên, chưa đăng nhập lần đầu, mới/cập nhật/ngưng hoạt động/đang hoạt động trong tháng — đều kèm tỷ lệ % hoặc so sánh với tháng trước).
+- Bổ sung biểu đồ "Tỷ lệ đăng nhập thành công/thất bại" và "Người dùng mới và không hoạt động (>30 ngày)" dạng cột chồng số lượng, có bộ lọc Tuần/Quý/Năm (mặc định Tuần); bổ sung "Top tính năng được truy cập nhiều nhất" dạng ranked list.
+
+6. Trang Báo cáo chia sẻ dữ liệu (DashboardReportPage.tsx):
+- Bổ sung nút "Xem chi tiết →" (không in đậm) vào 6 thẻ thống kê đầu trang.
+- Thẻ "Yêu cầu chia sẻ dữ liệu đang chờ xử lý": gộp nút "Xem chi tiết" của từng dòng thành 1 nút chung ở đầu thẻ, điều hướng sang "Cung cấp dữ liệu theo yêu cầu".
+- Bổ sung 2 hệ thống nguồn TTDLQG và Tòa án vào biểu đồ/bộ lọc "theo Hệ thống nguồn"; đổi mặc định bộ lọc ngày: ô "đến ngày" nhận ngày hiện tại thay vì ô "từ ngày".
+
+7. Mã nguồn bị ảnh hưởng:
+- \`src/components/dashboard/DashboardHome.tsx\`
+- \`src/components/dashboard/DashboardReportPage.tsx\`
+- \`src/components/dashboard/kpiReportData.ts\``
+  },
+  {
     id: 30,
     version: 'v2.6.19',
     date: '27/07/2026',
