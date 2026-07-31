@@ -3,7 +3,7 @@ import {
   Activity, Server, Database, Network, Clock, CheckCircle2, 
   AlertCircle, ChevronRight, FileText, Share2, PlusCircle, BarChart3, ShieldCheck 
 } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 
 // Mock Data Generators
 const generateData = (count: number, prefix: string, baseValue: number, variance: number) => {
@@ -46,13 +46,19 @@ const trafficData7Days = [
 
 const trafficData30Days = generateData(30, 'Ngày', 22000, 8000);
 
-const serviceTypeData = [
-  { name: 'REST API', value: 65 },
-  { name: 'SOAP', value: 20 },
-  { name: 'File/Sync', value: 15 },
+// Top 10 API có tỷ lệ lỗi cao nhất trong 7 ngày qua - dữ liệu mock [Unverified]
+const TOP_ERROR_RATE_APIS = [
+  { endpoint: '/v1/xaydung/giay-phep/tra-cuu', system: 'XAYDUNG', calls: 48210, errors: 5120, commonError: '504 Timeout', avgTimeMs: 1820, errorRate: 10.6 },
+  { endpoint: '/v1/datdai/thua-dat/chi-tiet', system: 'DATDAI', calls: 132400, errors: 11240, commonError: '500 Internal', avgTimeMs: 1465, errorRate: 8.5 },
+  { endpoint: '/v1/moitruong/quan-trac/realtime', system: 'MOITRUONG', calls: 86300, errors: 6210, commonError: '429 Rate limit', avgTimeMs: 980, errorRate: 7.2 },
+  { endpoint: '/v1/tuphap/ho-tich/khai-sinh', system: 'TUPHAP', calls: 57800, errors: 3410, commonError: '400 Bad request', avgTimeMs: 742, errorRate: 5.9 },
+  { endpoint: '/v1/thue/hoa-don/dong-bo', system: 'THUE', calls: 421500, errors: 21900, commonError: '503 Unavailable', avgTimeMs: 1210, errorRate: 5.2 },
+  { endpoint: '/v1/nnptnt/vung-trong/danh-sach', system: 'NNPTNT', calls: 22400, errors: 1050, commonError: '502 Bad gateway', avgTimeMs: 890, errorRate: 4.7 },
+  { endpoint: '/v1/bhxh/qua-trinh-dong/tra-cuu', system: 'BHXH', calls: 268900, errors: 9860, commonError: '401 Unauthorized', avgTimeMs: 655, errorRate: 3.7 },
+  { endpoint: '/v1/yte/ho-so-suc-khoe/lich-su', system: 'YTE', calls: 158700, errors: 4920, commonError: '504 Timeout', avgTimeMs: 1320, errorRate: 3.1 },
+  { endpoint: '/v1/congthuong/giay-phep/tra-cuu', system: 'CONGTHUONG', calls: 34600, errors: 830, commonError: '400 Bad request', avgTimeMs: 610, errorRate: 2.4 },
+  { endpoint: '/v1/gtvt/dang-kiem/tra-cuu', system: 'GTVT', calls: 76200, errors: 1370, commonError: '429 Rate limit', avgTimeMs: 540, errorRate: 1.8 },
 ];
-
-const COLORS = ['#f59e0b', '#3b82f6', '#10b981'];
 
 const recentLogs = [
   { id: 'LOG-942', time: '14:23:45', api: 'Lấy danh sách Hộ tịch', client: 'Sở Y tế', status: 200, latency: '124ms' },
@@ -184,48 +190,50 @@ export function DataProvisionDashboard() {
           </div>
         </div>
 
-        {/* Service Type Pie Chart */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col">
-          <div className="mb-4">
-            <h3 className="font-bold text-slate-800">Phân bổ Giao thức</h3>
-            <p className="text-xs text-slate-500">Tỉ lệ giao thức cung cấp dữ liệu</p>
+        {/* Top 10 API có tỷ lệ lỗi cao nhất */}
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
+          <div className="p-5 pb-0">
+            <h3 className="font-bold text-slate-800">Top 10 API có tỷ lệ lỗi cao nhất</h3>
+            <p className="text-xs text-slate-500 mb-4">Xếp hạng theo tỷ lệ lỗi trong 7 ngày qua</p>
           </div>
-          <div className="flex-1 flex flex-col items-center justify-center relative">
-            <div className="h-48 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={serviceTypeData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {serviceTypeData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip 
-                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                    itemStyle={{ fontSize: '13px', fontWeight: 'bold' }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            {/* Legend */}
-            <div className="w-full space-y-2 mt-4">
-              {serviceTypeData.map((item, idx) => (
-                <div key={item.name} className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[idx] }}></div>
-                    <span className="text-slate-600 font-medium">{item.name}</span>
-                  </div>
-                  <span className="font-bold text-slate-800">{item.value}%</span>
-                </div>
-              ))}
-            </div>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-[12px]">
+              <thead className="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th className="text-left py-2.5 px-3 text-[11px] text-slate-500 font-bold whitespace-nowrap">ENDPOINT</th>
+                  <th className="text-left py-2.5 px-3 text-[11px] text-slate-500 font-bold whitespace-nowrap">HỆ THỐNG</th>
+                  <th className="text-right py-2.5 px-3 text-[11px] text-slate-500 font-bold whitespace-nowrap">LƯỢT GỌI</th>
+                  <th className="text-right py-2.5 px-3 text-[11px] text-slate-500 font-bold whitespace-nowrap">SỐ LỖI</th>
+                  <th className="text-left py-2.5 px-3 text-[11px] text-slate-500 font-bold whitespace-nowrap">MÃ LỖI PHỔ BIẾN</th>
+                  <th className="text-right py-2.5 px-3 text-[11px] text-slate-500 font-bold whitespace-nowrap">THỜI GIAN TB</th>
+                  <th className="text-left py-2.5 px-3 text-[11px] text-slate-500 font-bold whitespace-nowrap">TỶ LỆ LỖI</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {TOP_ERROR_RATE_APIS.map(api => (
+                  <tr key={api.endpoint} className="hover:bg-slate-50 transition-colors">
+                    <td className="py-2.5 px-3 font-mono text-[11px] text-slate-700 whitespace-nowrap">{api.endpoint}</td>
+                    <td className="py-2.5 px-3">
+                      <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-blue-50 text-blue-700 rounded whitespace-nowrap">
+                        {api.system}
+                      </span>
+                    </td>
+                    <td className="py-2.5 px-3 text-right text-[12px] text-slate-900 whitespace-nowrap">{api.calls.toLocaleString('vi-VN')}</td>
+                    <td className="py-2.5 px-3 text-right text-[12px] text-slate-900 whitespace-nowrap">{api.errors.toLocaleString('vi-VN')}</td>
+                    <td className="py-2.5 px-3 text-[12px] text-slate-600 whitespace-nowrap">{api.commonError}</td>
+                    <td className="py-2.5 px-3 text-right text-[12px] text-slate-900 whitespace-nowrap">{api.avgTimeMs.toLocaleString('vi-VN')} ms</td>
+                    <td className="py-2.5 px-3">
+                      <div className="flex items-center gap-1.5 min-w-[100px]">
+                        <div className="flex-1 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                          <div className="h-full rounded-full bg-red-500" style={{ width: `${(api.errorRate / TOP_ERROR_RATE_APIS[0].errorRate) * 100}%` }} />
+                        </div>
+                        <span className="text-[12px] font-bold text-red-600 whitespace-nowrap">{api.errorRate}%</span>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

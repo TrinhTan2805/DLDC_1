@@ -22,9 +22,9 @@ const formatRawMetricValue = (metric: SourceTrendMetric, raw: number) => {
 };
 
 const METRIC_BAR_CONFIG: { key: SourceTrendMetric; label: string; color: string }[] = [
-  { key: 'services', label: 'Dịch vụ', color: '#22c55e' },
-  { key: 'records', label: 'Bản ghi', color: '#3b82f6' },
-  { key: 'dataSize', label: 'Dung lượng', color: '#f59e0b' },
+  { key: 'services', label: 'Dịch vụ', color: '#15803d' },
+  { key: 'records', label: 'Bản ghi', color: '#1d4ed8' },
+  { key: 'dataSize', label: 'Dung lượng', color: '#b45309' },
 ];
 
 const DATA_STATUS_CONFIG: { key: 'success' | 'draft' | 'error' | 'warning'; label: string; color: string }[] = [
@@ -33,13 +33,6 @@ const DATA_STATUS_CONFIG: { key: 'success' | 'draft' | 'error' | 'warning'; labe
   { key: 'error', label: 'Lỗi cập nhật', color: '#ef4444' },
   { key: 'warning', label: 'Đang xử lý', color: '#3b82f6' },
 ];
-
-const PROCESSING_STATUS_BADGE: { [key in 'success' | 'draft' | 'error' | 'warning']: { label: string; style: string } } = {
-  success: { label: 'Đã cập nhật dữ liệu', style: 'bg-green-100 text-green-700 border-green-200' },
-  draft: { label: 'Chưa có dữ liệu', style: 'bg-slate-100 text-slate-600 border-slate-200' },
-  warning: { label: 'Đang xử lý đồng bộ', style: 'bg-amber-100 text-amber-700 border-amber-200' },
-  error: { label: 'Thất bại', style: 'bg-red-100 text-red-700 border-red-200' },
-};
 
 // Mock: số quy tắc làm sạch/biến đổi/chuẩn hóa theo từng hệ thống nguồn (tổng khớp với 3 thẻ ở trên: 218/170/120)
 const PROCESSING_RULES_BY_SOURCE: { [source: string]: { cleaning: number; transform: number; normalize: number } } = {
@@ -292,21 +285,6 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
     volumeGB: Math.round(processedVolumeFinalGB * PROCESSING_TREND_RATIOS[i]),
     recordsM: Number((processedRecordsFinalM * PROCESSING_TREND_RATIOS[i]).toFixed(2)),
   }));
-
-  // Bảng dữ liệu cho "Xử lý": lấy Tên dữ liệu/Nguồn từ dữ liệu Thu thập, ghép số quy tắc + dung lượng đã xử lý theo hệ thống nguồn
-  const processingTableRows =
-    selectedKPI === 'Xử lý'
-      ? (detailedData['Thu thập'] || []).map(record => ({
-          id: record.id,
-          name: record.name,
-          source: record.source,
-          cleaning: PROCESSING_RULES_BY_SOURCE[record.source]?.cleaning ?? 0,
-          transform: PROCESSING_RULES_BY_SOURCE[record.source]?.transform ?? 0,
-          normalize: PROCESSING_RULES_BY_SOURCE[record.source]?.normalize ?? 0,
-          processedGB: PROCESSED_VOLUME_BY_SOURCE[record.source] ?? 0,
-          status: record.status,
-        }))
-      : [];
 
   const apiConfigBySourceData = [...SHARING_SYSTEMS_API_CONFIG].sort((a, b) => b.apiCount - a.apiCount);
 
@@ -1563,47 +1541,9 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
       )}
 
       {/* Data Table */}
-      {selectedKPI !== 'Chia sẻ' && (
+      {selectedKPI !== 'Chia sẻ' && selectedKPI !== 'Xử lý' && (
       <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          {selectedKPI === 'Xử lý' ? (
-            <table className="w-full border-collapse text-[13px]">
-              <thead className="bg-slate-50 border-b border-slate-200">
-                <tr>
-                  <th className="text-left py-3 px-4 text-[13px] text-slate-500 font-bold whitespace-nowrap">STT</th>
-                  <th className="text-left py-3 px-4 text-[13px] text-slate-500 font-bold whitespace-nowrap">Tên dữ liệu</th>
-                  <th className="text-left py-3 px-4 text-[13px] text-slate-500 font-bold whitespace-nowrap">Nguồn</th>
-                  <th className="text-right py-3 px-4 text-[13px] text-slate-500 font-bold whitespace-nowrap">Làm sạch</th>
-                  <th className="text-right py-3 px-4 text-[13px] text-slate-500 font-bold whitespace-nowrap">Biến đổi</th>
-                  <th className="text-right py-3 px-4 text-[13px] text-slate-500 font-bold whitespace-nowrap">Chuẩn hóa</th>
-                  <th className="text-right py-3 px-4 text-[13px] text-slate-500 font-bold whitespace-nowrap">Đã xử lý (GB)</th>
-                  <th className="text-center py-3 px-4 text-[13px] text-slate-500 font-bold whitespace-nowrap">Trạng thái</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {processingTableRows.map((row, index) => (
-                  <tr key={row.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="py-3 px-4 text-[13px] text-slate-600">{index + 1}</td>
-                    <td className="py-3 px-4">
-                      <span className="text-[13px] text-slate-900">{row.name}</span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className="text-[13px] text-slate-600">{row.source}</span>
-                    </td>
-                    <td className="py-3 px-4 text-right text-[13px] text-slate-900">{row.cleaning}</td>
-                    <td className="py-3 px-4 text-right text-[13px] text-slate-900">{row.transform}</td>
-                    <td className="py-3 px-4 text-right text-[13px] text-slate-900">{row.normalize}</td>
-                    <td className="py-3 px-4 text-right text-[13px] text-slate-900">{row.processedGB.toLocaleString('vi-VN')}</td>
-                    <td className="py-3 px-4 text-center">
-                      <span className={`px-2 py-1 text-[13px] border rounded-full ${PROCESSING_STATUS_BADGE[row.status].style}`}>
-                        {PROCESSING_STATUS_BADGE[row.status].label}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
             <table className="w-full border-collapse text-[13px]">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
@@ -1667,10 +1607,9 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
                 ))}
               </tbody>
             </table>
-          )}
         </div>
 
-        {(selectedKPI === 'Xử lý' ? processingTableRows.length === 0 : currentData.length === 0) && (
+        {currentData.length === 0 && (
           <div className="text-center py-12 text-slate-500">
             Không có dữ liệu chi tiết
           </div>

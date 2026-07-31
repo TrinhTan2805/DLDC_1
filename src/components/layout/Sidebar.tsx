@@ -57,7 +57,7 @@ const menuItems: MenuItem[] = [
     subItems: [
       {
         id: "collection-dashboard",
-        label: "Dashboard",
+        label: "Tổng quan thu thập",
         icon: LayoutDashboard,
       },
       {
@@ -212,6 +212,11 @@ const menuItems: MenuItem[] = [
     label: "Xử lý dữ liệu",
     color: "text-purple-600",
     subItems: [
+      {
+        id: "processing-dashboard",
+        label: "Tổng quan xử lý dữ liệu",
+        icon: LayoutDashboard,
+      },
       {
         id: "processing-internal",
         label: "CSDL Trong ngành",

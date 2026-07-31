@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Download, Database, Building2, Building } from 'lucide-react';
+import { Download, Database, Building2, Building, ChevronLeft, ChevronRight, XCircle, Calendar, FileText } from 'lucide-react';
 import { BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell, Legend, Label, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 // Màu chủ đạo theo design system
@@ -41,16 +41,39 @@ const methodData = [
   { name: 'File excel', value: 15 },
 ];
 
-const sourceDataAll = [
+// Mở rộng dữ liệu nguồn cung cấp với 3 chỉ tiêu (Dịch vụ/Bản ghi/Dung lượng) để phục vụ bộ lọc chỉ tiêu
+// records/dataSizeGB là dữ liệu mock [Unverified], quy đổi theo tỷ lệ ước lượng từ số dịch vụ (services)
+interface SourceMetricItem {
+  name: string;
+  services: number;
+  records: number;
+  dataSizeGB: number;
+}
+
+const withSourceMetrics = (items: { name: string; value: number }[]): SourceMetricItem[] =>
+  items.map(item => ({
+    name: item.name,
+    services: item.value,
+    records: Math.round(item.value * 3200),
+    dataSizeGB: Math.round(item.value * 3200 * 0.000003 * 10) / 10,
+  }));
+
+const SOURCE_METRIC_OPTIONS: { key: 'services' | 'records' | 'dataSizeGB'; label: string }[] = [
+  { key: 'services', label: 'Dịch vụ' },
+  { key: 'records', label: 'Bản ghi' },
+  { key: 'dataSizeGB', label: 'Dung lượng' },
+];
+
+const sourceDataAll = withSourceMetrics([
   { name: 'Cục hành chính tư pháp', value: 345 },
   { name: 'Cục thi hành án', value: 287 },
   { name: 'Cục bổ trợ tư pháp', value: 256 },
   { name: 'Vụ Hợp tác quốc tế', value: 178 },
   { name: 'Bộ Nội vụ', value: 210 },
   { name: 'Bộ Công an', value: 190 },
-];
+]);
 
-const sourceDataInternal = [
+const sourceDataInternal = withSourceMetrics([
   { name: 'Cục Hành chính tư pháp', value: 345 },
   { name: 'Cục Đăng ký GD bảo đảm & Bồi thường nhà nước', value: 312 },
   { name: 'Cục Quản lý thi hành án dân sự', value: 298 },
@@ -66,19 +89,57 @@ const sourceDataInternal = [
   { name: 'Thanh tra Bộ Tư pháp', value: 121 },
   { name: 'Trung tâm Lý lịch tư pháp quốc gia', value: 109 },
   { name: 'Học viện Tư pháp', value: 96 },
-];
+]);
 
-const sourceDataExternal = [
+const sourceDataExternal = withSourceMetrics([
   { name: 'Bộ Nội vụ', value: 210 },
   { name: 'Bộ Công an', value: 190 },
   { name: 'Bộ Tài chính', value: 150 },
   { name: 'Bộ Y tế', value: 120 },
-];
+]);
+
+// Khoảng thời gian mốc để tính tỷ lệ dữ liệu phát sinh trong khoảng ngày đã chọn (mock, đơn giản hoá)
+const SOURCE_BASELINE_START = new Date('2025-01-01').getTime();
+const SOURCE_BASELINE_END = new Date('2025-12-31').getTime();
+
+const getSourceDateScale = (from: string, to: string) => {
+  if (!from && !to) return 1;
+  const start = from ? new Date(from).getTime() : SOURCE_BASELINE_START;
+  const end = to ? new Date(to).getTime() : SOURCE_BASELINE_END;
+  const totalDays = (SOURCE_BASELINE_END - SOURCE_BASELINE_START) / 86400000;
+  const clampedStart = Math.max(start, SOURCE_BASELINE_START);
+  const clampedEnd = Math.min(end, SOURCE_BASELINE_END);
+  const rangeDays = Math.max(0, (clampedEnd - clampedStart) / 86400000);
+  return totalDays > 0 ? Math.min(1, Math.max(0, rangeDays / totalDays)) : 1;
+};
 
 const resultData = [
   { name: 'Bản nháp', value: 156 },
   { name: 'Hoạt động', value: 1245 },
   { name: 'Ngưng hoạt động', value: 89 },
+];
+
+// Trạng thái dữ liệu của các dịch vụ thu thập gần nhất - dữ liệu mock [Unverified]
+interface CollectionServiceStatus {
+  id: number;
+  name: string;
+  source: string;
+  lastSync: string;
+  dataSizeLabel: string;
+  status: 'success' | 'draft' | 'error' | 'warning';
+}
+
+const collectionServiceStatusData: CollectionServiceStatus[] = [
+  { id: 1, name: 'Thu thập dữ liệu hộ tịch điện tử', source: 'Cục Hành chính tư pháp', lastSync: '20/12/2025 10:00:00', dataSizeLabel: '4.8 GB', status: 'success' },
+  { id: 2, name: 'Thu thập Danh mục quốc tịch', source: 'Bộ Ngoại giao', lastSync: '19/12/2025 14:20:00', dataSizeLabel: '320 MB', status: 'success' },
+  { id: 3, name: 'Thu thập dữ liệu thi hành án dân sự', source: 'Cục Quản lý thi hành án dân sự', lastSync: '19/12/2025 09:00:00', dataSizeLabel: '6.1 GB', status: 'success' },
+  { id: 4, name: 'Thu thập dữ liệu công chứng, chứng thực', source: 'Cục Bổ trợ tư pháp', lastSync: '18/12/2025 16:45:00', dataSizeLabel: '1.9 GB', status: 'success' },
+  { id: 5, name: 'Thu thập dữ liệu đăng ký kết hôn có yếu tố nước ngoài', source: 'Cục Hành chính tư pháp', lastSync: '18/12/2025 08:30:00', dataSizeLabel: '780 MB', status: 'success' },
+  { id: 6, name: 'Thu thập dữ liệu tổ chức trọng tài thương mại', source: 'Cục Bổ trợ tư pháp', lastSync: '17/12/2025 11:00:00', dataSizeLabel: '0 MB', status: 'draft' },
+  { id: 7, name: 'Thu thập dữ liệu Diện người được trợ giúp pháp lý theo quy định pháp luật', source: 'Bộ Nội vụ', lastSync: '15/12/2025 08:00:00', dataSizeLabel: '2.13 GB', status: 'error' },
+  { id: 8, name: 'Thu thập Danh mục và mã các dân tộc Việt Nam từ Ủy ban Dân tộc', source: 'Ủy ban Dân tộc', lastSync: '14/12/2025 09:15:00', dataSizeLabel: '512 MB', status: 'error' },
+  { id: 9, name: 'Thu thập dữ liệu đối tượng đang hưởng trợ giúp xã hội hàng tháng tại cộng đồng', source: 'Bộ LĐTBXH', lastSync: '13/12/2025 07:40:00', dataSizeLabel: '1.4 GB', status: 'error' },
+  { id: 10, name: 'Thu thập dữ liệu văn bản quy phạm pháp luật mới ban hành', source: 'Cục Kiểm tra văn bản quy phạm pháp luật', lastSync: '20/12/2025 06:00:00', dataSizeLabel: 'Đang đồng bộ', status: 'warning' },
 ];
 
 const timeDataToday = [
@@ -375,8 +436,20 @@ export function CollectionDashboard() {
   const timeTotal = currentTimeData.reduce((acc, curr) => acc + curr.value, 0);
 
   const [sourceSystemFilter, setSourceSystemFilter] = React.useState('Trong ngành');
+  const [sourceMetric, setSourceMetric] = React.useState<'services' | 'records' | 'dataSizeGB'>('services');
+  const [sourceDateFrom, setSourceDateFrom] = React.useState('');
+  const [sourceDateTo, setSourceDateTo] = React.useState('');
+  const [selectedSourceNames, setSelectedSourceNames] = React.useState<string[]>(() => {
+    const allNames = [...sourceDataAll, ...sourceDataInternal, ...sourceDataExternal].map(s => s.name);
+    return Array.from(new Set(allNames));
+  });
+  const toggleSourceName = (name: string) => {
+    setSelectedSourceNames(prev =>
+      prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name]
+    );
+  };
 
-  const getSourceData = () => {
+  const getSourceScopeData = (): SourceMetricItem[] => {
     switch(sourceSystemFilter) {
       case 'Trong ngành': return sourceDataInternal;
       case 'Ngoài ngành': return sourceDataExternal;
@@ -385,8 +458,19 @@ export function CollectionDashboard() {
     }
   };
 
-  const currentSourceData = getSourceData();
+  const sourceScopeData = getSourceScopeData();
+  const sourceDateScale = getSourceDateScale(sourceDateFrom, sourceDateTo);
+  const currentSourceData = sourceScopeData
+    .filter(item => selectedSourceNames.includes(item.name))
+    .map(item => ({ name: item.name, value: Math.round(item[sourceMetric] * sourceDateScale) }));
   const sourceTotal = currentSourceData.reduce((acc, curr) => acc + curr.value, 0);
+
+  // Dịch vụ lỗi cập nhật
+  const [errorPage, setErrorPage] = React.useState(0);
+  const errorServices = collectionServiceStatusData.filter(s => s.status === 'error');
+  const ERROR_PAGE_SIZE = 3;
+  const errorTotalPages = Math.max(1, Math.ceil(errorServices.length / ERROR_PAGE_SIZE));
+  const errorPageItems = errorServices.slice(errorPage * ERROR_PAGE_SIZE, errorPage * ERROR_PAGE_SIZE + ERROR_PAGE_SIZE);
 
   return (
     <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px' }}>
@@ -444,39 +528,171 @@ export function CollectionDashboard() {
             filterValue={sourceSystemFilter}
             onFilterChange={setSourceSystemFilter}
             filterOptions={['Trong ngành', 'Ngoài ngành']}
+            renderFilter={
+              <div className="mb-4">
+                <div className="flex items-center gap-2 flex-wrap mb-3">
+                  <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
+                    {SOURCE_METRIC_OPTIONS.map(option => (
+                      <button
+                        key={option.key}
+                        onClick={() => setSourceMetric(option.key)}
+                        className={`px-3 py-1.5 text-[13px] rounded-md transition-colors ${
+                          sourceMetric === option.key
+                            ? 'bg-white text-blue-600 shadow-sm font-semibold'
+                            : 'text-slate-600 hover:text-slate-900'
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-1.5 bg-slate-100 rounded-lg p-1.5">
+                    <input
+                      type="date"
+                      value={sourceDateFrom}
+                      onChange={(e) => setSourceDateFrom(e.target.value)}
+                      className="text-[12px] bg-white border border-slate-200 rounded-md px-2 py-1 text-slate-700"
+                    />
+                    <span className="text-slate-400 text-[12px]">đến</span>
+                    <input
+                      type="date"
+                      value={sourceDateTo}
+                      onChange={(e) => setSourceDateTo(e.target.value)}
+                      className="text-[12px] bg-white border border-slate-200 rounded-md px-2 py-1 text-slate-700"
+                    />
+                    {(sourceDateFrom || sourceDateTo) && (
+                      <button
+                        onClick={() => { setSourceDateFrom(''); setSourceDateTo(''); }}
+                        className="text-[12px] text-slate-500 hover:text-slate-800 px-1.5"
+                        title="Bỏ lọc thời gian"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {sourceScopeData.map((item, index) => {
+                    const isChecked = selectedSourceNames.includes(item.name);
+                    const color = PIE_COLORS[index % PIE_COLORS.length];
+                    return (
+                      <label
+                        key={item.name}
+                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[13px] cursor-pointer transition-colors ${
+                          isChecked ? 'border-slate-300 bg-white' : 'border-slate-200 bg-slate-50 text-slate-400'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => toggleSourceName(item.name)}
+                          className="hidden"
+                        />
+                        <span
+                          className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                          style={{ backgroundColor: isChecked ? color : '#cbd5e1' }}
+                        />
+                        <span className={isChecked ? 'text-slate-700' : 'text-slate-400'}>{item.name}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            }
           />
         </div>
       </div>
 
-      {/* Biểu đồ theo thời gian (full width) */}
-      <div className="grid grid-cols-1 gap-3">
-        <ChartCard
-          title="Biểu đồ thu thập dữ liệu theo thời gian"
-          total={timeTotal}
-          data={currentTimeData}
-          chartType="line"
-          headerRight={
-            <div className="flex items-center gap-2">
-              <label className="text-[13px] text-slate-500 font-medium whitespace-nowrap">Từ ngày</label>
-              <input
-                type="date"
-                max={toDate || today}
-                value={fromDate}
-                onChange={(e) => handleFromDateChange(e.target.value)}
-                className="w-40 px-2.5 py-1.5 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-              />
-              <label className="text-[13px] text-slate-500 font-medium whitespace-nowrap ml-2">Đến ngày</label>
-              <input
-                type="date"
-                max={today}
-                min={fromDate}
-                value={toDate}
-                onChange={(e) => handleToDateChange(e.target.value)}
-                className="w-40 px-2.5 py-1.5 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-              />
+      {/* Khối dưới: cột trái Dịch vụ lỗi cập nhật (hẹp) · cột phải biểu đồ theo thời gian (rộng) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 gap-3 lg:col-span-1">
+          <div className="bg-white rounded-lg border border-slate-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <XCircle className="w-4 h-4 text-red-600" />
+                <h3 className="text-slate-900 font-semibold uppercase text-[13px] tracking-wide">
+                  Dịch vụ lỗi cập nhật ({errorServices.length})
+                </h3>
+              </div>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setErrorPage(p => Math.max(0, p - 1))}
+                  disabled={errorPage === 0}
+                  className="p-1 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setErrorPage(p => Math.min(errorTotalPages - 1, p + 1))}
+                  disabled={errorPage >= errorTotalPages - 1}
+                  className="p-1 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
-          }
-        />
+
+            <div className="space-y-2.5">
+              {errorPageItems.length === 0 && (
+                <div className="text-center py-6 text-slate-400 text-[13px]">Không có dịch vụ lỗi cập nhật</div>
+              )}
+              {errorPageItems.map(service => (
+                <div key={service.id} className="border border-slate-200 rounded-lg p-3">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <span className="text-[13px] font-semibold text-slate-900 leading-snug">{service.name}</span>
+                    <span className="flex-shrink-0 px-2 py-0.5 text-[11px] font-bold bg-red-100 text-red-700 rounded-full whitespace-nowrap">
+                      LỖI CẬP NHẬT
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[12px] text-slate-600 mb-1">
+                    <Database className="w-3.5 h-3.5 text-slate-400" />
+                    {service.source}
+                  </div>
+                  <div className="flex items-center justify-between text-[12px] text-slate-600">
+                    <div className="flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                      {service.lastSync}
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <FileText className="w-3.5 h-3.5 text-slate-400" />
+                      {service.dataSizeLabel}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="lg:col-span-2 h-full">
+          <ChartCard
+            title="Biểu đồ thu thập dữ liệu theo thời gian"
+            total={timeTotal}
+            data={currentTimeData}
+            chartType="line"
+            headerRight={
+              <div className="flex items-center gap-2">
+                <label className="text-[13px] text-slate-500 font-medium whitespace-nowrap">Từ ngày</label>
+                <input
+                  type="date"
+                  max={toDate || today}
+                  value={fromDate}
+                  onChange={(e) => handleFromDateChange(e.target.value)}
+                  className="w-40 px-2.5 py-1.5 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
+                />
+                <label className="text-[13px] text-slate-500 font-medium whitespace-nowrap ml-2">Đến ngày</label>
+                <input
+                  type="date"
+                  max={today}
+                  min={fromDate}
+                  value={toDate}
+                  onChange={(e) => handleToDateChange(e.target.value)}
+                  className="w-40 px-2.5 py-1.5 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
+                />
+              </div>
+            }
+          />
+        </div>
       </div>
     </div>
     </div>

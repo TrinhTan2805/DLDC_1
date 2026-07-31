@@ -1,17 +1,13 @@
-import { useState } from 'react';
-import { 
-  BarChart3, 
-  Download, 
-  FileText, 
+import { useState, useRef } from 'react';
+import html2canvas from 'html2canvas';
+import {
+  BarChart3,
+  Download,
+  FileText,
   Filter,
   Table2,
   Eye,
   Image as ImageIcon,
-  Calendar,
-  TrendingUp,
-  Database,
-  Users,
-  Activity,
   History,
   X,
   Printer
@@ -28,7 +24,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer
 } from 'recharts';
 
@@ -60,30 +55,46 @@ export interface IntegrationStats {
   integrated: number;
   processed: number;
   shared: number;
+  unit: string;
+  status: 'success' | 'warning' | 'critical';
+  connectedDate: string;
 }
 
+// 15 hệ thống nguồn - đồng bộ tên với SOURCE_TREND_LIST (kpiReportData.ts) dùng ở trang Báo cáo thu thập
+// integrated/processed/shared là dung lượng dữ liệu (GB); toàn bộ số liệu, unit, status, connectedDate là dữ liệu mock [Unverified]
 const integrationData: IntegrationStats[] = [
-  { name: 'Cơ sở dữ liệu Quốc gia', integrated: 9800000, processed: 0, shared: 0 },
-  { name: 'Doanh nghiệp', integrated: 845000, processed: 842300, shared: 612400 },
-  { name: 'Đất đai', integrated: 5300000, processed: 5200000, shared: 3100000 },
-  { name: 'Bảo hiểm y tế', integrated: 8900000, processed: 8900000, shared: 7300000 },
-  { name: 'Hộ tịch điện tử', integrated: 2100000, processed: 2100000, shared: 1400000 },
-  { name: 'Giáo dục phổ thông', integrated: 3700000, processed: 3600000, shared: 2200000 },
-  { name: 'Thuế cá nhân', integrated: 6400000, processed: 6000000, shared: 4100000 },
-  { name: 'Khám chữa bệnh', integrated: 4500000, processed: 4500000, shared: 3000000 },
-  { name: 'Đăng ký kinh doanh', integrated: 1200000, processed: 1200000, shared: 980000 },
-  { name: 'Trường ĐH-CĐ', integrated: 980000, processed: 970000, shared: 540000 }
+  { name: 'TAND Tối cao', integrated: 24.7, processed: 24.3, shared: 17.8, unit: 'Bộ Tư pháp', status: 'success', connectedDate: '2024-01-10' },
+  { name: 'Bộ Nội vụ', integrated: 5.7, processed: 5.6, shared: 4.0, unit: 'Bộ Tư pháp', status: 'success', connectedDate: '2024-01-18' },
+  { name: 'Ủy ban Dân tộc', integrated: 1.3, processed: 1.3, shared: 0.8, unit: 'Bộ Tư pháp', status: 'success', connectedDate: '2024-02-05' },
+  { name: 'Bộ Ngoại giao', integrated: 0.2, processed: 0, shared: 0, unit: 'Bộ Tư pháp', status: 'warning', connectedDate: '2024-02-12' },
+  { name: 'Bộ LĐTBXH', integrated: 60.8, processed: 59.5, shared: 43.5, unit: 'Bộ Tư pháp', status: 'success', connectedDate: '2024-01-25' },
+  { name: 'Bộ Y tế', integrated: 0.9, processed: 0.9, shared: 0.6, unit: 'Bộ Tư pháp', status: 'success', connectedDate: '2024-03-01' },
+  { name: 'Cục Hành chính tư pháp', integrated: 112.3, processed: 111.3, shared: 84.4, unit: 'Cục Hộ tịch, quốc tịch, chứng thực', status: 'success', connectedDate: '2024-01-05' },
+  { name: 'Cục Quản lý thi hành án dân sự', integrated: 14.9, processed: 14.6, shared: 10.3, unit: 'Bộ Tư pháp', status: 'success', connectedDate: '2024-02-20' },
+  { name: 'Cục Đăng ký giao dịch bảo đảm và BTNN', integrated: 5.3, processed: 5.3, shared: 3.7, unit: 'Cục Đăng ký quốc gia giao dịch bảo đảm', status: 'success', connectedDate: '2024-02-10' },
+  { name: 'Cục Kiểm tra văn bản và Quản lý xử lý vi phạm hành chính', integrated: 9.7, processed: 9.4, shared: 6.0, unit: 'Bộ Tư pháp', status: 'success', connectedDate: '2024-03-08' },
+  { name: 'Cục Bổ trợ tư pháp', integrated: 7.4, processed: 7.4, shared: 5.0, unit: 'Bộ Tư pháp', status: 'success', connectedDate: '2024-03-15' },
+  { name: 'Vụ Hợp tác quốc tế', integrated: 0.5, processed: 0.5, shared: 0.3, unit: 'Bộ Tư pháp', status: 'warning', connectedDate: '2024-04-02' },
+  { name: 'Cục Kế hoạch - Tài chính', integrated: 2.7, processed: 2.7, shared: 1.7, unit: 'Bộ Tư pháp', status: 'success', connectedDate: '2024-01-30' },
+  { name: 'TTDLQG', integrated: 9.3, processed: 8.9, shared: 6.3, unit: 'Cục Công nghệ thông tin', status: 'success', connectedDate: '2024-04-20' },
+  { name: 'Tòa án', integrated: 11.8, processed: 11.4, shared: 7.6, unit: 'Bộ Tư pháp', status: 'critical', connectedDate: '2024-05-02' }
+];
+
+const INTEGRATION_METRIC_CONFIG: { key: 'integrated' | 'processed' | 'shared'; label: string; color: string }[] = [
+  { key: 'integrated', label: 'Đã tích hợp', color: '#1d4ed8' },
+  { key: 'processed', label: 'Đã xử lý', color: '#15803d' },
+  { key: 'shared', label: 'Chia sẻ đi', color: '#6d28d9' },
+];
+
+const INTEGRATION_ITEM_COLORS = [
+  '#1d4ed8', '#15803d', '#6d28d9', '#b45309', '#0f766e',
+  '#be185d', '#4338ca', '#0369a1', '#a16207', '#334155',
+  '#c2410c', '#0891b2', '#7c3aed', '#ca8a04', '#475569',
 ];
 
 const formatNumber = (value: number) => {
-  if (value === 0) return '0';
-  if (value >= 1000000) {
-    return `${(value / 1000000).toFixed(1).replace('.0', '')} Tr`;
-  }
-  if (value >= 1000) {
-    return `${(value / 1000).toFixed(1).replace('.0', '')} N`;
-  }
-  return value.toLocaleString();
+  if (value === 0) return '0 GB';
+  return `${value.toLocaleString('vi-VN', { maximumFractionDigits: 1 })} GB`;
 };
 
 const moduleData = [
@@ -152,39 +163,61 @@ type ChartType = 'bar' | 'line' | 'pie';
 export function StatisticsPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('chart');
   const [chartType, setChartType] = useState<ChartType>('bar');
-  const [selectedUnit, setSelectedUnit] = useState('all');
   const [dateRange, setDateRange] = useState({ from: '2024-01-01', to: '2024-12-31' });
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [minRecords, setMinRecords] = useState<number | ''>('');
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedDetail, setSelectedDetail] = useState<StatisticsData | null>(null);
 
-  // States for Transaction 3, 6, 8
-  const [showDataLabels, setShowDataLabels] = useState(true);
+  // States for Transaction 6, 8
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showAllDetailsModal, setShowAllDetailsModal] = useState(false);
 
-  // States for integration statistics chart (matching the user's uploaded image)
-  const [showIntegrated, setShowIntegrated] = useState(true);
-  const [showProcessed, setShowProcessed] = useState(true);
-  const [showShared, setShowShared] = useState(true);
-  const [activeChartTab, setActiveChartTab] = useState<'chart' | 'structure' | 'table'>('chart');
+  // States for integration statistics chart (thiết kế theo mẫu "Số lượng dịch vụ, bản ghi và dữ liệu theo Hệ thống nguồn")
+  const [chartMetric, setChartMetric] = useState<'integrated' | 'processed' | 'shared'>('integrated');
+  const [selectedIntegrationItems, setSelectedIntegrationItems] = useState<string[]>(integrationData.map(d => d.name));
+  const toggleIntegrationItem = (name: string) => {
+    setSelectedIntegrationItems(prev =>
+      prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name]
+    );
+  };
+  const [activeChartTab, setActiveChartTab] = useState<'chart' | 'table'>('chart');
+  const [isDownloadingChart, setIsDownloadingChart] = useState(false);
+  const chartContentRef = useRef<HTMLDivElement>(null);
 
-  const units = [
-    'Tất cả đơn vị',
-    'Bộ Tư pháp',
-    'Cục Công nghệ thông tin',
-    'Cục Hộ tịch, quốc tịch, chứng thực',
-    'Cục Trợ giúp pháp lý',
-    'Cục Đăng ký quốc gia giao dịch bảo đảm'
-  ];
+  // Lọc biểu đồ thống kê CSDL tích hợp theo khoảng ngày kết nối
+  const filteredIntegrationData = integrationData.filter(row => {
+    if (dateRange.from && row.connectedDate < dateRange.from) return false;
+    if (dateRange.to && row.connectedDate > dateRange.to) return false;
+    return true;
+  });
+
+  // Biểu đồ cột: 1 chỉ tiêu tại một thời điểm (lọc bằng chartMetric), mỗi hạng mục tích hợp 1 thanh
+  const chartDisplayData = filteredIntegrationData.filter(row => selectedIntegrationItems.includes(row.name));
+  const activeMetricConfig = INTEGRATION_METRIC_CONFIG.find(m => m.key === chartMetric)!;
 
   const handleExportReport = () => {
     alert('Đang xuất báo cáo thống kê...');
   };
 
-  const handleDownloadChart = () => {
-    alert('Đang tải biểu đồ về máy...');
+  // Transaction 7: Tải biểu đồ thống kê CSDL tích hợp về máy tính cá nhân (chụp đúng vùng biểu đồ/bảng đang hiển thị thành ảnh PNG)
+  const handleDownloadChart = async () => {
+    if (!chartContentRef.current || isDownloadingChart) return;
+    setIsDownloadingChart(true);
+    try {
+      const canvas = await html2canvas(chartContentRef.current, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        logging: false,
+      });
+      const link = document.createElement('a');
+      link.download = `bieu_do_thong_ke_CSDL_tich_hop_${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (error) {
+      console.error('Lỗi khi tải biểu đồ:', error);
+      alert('Không thể tải biểu đồ, vui lòng thử lại.');
+    } finally {
+      setIsDownloadingChart(false);
+    }
   };
 
 
@@ -234,322 +267,94 @@ export function StatisticsPage() {
             </button>
             <button
               onClick={handleDownloadChart}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-medium text-sm shadow-sm"
+              disabled={isDownloadingChart}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-medium text-sm shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
               title="Tải biểu đồ"
             >
               <Download className="w-4 h-4" />
-              Tải xuống
+              {isDownloadingChart ? 'Đang tải...' : 'Tải xuống'}
             </button>
           </div>
         </div>
       </div>
-
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg border border-slate-200 p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Database className="w-5 h-5 text-blue-600" />
-            </div>
-            <div>
-              <div className="text-sm text-slate-600">Tổng bản ghi</div>
-              <div className="text-2xl text-slate-900">{totalRecords.toLocaleString()}</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg border border-slate-200 p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-green-600" />
-            </div>
-            <div>
-              <div className="text-sm text-slate-600">Thành công</div>
-              <div className="text-2xl text-green-600">{totalSuccess.toLocaleString()}</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg border border-slate-200 p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-              <Activity className="w-5 h-5 text-red-600" />
-            </div>
-            <div>
-              <div className="text-sm text-slate-600">Thất bại</div>
-              <div className="text-2xl text-red-600">{totalFailed.toLocaleString()}</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg border border-slate-200 p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-              <Users className="w-5 h-5 text-purple-600" />
-            </div>
-            <div>
-              <div className="text-sm text-slate-600">Tỷ lệ thành công</div>
-              <div className="text-2xl text-purple-600">{successRate}%</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="bg-white rounded-lg border border-slate-200 p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Filter className="w-5 h-5 text-slate-600" />
-          <h3 className="text-slate-900">Bộ lọc thống kê</h3>
-        </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-          {/* Unit Filter */}
-          <div>
-            <label className="block text-sm text-slate-700 mb-2">Lọc theo đơn vị</label>
-            <select
-              value={selectedUnit}
-              onChange={(e) => setSelectedUnit(e.target.value)}
-              className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-            >
-              {units.map((unit) => (
-                <option key={unit} value={unit}>
-                  {unit}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Date From */}
-          <div>
-            <label className="block text-sm text-slate-700 mb-2">Từ ngày kết nối</label>
-            <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
-                type="date"
-                value={dateRange.from}
-                onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
-                className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-              />
-            </div>
-          </div>
-
-          {/* Date To */}
-          <div>
-            <label className="block text-sm text-slate-700 mb-2">Đến ngày kết nối</label>
-            <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
-                type="date"
-                value={dateRange.to}
-                onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
-                className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-              />
-            </div>
-          </div>
-
-          {/* Status Filter */}
-          <div>
-            <label className="block text-sm text-slate-700 mb-2">Trạng thái</label>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-            >
-              <option value="all">Tất cả trạng thái</option>
-              <option value="success">Hoạt động ổn định</option>
-              <option value="warning">Cảnh báo / Lỗi nhẹ</option>
-              <option value="critical">Sự cố nghiêm trọng</option>
-            </select>
-          </div>
-
-          {/* Minimum Records Filter */}
-          <div>
-            <label className="block text-sm text-slate-700 mb-2">Số bản ghi tối thiểu</label>
-            <input
-              type="number"
-              placeholder="Nhập số bản ghi..."
-              value={minRecords}
-              onChange={(e) => setMinRecords(e.target.value === '' ? '' : Number(e.target.value))}
-              className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-            />
-          </div>
-        </div>
-      </div>
-
 
       {/* Chart View */}
       {viewMode === 'chart' && (
         <div className="space-y-6">
           {/* Main Chart */}
           {/* Main Chart Panel & Customization Side Panel */}
-          <div className="flex flex-row w-full items-stretch" style={{ gap: '1.5rem' }}>
+          <div className="flex flex-row w-full items-start" style={{ gap: '1.5rem' }}>
             {/* Left Chart/Table Panel */}
             <div className="bg-white rounded-xl border border-slate-200 p-6 flex flex-col justify-between shadow-sm" style={{ flex: '7 1 0%', minWidth: 0 }}>
               <div>
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 border-b border-slate-100 pb-4">
-                  <div>
-                    <h3 className="text-slate-900 font-bold text-lg m-0">
-                      Biểu đồ thống kê theo tích hợp
-                    </h3>
-                    <p className="text-sm text-slate-500 mt-1 font-normal">
-                      So sánh số lượng dữ liệu tích hợp / xử lý / chia sẻ
-                    </p>
-                  </div>
-
-                  {/* Inner Tab Controls */}
-                  <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
-                    <button
-                      onClick={() => setActiveChartTab('chart')}
-                      className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                        activeChartTab === 'chart'
-                          ? 'bg-white text-slate-800 shadow-sm'
-                          : 'text-slate-600 hover:text-slate-800'
-                      }`}
-                    >
-                      📈 Biểu đồ
-                    </button>
-                    <button
-                      onClick={() => setActiveChartTab('structure')}
-                      className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                        activeChartTab === 'structure'
-                          ? 'bg-white text-slate-800 shadow-sm'
-                          : 'text-slate-600 hover:text-slate-800'
-                      }`}
-                    >
-                      🍩 Cơ cấu
-                    </button>
-                    <button
-                      onClick={() => setActiveChartTab('table')}
-                      className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                        activeChartTab === 'table'
-                          ? 'bg-white text-slate-800 shadow-sm'
-                          : 'text-slate-600 hover:text-slate-800'
-                      }`}
-                    >
-                      📋 Dạng bảng
-                    </button>
-                  </div>
+                <div className="mb-6 border-b border-slate-100 pb-4">
+                  <h3 className="text-slate-900 font-bold text-lg m-0">
+                    Biểu đồ thống kê theo tích hợp
+                  </h3>
+                  <p className="text-sm text-slate-500 mt-1 font-normal">
+                    So sánh số lượng dữ liệu tích hợp / xử lý / chia sẻ theo dung lượng (GB)
+                  </p>
                 </div>
 
                 {/* Tab Content Container with Consistent Height */}
-                <div className="mt-4 flex-1 flex flex-col justify-center min-h-[420px]">
-                  {activeChartTab === 'chart' && (
-                    <div className="w-full overflow-y-auto pr-2" style={{ maxHeight: '420px', minHeight: '400px' }}>
-                      <div style={{ height: `${integrationData.length * 75 + 60}px` }}>
-                        <ResponsiveContainer width="100%" height="100%">
-                          <BarChart
-                            data={integrationData}
-                            layout="vertical"
-                            margin={{ top: 10, right: 40, left: 130, bottom: 10 }}
-                          >
-                            <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
-                            <XAxis type="number" tickFormatter={formatNumber} stroke="#94a3b8" fontSize={11} />
-                            <YAxis
-                              type="category"
-                              dataKey="name"
-                              width={130}
-                              stroke="#94a3b8"
-                              fontSize={11}
-                              tick={{ fill: '#334155' }}
-                            />
-                            <Tooltip
-                              formatter={(value: number) => [formatNumber(value), '']}
-                              contentStyle={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #cbd5e1' }}
-                            />
-                            <Legend verticalAlign="bottom" height={36} />
-                            {showIntegrated && (
-                              <Bar
-                                dataKey="integrated"
-                                fill="#ea580c"
-                                name="Đã tích hợp"
-                                barSize={14}
-                                radius={[0, 4, 4, 0]}
-                                label={
-                                  showDataLabels
-                                    ? {
-                                        position: 'right',
-                                        formatter: formatNumber,
-                                        fill: '#475569',
-                                        fontSize: 10,
-                                        fontWeight: '600'
-                                      }
-                                    : false
-                                }
-                              />
-                            )}
-                            {showProcessed && (
-                              <Bar
-                                dataKey="processed"
-                                fill="#0d9488"
-                                name="Đã xử lý"
-                                barSize={14}
-                                radius={[0, 4, 4, 0]}
-                                label={
-                                  showDataLabels
-                                    ? {
-                                        position: 'right',
-                                        formatter: formatNumber,
-                                        fill: '#475569',
-                                        fontSize: 10,
-                                        fontWeight: '600'
-                                      }
-                                    : false
-                                }
-                              />
-                            )}
-                            {showShared && (
-                              <Bar
-                                dataKey="shared"
-                                fill="#1e293b"
-                                name="Chia sẻ đi"
-                                barSize={14}
-                                radius={[0, 4, 4, 0]}
-                                label={
-                                  showDataLabels
-                                    ? {
-                                        position: 'right',
-                                        formatter: formatNumber,
-                                        fill: '#475569',
-                                        fontSize: 10,
-                                        fontWeight: '600'
-                                      }
-                                    : false
-                                }
-                              />
-                            )}
-                          </BarChart>
-                        </ResponsiveContainer>
-                      </div>
+                <div ref={chartContentRef} className="mt-4 flex-1 flex flex-col justify-center min-h-[420px] bg-white">
+                  {filteredIntegrationData.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-16 text-center text-slate-500 min-h-[400px]">
+                      <Filter className="w-8 h-8 text-slate-300 mb-2" />
+                      <p className="text-sm font-medium">Không có dữ liệu phù hợp với bộ lọc đã chọn</p>
+                      <p className="text-xs text-slate-400 mt-1">Vui lòng điều chỉnh lại tiêu chí lọc ở trên</p>
                     </div>
-                  )}
-
-                  {activeChartTab === 'structure' && (
-                    <div className="flex flex-col items-center justify-center py-4 w-full h-full min-h-[400px]">
-                      <h4 className="text-slate-700 font-semibold mb-4 text-sm">Cơ cấu tổng lượng dữ liệu tích hợp toàn hệ thống</h4>
-                      <ResponsiveContainer width="100%" height={320}>
-                        <PieChart>
-                          <Pie
-                            data={[
-                              { name: 'Đã tích hợp', value: integrationData.reduce((sum, item) => sum + item.integrated, 0), color: '#ea580c' },
-                              { name: 'Đã xử lý', value: integrationData.reduce((sum, item) => sum + item.processed, 0), color: '#0d9488' },
-                              { name: 'Chia sẻ đi', value: integrationData.reduce((sum, item) => sum + item.shared, 0), color: '#1e293b' }
-                            ]}
-                            cx="50%"
-                            cy="50%"
-                            labelLine={true}
-                            label={(entry) => `${entry.name}: ${formatNumber(entry.value)}`}
-                            outerRadius={100}
-                            fill="#8884d8"
-                            dataKey="value"
-                          >
-                            <Cell fill="#ea580c" />
-                            <Cell fill="#0d9488" />
-                            <Cell fill="#1e293b" />
-                          </Pie>
-                          <Tooltip formatter={(value: number) => [formatNumber(value), '']} />
-                          <Legend />
-                        </PieChart>
-                      </ResponsiveContainer>
+                  ) : (
+                  <>
+                  {activeChartTab === 'chart' && (
+                    <div>
+                      {chartDisplayData.length === 0 ? (
+                        <div className="flex items-center justify-center h-[300px] text-slate-400 text-sm">
+                          Chọn ít nhất một hạng mục dữ liệu để hiển thị
+                        </div>
+                      ) : (
+                        <div className="w-full">
+                          <div style={{ height: `${chartDisplayData.length * 36 + 40}px` }}>
+                            <ResponsiveContainer width="100%" height="100%">
+                              <BarChart
+                                data={chartDisplayData}
+                                layout="vertical"
+                                barCategoryGap="15%"
+                                margin={{ top: 10, right: 40, left: 130, bottom: 10 }}
+                              >
+                                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
+                                <XAxis type="number" tickFormatter={formatNumber} stroke="#94a3b8" fontSize={11} />
+                                <YAxis
+                                  type="category"
+                                  dataKey="name"
+                                  width={130}
+                                  stroke="#94a3b8"
+                                  fontSize={11}
+                                  tick={{ fill: '#334155' }}
+                                />
+                                <Tooltip
+                                  formatter={(value: number) => [formatNumber(value), activeMetricConfig.label]}
+                                  contentStyle={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                                />
+                                <Bar
+                                  dataKey={chartMetric}
+                                  fill={activeMetricConfig.color}
+                                  name={activeMetricConfig.label}
+                                  barSize={20}
+                                  radius={[0, 4, 4, 0]}
+                                  label={{
+                                    position: 'right',
+                                    formatter: formatNumber,
+                                    fill: '#475569',
+                                    fontSize: 10,
+                                    fontWeight: '600'
+                                  }}
+                                />
+                              </BarChart>
+                            </ResponsiveContainer>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -565,17 +370,19 @@ export function StatisticsPage() {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                          {integrationData.map((row, idx) => (
+                          {filteredIntegrationData.map((row, idx) => (
                             <tr key={idx} className="hover:bg-slate-50">
                               <td className="px-4 py-3 text-slate-900 font-medium">{row.name}</td>
-                              <td className="px-4 py-3 text-right text-orange-700 font-semibold">{formatNumber(row.integrated)}</td>
-                              <td className="px-4 py-3 text-right text-teal-700 font-semibold">{formatNumber(row.processed)}</td>
-                              <td className="px-4 py-3 text-right text-slate-800 font-semibold">{formatNumber(row.shared)}</td>
+                              <td className="px-4 py-3 text-right text-blue-500 font-semibold">{formatNumber(row.integrated)}</td>
+                              <td className="px-4 py-3 text-right text-green-500 font-semibold">{formatNumber(row.processed)}</td>
+                              <td className="px-4 py-3 text-right text-violet-500 font-semibold">{formatNumber(row.shared)}</td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
                     </div>
+                  )}
+                  </>
                   )}
                 </div>
               </div>
@@ -586,92 +393,121 @@ export function StatisticsPage() {
               <div className="space-y-6">
                 <div>
                   <h4 className="text-slate-900 font-bold text-base m-0">Tùy chỉnh hiển thị</h4>
-                  <p className="text-xs text-slate-500 mt-1 font-normal">Ẩn/hiện chuỗi số liệu và nhãn</p>
+                  <p className="text-xs text-slate-500 mt-1 font-normal">Chuyển chế độ xem và ẩn/hiện nhãn số liệu</p>
                 </div>
 
-                {/* Series Switches */}
-                <div className="space-y-4">
-                  <div className="text-xs font-bold text-slate-400 tracking-wider uppercase">Chuỗi dữ liệu</div>
-                  
-                  <div className="flex items-center justify-between py-1">
-                    <div className="flex items-center gap-2">
-                      <span className="w-3 h-3 rounded-full bg-orange-600 block"></span>
-                      <span className="text-sm font-semibold text-slate-700">Đã tích hợp</span>
-                    </div>
+                {/* Chế độ hiển thị */}
+                <div>
+                  <div className="text-xs font-bold text-slate-400 tracking-wider uppercase mb-2">Chế độ hiển thị</div>
+                  <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
                     <button
-                      onClick={() => setShowIntegrated(!showIntegrated)}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all focus:outline-none ${
-                        showIntegrated ? 'bg-orange-600' : 'bg-slate-200'
+                      onClick={() => setActiveChartTab('chart')}
+                      className={`flex-1 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                        activeChartTab === 'chart'
+                          ? 'bg-white text-slate-800 shadow-sm'
+                          : 'text-slate-600 hover:text-slate-800'
                       }`}
                     >
-                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-all ${
-                        showIntegrated ? 'translate-x-6' : 'translate-x-1'
-                      }`} />
+                      📈 Biểu đồ
                     </button>
-                  </div>
-
-                  <div className="flex items-center justify-between py-1">
-                    <div className="flex items-center gap-2">
-                      <span className="w-3 h-3 rounded-full bg-teal-600 block"></span>
-                      <span className="text-sm font-semibold text-slate-700">Đã xử lý</span>
-                    </div>
                     <button
-                      onClick={() => setShowProcessed(!showProcessed)}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all focus:outline-none ${
-                        showProcessed ? 'bg-teal-600' : 'bg-slate-200'
+                      onClick={() => setActiveChartTab('table')}
+                      className={`flex-1 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                        activeChartTab === 'table'
+                          ? 'bg-white text-slate-800 shadow-sm'
+                          : 'text-slate-600 hover:text-slate-800'
                       }`}
                     >
-                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-all ${
-                        showProcessed ? 'translate-x-6' : 'translate-x-1'
-                      }`} />
-                    </button>
-                  </div>
-
-                  <div className="flex items-center justify-between py-1">
-                    <div className="flex items-center gap-2">
-                      <span className="w-3 h-3 rounded-full bg-slate-800 block"></span>
-                      <span className="text-sm font-semibold text-slate-700">Chia sẻ đi</span>
-                    </div>
-                    <button
-                      onClick={() => setShowShared(!showShared)}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all focus:outline-none ${
-                        showShared ? 'bg-slate-800' : 'bg-slate-200'
-                      }`}
-                    >
-                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-all ${
-                        showShared ? 'translate-x-6' : 'translate-x-1'
-                      }`} />
+                      📋 Dạng bảng
                     </button>
                   </div>
                 </div>
 
-                <div className="border-t border-slate-100 my-4"></div>
-
-                {/* Show Data Labels Switch */}
-                <div className="flex items-center justify-between py-1">
-                  <div className="flex items-center gap-2 text-slate-700">
-                    <Eye className="w-4 h-4 text-slate-500" />
-                    <span className="text-sm font-semibold">Hiển thị số liệu trên biểu đồ</span>
+                {/* Lọc theo khoảng ngày kết nối - áp dụng cho cả Biểu đồ và Dạng bảng */}
+                <div>
+                  <div className="text-xs font-bold text-slate-400 tracking-wider uppercase mb-2">Khoảng ngày kết nối</div>
+                  <div className="flex items-center gap-1.5 bg-slate-100 rounded-lg p-1.5 flex-wrap">
+                    <input
+                      type="date"
+                      value={dateRange.from}
+                      onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
+                      className="text-[12px] bg-white border border-slate-200 rounded-md px-2 py-1 text-slate-700 flex-1 min-w-0"
+                    />
+                    <span className="text-slate-400 text-[12px]">đến</span>
+                    <input
+                      type="date"
+                      value={dateRange.to}
+                      onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
+                      className="text-[12px] bg-white border border-slate-200 rounded-md px-2 py-1 text-slate-700 flex-1 min-w-0"
+                    />
+                    {(dateRange.from || dateRange.to) && (
+                      <button
+                        onClick={() => setDateRange({ from: '', to: '' })}
+                        className="text-[12px] text-slate-500 hover:text-slate-800 px-1"
+                        title="Bỏ lọc thời gian"
+                      >
+                        ✕
+                      </button>
+                    )}
                   </div>
-                  <button
-                    onClick={() => setShowDataLabels(!showDataLabels)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all focus:outline-none ${
-                      showDataLabels ? 'bg-blue-600' : 'bg-slate-200'
-                    }`}
-                  >
-                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-all ${
-                      showDataLabels ? 'translate-x-6' : 'translate-x-1'
-                    }`} />
-                  </button>
                 </div>
-              </div>
 
-              {/* Bottom Tip Box */}
-              <div className="mt-6 p-4 bg-slate-50 border border-slate-100 rounded-xl flex items-start gap-2.5">
-                <span className="text-blue-500 font-bold text-sm">ⓘ</span>
-                <p className="text-xs text-slate-600 leading-relaxed font-medium m-0">
-                  Mẹo: bấm vào một dòng trong bảng để xem chi tiết chỉ tiêu của tích hợp đó.
-                </p>
+                {activeChartTab === 'chart' && (
+                  <>
+                    {/* Chọn chỉ tiêu hiển thị */}
+                    <div>
+                      <div className="text-xs font-bold text-slate-400 tracking-wider uppercase mb-2">Chỉ tiêu hiển thị</div>
+                      <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
+                        {INTEGRATION_METRIC_CONFIG.map(option => (
+                          <button
+                            key={option.key}
+                            onClick={() => setChartMetric(option.key)}
+                            className={`flex-1 px-2 py-1.5 text-[12px] rounded-md transition-colors ${
+                              chartMetric === option.key
+                                ? 'bg-white shadow-sm font-semibold'
+                                : 'text-slate-600 hover:text-slate-900'
+                            }`}
+                            style={chartMetric === option.key ? { color: option.color } : undefined}
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Chọn hạng mục dữ liệu tích hợp hiển thị */}
+                    <div>
+                      <div className="text-xs font-bold text-slate-400 tracking-wider uppercase mb-2">Hạng mục dữ liệu</div>
+                      <div className="flex flex-wrap gap-2 max-h-[220px] overflow-y-auto pr-1">
+                        {integrationData.map((item, index) => {
+                          const isChecked = selectedIntegrationItems.includes(item.name);
+                          const color = INTEGRATION_ITEM_COLORS[index % INTEGRATION_ITEM_COLORS.length];
+                          return (
+                            <label
+                              key={item.name}
+                              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[12px] cursor-pointer transition-colors ${
+                                isChecked ? 'border-slate-300 bg-white' : 'border-slate-200 bg-slate-50 text-slate-400'
+                              }`}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={() => toggleIntegrationItem(item.name)}
+                                className="hidden"
+                              />
+                              <span
+                                className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                                style={{ backgroundColor: isChecked ? color : '#cbd5e1' }}
+                              />
+                              <span className={isChecked ? 'text-slate-700' : 'text-slate-400'}>{item.name}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </>
+                )}
+
               </div>
             </div>
           </div>

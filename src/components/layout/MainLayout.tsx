@@ -274,8 +274,12 @@ const pageConfig: Record<string, { title: string; description: string }> = {
     description: 'Quản lý và giám sát các tiến trình đối soát dữ liệu cung cấp'
   },
   'collection-dashboard': {
-    title: 'Dashboard - Quản lý thu thập',
+    title: 'Tổng quan thu thập',
     description: 'Theo dõi tổng quan hoạt động thu thập dữ liệu'
+  },
+  'processing-dashboard': {
+    title: 'Tổng quan xử lý dữ liệu',
+    description: 'Theo dõi tổng quan hoạt động xử lý dữ liệu'
   },
   'category-dashboard': {
     title: 'Tổng quan danh mục dùng chung',
@@ -475,6 +479,7 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
               <DashboardReportPage kpiSlug={currentPage.replace('dashboard-report-', '')} />
             )}
             {currentPage === 'collection-dashboard' && <CollectionDashboard />}
+            {currentPage === 'processing-dashboard' && <DashboardReportPage kpiSlug="xu-ly" />}
             {currentPage === 'screen-flow-diagram' && <ScreenFlowDiagram />}
             {currentPage === 'collection' && <DataCollectionPage />}
             {/* view-collected-data mapping removed - clicking it now only toggles dropdown */}
@@ -972,7 +977,8 @@ const getBreadcrumbPath = (pageId: string, search: string = ''): string[] => {
     'dashboard': ['Tổng quan hệ thống'],
 
     // Collection
-    'collection-dashboard': ['Quản lý thu thập', 'Dashboard'],
+    'collection-dashboard': ['Quản lý thu thập', 'Tổng quan thu thập'],
+    'processing-dashboard': ['Xử lý dữ liệu', 'Tổng quan xử lý dữ liệu'],
     'collection-setup': ['Quản lý thu thập', 'Thiết lập thu thập'],
     'collection-source-system': ['Quản lý thu thập', 'Quản lý hệ thống nguồn'],
     'collection-agent': ['Quản lý thu thập', 'Quản trị Agent'],
