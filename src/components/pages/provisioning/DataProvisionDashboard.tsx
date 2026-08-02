@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
-  Activity, Server, Database, Network, Clock, CheckCircle2, 
-  AlertCircle, ChevronRight, FileText, Share2, PlusCircle, BarChart3, ShieldCheck 
+  Activity, Server, Database, Network, Clock, CheckCircle2,
+  ChevronRight, FileText, Share2, PlusCircle, BarChart3, ShieldCheck
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 
@@ -58,13 +58,6 @@ const TOP_ERROR_RATE_APIS = [
   { endpoint: '/v1/yte/ho-so-suc-khoe/lich-su', system: 'YTE', calls: 158700, errors: 4920, commonError: '504 Timeout', avgTimeMs: 1320, errorRate: 3.1 },
   { endpoint: '/v1/congthuong/giay-phep/tra-cuu', system: 'CONGTHUONG', calls: 34600, errors: 830, commonError: '400 Bad request', avgTimeMs: 610, errorRate: 2.4 },
   { endpoint: '/v1/gtvt/dang-kiem/tra-cuu', system: 'GTVT', calls: 76200, errors: 1370, commonError: '429 Rate limit', avgTimeMs: 540, errorRate: 1.8 },
-];
-
-const recentLogs = [
-  { id: 'LOG-942', time: '14:23:45', api: 'Lấy danh sách Hộ tịch', client: 'Sở Y tế', status: 200, latency: '124ms' },
-  { id: 'LOG-941', time: '14:21:10', api: 'Lấy danh sách Hộ tịch', client: 'UBND Huyện', status: 403, latency: '45ms' },
-  { id: 'LOG-940', time: '13:15:22', api: 'Đồng bộ THADS', client: 'Tổng cục THADS', status: 200, latency: '310ms' },
-  { id: 'LOG-939', time: '11:45:01', api: 'Đọc thông tin BPBĐ', client: 'Cục GDBĐ', status: 500, latency: '5020ms' },
 ];
 
 export function DataProvisionDashboard() {
@@ -149,9 +142,9 @@ export function DataProvisionDashboard() {
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         {/* Main Traffic Chart */}
-        <div className="lg:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="font-bold text-slate-800">Lưu lượng truy cập API Gateway</h3>
@@ -189,9 +182,13 @@ export function DataProvisionDashboard() {
             </ResponsiveContainer>
           </div>
         </div>
+      </div>
 
+      {/* Bottom Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
         {/* Top 10 API có tỷ lệ lỗi cao nhất */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
+        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col overflow-hidden">
           <div className="p-5 pb-0">
             <h3 className="font-bold text-slate-800">Top 10 API có tỷ lệ lỗi cao nhất</h3>
             <p className="text-xs text-slate-500 mb-4">Xếp hạng theo tỷ lệ lỗi trong 7 ngày qua</p>
@@ -201,7 +198,6 @@ export function DataProvisionDashboard() {
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
                   <th className="text-left py-2.5 px-3 text-[11px] text-slate-500 font-bold whitespace-nowrap">ENDPOINT</th>
-                  <th className="text-left py-2.5 px-3 text-[11px] text-slate-500 font-bold whitespace-nowrap">HỆ THỐNG</th>
                   <th className="text-right py-2.5 px-3 text-[11px] text-slate-500 font-bold whitespace-nowrap">LƯỢT GỌI</th>
                   <th className="text-right py-2.5 px-3 text-[11px] text-slate-500 font-bold whitespace-nowrap">SỐ LỖI</th>
                   <th className="text-left py-2.5 px-3 text-[11px] text-slate-500 font-bold whitespace-nowrap">MÃ LỖI PHỔ BIẾN</th>
@@ -213,11 +209,6 @@ export function DataProvisionDashboard() {
                 {TOP_ERROR_RATE_APIS.map(api => (
                   <tr key={api.endpoint} className="hover:bg-slate-50 transition-colors">
                     <td className="py-2.5 px-3 font-mono text-[11px] text-slate-700 whitespace-nowrap">{api.endpoint}</td>
-                    <td className="py-2.5 px-3">
-                      <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-blue-50 text-blue-700 rounded whitespace-nowrap">
-                        {api.system}
-                      </span>
-                    </td>
                     <td className="py-2.5 px-3 text-right text-[12px] text-slate-900 whitespace-nowrap">{api.calls.toLocaleString('vi-VN')}</td>
                     <td className="py-2.5 px-3 text-right text-[12px] text-slate-900 whitespace-nowrap">{api.errors.toLocaleString('vi-VN')}</td>
                     <td className="py-2.5 px-3 text-[12px] text-slate-600 whitespace-nowrap">{api.commonError}</td>
@@ -229,54 +220,6 @@ export function DataProvisionDashboard() {
                         </div>
                         <span className="text-[12px] font-bold text-red-600 whitespace-nowrap">{api.errorRate}%</span>
                       </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Recent Audit Logs */}
-        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl shadow-sm">
-          <div className="flex items-center justify-between p-5 border-b border-slate-100">
-            <div>
-              <h3 className="font-bold text-slate-800">Nhật ký khai thác gần đây</h3>
-              <p className="text-xs text-slate-500">Hoạt động gọi API từ các đơn vị</p>
-            </div>
-            <button className="text-sm font-bold text-amber-600 hover:text-amber-700 flex items-center">
-              Xem tất cả <ChevronRight className="w-4 h-4 ml-1" />
-            </button>
-          </div>
-          <div className="p-0">
-            <table className="w-full text-left whitespace-nowrap">
-              <thead>
-                <tr className="bg-slate-50/50 text-xs text-slate-500 uppercase tracking-wider">
-                  <th className="px-5 py-3 font-bold">Thời gian</th>
-                  <th className="px-5 py-3 font-bold">Client</th>
-                  <th className="px-5 py-3 font-bold">API</th>
-                  <th className="px-5 py-3 font-bold">Trạng thái</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-sm">
-                {recentLogs.map((log) => (
-                  <tr key={log.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-5 py-3.5 font-mono text-xs text-slate-500">{log.time}</td>
-                    <td className="px-5 py-3.5 font-semibold text-slate-800">{log.client}</td>
-                    <td className="px-5 py-3.5 text-slate-600 text-xs font-medium">{log.api}</td>
-                    <td className="px-5 py-3.5">
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border ${
-                        log.status === 200 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                        log.status === 403 ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                        'bg-rose-50 text-rose-700 border-rose-200'
-                      }`}>
-                        {log.status === 200 ? <CheckCircle2 className="w-3 h-3" /> : <AlertCircle className="w-3 h-3" />}
-                        {log.status}
-                      </span>
                     </td>
                   </tr>
                 ))}

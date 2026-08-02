@@ -38,6 +38,7 @@ import { CategoryReportVersionPage } from '../pages/category/reports/CategoryRep
 import { NewCategorySetupPage } from '../pages/new-category';
 import { CategorySetupPageNew } from '../pages/category/CategorySetupPageNew';
 import { OpenDataCategoryPage } from '../pages/OpenDataCategoryPage';
+import { OpenDataDashboardPage } from '../pages/open-data/OpenDataDashboardPage';
 import { OpenDataSetupPage } from '../pages/open-data/OpenDataSetupPage';
 import { OpenDataPublishedListPage } from '../pages/open-data/OpenDataPublishedListPage';
 import { OpenDataPublicPortal } from '../pages/open-data/OpenDataPublicPortal';
@@ -68,6 +69,7 @@ import { MasterDataGPage } from '../pages/master-data-list/MasterDataGPage';
 import { MasterDataHPage } from '../pages/master-data-list/MasterDataHPage';
 import { MasterDataIPage } from '../pages/master-data-list/MasterDataIPage';
 import { MasterDataJPage } from '../pages/master-data-list/MasterDataJPage';
+import { MasterDataDashboardPage } from '../pages/master-data/MasterDataDashboardPage';
 import { MasterDataScaleManagementPage } from '../pages/master-data/MasterDataScaleManagementPage';
 import { MasterDataUpdatePage } from '../pages/master-data/MasterDataUpdatePage';
 import MasterDataReportsPage from '../pages/master-data/MasterDataReportsPage';
@@ -317,6 +319,10 @@ const pageConfig: Record<string, { title: string; description: string }> = {
     title: 'Đối soát dữ liệu cung cấp',
     description: 'Thiết lập các quy tắc và cấu hình đối soát dữ liệu cung cấp'
   },
+  'open-data-dashboard': {
+    title: 'Tổng quan dữ liệu mở',
+    description: 'Tổng hợp quy trình phê duyệt, công bố và lượt chia sẻ theo API của danh mục dữ liệu mở'
+  },
   'open-data-setup': {
     title: 'Thiết lập danh mục dữ liệu mở',
     description: 'Cấu hình và thiết lập các danh mục dữ liệu mở phục vụ công khai, chia sẻ'
@@ -364,6 +370,10 @@ const pageConfig: Record<string, { title: string; description: string }> = {
   'master-data-reports': {
     title: 'Báo cáo tìm kiếm dữ liệu chủ',
     description: 'Tra cứu, báo cáo sử dụng và theo dõi vòng đời dữ liệu chủ'
+  },
+  'master-data-dashboard': {
+    title: 'Tổng quan dữ liệu chủ',
+    description: 'Tổng hợp mô hình, dung lượng và mức độ công khai dữ liệu chủ'
   },
   'master-data-scale-management': {
     title: 'Mô hình dữ liệu chủ',
@@ -535,6 +545,7 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'category-statistics-report' && <CategoryStatisticsReportPage />}
             {currentPage === 'new-category-setup' && <NewCategorySetupPage />}
             {currentPage === 'open-data' && <OpenDataCategoryPage />}
+            {currentPage === 'open-data-dashboard' && <OpenDataDashboardPage />}
             {currentPage === 'open-data-setup' && <OpenDataSetupPage onNavigate={setCurrentPage} />}
             {currentPage === 'open-data-category-list' && <OpenDataCategoryListPage />}
             {currentPage === 'open-data-published-list' && <OpenDataPublishedListPage />}
@@ -566,6 +577,7 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'master-data-h' && <MasterDataHPage />}
             {currentPage === 'master-data-i' && <MasterDataIPage />}
             {currentPage === 'master-data-j' && <MasterDataJPage />}
+            {currentPage === 'master-data-dashboard' && <MasterDataDashboardPage />}
             {currentPage === 'master-data-scale-management' && <MasterDataScaleManagementPage />}
             {currentPage === 'master-data-update' && <MasterDataUpdatePage />}
             {currentPage === 'master-data-update-b' && <ProcessingNationalityPage />}
@@ -1083,6 +1095,7 @@ const getBreadcrumbPath = (pageId: string, search: string = ''): string[] => {
     'category-report-version': ['Danh mục dùng chung', 'Thống kê danh mục', 'Báo cáo phiên bản danh mục'],
 
     // Open Data
+    'open-data-dashboard': ['Dữ liệu mở', 'Tổng quan dữ liệu mở'],
     'open-data-setup': ['Dữ liệu mở', 'Quản lý danh mục'],
     'open-data-category-list': ['Dữ liệu mở', 'Biên tập danh mục'],
     'open-data-category-a': ['Dữ liệu mở', 'Biên tập danh mục', 'Danh sách tổ chức thực hiện trợ giúp pháp lý'],
@@ -1092,6 +1105,7 @@ const getBreadcrumbPath = (pageId: string, search: string = ''): string[] => {
     'open-data-report': ['Dữ liệu mở', 'Thống kê dữ liệu mở'],
 
     // Master Data
+    'master-data-dashboard': ['Dữ liệu chủ', 'Tổng quan dữ liệu chủ'],
     'master-data-scale-management': ['Dữ liệu chủ', 'Mô hình dữ liệu chủ'],
     'master-data-update': ['Dữ liệu chủ', 'Cập nhật dữ liệu chủ'],
     'master-data-reports': ['Dữ liệu chủ', 'Báo cáo tìm kiếm dữ liệu chủ'],

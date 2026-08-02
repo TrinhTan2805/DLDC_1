@@ -387,6 +387,11 @@ const menuItems: MenuItem[] = [
     color: "text-emerald-600",
     subItems: [
       {
+        id: "open-data-dashboard",
+        label: "Tổng quan dữ liệu mở",
+        icon: LayoutDashboard,
+      },
+      {
         id: "open-data-setup",
         label: "Thiết lập danh mục dữ liệu mở",
         icon: Settings,
@@ -414,6 +419,11 @@ const menuItems: MenuItem[] = [
     label: "Dữ liệu chủ",
     color: "text-teal-600",
     subItems: [
+      {
+        id: "master-data-dashboard",
+        label: "Tổng quan dữ liệu chủ",
+        icon: LayoutDashboard,
+      },
       {
         id: "master-data-scale-management",
         label: "Mô hình dữ liệu chủ",

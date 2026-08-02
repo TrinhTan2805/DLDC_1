@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Database, CheckCircle, Share2, LayoutDashboard, TrendingUp, TrendingDown, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import { Database, CheckCircle, Share2, LayoutDashboard, TrendingUp, TrendingDown, ArrowRight } from 'lucide-react';
 import { PageHeader } from '../common/PageHeader';
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadialBarChart, RadialBar, PolarAngleAxis } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { KPI_LABEL_TO_SLUG } from './kpiReportData';
 
 type UserStatsGranularity = 'week' | 'quarter' | 'year';
@@ -13,7 +13,6 @@ const USER_STATS_GRANULARITY_OPTIONS: { key: UserStatsGranularity; label: string
 ];
 
 export function DashboardHome() {
-  const [publishedModelPage, setPublishedModelPage] = useState(0);
   const [loginSecurityGranularity, setLoginSecurityGranularity] = useState<UserStatsGranularity>('week');
   const [userActivityGranularity, setUserActivityGranularity] = useState<UserStatsGranularity>('week');
 
@@ -123,79 +122,6 @@ export function DashboardHome() {
     { name: 'Loại quyết định thi hành án', records: 52, publishedAt: '28/05/2026' },
   ];
 
-  // Xu hướng thay đổi dữ liệu chủ trong 6 tháng qua [Unverified]
-  const masterDataTrendData = [
-    { month: 'T1', fromSource: 1850, manual: 620 },
-    { month: 'T2', fromSource: 2040, manual: 580 },
-    { month: 'T3', fromSource: 2260, manual: 710 },
-    { month: 'T4', fromSource: 2480, manual: 640 },
-    { month: 'T5', fromSource: 2650, manual: 690 },
-    { month: 'T6', fromSource: 2820, manual: 750 },
-  ].map(row => ({ ...row, total: row.fromSource + row.manual }));
-
-  // Danh sách tập dữ liệu mở theo Phụ lục II - Quyết định 1634/QĐ-BTP ngày 30/6/2026
-  // Tên tập dữ liệu và ngày cung cấp lần đầu lấy từ văn bản đã cung cấp; số bản ghi là dữ liệu mock [Unverified]
-  const masterDataPublishedOnOpenData = [
-    { name: 'Danh sách tổ chức thực hiện trợ giúp pháp lý', records: 63, publishedAt: '01/01/2019' },
-    { name: 'Danh sách người thực hiện trợ giúp pháp lý', records: 210, publishedAt: '01/01/2019' },
-    { name: 'Danh sách Luật sư Việt Nam', records: 18450, publishedAt: '01/01/2027' },
-    { name: 'Danh sách Tổ chức hành nghề Luật sư Việt Nam', records: 4820, publishedAt: '01/01/2027' },
-    { name: 'Danh sách chi nhánh Tổ chức hành nghề Luật sư', records: 960, publishedAt: '01/01/2027' },
-    { name: 'Danh sách Luật sư nước ngoài', records: 145, publishedAt: '01/01/2027' },
-    { name: 'Danh sách Tổ chức hành nghề Luật sư nước ngoài', records: 62, publishedAt: '01/01/2027' },
-    { name: 'Danh sách chi nhánh Tổ chức hành nghề Luật sư nước ngoài', records: 24, publishedAt: '01/01/2027' },
-    { name: 'Danh sách Tư vấn viên pháp luật', records: 890, publishedAt: '01/01/2027' },
-    { name: 'Danh sách Trung tâm tư vấn pháp luật', records: 320, publishedAt: '01/01/2027' },
-    { name: 'Danh sách chi nhánh Trung tâm tư vấn pháp luật', records: 105, publishedAt: '01/01/2027' },
-    { name: 'Danh sách công chứng viên Việt Nam', records: 3260, publishedAt: '01/01/2027' },
-    { name: 'Danh sách tổ chức hành nghề công chứng', records: 1480, publishedAt: '01/01/2027' },
-    { name: 'Danh sách quản tài viên Việt Nam', records: 410, publishedAt: '01/01/2027' },
-    { name: 'Danh sách doanh nghiệp quản lý, thanh lý tài sản', records: 180, publishedAt: '01/01/2027' },
-    { name: 'Danh sách đấu giá viên', records: 720, publishedAt: '01/01/2027' },
-    { name: 'Danh sách tổ chức hành nghề đấu giá', records: 340, publishedAt: '01/01/2027' },
-    { name: 'Danh sách giám định viên tư pháp', records: 1050, publishedAt: '01/01/2027' },
-    { name: 'Danh sách tổ chức giám định tư pháp', records: 230, publishedAt: '01/01/2027' },
-    { name: 'Danh sách trọng tài viên thương mại', records: 380, publishedAt: '01/01/2027' },
-    { name: 'Danh sách trung tâm trọng tài thương mại', records: 42, publishedAt: '01/01/2027' },
-    { name: 'Danh sách hòa giải viên thương mại', records: 260, publishedAt: '01/01/2027' },
-    { name: 'Danh sách trung tâm hòa giải thương mại', records: 28, publishedAt: '01/01/2027' },
-    { name: 'Danh sách Báo cáo viên pháp luật trung ương', records: 150, publishedAt: '01/01/2017' },
-    { name: 'Dữ liệu thống kê ngành Tư pháp', records: 25, publishedAt: '01/01/2015' },
-    { name: 'Tài sản thi hành án được đưa ra bán đấu giá', records: 5600, publishedAt: '01/07/2009' },
-    { name: 'Dữ liệu người phải thi hành án chưa có điều kiện thi hành', records: 8300, publishedAt: '01/07/2015' },
-  ];
-  const PUBLISHED_MODEL_PAGE_SIZE = 5;
-  const publishedModelTotalPages = Math.ceil(masterDataPublishedOnOpenData.length / PUBLISHED_MODEL_PAGE_SIZE);
-  const publishedModelPageItems = masterDataPublishedOnOpenData.slice(
-    publishedModelPage * PUBLISHED_MODEL_PAGE_SIZE,
-    publishedModelPage * PUBLISHED_MODEL_PAGE_SIZE + PUBLISHED_MODEL_PAGE_SIZE
-  );
-
-  // Dữ liệu mở - Quy trình phê duyệt và công bố danh mục dữ liệu mở [Unverified]
-  const openDataFunnelStats = {
-    totalCreated: 27,
-    approved: 24,
-    submitted: 21,
-    published: 20,
-    shared: 14,
-  };
-  const openDataFunnelSteps = [
-    { label: 'Đã phê duyệt / Tổng đã tạo', value: openDataFunnelStats.approved, base: openDataFunnelStats.totalCreated, color: '#3b82f6' },
-    { label: 'Đã gửi công bố / Đã phê duyệt', value: openDataFunnelStats.submitted, base: openDataFunnelStats.approved, color: '#22c55e' },
-    { label: 'Đã công bố / Đã gửi công bố', value: openDataFunnelStats.published, base: openDataFunnelStats.submitted, color: '#f59e0b' },
-    { label: 'Đã thực hiện chia sẻ / Đã công bố', value: openDataFunnelStats.shared, base: openDataFunnelStats.published, color: '#a855f7' },
-  ].map(step => ({ ...step, percent: Math.round((step.value / step.base) * 100) }));
-
-  // Dữ liệu mở - Lượt chia sẻ theo API của các danh mục đã công bố [Unverified]
-  const apiSharesByOpenDataCounts = [
-    45, 12, 980, 340, 62, 8, 4, 2, 56, 21,
-    7, 210, 96, 26, 11, 48, 22, 68, 15, 24,
-    3, 17, 2, 9, 1, 320, 540,
-  ];
-  const apiSharesByOpenData = masterDataPublishedOnOpenData
-    .map((item, i) => ({ name: item.name, shares: apiSharesByOpenDataCounts[i] ?? 0 }))
-    .sort((a, b) => b.shares - a.shares);
-  const maxApiShares = Math.max(...apiSharesByOpenData.map(d => d.shares));
 
   // Thống kê người dùng hệ thống - thẻ tổng hợp [Unverified]
   const userStatsSummary = {
@@ -378,76 +304,6 @@ export function DashboardHome() {
         })}
       </div>
 
-      {/* Additional Charts Section - Row 2 */}
-      <div className="grid grid-cols-1 gap-6">
-        {/* Thống kê dữ liệu chủ */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <div className="mb-4">
-            <h3 className="text-slate-900 font-semibold mb-1">Thống kê dữ liệu chủ</h3>
-            <p className="text-sm text-slate-600">Tổng hợp mô hình, dung lượng và mức độ công khai dữ liệu chủ</p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 border border-slate-200 rounded-lg p-4">
-              <h4 className="text-slate-800 font-medium mb-1">Xu hướng thay đổi dữ liệu chủ trong 6 tháng qua</h4>
-              <ResponsiveContainer width="100%" height={400}>
-                <LineChart data={masterDataTrendData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                  <XAxis dataKey="month" stroke="#64748b" style={{ fontSize: '12px' }} />
-                  <YAxis stroke="#64748b" style={{ fontSize: '12px' }} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: '#fff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      fontSize: '12px'
-                    }}
-                    formatter={(value: number) => value.toLocaleString()}
-                  />
-                  <Legend />
-                  <Line type="monotone" dataKey="total" stroke="#22c55e" strokeWidth={3} name="Tổng thay đổi" dot={{ r: 3 }} />
-                  <Line type="monotone" dataKey="fromSource" stroke="#3b82f6" strokeWidth={2} name="Thay đổi từ nguồn" dot={{ r: 3 }} />
-                  <Line type="monotone" dataKey="manual" stroke="#f59e0b" strokeWidth={2} name="Thay đổi thủ công" dot={{ r: 3 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-
-            <div className="border border-slate-200 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h4 className="text-slate-800 font-medium">Mô hình dữ liệu chủ công khai trên Cổng dữ liệu mở</h4>
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => setPublishedModelPage(p => Math.max(0, p - 1))}
-                    disabled={publishedModelPage === 0}
-                    className="p-1 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => setPublishedModelPage(p => Math.min(publishedModelTotalPages - 1, p + 1))}
-                    disabled={publishedModelPage >= publishedModelTotalPages - 1}
-                    className="p-1 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-              <div className="space-y-2.5">
-                {publishedModelPageItems.map(model => (
-                  <div key={model.name} className="border border-slate-100 rounded-lg p-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-[13px] font-semibold text-slate-900">{model.name}</span>
-                      <span className="text-[13px] text-slate-500 whitespace-nowrap">{model.records.toLocaleString('vi-VN')} bản ghi</span>
-                    </div>
-                    <p className="text-[12px] text-slate-400 mt-1">Công khai: {model.publishedAt}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Additional Charts Section - Row 3 */}
       <div className="grid grid-cols-1 gap-6">
         {/* Danh mục dùng chung */}
@@ -497,68 +353,6 @@ export function DashboardHome() {
                       <span className="text-[13px] text-slate-500 whitespace-nowrap">{item.records.toLocaleString('vi-VN')} bản ghi</span>
                     </div>
                     <p className="text-[12px] text-slate-400 mt-1">Công khai: {item.publishedAt}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Dữ liệu mở Chart */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <div className="mb-4">
-            <h3 className="text-slate-900 font-semibold mb-1">Dữ liệu mở</h3>
-            <p className="text-sm text-slate-600">Tổng hợp quy trình phê duyệt, công bố và lượt chia sẻ theo API của danh mục dữ liệu mở</p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="border border-slate-200 rounded-lg p-4">
-              <h4 className="text-slate-800 font-medium mb-1">Xử lý quy trình phê duyệt và công bố danh mục dữ liệu mở</h4>
-              <p className="text-[12px] text-slate-500 mb-4">Tỷ lệ xử lý qua từng bước, tính trên tổng {openDataFunnelStats.totalCreated.toLocaleString('vi-VN')} danh mục đã tạo</p>
-              <div className="grid grid-cols-2 gap-3">
-                {openDataFunnelSteps.map(step => (
-                  <div key={step.label} className="border border-slate-100 rounded-lg p-3 flex flex-col items-center">
-                    <div className="relative" style={{ width: 110, height: 110 }}>
-                      <ResponsiveContainer width={110} height={110}>
-                        <RadialBarChart
-                          data={[{ value: step.percent }]}
-                          innerRadius="72%"
-                          outerRadius="100%"
-                          startAngle={90}
-                          endAngle={-270}
-                          barSize={10}
-                        >
-                          <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
-                          <RadialBar dataKey="value" cornerRadius={20} fill={step.color} background={{ fill: '#f1f5f9' }} />
-                        </RadialBarChart>
-                      </ResponsiveContainer>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className="text-base font-bold" style={{ color: step.color }}>{step.value.toLocaleString('vi-VN')}</span>
-                        <span className="text-[11px] text-slate-400">/ {step.base.toLocaleString('vi-VN')}</span>
-                        <span className="text-[11px] text-slate-500">{step.percent}%</span>
-                      </div>
-                    </div>
-                    <p className="text-[12px] text-slate-600 text-center mt-2">{step.label}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="border border-slate-200 rounded-lg p-4">
-              <h4 className="text-slate-800 font-medium mb-3">Lượt chia sẻ theo API của danh mục đã công bố</h4>
-              <div className="overflow-y-auto space-y-3" style={{ maxHeight: 420 }}>
-                {apiSharesByOpenData.map((item, i) => (
-                  <div key={item.name}>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-600 text-[11px] font-semibold flex items-center justify-center flex-shrink-0">
-                        {i + 1}
-                      </span>
-                      <span className="text-[13px] font-medium text-slate-900 flex-1 truncate" title={item.name}>{item.name}</span>
-                      <span className="text-[11px] text-slate-500 whitespace-nowrap">{item.shares.toLocaleString('vi-VN')} lượt</span>
-                    </div>
-                    <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                      <div className="h-full rounded-full bg-cyan-400" style={{ width: `${(item.shares / maxApiShares) * 100}%` }} />
-                    </div>
                   </div>
                 ))}
               </div>
