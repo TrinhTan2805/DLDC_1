@@ -313,25 +313,26 @@ export function StatisticsPage() {
                           Chọn ít nhất một hạng mục dữ liệu để hiển thị
                         </div>
                       ) : (
-                        <div className="w-full">
-                          <div style={{ height: `${chartDisplayData.length * 36 + 40}px` }}>
+                        <div className="w-full overflow-x-auto">
+                          <div style={{ height: '500px', minWidth: `${chartDisplayData.length * 50 + 40}px` }}>
                             <ResponsiveContainer width="100%" height="100%">
                               <BarChart
                                 data={chartDisplayData}
-                                layout="vertical"
-                                barCategoryGap="15%"
-                                margin={{ top: 10, right: 40, left: 130, bottom: 10 }}
+                                barCategoryGap="2%"
+                                margin={{ top: 30, right: 20, left: 10, bottom: 100 }}
                               >
-                                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
-                                <XAxis type="number" tickFormatter={formatNumber} stroke="#94a3b8" fontSize={11} />
-                                <YAxis
-                                  type="category"
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                                <XAxis
                                   dataKey="name"
-                                  width={130}
                                   stroke="#94a3b8"
                                   fontSize={11}
                                   tick={{ fill: '#334155' }}
+                                  interval={0}
+                                  angle={-35}
+                                  textAnchor="end"
+                                  height={100}
                                 />
+                                <YAxis type="number" tickFormatter={formatNumber} stroke="#94a3b8" fontSize={11} />
                                 <Tooltip
                                   formatter={(value: number) => [formatNumber(value), activeMetricConfig.label]}
                                   contentStyle={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #cbd5e1' }}
@@ -340,10 +341,10 @@ export function StatisticsPage() {
                                   dataKey={chartMetric}
                                   fill={activeMetricConfig.color}
                                   name={activeMetricConfig.label}
-                                  barSize={20}
-                                  radius={[0, 4, 4, 0]}
+                                  barSize={22}
+                                  radius={[4, 4, 0, 0]}
                                   label={{
-                                    position: 'right',
+                                    position: 'top',
                                     formatter: formatNumber,
                                     fill: '#475569',
                                     fontSize: 10,

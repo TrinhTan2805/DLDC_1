@@ -78,7 +78,7 @@ export function DataProvisionDashboard() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-slate-800">Tổng quan Cung cấp Dữ liệu</h2>
+        <h2 className="text-[18px] font-bold text-slate-800">Tổng quan Cung cấp Dữ liệu</h2>
         <p className="text-slate-500 mt-1">Trung tâm điều khiển và giám sát toàn bộ hoạt động điều phối, chia sẻ dữ liệu</p>
       </div>
 
@@ -147,7 +147,7 @@ export function DataProvisionDashboard() {
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="font-bold text-slate-800">Lưu lượng truy cập API Gateway</h3>
+              <h3 className="text-[16px] font-bold text-slate-800">Lưu lượng truy cập API Gateway</h3>
               <p className="text-xs text-slate-500">Thống kê số lượng request trong 7 ngày gần nhất</p>
             </div>
             <select 
@@ -190,7 +190,7 @@ export function DataProvisionDashboard() {
         {/* Top 10 API có tỷ lệ lỗi cao nhất */}
         <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col overflow-hidden">
           <div className="p-5 pb-0">
-            <h3 className="font-bold text-slate-800">Top 10 API có tỷ lệ lỗi cao nhất</h3>
+            <h3 className="text-[16px] font-bold text-slate-800">Top 10 API có tỷ lệ lỗi cao nhất</h3>
             <p className="text-xs text-slate-500 mb-4">Xếp hạng theo tỷ lệ lỗi trong 7 ngày qua</p>
           </div>
           <div className="overflow-x-auto">
@@ -230,7 +230,7 @@ export function DataProvisionDashboard() {
 
         {/* Quick Actions */}
         <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-5 flex flex-col">
-          <h3 className="font-bold text-slate-800 mb-1">Thao tác nhanh</h3>
+          <h3 className="text-[16px] font-bold text-slate-800 mb-1">Thao tác nhanh</h3>
           <p className="text-xs text-slate-500 mb-4">Các chức năng thường dùng</p>
           
           <div className="space-y-3 flex-1">

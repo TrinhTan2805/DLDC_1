@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, ArrowRight, Database, Hash, CheckCircle2, AlertTriangle, XCircle, FileEdit, FileText, Calendar, ChevronLeft, ChevronRight, ArrowUpDown, ChevronUp, ChevronDown, Settings2, Wand2, Shuffle, Layers, TrendingUp, Zap, Send, Clock, Eye } from 'lucide-react';
+import { ArrowRight, Database, Hash, CheckCircle2, AlertTriangle, XCircle, FileEdit, FileText, Calendar, ChevronLeft, ChevronRight, ArrowUpDown, ChevronUp, ChevronDown, Settings2, Wand2, Shuffle, Layers, TrendingUp, Zap, Send, Clock, Eye } from 'lucide-react';
 import { BarChart, Bar, LineChart, Line, RadialBarChart, RadialBar, PolarAngleAxis, ReferenceLine, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import {
   KPI_SLUG_TO_LABEL,
@@ -420,14 +420,6 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
     count: dataStatusCounts[config.key],
   }));
 
-  const handleBack = () => {
-    if (typeof (window as any).navigateToPage === 'function') {
-      (window as any).navigateToPage('dashboard');
-    } else {
-      window.history.back();
-    }
-  };
-
   const getStatusBadge = (status: 'success' | 'warning' | 'error' | 'draft') => {
     const styles = {
       success: 'bg-green-100 text-green-700 border-green-200',
@@ -466,18 +458,12 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <button
-          onClick={handleBack}
-          className="p-2 text-slate-500 hover:text-slate-800 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-slate-200 shadow-sm"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
         <div>
           <h1 className="text-[18px] font-bold text-slate-900">
             {selectedKPI === 'Thu thập'
               ? 'Báo cáo thu thập dữ liệu'
               : selectedKPI === 'Xử lý'
-              ? 'Báo cáo xử lý dữ liệu'
+              ? 'Tổng quan xử lý dữ liệu'
               : selectedKPI === 'Chia sẻ'
               ? 'Báo cáo chia sẻ dữ liệu'
               : `Chi tiết ${selectedKPI}`}

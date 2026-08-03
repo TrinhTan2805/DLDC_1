@@ -439,15 +439,6 @@ export function CollectionDashboard() {
   const [sourceMetric, setSourceMetric] = React.useState<'services' | 'records' | 'dataSizeGB'>('services');
   const [sourceDateFrom, setSourceDateFrom] = React.useState('');
   const [sourceDateTo, setSourceDateTo] = React.useState('');
-  const [selectedSourceNames, setSelectedSourceNames] = React.useState<string[]>(() => {
-    const allNames = [...sourceDataAll, ...sourceDataInternal, ...sourceDataExternal].map(s => s.name);
-    return Array.from(new Set(allNames));
-  });
-  const toggleSourceName = (name: string) => {
-    setSelectedSourceNames(prev =>
-      prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name]
-    );
-  };
 
   const getSourceScopeData = (): SourceMetricItem[] => {
     switch(sourceSystemFilter) {
@@ -461,7 +452,6 @@ export function CollectionDashboard() {
   const sourceScopeData = getSourceScopeData();
   const sourceDateScale = getSourceDateScale(sourceDateFrom, sourceDateTo);
   const currentSourceData = sourceScopeData
-    .filter(item => selectedSourceNames.includes(item.name))
     .map(item => ({ name: item.name, value: Math.round(item[sourceMetric] * sourceDateScale) }));
   const sourceTotal = currentSourceData.reduce((acc, curr) => acc + curr.value, 0);
 
@@ -570,32 +560,6 @@ export function CollectionDashboard() {
                       </button>
                     )}
                   </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {sourceScopeData.map((item, index) => {
-                    const isChecked = selectedSourceNames.includes(item.name);
-                    const color = PIE_COLORS[index % PIE_COLORS.length];
-                    return (
-                      <label
-                        key={item.name}
-                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[13px] cursor-pointer transition-colors ${
-                          isChecked ? 'border-slate-300 bg-white' : 'border-slate-200 bg-slate-50 text-slate-400'
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() => toggleSourceName(item.name)}
-                          className="hidden"
-                        />
-                        <span
-                          className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                          style={{ backgroundColor: isChecked ? color : '#cbd5e1' }}
-                        />
-                        <span className={isChecked ? 'text-slate-700' : 'text-slate-400'}>{item.name}</span>
-                      </label>
-                    );
-                  })}
                 </div>
               </div>
             }

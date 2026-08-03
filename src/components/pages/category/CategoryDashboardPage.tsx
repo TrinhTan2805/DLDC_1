@@ -2,13 +2,9 @@ import React, { useState } from 'react';
 import {
   FolderTree,
   Database,
-  Activity,
   CheckCircle2,
   Clock,
-  TrendingUp,
-  FileText,
-  Users,
-  ChevronRight
+  TrendingUp
 } from 'lucide-react';
 import {
   BarChart,
@@ -34,12 +30,12 @@ const ResponsiveContainerAny = ResponsiveContainer as any;
 
 
 export function CategoryDashboardPage() {
-  // Mock Data cho Dashboard
+  // Mock Data cho Dashboard [Unverified]
   const stats = {
     totalCategories: 124,
     activeCategories: 110,
     pendingApprovals: 5,
-    systemsConnected: 32
+    apisInUse: 32
   };
 
   // 24 Danh mục dùng chung theo Phụ lục I, mục I.2 - Quyết định 1634/QĐ-BTP ngày 30/6/2026
@@ -100,46 +96,11 @@ export function CategoryDashboardPage() {
     { month: 'Tháng 6', new: 10, updated: 18 }
   ];
 
-  const recentActivities = [
-    {
-      id: 1,
-      action: 'Cập nhật danh mục',
-      target: 'Danh mục Phòng Công chứng nhà nước',
-      user: 'admin_tudien',
-      time: '10 phút trước',
-      status: 'success'
-    },
-    {
-      id: 2,
-      action: 'Trình duyệt cấu trúc',
-      target: 'Danh mục Hộ tịch điện tử',
-      user: 'hoangnh_btp',
-      time: '1 giờ trước',
-      status: 'pending'
-    },
-    {
-      id: 3,
-      action: 'Tạo mới danh mục',
-      target: 'Danh mục Cán bộ tư pháp',
-      user: 'nguyenvana',
-      time: '3 giờ trước',
-      status: 'success'
-    },
-    {
-      id: 4,
-      action: 'Hủy công khai',
-      target: 'Danh mục Quốc gia cũ',
-      user: 'system_auto',
-      time: '1 ngày trước',
-      status: 'warning'
-    }
-  ];
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Tổng quan danh mục</h1>
+          <h1 className="text-[18px] font-bold text-slate-800">Tổng quan danh mục</h1>
           <p className="text-sm text-slate-500 mt-1">
             Giám sát số liệu và hoạt động quản trị danh mục
           </p>
@@ -187,17 +148,17 @@ export function CategoryDashboardPage() {
               <Database className="w-6 h-6" />
             </div>
           </div>
-          <h3 className="text-3xl font-bold text-slate-800">{stats.systemsConnected}</h3>
-          <p className="text-sm font-medium text-slate-500 mt-1">Hệ thống đang khai thác</p>
+          <h3 className="text-3xl font-bold text-slate-800">{stats.apisInUse}</h3>
+          <p className="text-sm font-medium text-slate-500 mt-1">Số API đang khai thác</p>
         </div>
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         {/* Ranked list: Lượng dữ liệu hình thành và chia sẻ theo danh mục */}
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-semibold text-slate-800">Lượng dữ liệu hình thành và chia sẻ theo danh mục</h3>
+            <h3 className="text-[16px] font-semibold text-slate-800">Lượng dữ liệu hình thành và chia sẻ theo danh mục</h3>
             <div className="flex items-center gap-3 text-[11px] text-slate-500 shrink-0">
               <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-blue-400 inline-block" />Đã hình thành</span>
               <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-purple-400 inline-block" />Đã chia sẻ</span>
@@ -226,7 +187,7 @@ export function CategoryDashboardPage() {
 
         {/* Bar Chart */}
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-          <h3 className="text-base font-semibold text-slate-800 mb-6">Tần suất cập nhật & Tạo mới (6 tháng)</h3>
+          <h3 className="text-[16px] font-semibold text-slate-800 mb-6">Tần suất cập nhật & Tạo mới (6 tháng)</h3>
           <div className="h-[400px]">
             <ResponsiveContainerAny width="100%" height={400}>
               <BarChartAny
@@ -246,44 +207,6 @@ export function CategoryDashboardPage() {
               </BarChartAny>
             </ResponsiveContainerAny>
           </div>
-        </div>
-      </div>
-
-      {/* Recent Activities */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-slate-200 flex items-center justify-between">
-          <h3 className="text-base font-semibold text-slate-800">Hoạt động gần đây</h3>
-          <button className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1">
-            Xem tất cả <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
-        <div className="divide-y divide-slate-100">
-          {recentActivities.map((activity) => (
-            <div key={activity.id} className="p-4 hover:bg-slate-50 transition-colors flex items-center gap-4">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                activity.status === 'success' ? 'bg-emerald-100 text-emerald-600' :
-                activity.status === 'pending' ? 'bg-amber-100 text-amber-600' :
-                'bg-slate-100 text-slate-600'
-              }`}>
-                <Activity className="w-5 h-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-slate-900 truncate">
-                  {activity.action}: <span className="font-semibold">{activity.target}</span>
-                </p>
-                <div className="flex items-center gap-3 mt-1">
-                  <span className="flex items-center gap-1 text-xs text-slate-500">
-                    <Users className="w-3.5 h-3.5" />
-                    {activity.user}
-                  </span>
-                  <span className="flex items-center gap-1 text-xs text-slate-500">
-                    <Clock className="w-3.5 h-3.5" />
-                    {activity.time}
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))}
         </div>
       </div>
     </div>

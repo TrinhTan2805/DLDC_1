@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Database, CheckCircle2, Layers, Share2 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 // Xu hướng thay đổi dữ liệu chủ trong 6 tháng qua [Unverified]
@@ -45,6 +45,15 @@ const masterDataPublishedOnOpenData = [
 ];
 const PUBLISHED_MODEL_PAGE_SIZE = 5;
 
+// Thẻ header tổng quan dữ liệu chủ [Unverified] (tổng số mô hình và số hệ thống khai thác là dữ liệu mock;
+// số mô hình đã công khai và tổng bản ghi tính từ danh sách công khai trên Cổng dữ liệu mở)
+const masterDataStats = {
+  totalModels: 32,
+  publishedModels: masterDataPublishedOnOpenData.length,
+  totalRecords: masterDataPublishedOnOpenData.reduce((sum, item) => sum + item.records, 0),
+  apisInUse: 18,
+};
+
 export function MasterDataDashboardPage() {
   const [publishedModelPage, setPublishedModelPage] = useState(0);
 
@@ -57,16 +66,51 @@ export function MasterDataDashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Tổng quan dữ liệu chủ</h1>
+        <h1 className="text-[18px] font-bold text-slate-800">Tổng quan dữ liệu chủ</h1>
         <p className="text-sm text-slate-500 mt-1">
           Tổng hợp mô hình, dung lượng và mức độ công khai dữ liệu chủ
         </p>
       </div>
 
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+          <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center mb-4">
+            <Database className="w-6 h-6" />
+          </div>
+          <h3 className="text-3xl font-bold text-slate-800">{masterDataStats.totalModels}</h3>
+          <p className="text-sm font-medium text-slate-500 mt-1">Tổng số mô hình dữ liệu chủ</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+          <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center mb-4">
+            <CheckCircle2 className="w-6 h-6" />
+          </div>
+          <h3 className="text-3xl font-bold text-slate-800">{masterDataStats.publishedModels}</h3>
+          <p className="text-sm font-medium text-slate-500 mt-1">Đã công khai trên Cổng dữ liệu mở</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+          <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center mb-4">
+            <Layers className="w-6 h-6" />
+          </div>
+          <h3 className="text-3xl font-bold text-slate-800">{masterDataStats.totalRecords.toLocaleString('vi-VN')}</h3>
+          <p className="text-sm font-medium text-slate-500 mt-1">Tổng số bản ghi dữ liệu chủ</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+          <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center mb-4">
+            <Share2 className="w-6 h-6" />
+          </div>
+          <h3 className="text-3xl font-bold text-slate-800">{masterDataStats.apisInUse}</h3>
+          <p className="text-sm font-medium text-slate-500 mt-1">Số API đang khai thác</p>
+        </div>
+      </div>
+
       <div className="bg-white rounded-xl border border-slate-200 p-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 border border-slate-200 rounded-lg p-4">
-            <h4 className="text-slate-800 font-medium mb-1">Xu hướng thay đổi dữ liệu chủ trong 6 tháng qua</h4>
+            <h4 className="text-slate-800 font-bold mb-1">Xu hướng thay đổi dữ liệu chủ trong 6 tháng qua</h4>
             <ResponsiveContainer width="100%" height={400}>
               <LineChart data={masterDataTrendData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
@@ -91,7 +135,7 @@ export function MasterDataDashboardPage() {
 
           <div className="border border-slate-200 rounded-lg p-4">
             <div className="flex items-center justify-between mb-3">
-              <h4 className="text-slate-800 font-medium">Mô hình dữ liệu chủ công khai trên Cổng dữ liệu mở</h4>
+              <h4 className="text-slate-800 font-bold">Mô hình dữ liệu chủ công khai trên Cổng dữ liệu mở</h4>
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setPublishedModelPage(p => Math.max(0, p - 1))}
