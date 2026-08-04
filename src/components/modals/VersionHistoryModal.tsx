@@ -7,6 +7,46 @@ interface VersionHistoryModalProps {
 
 const mockVersions = [
   {
+    id: 32,
+    version: 'v2.6.21',
+    date: '03/08/2026',
+    time: '17:30',
+    content: `1. Tổng quan thu thập (CollectionDashboard.tsx):
+- Bổ sung bộ lọc chỉ tiêu (Dịch vụ/Bản ghi/Dung lượng) và khoảng ngày cho biểu đồ "Thu thập dữ liệu theo nguồn cung cấp dữ liệu"; sau đó bỏ bộ lọc theo từng nguồn (checkbox pill) theo phản hồi, chỉ giữ lại bộ lọc chỉ tiêu và khoảng ngày.
+
+2. Thống kê CSDL tích hợp (StatisticsPage.tsx):
+- Chuyển bộ lọc (chỉ tiêu, khoảng ngày, hạng mục dữ liệu) vào khối "Tùy chỉnh hiển thị"; bỏ giới hạn chiều cao/thanh cuộn biểu đồ; đổi đơn vị hiển thị từ số bản ghi sang dung lượng (GB).
+- Thử nghiệm đổi biểu đồ thanh ngang sang bullet chart rồi quay lại biểu đồ cột dọc theo phản hồi; giảm khoảng cách giữa các cột; điều chỉnh chiều cao khối biểu đồ và nhãn trục X nghiêng để hiển thị đầy đủ tên hệ thống, sau đó tinh chỉnh lại cho vừa khít, tránh dư khoảng trắng.
+
+3. Trang Tổng quan (DashboardHome.tsx):
+- Đổi nút "Xem chi tiết" của 3 thẻ KPI Thu thập/Xử lý/Chia sẻ để điều hướng sang các trang tổng quan chuyên biệt tương ứng (Tổng quan thu thập/xử lý/cung cấp); bổ sung 3 thẻ KPI mới (Danh mục dùng chung, Dữ liệu mở, Dữ liệu chủ) điều hướng sang các trang tổng quan tương ứng; cho phép bấm vào bất kỳ vị trí nào trên thẻ KPI để điều hướng, không chỉ riêng nút.
+- Bỏ biểu đồ "Danh mục dùng chung" và "Top tính năng được truy cập nhiều nhất" khỏi trang Tổng quan; đổi tên "Tỷ lệ đăng nhập thành công/thất bại" thành "Số lượt đăng nhập thành công/thất bại", sau đó bỏ hẳn 2 biểu đồ "Số lượt đăng nhập thành công/thất bại" và "Người dùng mới và không hoạt động (>30 ngày)"; bổ sung nút "Xem chi tiết" (in đậm) tại khối "Thống kê người dùng hệ thống" điều hướng sang "Quản lý người dùng".
+
+4. Tổng quan danh mục (CategoryDashboardPage.tsx):
+- Chỉnh cỡ chữ tiêu đề trang về 18px, tiêu đề các biểu đồ về 16px; đổi thẻ "Hệ thống đang khai thác" thành "Số API đang khai thác".
+- Bổ sung biểu đồ tròn (donut) "Thị phần danh mục theo nguồn dữ liệu" (Đồng bộ từ TTDLQG/Kho DLDC/Tự cập nhật trực tiếp), tâm hiển thị tổng số danh mục, nhãn % màu khớp từng phần; sắp xếp lại bố cục 2 cột đều nhau, đưa biểu đồ "Tần suất cập nhật & Tạo mới" xuống dưới biểu đồ thị phần, cân chỉnh chiều cao 2 cột bằng nhau.
+
+5. Tổng quan dữ liệu mở (OpenDataDashboardPage.tsx) & Tổng quan dữ liệu chủ (MasterDataDashboardPage.tsx):
+- Chỉnh cỡ chữ tiêu đề trang (18px) và tiêu đề biểu đồ (16px); bổ sung biểu đồ "Tần suất cập nhật & Tạo mới (6 tháng)" vào Dữ liệu mở (đặt cạnh "Lượt chia sẻ theo API", tăng kích thước donut từng bước phê duyệt); bổ sung lại các thẻ số liệu tổng quan cho Dữ liệu chủ, đổi thẻ "Hệ thống đang khai thác" thành "Số API đang khai thác".
+
+6. Tổng quan xử lý dữ liệu (DashboardReportPage.tsx, dùng chung cho route "Tổng quan xử lý dữ liệu"):
+- Bỏ nút quay lại; đổi tiêu đề "Báo cáo xử lý dữ liệu" thành "Tổng quan xử lý dữ liệu".
+
+7. Tổng quan cung cấp (DataProvisionDashboard.tsx):
+- Chỉnh cỡ chữ tiêu đề trang (18px) và 3 tiêu đề biểu đồ (16px); bổ sung biểu đồ tròn (donut) "Biểu đồ cung cấp dữ liệu theo phương thức chia sẻ" (REST API/Excel/CSV/JSON).
+- Bỏ khối "Thao tác nhanh", thay bằng biểu đồ donut nói trên; đổi "Top 10 API có tỷ lệ lỗi cao nhất" thành "Danh sách API đang bị lỗi", thêm phân trang (nút "<"/">") hiển thị 5 API/trang thay vì cuộn; đồng bộ cỡ chữ bảng về 13px; cân chỉnh chiều cao 2 khối bằng nhau, căn lề trên cho tiêu đề biểu đồ donut.
+
+8. Mã nguồn bị ảnh hưởng:
+- \`src/components/collection/CollectionDashboard.tsx\`
+- \`src/components/pages/admin/StatisticsPage.tsx\`
+- \`src/components/dashboard/DashboardHome.tsx\`
+- \`src/components/dashboard/DashboardReportPage.tsx\`
+- \`src/components/pages/category/CategoryDashboardPage.tsx\`
+- \`src/components/pages/open-data/OpenDataDashboardPage.tsx\`
+- \`src/components/pages/master-data/MasterDataDashboardPage.tsx\`
+- \`src/components/pages/provisioning/DataProvisionDashboard.tsx\``
+  },
+  {
     id: 31,
     version: 'v2.6.20',
     date: '31/07/2026',
