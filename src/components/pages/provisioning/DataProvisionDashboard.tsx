@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { 
+import {
   Activity, Server, Database, Network, Clock, CheckCircle2,
-  ChevronRight, FileText, Share2, PlusCircle, BarChart3, ShieldCheck
+  FileText, Share2, ChevronLeft, ChevronRight
 } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Label } from 'recharts';
 
 // Mock Data Generators
 const generateData = (count: number, prefix: string, baseValue: number, variance: number) => {
@@ -60,9 +60,21 @@ const TOP_ERROR_RATE_APIS = [
   { endpoint: '/v1/gtvt/dang-kiem/tra-cuu', system: 'GTVT', calls: 76200, errors: 1370, commonError: '429 Rate limit', avgTimeMs: 540, errorRate: 1.8 },
 ];
 
+// Biểu đồ cung cấp dữ liệu theo phương thức chia sẻ [Unverified] - tổng khớp với "Dịch vụ công bố" (124)
+const provisionMethodShare = [
+  { name: 'REST API', value: 57, color: '#3b82f6' },
+  { name: 'Excel', value: 30, color: '#10b981' },
+  { name: 'CSV', value: 22, color: '#f59e0b' },
+  { name: 'JSON', value: 15, color: '#8b5cf6' },
+];
+const provisionMethodTotal = provisionMethodShare.reduce((sum, item) => sum + item.value, 0);
+
+const ERROR_API_PAGE_SIZE = 5;
+
 export function DataProvisionDashboard() {
   const [timeRange, setTimeRange] = useState<'24hours' | '7days' | '30days'>('24hours');
   const [isAnimating, setIsAnimating] = useState(false);
+  const [errorApiPage, setErrorApiPage] = useState(0);
 
   const handleTimeRangeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setIsAnimating(true);
@@ -70,9 +82,15 @@ export function DataProvisionDashboard() {
     setTimeout(() => setIsAnimating(false), 300);
   };
 
-  const chartData = timeRange === '24hours' ? trafficData24Hours 
-                  : timeRange === '7days' ? trafficData7Days 
+  const chartData = timeRange === '24hours' ? trafficData24Hours
+                  : timeRange === '7days' ? trafficData7Days
                   : trafficData30Days;
+
+  const errorApiTotalPages = Math.ceil(TOP_ERROR_RATE_APIS.length / ERROR_API_PAGE_SIZE);
+  const errorApiPageItems = TOP_ERROR_RATE_APIS.slice(
+    errorApiPage * ERROR_API_PAGE_SIZE,
+    errorApiPage * ERROR_API_PAGE_SIZE + ERROR_API_PAGE_SIZE
+  );
 
   return (
     <div className="space-y-6">
@@ -172,7 +190,7 @@ export function DataProvisionDashboard() {
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dy={10} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
-                <RechartsTooltip 
+                <RechartsTooltip
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                   itemStyle={{ fontSize: '13px', fontWeight: 'bold' }}
                   labelStyle={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}
@@ -185,40 +203,58 @@ export function DataProvisionDashboard() {
       </div>
 
       {/* Bottom Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Top 10 API có tỷ lệ lỗi cao nhất */}
-        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col overflow-hidden">
-          <div className="p-5 pb-0">
-            <h3 className="text-[16px] font-bold text-slate-800">Top 10 API có tỷ lệ lỗi cao nhất</h3>
-            <p className="text-xs text-slate-500 mb-4">Xếp hạng theo tỷ lệ lỗi trong 7 ngày qua</p>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+
+        {/* Danh sách API đang bị lỗi */}
+        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col overflow-hidden h-[340px]">
+          <div className="p-5 pb-0 flex items-center justify-between">
+            <div>
+              <h3 className="text-[16px] font-bold text-slate-800">Danh sách API đang bị lỗi</h3>
+              <p className="text-xs text-slate-500 mb-4">Xếp hạng theo tỷ lệ lỗi trong 7 ngày qua</p>
+            </div>
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                onClick={() => setErrorApiPage(p => Math.max(0, p - 1))}
+                disabled={errorApiPage === 0}
+                className="p-1 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setErrorApiPage(p => Math.min(errorApiTotalPages - 1, p + 1))}
+                disabled={errorApiPage >= errorApiTotalPages - 1}
+                className="p-1 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-[12px]">
+          <div className="overflow-x-auto flex-1 min-h-0">
+            <table className="w-full border-collapse text-[13px]">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th className="text-left py-2.5 px-3 text-[11px] text-slate-500 font-bold whitespace-nowrap">ENDPOINT</th>
-                  <th className="text-right py-2.5 px-3 text-[11px] text-slate-500 font-bold whitespace-nowrap">LƯỢT GỌI</th>
-                  <th className="text-right py-2.5 px-3 text-[11px] text-slate-500 font-bold whitespace-nowrap">SỐ LỖI</th>
-                  <th className="text-left py-2.5 px-3 text-[11px] text-slate-500 font-bold whitespace-nowrap">MÃ LỖI PHỔ BIẾN</th>
-                  <th className="text-right py-2.5 px-3 text-[11px] text-slate-500 font-bold whitespace-nowrap">THỜI GIAN TB</th>
-                  <th className="text-left py-2.5 px-3 text-[11px] text-slate-500 font-bold whitespace-nowrap">TỶ LỆ LỖI</th>
+                  <th className="text-left py-2.5 px-3 text-[13px] text-slate-500 font-bold whitespace-nowrap">ENDPOINT</th>
+                  <th className="text-right py-2.5 px-3 text-[13px] text-slate-500 font-bold whitespace-nowrap">LƯỢT GỌI</th>
+                  <th className="text-right py-2.5 px-3 text-[13px] text-slate-500 font-bold whitespace-nowrap">SỐ LỖI</th>
+                  <th className="text-left py-2.5 px-3 text-[13px] text-slate-500 font-bold whitespace-nowrap">MÃ LỖI PHỔ BIẾN</th>
+                  <th className="text-right py-2.5 px-3 text-[13px] text-slate-500 font-bold whitespace-nowrap">THỜI GIAN TB</th>
+                  <th className="text-left py-2.5 px-3 text-[13px] text-slate-500 font-bold whitespace-nowrap">TỶ LỆ LỖI</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {TOP_ERROR_RATE_APIS.map(api => (
+                {errorApiPageItems.map(api => (
                   <tr key={api.endpoint} className="hover:bg-slate-50 transition-colors">
-                    <td className="py-2.5 px-3 font-mono text-[11px] text-slate-700 whitespace-nowrap">{api.endpoint}</td>
-                    <td className="py-2.5 px-3 text-right text-[12px] text-slate-900 whitespace-nowrap">{api.calls.toLocaleString('vi-VN')}</td>
-                    <td className="py-2.5 px-3 text-right text-[12px] text-slate-900 whitespace-nowrap">{api.errors.toLocaleString('vi-VN')}</td>
-                    <td className="py-2.5 px-3 text-[12px] text-slate-600 whitespace-nowrap">{api.commonError}</td>
-                    <td className="py-2.5 px-3 text-right text-[12px] text-slate-900 whitespace-nowrap">{api.avgTimeMs.toLocaleString('vi-VN')} ms</td>
+                    <td className="py-2.5 px-3 font-mono text-[13px] text-slate-700 whitespace-nowrap">{api.endpoint}</td>
+                    <td className="py-2.5 px-3 text-right text-[13px] text-slate-900 whitespace-nowrap">{api.calls.toLocaleString('vi-VN')}</td>
+                    <td className="py-2.5 px-3 text-right text-[13px] text-slate-900 whitespace-nowrap">{api.errors.toLocaleString('vi-VN')}</td>
+                    <td className="py-2.5 px-3 text-[13px] text-slate-600 whitespace-nowrap">{api.commonError}</td>
+                    <td className="py-2.5 px-3 text-right text-[13px] text-slate-900 whitespace-nowrap">{api.avgTimeMs.toLocaleString('vi-VN')} ms</td>
                     <td className="py-2.5 px-3">
                       <div className="flex items-center gap-1.5 min-w-[100px]">
                         <div className="flex-1 h-1.5 rounded-full bg-slate-100 overflow-hidden">
                           <div className="h-full rounded-full bg-red-500" style={{ width: `${(api.errorRate / TOP_ERROR_RATE_APIS[0].errorRate) * 100}%` }} />
                         </div>
-                        <span className="text-[12px] font-bold text-red-600 whitespace-nowrap">{api.errorRate}%</span>
+                        <span className="text-[13px] font-bold text-red-600 whitespace-nowrap">{api.errorRate}%</span>
                       </div>
                     </td>
                   </tr>
@@ -228,50 +264,74 @@ export function DataProvisionDashboard() {
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-5 flex flex-col">
-          <h3 className="text-[16px] font-bold text-slate-800 mb-1">Thao tác nhanh</h3>
-          <p className="text-xs text-slate-500 mb-4">Các chức năng thường dùng</p>
-          
-          <div className="space-y-3 flex-1">
-            <button className="w-full flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:border-amber-400 hover:bg-amber-50 transition-colors group">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-amber-100 text-amber-600 rounded-lg group-hover:bg-amber-200 transition-colors">
-                  <PlusCircle className="w-5 h-5" />
-                </div>
-                <div className="text-left">
-                  <div className="text-sm font-bold text-slate-800">Tạo API mới</div>
-                  <div className="text-[10px] text-slate-500">Thiết lập endpoint cung cấp</div>
-                </div>
-              </div>
-              <ChevronRight className="w-4 h-4 text-slate-400" />
-            </button>
-
-            <button className="w-full flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 transition-colors group">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg group-hover:bg-indigo-200 transition-colors">
-                  <ShieldCheck className="w-5 h-5" />
-                </div>
-                <div className="text-left">
-                  <div className="text-sm font-bold text-slate-800">Phê duyệt yêu cầu</div>
-                  <div className="text-[10px] text-slate-500">5 ticket đang chờ xử lý</div>
-                </div>
-              </div>
-              <ChevronRight className="w-4 h-4 text-slate-400" />
-            </button>
-
-            <button className="w-full flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:border-emerald-400 hover:bg-emerald-50 transition-colors group">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-emerald-100 text-emerald-600 rounded-lg group-hover:bg-emerald-200 transition-colors">
-                  <BarChart3 className="w-5 h-5" />
-                </div>
-                <div className="text-left">
-                  <div className="text-sm font-bold text-slate-800">Báo cáo hiệu năng</div>
-                  <div className="text-[10px] text-slate-500">Xuất báo cáo lưu lượng</div>
-                </div>
-              </div>
-              <ChevronRight className="w-4 h-4 text-slate-400" />
-            </button>
+        {/* Biểu đồ cung cấp dữ liệu theo phương thức chia sẻ */}
+        <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-5 flex flex-col h-[340px]">
+          <h3 className="text-[16px] font-bold text-slate-800 mb-4">Biểu đồ cung cấp dữ liệu theo phương thức chia sẻ</h3>
+          <ResponsiveContainer width="100%" height={220}>
+            <PieChart margin={{ top: 8, right: 24, bottom: 8, left: 24 }}>
+              <Pie
+                data={provisionMethodShare}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                innerRadius={55}
+                outerRadius={85}
+                paddingAngle={3}
+                cornerRadius={4}
+                labelLine={false}
+                label={(props: any) => {
+                  const RADIAN = Math.PI / 180;
+                  const { cx, cy, midAngle, outerRadius: r, percent, index } = props;
+                  const radius = r + 22;
+                  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                  const color = provisionMethodShare[index].color;
+                  return (
+                    <text
+                      x={x}
+                      y={y}
+                      fill={color}
+                      textAnchor={x > cx ? 'start' : 'end'}
+                      dominantBaseline="central"
+                      fontSize={13}
+                      fontWeight={700}
+                    >
+                      {`${Math.round(percent * 100)}%`}
+                    </text>
+                  );
+                }}
+              >
+                {provisionMethodShare.map(entry => (
+                  <Cell key={entry.name} fill={entry.color} />
+                ))}
+                <Label
+                  position="center"
+                  content={({ viewBox }: any) => {
+                    const { cx, cy } = viewBox;
+                    return (
+                      <g>
+                        <text x={cx} y={cy - 12} textAnchor="middle" dominantBaseline="central" fill="#64748b" fontSize={12}>
+                          Tổng số
+                        </text>
+                        <text x={cx} y={cy + 12} textAnchor="middle" dominantBaseline="central" fill="#0f172a" fontSize={22} fontWeight={700}>
+                          {provisionMethodTotal.toLocaleString('vi-VN')}
+                        </text>
+                      </g>
+                    );
+                  }}
+                />
+              </Pie>
+              <RechartsTooltip formatter={(value: number) => value.toLocaleString('vi-VN')} />
+            </PieChart>
+          </ResponsiveContainer>
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 mt-2 text-[13px]">
+            {provisionMethodShare.map(item => (
+              <span key={item.name} className="flex items-center gap-1.5 text-slate-600">
+                <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: item.color }} />
+                {item.name}
+              </span>
+            ))}
           </div>
         </div>
 

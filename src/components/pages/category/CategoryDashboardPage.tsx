@@ -15,8 +15,10 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  LineChart,
-  Line
+  PieChart,
+  Pie,
+  Cell,
+  Label
 } from 'recharts';
 
 const BarChartAny = BarChart as any;
@@ -27,6 +29,10 @@ const CartesianGridAny = CartesianGrid as any;
 const TooltipAny = Tooltip as any;
 const LegendAny = Legend as any;
 const ResponsiveContainerAny = ResponsiveContainer as any;
+const PieChartAny = PieChart as any;
+const PieAny = Pie as any;
+const CellAny = Cell as any;
+const LabelAny = Label as any;
 
 
 export function CategoryDashboardPage() {
@@ -96,6 +102,14 @@ export function CategoryDashboardPage() {
     { month: 'Tháng 6', new: 10, updated: 18 }
   ];
 
+  // Thị phần danh mục dùng chung theo nguồn dữ liệu [Unverified] - tổng khớp với stats.totalCategories
+  const categorySourceShare = [
+    { name: 'Đồng bộ từ TTDLQG', value: 57, color: '#3b82f6' },
+    { name: 'Kho DLDC', value: 47, color: '#10b981' },
+    { name: 'Tự cập nhật trực tiếp', value: 20, color: '#f59e0b' },
+  ];
+  const categorySourceTotal = categorySourceShare.reduce((sum, item) => sum + item.value, 0);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -153,10 +167,10 @@ export function CategoryDashboardPage() {
         </div>
       </div>
 
-      {/* Charts Row */}
+      {/* Charts Row 1: Ranked list + Thị phần theo nguồn dữ liệu */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         {/* Ranked list: Lượng dữ liệu hình thành và chia sẻ theo danh mục */}
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col h-[800px]">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-[16px] font-semibold text-slate-800">Lượng dữ liệu hình thành và chia sẻ theo danh mục</h3>
             <div className="flex items-center gap-3 text-[11px] text-slate-500 shrink-0">
@@ -164,7 +178,7 @@ export function CategoryDashboardPage() {
               <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-purple-400 inline-block" />Đã chia sẻ</span>
             </div>
           </div>
-          <div className="overflow-y-auto space-y-3" style={{ maxHeight: 400 }}>
+          <div className="overflow-y-auto space-y-3 flex-1 min-h-0">
             {categoryCombinedData.map((item, i) => (
               <div key={item.category}>
                 <div className="flex items-center gap-2 mb-1">
@@ -185,11 +199,83 @@ export function CategoryDashboardPage() {
           </div>
         </div>
 
-        {/* Bar Chart */}
+        {/* Cột phải: Thị phần theo nguồn dữ liệu + Tần suất cập nhật & Tạo mới */}
+        <div className="flex flex-col gap-6">
+        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+          <h3 className="text-[16px] font-semibold text-slate-800 mb-4">Thị phần danh mục theo nguồn dữ liệu</h3>
+          <ResponsiveContainerAny width="100%" height={240}>
+            <PieChartAny margin={{ top: 8, right: 24, bottom: 8, left: 24 }}>
+              <PieAny
+                data={categorySourceShare}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                innerRadius={55}
+                outerRadius={85}
+                paddingAngle={3}
+                cornerRadius={4}
+                labelLine={false}
+                label={(props: any) => {
+                  const RADIAN = Math.PI / 180;
+                  const { cx, cy, midAngle, outerRadius: r, percent, index } = props;
+                  const radius = r + 22;
+                  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                  const color = categorySourceShare[index].color;
+                  return (
+                    <text
+                      x={x}
+                      y={y}
+                      fill={color}
+                      textAnchor={x > cx ? 'start' : 'end'}
+                      dominantBaseline="central"
+                      fontSize={14}
+                      fontWeight={700}
+                    >
+                      {`${Math.round(percent * 100)}%`}
+                    </text>
+                  );
+                }}
+              >
+                {categorySourceShare.map(entry => (
+                  <CellAny key={entry.name} fill={entry.color} />
+                ))}
+                <LabelAny
+                  position="center"
+                  content={({ viewBox }: any) => {
+                    const { cx, cy } = viewBox;
+                    return (
+                      <g>
+                        <text x={cx} y={cy - 12} textAnchor="middle" dominantBaseline="central" fill="#64748b" fontSize={12}>
+                          Tổng số
+                        </text>
+                        <text x={cx} y={cy + 12} textAnchor="middle" dominantBaseline="central" fill="#0f172a" fontSize={22} fontWeight={700}>
+                          {categorySourceTotal.toLocaleString('vi-VN')}
+                        </text>
+                      </g>
+                    );
+                  }}
+                />
+              </PieAny>
+              <TooltipAny formatter={(value: number) => value.toLocaleString('vi-VN')} />
+            </PieChartAny>
+          </ResponsiveContainerAny>
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 mt-2 text-[13px]">
+            {categorySourceShare.map(item => (
+              <span key={item.name} className="flex items-center gap-1.5 text-slate-600">
+                <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: item.color }} />
+                {item.name}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Tần suất cập nhật & Tạo mới */}
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
           <h3 className="text-[16px] font-semibold text-slate-800 mb-6">Tần suất cập nhật & Tạo mới (6 tháng)</h3>
-          <div className="h-[400px]">
-            <ResponsiveContainerAny width="100%" height={400}>
+          <div className="h-[320px]">
+            <ResponsiveContainerAny width="100%" height={320}>
               <BarChartAny
                 data={activityData}
                 margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
@@ -207,6 +293,7 @@ export function CategoryDashboardPage() {
               </BarChartAny>
             </ResponsiveContainerAny>
           </div>
+        </div>
         </div>
       </div>
     </div>
