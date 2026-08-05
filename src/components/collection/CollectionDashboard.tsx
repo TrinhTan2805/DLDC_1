@@ -1,6 +1,14 @@
 import * as React from 'react';
-import { Download, Database, Building2, Building, ChevronLeft, ChevronRight, XCircle, Calendar, FileText } from 'lucide-react';
+import { Download, Database, Building2, Building, ChevronLeft, ChevronRight, XCircle, Calendar, FileText, ArrowRight } from 'lucide-react';
 import { BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell, Legend, Label, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { mockCollectionServices } from '../pages/collection/mockCollectionServices';
+
+const goToServiceHistory = (serviceName: string) => {
+  const matched = mockCollectionServices.find(s => s.name === serviceName);
+  if (matched && typeof (window as any).navigateToPage === 'function') {
+    (window as any).navigateToPage(`collection-setup/view/${matched.id}?tab=history`);
+  }
+};
 
 // Màu chủ đạo theo design system
 const PRIMARY = '#2563eb';
@@ -567,7 +575,7 @@ export function CollectionDashboard() {
         </div>
       </div>
 
-      {/* Khối dưới: cột trái Dịch vụ lỗi cập nhật (hẹp) · cột phải biểu đồ theo thời gian (rộng) */}
+      {/* Khối dưới: cột trái Danh sách dịch vụ thu thập lỗi (hẹp) · cột phải biểu đồ theo thời gian (rộng) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         <div className="grid grid-cols-1 gap-3 lg:col-span-1">
           <div className="bg-white rounded-lg border border-slate-200 p-6">
@@ -575,7 +583,7 @@ export function CollectionDashboard() {
               <div className="flex items-center gap-2">
                 <XCircle className="w-4 h-4 text-red-600" />
                 <h3 className="text-slate-900 font-semibold uppercase text-[13px] tracking-wide">
-                  Dịch vụ lỗi cập nhật ({errorServices.length})
+                  Danh sách dịch vụ thu thập lỗi ({errorServices.length})
                 </h3>
               </div>
               <div className="flex items-center gap-1">
@@ -612,7 +620,7 @@ export function CollectionDashboard() {
                     <Database className="w-3.5 h-3.5 text-slate-400" />
                     {service.source}
                   </div>
-                  <div className="flex items-center justify-between text-[12px] text-slate-600">
+                  <div className="flex items-center justify-between text-[12px] text-slate-600 mb-2">
                     <div className="flex items-center gap-1.5">
                       <Calendar className="w-3.5 h-3.5 text-slate-400" />
                       {service.lastSync}
@@ -622,6 +630,12 @@ export function CollectionDashboard() {
                       {service.dataSizeLabel}
                     </div>
                   </div>
+                  <button
+                    onClick={() => goToServiceHistory(service.name)}
+                    className="flex items-center gap-1 text-[12px] font-semibold text-blue-600 hover:text-blue-700"
+                  >
+                    Xem chi tiết <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               ))}
             </div>

@@ -1,4 +1,4 @@
-import { Database, CheckCircle, Share2, LayoutDashboard, TrendingUp, TrendingDown, ArrowRight, FolderTree, Globe, HardDrive } from 'lucide-react';
+import { Database, CheckCircle, Share2, LayoutDashboard, TrendingUp, ArrowRight, FolderTree, Globe, HardDrive } from 'lucide-react';
 import { PageHeader } from '../common/PageHeader';
 
 export function DashboardHome() {
@@ -29,7 +29,7 @@ export function DashboardHome() {
       bgColor: 'bg-green-50',
       iconColor: 'text-green-600',
       borderColor: 'border-green-200',
-      detail: 'Tỷ lệ hoàn thành: 96.97%',
+      detail: 'Tháng này: +412,860 bản ghi',
       targetPage: 'processing-dashboard'
     },
     {
@@ -43,49 +43,49 @@ export function DashboardHome() {
       bgColor: 'bg-purple-50',
       iconColor: 'text-purple-600',
       borderColor: 'border-purple-200',
-      detail: 'Tuần này: +12,458 lượt',
-      targetPage: 'provision-dashboard'
+      detail: 'Tháng này: +30,940 lượt',
+      targetPage: 'provisioning-monitoring'
     },
     {
       id: 'Danh mục dùng chung',
       label: 'Danh mục dùng chung',
-      value: '838',
-      sizeLabel: '~24 danh mục',
-      subtitle: 'Bản ghi hình thành',
+      value: '124',
+      sizeLabel: '',
+      subtitle: 'Danh mục đã hình thành',
       change: '+6.4%',
       icon: FolderTree,
       bgColor: 'bg-indigo-50',
       iconColor: 'text-indigo-600',
       borderColor: 'border-indigo-200',
-      detail: 'Đã chia sẻ: 497 bản ghi',
+      detail: '88 danh mục đã chia sẻ đi',
       targetPage: 'category-dashboard'
     },
     {
       id: 'Dữ liệu mở',
       label: 'Dữ liệu mở',
       value: '27',
-      sizeLabel: 'bộ dữ liệu',
-      subtitle: 'Bộ dữ liệu đã công bố',
-      change: '+2 bộ mới',
+      sizeLabel: '',
+      subtitle: 'Danh mục đã hình thành',
+      change: '+2 danh mục mới',
       icon: Globe,
       bgColor: 'bg-emerald-50',
       iconColor: 'text-emerald-600',
       borderColor: 'border-emerald-200',
-      detail: 'Theo Phụ lục II - QĐ 1634/QĐ-BTP',
+      detail: '14 danh mục đã chia sẻ đi',
       targetPage: 'open-data-dashboard'
     },
     {
       id: 'Dữ liệu chủ',
       label: 'Dữ liệu chủ',
-      value: '3,570',
-      sizeLabel: 'bản ghi',
-      subtitle: 'Thay đổi trong tháng',
+      value: '32',
+      sizeLabel: '',
+      subtitle: 'Danh mục đã hình thành',
       change: '+7.1%',
       icon: HardDrive,
       bgColor: 'bg-teal-50',
       iconColor: 'text-teal-600',
       borderColor: 'border-teal-200',
-      detail: 'Từ nguồn: 2,820 · Thủ công: 750',
+      detail: '27 danh mục đã chia sẻ đi',
       targetPage: 'master-data-dashboard'
     },
   ];
@@ -100,21 +100,14 @@ export function DashboardHome() {
   const userStatsSummary = {
     totalAccounts: 2150,
     totalAccountsChangePct: 5.2,
-    accountsAssignedToUnit: 1980,
-    avgSessionMinutes: 18,
-    avgSessionMinutesChangePct: 3.1,
-    neverLoggedIn: 137,
-    newThisMonth: 93,
-    newThisMonthChangePct: 18.2,
-    updatedThisMonth: 214,
-    updatedThisMonthChangePct: 6.4,
-    suspendedThisMonth: 18,
-    suspendedThisMonthChangePct: -14.3,
     activeThisMonth: 1862,
+    monthlyUsageHours: 5280,
+    monthlyUsageHoursChangePct: 9.6,
+    unitsWithAccounts: 46,
+    totalUnits: 50,
   };
   const activeThisMonthRatePct = Math.round((userStatsSummary.activeThisMonth / userStatsSummary.totalAccounts) * 1000) / 10;
-  const accountsAssignedToUnitRatePct = Math.round((userStatsSummary.accountsAssignedToUnit / userStatsSummary.totalAccounts) * 1000) / 10;
-  const neverLoggedInRatePct = Math.round((userStatsSummary.neverLoggedIn / userStatsSummary.totalAccounts) * 1000) / 10;
+  const unitsWithAccountsRatePct = Math.round((userStatsSummary.unitsWithAccounts / userStatsSummary.totalUnits) * 1000) / 10;
 
   return (
     <div className="space-y-6">
@@ -184,7 +177,7 @@ export function DashboardHome() {
 
               {/* Detail */}
               <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-2">
-                <div className="text-xs text-slate-600">{kpi.detail}</div>
+                <div className="text-[14px] text-slate-600">{kpi.detail}</div>
                 <button
                   onClick={() => goToOverviewPage(kpi.targetPage)}
                   className="flex items-center gap-1 text-sm font-semibold text-blue-600 whitespace-nowrap hover:gap-1.5 transition-all"
@@ -201,17 +194,9 @@ export function DashboardHome() {
       {/* Additional Charts Section - Row 4 */}
       <div className="grid grid-cols-1 gap-6">
         <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <div className="flex items-start justify-between gap-2 mb-4">
-            <div>
-              <h3 className="text-slate-900 font-semibold mb-1">Thống kê người dùng hệ thống</h3>
-              <p className="text-sm text-slate-600">Tổng hợp tài khoản, mức độ sử dụng và an toàn đăng nhập</p>
-            </div>
-            <button
-              onClick={() => goToOverviewPage('admin-users')}
-              className="flex items-center gap-1 text-sm font-bold text-blue-600 hover:text-blue-700 whitespace-nowrap"
-            >
-              Xem chi tiết <ArrowRight className="w-4 h-4" />
-            </button>
+          <div className="mb-4">
+            <h3 className="text-slate-900 font-semibold mb-1">Thống kê người dùng hệ thống</h3>
+            <p className="text-sm text-slate-600">Tổng hợp tài khoản, mức độ sử dụng và an toàn đăng nhập</p>
           </div>
 
           <div className="grid grid-cols-4 gap-4 mb-6">
@@ -227,79 +212,33 @@ export function DashboardHome() {
               <p className="text-[11px] text-slate-400 mt-0.5">So với tháng trước</p>
             </div>
             <div className="border border-slate-200 rounded-lg p-4">
-              <p className="text-[12px] text-slate-500 mb-1">Tài khoản phân bổ theo đơn vị</p>
-              <div className="flex items-baseline gap-2">
-                <p className="text-2xl font-bold text-slate-900">
-                  {userStatsSummary.accountsAssignedToUnit.toLocaleString('vi-VN')}/{userStatsSummary.totalAccounts.toLocaleString('vi-VN')}
-                </p>
-                <span className="text-xs font-semibold text-blue-600">{accountsAssignedToUnitRatePct}%</span>
-              </div>
-              <p className="text-[11px] text-slate-400 mt-0.5">Trên tổng số tài khoản</p>
-            </div>
-            <div className="border border-slate-200 rounded-lg p-4">
-              <p className="text-[12px] text-slate-500 mb-1">Thời gian làm việc trung bình/phiên</p>
-              <div className="flex items-baseline gap-2">
-                <p className="text-2xl font-bold text-slate-900">{userStatsSummary.avgSessionMinutes} phút</p>
-                <span className="flex items-center gap-0.5 text-xs font-semibold text-green-600">
-                  <TrendingUp className="w-3 h-3" />
-                  +{userStatsSummary.avgSessionMinutesChangePct}%
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-400 mt-0.5">So với tháng trước</p>
-            </div>
-            <div className="border border-slate-200 rounded-lg p-4">
-              <p className="text-[12px] text-slate-500 mb-1">Tài khoản chưa đăng nhập lần đầu</p>
-              <div className="flex items-baseline gap-2">
-                <p className="text-2xl font-bold text-slate-900">
-                  {userStatsSummary.neverLoggedIn.toLocaleString('vi-VN')}/{userStatsSummary.totalAccounts.toLocaleString('vi-VN')}
-                </p>
-                <span className="text-xs font-semibold text-amber-600">{neverLoggedInRatePct}%</span>
-              </div>
-              <p className="text-[11px] text-slate-400 mt-0.5">Trên tổng số tài khoản</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-4 gap-4 mb-6">
-            <div className="border border-slate-200 rounded-lg p-4">
-              <p className="text-[12px] text-slate-500 mb-1">Tài khoản mới trong tháng</p>
-              <div className="flex items-baseline gap-2">
-                <p className="text-2xl font-bold text-slate-900">{userStatsSummary.newThisMonth.toLocaleString('vi-VN')}</p>
-                <span className="flex items-center gap-0.5 text-xs font-semibold text-green-600">
-                  <TrendingUp className="w-3 h-3" />
-                  +{userStatsSummary.newThisMonthChangePct}%
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-400 mt-0.5">So với tháng trước</p>
-            </div>
-            <div className="border border-slate-200 rounded-lg p-4">
-              <p className="text-[12px] text-slate-500 mb-1">Tài khoản cập nhật trong tháng</p>
-              <div className="flex items-baseline gap-2">
-                <p className="text-2xl font-bold text-slate-900">{userStatsSummary.updatedThisMonth.toLocaleString('vi-VN')}</p>
-                <span className="flex items-center gap-0.5 text-xs font-semibold text-green-600">
-                  <TrendingUp className="w-3 h-3" />
-                  +{userStatsSummary.updatedThisMonthChangePct}%
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-400 mt-0.5">So với tháng trước</p>
-            </div>
-            <div className="border border-slate-200 rounded-lg p-4">
-              <p className="text-[12px] text-slate-500 mb-1">Tài khoản ngưng hoạt động trong tháng</p>
-              <div className="flex items-baseline gap-2">
-                <p className="text-2xl font-bold text-slate-900">{userStatsSummary.suspendedThisMonth.toLocaleString('vi-VN')}</p>
-                <span className="flex items-center gap-0.5 text-xs font-semibold text-green-600">
-                  <TrendingDown className="w-3 h-3" />
-                  {userStatsSummary.suspendedThisMonthChangePct}%
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-400 mt-0.5">So với tháng trước</p>
-            </div>
-            <div className="border border-slate-200 rounded-lg p-4">
-              <p className="text-[12px] text-slate-500 mb-1">Tài khoản đang hoạt động trong tháng</p>
+              <p className="text-[12px] text-slate-500 mb-1">Số tài khoản hoạt động</p>
               <div className="flex items-baseline gap-2">
                 <p className="text-2xl font-bold text-slate-900">{userStatsSummary.activeThisMonth.toLocaleString('vi-VN')}</p>
                 <span className="text-xs font-semibold text-blue-600">{activeThisMonthRatePct}%</span>
               </div>
               <p className="text-[11px] text-slate-400 mt-0.5">Trên tổng số tài khoản</p>
+            </div>
+            <div className="border border-slate-200 rounded-lg p-4">
+              <p className="text-[12px] text-slate-500 mb-1">Tổng thời gian sử dụng hệ thống theo tháng</p>
+              <div className="flex items-baseline gap-2">
+                <p className="text-2xl font-bold text-slate-900">{userStatsSummary.monthlyUsageHours.toLocaleString('vi-VN')} giờ</p>
+                <span className="flex items-center gap-0.5 text-xs font-semibold text-green-600">
+                  <TrendingUp className="w-3 h-3" />
+                  +{userStatsSummary.monthlyUsageHoursChangePct}%
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400 mt-0.5">So với tháng trước</p>
+            </div>
+            <div className="border border-slate-200 rounded-lg p-4">
+              <p className="text-[12px] text-slate-500 mb-1">Số đơn vị đã có tài khoản trên đơn vị</p>
+              <div className="flex items-baseline gap-2">
+                <p className="text-2xl font-bold text-slate-900">
+                  {userStatsSummary.unitsWithAccounts.toLocaleString('vi-VN')}/{userStatsSummary.totalUnits.toLocaleString('vi-VN')}
+                </p>
+                <span className="text-xs font-semibold text-blue-600">{unitsWithAccountsRatePct}%</span>
+              </div>
+              <p className="text-[11px] text-slate-400 mt-0.5">Trên tổng số đơn vị</p>
             </div>
           </div>
 

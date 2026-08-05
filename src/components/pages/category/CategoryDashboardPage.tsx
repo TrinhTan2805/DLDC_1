@@ -73,33 +73,26 @@ export function CategoryDashboardPage() {
     'Trạng thái thi hành án',
   ];
 
-  // Danh mục dùng chung - Lượng dữ liệu đã hình thành theo danh mục [Unverified]
-  const categoryFormedCounts = [
-    12, 9, 22, 34, 41, 6, 58, 27, 45, 19,
-    63, 15, 11, 8, 13, 24, 21, 96, 88, 17,
-    120, 7, 52, 30,
+  // Danh mục dùng chung - Số lượng đơn vị khai thác theo danh mục [Unverified]
+  const categoryUnitsInUseCounts = [
+    5, 3, 8, 12, 15, 2, 21, 10, 17, 7,
+    23, 6, 4, 3, 5, 9, 8, 28, 26, 6,
+    32, 3, 19, 11,
   ];
 
-  // Danh mục dùng chung - Số lượng dữ liệu đã chia sẻ theo danh mục [Unverified]
-  const categorySharedCounts = [
-    4, 2, 6, 28, 33, 1, 15, 40, 12, 26,
-    18, 3, 2, 1, 4, 9, 7, 61, 55, 5,
-    97, 2, 44, 22,
-  ];
-
-  // Gộp 2 chỉ số hình thành/chia sẻ theo danh mục thành 1 danh sách xếp hạng
   const categoryCombinedData = commonCategoryList
-    .map((category, i) => ({ category, formed: categoryFormedCounts[i], shared: categorySharedCounts[i] }))
-    .sort((a, b) => b.formed - a.formed);
-  const maxCombinedFormed = Math.max(...categoryCombinedData.map(d => d.formed));
+    .map((category, i) => ({ category, unitsInUse: categoryUnitsInUseCounts[i] }))
+    .sort((a, b) => b.unitsInUse - a.unitsInUse);
+  const maxUnitsInUse = Math.max(...categoryCombinedData.map(d => d.unitsInUse));
 
-  const activityData = [
-    { month: 'Tháng 1', new: 12, updated: 25 },
-    { month: 'Tháng 2', new: 19, updated: 30 },
-    { month: 'Tháng 3', new: 15, updated: 22 },
-    { month: 'Tháng 4', new: 22, updated: 45 },
-    { month: 'Tháng 5', new: 30, updated: 50 },
-    { month: 'Tháng 6', new: 10, updated: 18 }
+  // Xu hướng biến động số lượng danh mục 6 tháng gần nhất [Unverified] - chốt tại stats.totalCategories (124)
+  const categoryCountTrendData = [
+    { month: 'Tháng 1', total: 98 },
+    { month: 'Tháng 2', total: 104 },
+    { month: 'Tháng 3', total: 110 },
+    { month: 'Tháng 4', total: 115 },
+    { month: 'Tháng 5', total: 120 },
+    { month: 'Tháng 6', total: 124 }
   ];
 
   // Thị phần danh mục dùng chung theo nguồn dữ liệu [Unverified] - tổng khớp với stats.totalCategories
@@ -169,13 +162,12 @@ export function CategoryDashboardPage() {
 
       {/* Charts Row 1: Ranked list + Thị phần theo nguồn dữ liệu */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        {/* Ranked list: Lượng dữ liệu hình thành và chia sẻ theo danh mục */}
+        {/* Ranked list: Số lượng đơn vị khai thác theo danh mục */}
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col h-[800px]">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-[16px] font-semibold text-slate-800">Lượng dữ liệu hình thành và chia sẻ theo danh mục</h3>
+            <h3 className="text-[16px] font-semibold text-slate-800">Số lượng đơn vị khai thác theo danh mục</h3>
             <div className="flex items-center gap-3 text-[11px] text-slate-500 shrink-0">
-              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-blue-400 inline-block" />Đã hình thành</span>
-              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-purple-400 inline-block" />Đã chia sẻ</span>
+              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-blue-400 inline-block" />Đơn vị khai thác</span>
             </div>
           </div>
           <div className="overflow-y-auto space-y-3 flex-1 min-h-0">
@@ -186,13 +178,10 @@ export function CategoryDashboardPage() {
                     {i + 1}
                   </span>
                   <span className="text-[13px] font-medium text-slate-900 flex-1 truncate" title={item.category}>{item.category}</span>
-                  <span className="text-[11px] text-slate-500 whitespace-nowrap">{item.formed.toLocaleString('vi-VN')} / {item.shared.toLocaleString('vi-VN')} bản ghi</span>
-                </div>
-                <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden mb-1">
-                  <div className="h-full rounded-full bg-blue-400" style={{ width: `${(item.formed / maxCombinedFormed) * 100}%` }} />
+                  <span className="text-[11px] text-slate-500 whitespace-nowrap">{item.unitsInUse.toLocaleString('vi-VN')} đơn vị</span>
                 </div>
                 <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                  <div className="h-full rounded-full bg-purple-400" style={{ width: `${(item.shared / maxCombinedFormed) * 100}%` }} />
+                  <div className="h-full rounded-full bg-blue-400" style={{ width: `${(item.unitsInUse / maxUnitsInUse) * 100}%` }} />
                 </div>
               </div>
             ))}
@@ -202,7 +191,7 @@ export function CategoryDashboardPage() {
         {/* Cột phải: Thị phần theo nguồn dữ liệu + Tần suất cập nhật & Tạo mới */}
         <div className="flex flex-col gap-6">
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
-          <h3 className="text-[16px] font-semibold text-slate-800 mb-4">Thị phần danh mục theo nguồn dữ liệu</h3>
+          <h3 className="text-[16px] font-semibold text-slate-800 mb-4">Tỷ lệ danh mục theo nguồn dữ liệu</h3>
           <ResponsiveContainerAny width="100%" height={240}>
             <PieChartAny margin={{ top: 8, right: 24, bottom: 8, left: 24 }}>
               <PieAny
@@ -271,13 +260,13 @@ export function CategoryDashboardPage() {
           </div>
         </div>
 
-        {/* Tần suất cập nhật & Tạo mới */}
+        {/* Xu hướng biến động số lượng danh mục 6 tháng gần nhất */}
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-          <h3 className="text-[16px] font-semibold text-slate-800 mb-6">Tần suất cập nhật & Tạo mới (6 tháng)</h3>
+          <h3 className="text-[16px] font-semibold text-slate-800 mb-6">Xu hướng biến động số lượng danh mục 6 tháng gần nhất</h3>
           <div className="h-[320px]">
             <ResponsiveContainerAny width="100%" height={320}>
               <BarChartAny
-                data={activityData}
+                data={categoryCountTrendData}
                 margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
               >
                 <CartesianGridAny strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
@@ -288,8 +277,7 @@ export function CategoryDashboardPage() {
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                 />
                 <LegendAny wrapperStyle={{ paddingTop: '20px' }} iconType="circle" />
-                <BarAny dataKey="new" name="Tạo mới" stackId="a" fill="#3b82f6" radius={[0, 0, 4, 4]} />
-                <BarAny dataKey="updated" name="Cập nhật" stackId="a" fill="#93c5fd" radius={[4, 4, 0, 0]} />
+                <BarAny dataKey="total" name="Tổng số danh mục" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={32} />
               </BarChartAny>
             </ResponsiveContainerAny>
           </div>

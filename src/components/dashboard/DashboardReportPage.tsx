@@ -49,6 +49,8 @@ const PROCESSING_RULES_BY_SOURCE: { [source: string]: { cleaning: number; transf
   'Cục Bổ trợ tư pháp': { cleaning: 19, transform: 15, normalize: 11 },
   'Vụ Hợp tác quốc tế': { cleaning: 9, transform: 7, normalize: 5 },
   'Cục Kế hoạch - Tài chính': { cleaning: 15, transform: 12, normalize: 8 },
+  'TTDLQG': { cleaning: 7, transform: 5, normalize: 4 },
+  'Tòa án': { cleaning: 9, transform: 7, normalize: 5 },
 };
 
 const PROCESSING_RULE_CONFIG = [
@@ -72,13 +74,39 @@ const PROCESSED_VOLUME_BY_SOURCE: { [source: string]: number } = {
   'Cục Bổ trợ tư pháp': 701,
   'Vụ Hợp tác quốc tế': 330,
   'Cục Kế hoạch - Tài chính': 536,
+  'TTDLQG': 310,
+  'Tòa án': 398,
 };
 
 const RANK_COLORS = ['#6366f1', '#a855f7', '#ec4899', '#f59e0b', '#22c55e', '#3b82f6', '#06b6d4'];
 
+// Phân loại hệ thống nguồn trong/ngoài ngành Tư pháp cho bộ lọc "Quy tắc xử lý theo từng hệ thống"
+// Ngoài ngành: TTDLQG, Tòa án (2 hệ thống) - còn lại 13 hệ thống là Trong ngành
+const PROCESSING_RULES_EXTERNAL_SOURCES = ['TTDLQG', 'Tòa án'];
+const PROCESSING_RULES_INTERNAL_SOURCES = SOURCE_TREND_LIST.filter(
+  source => !PROCESSING_RULES_EXTERNAL_SOURCES.includes(source)
+);
+
+// Khoảng thời gian mốc để tính tỷ lệ số quy tắc phát sinh trong khoảng ngày đã chọn (mock, đơn giản hoá)
+const PROCESSING_RULES_BASELINE_START = new Date('2025-01-01').getTime();
+const PROCESSING_RULES_BASELINE_END = new Date('2025-12-31').getTime();
+
+const getProcessingRulesDateScale = (from: string, to: string) => {
+  if (!from && !to) return 1;
+  const start = from ? new Date(from).getTime() : PROCESSING_RULES_BASELINE_START;
+  const end = to ? new Date(to).getTime() : PROCESSING_RULES_BASELINE_END;
+  const totalDays = (PROCESSING_RULES_BASELINE_END - PROCESSING_RULES_BASELINE_START) / 86400000;
+  const clampedStart = Math.max(start, PROCESSING_RULES_BASELINE_START);
+  const clampedEnd = Math.min(end, PROCESSING_RULES_BASELINE_END);
+  const selectedDays = Math.max(0, (clampedEnd - clampedStart) / 86400000);
+  return totalDays > 0 ? Math.max(0.1, Math.min(1, selectedDays / totalDays)) : 1;
+};
+
 // Mock: xu hướng xử lý 6 tháng gần nhất, chốt tại tổng hiện tại (GB và số bản ghi)
+// Dùng 2 chuỗi tỷ lệ khác nhau cho khối lượng (GB) và số bản ghi để 2 đường không trùng khít lên nhau
 const PROCESSING_TREND_MONTHS = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
-const PROCESSING_TREND_RATIOS = [0.55, 0.65, 0.75, 0.85, 0.93, 1];
+const PROCESSING_TREND_VOLUME_RATIOS = [0.5, 0.62, 0.7, 0.82, 0.91, 1];
+const PROCESSING_TREND_RECORDS_RATIOS = [0.6, 0.68, 0.79, 0.85, 0.94, 1];
 
 // Mock: 15 hệ thống CSDL quốc gia/bộ ngành đang kết nối chia sẻ dữ liệu
 const SHARING_SYSTEMS_API_CONFIG = [
@@ -185,6 +213,9 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
   const [apiCallsYear, setApiCallsYear] = useState(new Date().getFullYear());
   const [sortColumn, setSortColumn] = useState<'dataSize' | 'lastSync' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [processingRulesScope, setProcessingRulesScope] = useState<'Trong ngành' | 'Ngoài ngành'>('Trong ngành');
+  const [processingRulesDateFrom, setProcessingRulesDateFrom] = useState('');
+  const [processingRulesDateTo, setProcessingRulesDateTo] = useState('');
 
   const toggleSort = (column: 'dataSize' | 'lastSync') => {
     if (sortColumn === column) {
@@ -262,10 +293,21 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
     return sortDirection === 'asc' ? diff : -diff;
   });
 
-  const processingRulesChartData = SOURCE_TREND_LIST.map(source => ({
-    name: source,
-    ...PROCESSING_RULES_BY_SOURCE[source],
-  }));
+  const processingRulesDateScale = getProcessingRulesDateScale(processingRulesDateFrom, processingRulesDateTo);
+  const processingRulesChartData = SOURCE_TREND_LIST
+    .filter(source => {
+      const isInternal = PROCESSING_RULES_INTERNAL_SOURCES.includes(source);
+      return processingRulesScope === 'Trong ngành' ? isInternal : !isInternal;
+    })
+    .map(source => {
+      const rules = PROCESSING_RULES_BY_SOURCE[source];
+      return {
+        name: source,
+        cleaning: Math.round(rules.cleaning * processingRulesDateScale),
+        transform: Math.round(rules.transform * processingRulesDateScale),
+        normalize: Math.round(rules.normalize * processingRulesDateScale),
+      };
+    });
 
   const rankedVolumeData = SOURCE_TREND_LIST
     .map(source => ({ source, volumeGB: PROCESSED_VOLUME_BY_SOURCE[source] }))
@@ -282,8 +324,8 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
   const processedVolumeFinalGB = rankedVolumeData.reduce((sum, r) => sum + r.volumeGB, 0);
   const processingTrendData = PROCESSING_TREND_MONTHS.map((month, i) => ({
     month,
-    volumeGB: Math.round(processedVolumeFinalGB * PROCESSING_TREND_RATIOS[i]),
-    recordsM: Number((processedRecordsFinalM * PROCESSING_TREND_RATIOS[i]).toFixed(2)),
+    volumeGB: Math.round(processedVolumeFinalGB * PROCESSING_TREND_VOLUME_RATIOS[i]),
+    recordsM: Number((processedRecordsFinalM * PROCESSING_TREND_RECORDS_RATIOS[i]).toFixed(2)),
   }));
 
   const apiConfigBySourceData = [...SHARING_SYSTEMS_API_CONFIG].sort((a, b) => b.apiCount - a.apiCount);
@@ -444,11 +486,10 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
     const isActive = status === 'success';
     return (
       <span
-        className={`px-2 py-1 text-[13px] border rounded-full ${
-          isActive
-            ? 'bg-green-100 text-green-700 border-green-200'
-            : 'bg-slate-200 text-slate-600 border-slate-300'
-        }`}
+        className={`px-2 py-1 text-[13px] border rounded-full ${isActive
+          ? 'bg-green-100 text-green-700 border-green-200'
+          : 'bg-slate-200 text-slate-600 border-slate-300'
+          }`}
       >
         {isActive ? 'Hoạt động' : 'Ngưng hoạt động'}
       </span>
@@ -463,10 +504,10 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
             {selectedKPI === 'Thu thập'
               ? 'Báo cáo thu thập dữ liệu'
               : selectedKPI === 'Xử lý'
-              ? 'Tổng quan xử lý dữ liệu'
-              : selectedKPI === 'Chia sẻ'
-              ? 'Báo cáo chia sẻ dữ liệu'
-              : `Chi tiết ${selectedKPI}`}
+                ? 'Tổng quan xử lý dữ liệu'
+                : selectedKPI === 'Chia sẻ'
+                  ? 'Báo cáo chia sẻ dữ liệu'
+                  : `Chi tiết ${selectedKPI}`}
           </h1>
           <p className="text-sm text-slate-600 mt-1">
             Danh sách dữ liệu đã thu thập và đồng bộ
@@ -590,559 +631,556 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
                 Dữ liệu đã xử lý
               </span>
             </div>
-            <div className="text-3xl font-bold text-slate-900">7.69 TB</div>
-            <p className="text-[12px] text-slate-500 mt-1">7,871 GB</p>
+            <div className="text-3xl font-bold text-slate-900">7.69 TB <span className="text-lg font-medium text-slate-400">/ 9.2 TB</span></div>
+            <div className="mt-2">
+              <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                <div className="h-full bg-slate-700 rounded-full" style={{ width: '83.6%' }} />
+              </div>
+              <p className="text-[12px] text-slate-500 mt-1">83.6% dung lượng dữ liệu thu thập đã được xử lý</p>
+            </div>
           </div>
         </div>
       ) : selectedKPI === 'Chia sẻ' ? (
         <>
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        <div className="flex flex-col gap-3">
-          <button
-            onClick={() => setActiveShareCard('apiConfig')}
-            className={`w-full h-[94px] text-left bg-white rounded-lg border-l border-r border-b border-l-slate-200 border-r-slate-200 border-b-slate-200 border-t-4 border-t-cyan-500 p-3 flex flex-col justify-between transition-shadow ${
-              activeShareCard === 'apiConfig' ? 'ring-2 ring-cyan-400 shadow-md' : 'hover:shadow-md'
-            }`}
-          >
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Settings2 className="w-4 h-4 text-cyan-600" />
-                <span className="text-[12px] font-semibold uppercase tracking-wide text-slate-500">
-                  API đã cấu hình
-                </span>
-              </div>
-              <div className="text-2xl font-bold text-slate-900">{total}</div>
-            </div>
-            <div className="flex items-center justify-end gap-1 text-[11px] font-normal text-cyan-600">
-              Xem chi tiết
-              <ArrowRight className="w-3 h-3" />
-            </div>
-          </button>
-
-          <button
-            onClick={() => setActiveShareCard('apiCalls')}
-            className={`w-full h-[94px] text-left bg-white rounded-lg border-l border-r border-b border-l-slate-200 border-r-slate-200 border-b-slate-200 border-t-4 border-t-green-500 p-3 flex flex-col justify-between transition-shadow ${
-              activeShareCard === 'apiCalls' ? 'ring-2 ring-green-400 shadow-md' : 'hover:shadow-md'
-            }`}
-          >
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Zap className="w-4 h-4 text-green-600" />
-                <span className="text-[12px] font-semibold uppercase tracking-wide text-slate-500">
-                  Lượt truy cập API
-                </span>
-              </div>
-              <div className="text-2xl font-bold text-slate-900">{totalSynced.toLocaleString('vi-VN')}</div>
-            </div>
-            <div className="flex items-center justify-end gap-1 text-[11px] font-normal text-green-600">
-              Xem chi tiết
-              <ArrowRight className="w-3 h-3" />
-            </div>
-          </button>
-
-          <button
-            onClick={() => setActiveShareCard('volume')}
-            className={`w-full h-[94px] text-left bg-white rounded-lg border-l border-r border-b border-l-slate-200 border-r-slate-200 border-b-slate-200 border-t-4 border-t-purple-500 p-3 flex flex-col justify-between transition-shadow ${
-              activeShareCard === 'volume' ? 'ring-2 ring-purple-400 shadow-md' : 'hover:shadow-md'
-            }`}
-          >
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Database className="w-4 h-4 text-purple-600" />
-                <span className="text-[12px] font-semibold uppercase tracking-wide text-slate-500">
-                  Dung lượng chia sẻ
-                </span>
-              </div>
-              <div className="text-2xl font-bold text-slate-900">{formatDataSize(totalSynced * 1150)}</div>
-            </div>
-            <div className="flex items-center justify-end gap-1 text-[11px] font-normal text-purple-600">
-              Xem chi tiết
-              <ArrowRight className="w-3 h-3" />
-            </div>
-          </button>
-
-          <button
-            onClick={() => setActiveShareCard('requests')}
-            className={`w-full h-[94px] text-left bg-white rounded-lg border-l border-r border-b border-l-slate-200 border-r-slate-200 border-b-slate-200 border-t-4 border-t-blue-500 p-3 flex flex-col justify-between transition-shadow ${
-              activeShareCard === 'requests' ? 'ring-2 ring-blue-400 shadow-md' : 'hover:shadow-md'
-            }`}
-          >
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Send className="w-4 h-4 text-blue-600" />
-                <span className="text-[12px] font-semibold uppercase tracking-wide text-slate-500">
-                  Số lượng yêu cầu chia sẻ
-                </span>
-              </div>
-              <div className="text-2xl font-bold text-slate-900">{requestsReceived.toLocaleString('vi-VN')}</div>
-            </div>
-            <div className="flex items-center justify-end gap-1 text-[11px] font-normal text-blue-600">
-              Xem chi tiết
-              <ArrowRight className="w-3 h-3" />
-            </div>
-          </button>
-
-          <button
-            onClick={() => setActiveShareCard('responseTime')}
-            className={`w-full h-[94px] text-left bg-white rounded-lg border-l border-r border-b border-l-slate-200 border-r-slate-200 border-b-slate-200 border-t-4 border-t-teal-500 p-3 flex flex-col justify-between transition-shadow ${
-              activeShareCard === 'responseTime' ? 'ring-2 ring-teal-400 shadow-md' : 'hover:shadow-md'
-            }`}
-          >
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Clock className="w-4 h-4 text-teal-600" />
-                <span className="text-[12px] font-semibold uppercase tracking-wide text-slate-500">
-                  Thời gian phản hồi TB
-                </span>
-              </div>
-              <div className="text-2xl font-bold text-slate-900">299 ms</div>
-            </div>
-            <div className="flex items-center justify-end gap-1 text-[11px] font-normal text-teal-600">
-              Xem chi tiết
-              <ArrowRight className="w-3 h-3" />
-            </div>
-          </button>
-
-          <button
-            onClick={() => setActiveShareCard('errorRate')}
-            className={`w-full h-[94px] text-left bg-white rounded-lg border-l border-r border-b border-l-slate-200 border-r-slate-200 border-b-slate-200 border-t-4 border-t-red-500 p-3 flex flex-col justify-between transition-shadow ${
-              activeShareCard === 'errorRate' ? 'ring-2 ring-red-400 shadow-md' : 'hover:shadow-md'
-            }`}
-          >
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <AlertTriangle className="w-4 h-4 text-red-500" />
-                <span className="text-[12px] font-semibold uppercase tracking-wide text-slate-500">
-                  API cần theo dõi
-                </span>
-              </div>
-              <div className="text-2xl font-bold text-slate-900">8</div>
-            </div>
-            <div className="flex items-center justify-end gap-1 text-[11px] font-normal text-red-600">
-              Xem chi tiết
-              <ArrowRight className="w-3 h-3" />
-            </div>
-          </button>
-        </div>
-
-        <div className="lg:col-span-4 flex flex-col gap-4">
-          {activeShareCard === 'errorRate' ? (
-            <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
-              <div className="p-6 pb-0">
-                <h3 className="text-slate-900 font-semibold mb-1">Top 10 API có tỷ lệ lỗi cao nhất trong 7 ngày qua</h3>
-                <p className="text-sm text-slate-500 mb-4">Xếp hạng theo tỷ lệ lỗi trên tổng số lượt gọi</p>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse text-[13px]">
-                  <thead className="bg-slate-50 border-b border-slate-200">
-                    <tr>
-                      <th className="text-left py-3 px-4 text-[13px] text-slate-500 font-bold whitespace-nowrap">ENDPOINT</th>
-                      <th className="text-left py-3 px-4 text-[13px] text-slate-500 font-bold whitespace-nowrap">HỆ THỐNG</th>
-                      <th className="text-right py-3 px-4 text-[13px] text-slate-500 font-bold whitespace-nowrap">LƯỢT GỌI</th>
-                      <th className="text-right py-3 px-4 text-[13px] text-slate-500 font-bold whitespace-nowrap">SỐ LỖI</th>
-                      <th className="text-left py-3 px-4 text-[13px] text-slate-500 font-bold whitespace-nowrap">MÃ LỖI PHỔ BIẾN</th>
-                      <th className="text-right py-3 px-4 text-[13px] text-slate-500 font-bold whitespace-nowrap">THỜI GIAN TB</th>
-                      <th className="text-left py-3 px-4 text-[13px] text-slate-500 font-bold whitespace-nowrap">TỶ LỆ LỖI</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {TOP_ERROR_RATE_APIS.map(api => (
-                      <tr key={api.endpoint} className="hover:bg-slate-50 transition-colors">
-                        <td className="py-3 px-4 font-mono text-[13px] text-slate-700 whitespace-nowrap">{api.endpoint}</td>
-                        <td className="py-3 px-4">
-                          <span className="px-2 py-0.5 text-[11px] font-semibold bg-blue-50 text-blue-700 rounded whitespace-nowrap">
-                            {api.system}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-right text-[13px] text-slate-900 whitespace-nowrap">{api.calls.toLocaleString('vi-VN')}</td>
-                        <td className="py-3 px-4 text-right text-[13px] text-slate-900 whitespace-nowrap">{api.errors.toLocaleString('vi-VN')}</td>
-                        <td className="py-3 px-4 text-[13px] text-slate-600 whitespace-nowrap">{api.commonError}</td>
-                        <td className="py-3 px-4 text-right text-[13px] text-slate-900 whitespace-nowrap">{api.avgTimeMs.toLocaleString('vi-VN')} ms</td>
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-2 min-w-[140px]">
-                            <div className="flex-1 h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                              <div className="h-full rounded-full bg-red-500" style={{ width: `${(api.errorRate / TOP_ERROR_RATE_APIS[0].errorRate) * 100}%` }} />
-                            </div>
-                            <span className="text-[13px] font-bold text-red-600 whitespace-nowrap">{api.errorRate}%</span>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          ) : activeShareCard === 'responseTime' ? (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              <div className="lg:col-span-2 bg-white rounded-lg border border-slate-200 p-6">
-                <h3 className="text-slate-900 font-semibold mb-1">Thời gian phản hồi trung bình API</h3>
-                <p className="text-sm text-slate-500 mb-4">Theo giờ trong 24h qua (ms)</p>
-                <ResponsiveContainer width="100%" height={400}>
-                  <LineChart data={responseTimeTrendData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                    <XAxis dataKey="label" stroke="#64748b" style={{ fontSize: '11px' }} interval={2} />
-                    <YAxis stroke="#64748b" style={{ fontSize: '12px' }} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#fff',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '8px',
-                        fontSize: '12px'
-                      }}
-                      formatter={(value: number) => `${value.toLocaleString('vi-VN')} ms`}
-                    />
-                    <ReferenceLine
-                      y={RESPONSE_TIME_THRESHOLD_MS}
-                      stroke="#ef4444"
-                      strokeDasharray="4 4"
-                      label={{ value: `Ngưỡng cảnh báo ${RESPONSE_TIME_THRESHOLD_MS}ms`, position: 'insideTopRight', fill: '#ef4444', fontSize: 11 }}
-                    />
-                    <Line type="monotone" dataKey="responseTimeMs" stroke="#0d9488" strokeWidth={2} dot={{ r: 3 }} name="Thời gian phản hồi (ms)" />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="bg-white rounded-lg border border-slate-200 p-6">
-                <h3 className="text-slate-900 font-semibold mb-1">Top 5 API vượt ngưỡng cảnh báo</h3>
-                <p className="text-sm text-slate-500 mb-4">Ngưỡng cảnh báo: {RESPONSE_TIME_THRESHOLD_MS} ms</p>
-                <div className="space-y-4">
-                  {TOP_SLOW_APIS.map((api, i) => {
-                    const percent = (api.responseTimeMs / maxSlowApiResponseTime) * 100;
-                    return (
-                      <div key={api.name}>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <div className="flex items-center gap-2">
-                            <span className="w-6 h-6 rounded-full flex items-center justify-center bg-red-100 text-red-600 text-[12px] font-bold flex-shrink-0">
-                              {i + 1}
-                            </span>
-                            <span className="text-[13px] font-semibold text-slate-900">{api.name}</span>
-                          </div>
-                          <span className="text-[13px] font-bold text-red-600 whitespace-nowrap">{api.responseTimeMs} ms</span>
-                        </div>
-                        <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
-                          <div className="h-full rounded-full bg-red-500" style={{ width: `${percent}%` }} />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          ) : activeShareCard === 'requests' ? (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              <div className="bg-white rounded-lg border border-slate-200 p-5 flex flex-col">
-                <div className="flex items-start justify-between gap-2 mb-1">
-                  <h3 className="text-slate-900 font-semibold">Yêu cầu chia sẻ dữ liệu đang chờ xử lý</h3>
-                  <button
-                    onClick={() => {
-                      if (typeof (window as any).navigateToPage === 'function') {
-                        (window as any).navigateToPage('provisioning-data-request');
-                      }
-                    }}
-                    className="flex-shrink-0 flex items-center gap-1 text-[12px] font-semibold text-blue-600 hover:text-blue-700 whitespace-nowrap"
-                  >
-                    <Eye className="w-3.5 h-3.5" />
-                    Xem chi tiết
-                  </button>
-                </div>
-                <p className="text-[13px] text-slate-500 mb-3">5 yêu cầu mới nhất</p>
-                <div className="space-y-2.5">
-                  {PENDING_SHARE_REQUESTS.map(req => (
-                    <div key={req.id} className="border border-slate-100 rounded-lg p-3">
-                      <div className="flex items-start justify-between gap-2 mb-1.5">
-                        <span className="text-[13px] font-semibold text-slate-900">{req.requester}</span>
-                        <span className="flex-shrink-0 px-2 py-0.5 text-[11px] font-bold bg-amber-100 text-amber-700 rounded-full whitespace-nowrap">
-                          Chờ xử lý
-                        </span>
-                      </div>
-                      <p className="text-[12px] text-slate-500 mb-2">{req.dataType}</p>
-                      <div className="flex items-center gap-1 text-[11px] text-slate-400">
-                        <Calendar className="w-3 h-3" />
-                        {req.requestedAt}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="lg:col-span-2 bg-white rounded-lg border border-slate-200 p-6 flex flex-col">
-                <h3 className="text-slate-900 font-semibold mb-1">Xử lý yêu cầu chia sẻ dữ liệu</h3>
-                <p className="text-sm text-slate-500 mb-4">Tỷ lệ xử lý qua từng bước, tính trên tổng {requestsReceived.toLocaleString('vi-VN')} yêu cầu tiếp nhận</p>
-                <div className="grid grid-cols-3 gap-4 mb-4">
-                  {REQUEST_FUNNEL_RINGS.map(ring => {
-                    const percent = ring.total > 0 ? Math.round((ring.value / ring.total) * 100) : 0;
-                    return (
-                      <div key={ring.label} className="flex flex-col items-center justify-center border border-slate-100 rounded-lg p-3">
-                        <div className="relative w-[130px] h-[130px]">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <RadialBarChart
-                              innerRadius="72%"
-                              outerRadius="100%"
-                              data={[{ value: percent }]}
-                              startAngle={90}
-                              endAngle={90 - (360 * percent) / 100}
-                            >
-                              <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
-                              <RadialBar dataKey="value" fill={ring.color} cornerRadius={8} background={{ fill: '#e2e8f0' }} />
-                            </RadialBarChart>
-                          </ResponsiveContainer>
-                          <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            <span className="text-xl font-bold" style={{ color: ring.color }}>{ring.value.toLocaleString('vi-VN')}</span>
-                            <span className="text-[11px] text-slate-400">/ {ring.total.toLocaleString('vi-VN')}</span>
-                            <span className="text-[11px] text-slate-500 font-semibold mt-0.5">{percent}%</span>
-                          </div>
-                        </div>
-                        <p className="text-[12px] text-slate-600 text-center mt-2 leading-snug">{ring.label}</p>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div className="bg-white rounded-lg border-l border-r border-b border-l-slate-200 border-r-slate-200 border-b-slate-200 border-t-4 border-t-blue-500 p-4 flex flex-col justify-center">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => setActiveShareCard('apiConfig')}
+                className={`w-full h-[94px] text-left bg-white rounded-lg border-l border-r border-b border-l-slate-200 border-r-slate-200 border-b-slate-200 border-t-4 border-t-cyan-500 p-3 flex flex-col justify-between transition-shadow ${activeShareCard === 'apiConfig' ? 'ring-2 ring-cyan-400 shadow-md' : 'hover:shadow-md'
+                  }`}
+              >
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Settings2 className="w-4 h-4 text-cyan-600" />
                     <span className="text-[12px] font-semibold uppercase tracking-wide text-slate-500">
-                      Yêu cầu tiếp nhận
+                      API đã cấu hình
                     </span>
-                    <div className="text-3xl font-bold text-slate-900 mt-1">{requestsReceived.toLocaleString('vi-VN')}</div>
                   </div>
-                  <div className="bg-red-50 rounded-lg border border-red-100 p-4 flex flex-col justify-center">
-                    <span className="text-[12px] font-semibold uppercase tracking-wide text-red-600">
-                      Bị từ chối
-                    </span>
-                    <div className="text-3xl font-bold text-red-600 mt-1">{requestsRejected.toLocaleString('vi-VN')}</div>
-                  </div>
+                  <div className="text-2xl font-bold text-slate-900">{total}</div>
                 </div>
+                <div className="flex items-center justify-end gap-1 text-[11px] font-normal text-cyan-600">
+                  Xem chi tiết
+                  <ArrowRight className="w-3 h-3" />
+                </div>
+              </button>
 
-                <div className="border border-slate-100 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-slate-900 font-semibold text-[13px]">Số lượng API công khai dữ liệu</h3>
-                    <span className="text-[13px] font-bold text-slate-900">{publicApiTotal.toLocaleString('vi-VN')}</span>
+              <button
+                onClick={() => setActiveShareCard('apiCalls')}
+                className={`w-full h-[94px] text-left bg-white rounded-lg border-l border-r border-b border-l-slate-200 border-r-slate-200 border-b-slate-200 border-t-4 border-t-green-500 p-3 flex flex-col justify-between transition-shadow ${activeShareCard === 'apiCalls' ? 'ring-2 ring-green-400 shadow-md' : 'hover:shadow-md'
+                  }`}
+              >
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Zap className="w-4 h-4 text-green-600" />
+                    <span className="text-[12px] font-semibold uppercase tracking-wide text-slate-500">
+                      Lượt truy cập API
+                    </span>
                   </div>
-                  <div className="space-y-3">
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-[13px] font-semibold text-slate-700">Cổng dữ liệu Quốc gia</span>
-                        <span className="text-[13px] font-bold text-indigo-600">
-                          {((publicApiPortal / publicApiTotal) * 100).toFixed(2)}%
-                        </span>
-                      </div>
-                      <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
-                        <div className="h-full rounded-full bg-indigo-500" style={{ width: `${(publicApiPortal / publicApiTotal) * 100}%` }} />
-                      </div>
-                      <p className="text-[11px] text-slate-400 mt-1">{publicApiPortal.toLocaleString('vi-VN')} API</p>
-                    </div>
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-[13px] font-semibold text-slate-700">Nền tảng chia sẻ dữ liệu nội bộ</span>
-                        <span className="text-[13px] font-bold text-teal-600">
-                          {((publicApiInternal / publicApiTotal) * 100).toFixed(2)}%
-                        </span>
-                      </div>
-                      <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
-                        <div className="h-full rounded-full bg-teal-500" style={{ width: `${(publicApiInternal / publicApiTotal) * 100}%` }} />
-                      </div>
-                      <p className="text-[11px] text-slate-400 mt-1">{publicApiInternal.toLocaleString('vi-VN')} API</p>
+                  <div className="text-2xl font-bold text-slate-900">{totalSynced.toLocaleString('vi-VN')}</div>
+                </div>
+                <div className="flex items-center justify-end gap-1 text-[11px] font-normal text-green-600">
+                  Xem chi tiết
+                  <ArrowRight className="w-3 h-3" />
+                </div>
+              </button>
+
+              <button
+                onClick={() => setActiveShareCard('volume')}
+                className={`w-full h-[94px] text-left bg-white rounded-lg border-l border-r border-b border-l-slate-200 border-r-slate-200 border-b-slate-200 border-t-4 border-t-purple-500 p-3 flex flex-col justify-between transition-shadow ${activeShareCard === 'volume' ? 'ring-2 ring-purple-400 shadow-md' : 'hover:shadow-md'
+                  }`}
+              >
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Database className="w-4 h-4 text-purple-600" />
+                    <span className="text-[12px] font-semibold uppercase tracking-wide text-slate-500">
+                      Dung lượng chia sẻ
+                    </span>
+                  </div>
+                  <div className="text-2xl font-bold text-slate-900">{formatDataSize(totalSynced * 1150)}</div>
+                </div>
+                <div className="flex items-center justify-end gap-1 text-[11px] font-normal text-purple-600">
+                  Xem chi tiết
+                  <ArrowRight className="w-3 h-3" />
+                </div>
+              </button>
+
+              <button
+                onClick={() => setActiveShareCard('requests')}
+                className={`w-full h-[94px] text-left bg-white rounded-lg border-l border-r border-b border-l-slate-200 border-r-slate-200 border-b-slate-200 border-t-4 border-t-blue-500 p-3 flex flex-col justify-between transition-shadow ${activeShareCard === 'requests' ? 'ring-2 ring-blue-400 shadow-md' : 'hover:shadow-md'
+                  }`}
+              >
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Send className="w-4 h-4 text-blue-600" />
+                    <span className="text-[12px] font-semibold uppercase tracking-wide text-slate-500">
+                      Số lượng yêu cầu chia sẻ
+                    </span>
+                  </div>
+                  <div className="text-2xl font-bold text-slate-900">{requestsReceived.toLocaleString('vi-VN')}</div>
+                </div>
+                <div className="flex items-center justify-end gap-1 text-[11px] font-normal text-blue-600">
+                  Xem chi tiết
+                  <ArrowRight className="w-3 h-3" />
+                </div>
+              </button>
+
+              <button
+                onClick={() => setActiveShareCard('responseTime')}
+                className={`w-full h-[94px] text-left bg-white rounded-lg border-l border-r border-b border-l-slate-200 border-r-slate-200 border-b-slate-200 border-t-4 border-t-teal-500 p-3 flex flex-col justify-between transition-shadow ${activeShareCard === 'responseTime' ? 'ring-2 ring-teal-400 shadow-md' : 'hover:shadow-md'
+                  }`}
+              >
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Clock className="w-4 h-4 text-teal-600" />
+                    <span className="text-[12px] font-semibold uppercase tracking-wide text-slate-500">
+                      Thời gian phản hồi TB
+                    </span>
+                  </div>
+                  <div className="text-2xl font-bold text-slate-900">299 ms</div>
+                </div>
+                <div className="flex items-center justify-end gap-1 text-[11px] font-normal text-teal-600">
+                  Xem chi tiết
+                  <ArrowRight className="w-3 h-3" />
+                </div>
+              </button>
+
+              <button
+                onClick={() => setActiveShareCard('errorRate')}
+                className={`w-full h-[94px] text-left bg-white rounded-lg border-l border-r border-b border-l-slate-200 border-r-slate-200 border-b-slate-200 border-t-4 border-t-red-500 p-3 flex flex-col justify-between transition-shadow ${activeShareCard === 'errorRate' ? 'ring-2 ring-red-400 shadow-md' : 'hover:shadow-md'
+                  }`}
+              >
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <AlertTriangle className="w-4 h-4 text-red-500" />
+                    <span className="text-[12px] font-semibold uppercase tracking-wide text-slate-500">
+                      API cần theo dõi
+                    </span>
+                  </div>
+                  <div className="text-2xl font-bold text-slate-900">8</div>
+                </div>
+                <div className="flex items-center justify-end gap-1 text-[11px] font-normal text-red-600">
+                  Xem chi tiết
+                  <ArrowRight className="w-3 h-3" />
+                </div>
+              </button>
+            </div>
+
+            <div className="lg:col-span-4 flex flex-col gap-4">
+              {activeShareCard === 'errorRate' ? (
+                <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
+                  <div className="p-6 pb-0">
+                    <h3 className="text-slate-900 font-semibold mb-1">Top 10 API có tỷ lệ lỗi cao nhất trong 7 ngày qua</h3>
+                    <p className="text-sm text-slate-500 mb-4">Xếp hạng theo tỷ lệ lỗi trên tổng số lượt gọi</p>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse text-[13px]">
+                      <thead className="bg-slate-50 border-b border-slate-200">
+                        <tr>
+                          <th className="text-left py-3 px-4 text-[13px] text-slate-500 font-bold whitespace-nowrap">ENDPOINT</th>
+                          <th className="text-left py-3 px-4 text-[13px] text-slate-500 font-bold whitespace-nowrap">HỆ THỐNG</th>
+                          <th className="text-right py-3 px-4 text-[13px] text-slate-500 font-bold whitespace-nowrap">LƯỢT GỌI</th>
+                          <th className="text-right py-3 px-4 text-[13px] text-slate-500 font-bold whitespace-nowrap">SỐ LỖI</th>
+                          <th className="text-left py-3 px-4 text-[13px] text-slate-500 font-bold whitespace-nowrap">MÃ LỖI PHỔ BIẾN</th>
+                          <th className="text-right py-3 px-4 text-[13px] text-slate-500 font-bold whitespace-nowrap">THỜI GIAN TB</th>
+                          <th className="text-left py-3 px-4 text-[13px] text-slate-500 font-bold whitespace-nowrap">TỶ LỆ LỖI</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {TOP_ERROR_RATE_APIS.map(api => (
+                          <tr key={api.endpoint} className="hover:bg-slate-50 transition-colors">
+                            <td className="py-3 px-4 font-mono text-[13px] text-slate-700 whitespace-nowrap">{api.endpoint}</td>
+                            <td className="py-3 px-4">
+                              <span className="px-2 py-0.5 text-[11px] font-semibold bg-blue-50 text-blue-700 rounded whitespace-nowrap">
+                                {api.system}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-right text-[13px] text-slate-900 whitespace-nowrap">{api.calls.toLocaleString('vi-VN')}</td>
+                            <td className="py-3 px-4 text-right text-[13px] text-slate-900 whitespace-nowrap">{api.errors.toLocaleString('vi-VN')}</td>
+                            <td className="py-3 px-4 text-[13px] text-slate-600 whitespace-nowrap">{api.commonError}</td>
+                            <td className="py-3 px-4 text-right text-[13px] text-slate-900 whitespace-nowrap">{api.avgTimeMs.toLocaleString('vi-VN')} ms</td>
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-2 min-w-[140px]">
+                                <div className="flex-1 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                                  <div className="h-full rounded-full bg-red-500" style={{ width: `${(api.errorRate / TOP_ERROR_RATE_APIS[0].errorRate) * 100}%` }} />
+                                </div>
+                                <span className="text-[13px] font-bold text-red-600 whitespace-nowrap">{api.errorRate}%</span>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ) : activeShareCard === 'responseTime' ? (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                  <div className="lg:col-span-2 bg-white rounded-lg border border-slate-200 p-6">
+                    <h3 className="text-slate-900 font-semibold mb-1">Thời gian phản hồi trung bình API</h3>
+                    <p className="text-sm text-slate-500 mb-4">Theo giờ trong 24h qua (ms)</p>
+                    <ResponsiveContainer width="100%" height={400}>
+                      <LineChart data={responseTimeTrendData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <XAxis dataKey="label" stroke="#64748b" style={{ fontSize: '11px' }} interval={2} />
+                        <YAxis stroke="#64748b" style={{ fontSize: '12px' }} />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: '#fff',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '8px',
+                            fontSize: '12px'
+                          }}
+                          formatter={(value: number) => `${value.toLocaleString('vi-VN')} ms`}
+                        />
+                        <ReferenceLine
+                          y={RESPONSE_TIME_THRESHOLD_MS}
+                          stroke="#ef4444"
+                          strokeDasharray="4 4"
+                          label={{ value: `Ngưỡng cảnh báo ${RESPONSE_TIME_THRESHOLD_MS}ms`, position: 'insideTopRight', fill: '#ef4444', fontSize: 11 }}
+                        />
+                        <Line type="monotone" dataKey="responseTimeMs" stroke="#0d9488" strokeWidth={2} dot={{ r: 3 }} name="Thời gian phản hồi (ms)" />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  <div className="bg-white rounded-lg border border-slate-200 p-6">
+                    <h3 className="text-slate-900 font-semibold mb-1">Top 5 API vượt ngưỡng cảnh báo</h3>
+                    <p className="text-sm text-slate-500 mb-4">Ngưỡng cảnh báo: {RESPONSE_TIME_THRESHOLD_MS} ms</p>
+                    <div className="space-y-4">
+                      {TOP_SLOW_APIS.map((api, i) => {
+                        const percent = (api.responseTimeMs / maxSlowApiResponseTime) * 100;
+                        return (
+                          <div key={api.name}>
+                            <div className="flex items-center justify-between mb-1.5">
+                              <div className="flex items-center gap-2">
+                                <span className="w-6 h-6 rounded-full flex items-center justify-center bg-red-100 text-red-600 text-[12px] font-bold flex-shrink-0">
+                                  {i + 1}
+                                </span>
+                                <span className="text-[13px] font-semibold text-slate-900">{api.name}</span>
+                              </div>
+                              <span className="text-[13px] font-bold text-red-600 whitespace-nowrap">{api.responseTimeMs} ms</span>
+                            </div>
+                            <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                              <div className="h-full rounded-full bg-red-500" style={{ width: `${percent}%` }} />
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          ) : activeShareCard === 'volume' ? (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              <div className="lg:col-span-2 bg-white rounded-lg border border-slate-200 p-6">
-                <div className="flex items-start justify-between flex-wrap gap-3 mb-1">
-                  <div>
-                    <h3 className="text-slate-900 font-semibold mb-1">Xu hướng Chia sẻ dữ liệu theo dung lượng</h3>
-                    <p className="text-sm text-slate-500">Tổng dung lượng chia sẻ (MB) theo thời gian</p>
-                  </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
-                      {VOLUME_TREND_GRANULARITY_OPTIONS.map(option => (
-                        <button
-                          key={option.key}
-                          onClick={() => setVolumeTrendGranularity(option.key)}
-                          className={`px-2.5 py-1.5 text-[12px] rounded-md transition-colors whitespace-nowrap ${
-                            volumeTrendGranularity === option.key
-                              ? 'bg-white text-blue-600 shadow-sm font-semibold'
-                              : 'text-slate-600 hover:text-slate-900'
-                          }`}
-                        >
-                          {option.label}
-                        </button>
+              ) : activeShareCard === 'requests' ? (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                  <div className="bg-white rounded-lg border border-slate-200 p-5 flex flex-col">
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <h3 className="text-slate-900 font-semibold">Yêu cầu chia sẻ dữ liệu đang chờ xử lý</h3>
+                      <button
+                        onClick={() => {
+                          if (typeof (window as any).navigateToPage === 'function') {
+                            (window as any).navigateToPage('provisioning-data-request');
+                          }
+                        }}
+                        className="flex-shrink-0 flex items-center gap-1 text-[12px] font-semibold text-blue-600 hover:text-blue-700 whitespace-nowrap"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        Xem chi tiết
+                      </button>
+                    </div>
+                    <p className="text-[13px] text-slate-500 mb-3">5 yêu cầu mới nhất</p>
+                    <div className="space-y-2.5">
+                      {PENDING_SHARE_REQUESTS.map(req => (
+                        <div key={req.id} className="border border-slate-100 rounded-lg p-3">
+                          <div className="flex items-start justify-between gap-2 mb-1.5">
+                            <span className="text-[13px] font-semibold text-slate-900">{req.requester}</span>
+                            <span className="flex-shrink-0 px-2 py-0.5 text-[11px] font-bold bg-amber-100 text-amber-700 rounded-full whitespace-nowrap">
+                              Chờ xử lý
+                            </span>
+                          </div>
+                          <p className="text-[12px] text-slate-500 mb-2">{req.dataType}</p>
+                          <div className="flex items-center gap-1 text-[11px] text-slate-400">
+                            <Calendar className="w-3 h-3" />
+                            {req.requestedAt}
+                          </div>
+                        </div>
                       ))}
                     </div>
-                    {volumeTrendGranularity === 'year' && (
-                      <select
-                        value={volumeTrendYear}
-                        onChange={e => setVolumeTrendYear(Number(e.target.value))}
-                        className="text-[12px] bg-white border border-slate-200 rounded-md px-2 py-1.5 text-slate-700"
-                      >
-                        {availableTrendYears.map(y => (
-                          <option key={y} value={y}>{y}</option>
-                        ))}
-                      </select>
-                    )}
                   </div>
-                </div>
-                <ResponsiveContainer width="100%" height={370}>
-                  <LineChart data={volumeTrendData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                    <XAxis dataKey="label" stroke="#64748b" style={{ fontSize: '11px' }} interval={volumeTrendGranularity === 'month30' ? 2 : 0} />
-                    <YAxis stroke="#64748b" style={{ fontSize: '12px' }} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#fff',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '8px',
-                        fontSize: '12px'
-                      }}
-                      formatter={(value: number) => `${value.toLocaleString('vi-VN')} MB`}
-                    />
-                    <Line type="monotone" dataKey="volumeMB" stroke="#0d9488" strokeWidth={2} dot={{ r: 3 }} name="Dung lượng (MB)" />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
 
-              <div className="bg-white rounded-lg border border-slate-200 p-6">
-                <h3 className="text-slate-900 font-semibold mb-1">Top 5 loại dữ liệu được chia sẻ nhiều nhất</h3>
-                <p className="text-sm text-slate-500 mb-4">Xếp hạng theo tổng số lượt chia sẻ</p>
-                <div className="space-y-9">
-                  {TOP_SHARED_DATA_TYPES.map((item, i) => {
-                    const color = TOP_DATA_TYPE_COLORS[i % TOP_DATA_TYPE_COLORS.length];
-                    const percent = (item.shares / maxTopDataTypeShares) * 100;
-                    return (
-                      <div key={item.name}>
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <span
-                              className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[13px] font-bold flex-shrink-0"
-                              style={{ backgroundColor: color }}
-                            >
-                              {i + 1}
-                            </span>
-                            <span className="text-[13px] font-semibold text-slate-900">{item.name}</span>
+                  <div className="lg:col-span-2 bg-white rounded-lg border border-slate-200 p-6 flex flex-col">
+                    <h3 className="text-slate-900 font-semibold mb-1">Xử lý yêu cầu chia sẻ dữ liệu</h3>
+                    <p className="text-sm text-slate-500 mb-4">Tỷ lệ xử lý qua từng bước, tính trên tổng {requestsReceived.toLocaleString('vi-VN')} yêu cầu tiếp nhận</p>
+                    <div className="grid grid-cols-3 gap-4 mb-4">
+                      {REQUEST_FUNNEL_RINGS.map(ring => {
+                        const percent = ring.total > 0 ? Math.round((ring.value / ring.total) * 100) : 0;
+                        return (
+                          <div key={ring.label} className="flex flex-col items-center justify-center border border-slate-100 rounded-lg p-3">
+                            <div className="relative w-[130px] h-[130px]">
+                              <ResponsiveContainer width="100%" height="100%">
+                                <RadialBarChart
+                                  innerRadius="72%"
+                                  outerRadius="100%"
+                                  data={[{ value: percent }]}
+                                  startAngle={90}
+                                  endAngle={90 - (360 * percent) / 100}
+                                >
+                                  <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
+                                  <RadialBar dataKey="value" fill={ring.color} cornerRadius={8} background={{ fill: '#e2e8f0' }} />
+                                </RadialBarChart>
+                              </ResponsiveContainer>
+                              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                <span className="text-xl font-bold" style={{ color: ring.color }}>{ring.value.toLocaleString('vi-VN')}</span>
+                                <span className="text-[11px] text-slate-400">/ {ring.total.toLocaleString('vi-VN')}</span>
+                                <span className="text-[11px] text-slate-500 font-semibold mt-0.5">{percent}%</span>
+                              </div>
+                            </div>
+                            <p className="text-[12px] text-slate-600 text-center mt-2 leading-snug">{ring.label}</p>
                           </div>
-                          <span className="text-[13px] text-slate-500 whitespace-nowrap">{item.shares.toLocaleString('vi-VN')} lượt</span>
-                        </div>
-                        <div className="h-2.5 rounded-full bg-slate-100 overflow-hidden">
-                          <div className="h-full rounded-full" style={{ width: `${percent}%`, backgroundColor: color }} />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          ) : activeShareCard === 'apiCalls' ? (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              <div className="lg:col-span-2 bg-white rounded-lg border border-slate-200 p-6">
-                <div className="flex items-start justify-between flex-wrap gap-3 mb-1">
-                  <div>
-                    <h3 className="text-slate-900 font-semibold mb-1">Xu hướng truy cập API</h3>
-                    <p className="text-sm text-slate-500">Tổng lượt gọi API theo thời gian</p>
-                  </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
-                      {VOLUME_TREND_GRANULARITY_OPTIONS.map(option => (
-                        <button
-                          key={option.key}
-                          onClick={() => setApiCallsGranularity(option.key)}
-                          className={`px-2.5 py-1.5 text-[12px] rounded-md transition-colors whitespace-nowrap ${
-                            apiCallsGranularity === option.key
-                              ? 'bg-white text-blue-600 shadow-sm font-semibold'
-                              : 'text-slate-600 hover:text-slate-900'
-                          }`}
-                        >
-                          {option.label}
-                        </button>
-                      ))}
+                        );
+                      })}
                     </div>
-                    {apiCallsGranularity === 'year' && (
-                      <select
-                        value={apiCallsYear}
-                        onChange={e => setApiCallsYear(Number(e.target.value))}
-                        className="text-[12px] bg-white border border-slate-200 rounded-md px-2 py-1.5 text-slate-700"
-                      >
-                        {availableTrendYears.map(y => (
-                          <option key={y} value={y}>{y}</option>
-                        ))}
-                      </select>
-                    )}
-                  </div>
-                </div>
-                <ResponsiveContainer width="100%" height={370}>
-                  <LineChart data={apiCallsTrendData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                    <XAxis dataKey="label" stroke="#64748b" style={{ fontSize: '11px' }} interval={apiCallsGranularity === 'month30' ? 2 : 0} />
-                    <YAxis stroke="#64748b" style={{ fontSize: '12px' }} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#fff',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '8px',
-                        fontSize: '12px'
-                      }}
-                      formatter={(value: number) => `${value.toLocaleString('vi-VN')} lượt`}
-                    />
-                    <Line type="monotone" dataKey="calls" stroke="#22c55e" strokeWidth={2} dot={{ r: 3 }} name="Lượt truy cập API" />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
 
-              <div className="bg-white rounded-lg border border-slate-200 p-6">
-                <h3 className="text-slate-900 font-semibold mb-1">Top 5 API có lượt truy cập cao nhất</h3>
-                <p className="text-sm text-slate-500 mb-4">Xếp hạng theo tổng lượt gọi trong kỳ đã chọn</p>
-                <div className="space-y-9">
-                  {topApiCallsData.map((item, i) => {
-                    const color = TOP_API_CALL_COLORS[i % TOP_API_CALL_COLORS.length];
-                    const percent = (item.calls / maxTopApiCalls) * 100;
-                    return (
-                      <div key={item.name}>
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <span
-                              className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[13px] font-bold flex-shrink-0"
-                              style={{ backgroundColor: color }}
-                            >
-                              {i + 1}
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div className="bg-white rounded-lg border-l border-r border-b border-l-slate-200 border-r-slate-200 border-b-slate-200 border-t-4 border-t-blue-500 p-4 flex flex-col justify-center">
+                        <span className="text-[12px] font-semibold uppercase tracking-wide text-slate-500">
+                          Yêu cầu tiếp nhận
+                        </span>
+                        <div className="text-3xl font-bold text-slate-900 mt-1">{requestsReceived.toLocaleString('vi-VN')}</div>
+                      </div>
+                      <div className="bg-red-50 rounded-lg border border-red-100 p-4 flex flex-col justify-center">
+                        <span className="text-[12px] font-semibold uppercase tracking-wide text-red-600">
+                          Bị từ chối
+                        </span>
+                        <div className="text-3xl font-bold text-red-600 mt-1">{requestsRejected.toLocaleString('vi-VN')}</div>
+                      </div>
+                    </div>
+
+                    <div className="border border-slate-100 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-slate-900 font-semibold text-[13px]">Số lượng API công khai dữ liệu</h3>
+                        <span className="text-[13px] font-bold text-slate-900">{publicApiTotal.toLocaleString('vi-VN')}</span>
+                      </div>
+                      <div className="space-y-3">
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-[13px] font-semibold text-slate-700">Cổng dữ liệu Quốc gia</span>
+                            <span className="text-[13px] font-bold text-indigo-600">
+                              {((publicApiPortal / publicApiTotal) * 100).toFixed(2)}%
                             </span>
-                            <span className="text-[13px] font-semibold text-slate-900">{item.name}</span>
                           </div>
-                          <span className="text-[13px] text-slate-500 whitespace-nowrap">{item.calls.toLocaleString('vi-VN')} lượt</span>
+                          <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                            <div className="h-full rounded-full bg-indigo-500" style={{ width: `${(publicApiPortal / publicApiTotal) * 100}%` }} />
+                          </div>
+                          <p className="text-[11px] text-slate-400 mt-1">{publicApiPortal.toLocaleString('vi-VN')} API</p>
                         </div>
-                        <div className="h-2.5 rounded-full bg-slate-100 overflow-hidden">
-                          <div className="h-full rounded-full" style={{ width: `${percent}%`, backgroundColor: color }} />
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-[13px] font-semibold text-slate-700">Nền tảng chia sẻ dữ liệu nội bộ</span>
+                            <span className="text-[13px] font-bold text-teal-600">
+                              {((publicApiInternal / publicApiTotal) * 100).toFixed(2)}%
+                            </span>
+                          </div>
+                          <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                            <div className="h-full rounded-full bg-teal-500" style={{ width: `${(publicApiInternal / publicApiTotal) * 100}%` }} />
+                          </div>
+                          <p className="text-[11px] text-slate-400 mt-1">{publicApiInternal.toLocaleString('vi-VN')} API</p>
                         </div>
                       </div>
-                    );
-                  })}
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ) : activeShareCard === 'volume' ? (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                  <div className="lg:col-span-2 bg-white rounded-lg border border-slate-200 p-6">
+                    <div className="flex items-start justify-between flex-wrap gap-3 mb-1">
+                      <div>
+                        <h3 className="text-slate-900 font-semibold mb-1">Xu hướng Chia sẻ dữ liệu theo dung lượng</h3>
+                        <p className="text-sm text-slate-500">Tổng dung lượng chia sẻ (MB) theo thời gian</p>
+                      </div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
+                          {VOLUME_TREND_GRANULARITY_OPTIONS.map(option => (
+                            <button
+                              key={option.key}
+                              onClick={() => setVolumeTrendGranularity(option.key)}
+                              className={`px-2.5 py-1.5 text-[12px] rounded-md transition-colors whitespace-nowrap ${volumeTrendGranularity === option.key
+                                ? 'bg-white text-blue-600 shadow-sm font-semibold'
+                                : 'text-slate-600 hover:text-slate-900'
+                                }`}
+                            >
+                              {option.label}
+                            </button>
+                          ))}
+                        </div>
+                        {volumeTrendGranularity === 'year' && (
+                          <select
+                            value={volumeTrendYear}
+                            onChange={e => setVolumeTrendYear(Number(e.target.value))}
+                            className="text-[12px] bg-white border border-slate-200 rounded-md px-2 py-1.5 text-slate-700"
+                          >
+                            {availableTrendYears.map(y => (
+                              <option key={y} value={y}>{y}</option>
+                            ))}
+                          </select>
+                        )}
+                      </div>
+                    </div>
+                    <ResponsiveContainer width="100%" height={370}>
+                      <LineChart data={volumeTrendData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <XAxis dataKey="label" stroke="#64748b" style={{ fontSize: '11px' }} interval={volumeTrendGranularity === 'month30' ? 2 : 0} />
+                        <YAxis stroke="#64748b" style={{ fontSize: '12px' }} />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: '#fff',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '8px',
+                            fontSize: '12px'
+                          }}
+                          formatter={(value: number) => `${value.toLocaleString('vi-VN')} MB`}
+                        />
+                        <Line type="monotone" dataKey="volumeMB" stroke="#0d9488" strokeWidth={2} dot={{ r: 3 }} name="Dung lượng (MB)" />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  <div className="bg-white rounded-lg border border-slate-200 p-6">
+                    <h3 className="text-slate-900 font-semibold mb-1">Top 5 loại dữ liệu được chia sẻ nhiều nhất</h3>
+                    <p className="text-sm text-slate-500 mb-4">Xếp hạng theo tổng số lượt chia sẻ</p>
+                    <div className="space-y-9">
+                      {TOP_SHARED_DATA_TYPES.map((item, i) => {
+                        const color = TOP_DATA_TYPE_COLORS[i % TOP_DATA_TYPE_COLORS.length];
+                        const percent = (item.shares / maxTopDataTypeShares) * 100;
+                        return (
+                          <div key={item.name}>
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[13px] font-bold flex-shrink-0"
+                                  style={{ backgroundColor: color }}
+                                >
+                                  {i + 1}
+                                </span>
+                                <span className="text-[13px] font-semibold text-slate-900">{item.name}</span>
+                              </div>
+                              <span className="text-[13px] text-slate-500 whitespace-nowrap">{item.shares.toLocaleString('vi-VN')} lượt</span>
+                            </div>
+                            <div className="h-2.5 rounded-full bg-slate-100 overflow-hidden">
+                              <div className="h-full rounded-full" style={{ width: `${percent}%`, backgroundColor: color }} />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              ) : activeShareCard === 'apiCalls' ? (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                  <div className="lg:col-span-2 bg-white rounded-lg border border-slate-200 p-6">
+                    <div className="flex items-start justify-between flex-wrap gap-3 mb-1">
+                      <div>
+                        <h3 className="text-slate-900 font-semibold mb-1">Xu hướng truy cập API</h3>
+                        <p className="text-sm text-slate-500">Tổng lượt gọi API theo thời gian</p>
+                      </div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
+                          {VOLUME_TREND_GRANULARITY_OPTIONS.map(option => (
+                            <button
+                              key={option.key}
+                              onClick={() => setApiCallsGranularity(option.key)}
+                              className={`px-2.5 py-1.5 text-[12px] rounded-md transition-colors whitespace-nowrap ${apiCallsGranularity === option.key
+                                ? 'bg-white text-blue-600 shadow-sm font-semibold'
+                                : 'text-slate-600 hover:text-slate-900'
+                                }`}
+                            >
+                              {option.label}
+                            </button>
+                          ))}
+                        </div>
+                        {apiCallsGranularity === 'year' && (
+                          <select
+                            value={apiCallsYear}
+                            onChange={e => setApiCallsYear(Number(e.target.value))}
+                            className="text-[12px] bg-white border border-slate-200 rounded-md px-2 py-1.5 text-slate-700"
+                          >
+                            {availableTrendYears.map(y => (
+                              <option key={y} value={y}>{y}</option>
+                            ))}
+                          </select>
+                        )}
+                      </div>
+                    </div>
+                    <ResponsiveContainer width="100%" height={370}>
+                      <LineChart data={apiCallsTrendData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <XAxis dataKey="label" stroke="#64748b" style={{ fontSize: '11px' }} interval={apiCallsGranularity === 'month30' ? 2 : 0} />
+                        <YAxis stroke="#64748b" style={{ fontSize: '12px' }} />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: '#fff',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '8px',
+                            fontSize: '12px'
+                          }}
+                          formatter={(value: number) => `${value.toLocaleString('vi-VN')} lượt`}
+                        />
+                        <Line type="monotone" dataKey="calls" stroke="#22c55e" strokeWidth={2} dot={{ r: 3 }} name="Lượt truy cập API" />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  <div className="bg-white rounded-lg border border-slate-200 p-6">
+                    <h3 className="text-slate-900 font-semibold mb-1">Top 5 API có lượt truy cập cao nhất</h3>
+                    <p className="text-sm text-slate-500 mb-4">Xếp hạng theo tổng lượt gọi trong kỳ đã chọn</p>
+                    <div className="space-y-9">
+                      {topApiCallsData.map((item, i) => {
+                        const color = TOP_API_CALL_COLORS[i % TOP_API_CALL_COLORS.length];
+                        const percent = (item.calls / maxTopApiCalls) * 100;
+                        return (
+                          <div key={item.name}>
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[13px] font-bold flex-shrink-0"
+                                  style={{ backgroundColor: color }}
+                                >
+                                  {i + 1}
+                                </span>
+                                <span className="text-[13px] font-semibold text-slate-900">{item.name}</span>
+                              </div>
+                              <span className="text-[13px] text-slate-500 whitespace-nowrap">{item.calls.toLocaleString('vi-VN')} lượt</span>
+                            </div>
+                            <div className="h-2.5 rounded-full bg-slate-100 overflow-hidden">
+                              <div className="h-full rounded-full" style={{ width: `${percent}%`, backgroundColor: color }} />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-white rounded-lg border border-slate-200 p-6">
+                  <h3 className="text-slate-900 font-semibold mb-1">API đã cấu hình chia sẻ theo loại API</h3>
+                  <p className="text-sm text-slate-500 mb-4">{apiConfigBySourceData.length} hệ thống nguồn đang kết nối</p>
+                  <ResponsiveContainer width="100%" height={470}>
+                    <BarChart data={apiConfigBySourceData} layout="vertical" margin={{ left: 10, right: 20 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                      <XAxis type="number" stroke="#64748b" style={{ fontSize: '12px' }} />
+                      <YAxis type="category" dataKey="code" stroke="#64748b" style={{ fontSize: '11px' }} width={100} />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: '#fff',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '8px',
+                          fontSize: '12px'
+                        }}
+                      />
+                      <Bar dataKey="apiCount" fill="#0d9488" radius={[0, 4, 4, 0]} name="Số API" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="bg-white rounded-lg border border-slate-200 p-6">
-              <h3 className="text-slate-900 font-semibold mb-1">API đã cấu hình chia sẻ theo loại API</h3>
-              <p className="text-sm text-slate-500 mb-4">{apiConfigBySourceData.length} hệ thống nguồn đang kết nối</p>
-              <ResponsiveContainer width="100%" height={470}>
-                <BarChart data={apiConfigBySourceData} layout="vertical" margin={{ left: 10, right: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                  <XAxis type="number" stroke="#64748b" style={{ fontSize: '12px' }} />
-                  <YAxis type="category" dataKey="code" stroke="#64748b" style={{ fontSize: '11px' }} width={100} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: '#fff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      fontSize: '12px'
-                    }}
-                  />
-                  <Bar dataKey="apiCount" fill="#0d9488" radius={[0, 4, 4, 0]} name="Số API" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          )}
-        </div>
-        </div>
+          </div>
         </>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -1199,11 +1237,10 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
                   <button
                     key={option.key}
                     onClick={() => setBarMetric(option.key)}
-                    className={`px-3 py-1.5 text-[13px] rounded-md transition-colors ${
-                      barMetric === option.key
-                        ? 'bg-white text-blue-600 shadow-sm font-semibold'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
+                    className={`px-3 py-1.5 text-[13px] rounded-md transition-colors ${barMetric === option.key
+                      ? 'bg-white text-blue-600 shadow-sm font-semibold'
+                      : 'text-slate-600 hover:text-slate-900'
+                      }`}
                   >
                     {option.label}
                   </button>
@@ -1242,9 +1279,8 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
                 return (
                   <label
                     key={source}
-                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[13px] cursor-pointer transition-colors ${
-                      isChecked ? 'border-slate-300 bg-white' : 'border-slate-200 bg-slate-50 text-slate-400'
-                    }`}
+                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[13px] cursor-pointer transition-colors ${isChecked ? 'border-slate-300 bg-white' : 'border-slate-200 bg-slate-50 text-slate-400'
+                      }`}
                   >
                     <input
                       type="checkbox"
@@ -1416,6 +1452,45 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
               ))}
             </div>
           </div>
+
+          {/* Bộ lọc trong/ngoài ngành + khoảng thời gian */}
+          <div className="flex items-center gap-2 flex-wrap mb-4 mt-3">
+            <select
+              aria-label="Chọn phạm vi hệ thống"
+              className="px-3 py-2 border border-slate-200 rounded-lg text-[13px] text-slate-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+              title="Chọn phạm vi hệ thống"
+              value={processingRulesScope}
+              onChange={(e) => setProcessingRulesScope(e.target.value as 'Trong ngành' | 'Ngoài ngành')}
+            >
+              <option value="Trong ngành">Trong ngành</option>
+              <option value="Ngoài ngành">Ngoài ngành</option>
+            </select>
+            <div className="flex items-center gap-1.5 bg-slate-100 rounded-lg p-1.5">
+              <input
+                type="date"
+                value={processingRulesDateFrom}
+                onChange={(e) => setProcessingRulesDateFrom(e.target.value)}
+                className="text-[12px] bg-white border border-slate-200 rounded-md px-2 py-1 text-slate-700"
+              />
+              <span className="text-slate-400 text-[12px]">đến</span>
+              <input
+                type="date"
+                value={processingRulesDateTo}
+                onChange={(e) => setProcessingRulesDateTo(e.target.value)}
+                className="text-[12px] bg-white border border-slate-200 rounded-md px-2 py-1 text-slate-700"
+              />
+              {(processingRulesDateFrom || processingRulesDateTo) && (
+                <button
+                  onClick={() => { setProcessingRulesDateFrom(''); setProcessingRulesDateTo(''); }}
+                  className="text-[12px] text-slate-500 hover:text-slate-800 px-1.5"
+                  title="Bỏ lọc thời gian"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
+
           <ResponsiveContainer width="100%" height={380}>
             <BarChart data={processingRulesChartData} margin={{ bottom: 70, top: 10 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
@@ -1438,7 +1513,7 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
                 }}
               />
               {PROCESSING_RULE_CONFIG.map(rule => (
-                <Bar key={rule.key} dataKey={rule.key} stackId="rules" fill={rule.color} name={rule.label} />
+                <Bar key={rule.key} dataKey={rule.key} stackId="rules" fill={rule.color} name={rule.label} barSize={48} />
               ))}
             </BarChart>
           </ResponsiveContainer>
@@ -1448,8 +1523,8 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
       {selectedKPI === 'Xử lý' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className="bg-white rounded-lg border border-slate-200 p-6">
-            <h3 className="text-slate-900 font-semibold mb-1">Xu hướng xử lý dữ liệu 6 tháng</h3>
-            <p className="text-sm text-slate-500 mb-4">Tổng khối lượng (GB) và số bản ghi xử lý (triệu records)</p>
+            <h3 className="text-slate-900 font-semibold mb-1">Xu hướng xử lý dữ liệu 6 tháng gần nhất</h3>
+            <p className="text-sm text-slate-500 mb-4">Tổng dung lượng (GB) và số bản ghi xử lý (triệu records)</p>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={processingTrendData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
@@ -1528,8 +1603,8 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
 
       {/* Data Table */}
       {selectedKPI !== 'Chia sẻ' && selectedKPI !== 'Xử lý' && (
-      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
+        <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
+          <div className="overflow-x-auto">
             <table className="w-full border-collapse text-[13px]">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
@@ -1593,14 +1668,14 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
                 ))}
               </tbody>
             </table>
-        </div>
-
-        {currentData.length === 0 && (
-          <div className="text-center py-12 text-slate-500">
-            Không có dữ liệu chi tiết
           </div>
-        )}
-      </div>
+
+          {currentData.length === 0 && (
+            <div className="text-center py-12 text-slate-500">
+              Không có dữ liệu chi tiết
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

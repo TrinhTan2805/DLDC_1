@@ -9,7 +9,7 @@ import { ProvisionExportReportModal } from './modals/ProvisionExportReportModal'
 import { ProvisionServiceModal } from './modals/ProvisionServiceModal';
 import { AuditLogsTab } from './tabs/AuditLogsTab';
 import { ScrollText } from 'lucide-react';
-import { AreaChart, Area, LineChart, Line, BarChart, Bar, ReferenceLine, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, Label, ReferenceLine, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 // High-fidelity mock stats based on API
 const apiMockStats: Record<string, {
@@ -116,6 +116,27 @@ const reportData = reportBase.map((v, i) => ({
   loiKetNoi: i % 9 === 0 ? 14 : (i % 5 === 0 ? 6 : 1),
 }));
 
+// Biểu đồ cung cấp dữ liệu theo phương thức chia sẻ [Unverified] - áp dụng cùng bộ lọc (CSDL/API/khoảng ngày) với tab Báo cáo thống kê
+const PROVISION_METHOD_SHARE_BASE = [
+  { name: 'REST API', value: 57, color: '#3b82f6' },
+  { name: 'Excel', value: 30, color: '#10b981' },
+  { name: 'CSV', value: 22, color: '#f59e0b' },
+  { name: 'JSON', value: 15, color: '#8b5cf6' },
+];
+// Khoảng thời gian mốc của bộ dữ liệu báo cáo (Tháng 06/2026) để tính tỷ lệ theo khoảng ngày đã chọn
+const PROVISION_METHOD_BASELINE_START = new Date('2026-06-01').getTime();
+const PROVISION_METHOD_BASELINE_END = new Date('2026-06-30').getTime();
+const getProvisionMethodDateScale = (from: string, to: string) => {
+  if (!from && !to) return 1;
+  const start = from ? new Date(from).getTime() : PROVISION_METHOD_BASELINE_START;
+  const end = to ? new Date(to).getTime() : PROVISION_METHOD_BASELINE_END;
+  const totalDays = (PROVISION_METHOD_BASELINE_END - PROVISION_METHOD_BASELINE_START) / 86400000;
+  const clampedStart = Math.max(start, PROVISION_METHOD_BASELINE_START);
+  const clampedEnd = Math.min(end, PROVISION_METHOD_BASELINE_END);
+  const selectedDays = Math.max(0, (clampedEnd - clampedStart) / 86400000);
+  return totalDays > 0 ? Math.max(0.1, Math.min(1, selectedDays / totalDays)) : 1;
+};
+
 // Các loại báo cáo (UC2.1) — mỗi loại có kiểu biểu đồ phù hợp (UC2.2)
 const reportTypes: Array<{ key: string; label: string; dataKey: string; unit: string; chart: 'area' | 'line' | 'threshold' | 'bar'; threshold?: number; color: string }> = [
   { key: 'luuluong', label: 'Lưu lượng dữ liệu', dataKey: 'luuLuong', unit: 'MB', chart: 'area', color: '#2563eb' },
@@ -125,7 +146,7 @@ const reportTypes: Array<{ key: string; label: string; dataKey: string; unit: st
 ];
 
 export function DataProvisionMonitoringPage() {
-  const [activeTab, setActiveTab] = useState<'luong_du_lieu' | 'bao_cao' | 'nhat_ky'>('luong_du_lieu');
+  const [activeTab, setActiveTab] = useState<'luong_du_lieu' | 'bao_cao' | 'nhat_ky'>('bao_cao');
   const [showExportModal, setShowExportModal] = useState(false);
   
   // API monitoring select state
@@ -134,7 +155,7 @@ export function DataProvisionMonitoringPage() {
   
   // Pagination for detailed table
   const [tablePage, setTablePage] = useState(1);
-  const [tableItemsPerPage, setTableItemsPerPage] = useState(10);
+  const tableItemsPerPage = 5;
   
   const filteredApis = selectedDatabase ? apiList.filter(api => api.database === selectedDatabase) : apiList;
 
@@ -199,24 +220,25 @@ export function DataProvisionMonitoringPage() {
     return reportData.slice((tablePage - 1) * tableItemsPerPage, tablePage * tableItemsPerPage);
   }, [tablePage, tableItemsPerPage]);
 
+  // Biểu đồ cung cấp dữ liệu theo phương thức chia sẻ - áp dụng bộ lọc CSDL/API/khoảng ngày ở đầu trang
+  const provisionMethodDateScale = getProvisionMethodDateScale(monFrom, monTo);
+  const provisionMethodScopeScale = selectedApi
+    ? 1 / apiList.length
+    : selectedDatabase
+    ? filteredApis.length / apiList.length
+    : 1;
+  const provisionMethodShare = PROVISION_METHOD_SHARE_BASE.map(item => ({
+    ...item,
+    value: Math.max(1, Math.round(item.value * provisionMethodDateScale * provisionMethodScopeScale)),
+  }));
+  const provisionMethodTotal = provisionMethodShare.reduce((sum, item) => sum + item.value, 0);
+
   const renderTablePagination = (totalItems: number) => {
     const totalPages = Math.ceil(totalItems / tableItemsPerPage) || 1;
     return (
       <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white sm:px-6 text-[13px] collection-pagination">
         <div className="flex items-center gap-2">
-          <span className="text-slate-600">Hiển thị</span>
-          <select aria-label="Select record count" 
-            value={tableItemsPerPage}
-            onChange={(e) => { setTableItemsPerPage(Number(e.target.value)); setTablePage(1); }}
-            className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px]"
-            title="Số bản ghi trên trang"
-          >
-            <option value={5}>5</option>
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-          </select>
-          <span className="text-slate-600">bản ghi/trang</span>
+          <span className="text-slate-600">Hiển thị {tableItemsPerPage} bản ghi/trang</span>
         </div>
         
         <div className="flex items-center gap-4">
@@ -366,17 +388,6 @@ export function DataProvisionMonitoringPage() {
           <div className="border-b border-slate-200 bg-slate-50/50">
             <nav className="flex space-x-6 px-6" aria-label="Tabs">
               <button
-                onClick={() => setActiveTab('luong_du_lieu')}
-                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-[13px] flex items-center transition-colors ${
-                  activeTab === 'luong_du_lieu'
-                    ? 'border-blue-600 text-blue-600 font-semibold'
-                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                }`}
-              >
-                <Network className="w-4 h-4 mr-2" />
-                Sơ đồ giám sát
-              </button>
-              <button
                 onClick={() => setActiveTab('bao_cao')}
                 className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-[13px] flex items-center transition-colors ${
                   activeTab === 'bao_cao'
@@ -386,6 +397,17 @@ export function DataProvisionMonitoringPage() {
               >
                 <BarChart3 className="w-4 h-4 mr-2" />
                 Báo cáo thống kê
+              </button>
+              <button
+                onClick={() => setActiveTab('luong_du_lieu')}
+                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-[13px] flex items-center transition-colors ${
+                  activeTab === 'luong_du_lieu'
+                    ? 'border-blue-600 text-blue-600 font-semibold'
+                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                }`}
+              >
+                <Network className="w-4 h-4 mr-2" />
+                Sơ đồ giám sát
               </button>
               <button
                 onClick={() => setActiveTab('nhat_ky')}
@@ -676,43 +698,120 @@ export function DataProvisionMonitoringPage() {
                 </div>
               </div>
 
-              {/* Bảng chi tiết theo ngày (theo loại báo cáo đang chọn) */}
-              <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                <div className="px-5 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
-                  <h3 className="font-bold text-slate-800 text-sm flex items-center">
-                    <Database className="w-4 h-4 mr-2 text-blue-600" />
-                    Dữ liệu chi tiết theo ngày — {currentReportType.label}
-                  </h3>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm">
-                    <thead className="bg-slate-50 text-[13px] font-semibold text-slate-500 border-b border-slate-200 uppercase tracking-tight">
-                      <tr>
-                        <th className="px-6 py-3 font-semibold">Ngày</th>
-                        <th className="px-6 py-3 font-semibold text-right">{currentReportType.label} ({currentReportType.unit})</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {paginatedReport.map((row, idx) => (
-                        <tr key={idx} className="hover:bg-slate-50/70 transition-colors">
-                          <td className="px-6 py-3 font-medium text-slate-700">{row.day}</td>
-                          <td className="px-6 py-3 text-right font-mono text-slate-700">{(row as any)[currentReportType.dataKey].toLocaleString()}</td>
+              {/* Bảng chi tiết theo ngày + Biểu đồ cung cấp dữ liệu theo phương thức chia sẻ */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+                <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                  <div className="px-5 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                    <h3 className="font-bold text-slate-800 text-sm flex items-center">
+                      <Database className="w-4 h-4 mr-2 text-blue-600" />
+                      Dữ liệu chi tiết theo ngày — {currentReportType.label}
+                    </h3>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm">
+                      <thead className="bg-slate-50 text-[13px] font-semibold text-slate-500 border-b border-slate-200 uppercase tracking-tight">
+                        <tr>
+                          <th className="px-6 py-3 font-semibold">Ngày</th>
+                          <th className="px-6 py-3 font-semibold text-right">{currentReportType.label} ({currentReportType.unit})</th>
                         </tr>
-                      ))}
-                      {/* Summary row */}
-                      <tr className="bg-slate-50/50 font-bold text-slate-800">
-                        <td className="px-6 py-3">{currentReportType.key === 'phanhoi' ? 'Trung bình' : 'Tổng cộng'}</td>
-                        <td className="px-6 py-3 text-right font-mono">
-                          {currentReportType.key === 'phanhoi'
-                            ? Math.round(reportData.reduce((acc, r) => acc + r.thoiGianPhanHoi, 0) / reportData.length).toLocaleString()
-                            : reportData.reduce((acc, r) => acc + (r as any)[currentReportType.dataKey], 0).toLocaleString()}
-                          {currentReportType.key === 'phanhoi' ? ' ms' : ''}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {paginatedReport.map((row, idx) => (
+                          <tr key={idx} className="hover:bg-slate-50/70 transition-colors">
+                            <td className="px-6 py-3 font-medium text-slate-700">{row.day}</td>
+                            <td className="px-6 py-3 text-right font-mono text-slate-700">{(row as any)[currentReportType.dataKey].toLocaleString()}</td>
+                          </tr>
+                        ))}
+                        {/* Summary row */}
+                        <tr className="bg-slate-50/50 font-bold text-slate-800">
+                          <td className="px-6 py-3">{currentReportType.key === 'phanhoi' ? 'Trung bình' : 'Tổng cộng'}</td>
+                          <td className="px-6 py-3 text-right font-mono">
+                            {currentReportType.key === 'phanhoi'
+                              ? Math.round(reportData.reduce((acc, r) => acc + r.thoiGianPhanHoi, 0) / reportData.length).toLocaleString()
+                              : reportData.reduce((acc, r) => acc + (r as any)[currentReportType.dataKey], 0).toLocaleString()}
+                            {currentReportType.key === 'phanhoi' ? ' ms' : ''}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  {renderTablePagination(reportData.length)}
                 </div>
-                {renderTablePagination(reportData.length)}
+
+                <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-5 flex flex-col h-full">
+                  <h3 className="font-bold text-slate-800 text-sm flex items-center mb-4">
+                    <BarChart3 className="w-4 h-4 mr-2 text-blue-600" />
+                    Biểu đồ cung cấp dữ liệu theo phương thức chia sẻ
+                  </h3>
+                  <div className="flex-1 flex flex-col justify-center min-h-0">
+                  <ResponsiveContainer width="100%" height={220}>
+                    <PieChart margin={{ top: 8, right: 24, bottom: 8, left: 24 }}>
+                      <Pie
+                        data={provisionMethodShare}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={55}
+                        outerRadius={85}
+                        paddingAngle={3}
+                        cornerRadius={4}
+                        labelLine={false}
+                        label={(props: any) => {
+                          const RADIAN = Math.PI / 180;
+                          const { cx, cy, midAngle, outerRadius: r, percent, index } = props;
+                          const radius = r + 22;
+                          const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                          const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                          const color = provisionMethodShare[index].color;
+                          return (
+                            <text
+                              x={x}
+                              y={y}
+                              fill={color}
+                              textAnchor={x > cx ? 'start' : 'end'}
+                              dominantBaseline="central"
+                              fontSize={13}
+                              fontWeight={700}
+                            >
+                              {`${Math.round(percent * 100)}%`}
+                            </text>
+                          );
+                        }}
+                      >
+                        {provisionMethodShare.map(entry => (
+                          <Cell key={entry.name} fill={entry.color} />
+                        ))}
+                        <Label
+                          position="center"
+                          content={({ viewBox }: any) => {
+                            const { cx, cy } = viewBox;
+                            return (
+                              <g>
+                                <text x={cx} y={cy - 12} textAnchor="middle" dominantBaseline="central" fill="#64748b" fontSize={12}>
+                                  Tổng số
+                                </text>
+                                <text x={cx} y={cy + 12} textAnchor="middle" dominantBaseline="central" fill="#0f172a" fontSize={22} fontWeight={700}>
+                                  {provisionMethodTotal.toLocaleString('vi-VN')}
+                                </text>
+                              </g>
+                            );
+                          }}
+                        />
+                      </Pie>
+                      <Tooltip formatter={(value: number) => value.toLocaleString('vi-VN')} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 mt-2 text-[13px]">
+                    {provisionMethodShare.map(item => (
+                      <span key={item.name} className="flex items-center gap-1.5 text-slate-600">
+                        <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: item.color }} />
+                        {item.name}
+                      </span>
+                    ))}
+                  </div>
+                  </div>
+                </div>
               </div>
 
             </div>

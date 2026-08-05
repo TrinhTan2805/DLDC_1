@@ -448,9 +448,9 @@ const menuItems: MenuItem[] = [
     color: "text-amber-600",
     subItems: [
       {
-        id: "provision-dashboard",
-        label: "Tổng quan cung cấp",
-        icon: LayoutDashboard,
+        id: "provisioning-monitoring",
+        label: "Kiểm soát & giám sát cung cấp",
+        icon: Activity,
       },
       {
         id: "provisioning-service-setup",
@@ -466,11 +466,6 @@ const menuItems: MenuItem[] = [
         id: "provisioning-data-request",
         label: "Cung cấp dữ liệu theo yêu cầu",
         icon: FileText,
-      },
-      {
-        id: "provisioning-monitoring",
-        label: "Kiểm soát & giám sát cung cấp",
-        icon: Activity,
       },
       {
         id: "provisioning-service-catalog",

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   X, CheckCircle, Search, Calendar, Eye, Activity, Shield, FileText, Download,
@@ -24,16 +24,23 @@ interface ViewServiceModalProps {
   onClose: () => void;
   service?: any;
   onViewData?: (pageId?: string) => void;
+  initialTab?: TabType;
 }
 
 type TabType = 'general' | 'contact' | 'connection' | 'collection' | 'mapping' | 'history';
 
-export function ViewServiceModal({ isOpen, onClose, service }: ViewServiceModalProps) {
+export function ViewServiceModal({ isOpen, onClose, service, initialTab }: ViewServiceModalProps) {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<TabType>('general');
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab || 'general');
   const [showApiKey, setShowApiKey] = useState(false);
   const [showInactiveModal, setShowInactiveModal] = useState(false);
   const [inactiveReason, setInactiveReason] = useState('');
+
+  useEffect(() => {
+    if (isOpen) {
+      setActiveTab(initialTab || 'general');
+    }
+  }, [isOpen, initialTab, service]);
 
   const handleEdit = () => {
     navigate(`/collection-setup/edit/${service.id}?tab=${activeTab}`);

@@ -15,14 +15,14 @@ const openDataFunnelSteps = [
   { label: 'Đã thực hiện chia sẻ / Đã công bố', value: openDataFunnelStats.shared, base: openDataFunnelStats.published, color: '#a855f7' },
 ].map(step => ({ ...step, percent: Math.round((step.value / step.base) * 100) }));
 
-// Tần suất cập nhật & Tạo mới danh mục dữ liệu mở (6 tháng) [Unverified]
-const openDataActivityData = [
-  { month: 'Tháng 1', new: 4, updated: 10 },
-  { month: 'Tháng 2', new: 6, updated: 14 },
-  { month: 'Tháng 3', new: 3, updated: 9 },
-  { month: 'Tháng 4', new: 8, updated: 16 },
-  { month: 'Tháng 5', new: 5, updated: 12 },
-  { month: 'Tháng 6', new: 2, updated: 7 }
+// Xu hướng biến động số lượng danh mục dữ liệu mở 6 tháng gần nhất [Unverified] - chốt tại openDataFunnelStats.totalCreated (27)
+const openDataCountTrendData = [
+  { month: 'Tháng 1', total: 19 },
+  { month: 'Tháng 2', total: 21 },
+  { month: 'Tháng 3', total: 23 },
+  { month: 'Tháng 4', total: 24 },
+  { month: 'Tháng 5', total: 26 },
+  { month: 'Tháng 6', total: 27 }
 ];
 
 // Danh sách tập dữ liệu mở theo Phụ lục II - Quyết định 1634/QĐ-BTP ngày 30/6/2026
@@ -87,24 +87,30 @@ export function OpenDataDashboardPage() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {openDataFunnelSteps.map(step => (
             <div key={step.label} className="border border-slate-200 rounded-lg p-6 flex flex-col items-center">
-              <div className="relative" style={{ width: 120, height: 120 }}>
-                <ResponsiveContainer width={120} height={120}>
+              <div className="relative" style={{ width: 160, height: 160 }}>
+                <span
+                  className="absolute -right-6 top-1/2 -translate-y-1/2 text-[13px] font-bold"
+                  style={{ color: step.color }}
+                >
+                  {step.percent}%
+                </span>
+                <ResponsiveContainer width={160} height={160}>
                   <RadialBarChart
                     data={[{ value: step.percent }]}
                     innerRadius="72%"
                     outerRadius="100%"
                     startAngle={90}
                     endAngle={-270}
-                    barSize={10}
+                    barSize={12}
                   >
                     <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
                     <RadialBar dataKey="value" cornerRadius={20} fill={step.color} background={{ fill: '#f1f5f9' }} />
                   </RadialBarChart>
                 </ResponsiveContainer>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-lg font-bold" style={{ color: step.color }}>{step.value.toLocaleString('vi-VN')}</span>
-                  <span className="text-[11px] text-slate-400">/ {step.base.toLocaleString('vi-VN')}</span>
-                  <span className="text-[11px] text-slate-500">{step.percent}%</span>
+                  <span className="text-2xl font-bold leading-tight" style={{ color: step.color }}>{step.value.toLocaleString('vi-VN')}</span>
+                  <div className="w-6 border-t-2 border-slate-300 my-0.5" />
+                  <span className="text-sm text-slate-400 leading-tight">{step.base.toLocaleString('vi-VN')}</span>
                 </div>
               </div>
               <p className="text-[12px] text-slate-600 text-center mt-3 leading-tight">{step.label}</p>
@@ -135,11 +141,11 @@ export function OpenDataDashboardPage() {
           </div>
         </div>
 
-        {/* Tần suất cập nhật & Tạo mới */}
+        {/* Xu hướng biến động số lượng danh mục 6 tháng gần nhất */}
         <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h4 className="text-[16px] font-bold text-slate-800 mb-6">Tần suất cập nhật & Tạo mới (6 tháng)</h4>
+          <h4 className="text-[16px] font-bold text-slate-800 mb-6">Xu hướng biến động số lượng danh mục 6 tháng gần nhất</h4>
           <ResponsiveContainer width="100%" height={420}>
-            <BarChart data={openDataActivityData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+            <BarChart data={openDataCountTrendData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
               <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} dy={10} />
               <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} />
@@ -148,8 +154,7 @@ export function OpenDataDashboardPage() {
                 contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
               />
               <Legend wrapperStyle={{ paddingTop: '20px' }} iconType="circle" />
-              <Bar dataKey="new" name="Tạo mới" stackId="a" fill="#059669" radius={[0, 0, 4, 4]} />
-              <Bar dataKey="updated" name="Cập nhật" stackId="a" fill="#6ee7b7" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="total" name="Tổng số danh mục" fill="#059669" radius={[4, 4, 0, 0]} barSize={32} />
             </BarChart>
           </ResponsiveContainer>
         </div>

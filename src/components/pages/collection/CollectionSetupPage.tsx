@@ -665,6 +665,7 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
         isOpen={showDetailModal}
         onClose={closeModal}
         service={selectedService}
+        initialTab={initialTab as any}
         onViewData={(pageId?: string) => {
           closeModal();
           if (pageId && onNavigate) {

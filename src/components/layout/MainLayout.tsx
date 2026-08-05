@@ -199,7 +199,6 @@ import { DataProvisionApiManagementPage } from '../pages/provisioning/DataProvis
 import { DataProvisionRequestPage } from '../pages/provisioning/DataProvisionRequestPage';
 import { DataProvisionMonitoringPage } from '../pages/provisioning/DataProvisionMonitoringPage';
 import { DataProvisionServicesPage } from '../pages/provisioning/DataProvisionServicesPage';
-import { DataProvisionDashboard } from '../pages/provisioning/DataProvisionDashboard';
 
 // Page configuration for titles and descriptions
 const pageConfig: Record<string, { title: string; description: string }> = {
@@ -214,10 +213,6 @@ const pageConfig: Record<string, { title: string; description: string }> = {
   dashboard: {
     title: 'Tổng quan hệ thống',
     description: 'Theo dõi tổng quan hoạt động và thống kê hệ thống kho dữ liệu DLDC'
-  },
-  'provision-dashboard': {
-    title: 'Tổng quan Cung cấp',
-    description: 'Trung tâm điều khiển và giám sát hoạt động cung cấp dữ liệu'
   },
   'provisioning-service-setup': {
     title: 'Thiết lập điều phối dữ liệu',
@@ -583,7 +578,6 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'master-data-update-b' && <ProcessingNationalityPage />}
             {currentPage === 'master-data-update-c' && <ProcessingJudgmentPage />}
             {currentPage === 'master-data-reports' && <MasterDataReportsPage />}
-            {currentPage === 'provision-dashboard' && <DataProvisionDashboard />}
             {currentPage === 'provisioning-service-setup' && <DataProvisionServiceSetupPage />}
             {currentPage === 'provisioning-api-management' && <DataProvisionApiManagementPage />}
             {currentPage === 'provisioning-data-request' && <DataProvisionRequestPage />}
@@ -911,10 +905,6 @@ const getBreadcrumbPath = (pageId: string, search: string = ''): string[] => {
     if (tab === 'phan_quyen') return [...base, 'Phân quyền truy cập'];
     if (tab === 'danh_sach_tai_khoan') return [...base, 'Danh sách tài khoản'];
     return [...base, 'API Cung cấp dữ liệu'];
-  }
-
-  if (pageId === 'provision-dashboard') {
-    return ['Cung cấp dữ liệu', 'Tổng quan Cung cấp'];
   }
 
   if (pageId.match(/^reconciliation-\d+$/)) {
