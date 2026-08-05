@@ -1,4 +1,4 @@
-import { Database, CheckCircle, Share2, LayoutDashboard, TrendingUp, ArrowRight, FolderTree, Globe, HardDrive } from 'lucide-react';
+import { Database, CheckCircle, Share2, LayoutDashboard, TrendingUp, TrendingDown, ArrowRight, FolderTree, Globe, HardDrive } from 'lucide-react';
 import { PageHeader } from '../common/PageHeader';
 
 export function DashboardHome() {
@@ -52,7 +52,7 @@ export function DashboardHome() {
       value: '124',
       sizeLabel: '',
       subtitle: 'Danh mục đã hình thành',
-      change: '+6.4%',
+      change: '+8 danh mục mới',
       icon: FolderTree,
       bgColor: 'bg-indigo-50',
       iconColor: 'text-indigo-600',
@@ -66,7 +66,8 @@ export function DashboardHome() {
       value: '27',
       sizeLabel: '',
       subtitle: 'Danh mục đã hình thành',
-      change: '+2 danh mục mới',
+      change: '-1 danh mục',
+      changeType: 'down',
       icon: Globe,
       bgColor: 'bg-emerald-50',
       iconColor: 'text-emerald-600',
@@ -80,7 +81,7 @@ export function DashboardHome() {
       value: '32',
       sizeLabel: '',
       subtitle: 'Danh mục đã hình thành',
-      change: '+7.1%',
+      change: '+3 danh mục mới',
       icon: HardDrive,
       bgColor: 'bg-teal-50',
       iconColor: 'text-teal-600',
@@ -155,9 +156,13 @@ export function DashboardHome() {
                   <Icon className={`w-8 h-8 ${kpi.iconColor}`} />
                 </div>
                 <div className="flex flex-col items-end gap-1">
-                  <div className="flex items-center gap-1.5 bg-green-50 px-3 py-1.5 rounded-full">
-                    <TrendingUp className="w-4 h-4 text-green-600" />
-                    <span className="text-sm font-semibold text-green-600">{kpi.change}</span>
+                  <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full ${kpi.changeType === 'down' ? 'bg-red-50' : 'bg-green-50'}`}>
+                    {kpi.changeType === 'down' ? (
+                      <TrendingDown className="w-4 h-4 text-red-600" />
+                    ) : (
+                      <TrendingUp className="w-4 h-4 text-green-600" />
+                    )}
+                    <span className={`text-sm font-semibold ${kpi.changeType === 'down' ? 'text-red-600' : 'text-green-600'}`}>{kpi.change}</span>
                   </div>
                   <span className="text-[11px] text-slate-400">So với tháng trước</span>
                 </div>
