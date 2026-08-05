@@ -66,10 +66,12 @@ const masterDataUnitsRanked = masterDataPublishedOnOpenData
   .sort((a, b) => b.unitsInUse - a.unitsInUse);
 const maxMasterDataUnitsInUse = Math.max(...masterDataUnitsRanked.map(d => d.unitsInUse));
 
-// Tỷ lệ dữ liệu chủ theo nguồn dữ liệu [Unverified]
+// Tỷ lệ dữ liệu chủ theo loại thực thể [Unverified] - tổng khớp với masterDataStats.totalModels (32)
 const masterDataSourceShare = [
-  { name: 'Kho DLDC', value: 12, color: '#10b981' },
-  { name: 'Tự cập nhật trực tiếp', value: 5, color: '#f59e0b' },
+  { name: 'Thực thể Cá nhân', value: 12, color: '#3b82f6' },
+  { name: 'Thực thể Tổ chức', value: 10, color: '#10b981' },
+  { name: 'Thực thể Văn bản/Sự kiện pháp lý', value: 6, color: '#f59e0b' },
+  { name: 'Thực thể Tài sản', value: 4, color: '#8b5cf6' },
 ];
 const masterDataSourceTotal = masterDataSourceShare.reduce((sum, item) => sum + item.value, 0);
 
@@ -159,7 +161,7 @@ export function MasterDataDashboardPage() {
         {/* Cột phải: Thị phần theo nguồn dữ liệu + Xu hướng biến động số lượng mô hình dữ liệu chủ */}
         <div className="flex flex-col gap-6">
           <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
-            <h3 className="text-[16px] font-semibold text-slate-800 mb-4">Tỷ lệ dữ liệu chủ theo nguồn dữ liệu</h3>
+            <h3 className="text-[16px] font-semibold text-slate-800 mb-4">Tỷ lệ dữ liệu chủ theo loại thực thể</h3>
             <ResponsiveContainerAny width="100%" height={240}>
               <PieChartAny margin={{ top: 8, right: 24, bottom: 8, left: 24 }}>
                 <PieAny
