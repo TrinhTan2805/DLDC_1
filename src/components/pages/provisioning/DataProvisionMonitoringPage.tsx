@@ -116,23 +116,18 @@ const reportData = reportBase.map((v, i) => ({
   loiKetNoi: i % 9 === 0 ? 14 : (i % 5 === 0 ? 6 : 1),
 }));
 
-// Biểu đồ cung cấp dữ liệu theo phương thức chia sẻ [Unverified] - áp dụng cùng bộ lọc (CSDL/API/khoảng ngày) với tab Báo cáo thống kê
-const PROVISION_METHOD_SHARE_BASE = [
-  { name: 'REST API', value: 57, color: '#3b82f6' },
-  { name: 'Excel', value: 30, color: '#10b981' },
-  { name: 'CSV', value: 22, color: '#f59e0b' },
-  { name: 'JSON', value: 15, color: '#8b5cf6' },
-];
+// Tỷ lệ lưu lượng yêu cầu theo CSDL/API [Unverified] - áp dụng cùng bộ lọc (CSDL/API/khoảng ngày) với tab Báo cáo thống kê
+const REQUEST_SHARE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'];
 // Khoảng thời gian mốc của bộ dữ liệu báo cáo (Tháng 06/2026) để tính tỷ lệ theo khoảng ngày đã chọn
-const PROVISION_METHOD_BASELINE_START = new Date('2026-06-01').getTime();
-const PROVISION_METHOD_BASELINE_END = new Date('2026-06-30').getTime();
-const getProvisionMethodDateScale = (from: string, to: string) => {
+const REQUEST_SHARE_BASELINE_START = new Date('2026-06-01').getTime();
+const REQUEST_SHARE_BASELINE_END = new Date('2026-06-30').getTime();
+const getRequestShareDateScale = (from: string, to: string) => {
   if (!from && !to) return 1;
-  const start = from ? new Date(from).getTime() : PROVISION_METHOD_BASELINE_START;
-  const end = to ? new Date(to).getTime() : PROVISION_METHOD_BASELINE_END;
-  const totalDays = (PROVISION_METHOD_BASELINE_END - PROVISION_METHOD_BASELINE_START) / 86400000;
-  const clampedStart = Math.max(start, PROVISION_METHOD_BASELINE_START);
-  const clampedEnd = Math.min(end, PROVISION_METHOD_BASELINE_END);
+  const start = from ? new Date(from).getTime() : REQUEST_SHARE_BASELINE_START;
+  const end = to ? new Date(to).getTime() : REQUEST_SHARE_BASELINE_END;
+  const totalDays = (REQUEST_SHARE_BASELINE_END - REQUEST_SHARE_BASELINE_START) / 86400000;
+  const clampedStart = Math.max(start, REQUEST_SHARE_BASELINE_START);
+  const clampedEnd = Math.min(end, REQUEST_SHARE_BASELINE_END);
   const selectedDays = Math.max(0, (clampedEnd - clampedStart) / 86400000);
   return totalDays > 0 ? Math.max(0.1, Math.min(1, selectedDays / totalDays)) : 1;
 };
@@ -220,18 +215,14 @@ export function DataProvisionMonitoringPage() {
     return reportData.slice((tablePage - 1) * tableItemsPerPage, tablePage * tableItemsPerPage);
   }, [tablePage, tableItemsPerPage]);
 
-  // Biểu đồ cung cấp dữ liệu theo phương thức chia sẻ - áp dụng bộ lọc CSDL/API/khoảng ngày ở đầu trang
-  const provisionMethodDateScale = getProvisionMethodDateScale(monFrom, monTo);
-  const provisionMethodScopeScale = selectedApi
-    ? 1 / apiList.length
-    : selectedDatabase
-    ? filteredApis.length / apiList.length
-    : 1;
-  const provisionMethodShare = PROVISION_METHOD_SHARE_BASE.map(item => ({
-    ...item,
-    value: Math.max(1, Math.round(item.value * provisionMethodDateScale * provisionMethodScopeScale)),
+  // Tỷ lệ lưu lượng yêu cầu theo CSDL/API - áp dụng bộ lọc CSDL/API/khoảng ngày ở đầu trang
+  const requestShareDateScale = getRequestShareDateScale(monFrom, monTo);
+  const requestShareData = listApis.map((api, i) => ({
+    name: api.name,
+    value: Math.max(1, Math.round((apiMockStats[api.id]?.totalRequests || 0) * requestShareDateScale)),
+    color: REQUEST_SHARE_COLORS[i % REQUEST_SHARE_COLORS.length],
   }));
-  const provisionMethodTotal = provisionMethodShare.reduce((sum, item) => sum + item.value, 0);
+  const requestShareTotal = requestShareData.reduce((sum, item) => sum + item.value, 0);
 
   const renderTablePagination = (totalItems: number) => {
     const totalPages = Math.ceil(totalItems / tableItemsPerPage) || 1;
@@ -741,13 +732,13 @@ export function DataProvisionMonitoringPage() {
                 <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-5 flex flex-col h-full">
                   <h3 className="font-bold text-slate-800 text-sm flex items-center mb-4">
                     <BarChart3 className="w-4 h-4 mr-2 text-blue-600" />
-                    Biểu đồ cung cấp dữ liệu theo phương thức chia sẻ
+                    Tỷ lệ lưu lượng yêu cầu theo CSDL/API
                   </h3>
                   <div className="flex-1 flex flex-col justify-center min-h-0">
                   <ResponsiveContainer width="100%" height={220}>
                     <PieChart margin={{ top: 8, right: 24, bottom: 8, left: 24 }}>
                       <Pie
-                        data={provisionMethodShare}
+                        data={requestShareData}
                         dataKey="value"
                         nameKey="name"
                         cx="50%"
@@ -763,7 +754,7 @@ export function DataProvisionMonitoringPage() {
                           const radius = r + 22;
                           const x = cx + radius * Math.cos(-midAngle * RADIAN);
                           const y = cy + radius * Math.sin(-midAngle * RADIAN);
-                          const color = provisionMethodShare[index].color;
+                          const color = requestShareData[index].color;
                           return (
                             <text
                               x={x}
@@ -779,7 +770,7 @@ export function DataProvisionMonitoringPage() {
                           );
                         }}
                       >
-                        {provisionMethodShare.map(entry => (
+                        {requestShareData.map(entry => (
                           <Cell key={entry.name} fill={entry.color} />
                         ))}
                         <Label
@@ -792,7 +783,7 @@ export function DataProvisionMonitoringPage() {
                                   Tổng số
                                 </text>
                                 <text x={cx} y={cy + 12} textAnchor="middle" dominantBaseline="central" fill="#0f172a" fontSize={22} fontWeight={700}>
-                                  {provisionMethodTotal.toLocaleString('vi-VN')}
+                                  {requestShareTotal.toLocaleString('vi-VN')}
                                 </text>
                               </g>
                             );
@@ -803,7 +794,7 @@ export function DataProvisionMonitoringPage() {
                     </PieChart>
                   </ResponsiveContainer>
                   <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 mt-2 text-[13px]">
-                    {provisionMethodShare.map(item => (
+                    {requestShareData.map(item => (
                       <span key={item.name} className="flex items-center gap-1.5 text-slate-600">
                         <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: item.color }} />
                         {item.name}
