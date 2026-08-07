@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { 
   Activity, BarChart3, Download, Network, Share2, Server, Database, 
-  AlertCircle, ChevronRight, X, Clock, HelpCircle, CheckCircle2, ArrowRightLeft,
+  AlertCircle, ChevronLeft, ChevronRight, X, Clock, HelpCircle, CheckCircle2, ArrowRightLeft,
   ChevronDown, Search, Check, Info
 } from 'lucide-react';
 import { ProvisionExportReportModal } from './modals/ProvisionExportReportModal';
@@ -22,6 +22,8 @@ const apiMockStats: Record<string, {
   chartData: any[];
   logs: any[];
   sourceConnection: 'active' | 'error';
+  errorCode?: string;
+  errorMessage?: string;
 }> = {
   'Lấy danh sách Hộ tịch': {
     database: 'CSDL Hộ tịch điện tử',
@@ -71,7 +73,9 @@ const apiMockStats: Record<string, {
     logs: [
       { time: '10:45:22 19/05/2026', type: 'ERROR', message: 'Timeout error connecting to CSDL Thi hành án. Connection pool depleted. Retry 3 failed.', latency: '5000ms', clientIp: '172.16.8.99', responseSize: '0 B' },
       { time: '08:15:30 19/05/2026', type: 'INFO', message: 'Sync complete. 45 civil judgements synchronized successfully.', latency: '310ms', clientIp: '172.16.8.99', responseSize: '84.2 KB' }
-    ]
+    ],
+    errorCode: 'ERR_TIMEOUT_504',
+    errorMessage: 'Timeout kết nối tới CSDL Thi hành án. Connection pool depleted.'
   },
   'Đọc thông tin Biện pháp bảo đảm': {
     database: 'CSDL Biện pháp bảo đảm',
@@ -95,13 +99,148 @@ const apiMockStats: Record<string, {
     logs: [
       { time: '15:10:04 19/05/2026', type: 'INFO', message: 'Fetch collateral registration. Record ID: 94726-BD. Status 200 OK.', latency: '98ms', clientIp: '192.168.20.14', responseSize: '3.1 KB' }
     ]
+  },
+  // Các API bổ sung [Unverified] - mock cho trường hợp mỗi CSDL có nhiều API
+  'Tra cứu thông tin khai sinh': {
+    database: 'CSDL Hộ tịch điện tử',
+    gatewayStatus: 'Hoạt động tốt',
+    partners: [{ name: 'Sở Y tế tỉnh Bắc Ninh', connection: 'active' }],
+    totalRequests: 15600,
+    successRate: '99.5%',
+    avgLatency: '110 ms',
+    sourceConnection: 'active',
+    chartData: [
+      { name: 'T2', 'Luồng dữ liệu': 180, 'Lỗi kết nối': 1 },
+      { name: 'T3', 'Luồng dữ liệu': 210, 'Lỗi kết nối': 0 },
+      { name: 'T4', 'Luồng dữ liệu': 190, 'Lỗi kết nối': 1 },
+      { name: 'T5', 'Luồng dữ liệu': 240, 'Lỗi kết nối': 0 },
+      { name: 'T6', 'Luồng dữ liệu': 220, 'Lỗi kết nối': 1 },
+      { name: 'T7', 'Luồng dữ liệu': 90, 'Lỗi kết nối': 0 },
+      { name: 'CN', 'Luồng dữ liệu': 70, 'Lỗi kết nối': 0 },
+    ],
+    logs: [
+      { time: '13:05:12 19/05/2026', type: 'INFO', message: 'API Request successful. Status 200 OK. Fetching birth certificate record.', latency: '105ms', clientIp: '192.168.12.101', responseSize: '3.6 KB' }
+    ]
+  },
+  'Cập nhật dữ liệu kết hôn': {
+    database: 'CSDL Hộ tịch điện tử',
+    gatewayStatus: 'Ổn định',
+    partners: [{ name: 'Sở Y tế tỉnh Quảng Ninh', connection: 'active' }],
+    totalRequests: 9200,
+    successRate: '98.9%',
+    avgLatency: '145 ms',
+    sourceConnection: 'active',
+    chartData: [
+      { name: 'T2', 'Luồng dữ liệu': 100, 'Lỗi kết nối': 2 },
+      { name: 'T3', 'Luồng dữ liệu': 130, 'Lỗi kết nối': 1 },
+      { name: 'T4', 'Luồng dữ liệu': 120, 'Lỗi kết nối': 2 },
+      { name: 'T5', 'Luồng dữ liệu': 150, 'Lỗi kết nối': 0 },
+      { name: 'T6', 'Luồng dữ liệu': 140, 'Lỗi kết nối': 1 },
+      { name: 'T7', 'Luồng dữ liệu': 50, 'Lỗi kết nối': 0 },
+      { name: 'CN', 'Luồng dữ liệu': 40, 'Lỗi kết nối': 0 },
+    ],
+    logs: [
+      { time: '09:20:44 19/05/2026', type: 'INFO', message: 'Marriage record updated successfully. Status 200 OK.', latency: '140ms', clientIp: '10.20.30.46', responseSize: '2.9 KB' }
+    ]
+  },
+  'Tra cứu quyết định thi hành án': {
+    database: 'Cơ sở dữ liệu THADS',
+    gatewayStatus: 'Hoạt động tốt',
+    partners: [{ name: 'Hệ thống THADS Quốc gia', connection: 'active' }],
+    totalRequests: 7800,
+    successRate: '99.1%',
+    avgLatency: '135 ms',
+    sourceConnection: 'active',
+    chartData: [
+      { name: 'T2', 'Luồng dữ liệu': 70, 'Lỗi kết nối': 1 },
+      { name: 'T3', 'Luồng dữ liệu': 90, 'Lỗi kết nối': 0 },
+      { name: 'T4', 'Luồng dữ liệu': 85, 'Lỗi kết nối': 1 },
+      { name: 'T5', 'Luồng dữ liệu': 100, 'Lỗi kết nối': 0 },
+      { name: 'T6', 'Luồng dữ liệu': 95, 'Lỗi kết nối': 0 },
+      { name: 'T7', 'Luồng dữ liệu': 35, 'Lỗi kết nối': 0 },
+      { name: 'CN', 'Luồng dữ liệu': 25, 'Lỗi kết nối': 0 },
+    ],
+    logs: [
+      { time: '16:40:02 19/05/2026', type: 'INFO', message: 'Enforcement decision lookup successful. Status 200 OK.', latency: '130ms', clientIp: '172.16.8.100', responseSize: '5.2 KB' }
+    ]
+  },
+  'Cập nhật trạng thái thi hành án': {
+    database: 'Cơ sở dữ liệu THADS',
+    gatewayStatus: 'Có cảnh báo',
+    partners: [{ name: 'Hệ thống THADS Quốc gia', connection: 'error' }],
+    totalRequests: 5100,
+    successRate: '96.4%',
+    avgLatency: '380 ms',
+    sourceConnection: 'error',
+    chartData: [
+      { name: 'T2', 'Luồng dữ liệu': 45, 'Lỗi kết nối': 6 },
+      { name: 'T3', 'Luồng dữ liệu': 60, 'Lỗi kết nối': 8 },
+      { name: 'T4', 'Luồng dữ liệu': 55, 'Lỗi kết nối': 4 },
+      { name: 'T5', 'Luồng dữ liệu': 70, 'Lỗi kết nối': 10 },
+      { name: 'T6', 'Luồng dữ liệu': 65, 'Lỗi kết nối': 3 },
+      { name: 'T7', 'Luồng dữ liệu': 20, 'Lỗi kết nối': 0 },
+      { name: 'CN', 'Luồng dữ liệu': 15, 'Lỗi kết nối': 0 },
+    ],
+    logs: [
+      { time: '11:55:30 19/05/2026', type: 'ERROR', message: 'Timeout updating enforcement status. Retry 2 failed.', latency: '4200ms', clientIp: '172.16.8.101', responseSize: '0 B' }
+    ],
+    errorCode: 'ERR_CONN_REFUSED',
+    errorMessage: 'Không thể cập nhật trạng thái thi hành án. Kết nối bị từ chối từ hệ thống nguồn.'
+  },
+  'Tra cứu tài sản bảo đảm': {
+    database: 'CSDL Biện pháp bảo đảm',
+    gatewayStatus: 'Hoạt động tốt',
+    partners: [{ name: 'Cục Giao dịch bảo đảm', connection: 'active' }],
+    totalRequests: 6300,
+    successRate: '99.7%',
+    avgLatency: '92 ms',
+    sourceConnection: 'active',
+    chartData: [
+      { name: 'T2', 'Luồng dữ liệu': 55, 'Lỗi kết nối': 0 },
+      { name: 'T3', 'Luồng dữ liệu': 68, 'Lỗi kết nối': 0 },
+      { name: 'T4', 'Luồng dữ liệu': 62, 'Lỗi kết nối': 0 },
+      { name: 'T5', 'Luồng dữ liệu': 75, 'Lỗi kết nối': 0 },
+      { name: 'T6', 'Luồng dữ liệu': 70, 'Lỗi kết nối': 0 },
+      { name: 'T7', 'Luồng dữ liệu': 28, 'Lỗi kết nối': 0 },
+      { name: 'CN', 'Luồng dữ liệu': 20, 'Lỗi kết nối': 0 },
+    ],
+    logs: [
+      { time: '10:12:18 19/05/2026', type: 'INFO', message: 'Fetch collateral asset list. Status 200 OK.', latency: '88ms', clientIp: '192.168.20.15', responseSize: '4.4 KB' }
+    ]
+  },
+  'Đăng ký giao dịch bảo đảm': {
+    database: 'CSDL Biện pháp bảo đảm',
+    gatewayStatus: 'Ổn định',
+    partners: [{ name: 'Cục Giao dịch bảo đảm', connection: 'active' }],
+    totalRequests: 4100,
+    successRate: '98.2%',
+    avgLatency: '160 ms',
+    sourceConnection: 'active',
+    chartData: [
+      { name: 'T2', 'Luồng dữ liệu': 35, 'Lỗi kết nối': 1 },
+      { name: 'T3', 'Luồng dữ liệu': 45, 'Lỗi kết nối': 0 },
+      { name: 'T4', 'Luồng dữ liệu': 40, 'Lỗi kết nối': 1 },
+      { name: 'T5', 'Luồng dữ liệu': 50, 'Lỗi kết nối': 0 },
+      { name: 'T6', 'Luồng dữ liệu': 48, 'Lỗi kết nối': 0 },
+      { name: 'T7', 'Luồng dữ liệu': 18, 'Lỗi kết nối': 0 },
+      { name: 'CN', 'Luồng dữ liệu': 12, 'Lỗi kết nối': 0 },
+    ],
+    logs: [
+      { time: '14:48:55 19/05/2026', type: 'INFO', message: 'Collateral transaction registered. Status 201 Created.', latency: '155ms', clientIp: '192.168.20.16', responseSize: '2.1 KB' }
+    ]
   }
 };
 
 const apiList = [
   { id: 'Lấy danh sách Hộ tịch', name: 'Lấy danh sách Hộ tịch', database: 'CSDL Hộ tịch điện tử', code: 'SVC-HOTICH-001' },
+  { id: 'Tra cứu thông tin khai sinh', name: 'Tra cứu thông tin khai sinh', database: 'CSDL Hộ tịch điện tử', code: 'SVC-HOTICH-002' },
+  { id: 'Cập nhật dữ liệu kết hôn', name: 'Cập nhật dữ liệu kết hôn', database: 'CSDL Hộ tịch điện tử', code: 'SVC-HOTICH-003' },
   { id: 'Đồng bộ dữ liệu THADS', name: 'Đồng bộ dữ liệu THADS', database: 'Cơ sở dữ liệu THADS', code: 'SVC-THADS-001' },
-  { id: 'Đọc thông tin Biện pháp bảo đảm', name: 'Đọc thông tin Biện pháp bảo đảm', database: 'CSDL Biện pháp bảo đảm', code: 'SVC-BPBD-001' }
+  { id: 'Tra cứu quyết định thi hành án', name: 'Tra cứu quyết định thi hành án', database: 'Cơ sở dữ liệu THADS', code: 'SVC-THADS-002' },
+  { id: 'Cập nhật trạng thái thi hành án', name: 'Cập nhật trạng thái thi hành án', database: 'Cơ sở dữ liệu THADS', code: 'SVC-THADS-003' },
+  { id: 'Đọc thông tin Biện pháp bảo đảm', name: 'Đọc thông tin Biện pháp bảo đảm', database: 'CSDL Biện pháp bảo đảm', code: 'SVC-BPBD-001' },
+  { id: 'Tra cứu tài sản bảo đảm', name: 'Tra cứu tài sản bảo đảm', database: 'CSDL Biện pháp bảo đảm', code: 'SVC-BPBD-002' },
+  { id: 'Đăng ký giao dịch bảo đảm', name: 'Đăng ký giao dịch bảo đảm', database: 'CSDL Biện pháp bảo đảm', code: 'SVC-BPBD-003' }
 ];
 
 const databases = Array.from(new Set(apiList.map(api => api.database)));
@@ -117,7 +256,7 @@ const reportData = reportBase.map((v, i) => ({
 }));
 
 // Tỷ lệ lưu lượng yêu cầu theo CSDL/API [Unverified] - áp dụng cùng bộ lọc (CSDL/API/khoảng ngày) với tab Báo cáo thống kê
-const REQUEST_SHARE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'];
+const REQUEST_SHARE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#f43f5e', '#0ea5e9'];
 // Khoảng thời gian mốc của bộ dữ liệu báo cáo (Tháng 06/2026) để tính tỷ lệ theo khoảng ngày đã chọn
 const REQUEST_SHARE_BASELINE_START = new Date('2026-06-01').getTime();
 const REQUEST_SHARE_BASELINE_END = new Date('2026-06-30').getTime();
@@ -177,6 +316,8 @@ export function DataProvisionMonitoringPage() {
   // Bộ lọc thời gian
   const [monFrom, setMonFrom] = useState('');
   const [monTo, setMonTo] = useState('');
+  // CSDL đang được xem chi tiết (drill-down) trong biểu đồ "Tỷ lệ lưu lượng yêu cầu theo CSDL/API"; null = đang xem theo CSDL
+  const [drillDatabase, setDrillDatabase] = useState<string | null>(null);
 
   const isAllApi = selectedApi === '';
   const stats = apiMockStats[selectedApi] || apiMockStats[filteredApis[0]?.id] || apiMockStats['Lấy danh sách Hộ tịch'];
@@ -215,14 +356,59 @@ export function DataProvisionMonitoringPage() {
     return reportData.slice((tablePage - 1) * tableItemsPerPage, tablePage * tableItemsPerPage);
   }, [tablePage, tableItemsPerPage]);
 
-  // Tỷ lệ lưu lượng yêu cầu theo CSDL/API - áp dụng bộ lọc CSDL/API/khoảng ngày ở đầu trang
+  // Tỷ lệ theo Hệ thống/API - áp dụng bộ lọc CSDL/API/khoảng ngày ở đầu trang
+  // Bậc 1: theo CSDL (gộp chỉ tiêu của các API thuộc từng CSDL); bậc 2 (drill-down): theo API trong 1 CSDL đã chọn
+  // Chỉ tiêu đổi theo tab báo cáo đang chọn: lưu lượng yêu cầu (luuluong) hoặc số lượt truy cập (truycap, ước tính = lưu lượng x3.5 theo tỷ lệ dùng ở reportData)
   const requestShareDateScale = getRequestShareDateScale(monFrom, monTo);
-  const requestShareData = listApis.map((api, i) => ({
+  const getApiMetricValue = (apiId: string) => {
+    const s = apiMockStats[apiId];
+    if (!s) return 0;
+    const base = s.totalRequests;
+    return reportType === 'truycap' ? Math.round(base * 3.5) : base;
+  };
+  const requestShareDatabases = Array.from(new Set(listApis.map(api => api.database)));
+  const requestShareByDatabase = requestShareDatabases.map((db, i) => {
+    const apisInDb = listApis.filter(api => api.database === db);
+    const value = apisInDb.reduce((sum, api) => sum + Math.round(getApiMetricValue(api.id) * requestShareDateScale), 0);
+    return { name: db, value: Math.max(1, value), color: REQUEST_SHARE_COLORS[i % REQUEST_SHARE_COLORS.length], apiCount: apisInDb.length };
+  });
+
+  const drillApis = drillDatabase ? listApis.filter(api => api.database === drillDatabase) : [];
+  const requestShareByApi = drillApis.map((api, i) => ({
     name: api.name,
-    value: Math.max(1, Math.round((apiMockStats[api.id]?.totalRequests || 0) * requestShareDateScale)),
+    value: Math.max(1, Math.round(getApiMetricValue(api.id) * requestShareDateScale)),
     color: REQUEST_SHARE_COLORS[i % REQUEST_SHARE_COLORS.length],
   }));
+
+  const isDrilled = !!drillDatabase && requestShareByApi.length > 0;
+  const requestShareData = isDrilled ? requestShareByApi : requestShareByDatabase;
   const requestShareTotal = requestShareData.reduce((sum, item) => sum + item.value, 0);
+
+  // Tab "Thời gian phản hồi": danh sách API có thời gian phản hồi vượt ngưỡng cảnh báo
+  const responseTimeExceeded = listApis
+    .map(api => ({ api, stats: apiMockStats[api.id] }))
+    .filter(({ stats }) => stats && parseInt(stats.avgLatency, 10) > responseThreshold)
+    .map(({ api, stats }) => ({
+      id: api.id,
+      name: api.name,
+      database: api.database,
+      avgLatency: stats!.avgLatency,
+      avgLatencyMs: parseInt(stats!.avgLatency, 10),
+    }))
+    .sort((a, b) => b.avgLatencyMs - a.avgLatencyMs);
+
+  // Tab "Lỗi kết nối": danh sách API đang bị lỗi kết nối kèm mã lỗi cụ thể
+  const connectionErrors = listApis
+    .map(api => ({ api, stats: apiMockStats[api.id] }))
+    .filter(({ stats }) => stats && (stats.sourceConnection === 'error' || stats.partners.some(p => p.connection === 'error')))
+    .map(({ api, stats }) => ({
+      id: api.id,
+      name: api.name,
+      database: api.database,
+      errorCode: stats!.errorCode || 'ERR_UNKNOWN',
+      errorMessage: stats!.errorMessage || 'Mất kết nối tới hệ thống nguồn.',
+      gatewayStatus: stats!.gatewayStatus,
+    }));
 
   const renderTablePagination = (totalItems: number) => {
     const totalPages = Math.ceil(totalItems / tableItemsPerPage) || 1;
@@ -730,78 +916,165 @@ export function DataProvisionMonitoringPage() {
                 </div>
 
                 <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-5 flex flex-col h-full">
-                  <h3 className="font-bold text-slate-800 text-sm flex items-center mb-4">
-                    <BarChart3 className="w-4 h-4 mr-2 text-blue-600" />
-                    Tỷ lệ lưu lượng yêu cầu theo CSDL/API
-                  </h3>
-                  <div className="flex-1 flex flex-col justify-center min-h-0">
-                  <ResponsiveContainer width="100%" height={220}>
-                    <PieChart margin={{ top: 8, right: 24, bottom: 8, left: 24 }}>
-                      <Pie
-                        data={requestShareData}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={55}
-                        outerRadius={85}
-                        paddingAngle={3}
-                        cornerRadius={4}
-                        labelLine={false}
-                        label={(props: any) => {
-                          const RADIAN = Math.PI / 180;
-                          const { cx, cy, midAngle, outerRadius: r, percent, index } = props;
-                          const radius = r + 22;
-                          const x = cx + radius * Math.cos(-midAngle * RADIAN);
-                          const y = cy + radius * Math.sin(-midAngle * RADIAN);
-                          const color = requestShareData[index].color;
-                          return (
-                            <text
-                              x={x}
-                              y={y}
-                              fill={color}
-                              textAnchor={x > cx ? 'start' : 'end'}
-                              dominantBaseline="central"
-                              fontSize={13}
-                              fontWeight={700}
+                  {(reportType === 'luuluong' || reportType === 'truycap') && (
+                    <>
+                      <div className="mb-4">
+                        <h3 className="font-bold text-slate-800 text-sm flex items-center">
+                          {isDrilled && (
+                            <button
+                              onClick={() => setDrillDatabase(null)}
+                              className="mr-2 p-1 -ml-1 rounded-md hover:bg-slate-100 text-slate-500"
+                              title="Quay lại theo CSDL"
                             >
-                              {`${Math.round(percent * 100)}%`}
-                            </text>
-                          );
-                        }}
-                      >
-                        {requestShareData.map(entry => (
-                          <Cell key={entry.name} fill={entry.color} />
+                              <ChevronLeft className="w-4 h-4" />
+                            </button>
+                          )}
+                          <BarChart3 className="w-4 h-4 mr-2 text-blue-600" />
+                          {isDrilled
+                            ? `API theo CSDL — ${drillDatabase}`
+                            : reportType === 'truycap'
+                            ? 'Tỷ lệ số lượt truy cập theo Hệ thống/API'
+                            : 'Tỷ lệ lưu lượng yêu cầu theo Hệ thống/API'}
+                        </h3>
+                        {!isDrilled && (
+                          <p className="text-[11px] text-slate-400 mt-1">* Vui lòng chọn Hệ thống để xem tỷ lệ chi tiết của từng API chia sẻ</p>
+                        )}
+                      </div>
+                      <div className="flex-1 flex flex-col justify-center min-h-0">
+                      <ResponsiveContainer width="100%" height={220}>
+                        <PieChart margin={{ top: 8, right: 24, bottom: 8, left: 24 }}>
+                          <Pie
+                            data={requestShareData}
+                            dataKey="value"
+                            nameKey="name"
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={55}
+                            outerRadius={85}
+                            paddingAngle={3}
+                            cornerRadius={4}
+                            labelLine={false}
+                            onClick={(entry: any) => {
+                              if (!isDrilled) setDrillDatabase(entry.name);
+                            }}
+                            style={{ cursor: isDrilled ? 'default' : 'pointer' }}
+                            label={(props: any) => {
+                              const RADIAN = Math.PI / 180;
+                              const { cx, cy, midAngle, outerRadius: r, percent, index } = props;
+                              const radius = r + 22;
+                              const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                              const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                              const color = requestShareData[index].color;
+                              return (
+                                <text
+                                  x={x}
+                                  y={y}
+                                  fill={color}
+                                  textAnchor={x > cx ? 'start' : 'end'}
+                                  dominantBaseline="central"
+                                  fontSize={13}
+                                  fontWeight={700}
+                                >
+                                  {`${Math.round(percent * 100)}%`}
+                                </text>
+                              );
+                            }}
+                          >
+                            {requestShareData.map(entry => (
+                              <Cell key={entry.name} fill={entry.color} />
+                            ))}
+                            <Label
+                              position="center"
+                              content={({ viewBox }: any) => {
+                                const { cx, cy } = viewBox;
+                                return (
+                                  <g>
+                                    <text x={cx} y={cy - 12} textAnchor="middle" dominantBaseline="central" fill="#64748b" fontSize={12}>
+                                      Tổng số
+                                    </text>
+                                    <text x={cx} y={cy + 12} textAnchor="middle" dominantBaseline="central" fill="#0f172a" fontSize={22} fontWeight={700}>
+                                      {requestShareTotal.toLocaleString('vi-VN')}
+                                    </text>
+                                  </g>
+                                );
+                              }}
+                            />
+                          </Pie>
+                          <Tooltip formatter={(value: number) => value.toLocaleString('vi-VN')} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 mt-2 text-[13px]">
+                        {requestShareData.map(item => (
+                          <span
+                            key={item.name}
+                            onClick={() => { if (!isDrilled) setDrillDatabase(item.name); }}
+                            className={`flex items-center gap-1.5 text-slate-600 ${!isDrilled ? 'cursor-pointer hover:text-blue-600' : ''}`}
+                          >
+                            <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: item.color }} />
+                            {item.name}
+                          </span>
                         ))}
-                        <Label
-                          position="center"
-                          content={({ viewBox }: any) => {
-                            const { cx, cy } = viewBox;
-                            return (
-                              <g>
-                                <text x={cx} y={cy - 12} textAnchor="middle" dominantBaseline="central" fill="#64748b" fontSize={12}>
-                                  Tổng số
-                                </text>
-                                <text x={cx} y={cy + 12} textAnchor="middle" dominantBaseline="central" fill="#0f172a" fontSize={22} fontWeight={700}>
-                                  {requestShareTotal.toLocaleString('vi-VN')}
-                                </text>
-                              </g>
-                            );
-                          }}
-                        />
-                      </Pie>
-                      <Tooltip formatter={(value: number) => value.toLocaleString('vi-VN')} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                  <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 mt-2 text-[13px]">
-                    {requestShareData.map(item => (
-                      <span key={item.name} className="flex items-center gap-1.5 text-slate-600">
-                        <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: item.color }} />
-                        {item.name}
-                      </span>
-                    ))}
-                  </div>
-                  </div>
+                      </div>
+                      </div>
+                    </>
+                  )}
+
+                  {reportType === 'phanhoi' && (
+                    <>
+                      <h3 className="font-bold text-slate-800 text-sm flex items-center mb-1">
+                        <Clock className="w-4 h-4 mr-2 text-red-600" />
+                        API vượt ngưỡng thời gian phản hồi
+                      </h3>
+                      <p className="text-[11px] text-slate-400 mb-3">* Ngưỡng cảnh báo hiện tại: {responseThreshold} ms</p>
+                      <div className="flex-1 overflow-y-auto min-h-0">
+                        {responseTimeExceeded.length === 0 ? (
+                          <div className="h-full flex items-center justify-center text-[13px] text-slate-400 italic">
+                            Không có API nào vượt ngưỡng cảnh báo
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            {responseTimeExceeded.map(item => (
+                              <div key={item.id} className="border border-red-100 bg-red-50/50 rounded-lg px-3 py-2 flex items-center justify-between gap-3">
+                                <div className="min-w-0">
+                                  <p className="text-[13px] font-semibold text-slate-800 truncate">{item.name}</p>
+                                  <p className="text-[11px] text-slate-500 truncate">{item.database}</p>
+                                </div>
+                                <span className="text-[13px] font-bold text-red-600 whitespace-nowrap">{item.avgLatency}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
+
+                  {reportType === 'loi' && (
+                    <>
+                      <h3 className="font-bold text-slate-800 text-sm flex items-center mb-3">
+                        <AlertCircle className="w-4 h-4 mr-2 text-red-600" />
+                        API đang bị lỗi kết nối
+                      </h3>
+                      <div className="flex-1 overflow-y-auto min-h-0">
+                        {connectionErrors.length === 0 ? (
+                          <div className="h-full flex items-center justify-center text-[13px] text-slate-400 italic">
+                            Không có API nào đang bị lỗi kết nối
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            {connectionErrors.map(item => (
+                              <div key={item.id} className="border border-red-100 bg-red-50/50 rounded-lg px-3 py-2">
+                                <div className="flex items-center justify-between gap-3 mb-1">
+                                  <p className="text-[13px] font-semibold text-slate-800 truncate">{item.name}</p>
+                                  <span className="text-[10px] font-bold uppercase tracking-wide text-red-600 bg-red-100 px-2 py-0.5 rounded-full whitespace-nowrap">{item.errorCode}</span>
+                                </div>
+                                <p className="text-[11px] text-slate-500">{item.database}</p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 

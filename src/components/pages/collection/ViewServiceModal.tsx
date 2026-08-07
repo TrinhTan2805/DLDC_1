@@ -246,6 +246,11 @@ function TabGeneral({ service, sourceSystem, onEdit }: any) {
           </div>
 
           <div className="space-y-1">
+            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Loại dữ liệu thu thập</div>
+            <div className="text-[13px] text-slate-900 font-medium leading-relaxed">{service.dataType || '-'}</div>
+          </div>
+
+          <div className="space-y-1">
             <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Trạng thái dữ liệu</div>
             <div>
               {(() => {

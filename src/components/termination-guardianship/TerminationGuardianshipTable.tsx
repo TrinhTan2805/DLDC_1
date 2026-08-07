@@ -1,5 +1,5 @@
 import React from 'react';
-import { Eye, CheckCircle, AlertCircle, XCircle } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import { TerminationGuardianshipCertRecord } from '../TerminationGuardianshipCertModal';
 
 interface TerminationGuardianshipTableProps {
@@ -36,7 +36,6 @@ export function TerminationGuardianshipTable({
               <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Người giám hộ</th>
               <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Lý do chấm dứt</th>
               <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Ngày chấm dứt</th>
-              <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Trạng thái</th>
               <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Thao tác</th>
             </tr>
           </thead>
@@ -51,26 +50,6 @@ export function TerminationGuardianshipTable({
                 <td className="px-4 py-3 text-center text-slate-900 font-medium">{record.guardianName}</td>
                 <td className="px-4 py-3 text-center text-slate-600 font-medium">{record.terminationReason}</td>
                 <td className="px-4 py-3 text-center text-slate-600 font-medium font-mono">{record.terminationDate}</td>
-                <td className="px-4 py-3 text-center">
-                  {record.status === 'approved' && (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full font-bold uppercase tracking-wider border border-emerald-100 shadow-sm whitespace-nowrap" style={{ fontSize: '12px' }}>
-                      <CheckCircle className="w-3.5 h-3.5" />
-                      Đã duyệt
-                    </span>
-                  )}
-                  {record.status === 'pending' && (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full font-bold uppercase tracking-wider border border-amber-100 shadow-sm whitespace-nowrap" style={{ fontSize: '12px' }}>
-                      <AlertCircle className="w-3.5 h-3.5" />
-                      Chờ duyệt
-                    </span>
-                  )}
-                  {record.status === 'error' && (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-50 text-red-700 rounded-full font-bold uppercase tracking-wider border border-red-100 shadow-sm whitespace-nowrap" style={{ fontSize: '12px' }}>
-                      <XCircle className="w-3.5 h-3.5" />
-                      Lỗi
-                    </span>
-                  )}
-                </td>
                 <td className="px-4 py-3 text-center">
                   <button
                     onClick={() => onViewRecord(record)}

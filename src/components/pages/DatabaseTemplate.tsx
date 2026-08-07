@@ -125,6 +125,7 @@ export function DatabaseTemplate({
             newRecords={selectedStat.thisMonth}
             updatedRecords={Math.floor(selectedStat.thisMonth * 0.2)}
             errorRecords={Math.floor(selectedStat.thisMonth * 0.05)}
+            hideStatusColumn
           />
         )}
       </div>

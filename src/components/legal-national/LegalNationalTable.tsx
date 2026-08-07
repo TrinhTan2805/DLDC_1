@@ -1,5 +1,5 @@
 import React from 'react';
-import { Eye, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface LegalNationalTableProps {
   records: any[];
@@ -33,7 +33,6 @@ export function LegalNationalTable({
               <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Số hiệu</th>
               <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Loại văn bản</th>
               <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Ngày ban hành</th>
-              <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Trạng thái</th>
               <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Thao tác</th>
             </tr>
           </thead>
@@ -49,12 +48,6 @@ export function LegalNationalTable({
                 <td className="px-4 py-3 text-center text-slate-600 font-medium font-mono">{record.number}</td>
                 <td className="px-4 py-3 text-center text-slate-600 font-medium">{record.type}</td>
                 <td className="px-4 py-3 text-center text-slate-600 font-medium font-mono">{record.date}</td>
-                <td className="px-4 py-3 text-center">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full font-bold uppercase tracking-wider border border-emerald-100 shadow-sm whitespace-nowrap" style={{ fontSize: '12px' }}>
-                    <CheckCircle className="w-3.5 h-3.5" />
-                    Có hiệu lực
-                  </span>
-                </td>
                 <td className="px-4 py-3 text-center">
                   <button
                     onClick={() => onViewRecord(record)}

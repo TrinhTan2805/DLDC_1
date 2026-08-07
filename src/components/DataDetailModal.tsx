@@ -11,6 +11,7 @@ interface DataDetailModalProps {
   errorRecords: number;
   isInline?: boolean;
   description?: string;
+  hideStatusColumn?: boolean;
 }
 
 interface DetailRecord {
@@ -85,7 +86,8 @@ export function DataDetailModal({
   updatedRecords,
   errorRecords,
   isInline = false,
-  description
+  description,
+  hideStatusColumn = false
 }: DataDetailModalProps) {
   const [activeTab, setActiveTab] = useState('list');
   const [selectedRecord, setSelectedRecord] = useState<DetailRecord | null>(null);
@@ -709,7 +711,9 @@ export function DataDetailModal({
                       <th className="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Số định danh</th>
                       <th className="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Ngày đăng ký</th>
                       <th className="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Ngày đồng bộ</th>
-                      <th className="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Trạng thái</th>
+                      {!hideStatusColumn && (
+                        <th className="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Trạng thái</th>
+                      )}
                       <th className="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Thao tác</th>
                     </tr>
                   </thead>
@@ -744,19 +748,21 @@ export function DataDetailModal({
                         <td className="px-4 py-4 text-center text-sm text-slate-600 font-medium font-mono">{record.idNumber}</td>
                         <td className="px-4 py-4 text-center text-sm text-slate-600 font-medium font-mono">{record.registrationDate}</td>
                         <td className="px-4 py-4 text-center text-sm text-slate-500 font-medium font-mono whitespace-nowrap">{record.syncDate}</td>
+                        {!hideStatusColumn && (
+                          <td className="px-4 py-4 text-center">
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border shadow-sm whitespace-nowrap ${
+                              record.approvalStatus === 'Đã đồng bộ'
+                                ? 'bg-green-50 text-green-700 border-green-100'
+                                : record.approvalStatus === 'Đã gửi lại hệ thống nguồn'
+                                ? 'bg-blue-50 text-blue-700 border-blue-100'
+                                : 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                            }`}>
+                              {record.approvalStatus}
+                            </span>
+                          </td>
+                        )}
                         <td className="px-4 py-4 text-center">
-                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border shadow-sm whitespace-nowrap ${
-                            record.approvalStatus === 'Đã đồng bộ' 
-                              ? 'bg-green-50 text-green-700 border-green-100' 
-                              : record.approvalStatus === 'Đã gửi lại hệ thống nguồn'
-                              ? 'bg-blue-50 text-blue-700 border-blue-100'
-                              : 'bg-emerald-50 text-emerald-700 border-emerald-100'
-                          }`}>
-                            {record.approvalStatus}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 text-center">
-                          <button 
+                          <button
                             onClick={() => setSelectedRecord(record)}
                             className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all"
                             title="Xem chi tiết"

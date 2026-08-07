@@ -1,5 +1,5 @@
 import React from 'react';
-import { Eye, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface CategoryGroupTableProps {
   records: any[];
@@ -31,7 +31,6 @@ export function CategoryGroupTable({
               <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap w-12">STT</th>
               <th className="px-4 py-3 text-left font-semibold text-slate-500 whitespace-nowrap">Tên danh mục</th>
               <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Mã danh mục</th>
-              <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Trạng thái</th>
               <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Thao tác</th>
             </tr>
           </thead>
@@ -45,12 +44,6 @@ export function CategoryGroupTable({
                   <div className="font-semibold text-slate-900">{record.name}</div>
                 </td>
                 <td className="px-4 py-3 text-center text-slate-600 font-medium font-mono">{record.code}</td>
-                <td className="px-4 py-3 text-center">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full font-bold uppercase tracking-wider border border-emerald-100 shadow-sm whitespace-nowrap" style={{ fontSize: '12px' }}>
-                    <CheckCircle className="w-3.5 h-3.5" />
-                    Kích hoạt
-                  </span>
-                </td>
                 <td className="px-4 py-3 text-center">
                   <button
                     onClick={() => onViewRecord(record)}

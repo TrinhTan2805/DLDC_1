@@ -191,6 +191,7 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
   const [activeTab, setActiveTab] = useState<TabType>('general');
   const [dataClassification, setDataClassification] = useState('');
   const [connectionType, setConnectionType] = useState('API');
+  const [collectionDataType, setCollectionDataType] = useState('');
 
   // Source System State
   const [showSourceDropdown, setShowSourceDropdown] = useState(false);
@@ -356,6 +357,24 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
                         <option value="Dữ liệu nhạy cảm">Dữ liệu nhạy cảm</option>
                         <option value="Dữ liệu bảo mật">Dữ liệu bảo mật</option>
                         <option value="Dữ liệu tuyệt mật">Dữ liệu tuyệt mật</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="col-span-2">
+                      <label htmlFor="add-data-type" className="block text-[13px] text-slate-600 mb-1">Loại dữ liệu thu thập <span className="text-red-500">*</span></label>
+                      <select
+                        aria-label="Select box"
+                        id="add-data-type"
+                        title="Loại dữ liệu thu thập"
+                        required
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] transition-colors bg-white"
+                        value={collectionDataType}
+                        onChange={(e) => setCollectionDataType(e.target.value)}
+                      >
+                        <option value="">Chọn loại dữ liệu thu thập</option>
+                        <option value="Dữ liệu danh mục">Dữ liệu danh mục</option>
+                        <option value="Dữ liệu nghiệp vụ">Dữ liệu nghiệp vụ</option>
                       </select>
                     </div>
                   </div>
@@ -598,6 +617,23 @@ export function EditServiceModal({ isOpen, onClose, service, initialTab }: Servi
                       <option value="Dữ liệu nhạy cảm">Dữ liệu nhạy cảm</option>
                       <option value="Dữ liệu bảo mật">Dữ liệu bảo mật</option>
                       <option value="Dữ liệu tuyệt mật">Dữ liệu tuyệt mật</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="col-span-2">
+                    <label htmlFor="edit-data-type" className="block text-[13px] text-slate-600 mb-1">Loại dữ liệu thu thập <span className="text-red-500">*</span></label>
+                    <select
+                      aria-label="Select box"
+                      id="edit-data-type"
+                      title="Loại dữ liệu thu thập"
+                      required
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] transition-colors bg-white"
+                      defaultValue={service.dataType || ''}
+                    >
+                      <option value="">Chọn loại dữ liệu thu thập</option>
+                      <option value="Dữ liệu danh mục">Dữ liệu danh mục</option>
+                      <option value="Dữ liệu nghiệp vụ">Dữ liệu nghiệp vụ</option>
                     </select>
                   </div>
                 </div>

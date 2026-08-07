@@ -484,7 +484,6 @@ export function SecurityMeasuresPage({ mode = 'thu thập', context = 'thu thậ
                   <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Ngày sinh</th>
                   <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Số đăng ký</th>
                   <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Ngày đăng ký</th>
-                  <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Trạng thái</th>
                   <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Thao tác</th>
                 </tr>
               </thead>
@@ -499,12 +498,6 @@ export function SecurityMeasuresPage({ mode = 'thu thập', context = 'thu thậ
                     <td className="px-4 py-3 text-center text-slate-600 font-medium font-mono">{record.birthDate}</td>
                     <td className="px-4 py-3 text-center text-slate-600 font-medium font-mono">{record.regNo}</td>
                     <td className="px-4 py-3 text-center text-slate-600 font-medium font-mono">{record.regDate}</td>
-                    <td className="px-4 py-3 text-center">
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full font-bold uppercase tracking-wider border border-emerald-100 shadow-sm whitespace-nowrap" style={{ fontSize: '12px' }}>
-                        <CheckCircle className="w-3.5 h-3.5" />
-                        Đã phê duyệt
-                      </span>
-                    </td>
                     <td className="px-4 py-3 text-center">
                       <button
                         onClick={() => setSelectedRecord(record)}

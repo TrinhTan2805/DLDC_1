@@ -69,10 +69,10 @@ export function CivilLegalInfoModal({
         />
       )}
       
-      <div className={isInline ? "w-full flex flex-col" : "fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"}>
+      <div className={isInline ? "w-full flex-1 flex flex-col min-h-0" : "fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"}>
         {isInline && (
           <div className="flex items-center justify-between mb-0">
-            <h2 className="text-xl font-bold text-slate-900">{title}</h2>
+            <h2 className="text-[18px] font-bold text-slate-900">{title}</h2>
           </div>
         )}
 

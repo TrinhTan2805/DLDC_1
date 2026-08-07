@@ -10,6 +10,7 @@ interface DatabasePageTemplateProps {
   onSelectDataType: (id: string) => void;
   activeId?: string;
   children: React.ReactNode;
+  stretchHeight?: boolean;
 }
 
 export function DatabasePageTemplate({
@@ -19,26 +20,36 @@ export function DatabasePageTemplate({
   innerSidebarItems,
   onSelectDataType,
   activeId,
-  children
+  children,
+  stretchHeight = false
 }: DatabasePageTemplateProps) {
   return (
     <div className="flex gap-6 h-full min-h-[calc(100vh-140px)]">
       {/* Left Sidebar */}
       <div className="flex-shrink-0 sticky top-0 h-fit self-start">
-        <InnerSidebar 
-          title="Danh mục dữ liệu" 
-          items={innerSidebarItems} 
-          onSelectItem={onSelectDataType} 
+        <InnerSidebar
+          title="Danh mục dữ liệu"
+          items={innerSidebarItems}
+          onSelectItem={onSelectDataType}
           activeId={activeId}
+          stretchHeight={stretchHeight}
         />
       </div>
 
       {/* Right Content */}
-      <div className="flex-1 space-y-6 overflow-y-auto pr-2">
-        {/* Header removed as requested */}
-
-        {children}
-      </div>
+      {stretchHeight ? (
+        <div
+          className="flex-1 bg-white border border-slate-200 rounded-xl shadow-sm p-6 overflow-y-auto flex flex-col"
+          style={{ height: 'calc(100vh - 140px)' }}
+        >
+          {children}
+        </div>
+      ) : (
+        <div className="flex-1 space-y-6 overflow-y-auto pr-2">
+          {/* Header removed as requested */}
+          {children}
+        </div>
+      )}
     </div>
   );
 }

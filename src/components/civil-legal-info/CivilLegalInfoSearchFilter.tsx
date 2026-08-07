@@ -1,5 +1,5 @@
 import React from 'react';
-import { Filter, Download, Plus, Trash2, CheckCircle, X, RefreshCw } from 'lucide-react';
+import { Filter, Plus, Trash2, CheckCircle, X, RefreshCw } from 'lucide-react';
 
 interface CivilLegalInfoSearchFilterProps {
   isFilterOpen: boolean;
@@ -43,14 +43,6 @@ export function CivilLegalInfoSearchFilter({
             <RefreshCw className="w-5 h-5" />
           </button>
         )}
-
-        <button 
-          onClick={onExport}
-          className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium"
-        >
-          <Download className="w-5 h-5" />
-          Kết xuất
-        </button>
       </div>
 
       {isFilterOpen && (
