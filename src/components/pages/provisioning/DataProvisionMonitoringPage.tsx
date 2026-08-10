@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { 
   Activity, BarChart3, Download, Network, Share2, Server, Database, 
   AlertCircle, ChevronLeft, ChevronRight, X, Clock, HelpCircle, CheckCircle2, ArrowRightLeft,
-  ChevronDown, Search, Check, Info
+  ChevronDown, Search, Check, Info, List, PieChart as PieChartIcon
 } from 'lucide-react';
 import { ProvisionExportReportModal } from './modals/ProvisionExportReportModal';
 import { ProvisionServiceModal } from './modals/ProvisionServiceModal';
@@ -240,7 +240,25 @@ const apiList = [
   { id: 'Cập nhật trạng thái thi hành án', name: 'Cập nhật trạng thái thi hành án', database: 'Cơ sở dữ liệu THADS', code: 'SVC-THADS-003' },
   { id: 'Đọc thông tin Biện pháp bảo đảm', name: 'Đọc thông tin Biện pháp bảo đảm', database: 'CSDL Biện pháp bảo đảm', code: 'SVC-BPBD-001' },
   { id: 'Tra cứu tài sản bảo đảm', name: 'Tra cứu tài sản bảo đảm', database: 'CSDL Biện pháp bảo đảm', code: 'SVC-BPBD-002' },
-  { id: 'Đăng ký giao dịch bảo đảm', name: 'Đăng ký giao dịch bảo đảm', database: 'CSDL Biện pháp bảo đảm', code: 'SVC-BPBD-003' }
+  { id: 'Đăng ký giao dịch bảo đảm', name: 'Đăng ký giao dịch bảo đảm', database: 'CSDL Biện pháp bảo đảm', code: 'SVC-BPBD-003' },
+  { id: 'Tra cứu thông tin ĐKKD', name: 'Tra cứu thông tin ĐKKD', database: 'CSDL Đăng ký doanh nghiệp', code: 'SVC-DKKD-001' },
+  { id: 'Cập nhật giấy phép kinh doanh', name: 'Cập nhật giấy phép kinh doanh', database: 'CSDL Đăng ký doanh nghiệp', code: 'SVC-DKKD-002' },
+  { id: 'Tra cứu vụ việc trợ giúp pháp lý', name: 'Tra cứu vụ việc trợ giúp pháp lý', database: 'CSDL Trợ giúp pháp lý', code: 'SVC-TGPL-001' },
+  { id: 'Lấy danh sách trợ giúp viên', name: 'Lấy danh sách trợ giúp viên', database: 'CSDL Trợ giúp pháp lý', code: 'SVC-TGPL-002' },
+  { id: 'Cấp phiếu lý lịch tư pháp', name: 'Cấp phiếu lý lịch tư pháp', database: 'CSDL Lý lịch tư pháp', code: 'SVC-LLTP-001' },
+  { id: 'Tra cứu thông tin án tích', name: 'Tra cứu thông tin án tích', database: 'CSDL Lý lịch tư pháp', code: 'SVC-LLTP-002' },
+  { id: 'Tra cứu hồ sơ xin nhập quốc tịch', name: 'Tra cứu hồ sơ xin nhập quốc tịch', database: 'CSDL Quốc tịch', code: 'SVC-QT-001' },
+  { id: 'Đăng ký nuôi con nuôi', name: 'Đăng ký nuôi con nuôi', database: 'CSDL Nuôi con nuôi', code: 'SVC-NCN-001' },
+  { id: 'Tra cứu văn bản công chứng', name: 'Tra cứu văn bản công chứng', database: 'CSDL Công chứng', code: 'SVC-CC-001' },
+  { id: 'Tra cứu tổ chức bán đấu giá', name: 'Tra cứu tổ chức bán đấu giá', database: 'CSDL Bán đấu giá tài sản', code: 'SVC-BDG-001' },
+  { id: 'Tra cứu trung tâm trọng tài', name: 'Tra cứu trung tâm trọng tài', database: 'CSDL Trọng tài thương mại', code: 'SVC-TTTM-001' },
+  { id: 'Tra cứu văn phòng thừa phát lại', name: 'Tra cứu văn phòng thừa phát lại', database: 'CSDL Thừa phát lại', code: 'SVC-TPL-001' },
+  { id: 'Tra cứu giám định viên tư pháp', name: 'Tra cứu giám định viên tư pháp', database: 'CSDL Giám định tư pháp', code: 'SVC-GDTP-001' },
+  { id: 'Tra cứu chứng chỉ hành nghề luật sư', name: 'Tra cứu chứng chỉ hành nghề luật sư', database: 'CSDL Luật sư', code: 'SVC-LS-001' },
+  { id: 'Tra cứu điều ước quốc tế', name: 'Tra cứu điều ước quốc tế', database: 'CSDL Hợp tác quốc tế', code: 'SVC-HTQT-001' },
+  { id: 'Tra cứu tài liệu PBGDPL', name: 'Tra cứu tài liệu PBGDPL', database: 'CSDL Phổ biến giáo dục PL', code: 'SVC-PBGDPL-001' },
+  { id: 'Tra cứu văn bản QPPL', name: 'Tra cứu văn bản QPPL', database: 'CSDL VBQPPL', code: 'SVC-VBQPPL-001' },
+  { id: 'Tra cứu vụ việc bồi thường nhà nước', name: 'Tra cứu vụ việc bồi thường nhà nước', database: 'CSDL Bồi thường nhà nước', code: 'SVC-BTNN-001' },
 ];
 
 const databases = Array.from(new Set(apiList.map(api => api.database)));
@@ -256,7 +274,33 @@ const reportData = reportBase.map((v, i) => ({
 }));
 
 // Tỷ lệ lưu lượng yêu cầu theo CSDL/API [Unverified] - áp dụng cùng bộ lọc (CSDL/API/khoảng ngày) với tab Báo cáo thống kê
-const REQUEST_SHARE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#f43f5e', '#0ea5e9'];
+const REQUEST_SHARE_COLORS = [
+  '#2563eb', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', 
+  '#84cc16', '#f43f5e', '#0ea5e9', '#d97706', '#6366f1', '#14b8a6', 
+  '#a855f7', '#eab308', '#f97316', '#64748b', '#059669', '#7c3aed'
+];
+
+const demo18DatabasesList = [
+  { name: 'CSDL Hộ tịch điện tử', baseValue: 38450 },
+  { name: 'Cơ sở dữ liệu THADS', baseValue: 27100 },
+  { name: 'CSDL Biện pháp bảo đảm', baseValue: 19300 },
+  { name: 'CSDL Đăng ký doanh nghiệp', baseValue: 16800 },
+  { name: 'CSDL Trợ giúp pháp lý', baseValue: 14200 },
+  { name: 'CSDL Lý lịch tư pháp', baseValue: 12500 },
+  { name: 'CSDL Quốc tịch', baseValue: 10800 },
+  { name: 'CSDL Nuôi con nuôi', baseValue: 9400 },
+  { name: 'CSDL Công chứng', baseValue: 8700 },
+  { name: 'CSDL Bán đấu giá tài sản', baseValue: 7600 },
+  { name: 'CSDL Trọng tài thương mại', baseValue: 6500 },
+  { name: 'CSDL Thừa phát lại', baseValue: 5800 },
+  { name: 'CSDL Giám định tư pháp', baseValue: 5100 },
+  { name: 'CSDL Luật sư', baseValue: 4600 },
+  { name: 'CSDL Hợp tác quốc tế', baseValue: 4100 },
+  { name: 'CSDL Phổ biến giáo dục PL', baseValue: 3600 },
+  { name: 'CSDL VBQPPL', baseValue: 3200 },
+  { name: 'CSDL Bồi thường nhà nước', baseValue: 2800 },
+];
+
 // Khoảng thời gian mốc của bộ dữ liệu báo cáo (Tháng 06/2026) để tính tỷ lệ theo khoảng ngày đã chọn
 const REQUEST_SHARE_BASELINE_START = new Date('2026-06-01').getTime();
 const REQUEST_SHARE_BASELINE_END = new Date('2026-06-30').getTime();
@@ -357,31 +401,54 @@ export function DataProvisionMonitoringPage() {
   }, [tablePage, tableItemsPerPage]);
 
   // Tỷ lệ theo Hệ thống/API - áp dụng bộ lọc CSDL/API/khoảng ngày ở đầu trang
-  // Bậc 1: theo CSDL (gộp chỉ tiêu của các API thuộc từng CSDL); bậc 2 (drill-down): theo API trong 1 CSDL đã chọn
-  // Chỉ tiêu đổi theo tab báo cáo đang chọn: lưu lượng yêu cầu (luuluong) hoặc số lượt truy cập (truycap, ước tính = lưu lượng x3.5 theo tỷ lệ dùng ở reportData)
   const requestShareDateScale = getRequestShareDateScale(monFrom, monTo);
   const getApiMetricValue = (apiId: string) => {
     const s = apiMockStats[apiId];
-    if (!s) return 0;
-    const base = s.totalRequests;
+    const info = apiList.find(a => a.id === apiId);
+    const dbInfo = demo18DatabasesList.find(d => d.name === info?.database);
+    const base = s ? s.totalRequests : (dbInfo ? Math.round(dbInfo.baseValue / 2) : 6000);
     return reportType === 'truycap' ? Math.round(base * 3.5) : base;
   };
-  const requestShareDatabases = Array.from(new Set(listApis.map(api => api.database)));
-  const requestShareByDatabase = requestShareDatabases.map((db, i) => {
-    const apisInDb = listApis.filter(api => api.database === db);
-    const value = apisInDb.reduce((sum, api) => sum + Math.round(getApiMetricValue(api.id) * requestShareDateScale), 0);
-    return { name: db, value: Math.max(1, value), color: REQUEST_SHARE_COLORS[i % REQUEST_SHARE_COLORS.length], apiCount: apisInDb.length };
+
+  const allDatabasesShareData = demo18DatabasesList.map((db, i) => {
+    const val = reportType === 'truycap' ? Math.round(db.baseValue * 3.5) : db.baseValue;
+    return {
+      name: db.name,
+      value: Math.max(1, Math.round(val * requestShareDateScale)),
+      color: REQUEST_SHARE_COLORS[i % REQUEST_SHARE_COLORS.length],
+      apiCount: listApis.filter(a => a.database === db.name).length || 1,
+    };
   });
 
-  const drillApis = drillDatabase ? listApis.filter(api => api.database === drillDatabase) : [];
+  // Target database for drill down (either from top filter or list item click)
+  const targetDatabase = selectedDatabase || drillDatabase;
+  const drillApis = targetDatabase ? listApis.filter(api => api.database === targetDatabase) : [];
+
   const requestShareByApi = drillApis.map((api, i) => ({
     name: api.name,
     value: Math.max(1, Math.round(getApiMetricValue(api.id) * requestShareDateScale)),
     color: REQUEST_SHARE_COLORS[i % REQUEST_SHARE_COLORS.length],
   }));
 
-  const isDrilled = !!drillDatabase && requestShareByApi.length > 0;
-  const requestShareData = isDrilled ? requestShareByApi : requestShareByDatabase;
+  // If a specific API is selected in top dropdown:
+  const selectedApiShareData = selectedApi
+    ? (() => {
+        const info = apiList.find(a => a.id === selectedApi);
+        const apiName = info ? info.name : selectedApi;
+        return [{
+          name: apiName,
+          value: Math.max(1, Math.round(getApiMetricValue(selectedApi) * requestShareDateScale)),
+          color: REQUEST_SHARE_COLORS[0],
+        }];
+      })()
+    : null;
+
+  const isDrilled = (!!targetDatabase && requestShareByApi.length > 0) || !!selectedApi;
+
+  const requestShareData = selectedApiShareData
+    ? selectedApiShareData
+    : (isDrilled ? requestShareByApi : (selectedDatabase ? allDatabasesShareData.filter(d => d.name === selectedDatabase) : allDatabasesShareData));
+
   const requestShareTotal = requestShareData.reduce((sum, item) => sum + item.value, 0);
 
   // Tab "Thời gian phản hồi": danh sách API có thời gian phản hồi vượt ngưỡng cảnh báo
@@ -918,103 +985,80 @@ export function DataProvisionMonitoringPage() {
                 <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-5 flex flex-col h-full">
                   {(reportType === 'luuluong' || reportType === 'truycap') && (
                     <>
-                      <div className="mb-4">
-                        <h3 className="font-bold text-slate-800 text-sm flex items-center">
-                          {isDrilled && (
-                            <button
-                              onClick={() => setDrillDatabase(null)}
-                              className="mr-2 p-1 -ml-1 rounded-md hover:bg-slate-100 text-slate-500"
-                              title="Quay lại theo CSDL"
-                            >
-                              <ChevronLeft className="w-4 h-4" />
-                            </button>
+                      <div className="flex items-start justify-between mb-3 gap-2">
+                        <div>
+                          <h3 className="font-bold text-slate-800 text-sm flex items-center">
+                            {isDrilled && !selectedDatabase && (
+                              <button
+                                onClick={() => setDrillDatabase(null)}
+                                className="mr-2 p-1 -ml-1 rounded-md hover:bg-slate-100 text-slate-500"
+                                title="Quay lại theo CSDL"
+                              >
+                                <ChevronLeft className="w-4 h-4" />
+                              </button>
+                            )}
+                            <List className="w-4 h-4 mr-2 text-blue-600 text-[13px]" />
+                            {selectedApi
+                              ? `API được chọn — ${selectedApi}`
+                              : targetDatabase
+                              ? `Danh sách API thuộc CSDL — ${targetDatabase}`
+                              : reportType === 'truycap'
+                              ? 'Tỷ lệ số lượt truy cập theo Hệ thống/API (18 CSDL)'
+                              : 'Tỷ lệ lưu lượng yêu cầu theo Hệ thống/API (18 CSDL)'}
+                          </h3>
+                          {!isDrilled && (
+                            <p className="text-[11px] text-slate-400 mt-1">* Vui lòng chọn Hệ thống ở bộ lọc trên hoặc bấm vào tên CSDL để xem tỷ lệ chi tiết từng API chia sẻ</p>
                           )}
-                          <BarChart3 className="w-4 h-4 mr-2 text-blue-600" />
-                          {isDrilled
-                            ? `API theo CSDL — ${drillDatabase}`
-                            : reportType === 'truycap'
-                            ? 'Tỷ lệ số lượt truy cập theo Hệ thống/API'
-                            : 'Tỷ lệ lưu lượng yêu cầu theo Hệ thống/API'}
-                        </h3>
-                        {!isDrilled && (
-                          <p className="text-[11px] text-slate-400 mt-1">* Vui lòng chọn Hệ thống để xem tỷ lệ chi tiết của từng API chia sẻ</p>
-                        )}
+                        </div>
                       </div>
-                      <div className="flex-1 flex flex-col justify-center min-h-0">
-                      <ResponsiveContainer width="100%" height={220}>
-                        <PieChart margin={{ top: 8, right: 24, bottom: 8, left: 24 }}>
-                          <Pie
-                            data={requestShareData}
-                            dataKey="value"
-                            nameKey="name"
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={55}
-                            outerRadius={85}
-                            paddingAngle={3}
-                            cornerRadius={4}
-                            labelLine={false}
-                            onClick={(entry: any) => {
-                              if (!isDrilled) setDrillDatabase(entry.name);
-                            }}
-                            style={{ cursor: isDrilled ? 'default' : 'pointer' }}
-                            label={(props: any) => {
-                              const RADIAN = Math.PI / 180;
-                              const { cx, cy, midAngle, outerRadius: r, percent, index } = props;
-                              const radius = r + 22;
-                              const x = cx + radius * Math.cos(-midAngle * RADIAN);
-                              const y = cy + radius * Math.sin(-midAngle * RADIAN);
-                              const color = requestShareData[index].color;
-                              return (
-                                <text
-                                  x={x}
-                                  y={y}
-                                  fill={color}
-                                  textAnchor={x > cx ? 'start' : 'end'}
-                                  dominantBaseline="central"
-                                  fontSize={13}
-                                  fontWeight={700}
-                                >
-                                  {`${Math.round(percent * 100)}%`}
-                                </text>
-                              );
-                            }}
-                          >
-                            {requestShareData.map(entry => (
-                              <Cell key={entry.name} fill={entry.color} />
-                            ))}
-                            <Label
-                              position="center"
-                              content={({ viewBox }: any) => {
-                                const { cx, cy } = viewBox;
-                                return (
-                                  <g>
-                                    <text x={cx} y={cy - 12} textAnchor="middle" dominantBaseline="central" fill="#64748b" fontSize={12}>
-                                      Tổng số
-                                    </text>
-                                    <text x={cx} y={cy + 12} textAnchor="middle" dominantBaseline="central" fill="#0f172a" fontSize={22} fontWeight={700}>
-                                      {requestShareTotal.toLocaleString('vi-VN')}
-                                    </text>
-                                  </g>
-                                );
-                              }}
-                            />
-                          </Pie>
-                          <Tooltip formatter={(value: number) => value.toLocaleString('vi-VN')} />
-                        </PieChart>
-                      </ResponsiveContainer>
-                      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 mt-2 text-[13px]">
-                        {requestShareData.map(item => (
-                          <span
-                            key={item.name}
-                            onClick={() => { if (!isDrilled) setDrillDatabase(item.name); }}
-                            className={`flex items-center gap-1.5 text-slate-600 ${!isDrilled ? 'cursor-pointer hover:text-blue-600' : ''}`}
-                          >
-                            <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: item.color }} />
-                            {item.name}
-                          </span>
-                        ))}
-                      </div>
+
+                      <div className="flex-1 flex flex-col min-h-0 space-y-2 max-h-[275px] overflow-y-auto custom-scrollbar pr-1 pt-1">
+                        {requestShareData
+                          .slice()
+                          .sort((a, b) => b.value - a.value)
+                          .map((item, index) => {
+                            const pct = (item.value / requestShareTotal) * 100;
+                            const displayPct = Math.round(pct);
+                            return (
+                              <div
+                                key={item.name}
+                                onClick={() => { if (!isDrilled) setDrillDatabase(item.name); }}
+                                className={`p-2.5 rounded-xl border border-slate-100 bg-slate-50/70 hover:bg-white hover:shadow-md hover:border-slate-200 transition-all ${!isDrilled ? 'cursor-pointer' : ''}`}
+                              >
+                                <div className="flex items-center justify-between gap-2 mb-1.5">
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
+                                      index === 0 ? 'bg-amber-100 text-amber-700 border border-amber-200' :
+                                      index === 1 ? 'bg-slate-200 text-slate-700 border border-slate-300' :
+                                      index === 2 ? 'bg-amber-700/10 text-amber-800 border border-amber-700/20' :
+                                      'bg-slate-100 text-slate-500'
+                                    }`}>
+                                      {index + 1}
+                                    </span>
+                                    <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+                                    <span className="font-medium text-slate-800 text-[13px] truncate" title={item.name}>{item.name}</span>
+                                  </div>
+
+                                  <div className="flex items-center gap-2 shrink-0">
+                                    <span className="font-mono text-slate-700 font-semibold text-[13px]">
+                                      {item.value.toLocaleString('vi-VN')} {reportType === 'truycap' ? 'lượt' : 'MB'}
+                                    </span>
+                                    <span className="px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 font-bold font-mono text-[11px] border border-blue-100">
+                                      {displayPct}%
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* Thanh tiến trình tỉ lệ */}
+                                <div className="w-full bg-slate-200/80 h-2 rounded-full overflow-hidden">
+                                  <div
+                                    className="h-full rounded-full transition-all duration-500"
+                                    style={{ width: `${Math.max(2, pct)}%`, backgroundColor: item.color }}
+                                  />
+                                </div>
+                              </div>
+                            );
+                          })}
                       </div>
                     </>
                   )}
@@ -1026,7 +1070,7 @@ export function DataProvisionMonitoringPage() {
                         API vượt ngưỡng thời gian phản hồi
                       </h3>
                       <p className="text-[11px] text-slate-400 mb-3">* Ngưỡng cảnh báo hiện tại: {responseThreshold} ms</p>
-                      <div className="flex-1 overflow-y-auto min-h-0">
+                      <div className="flex-1 overflow-y-auto min-h-0 max-h-[275px]">
                         {responseTimeExceeded.length === 0 ? (
                           <div className="h-full flex items-center justify-center text-[13px] text-slate-400 italic">
                             Không có API nào vượt ngưỡng cảnh báo
@@ -1054,7 +1098,7 @@ export function DataProvisionMonitoringPage() {
                         <AlertCircle className="w-4 h-4 mr-2 text-red-600" />
                         API đang bị lỗi kết nối
                       </h3>
-                      <div className="flex-1 overflow-y-auto min-h-0">
+                      <div className="flex-1 overflow-y-auto min-h-0 max-h-[275px]">
                         {connectionErrors.length === 0 ? (
                           <div className="h-full flex items-center justify-center text-[13px] text-slate-400 italic">
                             Không có API nào đang bị lỗi kết nối

@@ -490,10 +490,12 @@ function TabConnection({ service, showApiKey, setShowApiKey, onEdit }: any) {
         <div className="grid grid-cols-2 gap-x-12 gap-y-6 max-w-4xl">
           <div className="space-y-1 col-span-2">
             <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Phương thức kết nối</div>
-            <div className="text-[13px] text-slate-900 font-medium">{connectionType === 'API' ? 'API' : connectionType === 'DB' ? 'Cơ sở dữ liệu' : 'Tải file'}</div>
+            <div className="text-[13px] text-slate-900 font-medium">
+              {connectionType === 'API' ? 'API' : connectionType === 'API_RECEIVE_JSON' ? 'API nhận (JSON)' : connectionType === 'API_RECEIVE_XML' ? 'API nhận (XML)' : connectionType === 'DB' ? 'Cơ sở dữ liệu' : 'Tải file'}
+            </div>
           </div>
 
-          {connectionType === 'API' && (
+          {(connectionType === 'API' || connectionType === 'API_RECEIVE_JSON' || connectionType === 'API_RECEIVE_XML') && (
             <>
               <div className="space-y-1">
                 <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Tên api</div>
@@ -1186,7 +1188,6 @@ function TabActivityHistory({ onEdit }: { onEdit: () => void }) {
                 <th className="px-6 py-4 font-bold whitespace-nowrap">Người tạo</th>
                 <th className="px-6 py-4 font-bold whitespace-nowrap">Thông Tin máy chủ</th>
                 <th className="px-6 py-4 font-bold whitespace-nowrap">Thời gian khởi tạo</th>
-                <th className="px-6 py-4 font-bold whitespace-nowrap text-center">#Hành động</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -1203,17 +1204,11 @@ function TabActivityHistory({ onEdit }: { onEdit: () => void }) {
                   <td className="px-6 py-4 text-slate-600 font-medium">{row.creator}</td>
                   <td className="px-6 py-4 text-slate-600 font-medium">{row.server}</td>
                   <td className="px-6 py-4 text-slate-600 font-medium">{row.time}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-center gap-2">
-                      <button className="px-3 py-1 bg-teal-500 text-white rounded text-[13px] hover:bg-teal-600 transition-colors">Chi tiết</button>
-                      <button className="px-3 py-1 bg-rose-500 text-white rounded text-[13px] hover:bg-rose-600 transition-colors">Xóa</button>
-                    </div>
-                  </td>
                 </tr>
               ))}
               {filteredHistory.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-6 py-10 text-center text-slate-500 italic">
+                  <td colSpan={6} className="px-6 py-10 text-center text-slate-500 italic">
                     Không tìm thấy dữ liệu lịch sử phù hợp.
                   </td>
                 </tr>

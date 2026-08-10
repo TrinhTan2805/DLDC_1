@@ -3224,3 +3224,158 @@ Redesign thanh tìm kiếm & bộ lọc tại tab **Kiểm tra & Phê duyệt** 
 
 **Các file bị ảnh hưởng:**
 - `src/components/pages/master-data/AttributesManagementTab.tsx`
+
+---
+
+## Cập nhật giao diện Modal Chi tiết dịch vụ — Tab Lịch sử hoạt động (Ngày cập nhật: 10/08/2026)
+
+**Nội dung thay đổi:**
+1. **Loại bỏ cột `#Hành động`:**
+   - Trong tab **Lịch sử hoạt động** (`TabActivityHistory`) thuộc Modal Chi tiết dịch vụ (`src/components/pages/collection/ViewServiceModal.tsx`), tiến hành xóa cột `#Hành động` (gồm các nút **Chi tiết** và **Xóa**) trong bảng danh sách theo yêu cầu.
+   - Cập nhật `colSpan` cho trường hợp bảng rỗng từ 7 về 6.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/collection/ViewServiceModal.tsx`
+
+---
+
+## Cập nhật thông tin tiêu đề Xem chi tiết dữ liệu thu thập — HTTT trợ giúp pháp lý (Ngày cập nhật: 10/08/2026)
+
+**Nội dung thay đổi:**
+1. **Bổ sung thông tin "Tích hợp" và "Thuộc đơn vị":**
+   - Tại giao diện xem chi tiết bộ dữ liệu thuộc **HTTT trợ giúp pháp lý** (`src/components/civil-legal-info/CivilLegalInfoModal.tsx`), bổ sung 2 dòng thông tin mô tả bên dưới tiêu đề:
+     - `Tích hợp: [Tên loại dữ liệu].`
+     - `Thuộc đơn vị: Cục Trợ giúp pháp lý.`
+
+**Các file bị ảnh hưởng:**
+- `src/components/civil-legal-info/CivilLegalInfoModal.tsx`
+
+---
+
+## Cập nhật bảng Danh sách thiết lập dịch vụ thu thập (Ngày cập nhật: 10/08/2026)
+
+**Nội dung thay đổi:**
+1. **Tách và điều chỉnh cột trong bảng dịch vụ thu thập:**
+   - Tách cột gộp "Mã / Tên dịch vụ" thành 2 cột riêng biệt: **Mã dịch vụ** (hiển thị font-mono, mã dịch vụ) và **Tên dịch vụ** (thu nhỏ độ rộng cột `max-w-[220px]`).
+   - Tách trường loại nguồn ra khỏi cột "Hệ thống nguồn" thành 1 cột riêng **Loại nguồn** hiển thị badge trạng thái (**Trong ngành** / **Ngoài ngành**).
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/collection/CollectionSetupPage.tsx`
+
+---
+
+## Tinh chỉnh giao diện bảng Danh sách dịch vụ thu thập (Ngày cập nhật: 10/08/2026)
+
+**Nội dung thay đổi:**
+1. **Sắp xếp lại thứ tự cột và xử lý ngắt dòng:**
+   - Đổi thứ tự cột theo mockup thiết kế: `STT` → `Tên dịch vụ` → `Mã dịch vụ`.
+   - Giới hạn giá trị hiển thị ở cột **Mã dịch vụ** tối đa 50 ký tự (`slice(0, 50)`), đặt độ rộng cột nhỏ gọn (`w-36 max-w-[150px]`) và cho phép tự động xuống dòng khi dài (`break-all`), không dùng dấu ba chấm `...`.
+   - Bỏ `line-clamp` ở cột **Tên dịch vụ**, cho phép tên dịch vụ dài xuống dòng tự nhiên (`break-words`), không cắt bằng `...`.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/collection/CollectionSetupPage.tsx`
+
+---
+
+## Cập nhật chữ đậm (bold) và thứ tự tiêu đề bảng Thu thập (Ngày cập nhật: 10/08/2026)
+
+**Nội dung thay đổi:**
+1. **In đậm tiêu đề bảng & căn chỉnh thứ tự:**
+   - Cập nhật CSS dòng tiêu đề bảng `table.collection-table th` thành chữ in đậm đậm nét (`font-weight: bold !important; color: #0f172a !important;`).
+   - Sắp xếp thứ tự các cột chính xác theo mockup ảnh: `STT` → `Tên dịch vụ` → `Mã dịch vụ` → `Loại nguồn` → `Phương thức kết nối` → `Phiên bản` → `Hệ thống nguồn` → `Ngày tạo` → `Trạng thái dịch vụ` → `Trạng thái dữ liệu` → `Thao tác`.
+
+**Các file bị ảnh hưởng:**
+- `src/index.css`
+- `src/components/pages/collection/CollectionSetupPage.tsx`
+
+---
+
+## Bổ sung phương thức kết nối API nhận (JSON) và API nhận (XML) (Ngày cập nhật: 10/08/2026)
+
+**Nội dung thay đổi:**
+1. **Thêm phương thức kết nối:**
+   - Trong giao diện cấu hình kết nối ([ConnectionConfigSection.tsx](file:///F:/BTP/DLDC_1/src/components/pages/collection/ConnectionConfigSection.tsx)), bổ sung 2 tùy chọn phương thức kết nối trong danh sách chọn: **API nhận (JSON)** và **API nhận (XML)**.
+   - Hiển thị khung thông báo cấu trúc file yêu cầu (`File phải chứa mảng data[] và object duLieuTiepNhan` cho JSON, hoặc `File XML phải chứa thẻ root và thẻ duLieuTiepNhan` cho XML).
+   - Thêm lựa chọn checkbox **"Tách bảng con từ mảng lồng"** cùng biểu tượng trợ giúp tooltip.
+   - Cập nhật hiển thị chi tiết tại [ViewServiceModal.tsx](file:///F:/BTP/DLDC_1/src/components/pages/collection/ViewServiceModal.tsx).
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/collection/ConnectionConfigSection.tsx`
+- `src/components/pages/collection/ViewServiceModal.tsx`
+
+---
+
+## Bổ sung demo 18 CSDL cho biểu đồ tròn trong Giám sát cung cấp dữ liệu (Ngày cập nhật: 10/08/2026)
+
+**Nội dung thay đổi:**
+1. **Demo hiển thị biểu đồ tròn với 18 Cơ sở dữ liệu:**
+   - Tại trang [DataProvisionMonitoringPage.tsx](file:///F:/BTP/DLDC_1/src/components/pages/provisioning/DataProvisionMonitoringPage.tsx) (màn hình **Kiểm soát & giám sát cung cấp**), bổ sung bộ dữ liệu demo 18 CSDL (Hộ tịch, THADS, BPBD, ĐKKD, TGPL, LLTP, Quốc tịch, Nuôi con nuôi, Công chứng, Bán đấu giá, Trọng tài, Thừa phát lại...).
+   - Mở rộng bảng màu `REQUEST_SHARE_COLORS` lên 18 tông màu khác nhau, đảm bảo phân biệt rõ ràng giữa các phần biểu đồ.
+   - Thêm nút chuyển đổi linh hoạt `[3 CSDL]` / `[Demo 18 CSDL]` góc trên thẻ biểu đồ.
+   - Tối ưu vùng legend bên dưới với dạng ô cuộn gọn gàng (`max-h-36 overflow-y-auto`), hiển thị thông tin phần trăm `(X%)` và giá trị khi di chuột.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/provisioning/DataProvisionMonitoringPage.tsx`
+
+---
+
+## Thêm dạng hiển thị Danh sách cho tỷ lệ lưu lượng / truy cập CSDL (Ngày cập nhật: 10/08/2026)
+
+**Nội dung thay đổi:**
+1. **Bổ sung chế độ xem dạng Danh sách (List View):**
+   - Tại trang [DataProvisionMonitoringPage.tsx](file:///F:/BTP/DLDC_1/src/components/pages/provisioning/DataProvisionMonitoringPage.tsx) (màn hình **Kiểm soát & giám sát cung cấp**), bổ sung công tắc chuyển đổi giữa `[Danh sách]` và `[Biểu đồ tròn]`.
+   - Chế độ **Danh sách** hiển thị xếp hạng các CSDL theo thứ tự lưu lượng / số lượt truy cập từ cao đến thấp kèm theo:
+     - Huy hiệu thứ tự xếp hạng (#1, #2, #3...).
+     - Tên CSDL và màu đại diện.
+     - Số liệu cụ thể (lượt / MB) và phần trăm tỉ lệ (% badge).
+     - Thanh tiến trình trực quan biểu diễn tỉ lệ chiếm dụng của từng CSDL.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/provisioning/DataProvisionMonitoringPage.tsx`
+
+---
+
+## Chốt dạng hiển thị Danh sách cho 18 CSDL trong Giám sát cung cấp (Ngày cập nhật: 10/08/2026)
+
+**Nội dung thay đổi:**
+1. **Chốt chính thức giao diện Danh sách 18 CSDL:**
+   - Tại trang [DataProvisionMonitoringPage.tsx](file:///F:/BTP/DLDC_1/src/components/pages/provisioning/DataProvisionMonitoringPage.tsx) (màn hình **Kiểm soát & giám sát cung cấp**), chốt sử dụng giao diện **Danh sách xếp hạng 18 CSDL** làm giao diện chuẩn chính thức.
+   - Loại bỏ các thẻ nút bấm công tắc demo (`3 CSDL / 18 CSDL`, `Biểu đồ tròn / Danh sách`) giúp giao diện tối giản, sạch sẽ, chuẩn hóa theo yêu cầu.
+   - Danh sách hiển thị mượt mà 18 CSDL xếp hạng với thanh tiến trình trực quan, huy hiệu rank, số liệu cụ thể (lượt / MB) và tỉ lệ phần trăm.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/provisioning/DataProvisionMonitoringPage.tsx`
+
+---
+
+## Đồng bộ Danh sách 18 CSDL theo bộ lọc Cơ sở dữ liệu, API & Khoảng ngày (Ngày cập nhật: 10/08/2026)
+
+**Nội dung thay đổi:**
+1. **Đồng bộ danh sách xếp hạng theo bộ lọc đầu trang:**
+   - Trong [DataProvisionMonitoringPage.tsx](file:///F:/BTP/DLDC_1/src/components/pages/provisioning/DataProvisionMonitoringPage.tsx), đồng bộ hoàn toàn danh sách xếp hạng 18 CSDL với bộ lọc **Cơ sở dữ liệu**, **API** và **Khoảng ngày** ở thanh tìm kiếm phía trên cùng.
+   - Khi người dùng chọn một **CSDL** cụ thể trên bộ lọc, danh sách tự động lọc hiển thị các API trực thuộc CSDL đó kèm theo tỉ lệ lượt/dung lượng chi tiết.
+   - Khi chọn một **API** cụ thể trên bộ lọc, danh sách chỉ hiển thị đúng API được chọn với tỉ lệ 100%.
+   - Khi thay đổi **Từ ngày - Đến ngày**, dữ liệu lượt truy cập/lưu lượng tự động tính toán lại tỉ lệ scale theo khoảng thời gian tương ứng.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/provisioning/DataProvisionMonitoringPage.tsx`
+
+---
+
+## Cân bằng chiều cao thẻ Danh sách 18 CSDL & Bảng dữ liệu theo ngày (Ngày cập nhật: 10/08/2026)
+
+**Nội dung thay đổi:**
+1. **Khắc phục khoảng trắng thừa dưới phân trang bảng:**
+   - Trong [DataProvisionMonitoringPage.tsx](file:///F:/BTP/DLDC_1/src/components/pages/provisioning/DataProvisionMonitoringPage.tsx), điều chỉnh chiều cao vùng cuộn của thẻ **Danh sách 18 CSDL** từ `max-h-[380px]` xuống `max-h-[275px]`.
+   - Giúp tổng chiều cao thẻ bên phải trùng khớp tuyệt đối với chiều cao tự nhiên của thẻ **Bảng chi tiết theo ngày** (gồm 5 dòng dữ liệu + 1 dòng tổng + thanh phân trang) phía bên trái.
+   - Loại bỏ hoàn toàn khoảng trắng thừa bên dưới thanh phân trang của bảng bên trái.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/provisioning/DataProvisionMonitoringPage.tsx`
+
+
+
+
+
+
+

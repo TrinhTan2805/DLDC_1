@@ -71,8 +71,13 @@ export function CivilLegalInfoModal({
       
       <div className={isInline ? "w-full flex-1 flex flex-col min-h-0" : "fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"}>
         {isInline && (
-          <div className="flex items-center justify-between mb-0">
-            <h2 className="text-[18px] font-bold text-slate-900">{title}</h2>
+          <div className="flex flex-col mb-4">
+            <h2 className="text-xl font-bold text-slate-900">{title}</h2>
+            <p className="text-sm text-slate-500 mt-1">
+              Tích hợp: {title}.
+              <br />
+              Thuộc đơn vị: Cục Trợ giúp pháp lý.
+            </p>
           </div>
         )}
 
@@ -81,6 +86,11 @@ export function CivilLegalInfoModal({
             <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0 bg-white sticky top-0 z-20 rounded-t-lg">
               <div>
                 <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
+                <p className="text-sm text-slate-500 mt-1">
+                  Tích hợp: {title}.
+                  <br />
+                  Thuộc đơn vị: Cục Trợ giúp pháp lý.
+                </p>
               </div>
               <button
                 onClick={onClose}

@@ -1,4 +1,4 @@
-import { Plus, ChevronDown, ChevronUp, Upload } from 'lucide-react';
+import { Plus, ChevronDown, ChevronUp, Upload, Info } from 'lucide-react';
 import { useState } from 'react';
 
 interface ConnectionConfigSectionProps {
@@ -65,12 +65,37 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
           disabled={isEdit}
         >
           <option value="API">API</option>
+          <option value="API_RECEIVE_JSON">API nhận (JSON)</option>
           <option value="DB">Cơ sở dữ liệu</option>
-          <option value="FILE">Tải file Excel</option>
+          <option value="FILE">Tải file</option>
+          <option value="API_RECEIVE_XML">API nhận (XML)</option>
         </select>
       </div>
 
-      {connectionType === 'API' && (
+      {(connectionType === 'API_RECEIVE_JSON' || connectionType === 'API_RECEIVE_XML') && (
+        <div className="space-y-3 animate-in fade-in duration-200">
+          <div className="border border-slate-200 rounded-xl p-4 bg-slate-50/70 text-[13px] text-slate-600 text-center shadow-inner">
+            {connectionType === 'API_RECEIVE_JSON' 
+              ? 'File phải chứa mảng data[] và object duLieuTiepNhan' 
+              : 'File XML phải chứa thẻ root và thẻ duLieuTiepNhan'}
+          </div>
+
+          <div className="flex items-center gap-2 pt-1">
+            <label className="flex items-center gap-2 text-[13px] text-slate-700 font-medium cursor-pointer select-none">
+              <input
+                type="checkbox"
+                className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
+              />
+              <span>Tách bảng con từ mảng lồng</span>
+            </label>
+            <div className="text-slate-400 hover:text-slate-600 cursor-pointer" title="Tách bảng con từ các mảng lồng nhau trong dữ liệu nhận được">
+              <Info className="w-4 h-4" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {(connectionType === 'API' || connectionType === 'API_RECEIVE_JSON' || connectionType === 'API_RECEIVE_XML') && (
         <div className="space-y-4">
           <div>
             <label className="block text-[13px] text-slate-700 mb-1">Tên api<span className="text-red-500">*</span></label>

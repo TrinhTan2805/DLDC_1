@@ -5531,7 +5531,12 @@ table td [class*='text-slate-'], table td [class*='text-gray-'] {
 
 /* Ghi đè riêng cho bảng Thu thập, tránh rule 14px !important của hệ thống */
 table.collection-table th,
-table.collection-table thead th,
+table.collection-table thead th {
+  font-size: 13px !important;
+  font-weight: bold !important;
+  color: #0f172a !important;
+}
+
 table.collection-table td,
 table.collection-table tbody td {
   font-size: 13px !important;

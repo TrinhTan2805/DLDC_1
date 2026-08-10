@@ -417,15 +417,17 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
                 <table className="w-full border-collapse collection-table text-[13px]">
                   <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-[1]">
                     <tr>
-                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-12 text-[13px]">STT</th>
-                      <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Mã / Tên dịch vụ</th>
-                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Phương thức kết nối</th>
-                      <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Hệ thống nguồn</th>
-                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-20 text-[13px]">Phiên bản</th>
-                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Ngày tạo</th>
-                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái dịch vụ</th>
-                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái dữ liệu</th>
-                      <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-32 text-[13px]">Thao tác</th>
+                      <th className="px-4 py-3 text-center font-bold text-slate-900 whitespace-nowrap w-12 text-[13px]">STT</th>
+                      <th className="px-4 py-3 text-left font-bold text-slate-900 whitespace-nowrap text-[13px]">Tên dịch vụ</th>
+                      <th className="px-4 py-3 text-left font-bold text-slate-900 whitespace-nowrap text-[13px] w-36 max-w-[150px]">Mã dịch vụ</th>
+                      <th className="px-4 py-3 text-center font-bold text-slate-900 whitespace-nowrap text-[13px]">Loại nguồn</th>
+                      <th className="px-4 py-3 text-center font-bold text-slate-900 whitespace-nowrap text-[13px]">Phương thức kết nối</th>
+                      <th className="px-4 py-3 text-center font-bold text-slate-900 whitespace-nowrap w-20 text-[13px]">Phiên bản</th>
+                      <th className="px-4 py-3 text-left font-bold text-slate-900 whitespace-nowrap text-[13px]">Hệ thống nguồn</th>
+                      <th className="px-4 py-3 text-center font-bold text-slate-900 whitespace-nowrap text-[13px]">Ngày tạo</th>
+                      <th className="px-4 py-3 text-center font-bold text-slate-900 whitespace-nowrap text-[13px]">Trạng thái dịch vụ</th>
+                      <th className="px-4 py-3 text-center font-bold text-slate-900 whitespace-nowrap text-[13px]">Trạng thái dữ liệu</th>
+                      <th className="px-4 py-3 text-center font-bold text-slate-900 whitespace-nowrap w-32 text-[13px]">Thao tác</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -434,12 +436,18 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
                       .map((service, index) => (
                         <tr key={service.id} className="hover:bg-slate-50 transition-all group border-b border-slate-100">
                           <td className="px-4 py-3 text-center text-slate-500 font-medium text-[13px]">{index + 1}</td>
-                          <td className="px-4 py-3 text-left text-[13px] min-w-[300px]">
-                            <div className="max-w-[440px]">
-                              <div className="font-medium text-slate-800 leading-snug break-words line-clamp-2 text-[13px]" title={service.name}>{service.name}</div>
-                              <div className="font-mono text-[13px] italic truncate leading-tight tracking-tight mt-1" style={{ color: '#94a3b8' }} title={service.code}>{service.code}</div>
-                              {service.description && <div className="text-slate-500 mt-1 line-clamp-2 text-[12px]">{service.description}</div>}
-                            </div>
+                          <td className="px-4 py-3 text-left text-[13px]">
+                            <div className="font-medium text-slate-800 leading-snug break-words text-[13px]" title={service.name}>{service.name}</div>
+                            {service.description && <div className="text-slate-500 mt-1 break-words text-[12px]">{service.description}</div>}
+                          </td>
+                          <td className="px-4 py-3 text-left font-mono text-[13px] text-slate-600 font-medium break-all w-36 max-w-[150px]" title={service.code}>
+                            {(service.code || '').slice(0, 50)}
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <StatusTag 
+                              label={service.source || 'Trong ngành'} 
+                              variant={service.source === 'Ngoài ngành' ? 'blue' : 'purple'} 
+                            />
                           </td>
                           <td className="px-4 py-3 text-center">
                             <StatusTag
@@ -447,16 +455,10 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
                               variant={service.type === 'SOAP' ? 'indigo' : service.type === 'REST' ? 'emerald' : 'amber'}
                             />
                           </td>
-                          <td className="px-4 py-3 text-left">
-                            <div className="max-w-[180px]">
-                              <div className="leading-snug text-slate-900 font-medium text-[13px]">{service.managingUnit}</div>
-                              <div className="flex items-center gap-1.5 mt-1">
-                                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${service.source === 'Trong ngành' ? 'bg-purple-500' : 'bg-blue-500'}`}></span>
-                                <span className="text-[12px] italic text-slate-400">{service.source}</span>
-                              </div>
-                            </div>
-                          </td>
                           <td className="px-4 py-3 text-center text-slate-600 font-medium font-mono text-[13px]">{service.version}</td>
+                          <td className="px-4 py-3 text-left">
+                            <div className="leading-snug text-slate-900 font-medium text-[13px] max-w-[180px]">{service.managingUnit}</div>
+                          </td>
                           <td className="px-4 py-3 text-center text-slate-500 font-medium font-mono whitespace-nowrap text-[13px]">
                             {service.updatedAt.split(' ').map((part: string, i: number) => (
                               <div key={i}>{part}</div>
