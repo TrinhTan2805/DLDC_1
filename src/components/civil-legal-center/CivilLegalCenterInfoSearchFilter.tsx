@@ -1,25 +1,23 @@
 import React from 'react';
-import { Filter, Download, Plus, Trash2, CheckCircle, X, RefreshCw } from 'lucide-react';
+import { Filter, Plus, Trash2, CheckCircle, X, RefreshCw } from 'lucide-react';
 
-interface LegalNationalSearchFilterProps {
+interface CivilLegalCenterInfoSearchFilterProps {
   isFilterOpen: boolean;
   setIsFilterOpen: (isOpen: boolean) => void;
   filterConditions: any[];
   setFilterConditions: (conditions: any[]) => void;
-  onExport?: () => void;
   onRefresh?: () => void;
   isInline?: boolean;
 }
 
-export function LegalNationalSearchFilter({
+export function CivilLegalCenterInfoSearchFilter({
   isFilterOpen,
   setIsFilterOpen,
   filterConditions,
   setFilterConditions,
-  onExport,
   onRefresh,
   isInline = false
-}: LegalNationalSearchFilterProps) {
+}: CivilLegalCenterInfoSearchFilterProps) {
   return (
     <div className={`flex-shrink-0 ${isInline ? 'mb-4' : 'px-6 py-4 border-b border-slate-200 bg-white'}`}>
       <div className="flex items-center justify-end gap-3">
@@ -94,10 +92,10 @@ export function LegalNationalSearchFilter({
                   }}
                 >
                   <option value="">Chọn trường dữ liệu</option>
-                  <option value="title">Tên văn bản</option>
-                  <option value="number">Số hiệu</option>
-                  <option value="type">Loại văn bản</option>
-                  <option value="date">Ngày ban hành</option>
+                  <option value="name">Tên hồ sơ / Quốc gia</option>
+                  <option value="type">Phân loại</option>
+                  <option value="number">Số công văn / Mã hồ sơ</option>
+                  <option value="syncDate">Ngày đồng bộ</option>
                 </select>
 
                 <select

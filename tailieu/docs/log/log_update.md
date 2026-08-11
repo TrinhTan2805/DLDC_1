@@ -3373,6 +3373,173 @@ Redesign thanh tìm kiếm & bộ lọc tại tab **Kiểm tra & Phê duyệt** 
 **Các file bị ảnh hưởng:**
 - `src/components/pages/provisioning/DataProvisionMonitoringPage.tsx`
 
+---
+
+## Chuẩn hóa thiết kế Bảng CSDL Hộ tịch điện tử theo HTTT Trợ giúp pháp lý (Ngày cập nhật: 10/08/2026)
+
+**Nội dung thay đổi:**
+1. **Thiết kế lại giao diện Bảng dữ liệu CSDL Hộ tịch điện tử:**
+   - Tại trang [CivilRegistryDatabasePage.tsx](file:///F:/BTP/DLDC_1/src/components/pages/external/CivilRegistryDatabasePage.tsx) (màn hình **Xem dữ liệu thu thập - CSDL Hộ tịch điện tử**), thiết kế lại toàn bộ giao diện bảng dữ liệu chuẩn hóa 100% theo giao diện của **HTTT trợ giúp pháp lý** ([CivilLegalInfoPage.tsx](file:///F:/BTP/DLDC_1/src/components/pages/internal/CivilLegalInfoPage.tsx)).
+   - Bổ sung header thông tin nguồn: `Tích hợp: [Tên bộ dữ liệu]. / Thuộc đơn vị: Cục Hành chính tư pháp.`.
+   - Căn chỉnh lại tiêu đề các cột (`Họ tên` căn trái, `STT` định dạng 2 chữ số `01`, `02`..., `Số đăng ký` và `Ngày đăng ký` định dạng `font-mono`, nút bấm `Xem chi tiết` dạng icon tròn `Eye`).
+   - Giữ nguyên 100% dữ liệu mock của tất cả 12 bộ dữ liệu hộ tịch (Khai sinh, Kết hôn, Tình trạng hôn nhân, Khai tử, Cha mẹ con, Nuôi con nuôi, Giám hộ, v.v.).
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/external/CivilRegistryDatabasePage.tsx`
+- `src/components/civil-registry/CivilRegistryInfoModal.tsx`
+- `src/components/civil-registry/CivilRegistryInfoTable.tsx`
+
+---
+
+## Đồng bộ Bộ lọc & Thanh tìm kiếm CSDL Hộ tịch điện tử theo HTTT Trợ giúp pháp lý (Ngày cập nhật: 10/08/2026)
+
+**Nội dung thay đổi:**
+1. **Đồng bộ hoàn toàn bộ lọc & thanh công cụ tìm kiếm:**
+   - Trong [CivilRegistryInfoSearchFilter.tsx](file:///F:/BTP/DLDC_1/src/components/civil-registry/CivilRegistryInfoSearchFilter.tsx), đồng bộ thanh công cụ gồm nút **Lọc** (bật/tắt drawer lọc nâng cao với điều kiện logic AND/OR, chọn trường dữ liệu, toán tử Bằng/Chứa/Bắt đầu) và nút **Tải lại** chuẩn hóa 100% theo giao diện của **HTTT trợ giúp pháp lý** ([CivilLegalInfoSearchFilter.tsx](file:///F:/BTP/DLDC_1/src/components/civil-legal-info/CivilLegalInfoSearchFilter.tsx)).
+
+**Các file bị ảnh hưởng:**
+- `src/components/civil-registry/CivilRegistryInfoSearchFilter.tsx`
+- `src/components/civil-registry/CivilRegistryInfoModal.tsx`
+
+---
+
+## Đồng bộ giao diện Bảng dữ liệu HT quản lý hồ sơ QT theo HTTT Trợ giúp pháp lý (Ngày cập nhật: 10/08/2026)
+
+**Nội dung thay đổi:**
+1. **Chuẩn hóa giao diện Bảng dữ liệu HT quản lý hồ sơ QT:**
+   - Trong [CaseManagementPage.tsx](file:///F:/BTP/DLDC_1/src/components/pages/internal/CaseManagementPage.tsx) (màn hình **Xem dữ liệu thu thập - HT quản lý hồ sơ QT (3)**), đồng bộ hoàn toàn giao diện Bảng dữ liệu, Thanh công cụ tìm kiếm & Bộ lọc nâng cao chuẩn 100% theo mẫu **HTTT Trợ giúp pháp lý** ([CivilLegalInfoPage.tsx](file:///F:/BTP/DLDC_1/src/components/pages/internal/CivilLegalInfoPage.tsx)).
+   - Bổ sung các file component mới: [NationalityInfoModal.tsx](file:///F:/BTP/DLDC_1/src/components/nationality-acquisition/NationalityInfoModal.tsx), [NationalityInfoTable.tsx](file:///F:/BTP/DLDC_1/src/components/nationality-acquisition/NationalityInfoTable.tsx) và [NationalityInfoSearchFilter.tsx](file:///F:/BTP/DLDC_1/src/components/nationality-acquisition/NationalityInfoSearchFilter.tsx).
+   - Thêm đầy đủ dữ liệu mock & giao diện hiển thị cho cả 3 bộ dữ liệu: `Dữ liệu Nhập Quốc tịch`, `Dữ liệu Thôi Quốc tịch`, `Dữ liệu Trở lại Quốc tịch`.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/internal/CaseManagementPage.tsx`
+- `src/components/nationality-acquisition/NationalityInfoModal.tsx`
+- `src/components/nationality-acquisition/NationalityInfoTable.tsx`
+- `src/components/nationality-acquisition/NationalityInfoSearchFilter.tsx`
+
+---
+
+## Bổ sung Import hooks React (useState, useMemo) bị thiếu tại CaseManagementPage (Ngày cập nhật: 10/08/2026)
+
+**Nội dung thay đổi:**
+1. **Khắc phục lỗi ReferenceError useState is not defined:**
+   - Trong [CaseManagementPage.tsx](file:///F:/BTP/DLDC_1/src/components/pages/internal/CaseManagementPage.tsx), bổ sung lại câu lệnh import các React Hooks (`useState`, `useMemo`), icon `UserCheck` và component `DatabasePageTemplate` bị thiếu ở đầu file, giúp trang chạy ổn định mượt mà không còn lỗi runtime.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/internal/CaseManagementPage.tsx`
+
+---
+
+## Chuẩn hóa Tên 12 Bộ dữ liệu CSDL Hộ tịch điện tử (Ngày cập nhật: 10/08/2026)
+
+**Nội dung thay đổi:**
+1. **Đối soát & Cập nhật tên 12 bộ dữ liệu hộ tịch:**
+   - Trong [CivilRegistryDatabasePage.tsx](file:///F:/BTP/DLDC_1/src/components/pages/external/CivilRegistryDatabasePage.tsx), đối soát danh sách 12 bộ dữ liệu hộ tịch với danh mục tiêu chuẩn và điều chỉnh các điểm viết tắt/rút gọn cũ (`DK` -> `đăng ký`, bổ sung cụm tên đầy đủ cho bộ dữ liệu số 9 và số 12, điều chỉnh thứ tự mục 10 & 11).
+   - Danh sách 12 bộ dữ liệu sau khi chuẩn hóa 100% khớp với danh mục thu thập hệ thống.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/external/CivilRegistryDatabasePage.tsx`
+
+---
+
+## Chuẩn hóa Giao diện & Đối soát 16 Bộ dữ liệu CSDL Thi hành án dân sự (Ngày cập nhật: 10/08/2026)
+
+**Nội dung thay đổi:**
+1. **Đối soát danh mục 16 bộ dữ liệu thi hành án dân sự:**
+   - Đã đối soát 16 tên bộ dữ liệu trong [CivilJudgmentPage.tsx](file:///F:/BTP/DLDC_1/src/components/pages/internal/CivilJudgmentPage.tsx) với danh sách thu thập hệ thống. Kết quả: **100% trùng khớp hoàn hảo**.
+2. **Nâng cấp giao diện Bảng dữ liệu chuẩn HTTT Trợ giúp pháp lý:**
+   - Nâng cấp [CivilJudgmentPage.tsx](file:///F:/BTP/DLDC_1/src/components/pages/internal/CivilJudgmentPage.tsx) sang giao diện `DatabasePageTemplate` có sidebar lựa chọn bộ dữ liệu, hỗ trợ hiển thị đầy đủ thông tin dữ liệu bảng, thanh công cụ tìm kiếm, bộ lọc nâng cao và chi tiết bản ghi.
+   - Bổ sung các file component: [CivilJudgmentInfoModal.tsx](file:///F:/BTP/DLDC_1/src/components/civil-judgment/CivilJudgmentInfoModal.tsx), [CivilJudgmentInfoTable.tsx](file:///F:/BTP/DLDC_1/src/components/civil-judgment/CivilJudgmentInfoTable.tsx), [CivilJudgmentInfoSearchFilter.tsx](file:///F:/BTP/DLDC_1/src/components/civil-judgment/CivilJudgmentInfoSearchFilter.tsx).
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/internal/CivilJudgmentPage.tsx`
+- `src/components/civil-judgment/CivilJudgmentInfoModal.tsx`
+- `src/components/civil-judgment/CivilJudgmentInfoTable.tsx`
+- `src/components/civil-judgment/CivilJudgmentInfoSearchFilter.tsx`
+
+---
+
+## Loại bỏ Tiền tố "Bộ dữ liệu " & "Dữ liệu " trong Danh sách Sidebar (Ngày cập nhật: 10/08/2026)
+
+**Nội dung thay đổi:**
+1. **Rút gọn tên hiển thị tại danh sách Sidebar:**
+   - Tại các trang CSDL Thi hành án dân sự ([CivilJudgmentPage.tsx](file:///F:/BTP/DLDC_1/src/components/pages/internal/CivilJudgmentPage.tsx)), CSDL Hộ tịch điện tử ([CivilRegistryDatabasePage.tsx](file:///F:/BTP/DLDC_1/src/components/pages/external/CivilRegistryDatabasePage.tsx)) và HT Quản lý hồ sơ QT ([CaseManagementPage.tsx](file:///F:/BTP/DLDC_1/src/components/pages/internal/CaseManagementPage.tsx)), loại bỏ tiền tố `"Bộ dữ liệu "` và `"Dữ liệu "` trong danh sách sidebar bên trái.
+   - Nhãn hiển thị trực tiếp tên chính của dữ liệu (Ví dụ: `Yêu cầu thi hành án của cá nhân, cơ quan, tổ chức`, `Quyết định thi hành án dân sự`, `Hồ sơ đăng ký khai sinh`, `Nhập Quốc tịch`, v.v.).
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/internal/CivilJudgmentPage.tsx`
+- `src/components/pages/external/CivilRegistryDatabasePage.tsx`
+- `src/components/pages/internal/CaseManagementPage.tsx`
+
+---
+
+## Chuẩn hóa Giao diện CSDL về Biện pháp Bảo đảm theo HTTT Trợ giúp pháp lý (Ngày cập nhật: 10/08/2026)
+
+**Nội dung thay đổi:**
+1. **Nâng cấp giao diện Bảng dữ liệu CSDL về biện pháp bảo đảm:**
+   - Trong [SecurityMeasuresPage.tsx](file:///F:/BTP/DLDC_1/src/components/pages/internal/SecurityMeasuresPage.tsx) (màn hình **Xem dữ liệu thu thập - CSDL về biện pháp BĐ (4)**), nâng cấp hoàn toàn sang mẫu giao diện Bảng dữ liệu chuẩn của **HTTT Trợ giúp pháp lý**.
+   - Loại bỏ các tiền tố `"Bộ dữ liệu "` và `"Dữ liệu "` ở danh sách sidebar bên trái, hiển thị trực tiếp tên bộ dữ liệu (`Thông tin chung (Bao gồm người đăng ký và Hợp đồng bảo đảm)`, `Bên bảo đảm`, `Bên nhận bảo đảm`, `Tài sản bảo đảm`).
+   - Bổ sung các component mới: [SecurityMeasuresInfoModal.tsx](file:///F:/BTP/DLDC_1/src/components/security-measures/SecurityMeasuresInfoModal.tsx), [SecurityMeasuresInfoTable.tsx](file:///F:/BTP/DLDC_1/src/components/security-measures/SecurityMeasuresInfoTable.tsx) và [SecurityMeasuresInfoSearchFilter.tsx](file:///F:/BTP/DLDC_1/src/components/security-measures/SecurityMeasuresInfoSearchFilter.tsx).
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/internal/SecurityMeasuresPage.tsx`
+- `src/components/security-measures/SecurityMeasuresInfoModal.tsx`
+- `src/components/security-measures/SecurityMeasuresInfoTable.tsx`
+- `src/components/security-measures/SecurityMeasuresInfoSearchFilter.tsx`
+
+---
+
+## Chuẩn hóa Giao diện CSDL Quốc gia về Pháp luật theo HTTT Trợ giúp pháp lý (Ngày cập nhật: 10/08/2026)
+
+**Nội dung thay đổi:**
+1. **Nâng cấp giao diện & Chuẩn hóa Sidebar CSDL Quốc gia về PL:**
+   - Trong [LegalNationalPage.tsx](file:///F:/BTP/DLDC_1/src/components/pages/internal/LegalNationalPage.tsx) (màn hình **Xem dữ liệu thu thập - CSDL quốc gia về PL (5)**), loại bỏ tiền tố `"Dữ liệu "` trong tiêu đề & danh sách sidebar, hiển thị tên bộ dữ liệu chuẩn: `Văn bản quy phạm pháp luật`, `Nội dung của văn bản quy phạm pháp luật`, `Quan hệ giữa các điều khoản trong các văn bản quy phạm pháp luật`, `Văn bản hợp nhất`, `Hệ thống hóa văn bản quy phạm pháp luật`.
+   - Cập nhật [LegalNationalModal.tsx](file:///F:/BTP/DLDC_1/src/components/legal-national/LegalNationalModal.tsx) bổ sung thông tin header mô tả đơn vị `Cục Kiểm tra văn bản quy phạm pháp luật`, đồng bộ giao diện Bảng dữ liệu và Bộ lọc nâng cao theo mẫu **HTTT Trợ giúp pháp lý**.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/internal/LegalNationalPage.tsx`
+- `src/components/legal-national/LegalNationalModal.tsx`
+
+---
+
+## Loại bỏ Nút Kết xuất tại CSDL Quốc gia về Pháp luật (Ngày cập nhật: 10/08/2026)
+
+**Nội dung thay đổi:**
+1. **Bỏ nút Kết xuất (Export):**
+   - Trong [LegalNationalSearchFilter.tsx](file:///F:/BTP/DLDC_1/src/components/legal-national/LegalNationalSearchFilter.tsx) của màn hình CSDL Quốc gia về Pháp luật, loại bỏ nút bấm **Kết xuất** màu xanh lá cây khỏi thanh công cụ phía trên bảng dữ liệu.
+
+**Các file bị ảnh hưởng:**
+- `src/components/legal-national/LegalNationalSearchFilter.tsx`
+
+---
+
+## Chuẩn hóa Giao diện CSDL TT Tư pháp Dân sự theo HTTT Trợ giúp Pháp lý (Ngày cập nhật: 10/08/2026)
+
+**Nội dung thay đổi:**
+1. **Nâng cấp giao diện CSDL TT Tư pháp Dân sự & Giữ 2 cột Phân loại & Ngày đồng bộ:**
+   - Trong [CivilLegalCenterPage.tsx](file:///F:/BTP/DLDC_1/src/components/pages/internal/CivilLegalCenterPage.tsx) (màn hình **Xem dữ liệu thu thập - CSDL TT Tư Pháp dân sự (2)**), chuyển đổi sang mẫu giao diện Bảng dữ liệu của **HTTT Trợ giúp pháp lý**.
+   - Thiết kế lại các cột của Bảng dữ liệu bao gồm: `STT` (2 chữ số), `Tên hồ sơ / Quốc gia ủy thác`, `Phân loại` (Ủy thác đến / Ủy thác đi - theo yêu cầu người dùng), `Số công văn / Mã hồ sơ`, `Ngày đồng bộ` (theo yêu cầu người dùng) và `Thao tác`.
+   - Loại bỏ các tiền tố `"Dữ liệu "` trong sidebar, hiển thị trực tiếp `Hồ sơ ủy thác tư pháp đến` và `Hồ sơ ủy thác tư pháp đi`.
+   - Bổ sung các file component mới: [CivilLegalCenterInfoModal.tsx](file:///F:/BTP/DLDC_1/src/components/civil-legal-center/CivilLegalCenterInfoModal.tsx), [CivilLegalCenterInfoTable.tsx](file:///F:/BTP/DLDC_1/src/components/civil-legal-center/CivilLegalCenterInfoTable.tsx) và [CivilLegalCenterInfoSearchFilter.tsx](file:///F:/BTP/DLDC_1/src/components/civil-legal-center/CivilLegalCenterInfoSearchFilter.tsx).
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/internal/CivilLegalCenterPage.tsx`
+- `src/components/civil-legal-center/CivilLegalCenterInfoModal.tsx`
+- `src/components/civil-legal-center/CivilLegalCenterInfoTable.tsx`
+- `src/components/civil-legal-center/CivilLegalCenterInfoSearchFilter.tsx`
+
+---
+
+## Cập nhật Giá trị Cột Phân loại (Thêm mới / Cập nhật) tại CSDL TT Tư pháp Dân sự (Ngày cập nhật: 10/08/2026)
+
+**Nội dung thay đổi:**
+1. **Cập nhật giá trị cột Phân loại:**
+   - Cập nhật cột **Phân loại** hiển thị các trạng thái `Thêm mới` và `Cập nhật` thay vì `Ủy thác đến / đi`, chuẩn hóa với yêu cầu theo dõi cập nhật dữ liệu.
+
+**Các file bị ảnh hưởng:**
+- `src/components/civil-legal-center/CivilLegalCenterInfoTable.tsx`
+- `src/components/civil-legal-center/CivilLegalCenterInfoModal.tsx`
+
 
 
 

@@ -25,11 +25,11 @@ export function LegalNationalPage({ mode = 'thu thập', context = 'thu thập',
   // Generate realistic random data for National Legal Database (5 types)
   const stats = useMemo(() => {
     const data = [
-      { id: '1', title: 'Dữ liệu Văn bản quy phạm pháp luật', icon: FileText, color: 'blue', lastMonth: 1845678, thisMonth: 2179200 },
-      { id: '2', title: 'Dữ liệu Nội dung của văn bản quy phạm pháp luật', icon: BookOpen, color: 'green', lastMonth: 2587543, thisMonth: 2946447 },
-      { id: '3', title: 'Dữ liệu Quan hệ giữa các điều khoản trong các văn bản quy phạm pháp luật', icon: GitBranch, color: 'purple', lastMonth: 1698234, thisMonth: 1926644 },
-      { id: '4', title: 'Dữ liệu Văn bản hợp nhất', icon: FileCheck, color: 'orange', lastMonth: 1456789, thisMonth: 1734567 },
-      { id: '5', title: 'Dữ liệu Hệ thống hóa văn bản quy phạm pháp luật', icon: FolderTree, color: 'blue', lastMonth: 1234567, thisMonth: 1456789 },
+      { id: '1', title: 'Văn bản quy phạm pháp luật', icon: FileText, color: 'blue', lastMonth: 1845678, thisMonth: 2179200 },
+      { id: '2', title: 'Nội dung của văn bản quy phạm pháp luật', icon: BookOpen, color: 'green', lastMonth: 2587543, thisMonth: 2946447 },
+      { id: '3', title: 'Quan hệ giữa các điều khoản trong các văn bản quy phạm pháp luật', icon: GitBranch, color: 'purple', lastMonth: 1698234, thisMonth: 1926644 },
+      { id: '4', title: 'Văn bản hợp nhất', icon: FileCheck, color: 'orange', lastMonth: 1456789, thisMonth: 1734567 },
+      { id: '5', title: 'Hệ thống hóa văn bản quy phạm pháp luật', icon: FolderTree, color: 'blue', lastMonth: 1234567, thisMonth: 1456789 },
     ];
 
     return data.map(item => {
@@ -66,8 +66,9 @@ export function LegalNationalPage({ mode = 'thu thập', context = 'thu thập',
       innerSidebarItems={sidebarItems}
       activeId={selectedId}
       onSelectDataType={(id) => setSelectedId(id)}
+      stretchHeight
     >
-      <div className="mt-4">
+      <div className="mt-4 flex-1 flex flex-col min-h-0">
         <LegalNationalModal
           isOpen={true}
           onClose={() => {}}

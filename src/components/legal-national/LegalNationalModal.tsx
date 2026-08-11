@@ -69,18 +69,28 @@ export function LegalNationalModal({
         />
       )}
       
-      <div className={isInline ? "w-full flex flex-col" : "fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"}>
+      <div className={isInline ? "w-full flex-1 flex flex-col min-h-0" : "fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"}>
         {isInline && (
-          <div className="flex items-center justify-between mb-0">
+          <div className="flex flex-col mb-4">
             <h2 className="text-xl font-bold text-slate-900">{title}</h2>
+            <p className="text-sm text-slate-500 mt-1">
+              Tích hợp: {title}.
+              <br />
+              Thuộc đơn vị: Cục Kiểm tra văn bản quy phạm pháp luật.
+            </p>
           </div>
         )}
 
-        <div className={isInline ? "flex flex-col flex-1" : "bg-white rounded-lg shadow-xl max-w-7xl w-full max-h-[90vh] pointer-events-auto flex flex-col"}>
+        <div className={isInline ? "flex flex-col flex-1 min-h-0" : "bg-white rounded-lg shadow-xl max-w-7xl w-full max-h-[90vh] pointer-events-auto flex flex-col"}>
           {!isInline && (
             <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0 bg-white sticky top-0 z-20 rounded-t-lg">
               <div>
                 <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
+                <p className="text-sm text-slate-500 mt-1">
+                  Tích hợp: {title}.
+                  <br />
+                  Thuộc đơn vị: Cục Kiểm tra văn bản quy phạm pháp luật.
+                </p>
               </div>
               <button
                 onClick={onClose}

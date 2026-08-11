@@ -1,21 +1,8 @@
 import { useState, useMemo } from 'react';
 import { UserCheck } from 'lucide-react';
 import { DatabasePageTemplate } from '../collection/DatabasePageTemplate';
-import { NationalityAcquisitionModal } from '../../nationality-acquisition/NationalityAcquisitionModal';
-
-interface StatCard {
-  id: string;
-  title: string;
-  value: string;
-  change: string;
-  icon: any;
-  color: string;
-  lastMonth: number;
-  thisMonth: number;
-  totalCollected?: number;
-  totalProcessed?: number;
-  processingRate?: number;
-}
+import { NationalityInfoModal } from '../../nationality-acquisition/NationalityInfoModal';
+import { GenericProcessingPage } from '../processing/GenericProcessingPage';
 
 interface CaseManagementPageProps {
   mode?: 'thu thập' | 'xử lý';
@@ -51,7 +38,11 @@ export function CaseManagementPage({ mode = 'thu thập', context = 'thu thập'
     });
   }, []);
 
-  const sidebarItems = stats.map(s => ({ id: s.id, label: `Bộ dữ liệu ${s.title.toLowerCase()}` }));
+  if (mode === 'xử lý') {
+    return <GenericProcessingPage systemName="HT quản lý hồ sơ QT" datasets={stats.map((s) => ({ id: s.id, name: s.title }))} />;
+  }
+
+  const sidebarItems = stats.map(s => ({ id: s.id, label: s.title }));
 
   return (
     <DatabasePageTemplate
@@ -61,20 +52,16 @@ export function CaseManagementPage({ mode = 'thu thập', context = 'thu thập'
       innerSidebarItems={sidebarItems}
       activeId={selectedId}
       onSelectDataType={(id) => setSelectedId(id)}
+      stretchHeight
     >
-      <div className="mt-4">
-        {selectedId === '1' ? (
-          <NationalityAcquisitionModal
-            isOpen={true}
-            onClose={() => {}}
-            isInline={true}
-            title="Dữ liệu Nhập Quốc tịch"
-          />
-        ) : (
-          <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
-            <p className="text-slate-500">Giao diện cho bộ dữ liệu này đang được cập nhật...</p>
-          </div>
-        )}
+      <div className="mt-4 flex-1 flex flex-col min-h-0">
+        <NationalityInfoModal
+          isOpen={true}
+          onClose={() => {}}
+          isInline={true}
+          title={stats.find(s => s.id === selectedId)?.title || 'Dữ liệu Nhập Quốc tịch'}
+          datasetId={selectedId}
+        />
       </div>
     </DatabasePageTemplate>
   );
