@@ -9,6 +9,7 @@ import {
   SOURCE_TREND_MONTHS,
   sourceTrendSeries,
   SourceTrendMetric,
+  TOTAL_COLLECTED_RECORDS,
 } from './kpiReportData';
 
 const SOURCE_LINE_COLORS = [
@@ -58,6 +59,10 @@ const PROCESSING_RULE_CONFIG = [
   { key: 'transform', label: 'Biến đổi', color: '#a855f7' },
   { key: 'normalize', label: 'Chuẩn hóa', color: '#ec4899' },
 ] as const;
+
+// Mock: tỷ lệ bản ghi còn lại sau xử lý (đã loại trùng lặp/lỗi) trên tổng số bản ghi thu thập ban đầu, dùng cho thẻ "Bản ghi còn lại sau xử lý"
+const retainedRecordsPercent = 83.6;
+const retainedRecords = Math.round(TOTAL_COLLECTED_RECORDS * retainedRecordsPercent / 100);
 
 // Mock: dung lượng đã xử lý (GB) theo từng hệ thống nguồn, tổng khớp với thẻ "Dữ liệu đã xử lý" (~7,871 GB)
 const PROCESSED_VOLUME_BY_SOURCE: { [source: string]: number } = {
@@ -628,15 +633,18 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
             <div className="flex items-center gap-2 mb-2">
               <Database className="w-4 h-4 text-slate-500" />
               <span className="text-[13px] font-semibold uppercase tracking-wide text-slate-500">
-                Dữ liệu đã xử lý
+                Bản ghi còn lại sau xử lý
               </span>
             </div>
-            <div className="text-3xl font-bold text-slate-900">7.69 TB <span className="text-lg font-medium text-slate-400">/ 9.2 TB</span></div>
+            <div className="text-3xl font-bold text-slate-900">
+              {retainedRecords.toLocaleString('vi-VN')}
+              <span className="text-lg font-medium text-slate-400"> / {TOTAL_COLLECTED_RECORDS.toLocaleString('vi-VN')}</span>
+            </div>
             <div className="mt-2">
               <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                <div className="h-full bg-slate-700 rounded-full" style={{ width: '83.6%' }} />
+                <div className="h-full bg-slate-700 rounded-full" style={{ width: `${retainedRecordsPercent}%` }} />
               </div>
-              <p className="text-[12px] text-slate-500 mt-1">83.6% dung lượng dữ liệu thu thập đã được xử lý</p>
+              <p className="text-[12px] text-slate-500 mt-1">{retainedRecordsPercent}% bản ghi thu thập được giữ lại sau xử lý</p>
             </div>
           </div>
         </div>

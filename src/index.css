@@ -5579,6 +5579,14 @@ table.approval-detail-table tbody td {
   font-size: 13px !important;
 }
 
+/* Ghi đè 13px cho 2 bảng grid ở trang Báo cáo tình trạng khai thác danh mục */
+table.exploitation-report-table th,
+table.exploitation-report-table thead th,
+table.exploitation-report-table td,
+table.exploitation-report-table tbody td {
+  font-size: 13px !important;
+}
+
 .collection-pagination,
 .collection-pagination span,
 .collection-pagination select,

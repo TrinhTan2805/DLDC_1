@@ -438,37 +438,30 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
           <p className="text-[13px] text-slate-500 mb-6">Nguồn dữ liệu: {systemName} | Dữ liệu {activeService.name.toLowerCase()}</p>
 
           {/* Stats Overview */}
-          <div className="grid grid-cols-5 gap-4 mb-8">
+          <div className="grid grid-cols-4 gap-4 mb-8">
             <div className="bg-white p-4 rounded-xl border border-blue-100 flex flex-col justify-center shadow-sm">
-              <span className="font-bold text-slate-500 uppercase tracking-wider mb-2" style={{ fontSize: '13px' }}>Số lượng Thu thập</span>
+              <span className="font-bold text-slate-500 uppercase tracking-wider mb-2" style={{ fontSize: '13px' }}>Số lượng bản ghi thu thập</span>
               <span className="text-[16px] font-bold text-blue-600">50,000</span>
             </div>
             <div className="bg-white p-4 rounded-xl border border-emerald-100 flex flex-col justify-center shadow-sm">
-              <span className="font-bold text-slate-500 uppercase tracking-wider mb-2" style={{ fontSize: '13px' }}>Đã Làm sạch</span>
+              <span className="font-bold text-slate-500 uppercase tracking-wider mb-2" style={{ fontSize: '13px' }}>Số lượng bản ghi còn lại sau làm sạch</span>
               <div className="flex items-baseline gap-2">
                 <span className="text-[16px] font-bold text-emerald-600">49,850</span>
                 <span className="text-[11px] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded">99.7%</span>
               </div>
             </div>
             <div className="bg-white p-4 rounded-xl border border-indigo-100 flex flex-col justify-center shadow-sm">
-              <span className="font-bold text-slate-500 uppercase tracking-wider mb-2" style={{ fontSize: '13px' }}>Đã Chuẩn hóa</span>
+              <span className="font-bold text-slate-500 uppercase tracking-wider mb-2" style={{ fontSize: '13px' }}>Số lượng bản ghi còn lại sau chuẩn hóa</span>
               <div className="flex items-baseline gap-2">
                 <span className="text-[16px] font-bold text-indigo-600">45,230</span>
                 <span className="text-[11px] font-bold text-indigo-500 bg-indigo-50 px-1.5 py-0.5 rounded">90.4%</span>
               </div>
             </div>
             <div className="bg-white p-4 rounded-xl border border-purple-100 flex flex-col justify-center shadow-sm">
-              <span className="font-bold text-slate-500 uppercase tracking-wider mb-2" style={{ fontSize: '13px' }}>Đã Biến đổi</span>
+              <span className="font-bold text-slate-500 uppercase tracking-wider mb-2" style={{ fontSize: '13px' }}>Số lượng bản ghi còn lại sau biến đổi</span>
               <div className="flex items-baseline gap-2">
                 <span className="text-[16px] font-bold text-purple-600">45,230</span>
                 <span className="text-[11px] font-bold text-purple-500 bg-purple-50 px-1.5 py-0.5 rounded">90.4%</span>
-              </div>
-            </div>
-            <div className="bg-white p-4 rounded-xl border border-rose-100 flex flex-col justify-center shadow-sm">
-              <span className="font-bold text-rose-500 uppercase tracking-wider mb-2" style={{ fontSize: '13px' }}>Danh sách lỗi</span>
-              <div className="flex items-baseline gap-2">
-                <span className="text-[16px] font-bold text-rose-600">12</span>
-                <span className="text-[11px] font-bold text-rose-400">0.02%</span>
               </div>
             </div>
           </div>

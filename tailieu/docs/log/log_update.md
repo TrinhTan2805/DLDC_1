@@ -1,5 +1,378 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 33
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo trạng thái danh mục (`CategoryReportStatusPage.tsx`).
+
+**Nội dung thay đổi:**
+- Đổi lưới thẻ tổng hợp trạng thái thành **luôn cố định `grid-cols-6`** (bỏ các mốc responsive `md:`/`xl:`) theo yêu cầu PM — đảm bảo 6 thẻ luôn nằm 1 hàng ngang ở mọi kích thước màn hình.
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryReportStatusPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 32
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo trạng thái danh mục (`CategoryReportStatusPage.tsx`).
+
+**Nội dung thay đổi:**
+1. Đổi màu nút **"Truy xuất dữ liệu"** từ `bg-slate-800` sang `bg-[#10B981]` — khớp màu với nút "Truy xuất báo cáo"/"Truy xuất dữ liệu" ở trang "Báo cáo tình trạng khai thác danh mục". Nút "Xuất File" đã sẵn `bg-blue-600` khớp từ trước, không cần đổi.
+2. Đổi danh sách trạng thái (`STATUS_OPTIONS`, filter, biểu đồ tròn, thẻ tổng hợp, badge bảng chi tiết) từ 4 trạng thái cũ (Đang hoạt động, Đang chờ duyệt, Hết hiệu lực, Tạm dừng) sang **6 trạng thái mới**: Đang soạn thảo, Chờ phê duyệt, Đã phê duyệt, Từ chối, Hiệu lực, Hết hiệu lực — mỗi trạng thái có màu riêng (xám/xanh dương/tím/đỏ/xanh lá/cam).
+3. Cập nhật dữ liệu mock: `summaryData` (biểu đồ tròn) chia lại theo 6 trạng thái; `detailData` remap trạng thái các dòng có sẵn theo danh sách mới + thêm 2 dòng demo cho trạng thái "Đã phê duyệt" (DM-011, DM-012).
+4. Đổi lưới thẻ tổng hợp từ `grid-cols-4` sang `grid-cols-3` để xếp gọn 6 thẻ (2 hàng x 3 cột) thay vì 4 thẻ.
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryReportStatusPage.tsx`.
+
+**Lưu ý:** File này được PM mở khóa `[x]` trong `stauts.md` riêng cho yêu cầu này.
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 31
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo tình trạng khai thác danh mục (`CategorySystemExploitationTable.tsx`).
+
+**Nội dung thay đổi:**
+- Đưa bộ lọc "Hệ thống khai thác" lên **cùng dòng** với tiêu đề bảng (dùng `flex justify-between`), thay vì nằm ở dòng riêng bên dưới.
+- Tăng cỡ chữ tiêu đề "Danh mục theo hệ thống đang khai thác" từ `text-[13px] font-medium` lên `text-[18px] font-bold`.
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategorySystemExploitationTable.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 30
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo tình trạng khai thác danh mục (`CategorySystemExploitationTable.tsx`).
+
+**Nội dung thay đổi:**
+1. Đổi cột bảng: bỏ **"Lượt truy cập"** (trùng ý nghĩa "Lượt gọi API") và **"Tình trạng khai thác"** (1 badge/hệ thống không đại diện được nhiều API); thay bằng **"Số API đang sử dụng"** (đếm số API distinct hệ thống đó đang gọi) và **"Tỷ lệ API ổn định"** (text `x/y API ổn định`, không badge — cùng cách làm với bảng theo danh mục).
+2. Bổ sung bộ lọc **"Hệ thống khai thác"** (multi-select, cho chọn nhiều) ngay trong component — lọc trực tiếp (live filter, không cần nút "Tìm kiếm" vì đây là bảng nhỏ độc lập), có xử lý trạng thái rỗng khi không hệ thống nào phù hợp.
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategorySystemExploitationTable.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 29
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo tình trạng khai thác danh mục (`CategoryTrendAndStatsSection.tsx`).
+
+**Nội dung thay đổi:**
+- Đổi tiêu đề biểu đồ từ "Xu hướng tổng lượt gọi API theo thời gian" thành **"Xu hướng tổng chia sẻ danh mục dùng chung theo thời gian"**.
+- Tăng cỡ chữ tiêu đề từ `text-[13px] font-medium` lên `text-[18px] font-bold`.
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryTrendAndStatsSection.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 28
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo tình trạng khai thác danh mục.
+
+**Nội dung thay đổi:**
+- Tạo component mới **`CategoryTrendAndStatsSection.tsx`** gộp chung biểu đồ xu hướng lượt gọi API + bảng thống kê theo danh mục vào **1 khung trắng duy nhất** (`bg-white border rounded-2xl shadow-sm p-6`), tách biệt rõ với bảng "Danh mục theo hệ thống đang khai thác" (`CategorySystemExploitationTable.tsx`) đứng riêng bên dưới.
+- `CategoryReportExploitationPage.tsx` chỉ còn truyền dữ liệu đã lọc (`appliedTrendData`, `appliedCategories`, `selectedCategories.length`) vào component mới qua props; bỏ phần tính tổng (`totalApiCount`/`totalStableApiCount`/`totalApiCalls`) trùng lặp — logic này chuyển vào trong component mới.
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryTrendAndStatsSection.tsx` (mới), `src/components/pages/category/reports/CategoryReportExploitationPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 27
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo tình trạng khai thác danh mục (`CategoryReportExploitationPage.tsx` + `CategorySystemExploitationTable.tsx`).
+
+**Nguyên nhân:** PM phản hồi 2 bảng grid (kể cả dòng tiêu đề) đang hiển thị 14px thay vì 13px. Điều tra ra nguyên nhân: `src/index.css` có rule toàn cục `table th, table thead th, table td, table tbody td { font-size: 14px !important; }` (dòng ~5497-5509) ghi đè lên class `text-[13px]` của Tailwind trên mọi bảng trong hệ thống. Dự án đã có sẵn cách xử lý chuẩn cho vấn đề này: gắn class riêng cho từng bảng (`table.collection-table`, `table.stats-table`, `table.version-modal-table`...) kèm rule `font-size: 13px !important` riêng.
+
+**Nội dung thay đổi:**
+- Thêm class `exploitation-report-table` vào cả 2 bảng (bảng thống kê danh mục và bảng theo hệ thống khai thác).
+- Thêm rule CSS mới trong `src/index.css` (nối theo đúng pattern các rule tương tự đã có): `table.exploitation-report-table th/thead th/td/tbody td { font-size: 13px !important; }`.
+
+**File bị ảnh hưởng:** `src/index.css` (file dùng chung — chỉ thêm rule mới, không sửa/xóa rule có sẵn, theo đúng pattern đã dùng nhiều lần trong dự án), `src/components/pages/category/reports/CategoryReportExploitationPage.tsx`, `src/components/pages/category/reports/CategorySystemExploitationTable.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 26
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo tình trạng khai thác danh mục (`CategoryReportExploitationPage.tsx` + `CategorySystemExploitationTable.tsx`).
+
+**Nội dung thay đổi:**
+- Đồng bộ cỡ chữ 13px cho cả 2 bảng grid: bảng "Bảng thống kê danh mục" đã sẵn 13px (không cần đổi); bảng "Danh mục theo hệ thống đang khai thác" — đổi badge trạng thái từ `text-xs` (12px) sang `text-[13px]`.
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategorySystemExploitationTable.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 25
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo tình trạng khai thác danh mục (`CategoryReportExploitationPage.tsx`).
+
+**Nội dung thay đổi:**
+- Giới hạn chiều cao dropdown filter "Danh mục" (đang có 29 danh mục): thêm `max-h-[280px] overflow-y-auto custom-scrollbar` cho phần danh sách từng danh mục, giữ nút "Tất cả danh mục" cố định phía trên (không cuộn theo).
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryReportExploitationPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 24
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo tình trạng khai thác danh mục (`CategoryReportExploitationPage.tsx`).
+
+**Nội dung thay đổi:**
+1. Mở rộng dữ liệu mock `categoryTrendData` từ 7 tháng lên **đủ 12 tháng** (thêm Tháng 8-12 cho 5 danh mục gốc; `GROWTH_RATIOS` cho 24 danh mục demo cũng đổi từ 7 sang 12 mốc) để hỗ trợ đủ các mốc lọc mới.
+2. Đổi bộ lọc "Thời gian thống kê" từ (Toàn thời gian/Tháng gần nhất/6 tháng qua) sang **3 tháng / 6 tháng / 9 tháng / 12 tháng**, tính **từ đầu năm** (Tháng 1 → Tháng N) thay vì lùi từ tháng hiện tại — ví dụ "9 tháng" luôn là Tháng 1-9, không phải "9 tháng gần nhất". Mặc định đổi sang **12 tháng** (thay cho "Toàn thời gian" cũ).
+3. Bảng thống kê theo danh mục: thêm `max-h-[420px] overflow-y-auto` (dùng `custom-scrollbar` có sẵn trong dự án) để giới hạn chiều cao và cuộn nội bộ khi danh sách dài (hiện có 29 danh mục); dòng tiêu đề `sticky top-0` để luôn hiển thị khi cuộn.
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryReportExploitationPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 23
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo tình trạng khai thác danh mục (`CategoryReportExploitationPage.tsx`).
+
+**Nội dung thay đổi:**
+- Đổi biểu đồ từ Bar Chart theo danh mục (kèm Top N + "Khác") sang **Line Chart xu hướng theo thời gian** — chỉ 1 đường duy nhất "Tổng lượt gọi API", mỗi điểm trên trục thời gian (tháng) = **tổng lượt gọi API cộng dồn từ các danh mục đang được lọc** (hoặc toàn bộ 29 danh mục nếu không lọc gì).
+- Nhờ chỉ còn 1 series duy nhất, bỏ hẳn cơ chế Top N + "Khác", `CATEGORY_COLORS`/`COLOR_PALETTE` (không còn cần tô màu riêng theo danh mục) — giải quyết triệt để vấn đề "quá nhiều danh mục làm biểu đồ khó đọc" mà không cần giới hạn hiển thị.
+- Bảng thống kê theo danh mục phía dưới giữ nguyên (vẫn liệt kê chi tiết từng danh mục với Số API đang chia sẻ / Lượt gọi API / Tỷ lệ API ổn định).
+- Thêm chú thích rõ dưới biểu đồ để người dùng biết đường đang thể hiện tổng của bao nhiêu danh mục.
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryReportExploitationPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 22
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo tình trạng khai thác danh mục (`CategoryReportExploitationPage.tsx`).
+
+**Nội dung thay đổi:**
+- Bổ sung demo **24 danh mục thực tế** (hộ tịch, trợ giúp pháp lý, biện pháp bảo đảm, công chứng, thi hành án...) theo danh sách PM cung cấp, **giữ nguyên 5 danh mục gốc** (giới tính, dân tộc, quốc gia/quốc tịch, tôn giáo, cơ quan) — tổng cộng 29 danh mục để mô phỏng hệ thống có nhiều danh mục thật.
+- Mỗi danh mục mới có `apiCount`/`stableApiCount` riêng và chuỗi lượt gọi API theo 7 tháng được sinh tự động từ `finalApiCalls` (giá trị tháng cuối) nhân với `GROWTH_RATIOS` — cùng cách làm với dữ liệu 5 danh mục gốc.
+- Đổi `CATEGORY_COLORS` từ khai báo tay từng màu sang **bảng màu lặp vòng `COLOR_PALETTE`** (15 màu) áp theo thứ tự danh mục, để không phải khai báo tay khi số danh mục tăng lên.
+- Với 29 danh mục, cơ chế Top N + "Khác" (đã làm trước đó) sẽ tự động phát huy: biểu đồ chỉ hiển thị riêng 5 danh mục có lượt gọi API cao nhất theo khoảng thời gian đang lọc, phần còn lại gộp vào cột "Khác".
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryReportExploitationPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 21
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo tình trạng khai thác danh mục (`CategoryReportExploitationPage.tsx`).
+
+**Nội dung thay đổi:**
+1. Đổi trục hoành biểu đồ từ **tên tháng** sang **tên danh mục** — mỗi cột = tổng lượt gọi API của 1 danh mục.
+2. Bổ sung logic tính tổng lượt gọi API theo danh mục **trong đúng khoảng thời gian đang lọc** (`getMonthsForRange`/`getApiCallsInRange`, dựa trên dữ liệu tháng có sẵn `categoryTrendData`) — khi bấm "Truy xuất báo cáo", số liệu ở cả biểu đồ và bảng đều tính lại theo `dateRange` đang chọn.
+3. Đổi bộ lọc "Thời gian thống kê": mặc định **"Toàn thời gian"** (`all`, tính tổng hết các tháng có dữ liệu), thêm 2 lựa chọn "Tháng gần nhất" và "6 tháng qua".
+4. Top N + "Khác" trên biểu đồ nay xếp hạng theo lượt gọi API **đã tính theo khoảng thời gian đang lọc** (trước đó xếp theo tổng cố định toàn bộ dữ liệu, không phản ánh đúng bộ lọc thời gian).
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryReportExploitationPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 20
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo tình trạng khai thác danh mục (`CategoryReportExploitationPage.tsx`).
+
+**Nội dung thay đổi:**
+- Đổi biểu đồ từ Area Chart (nhiều đường chồng) sang **Bar Chart cột chồng (stacked)**, do hệ thống có thể khai báo rất nhiều danh mục khiến biểu đồ nhiều đường không còn đọc được.
+- Bổ sung cơ chế **Top N + "Khác"**: chỉ vẽ riêng tối đa `TOP_N_CHART_SERIES = 5` danh mục có tổng lượt gọi API cao nhất (trong tập đang áp dụng filter), phần còn lại gộp thành 1 cột "Khác" (màu xám `#94a3b8`) — đảm bảo biểu đồ luôn đọc được bất kể hệ thống có bao nhiêu danh mục. Khi người dùng chủ động lọc chỉ còn ≤5 danh mục, biểu đồ hiển thị đúng các danh mục đó, không kích hoạt gộp "Khác".
+- Có chú thích rõ khi đang gộp "Khác" để không gây hiểu nhầm, kèm hướng người dùng xem chi tiết ở bảng thống kê bên dưới.
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryReportExploitationPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 19
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo tình trạng khai thác danh mục (`CategoryReportExploitationPage.tsx`).
+
+**Nội dung thay đổi:**
+- Bảng thống kê theo danh mục: bỏ 2 cột "Lượt truy cập" (trùng ý nghĩa với "Lượt gọi API") và "Tình trạng khai thác" (badge 1 giá trị, không đại diện được nhiều API cùng khai thác 1 danh mục).
+- Thay bằng 2 chỉ tiêu: **"Số API đang chia sẻ"** (đếm số API distinct đang expose danh mục) và **"Tỷ lệ API ổn định"** — hiển thị dạng text thuần `x/y API ổn định` (không đặt trong badge), màu xanh nếu 100% ổn định, cam nếu có API gián đoạn.
+- Dòng "Tổng cộng" tính tổng `apiCount` và tỷ lệ tổng `stableApiCount/apiCount` theo cùng quy tắc màu.
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryReportExploitationPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 18
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo tình trạng khai thác danh mục (`CategoryReportExploitationPage.tsx` + component mới `CategorySystemExploitationTable.tsx`).
+
+**Nội dung thay đổi (tách bảng theo hệ thống ra component riêng, theo yêu cầu PM):**
+1. **`CategoryReportExploitationPage.tsx`** — thu hẹp lại chỉ còn: filter Danh mục (multi-select), filter Thời gian thống kê, biểu đồ xu hướng lượt gọi API theo tháng (tách theo từng danh mục — `categoryTrendData`), và bảng thống kê theo danh mục (`mockCategoryStats`: Lượt truy cập, Lượt gọi API, Tình trạng khai thác). Bỏ hoàn toàn filter/khái niệm "Hệ thống sử dụng" khỏi component này.
+2. **`CategorySystemExploitationTable.tsx`** (component mới, hoàn toàn độc lập — không dùng chung state/dữ liệu với component trên): bảng nhỏ "Danh mục theo hệ thống đang khai thác" — liệt kê từng hệ thống đã định danh, số danh mục đang khai thác, lượt truy cập, lượt gọi API, tình trạng khai thác. Có ghi chú rõ: chỉ tính hệ thống có định danh khi gọi API; lượt gọi từ API công khai/không định danh được hệ thống gọi sẽ không xuất hiện ở bảng này (theo quyết định thiết kế đã thống nhất với PM).
+3. Component mới được import và render ở cuối `CategoryReportExploitationPage.tsx` để vẫn hiển thị trên cùng màn hình, nhưng độc lập hoàn toàn về code/state.
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryReportExploitationPage.tsx`, `src/components/pages/category/reports/CategorySystemExploitationTable.tsx` (mới).
+
+**Lưu ý:** Toàn bộ vẫn là prototype/mock theo UC, chưa nối dữ liệu thật.
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 17
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo tình trạng khai thác danh mục (`CategoryReportExploitationPage.tsx`).
+
+**Nội dung thay đổi (thử nghiệm theo hướng UC "xem xu hướng"):**
+1. Đổi grain dữ liệu mock từ 1 dòng/1 hệ thống sang **1 dòng/1 cặp (Danh mục, Hệ thống khai thác)** (`mockUsageRows`), phản ánh đúng quan hệ nhiều-nhiều thực tế (1 danh mục có thể chia sẻ qua nhiều API/hệ thống).
+2. Bổ sung filter **"Danh mục"** (multi-select, giống cấu trúc filter "Hệ thống sử dụng" đã có), kết hợp lọc AND với filter hệ thống.
+3. Bảng dữ liệu: thêm cột **"Danh mục"**, đổi "Tổng lượt truy xuất" → **"Lượt truy cập"**, bổ sung cột mới **"Lượt gọi API"**, đổi "Trạng thái kết nối" → **"Tình trạng khai thác"**. Dòng "Tổng cộng" tính tổng cả 2 cột số.
+4. Biểu đồ giữ nguyên dạng Area Chart xu hướng theo tháng (đúng hướng "xem xu hướng" đã chọn), lọc theo hệ thống còn lại sau filter; có chú thích rõ biểu đồ đang tổng hợp theo hệ thống (chưa tách theo danh mục) để không gây hiểu nhầm.
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryReportExploitationPage.tsx`.
+
+**Lưu ý:** Đây là bản dựng thử (prototype) theo UC, dữ liệu vẫn là mock. Nếu cần biểu đồ xu hướng tách riêng theo từng danh mục, cần bổ sung dữ liệu theo tháng ở grain (danh mục, hệ thống, tháng) — hiện tại `exploitationData` chỉ có grain (hệ thống, tháng).
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 16
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo tình trạng khai thác danh mục (`CategoryReportExploitationPage.tsx`).
+
+**Nội dung thay đổi:**
+- Đổi màu nút **"Truy xuất báo cáo"** từ `bg-slate-800` sang `bg-[#10B981]` (giống nút "Truy xuất dữ liệu" ở trang "Báo cáo thống kê danh sách danh mục").
+- Nút "Xuất File" đã sẵn `bg-blue-600 hover:bg-blue-700` — khớp màu, không cần đổi.
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryReportExploitationPage.tsx`.
+
+**Lưu ý:** File này được PM mở khóa `[x]` trong `stauts.md` riêng cho yêu cầu này.
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 15
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo thống kê danh sách danh mục (`CategoryReportListPage.tsx`).
+
+**Nội dung thay đổi:**
+- Đổi giá trị mặc định của bộ lọc "Thời gian tạo (Năm)" từ `2024` sang **"Toàn thời gian"** (`all`).
+- Đổi danh sách giá trị lọc: Toàn thời gian, **Năm 2026**, **Năm 2025** (bỏ 2024/2023 cũ, theo năm hiện tại/năm ngoái).
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryReportListPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 14
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo thống kê danh sách danh mục (`CategoryReportListPage.tsx`).
+
+**Nội dung thay đổi:**
+- Tăng chiều cao khung biểu đồ từ `h-64` (256px) lên `h-96` (384px), tăng `margin.bottom` (40 → 90) và `XAxis height` (60 → 110), góc xoay nhãn (-20° → -30°) để nhãn tên đơn vị dài không bị cắt mất chữ.
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryReportListPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 13
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo thống kê danh sách danh mục (`CategoryReportListPage.tsx`).
+
+**Nội dung thay đổi:**
+- Bỏ chú thích (Legend) "■ Tổng số bộ danh mục" trong biểu đồ — không cần thiết vì chart chỉ có 1 series và đang đè lên nhãn trục hoành đã xoay nghiêng.
+- Xóa import `Legend` không dùng tới.
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryReportListPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 12
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo thống kê danh sách danh mục (`CategoryReportListPage.tsx`).
+
+**Nội dung thay đổi:**
+- Cấu trúc lại `mockDataList`: chuyển từ 5 dòng theo "chủ đề" sang **11 dòng, mỗi dòng tương ứng 1 đơn vị quản lý** (khớp `AGENCY_OPTIONS`). Nhờ đó khi chọn bộ lọc "Đơn vị quản lý", biểu đồ và bảng grid hiển thị đúng và đủ các đơn vị được chọn (tối đa 11 đơn vị, logic lọc `filter` theo `agency` đã có sẵn từ trước).
+- Mở rộng bảng màu `COLORS` từ 5 lên 11 màu để mỗi đơn vị trong biểu đồ có màu riêng biệt.
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryReportListPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 11
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo thống kê danh sách danh mục (`CategoryReportListPage.tsx`).
+
+**Nội dung thay đổi:**
+- Đổi trục hoành của biểu đồ từ `dataKey="category"` (tên chủ đề — đã bị bỏ khỏi bảng) sang `dataKey="agency"` (đơn vị quản lý/hệ thống), tương ứng với bảng dữ liệu bên dưới.
+- Xoay nhãn trục hoành (-20°, `textAnchor="end"`) và tăng chiều cao vùng nhãn để hiển thị đủ tên đơn vị dài mà không bị chồng chữ.
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryReportListPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 10
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo thống kê danh sách danh mục (`CategoryReportListPage.tsx`).
+
+**Nội dung thay đổi:**
+- Đổi text các mục trong dropdown "Đơn vị quản lý" (mục "Tất cả đơn vị" và từng đơn vị) từ `text-sm` sang `text-[13px]` để đồng bộ cỡ chữ.
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryReportListPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 9
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo thống kê danh sách danh mục (`CategoryReportListPage.tsx`).
+
+**Nội dung thay đổi:**
+1. Đổi màu nút **"Truy xuất dữ liệu"** từ `bg-slate-800` sang `bg-[#10B981]` theo mẫu PM cung cấp.
+2. Bảng grid phía dưới:
+   - Bỏ cột **"Tên chủ đề / Phân hệ"**.
+   - Đổi danh sách "Đơn vị quản lý" (`AGENCY_OPTIONS`) thành 11 đơn vị PM cung cấp: Cục Hành chính tư pháp, Cục Quản lý thi hành án dân sự, Cục Đăng ký GD bảo đảm & Bồi thường nhà nước, Cục Kiểm tra văn bản & Quản lý xử lý VP hành chính, Cục Pháp luật quốc tế và Giải quyết tranh chấp đầu tư quốc tế, Cục Phổ biến, giáo dục pháp luật và Trợ giúp pháp lý, Cục Bổ trợ tư pháp, Vụ Hợp tác quốc tế, Cục Kế hoạch - Tài chính, Tòa án nhân dân tối cao, Trung tâm dữ liệu Quốc gia (TTDLQG).
+   - Đổi tên cột "Số lượng DM Cập mới" → **"Số lượng danh mục tạo mới"**.
+   - Bổ sung cột mới **"Số lượng danh mục cập nhật"** (field `updated`), có tính tổng ở dòng "Tổng cộng".
+   - Đảm bảo toàn bộ text trong bảng (kể cả dòng tiêu đề) là `text-[13px]`.
+   - Dữ liệu mock (`mockDataList`) được gán lại trường `agency` cho khớp danh sách 11 đơn vị mới.
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryReportListPage.tsx`.
+
+**Lưu ý:** File này được PM mở khóa `[x]` trong `stauts.md` riêng cho yêu cầu này.
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 8
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Khai thác báo cáo (`CategoryReportPage.tsx`).
+
+**Nội dung thay đổi:**
+- Đổi màu nút "Kết xuất" từ `bg-indigo-600` sang mã màu chính xác PM cung cấp: `bg-[#2F3CC1]` (hover: `brightness-110`).
+
+**File bị ảnh hưởng:** `src/components/pages/category/CategoryReportPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 7
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Khai thác báo cáo (`CategoryReportPage.tsx`).
+
+**Nội dung thay đổi:**
+- Đổi độ đậm chữ header bảng (8 cột: STT, Mã danh mục, Tên danh mục, Đơn vị chủ quản, Phạm vi, Trường thuộc tính, Trạng thái, Thao tác) từ `font-semibold text-slate-700` sang `font-bold text-slate-900` theo mẫu PM gửi.
+
+**File bị ảnh hưởng:** `src/components/pages/category/CategoryReportPage.tsx`.
+
+**Lưu ý:** File này đang mở khóa `[x]` từ yêu cầu trước đó trong cùng phiên làm việc.
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 6
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Khai thác báo cáo (`CategoryReportPage.tsx`).
+
+**Nội dung thay đổi:**
+1. Chuyển nút **"Xuất File"** (đổi tên thành **"Kết xuất"**) từ hàng riêng bên dưới lên cạnh nút "Tìm kiếm"/"Đặt lại" ở thanh bộ lọc phía trên.
+2. Bỏ dòng text "Tìm thấy {n} kết quả".
+3. Đổi màu nút "Kết xuất" từ `bg-blue-600` sang `bg-indigo-600 hover:bg-indigo-700` theo mẫu PM cung cấp.
+
+**File bị ảnh hưởng:** `src/components/pages/category/CategoryReportPage.tsx`.
+
+**Lưu ý:** File này đang mở khóa `[x]` từ yêu cầu trước đó trong cùng phiên làm việc.
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 5
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Khai thác báo cáo (`CategoryReportPage.tsx`).
+
+**Nội dung thay đổi:**
+- Đổi màu nút **"Tìm kiếm"** từ `bg-slate-800` (đen) sang `bg-blue-600 hover:bg-blue-700` — đúng màu Primary chuẩn theo design system chung (`compomennt.md`).
+
+**File bị ảnh hưởng:** `src/components/pages/category/CategoryReportPage.tsx`.
+
+**Lưu ý:** File này được PM mở khóa `[x]` trong `stauts.md` riêng cho yêu cầu này.
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 4
+
+**Màn hình:** Danh mục dùng chung → Modal "Thiết lập danh mục dùng chung" (`CategoryWizardModal.tsx`), Bước 1 - Thông tin chung.
+
+**Nội dung thay đổi:**
+- Đổi trường **"Cơ sở dữ liệu/Hệ thống"** từ ô nhập text tự do thành dropdown chọn trong danh sách hệ thống nguồn, tái sử dụng danh sách `SOURCE_TREND_LIST` đã có sẵn tại `dashboard/kpiReportData.ts` (TAND Tối cao, Bộ Nội vụ, Ủy ban Dân tộc, Bộ Ngoại giao, Bộ LĐTBXH, Bộ Y tế, Cục Hành chính tư pháp, Cục Quản lý thi hành án dân sự, Cục Đăng ký giao dịch bảo đảm và BTNN, Cục Kiểm tra văn bản và Quản lý xử lý VPHC, Cục Bổ trợ tư pháp, Vụ Hợp tác quốc tế, Cục Kế hoạch - Tài chính, TTDLQG, Tòa án).
+
+**File bị ảnh hưởng:** `src/components/pages/category/components/modals/CategoryWizardModal.tsx`.
+
+**Lưu ý:** File này được PM mở khóa `[x]` trong `stauts.md` riêng cho yêu cầu này.
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 3
+
+**Màn hình:** Toàn bộ các trang "Quản lý Quy tắc Xử lý" (`GenericProcessingPage.tsx`), truy cập qua các route `processing-data-info-*`, `processing-external-*` và `processing-collection-statistics`.
+
+**Nội dung thay đổi:**
+- Nới rộng chiều ngang khung nội dung từ `max-w-[1600px]` lên `max-w-[1900px]`, sau đó theo phản hồi PM nới tiếp lên `max-w-[2100px]` — **chỉ cho các route trên**. Các trang khác trong toàn hệ thống giữ nguyên `max-w-[1600px]`.
+
+**File bị ảnh hưởng:** `src/components/layout/MainLayout.tsx` (file dùng chung — PM đã duyệt thay đổi có kiểm soát, chỉ áp dụng cho các route liệt kê ở trên).
+
+**Lưu ý:** Nếu 2100px vẫn chưa đủ hoặc cần đổi khác, chỉ cần chỉnh giá trị `max-w-[2100px]` tại điều kiện tương ứng trong `MainLayout.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 2
+
+**Màn hình:** Xử lý dữ liệu → CSDL Trong ngành → (bất kỳ CSDL nào) → Quản lý Quy tắc Xử lý (`GenericProcessingPage.tsx`).
+
+**Nội dung thay đổi:**
+1. Bỏ thẻ **"Danh sách lỗi"** khỏi khối tổng quan (5 thẻ → còn 4 thẻ).
+2. Đổi `grid-cols-5` → `grid-cols-4` để 4 thẻ còn lại chia đều chiều rộng.
+3. Đổi tên 4 thẻ còn lại:
+   - "Số lượng Thu thập" → **"Số lượng bản ghi thu thập"**
+   - "Đã Làm sạch" → **"Số lượng bản ghi còn lại sau làm sạch"**
+   - "Đã Chuẩn hóa" → **"Số lượng bản ghi còn lại sau chuẩn hóa"**
+   - "Đã Biến đổi" → **"Số lượng bản ghi còn lại sau biến đổi"**
+
+**File bị ảnh hưởng:** `src/components/pages/processing/GenericProcessingPage.tsx`.
+
+**Lưu ý:** File này được PM mở khóa `[x]` trong `stauts.md` riêng cho yêu cầu này.
+
+## Cập nhật giao diện (Ngày thực hiện: 12/08/2026)
+
+**Màn hình:** Xử lý dữ liệu → Tổng quan xử lý dữ liệu (`DashboardReportPage.tsx`, tab KPI "Xử lý").
+
+**Nội dung thay đổi:**
+1. Đổi thẻ **"Dữ liệu đã xử lý"** (hiển thị dung lượng, VD: `7.69 TB / 9.2 TB`) thành thẻ **"Bản ghi còn lại sau xử lý"**, hiển thị số bản ghi còn lại sau xử lý (đã loại trùng lặp/lỗi) trên tổng số bản ghi thu thập ban đầu (VD: `78.213.821 / 93.533.279`).
+2. Thêm hằng số `TOTAL_COLLECTED_RECORDS` (`kpiReportData.ts`) — tổng số bản ghi thu thập, cộng dồn từ `SOURCE_FINAL_TOTALS`.
+3. Thêm `retainedRecords` / `retainedRecordsPercent` (mock, tỷ lệ minh hoạ 83.6%) trong `DashboardReportPage.tsx` để tính số bản ghi còn lại sau xử lý. (Trước đó đặt tên `processedRecords`/`processedRecordsPercent` — đã đổi tên cho đúng ngữ nghĩa "còn lại sau xử lý" theo yêu cầu PM.)
+
+**File bị ảnh hưởng:** `src/components/dashboard/DashboardReportPage.tsx`, `src/components/dashboard/kpiReportData.ts`.
+
+**Lưu ý:** Số liệu bản ghi vẫn là dữ liệu mock minh hoạ, chưa nối API thật.
+
 <<<<<<< HEAD
 ## Cập nhật giao diện (Ngày thực hiện: 22/07/2026)
 

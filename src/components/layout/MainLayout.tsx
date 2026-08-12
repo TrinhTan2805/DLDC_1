@@ -419,8 +419,8 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
   const basePage = currentPage.startsWith('target-database-detail-')
     ? 'target-database-detail'
     : currentPage.startsWith('dashboard-report-')
-    ? 'dashboard-report'
-    : currentPage;
+      ? 'dashboard-report'
+      : currentPage;
   const currentPageConfig = pageConfig[basePage] || pageConfig.dashboard;
 
   useEffect(() => {
@@ -478,7 +478,12 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto">
-          <div className="max-w-[1600px] mx-auto p-6">
+          <div className={`mx-auto p-6 ${currentPage.startsWith('processing-data-info-') ||
+            currentPage.startsWith('processing-external-') ||
+            currentPage === 'processing-collection-statistics'
+            ? 'max-w-[3000px]'
+            : 'max-w-[1600px]'
+            }`}>
             {currentPage === 'dashboard' && <DashboardHome />}
             {currentPage.startsWith('dashboard-report-') && (
               <DashboardReportPage kpiSlug={currentPage.replace('dashboard-report-', '')} />

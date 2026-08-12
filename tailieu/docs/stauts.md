@@ -76,7 +76,7 @@
 - `[ ]` Quản lý lịch xử lý (`processing/ScheduleManagementModal.tsx`)
 
 ### Trang xử lý từng lĩnh vực nghiệp vụ
-- `[ ]` Xử lý chung (template) (`processing/GenericProcessingPage.tsx`)
+- `[x]` Xử lý chung (template) (`processing/GenericProcessingPage.tsx`)
 - `[ ]` Xử lý Hộ tịch (`processing/ProcessingCivilRegistryPage.tsx`)
 - `[ ]` Xử lý Đăng ký Quốc tịch (`processing/ProcessingNationalityPage.tsx`)
 - `[ ]` Xử lý Luật sư (`processing/ProcessingLawyerPage.tsx`)
@@ -140,7 +140,7 @@
 - `[ ]` Đơn vị Bộ Tư pháp (`category/CategoryMojUnitsPage.tsx`)
 - `[ ]` Công bố danh mục (`category/CategoryPublishPage.tsx`)
 - `[ ]` Danh sách đã công bố (`category/CategoryPublishedListPage.tsx`)
-- `[ ]` Báo cáo danh mục (`category/CategoryReportPage.tsx`)
+- `[x]` Báo cáo danh mục (`category/CategoryReportPage.tsx`)
 - `[ ]` Thống kê danh mục (`category/CategoryStatisticsPage.tsx`)
 - `[ ]` Báo cáo thống kê tổng hợp (`category/CategoryStatisticsReportPage.tsx`)
 
@@ -152,7 +152,7 @@
 - `[ ]` Tab Lịch sử phiên bản (`category/components/tabs/VersionHistoryTab.tsx`)
 
 ### Modals danh mục
-- `[ ]` Modal Wizard tạo danh mục mới (`category/components/modals/CategoryWizardModal.tsx`)
+- `[x]` Modal Wizard tạo danh mục mới (`category/components/modals/CategoryWizardModal.tsx`)
 - `[ ]` Modal Chỉnh sửa danh mục (`category/components/modals/EditCategoryModal.tsx`)
 - `[ ]` Modal Xác nhận xóa (`category/components/modals/DeleteConfirmModal.tsx`)
 - `[ ]` Modal Gửi phê duyệt (`category/components/modals/ApprovalRequestModal.tsx`)
@@ -172,9 +172,9 @@
 - `[ ]` Modal Xóa đơn vị BTP (`category/components/modals/MojUnitDeleteConfirmModal.tsx`)
 
 ### Báo cáo danh mục
-- `[ ]` Báo cáo danh sách (`category/reports/CategoryReportListPage.tsx`)
-- `[ ]` Báo cáo trạng thái (`category/reports/CategoryReportStatusPage.tsx`)
-- `[ ]` Báo cáo khai thác (`category/reports/CategoryReportExploitationPage.tsx`)
+- `[x]` Báo cáo danh sách (`category/reports/CategoryReportListPage.tsx`)
+- `[x]` Báo cáo trạng thái (`category/reports/CategoryReportStatusPage.tsx`)
+- `[x]` Báo cáo khai thác (`category/reports/CategoryReportExploitationPage.tsx`)
 - `[ ]` Báo cáo phiên bản (`category/reports/CategoryReportVersionPage.tsx`)
 
 ---

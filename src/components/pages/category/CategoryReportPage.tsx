@@ -133,7 +133,7 @@ export function CategoryReportPage() {
           <button
             type="button"
             onClick={handleSearch}
-            className="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors font-medium text-[13px] shadow-sm shrink-0 cursor-pointer active:scale-95"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors font-medium text-[13px] shadow-sm shrink-0 cursor-pointer active:scale-95"
           >
             <Search className="w-4 h-4" />
             Tìm kiếm
@@ -147,38 +147,31 @@ export function CategoryReportPage() {
               Đặt lại
             </button>
           )}
-        </div>
-      </div>
-
-      {/* Results Summary + Export */}
-      <div className="flex items-center justify-between">
-        <span className="text-[13px] text-slate-600">
-          Tìm thấy <span className="text-blue-600 font-semibold">{filteredDatasets.length}</span> kết quả
-        </span>
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => setShowExportMenu(prev => !prev)}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 text-[13px] font-medium transition-all active:scale-95 shadow-sm cursor-pointer"
-          >
-            <Download className="w-4 h-4" />
-            Xuất File
-            <ChevronDown className="w-4 h-4" />
-          </button>
-          {showExportMenu && (
-            <div className="absolute right-0 top-full mt-1.5 w-40 rounded-xl border border-slate-200 bg-white shadow-xl z-20 overflow-hidden">
-              {['Excel', 'PDF', 'CSV'].map(fmt => (
-                <button
-                  key={fmt}
-                  type="button"
-                  onClick={() => handleExportFile(fmt)}
-                  className="w-full text-left px-4 py-2.5 hover:bg-slate-50 text-[13px] text-slate-700 transition-colors"
-                >
-                  {fmt}
-                </button>
-              ))}
-            </div>
-          )}
+          <div className="relative shrink-0">
+            <button
+              type="button"
+              onClick={() => setShowExportMenu(prev => !prev)}
+              className="px-4 py-2 bg-[#2F3CC1] hover:brightness-110 text-white rounded-lg flex items-center gap-2 text-[13px] font-medium transition-all active:scale-95 shadow-sm cursor-pointer"
+            >
+              <Download className="w-4 h-4" />
+              Kết xuất
+              <ChevronDown className="w-4 h-4" />
+            </button>
+            {showExportMenu && (
+              <div className="absolute right-0 top-full mt-1.5 w-40 rounded-xl border border-slate-200 bg-white shadow-xl z-20 overflow-hidden">
+                {['Excel', 'PDF', 'CSV'].map(fmt => (
+                  <button
+                    key={fmt}
+                    type="button"
+                    onClick={() => handleExportFile(fmt)}
+                    className="w-full text-left px-4 py-2.5 hover:bg-slate-50 text-[13px] text-slate-700 transition-colors"
+                  >
+                    {fmt}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -188,14 +181,14 @@ export function CategoryReportPage() {
           <table className="w-full text-left">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap w-14 text-center">STT</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Mã danh mục</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên danh mục</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Đơn vị chủ quản</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Phạm vi</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Trường thuộc tính</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Trạng thái</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-20">Thao tác</th>
+                <th className="px-6 py-4 text-[13px] font-bold text-slate-900 whitespace-nowrap w-14 text-center">STT</th>
+                <th className="px-6 py-4 text-[13px] font-bold text-slate-900 whitespace-nowrap">Mã danh mục</th>
+                <th className="px-6 py-4 text-[13px] font-bold text-slate-900 whitespace-nowrap">Tên danh mục</th>
+                <th className="px-6 py-4 text-[13px] font-bold text-slate-900 whitespace-nowrap">Đơn vị chủ quản</th>
+                <th className="px-6 py-4 text-[13px] font-bold text-slate-900 whitespace-nowrap">Phạm vi</th>
+                <th className="px-6 py-4 text-[13px] font-bold text-slate-900 whitespace-nowrap text-center">Trường thuộc tính</th>
+                <th className="px-6 py-4 text-[13px] font-bold text-slate-900 whitespace-nowrap text-center">Trạng thái</th>
+                <th className="px-6 py-4 text-[13px] font-bold text-slate-900 whitespace-nowrap text-center w-20">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">

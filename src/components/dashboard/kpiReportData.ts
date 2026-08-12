@@ -120,6 +120,9 @@ const SOURCE_FINAL_TOTALS: { source: string; records: number; dataSizeMB: number
 
 export const SOURCE_TREND_LIST = SOURCE_FINAL_TOTALS.map(t => t.source);
 
+// Tổng số bản ghi đã thu thập (cộng dồn từ SOURCE_FINAL_TOTALS), dùng làm mẫu số cho thẻ "Dữ liệu đã xử lý"
+export const TOTAL_COLLECTED_RECORDS = SOURCE_FINAL_TOTALS.reduce((sum, t) => sum + t.records, 0);
+
 // { [metric]: { [source]: number[] } } - mỗi mảng có 12 phần tử tương ứng SOURCE_TREND_MONTHS
 export const sourceTrendSeries: { [metric in SourceTrendMetric]: { [source: string]: number[] } } = {
   records: Object.fromEntries(SOURCE_FINAL_TOTALS.map(t => [t.source, buildMonthlySeries(t.records)])),

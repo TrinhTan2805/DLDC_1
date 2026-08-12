@@ -13,32 +13,38 @@ const Legend = LegendR as any;
 
 // Trạng thái danh mục
 const STATUS_OPTIONS = [
-  { value: 'Đang hoạt động', label: 'Đang hoạt động', color: '#10b981', bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200', dot: 'bg-green-500' },
-  { value: 'Đang chờ duyệt',  label: 'Đang chờ duyệt',  color: '#3b82f6', bg: 'bg-blue-50',  text: 'text-blue-700',  border: 'border-blue-200',  dot: 'bg-blue-500'  },
-  { value: 'Hết hiệu lực',   label: 'Hết hiệu lực',   color: '#ef4444', bg: 'bg-red-50',   text: 'text-red-700',   border: 'border-red-200',   dot: 'bg-red-500'   },
-  { value: 'Tạm dừng',       label: 'Tạm dừng',       color: '#f59e0b', bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', dot: 'bg-amber-500' },
+  { value: 'Đang soạn thảo', label: 'Đang soạn thảo', color: '#94a3b8', bg: 'bg-slate-50',  text: 'text-slate-600',  border: 'border-slate-200',  dot: 'bg-slate-400'  },
+  { value: 'Chờ phê duyệt',  label: 'Chờ phê duyệt',  color: '#3b82f6', bg: 'bg-blue-50',   text: 'text-blue-700',   border: 'border-blue-200',   dot: 'bg-blue-500'   },
+  { value: 'Đã phê duyệt',   label: 'Đã phê duyệt',   color: '#6366f1', bg: 'bg-indigo-50', text: 'text-indigo-700', border: 'border-indigo-200', dot: 'bg-indigo-500' },
+  { value: 'Từ chối',        label: 'Từ chối',        color: '#ef4444', bg: 'bg-red-50',    text: 'text-red-700',    border: 'border-red-200',    dot: 'bg-red-500'    },
+  { value: 'Hiệu lực',       label: 'Hiệu lực',       color: '#10b981', bg: 'bg-green-50',  text: 'text-green-700',  border: 'border-green-200',  dot: 'bg-green-500'  },
+  { value: 'Hết hiệu lực',   label: 'Hết hiệu lực',   color: '#f59e0b', bg: 'bg-amber-50',  text: 'text-amber-700',  border: 'border-amber-200',  dot: 'bg-amber-500'  },
 ];
 
 // Dữ liệu tổng hợp (cho biểu đồ tròn)
 const summaryData = [
-  { name: 'Đang hoạt động', value: 345 },
-  { name: 'Đang chờ duyệt',  value: 25  },
-  { name: 'Hết hiệu lực',   value: 120  },
-  { name: 'Tạm dừng',       value: 45   },
+  { name: 'Đang soạn thảo', value: 30  },
+  { name: 'Chờ phê duyệt',  value: 25  },
+  { name: 'Đã phê duyệt',   value: 40  },
+  { name: 'Từ chối',        value: 15  },
+  { name: 'Hiệu lực',       value: 345 },
+  { name: 'Hết hiệu lực',   value: 120 },
 ];
 
 // Dữ liệu chi tiết từng danh mục (cho bảng — UC yêu cầu thời gian chuyển trạng thái, người duyệt, lý do)
 const detailData = [
-  { id: 'DM-001', name: 'Danh mục giới tính',        status: 'Đang hoạt động', transitionDate: '12/03/2026 08:30', approver: 'Nguyễn Văn A', reason: 'Phê duyệt định kỳ' },
-  { id: 'DM-002', name: 'Danh mục dân tộc',           status: 'Đang hoạt động', transitionDate: '10/03/2026 09:00', approver: 'Trần Thị B',   reason: 'Cập nhật phiên bản mới' },
-  { id: 'DM-003', name: 'Danh mục quốc tịch',         status: 'Đang chờ duyệt', transitionDate: '15/06/2026 14:15', approver: '—',             reason: 'Chờ lãnh đạo phê duyệt' },
-  { id: 'DM-004', name: 'Danh mục đơn vị hành chính', status: 'Đang chờ duyệt', transitionDate: '20/06/2026 10:00', approver: '—',             reason: 'Gửi duyệt lần 2' },
-  { id: 'DM-005', name: 'Danh mục tôn giáo',          status: 'Hết hiệu lực',   transitionDate: '01/01/2026 00:00', approver: 'Lê Văn C',      reason: 'Hết thời hạn sử dụng' },
-  { id: 'DM-006', name: 'Danh mục nghề nghiệp',       status: 'Hết hiệu lực',   transitionDate: '15/12/2025 17:00', approver: 'Phạm Văn D',    reason: 'Thay thế bởi phiên bản v2' },
-  { id: 'DM-007', name: 'Danh mục loại hộ gia đình',  status: 'Tạm dừng',       transitionDate: '05/05/2026 11:30', approver: 'Nguyễn Thị E',  reason: 'Đang rà soát chuẩn hóa' },
-  { id: 'DM-008', name: 'Danh mục cơ quan hành chính',status: 'Tạm dừng',       transitionDate: '18/04/2026 08:00', approver: 'Hoàng Văn F',   reason: 'Phát hiện sai sót cần xử lý' },
-  { id: 'DM-009', name: 'Danh mục biện pháp bảo đảm', status: 'Đang hoạt động', transitionDate: '22/02/2026 13:45', approver: 'Trần Văn G',    reason: 'Phê duyệt theo đề nghị đơn vị' },
-  { id: 'DM-010', name: 'Danh mục phán quyết TAND',   status: 'Hết hiệu lực',   transitionDate: '30/11/2025 16:00', approver: 'Lê Thị H',      reason: 'Hết vòng đời quy định' },
+  { id: 'DM-001', name: 'Danh mục giới tính',        status: 'Hiệu lực',       transitionDate: '12/03/2026 08:30', approver: 'Nguyễn Văn A', reason: 'Phê duyệt định kỳ' },
+  { id: 'DM-002', name: 'Danh mục dân tộc',           status: 'Hiệu lực',       transitionDate: '10/03/2026 09:00', approver: 'Trần Thị B',   reason: 'Cập nhật phiên bản mới' },
+  { id: 'DM-003', name: 'Danh mục quốc tịch',         status: 'Chờ phê duyệt',  transitionDate: '15/06/2026 14:15', approver: '—',             reason: 'Chờ lãnh đạo phê duyệt' },
+  { id: 'DM-004', name: 'Danh mục đơn vị hành chính', status: 'Chờ phê duyệt',  transitionDate: '20/06/2026 10:00', approver: '—',             reason: 'Gửi duyệt lần 2' },
+  { id: 'DM-005', name: 'Danh mục tôn giáo',          status: 'Hết hiệu lực',  transitionDate: '01/01/2026 00:00', approver: 'Lê Văn C',      reason: 'Hết thời hạn sử dụng' },
+  { id: 'DM-006', name: 'Danh mục nghề nghiệp',       status: 'Hết hiệu lực',  transitionDate: '15/12/2025 17:00', approver: 'Phạm Văn D',    reason: 'Thay thế bởi phiên bản v2' },
+  { id: 'DM-007', name: 'Danh mục loại hộ gia đình',  status: 'Đang soạn thảo', transitionDate: '05/05/2026 11:30', approver: '—',             reason: 'Đang rà soát chuẩn hóa' },
+  { id: 'DM-008', name: 'Danh mục cơ quan hành chính',status: 'Từ chối',       transitionDate: '18/04/2026 08:00', approver: 'Hoàng Văn F',   reason: 'Phát hiện sai sót cần xử lý' },
+  { id: 'DM-009', name: 'Danh mục biện pháp bảo đảm', status: 'Hiệu lực',       transitionDate: '22/02/2026 13:45', approver: 'Trần Văn G',    reason: 'Phê duyệt theo đề nghị đơn vị' },
+  { id: 'DM-010', name: 'Danh mục phán quyết TAND',   status: 'Hết hiệu lực',  transitionDate: '30/11/2025 16:00', approver: 'Lê Thị H',      reason: 'Hết vòng đời quy định' },
+  { id: 'DM-011', name: 'Danh mục loại hình doanh nghiệp', status: 'Đã phê duyệt', transitionDate: '25/05/2026 09:20', approver: 'Nguyễn Văn I', reason: 'Đã phê duyệt, chờ công bố hiệu lực' },
+  { id: 'DM-012', name: 'Danh mục hình thức xử phạt', status: 'Đã phê duyệt', transitionDate: '28/05/2026 15:40', approver: 'Đặng Thị K',    reason: 'Đã phê duyệt, chờ công bố hiệu lực' },
 ];
 
 export function CategoryReportStatusPage() {
@@ -204,7 +210,7 @@ export function CategoryReportStatusPage() {
           <button
             type="button"
             onClick={handleSearch}
-            className="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors font-medium text-[13px] shadow-sm shrink-0 active:scale-95"
+            className="bg-[#10B981] hover:brightness-110 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors font-medium text-[13px] shadow-sm shrink-0 active:scale-95"
           >
             <Search className="w-4 h-4" />
             Truy xuất dữ liệu
@@ -275,7 +281,7 @@ export function CategoryReportStatusPage() {
             </div>
 
             {/* Thẻ tóm tắt */}
-            <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-3 w-full">
+            <div className="flex-1 grid grid-cols-6 gap-3 w-full">
               {appliedSummary.map(item => {
                 const meta = getStatusMeta(item.name);
                 return (

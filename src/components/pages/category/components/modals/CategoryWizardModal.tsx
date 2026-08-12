@@ -5,6 +5,7 @@ import { RelationshipsTab } from '../tabs/RelationshipsTab';
 import { MasterDataEntity, MasterDataAttribute, ScopeType, FieldDataType, ApprovalRequest, EntityRelationship } from '../../categoryTypes';
 import { Portal } from '../../../../common/Portal';
 import { ReviewResultCard } from './ReviewResultCard';
+import { SOURCE_TREND_LIST } from '../../../../dashboard/kpiReportData';
 
 const EXPIRE_REASON_LABELS: Record<string, string> = {
   'Tích hợp vào danh mục khác': 'Tích hợp vào danh mục khác',
@@ -216,14 +217,21 @@ export function CategoryWizardModal({
                   </div>
                   <div>
                     <label className="block text-[13px] text-slate-700 mb-2 font-medium">Cơ sở dữ liệu/Hệ thống</label>
-                    <input
-                      type="text"
-                      disabled={isViewOnly}
-                      value={formData.databaseSystem || ''}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, databaseSystem: e.target.value })}
-                      placeholder="VD: Cơ sở dữ liệu quốc gia về dân cư"
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none disabled:bg-slate-50 disabled:text-slate-500 font-medium bg-white hover:bg-slate-50/30 transition-all shadow-sm"
-                    />
+                    <div className="relative">
+                      <select
+                        title="Cơ sở dữ liệu/Hệ thống"
+                        disabled={isViewOnly}
+                        value={formData.databaseSystem || ''}
+                        onChange={(e: ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, databaseSystem: e.target.value })}
+                        className="w-full pl-3 pr-8 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white font-medium appearance-none cursor-pointer disabled:bg-slate-50 disabled:text-slate-500"
+                      >
+                        <option value="">-- Chọn hệ thống nguồn --</option>
+                        {SOURCE_TREND_LIST.map(system => (
+                          <option key={system} value={system}>{system}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                    </div>
                   </div>
                   <div>
                     <label className="block text-[13px] text-slate-700 mb-2 font-medium">Đơn vị chủ quản <span className="text-red-500">*</span></label>
