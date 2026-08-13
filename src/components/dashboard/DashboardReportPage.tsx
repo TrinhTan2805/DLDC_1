@@ -83,7 +83,7 @@ const PROCESSED_VOLUME_BY_SOURCE: { [source: string]: number } = {
   'Tòa án': 398,
 };
 
-const RANK_COLORS = ['#6366f1', '#a855f7', '#ec4899', '#f59e0b', '#22c55e', '#3b82f6', '#06b6d4'];
+const VOLUME_RANK_COLOR = '#6366f1';
 
 // Phân loại hệ thống nguồn trong/ngoài ngành Tư pháp cho bộ lọc "Quy tắc xử lý theo từng hệ thống"
 // Ngoài ngành: TTDLQG, Tòa án (2 hệ thống) - còn lại 13 hệ thống là Trong ngành
@@ -317,13 +317,15 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
   const rankedVolumeData = SOURCE_TREND_LIST
     .map(source => ({ source, volumeGB: PROCESSED_VOLUME_BY_SOURCE[source] }))
     .sort((a, b) => b.volumeGB - a.volumeGB);
-  const maxVolumeGB = Math.max(...rankedVolumeData.map(r => r.volumeGB));
   const VOLUME_RANK_PAGE_SIZE = 5;
   const volumeRankTotalPages = Math.ceil(rankedVolumeData.length / VOLUME_RANK_PAGE_SIZE);
   const volumeRankPageItems = rankedVolumeData.slice(
     volumeRankPage * VOLUME_RANK_PAGE_SIZE,
     volumeRankPage * VOLUME_RANK_PAGE_SIZE + VOLUME_RANK_PAGE_SIZE
   );
+  // Trục X dùng chung cho mọi trang để giữ tỷ lệ nhất quán khi chuyển trang
+  const volumeRankAxisMax = Math.ceil(Math.max(...rankedVolumeData.map(r => r.volumeGB)) / 200) * 200;
+  const volumeRankAxisTicks = [0, 0.25, 0.5, 0.75, 1].map(f => Math.round(volumeRankAxisMax * f));
 
   const processedRecordsFinalM = totalSynced > 0 ? totalSynced / 1_000_000 : 4.06;
   const processedVolumeFinalGB = rankedVolumeData.reduce((sum, r) => sum + r.volumeGB, 0);
@@ -1562,7 +1564,7 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-1.5">
                 <TrendingUp className="w-4 h-4 text-slate-700" />
-                <h3 className="text-slate-900 font-semibold">Xếp hạng hệ thống có dung lượng xử lý lớn nhất</h3>
+                <h3 className="text-slate-900 font-semibold">Xếp hạng cơ sở dữ liệu đích có dung lượng xử lý lớn nhất</h3>
               </div>
               <div className="flex items-center gap-1">
                 <button
@@ -1583,32 +1585,42 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
             </div>
             <p className="text-sm text-slate-500 mb-4">Xếp hạng theo tổng GB đã xử lý</p>
 
-            <div className="space-y-4">
-              {volumeRankPageItems.map((item, i) => {
-                const rank = volumeRankPage * VOLUME_RANK_PAGE_SIZE + i + 1;
-                const color = RANK_COLORS[i % RANK_COLORS.length];
-                const percent = (item.volumeGB / maxVolumeGB) * 100;
-                return (
-                  <div key={item.source}>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[12px] font-bold flex-shrink-0"
-                          style={{ backgroundColor: color }}
-                        >
-                          {rank}
-                        </span>
-                        <span className="text-[13px] font-semibold text-slate-900">{item.source}</span>
-                      </div>
-                      <span className="text-[13px] text-slate-500 whitespace-nowrap">{item.volumeGB.toLocaleString('vi-VN')} GB</span>
-                    </div>
-                    <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
-                      <div className="h-full rounded-full" style={{ width: `${percent}%`, backgroundColor: color }} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart
+                data={volumeRankPageItems}
+                layout="vertical"
+                margin={{ left: 8, right: 24, top: 4, bottom: 4 }}
+                barCategoryGap={16}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
+                <XAxis
+                  type="number"
+                  domain={[0, volumeRankAxisMax]}
+                  ticks={volumeRankAxisTicks}
+                  stroke="#64748b"
+                  style={{ fontSize: '11px' }}
+                  label={{ value: 'Dung lượng (GB)', position: 'insideBottom', offset: -4, fontSize: 11, fill: '#94a3b8' }}
+                />
+                <YAxis
+                  type="category"
+                  dataKey="source"
+                  stroke="#64748b"
+                  style={{ fontSize: '12px' }}
+                  width={180}
+                  tick={{ fill: '#334155' }}
+                />
+                <Tooltip
+                  formatter={(value: number) => [`${value.toLocaleString('vi-VN')} GB`, 'Dung lượng']}
+                  contentStyle={{
+                    backgroundColor: '#fff',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    fontSize: '12px'
+                  }}
+                />
+                <Bar dataKey="volumeGB" fill={VOLUME_RANK_COLOR} radius={[0, 4, 4, 0]} barSize={18} name="Dung lượng (GB)" />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
       )}

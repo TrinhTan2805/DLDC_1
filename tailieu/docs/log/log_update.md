@@ -1,5 +1,88 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 53
+
+**Màn hình:** Dữ liệu chủ → Báo cáo tìm kiếm dữ liệu chủ (`MasterDataReportsPage.tsx`), tab "Báo cáo vòng đời dữ liệu".
+
+**Nội dung thay đổi:** Đổi luồng thao tác theo đúng UC — bắt buộc chọn "Danh mục dữ liệu" + "Trạng thái vòng đời" và bấm "Truy xuất báo cáo" trước khi hiển thị thẻ đếm/cảnh báo/bảng grid, thiết kế đồng bộ với tab "Báo cáo sử dụng dữ liệu chủ":
+- Bộ lọc chuyển sang dạng Control Panel giống tab Báo cáo sử dụng (label phía trên, select có `value`/`onChange` — trước đó 2 select không controlled, không lọc được).
+- Thêm state `lifecycleDataType`, `lifecycleStatusFilter`, `hasSearchedLifecycle`, `appliedLifecycleData`, `showLifecycleExportMenu` + handler `handleSearchLifecycle` (lọc `mockLifecycleData` theo danh mục/trạng thái), `handleExportLifecycleFile`.
+- Trước khi truy xuất: hiển thị empty state (icon `BarChart2` mờ + hướng dẫn), ẩn cảnh báo/thẻ đếm/bảng.
+- Sau khi truy xuất: cảnh báo + 3 thẻ đếm (Hoạt động bình thường/Sắp hết hiệu lực/Đã hết hiệu lực) tính động theo `appliedLifecycleData` (trước đó là số cứng 1/2/1); bảng hiển thị `appliedLifecycleData`, có dòng "Không có bản ghi phù hợp" khi rỗng.
+- Nút xuất file: gộp 2 nút "Xuất Excel"/"Xuất PDF" (đặt trong header bảng) thành 1 nút "Xuất File" dạng dropdown (Excel/PDF/CSV) đặt trong Control Panel, giống hệt tab Báo cáo sử dụng.
+
+**File bị ảnh hưởng:** `src/components/pages/master-data/MasterDataReportsPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 52
+
+**Màn hình:** Dữ liệu chủ → Báo cáo tìm kiếm dữ liệu chủ (`MasterDataReportsPage.tsx`), tab "Tra cứu dữ liệu chủ".
+
+**Nội dung thay đổi:**
+1. Thêm cột "Cơ quan quản lý" vào bảng "Kết quả tìm kiếm" (field `agency` bổ sung vào mock `mockSearchResults`).
+2. Nút "Xem chi tiết bản ghi" (icon `Eye`) đổi sang mở modal "Xem chi tiết thực thể dữ liệu chủ" — copy nguyên mẫu thanh stepper 7 bước + layout form + footer (Chỉnh sửa/Quay lại/Đóng/Tiếp theo) từ modal cùng tên tại `MasterDataScaleManagementPage.tsx` (module Mô hình dữ liệu chủ). Bước 1 hiển thị dữ liệu từ bản ghi được chọn (Mã thực thể, Tên dữ liệu chủ, Loại thực thể, Phạm vi sử dụng, Đơn vị chủ quản, Mô tả đối tượng, Tên CSDL/Hệ thống, Trạng thái vòng đời); các bước 2-7 hiển thị placeholder do mock data hiện tại không có dữ liệu demo cho các bước này.
+3. Thêm nút mới (icon `Layers`) "Xem dữ liệu tại Cập nhật dữ liệu chủ" — điều hướng sang trang `MasterDataUpdatePage.tsx` với danh mục dữ liệu tương ứng, dùng route mới `master-data-goto-<masterId>` (map từ `dataType` của bản ghi qua bảng `DATA_TYPE_TO_MASTER_ID`).
+4. `MasterDataReportsPage` nhận thêm prop `onNavigate` để gọi điều hướng; `MasterDataUpdatePage` nhận thêm prop `initialMasterId` để chọn sẵn danh mục khi được điều hướng tới.
+5. `MainLayout.tsx` thêm route `currentPage.startsWith('master-data-goto-')` → `<MasterDataUpdatePage initialMasterId={...} />`, và truyền `onNavigate={setCurrentPage}` cho `MasterDataReportsPage`.
+
+**File này (`MasterDataUpdatePage.tsx`) được PM mở khóa `[x]` trong `stauts.md` riêng cho yêu cầu này.**
+
+**File bị ảnh hưởng:** `src/components/pages/master-data/MasterDataReportsPage.tsx`, `src/components/pages/master-data/MasterDataUpdatePage.tsx`, `src/components/layout/MainLayout.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 51
+
+**Màn hình:** Dữ liệu chủ → Báo cáo tìm kiếm dữ liệu chủ (`MasterDataReportsPage.tsx`), tab "Tra cứu dữ liệu chủ".
+
+**Nội dung thay đổi:** Thêm thanh phân trang cho bảng "Kết quả tìm kiếm", copy nguyên mẫu từ `CategoryReportPage.tsx` (select số bản ghi/trang, hiển thị "start-end/total", nút Trước/số trang/Sau). Thêm state `currentPage`/`pageSize`, biến tính `totalPages`/`safePage`/`paginatedResults`/`startItem`/`endItem`; bảng hiển thị `paginatedResults` thay vì toàn bộ `searchResults`.
+
+**File bị ảnh hưởng:** `src/components/pages/master-data/MasterDataReportsPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 50
+
+**Màn hình:** Dữ liệu chủ → Báo cáo tìm kiếm dữ liệu chủ (`MasterDataReportsPage.tsx`).
+
+**Nội dung thay đổi:** Đổi thiết kế thanh tab (Tra cứu / Báo cáo sử dụng / Báo cáo vòng đời) theo đúng mẫu PM cung cấp (giống thanh tab ở "Mô hình dữ liệu chủ" — Thiết lập thực thể/thuộc tính/...):
+- Container: `flex border-b border-slate-200 overflow-x-auto bg-white` (bỏ khung bo góc/viền/shadow đã làm ở bước trước).
+- Từng tab: `flex items-center gap-2 px-6 py-4 text-[13px] font-medium border-b-2` — active: `border-blue-600 text-blue-600 bg-blue-50/50 font-bold` + icon màu `text-blue-600`; inactive: `border-transparent text-slate-600 hover:border-slate-300` + icon màu `text-slate-400`.
+
+**File bị ảnh hưởng:** `src/components/pages/master-data/MasterDataReportsPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 49
+
+**Màn hình:** Dữ liệu chủ → Báo cáo tìm kiếm dữ liệu chủ (`MasterDataReportsPage.tsx`).
+
+**Nội dung thay đổi:** Bọc riêng biệt từng khối vào khung nền trắng (`bg-white border border-slate-200 rounded-lg shadow-sm`) theo PM khoanh đỏ:
+1. Thanh tab (3 tab) — thêm khung trắng bao ngoài.
+2. Bộ lọc tìm kiếm (tab Tra cứu) — đổi nền từ `bg-slate-50` sang `bg-white`.
+3. Hàng chọn "Danh mục dữ liệu" (tab Vòng đời) — thêm khung trắng bao ngoài.
+4. Khối "Chi tiết vòng đời dữ liệu" (tab Vòng đời) — gộp tiêu đề + nút Xuất Excel/PDF + bảng vào **chung 1 khung trắng** (trước đó tiêu đề/nút nằm ngoài, chỉ bảng có khung riêng).
+
+Mỗi khối là 1 card riêng biệt, không lồng chung 1 wrapper lớn.
+
+**File bị ảnh hưởng:** `src/components/pages/master-data/MasterDataReportsPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 48
+
+**Màn hình:** Dữ liệu chủ → Báo cáo tìm kiếm dữ liệu chủ (`MasterDataReportsPage.tsx`).
+
+**Nội dung thay đổi:** Bỏ khung trắng (`bg-white rounded-lg shadow-sm border`) bọc ngoài cùng thanh tab + nội dung tab — giờ thanh tab nằm trực tiếp trên nền `bg-slate-50` của trang, khớp với cách bố trí của "Thống kê dữ liệu mở" (không lồng card trắng ngoài cùng, các khối bên trong mỗi tab vẫn tự có card trắng riêng).
+
+**File bị ảnh hưởng:** `src/components/pages/master-data/MasterDataReportsPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 47
+
+**Màn hình:** Dữ liệu chủ → Báo cáo tìm kiếm dữ liệu chủ (`MasterDataReportsPage.tsx`).
+
+**Nội dung thay đổi:** Áp dụng lại toàn bộ thiết kế UI theo đúng phong cách trang "Thống kê dữ liệu mở" (`open-data-report/OpenDataReportPage.tsx`), **chỉ đổi thiết kế — giữ nguyên cấu trúc component, state, logic và dữ liệu mock**:
+1. **Thanh tab** (Tra cứu / Báo cáo sử dụng / Báo cáo vòng đời): đổi từ kiểu `pb-3 pt-4 px-2` sang `flex items-center gap-2 px-3 py-2 border-b-2 text-[13px]`, tab active có thêm nền `bg-blue-50`.
+2. **Bộ lọc tìm kiếm** (tab Tra cứu): đổi khung từ `bg-blue-50 border-blue-200` (nổi bật xanh) sang `bg-slate-50 border-slate-200 shadow-sm` (trung tính) đúng phong cách Open Data; label/input/select đồng bộ `text-[13px]`, input thêm `shadow-sm`.
+3. **Bảng grid** (cả 3 tab: Tra cứu, Báo cáo sử dụng, Báo cáo vòng đời): header đổi từ `text-xs uppercase` sang `text-[13px] text-slate-600`; toàn bộ cell đổi từ `text-sm`/`text-xs` sang `text-[13px]`; badge trạng thái vòng đời đổi từ hình chữ nhật bo nhẹ (`rounded`) sang dạng pill (`rounded-full`) với viền màu, khớp mẫu badge Open Data.
+4. **Nút bấm**: đồng bộ cỡ chữ `text-[13px]` cho toàn bộ nút (Tìm kiếm, Xóa bộ lọc, In, Excel, PDF...). Riêng tab "Báo cáo sử dụng": đổi nút chính "Truy xuất báo cáo" từ `bg-slate-800` sang `bg-blue-600` (primary), nút "Xuất File" từ `bg-blue-600` sang `bg-green-600` (export) — đúng bảng màu primary/export của Open Data.
+5. Đồng bộ cỡ chữ `text-[13px]` cho label/select/thẻ trạng thái/cảnh báo ở tab "Báo cáo vòng đời".
+
+**File bị ảnh hưởng:** `src/components/pages/master-data/MasterDataReportsPage.tsx`.
+
+**Lưu ý:** File này được PM mở khóa `[x]` trong `stauts.md` riêng cho yêu cầu này (phạm vi giới hạn ở trang này, chưa áp dụng cho các trang khác trong module Dữ liệu chủ).
+
 ## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 46
 
 **Màn hình:** Tổng quan → Xử lý dữ liệu (`DashboardReportPage.tsx`, tab KPI "Xử lý").

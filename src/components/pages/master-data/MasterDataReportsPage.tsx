@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, ChangeEvent } from 'react';
-import { Search, Download, FileText, Printer, TrendingUp, AlertCircle, Calendar, Filter, X, ChevronDown, Check, BarChart2, Eye, List } from 'lucide-react';
+import { Search, Download, FileText, Printer, TrendingUp, AlertCircle, Calendar, Filter, X, ChevronDown, Check, BarChart2, Eye, Layers, ChevronLeft, ArrowRight, Edit } from 'lucide-react';
 import {
   AreaChart, Area as AreaR, XAxis as XAxisR, YAxis as YAxisR,
   CartesianGrid, Tooltip as TooltipR, ResponsiveContainer
@@ -47,6 +47,7 @@ const mockSearchResults: {
   recordCode: string;
   fullName: string;
   dataType: string;
+  agency: string;
   birthDate: string;
   cccdNumber: string;
   birthPlace: string;
@@ -58,6 +59,7 @@ const mockSearchResults: {
     recordCode: 'DLDC-2024-001',
     fullName: 'Nguyễn Văn An',
     dataType: 'Công chứng',
+    agency: 'Cục Bổ trợ tư pháp',
     birthDate: '15/01/1990',
     cccdNumber: '001234567890',
     birthPlace: 'Hà Nội',
@@ -69,6 +71,7 @@ const mockSearchResults: {
     recordCode: 'DLDC-2024-002',
     fullName: 'Trần Thị Bình',
     dataType: 'Đăng ký kinh doanh',
+    agency: 'Bộ Kế hoạch và Đầu tư',
     birthDate: '22/05/1985',
     cccdNumber: '001234567891',
     birthPlace: 'TP.HCM',
@@ -80,6 +83,7 @@ const mockSearchResults: {
     recordCode: 'DLDC-2024-003',
     fullName: 'Lê Văn Cường',
     dataType: 'Trợ giúp pháp lý',
+    agency: 'Cục Trợ giúp pháp lý',
     birthDate: '10/08/1992',
     cccdNumber: '001234567892',
     birthPlace: 'Đà Nẵng',
@@ -87,6 +91,43 @@ const mockSearchResults: {
     updateDate: '18/12/2024',
   },
 ];
+
+// Bước xem chi tiết thực thể dữ liệu chủ — giống stepper ở "Mô hình dữ liệu chủ"
+const VIEW_STEPS = [
+  { number: 1, title: 'Khởi tạo dữ liệu chủ' },
+  { number: 2, title: 'Tạo thuộc tính' },
+  { number: 3, title: 'Quy tắc hợp nhất' },
+  { number: 4, title: 'Thiết lập quan hệ' },
+  { number: 5, title: 'Định danh duy nhất' },
+  { number: 6, title: 'Quy tắc đánh phiên bản' },
+  { number: 7, title: 'Phê duyệt' },
+];
+
+// Hệ thống nguồn tương ứng từng loại dữ liệu — dùng để hiển thị trong modal xem chi tiết
+const DATA_TYPE_SYSTEM_NAME: Record<string, string> = {
+  'Công chứng': 'CSDL Công chứng điện tử',
+  'Đăng ký kinh doanh': 'CSDL Đăng ký doanh nghiệp quốc gia',
+  'Trợ giúp pháp lý': 'CSDL Trợ giúp pháp lý',
+  'Hộ tịch': 'CSDL Hộ tịch điện tử',
+};
+
+// Trạng thái vòng đời hiển thị trong modal, suy ra từ trạng thái phê duyệt của bản ghi
+const APPROVAL_TO_LIFECYCLE_LABEL: Record<ApprovalStatus, string> = {
+  draft: 'Đang soạn thảo',
+  reviewing: 'Đang rà soát',
+  pending: 'Đang chờ phê duyệt',
+  approved: 'Hiệu lực',
+  rejected: 'Từ chối',
+  deleted: 'Đã xóa',
+};
+
+// Ánh xạ loại dữ liệu (tab Tra cứu) sang mã danh mục dữ liệu chủ (dùng cho nút "Xem dữ liệu" điều hướng tới Cập nhật dữ liệu chủ)
+const DATA_TYPE_TO_MASTER_ID: Record<string, string> = {
+  'Công chứng': 'md-017',
+  'Đăng ký kinh doanh': 'md-001',
+  'Trợ giúp pháp lý': 'md-035',
+  'Hộ tịch': 'md-002',
+};
 
 const mockUsageReports: UsageReport[] = [
   {
@@ -143,6 +184,8 @@ const DATA_TYPE_COLORS: Record<string, string> = {
 
 const DATA_TYPE_OPTIONS = mockUsageReports.map(u => ({ value: u.dataType, label: u.dataType }));
 
+const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
+
 const mockConnectedSystems = [
   { name: 'Cổng Dịch vụ công Quốc gia', hits: 145000, status: 'Ổn định', lastAccess: '25/12/2024 14:30' },
   { name: 'Hệ thống Hộ tịch điện tử', hits: 89000, status: 'Ổn định', lastAccess: '25/12/2024 14:25' },
@@ -193,7 +236,11 @@ const mockLifecycleData: LifecycleData[] = [
   },
 ];
 
-export default function MasterDataReportsPage() {
+interface MasterDataReportsPageProps {
+  onNavigate?: (page: string) => void;
+}
+
+export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsPageProps = {}) {
   const [activeTab, setActiveTab] = useState<TabType>('search');
   const [showFilters, setShowFilters] = useState(true);
   const [searchFilters, setSearchFilters] = useState<SearchFilter>({
@@ -206,6 +253,9 @@ export default function MasterDataReportsPage() {
   const [searchResults, setSearchResults] = useState(mockSearchResults);
   const [selectedRecord, setSelectedRecord] = useState<any>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [viewStep, setViewStep] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   // ─── Báo cáo sử dụng dữ liệu chủ ────────────────────────────────────────
   const [selectedDataTypes, setSelectedDataTypes] = useState<string[]>([]);
@@ -215,8 +265,16 @@ export default function MasterDataReportsPage() {
   const [hasSearchedUsage, setHasSearchedUsage] = useState(false);
   const [appliedUsageReports, setAppliedUsageReports] = useState(mockUsageReports);
 
+  // ─── Báo cáo vòng đời dữ liệu chủ ───────────────────────────────────────
+  const [lifecycleDataType, setLifecycleDataType] = useState('');
+  const [lifecycleStatusFilter, setLifecycleStatusFilter] = useState('');
+  const [showLifecycleExportMenu, setShowLifecycleExportMenu] = useState(false);
+  const [hasSearchedLifecycle, setHasSearchedLifecycle] = useState(false);
+  const [appliedLifecycleData, setAppliedLifecycleData] = useState<LifecycleData[]>([]);
+
   const dataTypeRef = useRef<HTMLDivElement | null>(null);
   const usageExportRef = useRef<HTMLDivElement | null>(null);
+  const lifecycleExportRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -226,10 +284,26 @@ export default function MasterDataReportsPage() {
       if (usageExportRef.current && !usageExportRef.current.contains(e.target as Node)) {
         setShowUsageExportMenu(false);
       }
+      if (lifecycleExportRef.current && !lifecycleExportRef.current.contains(e.target as Node)) {
+        setShowLifecycleExportMenu(false);
+      }
     };
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
+
+  const handleSearchLifecycle = () => {
+    let result = mockLifecycleData;
+    if (lifecycleDataType) result = result.filter(d => d.dataType === lifecycleDataType);
+    if (lifecycleStatusFilter) result = result.filter(d => d.status === lifecycleStatusFilter);
+    setAppliedLifecycleData(result);
+    setHasSearchedLifecycle(true);
+  };
+
+  const handleExportLifecycleFile = (format: string) => {
+    setShowLifecycleExportMenu(false);
+    alert(`Đang xuất dữ liệu sang định dạng ${format}...`);
+  };
 
   const toggleDataType = (value: string) => {
     setSelectedDataTypes(prev =>
@@ -264,10 +338,17 @@ export default function MasterDataReportsPage() {
     alert(`Đang xuất dữ liệu sang định dạng ${format}...`);
   };
 
+  const totalPages = Math.max(1, Math.ceil(searchResults.length / pageSize));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedResults = searchResults.slice((safePage - 1) * pageSize, safePage * pageSize);
+  const startItem = searchResults.length === 0 ? 0 : (safePage - 1) * pageSize + 1;
+  const endItem = Math.min(safePage * pageSize, searchResults.length);
+
   const handleSearch = () => {
     // Mock search logic
     console.log('Searching with filters:', searchFilters);
     // In real app, call API with filters
+    setCurrentPage(1);
   };
 
   const handleResetFilters = () => {
@@ -278,11 +359,18 @@ export default function MasterDataReportsPage() {
       dateFrom: '',
       dateTo: '',
     });
+    setCurrentPage(1);
   };
 
   const handleViewDetail = (record: any) => {
     setSelectedRecord(record);
+    setViewStep(1);
     setShowDetailModal(true);
+  };
+
+  const handleGoToUpdate = (record: any) => {
+    const masterId = DATA_TYPE_TO_MASTER_ID[record.dataType] ?? 'md-001';
+    onNavigate?.(`master-data-goto-${masterId}`);
   };
 
   const handleExportExcel = () => {
@@ -301,75 +389,67 @@ export default function MasterDataReportsPage() {
     <div className="flex-1 overflow-auto bg-slate-50">
       <div className="p-6">
         {/* Tabs */}
-        <div className="bg-white rounded-lg shadow-sm border border-slate-200 mb-6">
-          <div className="border-b border-slate-200">
-            <div className="flex gap-6 px-6">
-              <button
-                onClick={() => setActiveTab('search')}
-                className={`pb-3 pt-4 px-2 border-b-2 transition-colors ${
-                  activeTab === 'search'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <Search className="w-4 h-4" />
-                  <span>Tra cứu dữ liệu chủ</span>
-                </div>
-              </button>
-              <button
-                onClick={() => setActiveTab('usage')}
-                className={`pb-3 pt-4 px-2 border-b-2 transition-colors ${
-                  activeTab === 'usage'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4" />
-                  <span>Báo cáo sử dụng dữ liệu chủ</span>
-                </div>
-              </button>
-              <button
-                onClick={() => setActiveTab('lifecycle')}
-                className={`pb-3 pt-4 px-2 border-b-2 transition-colors ${
-                  activeTab === 'lifecycle'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  <span>Báo cáo vòng đời dữ liệu</span>
-                </div>
-              </button>
-            </div>
+        <div className="mb-6">
+          <div className="flex border-b border-slate-200 overflow-x-auto bg-white">
+            <button
+              onClick={() => setActiveTab('search')}
+              className={`flex items-center gap-2 px-6 py-4 text-[13px] font-medium transition-all border-b-2 cursor-pointer whitespace-nowrap ${
+                activeTab === 'search'
+                  ? 'border-blue-600 text-blue-600 bg-blue-50/50 font-bold'
+                  : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
+              }`}
+            >
+              <Search className={`w-4 h-4 ${activeTab === 'search' ? 'text-blue-600' : 'text-slate-400'}`} />
+              Tra cứu dữ liệu chủ
+            </button>
+            <button
+              onClick={() => setActiveTab('usage')}
+              className={`flex items-center gap-2 px-6 py-4 text-[13px] font-medium transition-all border-b-2 cursor-pointer whitespace-nowrap ${
+                activeTab === 'usage'
+                  ? 'border-blue-600 text-blue-600 bg-blue-50/50 font-bold'
+                  : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
+              }`}
+            >
+              <TrendingUp className={`w-4 h-4 ${activeTab === 'usage' ? 'text-blue-600' : 'text-slate-400'}`} />
+              Báo cáo sử dụng dữ liệu chủ
+            </button>
+            <button
+              onClick={() => setActiveTab('lifecycle')}
+              className={`flex items-center gap-2 px-6 py-4 text-[13px] font-medium transition-all border-b-2 cursor-pointer whitespace-nowrap ${
+                activeTab === 'lifecycle'
+                  ? 'border-blue-600 text-blue-600 bg-blue-50/50 font-bold'
+                  : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
+              }`}
+            >
+              <Calendar className={`w-4 h-4 ${activeTab === 'lifecycle' ? 'text-blue-600' : 'text-slate-400'}`} />
+              Báo cáo vòng đời dữ liệu
+            </button>
           </div>
 
           {/* Tab Content */}
-          <div className="p-6">
+          <div className="pt-6">
             {/* Search Tab */}
             {activeTab === 'search' && (
               <div className="space-y-6">
                 {/* Filter Section */}
                 {showFilters && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                  <div className="bg-white border border-slate-200 rounded-lg p-5 shadow-sm">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2">
-                        <Filter className="w-5 h-5 text-blue-600" />
-                        <h3 className="text-blue-900">Bộ lọc tìm kiếm</h3>
+                        <Filter className="w-4 h-4 text-slate-500" />
+                        <h3 className="text-[13px] font-medium text-slate-700">Bộ lọc tìm kiếm</h3>
                       </div>
                       <button
                         onClick={() => setShowFilters(false)}
-                        className="p-1 hover:bg-blue-100 rounded transition-colors"
+                        className="p-1 hover:bg-slate-200 rounded transition-colors"
                       >
-                        <X className="w-4 h-4 text-blue-600" />
+                        <X className="w-4 h-4 text-slate-500" />
                       </button>
                     </div>
 
                     <div className="grid grid-cols-3 gap-4 mb-4">
-                      <div>
-                        <label className="block text-sm text-slate-700 mb-2">
+                      <div className="space-y-1.5">
+                        <label className="block text-[13px] font-medium text-slate-700">
                           Tìm kiếm theo mã, tên bản ghi dữ liệu chủ
                         </label>
                         <input
@@ -379,11 +459,11 @@ export default function MasterDataReportsPage() {
                             setSearchFilters({ ...searchFilters, keyword: e.target.value })
                           }
                           placeholder="Nhập mã hoặc tên bản ghi..."
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                         />
                       </div>
-                      <div>
-                        <label className="block text-sm text-slate-700 mb-2">
+                      <div className="space-y-1.5">
+                        <label className="block text-[13px] font-medium text-slate-700">
                           Loại dữ liệu
                         </label>
                         <select
@@ -391,7 +471,7 @@ export default function MasterDataReportsPage() {
                           onChange={(e) =>
                             setSearchFilters({ ...searchFilters, dataType: e.target.value })
                           }
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                         >
                           <option value="">Tất cả</option>
                           <option value="congchung">Công chứng</option>
@@ -400,8 +480,8 @@ export default function MasterDataReportsPage() {
                           <option value="hotich">Hộ tịch</option>
                         </select>
                       </div>
-                      <div>
-                        <label className="block text-sm text-slate-700 mb-2">
+                      <div className="space-y-1.5">
+                        <label className="block text-[13px] font-medium text-slate-700">
                           Trạng thái phê duyệt
                         </label>
                         <select
@@ -409,7 +489,7 @@ export default function MasterDataReportsPage() {
                           onChange={(e) =>
                             setSearchFilters({ ...searchFilters, approvalStatus: e.target.value })
                           }
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                         >
                           <option value="">Tất cả</option>
                           <option value="draft">Chưa phê duyệt</option>
@@ -420,8 +500,8 @@ export default function MasterDataReportsPage() {
                           <option value="deleted">Đã xóa</option>
                         </select>
                       </div>
-                      <div>
-                        <label className="block text-sm text-slate-700 mb-2">
+                      <div className="space-y-1.5">
+                        <label className="block text-[13px] font-medium text-slate-700">
                           Từ ngày
                         </label>
                         <input
@@ -430,11 +510,11 @@ export default function MasterDataReportsPage() {
                           onChange={(e) =>
                             setSearchFilters({ ...searchFilters, dateFrom: e.target.value })
                           }
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                         />
                       </div>
-                      <div>
-                        <label className="block text-sm text-slate-700 mb-2">
+                      <div className="space-y-1.5">
+                        <label className="block text-[13px] font-medium text-slate-700">
                           Đến ngày
                         </label>
                         <input
@@ -443,7 +523,7 @@ export default function MasterDataReportsPage() {
                           onChange={(e) =>
                             setSearchFilters({ ...searchFilters, dateTo: e.target.value })
                           }
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                         />
                       </div>
                     </div>
@@ -451,13 +531,13 @@ export default function MasterDataReportsPage() {
                     <div className="flex items-center justify-end gap-3">
                       <button
                         onClick={handleResetFilters}
-                        className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+                        className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-[13px] shadow-sm"
                       >
                         Xóa bộ lọc
                       </button>
                       <button
                         onClick={handleSearch}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-[13px] shadow-sm"
                       >
                         <Search className="w-4 h-4" />
                         Tìm kiếm
@@ -469,7 +549,7 @@ export default function MasterDataReportsPage() {
                 {!showFilters && (
                   <button
                     onClick={() => setShowFilters(true)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-[13px] shadow-sm"
                   >
                     <Filter className="w-4 h-4" />
                     Hiển thị bộ lọc
@@ -480,29 +560,29 @@ export default function MasterDataReportsPage() {
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
-                      <FileText className="w-5 h-5 text-slate-600" />
-                      <h3 className="text-slate-900">
+                      <FileText className="w-4 h-4 text-slate-500" />
+                      <h3 className="text-[13px] font-medium text-slate-700">
                         Kết quả tìm kiếm ({searchResults.length} bản ghi)
                       </h3>
                     </div>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={handlePrint}
-                        className="px-3 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors flex items-center gap-2"
+                        className="px-3 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors flex items-center gap-2 text-[13px]"
                       >
                         <Printer className="w-4 h-4" />
                         In
                       </button>
                       <button
                         onClick={handleExportExcel}
-                        className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+                        className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 text-[13px]"
                       >
                         <Download className="w-4 h-4" />
                         Excel
                       </button>
                       <button
                         onClick={handleExportPDF}
-                        className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+                        className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2 text-[13px]"
                       >
                         <Download className="w-4 h-4" />
                         PDF
@@ -510,65 +590,138 @@ export default function MasterDataReportsPage() {
                     </div>
                   </div>
 
-                  <div className="border border-slate-200 rounded-lg overflow-hidden">
-                    <table className="w-full">
-                      <thead className="bg-slate-50 border-b border-slate-200">
-                        <tr>
-                          <th className="px-4 py-3 text-left text-xs text-slate-700 uppercase">
-                            STT
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs text-slate-700 uppercase">
-                            Mã dữ liệu
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs text-slate-700 uppercase">
-                            Tên dữ liệu chủ
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs text-slate-700 uppercase">
-                            Loại dữ liệu
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs text-slate-700 uppercase">
-                            Ngày cập nhật
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs text-slate-700 uppercase">
-                            Trạng thái phê duyệt
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs text-slate-700 uppercase">
-                            Thao tác
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-200">
-                        {searchResults.map((record, index) => (
-                          <tr key={record.id} className="hover:bg-slate-50">
-                            <td className="px-4 py-3 text-sm text-slate-900">{index + 1}</td>
-                            <td className="px-4 py-3 text-sm text-blue-600">
-                              {record.recordCode}
-                            </td>
-                            <td className="px-4 py-3 text-sm text-slate-900">
-                              {record.fullName}
-                            </td>
-                            <td className="px-4 py-3 text-sm text-slate-600">
-                              {record.dataType}
-                            </td>
-                            <td className="px-4 py-3 text-sm text-slate-600">
-                              {record.updateDate}
-                            </td>
-                            <td className="px-4 py-3">
-                              <ApprovalBadge status={record.approvalStatus} />
-                            </td>
-                            <td className="px-4 py-3">
-                              <button
-                                onClick={() => handleViewDetail(record)}
-                                className="p-1.5 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
-                                title="Xem chi tiết bản ghi"
-                              >
-                                <Eye className="w-4 h-4" />
-                              </button>
-                            </td>
+                  <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead className="bg-slate-50 border-b border-slate-200">
+                          <tr>
+                            <th className="px-4 py-3 text-left text-[13px] text-slate-600">
+                              STT
+                            </th>
+                            <th className="px-4 py-3 text-left text-[13px] text-slate-600">
+                              Mã dữ liệu
+                            </th>
+                            <th className="px-4 py-3 text-left text-[13px] text-slate-600">
+                              Tên dữ liệu chủ
+                            </th>
+                            <th className="px-4 py-3 text-left text-[13px] text-slate-600">
+                              Loại dữ liệu
+                            </th>
+                            <th className="px-4 py-3 text-left text-[13px] text-slate-600">
+                              Cơ quan quản lý
+                            </th>
+                            <th className="px-4 py-3 text-left text-[13px] text-slate-600">
+                              Ngày cập nhật
+                            </th>
+                            <th className="px-4 py-3 text-left text-[13px] text-slate-600">
+                              Trạng thái phê duyệt
+                            </th>
+                            <th className="px-4 py-3 text-left text-[13px] text-slate-600">
+                              Thao tác
+                            </th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody className="divide-y divide-slate-200">
+                          {paginatedResults.map((record, index) => (
+                            <tr key={record.id} className="hover:bg-slate-50">
+                              <td className="px-4 py-3 text-[13px] text-slate-900">{startItem + index}</td>
+                              <td className="px-4 py-3 text-[13px] text-blue-600">
+                                {record.recordCode}
+                              </td>
+                              <td className="px-4 py-3 text-[13px] text-slate-900">
+                                {record.fullName}
+                              </td>
+                              <td className="px-4 py-3 text-[13px] text-slate-600">
+                                {record.dataType}
+                              </td>
+                              <td className="px-4 py-3 text-[13px] text-slate-600">
+                                {record.agency}
+                              </td>
+                              <td className="px-4 py-3 text-[13px] text-slate-600">
+                                {record.updateDate}
+                              </td>
+                              <td className="px-4 py-3">
+                                <ApprovalBadge status={record.approvalStatus} />
+                              </td>
+                              <td className="px-4 py-3">
+                                <div className="flex items-center gap-1">
+                                  <button
+                                    onClick={() => handleViewDetail(record)}
+                                    className="p-1.5 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                                    title="Xem chi tiết bản ghi"
+                                  >
+                                    <Eye className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleGoToUpdate(record)}
+                                    className="p-1.5 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                                    title="Xem dữ liệu tại Cập nhật dữ liệu chủ"
+                                  >
+                                    <Layers className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Pagination */}
+                    {searchResults.length > 0 && (
+                      <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-white text-[13px] font-medium">
+                        <div className="flex items-center gap-2">
+                          <span className="text-slate-600 font-normal">Hiển thị</span>
+                          <select
+                            aria-label="Số bản ghi trên trang"
+                            value={pageSize}
+                            onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}
+                            className="px-2 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 bg-white text-[13px] cursor-pointer font-medium"
+                            title="Số bản ghi trên trang"
+                          >
+                            {PAGE_SIZE_OPTIONS.map(n => (
+                              <option key={n} value={n}>{n}</option>
+                            ))}
+                          </select>
+                          <span className="text-slate-600 font-normal">bản ghi/trang</span>
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                          <span className="text-slate-600 font-normal">
+                            {startItem} - {endItem} / {searchResults.length}
+                          </span>
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => setCurrentPage(Math.max(1, safePage - 1))}
+                              disabled={safePage === 1}
+                              className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
+                            >
+                              Trước
+                            </button>
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                              <button
+                                key={page}
+                                onClick={() => setCurrentPage(page)}
+                                className={`px-3 py-1.5 border rounded-xl font-medium text-[13px] transition-colors cursor-pointer ${
+                                  safePage === page
+                                    ? 'bg-blue-600 border-blue-600 text-white'
+                                    : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                                }`}
+                              >
+                                {page}
+                              </button>
+                            ))}
+                            <button
+                              onClick={() => setCurrentPage(Math.min(totalPages, safePage + 1))}
+                              disabled={safePage === totalPages}
+                              className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
+                            >
+                              Sau
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -678,7 +831,7 @@ export default function MasterDataReportsPage() {
                     <button
                       type="button"
                       onClick={handleSearchUsage}
-                      className="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors font-medium text-[13px] shadow-sm shrink-0 active:scale-95"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors font-medium text-[13px] shadow-sm shrink-0 active:scale-95"
                     >
                       <Search className="w-4 h-4" />
                       Truy xuất báo cáo
@@ -688,7 +841,7 @@ export default function MasterDataReportsPage() {
                       <button
                         type="button"
                         onClick={() => setShowUsageExportMenu(prev => !prev)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors font-medium text-[13px] shadow-sm"
+                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors font-medium text-[13px] shadow-sm"
                       >
                         <FileText className="w-4 h-4" />
                         Xuất File
@@ -797,192 +950,253 @@ export default function MasterDataReportsPage() {
             {/* Lifecycle Report Tab */}
             {activeTab === 'lifecycle' && (
               <div className="space-y-6">
-                {/* Data Type Selector */}
-                <div className="flex items-center gap-4">
-                  <label className="text-sm text-slate-700">Danh mục dữ liệu:</label>
-                  <select className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option>Tất cả</option>
-                    <option>Công chứng</option>
-                    <option>Đăng ký kinh doanh</option>
-                    <option>Trợ giúp pháp lý</option>
-                    <option>Hộ tịch</option>
-                  </select>
-                  <select className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option>Tất cả trạng thái</option>
-                    <option>Hoạt động bình thường</option>
-                    <option>Sắp hết hiệu lực</option>
-                    <option>Đã hết hiệu lực</option>
-                  </select>
-                </div>
-
-                {/* Warning Alert */}
-                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="text-sm text-orange-900 mb-1">
-                        Cảnh báo dữ liệu sắp hết hiệu lực
-                      </h4>
-                      <p className="text-sm text-orange-700">
-                        Có <strong>2 bản ghi</strong> sắp hết hiệu lực trong 30 ngày tới và{' '}
-                        <strong>1 bản ghi</strong> đã hết hiệu lực cần xử lý.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Lifecycle Status Cards */}
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="bg-white border border-green-200 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="text-sm text-slate-700">Hoạt động bình thường</div>
-                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    </div>
-                    <div className="text-2xl text-slate-900 mb-1">1</div>
-                    <div className="text-xs text-slate-600">Còn hơn 30 ngày</div>
-                  </div>
-                  <div className="bg-white border border-orange-200 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="text-sm text-slate-700">Sắp hết hiệu lực</div>
-                      <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-                    </div>
-                    <div className="text-2xl text-slate-900 mb-1">2</div>
-                    <div className="text-xs text-slate-600">Còn dưới 30 ngày</div>
-                  </div>
-                  <div className="bg-white border border-red-200 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="text-sm text-slate-700">Đã hết hiệu lực</div>
-                      <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                    </div>
-                    <div className="text-2xl text-slate-900 mb-1">1</div>
-                    <div className="text-xs text-slate-600">Cần xử lý ngay</div>
-                  </div>
-                </div>
-
-                {/* Lifecycle Table */}
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-slate-900">Chi tiết vòng đời dữ liệu</h3>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={handleExportExcel}
-                        className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+                {/* Control Panel */}
+                <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm relative z-30">
+                  <div className="flex flex-wrap items-end gap-3">
+                    <div className="min-w-[200px]">
+                      <label className="block text-[12px] text-slate-500 mb-1 font-medium">Danh mục dữ liệu</label>
+                      <select
+                        title="Danh mục dữ liệu"
+                        value={lifecycleDataType}
+                        onChange={(e: ChangeEvent<HTMLSelectElement>) => setLifecycleDataType(e.target.value)}
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                       >
-                        <Download className="w-4 h-4" />
-                        Xuất Excel
-                      </button>
-                      <button
-                        onClick={handleExportPDF}
-                        className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+                        <option value="">Tất cả</option>
+                        <option value="Công chứng">Công chứng</option>
+                        <option value="Đăng ký kinh doanh">Đăng ký kinh doanh</option>
+                        <option value="Trợ giúp pháp lý">Trợ giúp pháp lý</option>
+                        <option value="Hộ tịch">Hộ tịch</option>
+                      </select>
+                    </div>
+                    <div className="min-w-[190px]">
+                      <label className="block text-[12px] text-slate-500 mb-1 font-medium">Trạng thái vòng đời</label>
+                      <select
+                        title="Trạng thái vòng đời"
+                        value={lifecycleStatusFilter}
+                        onChange={(e: ChangeEvent<HTMLSelectElement>) => setLifecycleStatusFilter(e.target.value)}
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                       >
-                        <Download className="w-4 h-4" />
-                        Xuất PDF
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="active">Hoạt động bình thường</option>
+                        <option value="warning">Sắp hết hiệu lực</option>
+                        <option value="expired">Đã hết hiệu lực</option>
+                      </select>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleSearchLifecycle}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors font-medium text-[13px] shadow-sm shrink-0 active:scale-95"
+                    >
+                      <Search className="w-4 h-4" />
+                      Truy xuất báo cáo
+                    </button>
+
+                    <div className="relative shrink-0" ref={lifecycleExportRef}>
+                      <button
+                        type="button"
+                        onClick={() => setShowLifecycleExportMenu(prev => !prev)}
+                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors font-medium text-[13px] shadow-sm"
+                      >
+                        <FileText className="w-4 h-4" />
+                        Xuất File
+                        <ChevronDown className="w-4 h-4" />
                       </button>
+                      {showLifecycleExportMenu && (
+                        <div className="absolute right-0 mt-2 w-44 rounded-xl border border-slate-200 bg-white shadow-xl z-50 overflow-hidden">
+                          {['Excel', 'PDF', 'CSV'].map(fmt => (
+                            <button
+                              key={fmt}
+                              type="button"
+                              onClick={() => handleExportLifecycleFile(fmt)}
+                              className="w-full text-left px-4 py-2.5 hover:bg-slate-50 text-sm text-slate-700 transition-colors"
+                            >
+                              {fmt}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
-
-                  <div className="border border-slate-200 rounded-lg overflow-hidden">
-                    <table className="w-full">
-                      <thead className="bg-slate-50 border-b border-slate-200">
-                        <tr>
-                          <th className="px-4 py-3 text-left text-xs text-slate-700 uppercase">
-                            STT
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs text-slate-700 uppercase">
-                            Mã dữ liệu
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs text-slate-700 uppercase">
-                            Tên dữ liệu chủ
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs text-slate-700 uppercase">
-                            Loại dữ liệu
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs text-slate-700 uppercase">
-                            Ngày tạo
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs text-slate-700 uppercase">
-                            Ngày hết hạn
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs text-slate-700 uppercase">
-                            Số ngày còn lại
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs text-slate-700 uppercase">
-                            Trạng thái
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-200">
-                        {mockLifecycleData.map((data, index) => (
-                          <tr key={data.id} className="hover:bg-slate-50">
-                            <td className="px-4 py-3 text-sm text-slate-900">{index + 1}</td>
-                            <td className="px-4 py-3 text-sm text-blue-600">
-                              {data.recordCode}
-                            </td>
-                            <td className="px-4 py-3 text-sm text-slate-900">
-                              {data.fullName}
-                            </td>
-                            <td className="px-4 py-3 text-sm text-slate-600">
-                              {data.dataType}
-                            </td>
-                            <td className="px-4 py-3 text-sm text-slate-600">
-                              {data.createdDate}
-                            </td>
-                            <td className="px-4 py-3 text-sm text-slate-600">
-                              {data.expiryDate}
-                            </td>
-                            <td className="px-4 py-3 text-sm">
-                              <span
-                                className={
-                                  data.daysRemaining < 0
-                                    ? 'text-red-700'
-                                    : data.daysRemaining < 30
-                                    ? 'text-orange-700'
-                                    : 'text-green-700'
-                                }
-                              >
-                                {data.daysRemaining < 0
-                                  ? `Quá hạn ${Math.abs(data.daysRemaining)} ngày`
-                                  : `${data.daysRemaining} ngày`}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3">
-                              <span
-                                className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs ${
-                                  data.status === 'active'
-                                    ? 'bg-green-100 text-green-800'
-                                    : data.status === 'warning'
-                                    ? 'bg-orange-100 text-orange-800'
-                                    : 'bg-red-100 text-red-800'
-                                }`}
-                              >
-                                {data.status === 'active'
-                                  ? 'Hoạt động'
-                                  : data.status === 'warning'
-                                  ? 'Sắp hết hạn'
-                                  : 'Đã hết hạn'}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
                 </div>
+
+                {/* Chưa truy xuất — empty state */}
+                {!hasSearchedLifecycle && (
+                  <div className="bg-white border border-slate-200 rounded-2xl shadow-sm flex flex-col items-center justify-center py-20 gap-4 text-slate-400">
+                    <BarChart2 className="w-12 h-12 opacity-30" />
+                    <p className="text-[13px] font-medium">Chọn danh mục dữ liệu, trạng thái vòng đời và bấm <span className="text-slate-600 font-semibold">Truy xuất báo cáo</span> để xem kết quả</p>
+                  </div>
+                )}
+
+                {hasSearchedLifecycle && (() => {
+                  const activeCount = appliedLifecycleData.filter(d => d.status === 'active').length;
+                  const warningCount = appliedLifecycleData.filter(d => d.status === 'warning').length;
+                  const expiredCount = appliedLifecycleData.filter(d => d.status === 'expired').length;
+                  return (
+                    <>
+                      {/* Warning Alert */}
+                      {(warningCount > 0 || expiredCount > 0) && (
+                        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                          <div className="flex items-start gap-3">
+                            <AlertCircle className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
+                            <div>
+                              <h4 className="text-[13px] font-medium text-orange-900 mb-1">
+                                Cảnh báo dữ liệu sắp hết hiệu lực
+                              </h4>
+                              <p className="text-[13px] text-orange-700">
+                                Có <strong>{warningCount} bản ghi</strong> sắp hết hiệu lực trong 30 ngày tới và{' '}
+                                <strong>{expiredCount} bản ghi</strong> đã hết hiệu lực cần xử lý.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Lifecycle Status Cards */}
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="bg-white border border-green-200 rounded-lg p-4 shadow-sm">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="text-[13px] font-medium text-slate-700">Hoạt động bình thường</div>
+                            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                          </div>
+                          <div className="text-2xl text-slate-900 mb-1">{activeCount}</div>
+                          <div className="text-[13px] text-slate-600">Còn hơn 30 ngày</div>
+                        </div>
+                        <div className="bg-white border border-orange-200 rounded-lg p-4 shadow-sm">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="text-[13px] font-medium text-slate-700">Sắp hết hiệu lực</div>
+                            <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                          </div>
+                          <div className="text-2xl text-slate-900 mb-1">{warningCount}</div>
+                          <div className="text-[13px] text-slate-600">Còn dưới 30 ngày</div>
+                        </div>
+                        <div className="bg-white border border-red-200 rounded-lg p-4 shadow-sm">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="text-[13px] font-medium text-slate-700">Đã hết hiệu lực</div>
+                            <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                          </div>
+                          <div className="text-2xl text-slate-900 mb-1">{expiredCount}</div>
+                          <div className="text-[13px] text-slate-600">Cần xử lý ngay</div>
+                        </div>
+                      </div>
+
+                      {/* Lifecycle Table */}
+                      <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+                        <div className="p-4 border-b border-slate-200">
+                          <h3 className="text-[13px] font-medium text-slate-700">Chi tiết vòng đời dữ liệu</h3>
+                        </div>
+
+                        <div>
+                          <div className="overflow-x-auto">
+                            <table className="w-full">
+                              <thead className="bg-slate-50 border-b border-slate-200">
+                                <tr>
+                                  <th className="px-4 py-3 text-left text-[13px] text-slate-600">
+                                    STT
+                                  </th>
+                                  <th className="px-4 py-3 text-left text-[13px] text-slate-600">
+                                    Mã dữ liệu
+                                  </th>
+                                  <th className="px-4 py-3 text-left text-[13px] text-slate-600">
+                                    Tên dữ liệu chủ
+                                  </th>
+                                  <th className="px-4 py-3 text-left text-[13px] text-slate-600">
+                                    Loại dữ liệu
+                                  </th>
+                                  <th className="px-4 py-3 text-left text-[13px] text-slate-600">
+                                    Ngày tạo
+                                  </th>
+                                  <th className="px-4 py-3 text-left text-[13px] text-slate-600">
+                                    Ngày hết hạn
+                                  </th>
+                                  <th className="px-4 py-3 text-left text-[13px] text-slate-600">
+                                    Số ngày còn lại
+                                  </th>
+                                  <th className="px-4 py-3 text-left text-[13px] text-slate-600">
+                                    Trạng thái
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-200">
+                                {appliedLifecycleData.length === 0 && (
+                                  <tr>
+                                    <td colSpan={8} className="px-4 py-6 text-center text-[13px] text-slate-400 italic">
+                                      Không có bản ghi phù hợp với bộ lọc đã chọn
+                                    </td>
+                                  </tr>
+                                )}
+                                {appliedLifecycleData.map((data, index) => (
+                                  <tr key={data.id} className="hover:bg-slate-50">
+                                    <td className="px-4 py-3 text-[13px] text-slate-900">{index + 1}</td>
+                                    <td className="px-4 py-3 text-[13px] text-blue-600">
+                                      {data.recordCode}
+                                    </td>
+                                    <td className="px-4 py-3 text-[13px] text-slate-900">
+                                      {data.fullName}
+                                    </td>
+                                    <td className="px-4 py-3 text-[13px] text-slate-600">
+                                      {data.dataType}
+                                    </td>
+                                    <td className="px-4 py-3 text-[13px] text-slate-600">
+                                      {data.createdDate}
+                                    </td>
+                                    <td className="px-4 py-3 text-[13px] text-slate-600">
+                                      {data.expiryDate}
+                                    </td>
+                                    <td className="px-4 py-3 text-[13px]">
+                                      <span
+                                        className={
+                                          data.daysRemaining < 0
+                                            ? 'text-red-700'
+                                            : data.daysRemaining < 30
+                                            ? 'text-orange-700'
+                                            : 'text-green-700'
+                                        }
+                                      >
+                                        {data.daysRemaining < 0
+                                          ? `Quá hạn ${Math.abs(data.daysRemaining)} ngày`
+                                          : `${data.daysRemaining} ngày`}
+                                      </span>
+                                    </td>
+                                    <td className="px-4 py-3">
+                                      <span
+                                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[13px] ${
+                                          data.status === 'active'
+                                            ? 'bg-green-50 text-green-700 border border-green-200'
+                                            : data.status === 'warning'
+                                            ? 'bg-orange-50 text-orange-700 border border-orange-200'
+                                            : 'bg-red-50 text-red-700 border border-red-200'
+                                        }`}
+                                      >
+                                        {data.status === 'active'
+                                          ? 'Hoạt động'
+                                          : data.status === 'warning'
+                                          ? 'Sắp hết hạn'
+                                          : 'Đã hết hạn'}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Detail Modal — giống modal "Chi tiết bản ghi" tại Cập nhật dữ liệu chủ */}
+      {/* Detail Modal — giống modal "Xem chi tiết thực thể dữ liệu chủ" tại Mô hình dữ liệu chủ */}
       {showDetailModal && selectedRecord && (
         <div className="fixed inset-0 flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                <Eye className="w-5 h-5 text-blue-600" />
-                Chi tiết bản ghi
-              </h3>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-slate-200">
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between shrink-0">
+              <h3 className="text-[15px] font-bold text-slate-800">Xem chi tiết thực thể dữ liệu chủ</h3>
               <button
                 onClick={() => setShowDetailModal(false)}
                 className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
@@ -992,45 +1206,128 @@ export default function MasterDataReportsPage() {
               </button>
             </div>
 
-            <div className="px-6 pt-3 border-b border-slate-200 flex items-center gap-1 flex-wrap">
-              <button
-                className="flex items-center gap-1.5 px-3 py-2 text-[13px] font-medium border-b-2 border-blue-600 text-blue-600 transition-colors cursor-pointer"
-              >
-                <List className="w-4 h-4" />
-                Giá trị dữ liệu chủ
-              </button>
-            </div>
-
-            <div className="p-6 space-y-3 text-[13px] overflow-y-auto">
-              <div className="flex items-center gap-2">
-                <span className="text-slate-500">Trạng thái:</span>
-                <ApprovalBadge status={selectedRecord.approvalStatus} />
-              </div>
-              <div className="border border-slate-200 rounded-lg divide-y divide-slate-100">
-                {[
-                  { label: 'Mã dữ liệu', key: 'recordCode' },
-                  { label: 'Họ và tên', key: 'fullName' },
-                  { label: 'Ngày sinh', key: 'birthDate' },
-                  { label: 'Số CCCD', key: 'cccdNumber' },
-                  { label: 'Nơi sinh', key: 'birthPlace' },
-                  { label: 'Loại dữ liệu', key: 'dataType' },
-                  { label: 'Ngày cập nhật', key: 'updateDate' },
-                ].map(col => (
-                  <div key={col.key} className="flex px-3 py-2">
-                    <span className="w-40 shrink-0 text-slate-500">{col.label}</span>
-                    <span className="flex-1 text-slate-800 font-medium break-words">{selectedRecord[col.key] || <span className="text-slate-400 italic">(trống)</span>}</span>
+            {/* Stepper */}
+            <div className="px-6 py-4 border-b border-slate-200 bg-slate-50 shrink-0">
+              <div className="flex items-start justify-between">
+                {VIEW_STEPS.map((step, index) => (
+                  <div key={step.number} className="flex items-start flex-1">
+                    <div className="flex flex-col items-center flex-1">
+                      <button
+                        type="button"
+                        onClick={() => setViewStep(step.number)}
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-[12px] transition-colors cursor-pointer flex-shrink-0 ${
+                          viewStep === step.number
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-green-600 text-white hover:bg-green-700'
+                        }`}
+                        title={step.title}
+                      >
+                        {viewStep === step.number ? step.number : <Check className="w-4 h-4" />}
+                      </button>
+                      <p className={`text-[12px] mt-1.5 text-center ${viewStep === step.number ? 'text-blue-600 font-medium' : 'text-slate-500'}`}>
+                        {step.title}
+                      </p>
+                    </div>
+                    {index < VIEW_STEPS.length - 1 && (
+                      <div className="flex-1 h-0.5 bg-slate-200 mx-1 mt-4" />
+                    )}
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end">
+            <div className="p-6 space-y-4 text-[13px] overflow-y-auto">
+              {viewStep === 1 ? (
+                <>
+                  <div>
+                    <label className="block text-slate-500 mb-1">Mã thực thể</label>
+                    <div className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 font-semibold text-slate-800">
+                      {selectedRecord.recordCode}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-slate-500 mb-1">Tên dữ liệu chủ</label>
+                    <div className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-800">
+                      Bộ dữ liệu chủ {selectedRecord.dataType}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-slate-500 mb-1">Loại thực thể</label>
+                      <div className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-800">
+                        Thực thể Cá nhân
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-slate-500 mb-1">Phạm vi sử dụng</label>
+                      <div className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-800">
+                        Cấp quốc gia
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-slate-500 mb-1">Đơn vị chủ quản</label>
+                    <div className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-800">
+                      {selectedRecord.agency}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-slate-500 mb-1">Mô tả đối tượng</label>
+                    <div className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-800 min-h-[64px]">
+                      Dữ liệu chuẩn về {selectedRecord.dataType.toLowerCase()} bao gồm thông tin cá nhân như họ tên, ngày sinh, số CCCD, nơi sinh theo hồ sơ {selectedRecord.recordCode}.
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-slate-500 mb-1">Tên cơ sở dữ liệu / Hệ thống</label>
+                    <div className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-800">
+                      {DATA_TYPE_SYSTEM_NAME[selectedRecord.dataType] ?? 'CSDL hộ tịch điện tử'}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-slate-500 mb-1">Trạng thái vòng đời</label>
+                    <div className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-800">
+                      {APPROVAL_TO_LIFECYCLE_LABEL[selectedRecord.approvalStatus as ApprovalStatus] ?? '—'}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-16 text-slate-400 italic">
+                  (Chưa có dữ liệu demo cho bước "{VIEW_STEPS.find(s => s.number === viewStep)?.title}")
+                </div>
+              )}
+            </div>
+
+            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl flex justify-end gap-3 shrink-0">
               <button
                 onClick={() => setShowDetailModal(false)}
-                className="px-4 py-2 border border-slate-300 text-slate-700 bg-white rounded-lg hover:bg-slate-50 font-medium text-[13px] transition-colors cursor-pointer active:scale-95"
+                className="bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-lg font-medium text-[13px] flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
+              >
+                <Edit className="w-4 h-4" /> Chỉnh sửa
+              </button>
+              {viewStep > 1 && (
+                <button
+                  onClick={() => setViewStep(viewStep - 1)}
+                  className="bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-lg font-medium text-[13px] flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
+                >
+                  <ChevronLeft className="w-4 h-4" /> Quay lại
+                </button>
+              )}
+              <button
+                onClick={() => setShowDetailModal(false)}
+                className={`px-4 py-2 rounded-lg font-medium text-[13px] transition-colors cursor-pointer shadow-sm ${
+                  viewStep < 7 ? 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50' : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
               >
                 Đóng
               </button>
+              {viewStep < 7 && (
+                <button
+                  onClick={() => setViewStep(viewStep + 1)}
+                  className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg font-medium text-[13px] flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
+                >
+                  Tiếp theo <ArrowRight className="w-4 h-4" />
+                </button>
+              )}
             </div>
           </div>
         </div>

@@ -255,10 +255,10 @@
 - `[ ]` Thiết lập Master Data (`master-data/MasterDataSetupPage.tsx`)
 - `[ ]` Phê duyệt Master Data (`master-data/MasterDataApprovalPage.tsx`)
 - `[ ]` Công bố Master Data (`master-data/MasterDataPublishPage.tsx`)
-- `[ ]` Báo cáo Master Data (`master-data/MasterDataReportsPage.tsx`)
+- `[x]` Báo cáo Master Data (`master-data/MasterDataReportsPage.tsx`)
 - `[ ]` Quản lý quy mô / tỉ lệ (`master-data/MasterDataScaleManagementPage.tsx`)
 - `[ ]` Wizard tạo Master Data (`master-data/MasterDataWizard.tsx`)
-- `[ ]` Trang cập nhật Master Data (`master-data/MasterDataUpdatePage.tsx`)
+- `[x]` Trang cập nhật Master Data (`master-data/MasterDataUpdatePage.tsx`)
 
 ### Tabs trong trang Master Data
 - `[ ]` Tab Quản lý thuộc tính (`master-data/AttributesManagementTab.tsx`)

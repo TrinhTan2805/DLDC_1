@@ -43,8 +43,16 @@ const MASTER_DATA_ITEMS = [
   { id: 'md-038', label: 'Tài sản bảo đảm', group: 'Đăng ký giao dịch bảo đảm' },
 ];
 
-export function MasterDataUpdatePage() {
-  const [selectedId, setSelectedId] = useState(MASTER_DATA_ITEMS[0].id);
+interface MasterDataUpdatePageProps {
+  initialMasterId?: string;
+}
+
+export function MasterDataUpdatePage({ initialMasterId }: MasterDataUpdatePageProps = {}) {
+  const [selectedId, setSelectedId] = useState(
+    (initialMasterId && MASTER_DATA_ITEMS.some(m => m.id === initialMasterId))
+      ? initialMasterId
+      : MASTER_DATA_ITEMS[0].id
+  );
   const selected = MASTER_DATA_ITEMS.find(m => m.id === selectedId) || MASTER_DATA_ITEMS[0];
 
   return (

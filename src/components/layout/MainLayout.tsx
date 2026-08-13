@@ -582,7 +582,8 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'master-data-update' && <MasterDataUpdatePage />}
             {currentPage === 'master-data-update-b' && <ProcessingNationalityPage />}
             {currentPage === 'master-data-update-c' && <ProcessingJudgmentPage />}
-            {currentPage === 'master-data-reports' && <MasterDataReportsPage />}
+            {currentPage.startsWith('master-data-goto-') && <MasterDataUpdatePage initialMasterId={currentPage.replace('master-data-goto-', '')} />}
+            {currentPage === 'master-data-reports' && <MasterDataReportsPage onNavigate={setCurrentPage} />}
             {currentPage === 'provisioning-service-setup' && <DataProvisionServiceSetupPage />}
             {currentPage === 'provisioning-api-management' && <DataProvisionApiManagementPage />}
             {currentPage === 'provisioning-data-request' && <DataProvisionRequestPage />}
