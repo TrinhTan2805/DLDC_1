@@ -1,5 +1,5 @@
 import { useState, ChangeEvent } from 'react';
-import { X, Check, ChevronRight, ChevronLeft, AlertCircle, AlertTriangle, CheckCircle2, Plus, Trash2, Database, FileText, ChevronDown, ChevronUp, Network, ArrowRight, Key, Search, SquarePen, GitMerge } from 'lucide-react';
+import { X, Check, ChevronRight, ChevronLeft, AlertCircle, AlertTriangle, CheckCircle2, Plus, Trash2, Database, FileText, ChevronDown, ChevronUp, Network, ArrowRight, Key, Search, SquarePen, GitMerge, Info } from 'lucide-react';
 import { Portal } from '../../common/Portal';
 
 type LifecycleStatus = 'active' | 'draft' | 'inactive' | 'archived';
@@ -320,6 +320,8 @@ export interface WizardData {
   scope: ScopeType;
   description: string;
   systemName?: string;
+  // Ngày hiệu lực mặc định gán cho các bản ghi của thực thể, có thể chỉnh sửa khi rà soát bản ghi
+  effectiveDate?: string;
   lifecycleStatus: LifecycleStatus;
   sources: WizardSource[];
   dataSource?: DataSourceType;
@@ -358,6 +360,8 @@ interface MasterDataWizardProps {
   initialData?: Partial<WizardData>;
   initialDldcFieldRows?: DldcFieldRow[];
   initialStep?: number;
+  // Đang chỉnh sửa thực thể đã có (khác với tạo mới) — dùng để khoá Ngày hiệu lực
+  isEditMode?: boolean;
 }
 
 const MANAGING_UNITS = [
@@ -378,6 +382,17 @@ const MANAGING_UNITS = [
   'Bộ Nội vụ',
   'Bộ Công an',
   'Bộ Kế hoạch và Đầu tư',
+];
+
+// Danh sách các hệ thống đang kết nối/khai thác trong Kho DLDC, dùng cho dropdown "Tên cơ sở dữ liệu / Hệ thống"
+const SYSTEM_OPTIONS = [
+  'CSDL hộ tịch điện tử',
+  'CSDL quốc gia về dân cư',
+  'Hệ thống đăng ký kinh doanh quốc gia',
+  'Cơ sở dữ liệu quốc gia về văn bản pháp luật',
+  'Cổng Dịch vụ công Quốc gia',
+  'Cổng dữ liệu mở Hà Nội',
+  'Hệ thống trợ giúp pháp lý',
 ];
 
 const MOCK_REVIEWERS = [
@@ -524,7 +539,9 @@ const steps = [
   { number: 7, title: 'Phê duyệt', description: 'Xem lại và gửi phê duyệt' },
 ];
 
-export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initialData, initialDldcFieldRows, initialStep }: MasterDataWizardProps) {
+export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initialData, initialDldcFieldRows, initialStep, isEditMode }: MasterDataWizardProps) {
+  // Chỉnh sửa thực thể đã có không cho đổi Ngày hiệu lực
+  const isEditingEntity = isEditMode ?? Boolean(initialData);
   const [currentStep, setCurrentStep] = useState(initialStep || 1);
   const [wizardData, setWizardData] = useState<WizardData>({
     code: '',
@@ -534,6 +551,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
     scope: 'national',
     description: '',
     systemName: '',
+    effectiveDate: '',
     lifecycleStatus: 'draft',
     sources: [
       { id: 'src-hotich', name: 'Hộ tịch', kind: 'table', grain: '1:1' },
@@ -1168,13 +1186,39 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                 <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
                   Tên cơ sở dữ liệu / Hệ thống
                 </label>
-                <input
-                  type="text"
+                <select
                   value={wizardData.systemName || ''}
                   onChange={(e) => setWizardData({ ...wizardData, systemName: e.target.value })}
-                  placeholder="VD: CSDL hộ tịch điện tử, Hệ thống TGPL..."
-                  className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700"
-                />
+                  className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 cursor-pointer"
+                >
+                  <option value="">-- Chọn hệ thống --</option>
+                  {SYSTEM_OPTIONS.map(sys => (
+                    <option key={sys} value={sys}>{sys}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Ngày hiệu lực — không cho đổi khi đang chỉnh sửa thực thể đã có */}
+              <div>
+                <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
+                  Ngày hiệu lực
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="date"
+                    value={wizardData.effectiveDate || ''}
+                    onChange={(e) => setWizardData({ ...wizardData, effectiveDate: e.target.value })}
+                    disabled={isEditingEntity}
+                    className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed"
+                  />
+                  <span className="relative inline-flex items-center group shrink-0">
+                    <Info className="w-4 h-4 text-slate-400 cursor-help" />
+                    <span className="absolute right-0 bottom-full mb-2 hidden group-hover:block w-72 bg-slate-900 text-white text-xs rounded-lg p-3 z-10 shadow-lg leading-relaxed">
+                      Thời gian hiệu lực sẽ được gán với từng bản ghi trong thực thể dữ liệu chủ, hiệu lực của bản ghi có thể chỉnh sửa khi thực hiện rà soát bản ghi.
+                      <span className="absolute right-2 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-slate-900" />
+                    </span>
+                  </span>
+                </div>
               </div>
 
               {/* Đăng ký nguồn dữ liệu (chip + grain) */}

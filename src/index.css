@@ -5595,6 +5595,14 @@ table.status-report-table tbody td {
   font-size: 13px !important;
 }
 
+/* Ghi đè 13px cho 2 bảng grid ở tab Tiêu thụ - Báo cáo tìm kiếm dữ liệu chủ */
+table.master-data-consumption-table th,
+table.master-data-consumption-table thead th,
+table.master-data-consumption-table td,
+table.master-data-consumption-table tbody td {
+  font-size: 13px !important;
+}
+
 .collection-pagination,
 .collection-pagination span,
 .collection-pagination select,

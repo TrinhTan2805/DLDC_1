@@ -82,6 +82,8 @@ interface ApprovalRecord {
   dataType: DataType;
   scope: ScopeType;
   systemName?: string;
+  // Ngày hiệu lực mặc định gán cho các bản ghi của thực thể, có thể chỉnh sửa khi rà soát bản ghi
+  effectiveDate?: string;
   lifecycleStatus: LifecycleStatus;
   managingAgency: string;
   submittedBy: string;
@@ -120,6 +122,7 @@ const mockApprovalRecords: ApprovalRecord[] = [
     dataType: 'standard',
     scope: 'national',
     systemName: 'CSDL quốc gia về dân cư',
+    effectiveDate: '2024-01-01',
     lifecycleStatus: 'active',
     managingAgency: 'Cục Hộ tịch - Quốc tịch - Chứng thực',
     submittedBy: 'Nguyễn Văn A',
@@ -1002,6 +1005,19 @@ export function ApprovalTab() {
                       <div>
                         <span className="text-slate-500">Tên CSDL/Hệ thống:</span>
                         <p className="text-[13px] text-slate-900 mt-1">{selectedRecord.systemName || '—'}</p>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 inline-flex items-center gap-1.5">
+                          Ngày hiệu lực:
+                          <span className="relative inline-flex items-center group">
+                            <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                            <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-72 bg-slate-900 text-white text-xs rounded-lg p-3 z-10 shadow-lg leading-relaxed normal-case">
+                              Thời gian hiệu lực sẽ được gán với từng bản ghi trong thực thể dữ liệu chủ, hiệu lực của bản ghi có thể chỉnh sửa khi thực hiện rà soát bản ghi.
+                              <span className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-slate-900" />
+                            </span>
+                          </span>
+                        </span>
+                        <p className="text-[13px] text-slate-900 mt-1">{selectedRecord.effectiveDate || '—'}</p>
                       </div>
                       <div>
                         <span className="text-slate-500">Nguồn dữ liệu đăng ký:</span>

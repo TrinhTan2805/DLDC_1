@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Settings, Sliders, GitCompare, Network, Key, Plus, Edit, Trash2, X, Search, Filter, Circle, CheckSquare, ChevronDown, ChevronLeft, Eye, FileText, Clock, XCircle, Send, AlertCircle, Check, ArrowRight, SquarePen } from 'lucide-react';
+import { Settings, Sliders, GitCompare, Network, Key, Plus, Edit, Trash2, X, Search, Filter, Circle, CheckSquare, ChevronDown, ChevronLeft, Eye, FileText, Clock, XCircle, Send, AlertCircle, Check, ArrowRight, SquarePen, Info } from 'lucide-react';
 import { AttributesManagementTab, defaultAttributes, DLDC_ENTITY_DETAIL_CONFIGS } from './AttributesManagementTab';
 import { MasterDataWizard } from './MasterDataWizard';
 import { MergeRulesManagementTab, mockMergeRules, matchMethodLabels, fuzzyAlgorithmLabels, conflictStrategyLabels, onEmptyLabels } from './MergeRulesManagementTab';
@@ -58,6 +58,8 @@ interface MasterDataEntity {
   createdBy: string;
   updatedBy?: string;
   systemName?: string;
+  // Ngày hiệu lực mặc định gán cho các bản ghi của thực thể, có thể chỉnh sửa khi rà soát bản ghi
+  effectiveDate?: string;
   // Đăng ký nguồn dữ liệu (giống Bước 1 Wizard)
   sources?: EntitySource[];
   // Data source fields
@@ -91,6 +93,7 @@ const defaultEntities: MasterDataEntity[] = [
     createdBy: 'Nguyễn Văn A',
     updatedBy: 'Trần Thị Bình',
     systemName: 'CSDL hộ tịch điện tử',
+    effectiveDate: '2024-01-01',
     sources: [
       { id: 'src-1-1', name: 'Hộ tịch', kind: 'table', grain: '1:1' },
       { id: 'src-1-2', name: 'CCCD', kind: 'table', grain: '1:1' },
@@ -1255,6 +1258,23 @@ export function MasterDataScaleManagementPage() {
                   </div>
                 </div>
 
+                {/* Ngày hiệu lực */}
+                <div>
+                  <label className="flex items-center gap-1.5 text-[13px] font-medium text-slate-500 mb-1">
+                    Ngày hiệu lực
+                    <span className="relative inline-flex items-center group">
+                      <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                      <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-72 bg-slate-900 text-white text-xs rounded-lg p-3 z-10 shadow-lg leading-relaxed normal-case font-normal">
+                        Thời gian hiệu lực sẽ được gán với từng bản ghi trong thực thể dữ liệu chủ, hiệu lực của bản ghi có thể chỉnh sửa khi thực hiện rà soát bản ghi.
+                        <span className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-slate-900" />
+                      </span>
+                    </span>
+                  </label>
+                  <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-800">
+                    {viewingEntity.effectiveDate || <span className="text-slate-400 font-normal italic">Chưa cập nhật</span>}
+                  </div>
+                </div>
+
                 {/* Trạng thái vòng đời */}
                 <div>
                   <label className="block text-[13px] font-medium text-slate-500 mb-1">Trạng thái vòng đời</label>
@@ -2009,6 +2029,7 @@ export function MasterDataScaleManagementPage() {
       {/* Wizard Modal */}
       <MasterDataWizard
         isOpen={showWizard}
+        isEditMode={!!editingEntity}
         onClose={() => { setShowWizard(false); setEditingEntity(null); }}
         onSubmit={(wizardData) => {
           const now = new Date();
@@ -2024,6 +2045,7 @@ export function MasterDataScaleManagementPage() {
               scope: wizardData.scope,
               description: wizardData.description,
               systemName: wizardData.systemName,
+              effectiveDate: wizardData.effectiveDate,
               updatedDate: dateStr,
               dataSource: wizardData.dataSource,
               apiSystem: wizardData.apiSystem,
@@ -2048,6 +2070,7 @@ export function MasterDataScaleManagementPage() {
             scope: wizardData.scope,
             description: wizardData.description,
             systemName: wizardData.systemName,
+            effectiveDate: wizardData.effectiveDate,
             sources: wizardData.sources,
             lifecycleStatus: 'draft', // Always draft when created via wizard
             createdDate: dateStr,
@@ -2079,6 +2102,7 @@ export function MasterDataScaleManagementPage() {
               scope: wizardData.scope,
               description: wizardData.description,
               systemName: wizardData.systemName,
+              effectiveDate: wizardData.effectiveDate,
               updatedDate: dateStr,
               dataSource: wizardData.dataSource,
               apiSystem: wizardData.apiSystem,
@@ -2103,6 +2127,7 @@ export function MasterDataScaleManagementPage() {
             scope: wizardData.scope,
             description: wizardData.description,
             systemName: wizardData.systemName,
+            effectiveDate: wizardData.effectiveDate,
             sources: wizardData.sources,
             lifecycleStatus: 'draft',
             createdDate: dateStr,

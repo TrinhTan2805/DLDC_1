@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, ChangeEvent } from 'react';
 import { Search, Download, FileText, Printer, TrendingUp, AlertCircle, Calendar, Filter, X, ChevronDown, Check, BarChart2, Eye, Layers, ChevronLeft, ArrowRight, Edit } from 'lucide-react';
 import {
-  AreaChart, Area as AreaR, BarChart, Bar as BarR, XAxis as XAxisR, YAxis as YAxisR,
+  LineChart, Line as LineR, BarChart, Bar as BarR, XAxis as XAxisR, YAxis as YAxisR,
   CartesianGrid, Tooltip as TooltipR, ResponsiveContainer, Cell
 } from 'recharts';
 import {
@@ -9,7 +9,7 @@ import {
   COLUMNS as MASTER_DATA_COLUMNS, MOCK_BY_CATEGORY, CATEGORY_LABELS,
 } from './MasterDataUpdateItemPage';
 
-const Area = AreaR as any;
+const Line = LineR as any;
 const Bar = BarR as any;
 const XAxis = XAxisR as any;
 const YAxis = YAxisR as any;
@@ -217,17 +217,50 @@ const mockUsageReports: UsageReport[] = [
     avgResponseTime: 1.1,
     lastAccess: '25/12/2024 12:00',
   },
+  {
+    id: '5',
+    dataType: 'Thi hành án dân sự',
+    totalAccess: 430,
+    totalUsage: 350,
+    avgResponseTime: 1.3,
+    lastAccess: '25/12/2024 11:10',
+  },
+  {
+    id: '6',
+    dataType: 'Giám định tư pháp',
+    totalAccess: 310,
+    totalUsage: 260,
+    avgResponseTime: 1.4,
+    lastAccess: '25/12/2024 09:55',
+  },
+  {
+    id: '7',
+    dataType: 'Nuôi con nuôi',
+    totalAccess: 210,
+    totalUsage: 180,
+    avgResponseTime: 1.6,
+    lastAccess: '25/12/2024 10:40',
+  },
+  {
+    id: '8',
+    dataType: 'Trọng tài thương mại',
+    totalAccess: 150,
+    totalUsage: 120,
+    avgResponseTime: 1.8,
+    lastAccess: '25/12/2024 09:20',
+  },
 ];
 
-// Dữ liệu biểu đồ: mỗi tháng có giá trị riêng cho từng loại dữ liệu chủ
-const usageTrendData = [
-  { name: 'Tháng 1', 'Công chứng': 980, 'Đăng ký kinh doanh': 1750, 'Trợ giúp pháp lý': 410, 'Hộ tịch': 620 },
-  { name: 'Tháng 2', 'Công chứng': 1050, 'Đăng ký kinh doanh': 1900, 'Trợ giúp pháp lý': 380, 'Hộ tịch': 700 },
-  { name: 'Tháng 3', 'Công chứng': 1120, 'Đăng ký kinh doanh': 2050, 'Trợ giúp pháp lý': 450, 'Hộ tịch': 760 },
-  { name: 'Tháng 4', 'Công chứng': 1000, 'Đăng ký kinh doanh': 2200, 'Trợ giúp pháp lý': 500, 'Hộ tịch': 810 },
-  { name: 'Tháng 5', 'Công chứng': 1180, 'Đăng ký kinh doanh': 2150, 'Trợ giúp pháp lý': 470, 'Hộ tịch': 850 },
-  { name: 'Tháng 6', 'Công chứng': 1220, 'Đăng ký kinh doanh': 2280, 'Trợ giúp pháp lý': 540, 'Hộ tịch': 870 },
-  { name: 'Tháng 7', 'Công chứng': 1250, 'Đăng ký kinh doanh': 2340, 'Trợ giúp pháp lý': 560, 'Hộ tịch': 890 },
+// Dữ liệu biểu đồ: mỗi tháng có giá trị riêng cho từng loại dữ liệu chủ, dùng để tính tổng lượt
+// truy cập theo thời gian (biểu đồ đường) — số lượng thực thể có thể tiếp tục tăng lên
+const usageTrendData: { name: string; [dataType: string]: number | string }[] = [
+  { name: 'Tháng 1', 'Công chứng': 980, 'Đăng ký kinh doanh': 1750, 'Trợ giúp pháp lý': 410, 'Hộ tịch': 620, 'Thi hành án dân sự': 310, 'Giám định tư pháp': 230, 'Nuôi con nuôi': 150, 'Trọng tài thương mại': 100 },
+  { name: 'Tháng 2', 'Công chứng': 1050, 'Đăng ký kinh doanh': 1900, 'Trợ giúp pháp lý': 380, 'Hộ tịch': 700, 'Thi hành án dân sự': 340, 'Giám định tư pháp': 250, 'Nuôi con nuôi': 165, 'Trọng tài thương mại': 110 },
+  { name: 'Tháng 3', 'Công chứng': 1120, 'Đăng ký kinh doanh': 2050, 'Trợ giúp pháp lý': 450, 'Hộ tịch': 760, 'Thi hành án dân sự': 365, 'Giám định tư pháp': 265, 'Nuôi con nuôi': 175, 'Trọng tài thương mại': 120 },
+  { name: 'Tháng 4', 'Công chứng': 1000, 'Đăng ký kinh doanh': 2200, 'Trợ giúp pháp lý': 500, 'Hộ tịch': 810, 'Thi hành án dân sự': 350, 'Giám định tư pháp': 255, 'Nuôi con nuôi': 185, 'Trọng tài thương mại': 125 },
+  { name: 'Tháng 5', 'Công chứng': 1180, 'Đăng ký kinh doanh': 2150, 'Trợ giúp pháp lý': 470, 'Hộ tịch': 850, 'Thi hành án dân sự': 390, 'Giám định tư pháp': 280, 'Nuôi con nuôi': 195, 'Trọng tài thương mại': 135 },
+  { name: 'Tháng 6', 'Công chứng': 1220, 'Đăng ký kinh doanh': 2280, 'Trợ giúp pháp lý': 540, 'Hộ tịch': 870, 'Thi hành án dân sự': 410, 'Giám định tư pháp': 295, 'Nuôi con nuôi': 200, 'Trọng tài thương mại': 142 },
+  { name: 'Tháng 7', 'Công chứng': 1250, 'Đăng ký kinh doanh': 2340, 'Trợ giúp pháp lý': 560, 'Hộ tịch': 890, 'Thi hành án dân sự': 430, 'Giám định tư pháp': 310, 'Nuôi con nuôi': 210, 'Trọng tài thương mại': 150 },
 ];
 
 const DATA_TYPE_COLORS: Record<string, string> = {
@@ -235,9 +268,11 @@ const DATA_TYPE_COLORS: Record<string, string> = {
   'Đăng ký kinh doanh': '#10b981',
   'Trợ giúp pháp lý': '#f59e0b',
   'Hộ tịch': '#8b5cf6',
+  'Thi hành án dân sự': '#ef4444',
+  'Giám định tư pháp': '#06b6d4',
+  'Nuôi con nuôi': '#ec4899',
+  'Trọng tài thương mại': '#84cc16',
 };
-
-const DATA_TYPE_OPTIONS = mockUsageReports.map(u => ({ value: u.dataType, label: u.dataType }));
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
@@ -253,13 +288,38 @@ const mockCategoryApiStats: Record<DataCategory, { apiCount: number; stableApiCo
 // Dung lượng ước tính trung bình mỗi bản ghi tiêu thụ (giả định, dùng để suy ra dung lượng tiêu thụ ước tính)
 const AVG_RECORD_SIZE_KB = 2;
 
-// Tổng lượt tiêu thụ (số bản ghi) và tỷ lệ tăng trưởng so với kỳ trước (%) — theo đúng 3 thực thể dữ liệu chủ
-// chính thức đang có trong Cập nhật dữ liệu chủ, dùng cho bảng + biểu đồ Tiêu thụ
-const mockCategoryConsumption: Record<DataCategory, { totalUsage: number; growthRate: number }> = {
-  'civil-status': { totalUsage: 42800, growthRate: 15 },
-  'enforcement-decision': { totalUsage: 21500, growthRate: -5 },
-  'legal-document': { totalUsage: 9600, growthRate: 8 },
+// Tổng lượt tiêu thụ (số bản ghi) theo đúng 3 thực thể dữ liệu chủ chính thức đang có trong
+// Cập nhật dữ liệu chủ, dùng cho bảng Tiêu thụ theo thực thể
+const mockCategoryConsumption: Record<DataCategory, { totalUsage: number }> = {
+  'civil-status': { totalUsage: 42800 },
+  'enforcement-decision': { totalUsage: 21500 },
+  'legal-document': { totalUsage: 9600 },
 };
+
+// Dung lượng tiêu thụ (MB) của các thực thể dữ liệu chủ khác ngoài 3 thực thể chính thức, mock thêm
+// nhiều dòng để kiểm chứng chiều cao bảng "Báo cáo tiêu thụ dữ liệu theo thực thể" luôn cố định
+// (cuộn bên trong) dù số lượng dữ liệu tăng lên
+const mockExtraEntityConsumption: { category: string; usageMB: number }[] = [
+  { category: 'Thông tin hộ nghèo, cận nghèo', usageMB: 14.2 },
+  { category: 'Danh mục dùng chung', usageMB: 6.8 },
+  { category: 'Thông tin bảo trợ xã hội', usageMB: 9.4 },
+  { category: 'Danh sách người có công', usageMB: 11.7 },
+  { category: 'Thông tin lý lịch tư pháp', usageMB: 7.3 },
+];
+
+// Dung lượng tiêu thụ dữ liệu chủ (MB) theo từng đơn vị được cấp quyền khai thác, dùng cho bảng
+// "Báo cáo tiêu thụ dữ liệu chủ theo đơn vị được cấp quyền" tại tab Tiêu thụ — mock nhiều dòng để
+// kiểm chứng chiều cao bảng luôn cố định (cuộn bên trong) dù số lượng dữ liệu tăng lên
+const mockUnitConsumption: { unit: string; usageMB: number }[] = [
+  { unit: 'Sở Tư pháp Hà Nội', usageMB: 52.4 },
+  { unit: 'Sở Tư pháp TP. Hồ Chí Minh', usageMB: 38.7 },
+  { unit: 'Sở Tư pháp Đà Nẵng', usageMB: 24.1 },
+  { unit: 'Bộ Lao động - Thương binh và Xã hội', usageMB: 18.5 },
+  { unit: 'Sở Tư pháp Hải Phòng', usageMB: 10.6 },
+  { unit: 'Sở Tư pháp Cần Thơ', usageMB: 9.2 },
+  { unit: 'Sở Tư pháp Bình Dương', usageMB: 7.8 },
+  { unit: 'Sở Tư pháp Nghệ An', usageMB: 6.1 },
+];
 
 interface MasterDataReportsPageProps {
   onNavigate?: (page: string) => void;
@@ -285,9 +345,10 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
   // ─── Báo cáo sử dụng dữ liệu chủ ────────────────────────────────────────
   // Loại báo cáo: Truy cập (hệ thống kết nối) / Tiêu thụ (khối lượng đã lấy) / Thống kê (xu hướng theo thời gian)
   const [usageReportType, setUsageReportType] = useState<'access' | 'consumption' | 'stats'>('access');
-  const [selectedDataTypes, setSelectedDataTypes] = useState<string[]>([]);
-  const [showDataTypeDropdown, setShowDataTypeDropdown] = useState(false);
   const [usageDateRange, setUsageDateRange] = useState('6months');
+  const currentYear = new Date().getFullYear();
+  const [usageStatMonth, setUsageStatMonth] = useState(new Date().getMonth() + 1);
+  const [usageStatYear, setUsageStatYear] = useState(currentYear);
   const [showUsageExportMenu, setShowUsageExportMenu] = useState(false);
   const [hasSearchedUsage, setHasSearchedUsage] = useState(false);
   const [appliedUsageReports, setAppliedUsageReports] = useState(mockUsageReports);
@@ -302,15 +363,11 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
   const [appliedLifecycleData, setAppliedLifecycleData] = useState<MasterDataRow[]>([]);
   const [lifecycleDetailRow, setLifecycleDetailRow] = useState<MasterDataRow | null>(null);
 
-  const dataTypeRef = useRef<HTMLDivElement | null>(null);
   const usageExportRef = useRef<HTMLDivElement | null>(null);
   const lifecycleExportRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
-      if (dataTypeRef.current && !dataTypeRef.current.contains(e.target as Node)) {
-        setShowDataTypeDropdown(false);
-      }
       if (usageExportRef.current && !usageExportRef.current.contains(e.target as Node)) {
         setShowUsageExportMenu(false);
       }
@@ -333,31 +390,9 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
     alert(`Đang xuất dữ liệu sang định dạng ${format}...`);
   };
 
-  const toggleDataType = (value: string) => {
-    setSelectedDataTypes(prev =>
-      prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
-    );
-  };
-
-  const toggleAllDataTypes = () => {
-    setSelectedDataTypes(prev =>
-      prev.length === DATA_TYPE_OPTIONS.length ? [] : DATA_TYPE_OPTIONS.map(o => o.value)
-    );
-  };
-
   const handleSearchUsage = () => {
-    const result = selectedDataTypes.length === 0
-      ? mockUsageReports
-      : mockUsageReports.filter(r => selectedDataTypes.includes(r.dataType));
-    setAppliedUsageReports(result);
+    setAppliedUsageReports(mockUsageReports);
     setHasSearchedUsage(true);
-  };
-
-
-  const dataTypeDisplayText = () => {
-    if (selectedDataTypes.length === 0) return 'Tất cả loại dữ liệu';
-    if (selectedDataTypes.length === 1) return selectedDataTypes[0];
-    return `${selectedDataTypes.length} loại dữ liệu đã chọn`;
   };
 
   const handleExportUsageFile = (format: string) => {
@@ -757,20 +792,12 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
             {/* Usage Report Tab */}
             {activeTab === 'usage' && (
               <div className="space-y-6">
-                {/* Backdrop khi dropdown mở */}
-                {showDataTypeDropdown && (
-                  <div
-                    className="fixed inset-0 z-20"
-                    onClick={() => setShowDataTypeDropdown(false)}
-                  />
-                )}
-
                 {/* Control Panel */}
                 <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm relative z-30">
                   <div className="flex flex-wrap items-end gap-3">
 
                     {/* Loại báo cáo: Truy cập / Tiêu thụ / Thống kê */}
-                    <div className="min-w-[180px]">
+                    <div className="flex-1 min-w-[220px]">
                       <label className="block text-[12px] text-slate-500 mb-1 font-medium">Loại báo cáo</label>
                       <select
                         title="Loại báo cáo"
@@ -784,79 +811,8 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
                       </select>
                     </div>
 
-                    {/* Multi-select Loại dữ liệu chủ */}
-                    <div className="flex-1 min-w-[220px]">
-                      <label className="block text-[12px] text-slate-500 mb-1 font-medium">Chọn thực thể dữ liệu chủ</label>
-                      <div className="relative" ref={dataTypeRef}>
-                        <button
-                          type="button"
-                          onClick={() => setShowDataTypeDropdown(prev => !prev)}
-                          className={`w-full px-3 py-2 border rounded-lg text-[13px] bg-white text-left flex items-center justify-between gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                            showDataTypeDropdown ? 'border-blue-400 ring-2 ring-blue-500/20' : 'border-slate-200 hover:border-slate-300'
-                          }`}
-                        >
-                          <span className={`truncate ${selectedDataTypes.length === 0 ? 'text-slate-500' : 'text-slate-800 font-medium'}`}>
-                            {dataTypeDisplayText()}
-                          </span>
-                          <div className="flex items-center gap-1 shrink-0">
-                            {selectedDataTypes.length > 0 && (
-                              <span
-                                onClick={(e) => { e.stopPropagation(); setSelectedDataTypes([]); }}
-                                className="w-4 h-4 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center cursor-pointer transition-colors"
-                              >
-                                <X className="w-2.5 h-2.5 text-slate-600" />
-                              </span>
-                            )}
-                            <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${showDataTypeDropdown ? 'rotate-180' : ''}`} />
-                          </div>
-                        </button>
-
-                        {showDataTypeDropdown && (
-                          <div className="absolute left-0 top-full mt-1.5 w-full bg-white border border-slate-200 rounded-xl shadow-2xl z-40 overflow-hidden">
-                            <button
-                              type="button"
-                              onClick={toggleAllDataTypes}
-                              className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors border-b border-slate-100 text-sm font-medium text-slate-700"
-                            >
-                              <span className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
-                                selectedDataTypes.length === DATA_TYPE_OPTIONS.length
-                                  ? 'bg-blue-600 border-blue-600'
-                                  : selectedDataTypes.length > 0
-                                  ? 'bg-blue-100 border-blue-400'
-                                  : 'border-slate-300'
-                              }`}>
-                                {selectedDataTypes.length === DATA_TYPE_OPTIONS.length && <Check className="w-3 h-3 text-white" />}
-                                {selectedDataTypes.length > 0 && selectedDataTypes.length < DATA_TYPE_OPTIONS.length && (
-                                  <span className="w-2 h-0.5 bg-blue-600 rounded" />
-                                )}
-                              </span>
-                              Tất cả loại dữ liệu
-                            </button>
-
-                            {DATA_TYPE_OPTIONS.map(opt => (
-                              <button
-                                key={opt.value}
-                                type="button"
-                                onClick={() => toggleDataType(opt.value)}
-                                className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors text-sm text-slate-700 text-left"
-                              >
-                                <span className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
-                                  selectedDataTypes.includes(opt.value)
-                                    ? 'bg-blue-600 border-blue-600'
-                                    : 'border-slate-300'
-                                }`}>
-                                  {selectedDataTypes.includes(opt.value) && <Check className="w-3 h-3 text-white" />}
-                                </span>
-                                <span className="truncate">{opt.label}</span>
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
                     {/* Thời gian */}
-                    <div className="min-w-[170px]">
+                    <div className="flex-1 min-w-[220px]">
                       <label className="block text-[12px] text-slate-500 mb-1 font-medium">Thời gian thống kê</label>
                       <select
                         title="Thời gian thống kê"
@@ -864,11 +820,45 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
                         onChange={(e: ChangeEvent<HTMLSelectElement>) => setUsageDateRange(e.target.value)}
                         className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
                       >
-                        <option value="last_month">Tháng trước</option>
-                        <option value="6months">6 tháng qua</option>
-                        <option value="2024">Năm 2024</option>
+                        <option value="this_month">Trong tháng</option>
+                        <option value="6months">6 tháng</option>
+                        <option value="year">Trong năm</option>
                       </select>
                     </div>
+
+                    {/* Chọn tháng — chỉ hiện khi Thời gian thống kê = Trong tháng */}
+                    {usageDateRange === 'this_month' && (
+                      <div className="min-w-[140px]">
+                        <label className="block text-[12px] text-slate-500 mb-1 font-medium">Chọn tháng</label>
+                        <select
+                          title="Chọn tháng"
+                          value={usageStatMonth}
+                          onChange={(e: ChangeEvent<HTMLSelectElement>) => setUsageStatMonth(Number(e.target.value))}
+                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        >
+                          {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
+                            <option key={m} value={m}>{`Tháng ${m}/${currentYear}`}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
+                    {/* Chọn năm — chỉ hiện khi Thời gian thống kê = Trong năm */}
+                    {usageDateRange === 'year' && (
+                      <div className="min-w-[140px]">
+                        <label className="block text-[12px] text-slate-500 mb-1 font-medium">Chọn năm</label>
+                        <select
+                          title="Chọn năm"
+                          value={usageStatYear}
+                          onChange={(e: ChangeEvent<HTMLSelectElement>) => setUsageStatYear(Number(e.target.value))}
+                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        >
+                          {[currentYear, currentYear - 1, currentYear - 2].map(y => (
+                            <option key={y} value={y}>{`Năm ${y}`}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
 
                     <button
                       type="button"
@@ -915,91 +905,170 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
                   </div>
                 )}
 
-                {/* Thống kê — xu hướng sử dụng theo thời gian */}
-                {hasSearchedUsage && usageReportType === 'stats' && (
-                  <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
-                    <div className="h-64">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={usageTrendData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                          <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#374151' }} />
-                          <YAxis tick={{ fontSize: 12, fill: '#374151' }} />
-                          <Tooltip />
-                          {appliedUsageReports.map(rep => (
-                            <Area
-                              key={rep.dataType}
-                              type="monotone"
-                              dataKey={rep.dataType}
-                              name={rep.dataType}
-                              stroke={DATA_TYPE_COLORS[rep.dataType] ?? '#94a3b8'}
-                              fill={DATA_TYPE_COLORS[rep.dataType] ?? '#94a3b8'}
-                              fillOpacity={0.1}
-                              strokeWidth={2}
-                            />
-                          ))}
-                        </AreaChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-                )}
-
-                {/* Tiêu thụ — đúng 3 thực thể dữ liệu chủ chính thức đang có trong Cập nhật dữ liệu chủ,
-                    bảng + biểu đồ tăng trưởng chia 2 cột cùng hàng */}
-                {hasSearchedUsage && usageReportType === 'consumption' && (() => {
-                  const consumptionRows = (Object.keys(CATEGORY_LABELS) as DataCategory[]).map(cat => ({
-                    category: CATEGORY_LABELS[cat],
-                    ...mockCategoryConsumption[cat],
+                {/* Thống kê — tổng lượt truy cập theo thời gian (gộp mọi thực thể, tránh rối khi số thực
+                    thể dữ liệu chủ tăng lên) + tần suất khai thác chi tiết theo từng thực thể */}
+                {hasSearchedUsage && usageReportType === 'stats' && (() => {
+                  const monthlyTrendData = usageTrendData.map(row => ({
+                    name: row.name,
+                    total: appliedUsageReports.reduce(
+                      (sum, rep) => sum + (typeof row[rep.dataType] === 'number' ? (row[rep.dataType] as number) : 0),
+                      0
+                    ),
                   }));
-                  const totalUsage = consumptionRows.reduce((acc, r) => acc + r.totalUsage, 0);
+
+                  // Trong tháng — quy đổi trục hoành thành 30 ngày, dựa trên tổng lượt truy cập
+                  // trung bình mỗi ngày (tổng lượt truy cập trong kỳ / 30), có dao động nhẹ cho tự nhiên
+                  const totalMonthlyAccess = appliedUsageReports.reduce((sum, rep) => sum + rep.totalAccess, 0);
+                  const dailyBase = totalMonthlyAccess / 30;
+                  const dailyTrendData = Array.from({ length: 30 }, (_, i) => {
+                    const day = i + 1;
+                    const variation = 1 + Math.sin(day / 4) * 0.15;
+                    return { name: `${day}`, total: Math.round(dailyBase * variation) };
+                  });
+
+                  const isMonthView = usageDateRange === 'this_month';
+                  const totalAccessTrendData = isMonthView ? dailyTrendData : monthlyTrendData;
+
                   return (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
-                      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-                        <div className="overflow-x-auto">
-                          <table className="w-full text-left border-collapse table-auto">
-                            <thead>
-                              <tr className="bg-slate-50 border-b border-slate-200 text-[13px] font-semibold text-slate-500 uppercase tracking-tight">
-                                <th className="py-3 px-4 text-center w-12">STT</th>
-                                <th className="py-3 px-4">Thực thể dữ liệu chủ</th>
-                                <th className="py-3 px-4 text-right">Dung lượng tiêu thụ ước tính</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100 text-[13px] text-slate-700">
-                              {consumptionRows.map((item, idx) => (
-                                <tr key={idx} className="hover:bg-slate-50/50 transition-all">
-                                  <td className="py-3 px-4 text-center text-slate-500">{idx + 1}</td>
-                                  <td className="py-3 px-4 font-medium text-slate-900">{item.category}</td>
-                                  <td className="py-3 px-4 text-right text-blue-600 font-medium">
-                                    {((item.totalUsage * AVG_RECORD_SIZE_KB) / 1024).toFixed(1)} MB
-                                  </td>
-                                </tr>
-                              ))}
-                              <tr className="bg-slate-50 font-semibold border-t border-slate-200">
-                                <td colSpan={2} className="py-3 px-4 text-center text-slate-700 uppercase text-[13px]">Tổng tiêu thụ</td>
-                                <td className="py-3 px-4 text-right text-blue-600">
-                                  {((totalUsage * AVG_RECORD_SIZE_KB) / 1024).toFixed(1)} MB
-                                </td>
-                              </tr>
-                            </tbody>
-                          </table>
+                    <div className="space-y-4">
+                      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+                        <p className="text-[18px] font-semibold text-slate-700 mb-3">
+                          {isMonthView
+                            ? `Tổng lượt truy cập dữ liệu chủ theo ngày trong Tháng ${usageStatMonth}/${currentYear} (lượt truy cập)`
+                            : 'Tổng lượt truy cập dữ liệu chủ theo thời gian (lượt truy cập)'}
+                        </p>
+                        <div className={isMonthView ? 'h-72' : 'h-64'}>
+                          <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={totalAccessTrendData} margin={{ top: 10, right: 30, left: 0, bottom: isMonthView ? 20 : 0 }}>
+                              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                              <XAxis
+                                dataKey="name"
+                                tick={{ fontSize: 12, fill: '#374151' }}
+                                interval={isMonthView ? 1 : 0}
+                                height={isMonthView ? 50 : 30}
+                                label={isMonthView ? { value: '(Ngày)', position: 'insideBottomLeft', offset: -18, fontSize: 12, fill: '#374151' } : undefined}
+                              />
+                              <YAxis tick={{ fontSize: 12, fill: '#374151' }} />
+                              <Tooltip />
+                              <Line
+                                type="monotone"
+                                dataKey="total"
+                                name="Tổng lượt truy cập"
+                                stroke="#2563eb"
+                                strokeWidth={2}
+                                dot={{ r: 3 }}
+                              />
+                            </LineChart>
+                          </ResponsiveContainer>
                         </div>
                       </div>
 
                       <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
-                        <p className="text-[13px] font-medium text-slate-700 mb-3">Tỷ lệ tăng trưởng tiêu thụ so với kỳ trước (%)</p>
-                        <div className="h-64">
+                        <p className="text-[18px] font-semibold text-slate-700 mb-3">Tần suất khai thác dữ liệu chủ theo thực thể (tổng lượt truy cập trong kỳ)</p>
+                        <div className="h-72">
                           <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={consumptionRows.map(r => ({ name: r.category, growth: r.growthRate }))} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                            <BarChart
+                              data={appliedUsageReports.map(rep => ({ name: rep.dataType, totalAccess: rep.totalAccess }))}
+                              margin={{ top: 10, right: 30, left: 0, bottom: 40 }}
+                              barCategoryGap="20%"
+                            >
                               <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                              <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#374151' }} />
-                              <YAxis tick={{ fontSize: 12, fill: '#374151' }} unit="%" />
+                              <XAxis
+                                dataKey="name"
+                                interval={0}
+                                angle={-30}
+                                textAnchor="end"
+                                height={60}
+                                tick={{ fontSize: 11, fill: '#374151' }}
+                              />
+                              <YAxis tick={{ fontSize: 12, fill: '#374151' }} />
                               <Tooltip />
-                              <Bar dataKey="growth" name="Tăng trưởng (%)" radius={[4, 4, 0, 0]}>
-                                {consumptionRows.map((r, i) => (
-                                  <Cell key={i} fill={r.growthRate >= 0 ? '#16a34a' : '#dc2626'} />
+                              <Bar dataKey="totalAccess" name="Lượt truy cập" radius={[4, 4, 0, 0]} maxBarSize={24}>
+                                {appliedUsageReports.map(rep => (
+                                  <Cell key={rep.dataType} fill={DATA_TYPE_COLORS[rep.dataType] ?? '#94a3b8'} />
                                 ))}
                               </Bar>
                             </BarChart>
                           </ResponsiveContainer>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Tiêu thụ — đúng 3 thực thể dữ liệu chủ chính thức đang có trong Cập nhật dữ liệu chủ,
+                    bảng + biểu đồ tăng trưởng chia 2 cột cùng hàng */}
+                {hasSearchedUsage && usageReportType === 'consumption' && (() => {
+                  const consumptionRows = [
+                    ...(Object.keys(CATEGORY_LABELS) as DataCategory[]).map(cat => ({
+                      category: CATEGORY_LABELS[cat],
+                      usageMB: (mockCategoryConsumption[cat].totalUsage * AVG_RECORD_SIZE_KB) / 1024,
+                    })),
+                    ...mockExtraEntityConsumption,
+                  ];
+                  const totalUsageMB = consumptionRows.reduce((acc, r) => acc + r.usageMB, 0);
+                  const totalUnitUsageMB = mockUnitConsumption.reduce((acc, r) => acc + r.usageMB, 0);
+                  return (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+                      <div className="flex flex-col gap-3">
+                        <p className="text-[18px] font-semibold text-slate-700">Báo cáo tiêu thụ dữ liệu theo thực thể</p>
+                        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+                          <div className="overflow-auto h-[320px]">
+                            <table className="master-data-consumption-table w-full text-left border-collapse table-auto text-[13px]">
+                              <thead>
+                                <tr className="bg-slate-50 border-b border-slate-200 font-semibold text-slate-500 uppercase tracking-tight">
+                                  <th className="py-3 px-4 text-center w-12">STT</th>
+                                  <th className="py-3 px-4">Thực thể dữ liệu chủ</th>
+                                  <th className="py-3 px-4 text-right">Dung lượng tiêu thụ ước tính</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-100 text-slate-700">
+                                {consumptionRows.map((item, idx) => (
+                                  <tr key={idx} className="hover:bg-slate-50/50 transition-all">
+                                    <td className="py-3 px-4 text-center text-slate-500">{idx + 1}</td>
+                                    <td className="py-3 px-4 font-medium text-slate-900">{item.category}</td>
+                                    <td className="py-3 px-4 text-right text-blue-600 font-medium">
+                                      {item.usageMB.toFixed(1)} MB
+                                    </td>
+                                  </tr>
+                                ))}
+                                <tr className="bg-slate-50 font-semibold border-t border-slate-200">
+                                  <td colSpan={2} className="py-3 px-4 text-center text-slate-700 uppercase">Tổng tiêu thụ</td>
+                                  <td className="py-3 px-4 text-right text-blue-600">
+                                    {totalUsageMB.toFixed(1)} MB
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-3">
+                        <p className="text-[18px] font-semibold text-slate-700">Báo cáo tiêu thụ dữ liệu chủ theo đơn vị được cấp quyền</p>
+                        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+                          <div className="overflow-auto h-[320px]">
+                            <table className="master-data-consumption-table w-full text-left border-collapse table-auto text-[13px]">
+                              <thead>
+                                <tr className="bg-slate-50 border-b border-slate-200 font-semibold text-slate-500 uppercase tracking-tight">
+                                  <th className="py-3 px-4">Đơn vị</th>
+                                  <th className="py-3 px-4 text-right">Dung lượng tiêu thụ (MB)</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-100 text-slate-700">
+                                {mockUnitConsumption.map((item, idx) => (
+                                  <tr key={idx} className="hover:bg-slate-50/50 transition-all">
+                                    <td className="py-3 px-4 font-medium text-slate-900">{item.unit}</td>
+                                    <td className="py-3 px-4 text-right text-blue-600 font-medium">{item.usageMB.toFixed(1)} MB</td>
+                                  </tr>
+                                ))}
+                                <tr className="bg-slate-50 font-semibold border-t border-slate-200">
+                                  <td className="py-3 px-4 text-center text-slate-700 uppercase">Tổng tiêu thụ</td>
+                                  <td className="py-3 px-4 text-right text-blue-600">{totalUnitUsageMB.toFixed(1)} MB</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
                         </div>
                       </div>
                     </div>
