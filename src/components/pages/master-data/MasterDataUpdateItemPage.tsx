@@ -4,9 +4,10 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 
 export type ApprovalStatus = 'draft' | 'reviewing' | 'pending' | 'approved' | 'rejected' | 'deleted';
 type PublicStatus = 'published' | 'unpublished';
-type DataCategory = 'enforcement' | 'civil-registry' | 'nationality' | 'individual' | 'organization' | 'legal-aid-object' | 'asset';
+// 3 loại thực thể dữ liệu chủ theo quy định của Bộ Tư pháp (bảng "Dữ liệu chủ" chính thức)
+export type DataCategory = 'civil-status' | 'enforcement-decision' | 'legal-document';
 
-interface ColDef { key: string; label: string }
+export interface ColDef { key: string; label: string }
 
 interface ItemConfig {
   category: DataCategory;
@@ -18,226 +19,99 @@ interface ItemConfig {
 // ─── Config per master data ID ────────────────────────────────────────────────
 
 const ITEM_CONFIGS: Record<string, ItemConfig> = {
-  'md-001': { category: 'enforcement',       unit: 'Cục Quản lý thi hành án dân sự',                     system: 'Nền tảng số THADS',                           idLabel: 'Số quyết định' },
-  'md-002': { category: 'civil-registry',    unit: 'Cục Hành chính tư pháp',                             system: 'CSDL hộ tịch điện tử',                        idLabel: 'Số đăng ký khai sinh' },
-  'md-003': { category: 'civil-registry',    unit: 'Cục Hành chính tư pháp',                             system: 'CSDL hộ tịch điện tử',                        idLabel: 'Số đăng ký khai tử' },
-  'md-004': { category: 'civil-registry',    unit: 'Cục Hành chính tư pháp',                             system: 'CSDL hộ tịch điện tử',                        idLabel: 'Số đăng ký kết hôn' },
-  'md-005': { category: 'civil-registry',    unit: 'Cục Hành chính tư pháp',                             system: 'CSDL hộ tịch điện tử',                        idLabel: 'Số xác nhận' },
-  'md-006': { category: 'civil-registry',    unit: 'Cục Hành chính tư pháp',                             system: 'CSDL hộ tịch điện tử',                        idLabel: 'Số đăng ký' },
-  'md-007': { category: 'civil-registry',    unit: 'Cục Hành chính tư pháp',                             system: 'CSDL hộ tịch điện tử',                        idLabel: 'Số đăng ký CC' },
-  'md-008': { category: 'civil-registry',    unit: 'Cục Hành chính tư pháp',                             system: 'CSDL hộ tịch điện tử',                        idLabel: 'Số đăng ký GH' },
-  'md-009': { category: 'civil-registry',    unit: 'Cục Hành chính tư pháp',                             system: 'CSDL hộ tịch điện tử',                        idLabel: 'Số ghi chú LH' },
-  'md-010': { category: 'civil-registry',    unit: 'Cục Hành chính tư pháp',                             system: 'CSDL hộ tịch điện tử',                        idLabel: 'Số đăng ký NCN' },
-  'md-011': { category: 'nationality',       unit: 'Cục Hành chính tư pháp',                             system: 'CSDL quốc tịch',                              idLabel: 'Số ký hiệu QĐ nhập' },
-  'md-012': { category: 'nationality',       unit: 'Cục Hành chính tư pháp',                             system: 'CSDL quốc tịch',                              idLabel: 'Số ký hiệu QĐ thôi' },
-  'md-013': { category: 'nationality',       unit: 'Cục Hành chính tư pháp',                             system: 'CSDL quốc tịch',                              idLabel: 'Số ký hiệu QĐ trở lại' },
-  'md-014': { category: 'nationality',       unit: 'Cục Hành chính tư pháp',                             system: 'CSDL quốc tịch',                              idLabel: 'Số ký hiệu QĐ tước' },
-  'md-015': { category: 'individual',        unit: 'Cục Bổ trợ tư pháp',                                 system: 'Phần mềm quản lý bổ trợ tư pháp',             idLabel: 'Mã hành nghề' },
-  'md-016': { category: 'individual',        unit: 'Cục Bổ trợ tư pháp',                                 system: 'Phần mềm quản lý bổ trợ tư pháp',             idLabel: 'Mã thẻ TVPPL' },
-  'md-017': { category: 'individual',        unit: 'Cục Bổ trợ tư pháp',                                 system: 'Phần mềm quản lý bổ trợ tư pháp',             idLabel: 'Mã công chứng viên' },
-  'md-018': { category: 'individual',        unit: 'Cục Bổ trợ tư pháp',                                 system: 'Phần mềm quản lý bổ trợ tư pháp',             idLabel: 'Mã quản tài viên' },
-  'md-019': { category: 'individual',        unit: 'Cục Bổ trợ tư pháp',                                 system: 'Phần mềm quản lý bổ trợ tư pháp',             idLabel: 'Mã đấu giá viên' },
-  'md-020': { category: 'individual',        unit: 'Cục Bổ trợ tư pháp',                                 system: 'Phần mềm quản lý bổ trợ tư pháp',             idLabel: 'Mã giám định viên' },
-  'md-021': { category: 'individual',        unit: 'Cục Bổ trợ tư pháp',                                 system: 'Phần mềm quản lý bổ trợ tư pháp',             idLabel: 'Mã trọng tài viên' },
-  'md-022': { category: 'individual',        unit: 'Cục Bổ trợ tư pháp',                                 system: 'Phần mềm quản lý bổ trợ tư pháp',             idLabel: 'Mã hòa giải viên' },
-  'md-023': { category: 'organization',      unit: 'Cục Bổ trợ tư pháp',                                 system: 'Phần mềm quản lý bổ trợ tư pháp',             idLabel: 'Mã tổ chức' },
-  'md-024': { category: 'organization',      unit: 'Cục Bổ trợ tư pháp',                                 system: 'Phần mềm quản lý bổ trợ tư pháp',             idLabel: 'Mã tổ chức NN' },
-  'md-025': { category: 'organization',      unit: 'Cục Bổ trợ tư pháp',                                 system: 'Phần mềm quản lý bổ trợ tư pháp',             idLabel: 'Mã trung tâm' },
-  'md-026': { category: 'organization',      unit: 'Cục Bổ trợ tư pháp',                                 system: 'Phần mềm quản lý bổ trợ tư pháp',             idLabel: 'Mã tổ chức CC' },
-  'md-027': { category: 'organization',      unit: 'Cục Bổ trợ tư pháp',                                 system: 'Phần mềm quản lý bổ trợ tư pháp',             idLabel: 'Mã doanh nghiệp' },
-  'md-028': { category: 'organization',      unit: 'Cục Bổ trợ tư pháp',                                 system: 'Phần mềm quản lý bổ trợ tư pháp',             idLabel: 'Mã tổ chức ĐG' },
-  'md-029': { category: 'organization',      unit: 'Cục Bổ trợ tư pháp',                                 system: 'Phần mềm quản lý bổ trợ tư pháp',             idLabel: 'Mã tổ chức GĐ' },
-  'md-030': { category: 'organization',      unit: 'Cục Bổ trợ tư pháp',                                 system: 'Phần mềm quản lý bổ trợ tư pháp',             idLabel: 'Mã trung tâm HG' },
-  'md-031': { category: 'organization',      unit: 'Cục Bổ trợ tư pháp',                                 system: 'Phần mềm quản lý bổ trợ tư pháp',             idLabel: 'Mã trung tâm TT' },
-  'md-032': { category: 'individual',        unit: 'Cục Phổ biến, GDPL và Trợ giúp pháp lý',             system: 'CSDL phổ biến, GDPL và hòa giải cơ sở',       idLabel: 'Số QĐ công nhận' },
-  'md-033': { category: 'individual',        unit: 'Cục Phổ biến, GDPL và Trợ giúp pháp lý',             system: 'CSDL phổ biến, GDPL và hòa giải cơ sở',       idLabel: 'Số QĐ công nhận' },
-  'md-034': { category: 'individual',        unit: 'Cục Phổ biến, GDPL và Trợ giúp pháp lý',             system: 'CSDL phổ biến, GDPL và hòa giải cơ sở',       idLabel: 'Số QĐ công nhận' },
-  'md-035': { category: 'legal-aid-object',  unit: 'Cục Phổ biến, GDPL và Trợ giúp pháp lý',             system: 'Hệ thống thông tin trợ giúp pháp lý',          idLabel: 'Mã định danh' },
-  'md-036': { category: 'organization',      unit: 'Cục Phổ biến, GDPL và Trợ giúp pháp lý',             system: 'Hệ thống thông tin trợ giúp pháp lý',          idLabel: 'Mã định danh tổ chức' },
-  'md-037': { category: 'individual',        unit: 'Cục Phổ biến, GDPL và Trợ giúp pháp lý',             system: 'Hệ thống thông tin trợ giúp pháp lý',          idLabel: 'Số giấy phép/chứng chỉ' },
-  'md-038': { category: 'asset',             unit: 'Cục Đăng ký giao dịch bảo đảm và Bồi thường nhà nước', system: 'Hệ thống thông tin giao dịch bảo đảm',       idLabel: 'Số định danh tài sản' },
+  'md-001': { category: 'civil-status',         unit: 'Cục Hành chính tư pháp',                                        system: 'CSDL hộ tịch điện tử',                idLabel: 'Mã số hộ tịch' },
+  'md-002': { category: 'enforcement-decision', unit: 'Cục Quản lý thi hành án dân sự',                                system: 'Nền tảng số THADS',                    idLabel: 'Mã quyết định THA' },
+  'md-003': { category: 'legal-document',       unit: 'Cục Kiểm tra văn bản và Quản lý xử lý vi phạm hành chính',       system: 'CSDL văn bản quy phạm pháp luật',      idLabel: 'Số định danh văn bản' },
 };
 
-// ─── Column definitions per category ─────────────────────────────────────────
+// ─── Column definitions per category — đúng theo bảng "Dữ liệu chủ" quy định của Bộ Tư pháp ──────
 
-const COLUMNS: Record<DataCategory, ColDef[]> = {
-  'enforcement': [
-    { key: 'ma',          label: 'Số quyết định' },
-    { key: 'ngayBanHanh', label: 'Ngày ban hành' },
-    { key: 'hoTen',       label: 'Họ tên đương sự' },
-    { key: 'cccd',        label: 'CCCD/Hộ chiếu' },
-    { key: 'nghiaVu',     label: 'Nghĩa vụ THA' },
-    { key: 'coQuan',      label: 'Cơ quan ra QĐ' },
+export const COLUMNS: Record<DataCategory, ColDef[]> = {
+  'civil-status': [
+    { key: 'ma',                 label: 'Mã số hộ tịch' },
+    { key: 'hoTen',               label: 'Họ và tên' },
+    { key: 'ngaySinh',            label: 'Ngày sinh' },
+    { key: 'gioiTinh',            label: 'Giới tính' },
+    { key: 'noiSinh',             label: 'Nơi sinh' },
+    { key: 'danToc',              label: 'Dân tộc' },
+    { key: 'quocTich',            label: 'Quốc tịch' },
+    { key: 'queQuan',             label: 'Quê quán' },
+    { key: 'soDinhDanh',          label: 'Số định danh cá nhân' },
+    { key: 'ngayXacLapHonNhan',   label: 'Ngày xác lập hôn nhân lần đầu' },
+    { key: 'ngayMat',             label: 'Ngày mất' },
+    { key: 'noiMat',              label: 'Nơi mất' },
+    { key: 'hieuLuc',             label: 'Hiệu lực' },
   ],
-  'civil-registry': [
-    { key: 'ma',          label: 'Số đăng ký' },
-    { key: 'ngayDangKy',  label: 'Ngày đăng ký' },
-    { key: 'noiDangKy',   label: 'Nơi đăng ký' },
-    { key: 'hoTen',       label: 'Họ tên' },
-    { key: 'ngaySinh',    label: 'Ngày sinh' },
-    { key: 'quocTich',    label: 'Quốc tịch' },
+  'enforcement-decision': [
+    { key: 'ma',                  label: 'Mã quyết định THA' },
+    { key: 'ngayQuyetDinh',       label: 'Ngày quyết định' },
+    { key: 'coQuanThiHanhAn',     label: 'Cơ quan thi hành án' },
+    { key: 'tinhTrangThiHanhAn',  label: 'Tình trạng thi hành án' },
+    { key: 'hieuLuc',             label: 'Hiệu lực' },
   ],
-  'nationality': [
-    { key: 'ma',           label: 'Số ký hiệu QĐ' },
-    { key: 'hoTen',        label: 'Họ và tên' },
-    { key: 'ngaySinh',     label: 'Ngày sinh' },
-    { key: 'noiSinh',      label: 'Nơi sinh' },
-    { key: 'gioiTinh',     label: 'Giới tính' },
-    { key: 'ngayQuyetDinh',label: 'Ngày QĐ CTN' },
-  ],
-  'individual': [
-    { key: 'ma',      label: 'Mã định danh' },
-    { key: 'hoTen',   label: 'Họ và tên' },
-    { key: 'ngaySinh',label: 'Ngày sinh' },
-    { key: 'cccd',    label: 'CCCD' },
-    { key: 'chucDanh',label: 'Chức danh' },
-    { key: 'soCCHN',  label: 'Số CCHN/Thẻ' },
-    { key: 'linhVuc', label: 'Lĩnh vực' },
-  ],
-  'organization': [
-    { key: 'ma',           label: 'Mã tổ chức' },
-    { key: 'tenTochuc',    label: 'Tên tổ chức' },
-    { key: 'loaiHinh',     label: 'Loại hình' },
-    { key: 'soDKHD',       label: 'Số đăng ký HĐ' },
-    { key: 'diaChi',       label: 'Địa chỉ trụ sở' },
-    { key: 'nguoiDaiDien', label: 'Người đại diện' },
-  ],
-  'legal-aid-object': [
-    { key: 'ma',       label: 'Mã định danh' },
-    { key: 'loai',     label: 'Loại đối tượng' },
-    { key: 'cccd',     label: 'CCCD/Hộ chiếu' },
-    { key: 'hoTen',    label: 'Họ và tên' },
-    { key: 'dienTGPL', label: 'Diện TGPL' },
-    { key: 'tinh',     label: 'Tỉnh/Thành phố' },
-  ],
-  'asset': [
-    { key: 'ma',         label: 'Số định danh TS' },
-    { key: 'maHopDong',  label: 'Mã hợp đồng' },
-    { key: 'hieuluc',    label: 'Hiệu lực HĐ' },
-    { key: 'soGCN',      label: 'Số GCN sở hữu' },
-    { key: 'loaiTaiSan', label: 'Loại tài sản' },
-    { key: 'benBaoDam',  label: 'Bên bảo đảm' },
+  'legal-document': [
+    { key: 'ma',                 label: 'Số định danh văn bản' },
+    { key: 'tenVanBan',           label: 'Tên văn bản' },
+    { key: 'soKyHieu',            label: 'Số ký hiệu' },
+    { key: 'loaiVanBan',          label: 'Loại văn bản' },
+    { key: 'coQuanBanHanh',       label: 'Cơ quan ban hành' },
+    { key: 'ngayBanHanh',         label: 'Ngày ban hành' },
+    { key: 'ngayHieuLuc',         label: 'Ngày hiệu lực' },
+    { key: 'linhVuc',             label: 'Lĩnh vực' },
+    { key: 'trangThaiHieuLuc',    label: 'Trạng thái hiệu lực' },
+    { key: 'hieuLuc',             label: 'Hiệu lực' },
   ],
 };
 
 // ─── Mock data per category ───────────────────────────────────────────────────
 
-type Row = Record<string, string> & { id: string; approvalStatus: ApprovalStatus; publicStatus: PublicStatus };
+export type Row = Record<string, string> & { id: string; approvalStatus: ApprovalStatus; publicStatus: PublicStatus };
 
-const MOCK_ENFORCEMENT: Row[] = [
-  { id: '1', ma: 'QĐ-THADS-2026-00156', ngayBanHanh: '15/01/2026', hoTen: 'Nguyễn Văn Anh',   cccd: '001234567890', nghiaVu: 'Bồi thường 250.000.000đ',              coQuan: 'Cục THADS TP. Hà Nội',          approvalStatus: 'approved', publicStatus: 'published' },
-  { id: '2', ma: 'QĐ-THADS-2026-00287', ngayBanHanh: '22/02/2026', hoTen: 'Nguyễn Văn Anh',   cccd: '079199001234', nghiaVu: 'Phạt cải tạo không giam giữ 12 tháng',  coQuan: '',                              approvalStatus: 'pending',  publicStatus: 'unpublished' },
-  { id: '3', ma: 'QĐ-THADS-2025-08456', ngayBanHanh: '10/11/2025', hoTen: 'Lê Minh Cường',    cccd: '036087003456', nghiaVu: 'Trả nợ 180.000.000đ và lãi suất',       coQuan: 'Cục THADS TP. Đà Nẵng',         approvalStatus: 'draft',    publicStatus: 'unpublished' },
-  { id: '4', ma: 'QĐ-THADS-2026-00401', ngayBanHanh: '05/03/2026', hoTen: 'Phạm Quốc Dũng',   cccd: '031075004567', nghiaVu: 'Giao nộp tài sản theo bản án số 12/2025', coQuan: 'Chi Cục THADS TP. Cần Thơ',     approvalStatus: 'rejected', publicStatus: 'unpublished' },
-  { id: '5', ma: 'QĐ-THADS-2026-00512', ngayBanHanh: '15/04/2026', hoTen: 'Hoàng Thị Lan',    cccd: '038079005678', nghiaVu: 'Bồi thường thiệt hại 75.000.000đ',       coQuan: 'Chi Cục THADS Q. Hải An, HN',  approvalStatus: 'pending',  publicStatus: 'unpublished' },
-  { id: '6', ma: 'QĐ-THADS-2026-00623', ngayBanHanh: '28/05/2026', hoTen: 'Vũ Đức Thắng',     cccd: '026068006789', nghiaVu: 'Nộp tiền phạt 50.000.000đ',               coQuan: 'Chi Cục THADS Q. Sơn Trà, ĐN', approvalStatus: 'approved', publicStatus: 'published' },
-  { id: '7', ma: 'QĐ-THADS-2026-00734', ngayBanHanh: '02/06/2026', hoTen: 'Đặng Thị Kim Oanh', cccd: '034082007890', nghiaVu: 'Bồi thường 45.000.000đ',                  coQuan: 'Chi Cục THADS Q. Cầu Giấy, HN', approvalStatus: 'reviewing', publicStatus: 'unpublished' },
-  { id: '8', ma: 'QĐ-THADS-2026-00845', ngayBanHanh: '18/06/2026', hoTen: 'Bùi Văn Thành',     cccd: '045085008901', nghiaVu: 'Bồi thường 120.000.000đ',                 coQuan: 'Cục THADS TP. Hà Nội',          approvalStatus: 'approved', publicStatus: 'unpublished' },
-  { id: '9', ma: 'QĐ-THADS-2026-00902', ngayBanHanh: '25/06/2026', hoTen: 'Trịnh Thị Hoa',     cccd: '052090009012', nghiaVu: 'Truy thu thuế 60.000.000đ',               coQuan: 'Chi Cục THADS TP. Vinh',        approvalStatus: 'approved', publicStatus: 'unpublished' },
-  { id: '10', ma: 'QĐ-THADS-2026-00967', ngayBanHanh: '30/06/2026', hoTen: 'Vũ Đức Thắng',    cccd: '026068009999', nghiaVu: 'Nộp tiền phạt 15.000.000đ',              coQuan: 'Chi Cục THADS Q. Sơn Trà, ĐN',  approvalStatus: 'pending',  publicStatus: 'unpublished' },
+const MOCK_CIVIL_STATUS: Row[] = [
+  { id: '1', ma: 'HT-2026-000145', hoTen: 'Trần Minh Khoa',       ngaySinh: '01/01/2026', gioiTinh: 'Nam', noiSinh: 'Hà Nội',      danToc: 'Kinh', quocTich: 'Việt Nam', queQuan: 'Nam Định',    soDinhDanh: '001126000123', ngayXacLapHonNhan: '',           ngayMat: '—',           noiMat: '—',          hieuLuc: '01/01/2026', approvalStatus: 'approved',  publicStatus: 'published' },
+  { id: '2', ma: 'HT-2026-000287', hoTen: 'Trần Minh Khoa',       ngaySinh: '14/02/2026', gioiTinh: 'Nam', noiSinh: '',            danToc: 'Kinh', quocTich: 'Việt Nam', queQuan: 'Nam Định',    soDinhDanh: '001126000456', ngayXacLapHonNhan: '',           ngayMat: '—',           noiMat: '—',          hieuLuc: '14/02/2026', approvalStatus: 'approved',  publicStatus: 'published' },
+  { id: '3', ma: 'HT-2025-008456', hoTen: 'Lê Gia Bảo',           ngaySinh: '08/12/2025', gioiTinh: 'Nam', noiSinh: 'Đà Nẵng',     danToc: 'Kinh', quocTich: 'Việt Nam', queQuan: 'Đà Nẵng',     soDinhDanh: '048125007890', ngayXacLapHonNhan: '',           ngayMat: '—',           noiMat: '—',          hieuLuc: '08/12/2025', approvalStatus: 'pending',   publicStatus: 'unpublished' },
+  { id: '4', ma: 'HT-2026-000298', hoTen: 'Phạm Nhật Minh',       ngaySinh: '03/03/2026', gioiTinh: 'Nam', noiSinh: 'Hải Phòng',   danToc: 'Kinh', quocTich: 'Việt Nam', queQuan: 'Hải Phòng',   soDinhDanh: '031126001234', ngayXacLapHonNhan: '',           ngayMat: '—',           noiMat: '—',          hieuLuc: '03/03/2026', approvalStatus: 'draft',     publicStatus: 'unpublished' },
+  { id: '5', ma: 'HT-1995-002234', hoTen: 'Đinh Thị Yến Nhi',     ngaySinh: '12/05/1995', gioiTinh: 'Nữ',  noiSinh: 'Cần Thơ',     danToc: 'Kinh', quocTich: 'Việt Nam', queQuan: 'Cần Thơ',     soDinhDanh: '092195003456', ngayXacLapHonNhan: '20/09/2020', ngayMat: '—',           noiMat: '—',          hieuLuc: '20/09/2020', approvalStatus: 'pending',   publicStatus: 'unpublished' },
+  { id: '6', ma: 'HT-1950-000512', hoTen: 'Trần Bình An',         ngaySinh: '10/05/1950', gioiTinh: 'Nam', noiSinh: 'Bình Dương',  danToc: 'Kinh', quocTich: 'Việt Nam', queQuan: 'Bình Dương',  soDinhDanh: '079150005678', ngayXacLapHonNhan: '15/03/1975', ngayMat: '12/01/2024',  noiMat: 'Bình Dương', hieuLuc: '12/01/2024', approvalStatus: 'rejected',  publicStatus: 'unpublished' },
+  { id: '7', ma: 'HT-2026-000099', hoTen: 'Bùi Văn Sơn',          ngaySinh: '01/01/2026', gioiTinh: 'Nam', noiSinh: 'Hà Nội',      danToc: 'Kinh', quocTich: 'Việt Nam', queQuan: 'Hà Nội',      soDinhDanh: '001126009012', ngayXacLapHonNhan: '',           ngayMat: '—',           noiMat: '—',          hieuLuc: '01/01/2026', approvalStatus: 'reviewing', publicStatus: 'unpublished' },
 ];
 
-const MOCK_CIVIL_REGISTRY: Row[] = [
-  { id: '1', ma: '01/2026/ĐKKS',   ngayDangKy: '02/01/2026', noiDangKy: 'UBND P. Hàng Bông, HN',       hoTen: 'Trần Minh Khoa',    ngaySinh: '01/01/2026', quocTich: 'Việt Nam', approvalStatus: 'approved', publicStatus: 'published' },
-  { id: '2', ma: '124/2026/ĐKKS',  ngayDangKy: '15/02/2026', noiDangKy: '',                            hoTen: 'Trần Minh Khoa',    ngaySinh: '14/02/2026', quocTich: 'Việt Nam', approvalStatus: 'approved', publicStatus: 'published' },
-  { id: '3', ma: '2847/2025/ĐKKS', ngayDangKy: '10/12/2025', noiDangKy: 'UBND P. Hải Châu 1, ĐN',      hoTen: 'Lê Gia Bảo',        ngaySinh: '08/12/2025', quocTich: 'Việt Nam', approvalStatus: 'pending',  publicStatus: 'unpublished' },
-  { id: '4', ma: '298/2026/ĐKKS',  ngayDangKy: '05/03/2026', noiDangKy: 'UBND P. Lê Chân, Hải Phòng',  hoTen: 'Phạm Nhật Minh',    ngaySinh: '03/03/2026', quocTich: 'Việt Nam', approvalStatus: 'draft',    publicStatus: 'unpublished' },
-  { id: '5', ma: '401/2026/ĐKKS',  ngayDangKy: '20/04/2026', noiDangKy: 'UBND P. An Hòa, Cần Thơ',     hoTen: 'Đinh Thị Yến Nhi',  ngaySinh: '18/04/2026', quocTich: 'Việt Nam', approvalStatus: 'pending',  publicStatus: 'unpublished' },
-  { id: '6', ma: '512/2026/ĐKKS',  ngayDangKy: '10/05/2026', noiDangKy: 'UBND P. Vĩnh Phú, Bình Dương', hoTen: 'Trần Bình An',      ngaySinh: '08/05/2026', quocTich: 'Việt Nam', approvalStatus: 'rejected', publicStatus: 'unpublished' },
-  { id: '7', ma: '099/2026/ĐKKS',  ngayDangKy: '12/05/2026', noiDangKy: 'UBND P. Cầu Giấy, HN',        hoTen: 'Bùi Văn Sơn',       ngaySinh: '01/01/2026', quocTich: 'Việt Nam', approvalStatus: 'reviewing', publicStatus: 'unpublished' },
+const MOCK_ENFORCEMENT_DECISION: Row[] = [
+  { id: '1', ma: 'QĐ-THADS-2026-00156', ngayQuyetDinh: '15/01/2026', coQuanThiHanhAn: 'Cục THADS TP. Hà Nội',           tinhTrangThiHanhAn: 'Đang thi hành',       hieuLuc: '15/01/2026', approvalStatus: 'approved',  publicStatus: 'published' },
+  { id: '2', ma: 'QĐ-THADS-2026-00287', ngayQuyetDinh: '22/02/2026', coQuanThiHanhAn: 'Chi cục THADS Q. Cầu Giấy, HN',  tinhTrangThiHanhAn: 'Đã thi hành xong',    hieuLuc: '22/02/2026', approvalStatus: 'pending',   publicStatus: 'unpublished' },
+  { id: '3', ma: 'QĐ-THADS-2025-08456', ngayQuyetDinh: '10/11/2025', coQuanThiHanhAn: 'Cục THADS TP. Đà Nẵng',          tinhTrangThiHanhAn: '',                    hieuLuc: '10/11/2025', approvalStatus: 'draft',     publicStatus: 'unpublished' },
+  { id: '4', ma: 'QĐ-THADS-2026-00401', ngayQuyetDinh: '05/03/2026', coQuanThiHanhAn: 'Chi cục THADS TP. Cần Thơ',      tinhTrangThiHanhAn: 'Tạm đình chỉ',        hieuLuc: '05/03/2026', approvalStatus: 'rejected',  publicStatus: 'unpublished' },
+  { id: '5', ma: 'QĐ-THADS-2026-00512', ngayQuyetDinh: '15/04/2026', coQuanThiHanhAn: 'Chi cục THADS Q. Hải An, HN',    tinhTrangThiHanhAn: 'Đang thi hành',       hieuLuc: '15/04/2026', approvalStatus: 'pending',   publicStatus: 'unpublished' },
+  { id: '6', ma: 'QĐ-THADS-2026-00623', ngayQuyetDinh: '28/05/2026', coQuanThiHanhAn: 'Chi cục THADS Q. Sơn Trà, ĐN',   tinhTrangThiHanhAn: 'Đã thi hành xong',    hieuLuc: '28/05/2026', approvalStatus: 'approved',  publicStatus: 'published' },
+  { id: '7', ma: 'QĐ-THADS-2026-00734', ngayQuyetDinh: '02/06/2026', coQuanThiHanhAn: 'Chi cục THADS Q. Cầu Giấy, HN',  tinhTrangThiHanhAn: 'Đang thi hành',       hieuLuc: '02/06/2026', approvalStatus: 'reviewing', publicStatus: 'unpublished' },
 ];
 
-const MOCK_NATIONALITY: Row[] = [
-  { id: '1', ma: '385/QĐ-CTN-2025', hoTen: 'Nguyễn Thị Hương',    ngaySinh: '15/05/1985', noiSinh: 'Hà Nội',        gioiTinh: 'Nữ',  ngayQuyetDinh: '20/08/2025', approvalStatus: 'approved', publicStatus: 'published' },
-  { id: '2', ma: '112/QĐ-CTN-2026', hoTen: 'Nguyễn Thị Hương',     ngaySinh: '10/03/1990', noiSinh: '',              gioiTinh: 'Nam', ngayQuyetDinh: '15/02/2026', approvalStatus: 'approved', publicStatus: 'published' },
-  { id: '3', ma: '047/QĐ-CTN-2026', hoTen: 'Trần Thị Mai Ly',      ngaySinh: '22/11/1978', noiSinh: 'Đà Nẵng',       gioiTinh: 'Nữ',  ngayQuyetDinh: '10/01/2026', approvalStatus: 'pending',  publicStatus: 'unpublished' },
-  { id: '4', ma: '198/QĐ-CTN-2025', hoTen: 'Phạm Văn Tùng',        ngaySinh: '08/07/1965', noiSinh: 'Nghệ An',       gioiTinh: 'Nam', ngayQuyetDinh: '05/05/2025', approvalStatus: 'draft',    publicStatus: 'unpublished' },
-  { id: '5', ma: '256/QĐ-CTN-2026', hoTen: 'Hoàng Thị Bích Ngọc',  ngaySinh: '30/01/1992', noiSinh: 'Hải Phòng',     gioiTinh: 'Nữ',  ngayQuyetDinh: '28/03/2026', approvalStatus: 'rejected', publicStatus: 'unpublished' },
-  { id: '6', ma: '311/QĐ-CTN-2026', hoTen: 'Vũ Đình Khương',        ngaySinh: '14/09/1988', noiSinh: 'Bắc Ninh',      gioiTinh: 'Nam', ngayQuyetDinh: '15/04/2026', approvalStatus: 'pending',  publicStatus: 'unpublished' },
-  { id: '7', ma: '289/QĐ-CTN-2026', hoTen: 'Đỗ Thị Thanh Huyền',    ngaySinh: '02/02/1995', noiSinh: 'Thanh Hóa',     gioiTinh: 'Nữ',  ngayQuyetDinh: '10/06/2026', approvalStatus: 'reviewing', publicStatus: 'unpublished' },
+const MOCK_LEGAL_DOCUMENT: Row[] = [
+  { id: '1', ma: 'VB-2026-000145', tenVanBan: 'Nghị định quy định chi tiết một số điều của Luật Hộ tịch',                           soKyHieu: '12/2026/NĐ-CP',            loaiVanBan: 'Nghị định',  coQuanBanHanh: 'Chính phủ',   ngayBanHanh: '15/01/2026', ngayHieuLuc: '01/03/2026', linhVuc: 'Hộ tịch',                       trangThaiHieuLuc: 'Còn hiệu lực',  hieuLuc: '01/03/2026', approvalStatus: 'approved',  publicStatus: 'published' },
+  { id: '2', ma: 'VB-2026-000287', tenVanBan: 'Nghị định quy định chi tiết một số điều của Luật Hộ tịch',                           soKyHieu: '12/2026/NĐ-CP-sửa đổi',    loaiVanBan: 'Nghị định',  coQuanBanHanh: 'Chính phủ',   ngayBanHanh: '20/02/2026', ngayHieuLuc: '',           linhVuc: 'Hộ tịch',                       trangThaiHieuLuc: 'Chưa hiệu lực', hieuLuc: '',           approvalStatus: 'pending',   publicStatus: 'unpublished' },
+  { id: '3', ma: 'VB-2025-008456', tenVanBan: 'Thông tư hướng dẫn thi hành án dân sự',                                              soKyHieu: '05/2025/TT-BTP',            loaiVanBan: 'Thông tư',   coQuanBanHanh: 'Bộ Tư pháp',  ngayBanHanh: '10/11/2025', ngayHieuLuc: '25/12/2025', linhVuc: 'Thi hành án dân sự',            trangThaiHieuLuc: 'Còn hiệu lực',  hieuLuc: '25/12/2025', approvalStatus: 'draft',     publicStatus: 'unpublished' },
+  { id: '4', ma: 'VB-2026-000401', tenVanBan: 'Luật sửa đổi, bổ sung một số điều của Luật Xử lý vi phạm hành chính',                soKyHieu: '08/2026/QH15',              loaiVanBan: 'Luật',       coQuanBanHanh: 'Quốc hội',    ngayBanHanh: '05/03/2026', ngayHieuLuc: '01/07/2026', linhVuc: 'Xử lý vi phạm hành chính',      trangThaiHieuLuc: 'Chưa hiệu lực', hieuLuc: '01/07/2026', approvalStatus: 'rejected',  publicStatus: 'unpublished' },
+  { id: '5', ma: 'VB-2026-000512', tenVanBan: 'Nghị định quy định về đăng ký giao dịch bảo đảm',                                    soKyHieu: '15/2026/NĐ-CP',             loaiVanBan: 'Nghị định',  coQuanBanHanh: 'Chính phủ',   ngayBanHanh: '15/04/2026', ngayHieuLuc: '01/06/2026', linhVuc: 'Giao dịch bảo đảm',             trangThaiHieuLuc: 'Còn hiệu lực',  hieuLuc: '01/06/2026', approvalStatus: 'pending',   publicStatus: 'unpublished' },
+  { id: '6', ma: 'VB-2026-000623', tenVanBan: 'Thông tư quy định về công chứng, chứng thực',                                        soKyHieu: '09/2026/TT-BTP',            loaiVanBan: 'Thông tư',   coQuanBanHanh: 'Bộ Tư pháp',  ngayBanHanh: '28/05/2026', ngayHieuLuc: '15/07/2026', linhVuc: 'Công chứng, chứng thực',        trangThaiHieuLuc: 'Còn hiệu lực',  hieuLuc: '15/07/2026', approvalStatus: 'approved',  publicStatus: 'published' },
+  { id: '7', ma: 'VB-2026-000734', tenVanBan: 'Quyết định công bố thủ tục hành chính lĩnh vực trợ giúp pháp lý',                     soKyHieu: '02/2026/QĐ-BTP',            loaiVanBan: 'Quyết định', coQuanBanHanh: 'Bộ Tư pháp',  ngayBanHanh: '02/06/2026', ngayHieuLuc: '02/06/2026', linhVuc: 'Trợ giúp pháp lý',              trangThaiHieuLuc: 'Còn hiệu lực',  hieuLuc: '02/06/2026', approvalStatus: 'reviewing', publicStatus: 'unpublished' },
 ];
 
-const MOCK_INDIVIDUAL: Row[] = [
-  { id: '1', ma: 'HN-LS-2019-00145',  hoTen: 'Nguyễn Thanh Hải',   ngaySinh: '15/04/1978', cccd: '001078001234', chucDanh: 'Luật sư',         soCCHN: 'CCHN-LS-0012345', linhVuc: 'Dân sự, Hình sự',       approvalStatus: 'approved', publicStatus: 'published' },
-  { id: '2', ma: 'HCM-LS-2020-00892', hoTen: 'Nguyễn Văn Anh',    ngaySinh: '22/08/1982', cccd: '079199001234', chucDanh: 'Luật sư',         soCCHN: '',                linhVuc: 'Kinh doanh thương mại', approvalStatus: 'approved', publicStatus: 'published' },
-  { id: '3', ma: 'DN-CC-2021-00234',  hoTen: 'Lê Thị Thu Hà',       ngaySinh: '10/12/1985', cccd: '048085003456', chucDanh: 'Công chứng viên', soCCHN: 'CCHN-CC-0034567', linhVuc: 'Công chứng',            approvalStatus: 'pending',  publicStatus: 'unpublished' },
-  { id: '4', ma: 'HN-DGV-2018-00067', hoTen: 'Phạm Xuân Long',      ngaySinh: '05/03/1975', cccd: '001075004567', chucDanh: 'Đấu giá viên',    soCCHN: 'CCHN-DG-0045678', linhVuc: 'Đấu giá tài sản',      approvalStatus: 'draft',    publicStatus: 'unpublished' },
-  { id: '5', ma: 'HP-QTV-2022-00189', hoTen: 'Hoàng Văn Bình',      ngaySinh: '18/06/1980', cccd: '031080005678', chucDanh: 'Quản tài viên',   soCCHN: 'CCHN-QT-0056789', linhVuc: 'Quản lý, thanh lý TS',  approvalStatus: 'rejected', publicStatus: 'unpublished' },
-  { id: '6', ma: 'CT-GDVTP-2020-0045',hoTen: 'Vũ Thị Ngọc Lan',     ngaySinh: '27/09/1988', cccd: '087088006789', chucDanh: 'Giám định viên',  soCCHN: 'CCHN-GD-0067890', linhVuc: 'Tài chính kế toán',     approvalStatus: 'pending',  publicStatus: 'unpublished' },
-  { id: '7', ma: 'HN-LS-2026-00312',  hoTen: 'Ngô Thanh Sơn',       ngaySinh: '30/01/1990', cccd: '001090008901', chucDanh: 'Luật sư',         soCCHN: 'CCHN-LS-0078901', linhVuc: 'Dân sự',                approvalStatus: 'reviewing', publicStatus: 'unpublished' },
-];
-
-const MOCK_ORGANIZATION: Row[] = [
-  { id: '1', ma: 'TC-LS-HN-0001',  tenTochuc: 'Công ty Luật TNHH Việt Phát',              loaiHinh: 'Công ty TNHH',     soDKHD: '01012345/TP/ĐKHĐ-LS', diaChi: '12 Lý Thường Kiệt, Q. Hoàn Kiếm, HN',  nguoiDaiDien: 'Nguyễn Văn Thành', approvalStatus: 'approved', publicStatus: 'published' },
-  { id: '2', ma: 'TC-LS-HCM-0089', tenTochuc: 'Công ty Luật TNHH Việt Phát',               loaiHinh: 'Văn phòng LS',     soDKHD: '01098765/TP/ĐKHĐ-LS', diaChi: '',                                       nguoiDaiDien: 'Trần Công Minh',   approvalStatus: 'approved', publicStatus: 'published' },
-  { id: '3', ma: 'TC-CC-DN-0024',  tenTochuc: 'Văn phòng Công chứng Đà Nẵng',              loaiHinh: 'Văn phòng CC',     soDKHD: '02024680/TP/ĐKHĐ-CC', diaChi: '78 Trần Phú, Q. Hải Châu, ĐN',          nguoiDaiDien: 'Lê Thị Hồng',      approvalStatus: 'pending',  publicStatus: 'unpublished' },
-  { id: '4', ma: 'TC-DG-HP-0015',  tenTochuc: 'Công ty Đấu giá Hợp danh Hải Phòng',        loaiHinh: 'Công ty HD',       soDKHD: '03012345/TP/ĐKHĐ-DG', diaChi: '45 Điện Biên Phủ, Q. Lê Chân, HP',      nguoiDaiDien: 'Phạm Đức Hùng',    approvalStatus: 'draft',    publicStatus: 'unpublished' },
-  { id: '5', ma: 'TC-GD-HN-0008',  tenTochuc: 'Trung tâm Giám định Tư pháp Hà Nội',        loaiHinh: 'Trung tâm',        soDKHD: '04098765/TP/ĐKHĐ-GĐ', diaChi: '101 Trần Hưng Đạo, Q. Hoàn Kiếm, HN',  nguoiDaiDien: 'Hoàng Minh Tuấn',  approvalStatus: 'rejected', publicStatus: 'unpublished' },
-  { id: '6', ma: 'TC-TT-HCM-0032', tenTochuc: 'Trung tâm Trọng tài Thương mại Phía Nam',   loaiHinh: 'Trung tâm',        soDKHD: '05024680/TP/ĐKHĐ-TT', diaChi: '200 Lê Lai, Q.1, TP.HCM',               nguoiDaiDien: 'Vũ Quang Huy',     approvalStatus: 'pending',  publicStatus: 'unpublished' },
-  { id: '7', ma: 'TC-DG-CT-0087',  tenTochuc: 'Công ty Đấu giá Hợp danh Cần Thơ',         loaiHinh: 'Công ty HD',       soDKHD: '01087654/TP/ĐKHĐ-DG', diaChi: '15 Trần Hưng Đạo, Q. Ninh Kiều, CT',    nguoiDaiDien: 'Lâm Văn Đạt',      approvalStatus: 'reviewing', publicStatus: 'unpublished' },
-];
-
-const MOCK_LEGAL_AID_OBJECT: Row[] = [
-  { id: '1', ma: 'TGPL-DN-2026-001234', loai: 'Người có công',      cccd: '001078001234', hoTen: 'Nguyễn Thị Bích',     dienTGPL: 'Thương binh hạng 2/4', tinh: 'Hà Nội',     approvalStatus: 'approved', publicStatus: 'published' },
-  { id: '2', ma: 'TGPL-DN-2026-002345', loai: 'Hộ nghèo',           cccd: '079199001234', hoTen: 'Nguyễn Văn Anh',      dienTGPL: '',                     tinh: 'TP.HCM',     approvalStatus: 'approved', publicStatus: 'published' },
-  { id: '3', ma: 'TGPL-DN-2025-098765', loai: 'Người dân tộc thiểu số', cccd: '038059003456', hoTen: 'Lý Thị Mai',      dienTGPL: 'DTTS cư trú vùng KK',  tinh: 'Đà Nẵng',    approvalStatus: 'pending',  publicStatus: 'unpublished' },
-  { id: '4', ma: 'TGPL-DN-2026-003456', loai: 'Người cao tuổi',     cccd: '031040004567', hoTen: 'Phạm Văn Cương',       dienTGPL: 'Trên 80 tuổi không lương', tinh: 'Hải Phòng', approvalStatus: 'draft',    publicStatus: 'unpublished' },
-  { id: '5', ma: 'TGPL-DN-2026-004567', loai: 'Người khuyết tật',   cccd: '087072005678', hoTen: 'Hoàng Thị Linh',       dienTGPL: 'KT nặng theo hồ sơ',   tinh: 'Cần Thơ',    approvalStatus: 'rejected', publicStatus: 'unpublished' },
-  { id: '6', ma: 'TGPL-DN-2026-005678', loai: 'Trẻ em',             cccd: '001018006789', hoTen: 'Vũ Minh Quân',          dienTGPL: 'Trẻ em (dưới 16 tuổi)', tinh: 'Bình Dương', approvalStatus: 'pending',  publicStatus: 'unpublished' },
-  { id: '7', ma: 'TGPL-DN-2026-006789', loai: 'Người khuyết tật',   cccd: '079091009012', hoTen: 'Bùi Thị Cẩm Tú',        dienTGPL: 'KT nhẹ theo hồ sơ',      tinh: 'Hà Nội',     approvalStatus: 'reviewing', publicStatus: 'unpublished' },
-];
-
-const MOCK_ASSET: Row[] = [
-  { id: '1', ma: 'TS-2026-000145', maHopDong: 'HĐ-TC-2026-001234', hieuluc: '01/01/2026 – 01/01/2031', soGCN: 'GCN-QSD-001234567', loaiTaiSan: 'Quyền sử dụng đất',    benBaoDam: 'Nguyễn Văn Hùng',    approvalStatus: 'approved', publicStatus: 'published' },
-  { id: '2', ma: 'TS-2026-000287', maHopDong: 'HĐ-TC-2026-002345', hieuluc: '15/02/2026 – 15/02/2029', soGCN: '',                  loaiTaiSan: 'Phương tiện ô tô',     benBaoDam: 'Nguyễn Văn Hùng',    approvalStatus: 'approved', publicStatus: 'published' },
-  { id: '3', ma: 'TS-2025-008456', maHopDong: 'HĐ-TC-2025-003456', hieuluc: '20/11/2025 – 20/11/2028', soGCN: 'GCN-SHNO-003456789',loaiTaiSan: 'Nhà ở',                benBaoDam: 'Lê Minh Đức',         approvalStatus: 'pending',  publicStatus: 'unpublished' },
-  { id: '4', ma: 'TS-2026-000401', maHopDong: 'HĐ-TC-2026-004567', hieuluc: '10/03/2026 – 10/03/2030', soGCN: 'GCN-MMTB-004567890',loaiTaiSan: 'Máy móc thiết bị',     benBaoDam: 'Phạm Quốc Khánh',    approvalStatus: 'rejected', publicStatus: 'unpublished' },
-  { id: '5', ma: 'TS-2026-000512', maHopDong: 'HĐ-TC-2026-005678', hieuluc: '25/04/2026 – 25/04/2028', soGCN: 'GCN-HHDV-005678901',loaiTaiSan: 'Hàng hóa trong kho',   benBaoDam: 'Hoàng Đức Lân',      approvalStatus: 'draft',    publicStatus: 'unpublished' },
-  { id: '6', ma: 'TS-2026-000623', maHopDong: 'HĐ-TC-2026-006789', hieuluc: '05/06/2026 – 05/06/2029', soGCN: 'GCN-QSD-006789012', loaiTaiSan: 'Tài sản hình thành trong tương lai', benBaoDam: 'Vũ Thị Hà',  approvalStatus: 'pending',  publicStatus: 'unpublished' },
-  { id: '7', ma: 'TS-2026-000734', maHopDong: 'HĐ-TC-2026-007890', hieuluc: '12/06/2026 – 12/06/2030', soGCN: 'GCN-QSD-007890123', loaiTaiSan: 'Quyền sử dụng đất',    benBaoDam: 'Đặng Văn Kiên',  approvalStatus: 'reviewing', publicStatus: 'unpublished' },
-];
-
-const MOCK_BY_CATEGORY: Record<DataCategory, Row[]> = {
-  'enforcement':       MOCK_ENFORCEMENT,
-  'civil-registry':    MOCK_CIVIL_REGISTRY,
-  'nationality':       MOCK_NATIONALITY,
-  'individual':        MOCK_INDIVIDUAL,
-  'organization':      MOCK_ORGANIZATION,
-  'legal-aid-object':  MOCK_LEGAL_AID_OBJECT,
-  'asset':             MOCK_ASSET,
+export const MOCK_BY_CATEGORY: Record<DataCategory, Row[]> = {
+  'civil-status':         MOCK_CIVIL_STATUS,
+  'enforcement-decision': MOCK_ENFORCEMENT_DECISION,
+  'legal-document':       MOCK_LEGAL_DOCUMENT,
 };
 
-// For civil registry items, prefix the maDangKy based on the specific type
-const CIVIL_REGISTRY_PREFIXES: Record<string, string> = {
-  'md-002': 'KS',   // khai sinh
-  'md-003': 'KT',   // khai tử
-  'md-004': 'KH',   // kết hôn
-  'md-005': 'HN',   // hôn nhân
-  'md-006': 'CMC',  // cha mẹ con
-  'md-007': 'CC',   // cải chính
-  'md-008': 'GH',   // giám hộ
-  'md-009': 'LH',   // ly hôn
-  'md-010': 'NCN',  // nuôi con nuôi
-};
-
-function getMockData(masterId: string, category: DataCategory): Row[] {
-  const base = MOCK_BY_CATEGORY[category];
-  if (category === 'civil-registry') {
-    const prefix = CIVIL_REGISTRY_PREFIXES[masterId] || 'HT';
-    return base.map(r => ({ ...r, ma: r.ma.replace(/ĐKKS|KS|KT|KH|HN|CMC|CC|GH|LH|NCN/, prefix) }));
-  }
-  return base;
+function getMockData(_masterId: string, category: DataCategory): Row[] {
+  return MOCK_BY_CATEGORY[category];
 }
 
-// ─── Liên kết chéo thực thể: cùng một chủ thể (CCCD) xuất hiện ở nhiều loại dữ liệu chủ khác nhau ──
-const CATEGORY_LABELS: Record<DataCategory, string> = {
-  'enforcement':      'Thi hành án dân sự',
-  'civil-registry':   'Hộ tịch',
-  'nationality':      'Quốc tịch',
-  'individual':       'Cá nhân hành nghề bổ trợ tư pháp',
-  'organization':     'Tổ chức hành nghề bổ trợ tư pháp',
-  'legal-aid-object': 'Đối tượng trợ giúp pháp lý',
-  'asset':            'Tài sản bảo đảm',
+// ─── Liên kết chéo thực thể giữa các danh mục dữ liệu chủ ─────────────────────
+export const CATEGORY_LABELS: Record<DataCategory, string> = {
+  'civil-status':         'Thông tin hộ tịch của cá nhân',
+  'enforcement-decision': 'Quyết định thi hành án',
+  'legal-document':       'Văn bản quy phạm pháp luật',
 };
 
 function normalizeIdentifier(value: string): string {
@@ -247,6 +121,8 @@ function normalizeIdentifier(value: string): string {
 // Cấu hình quan hệ giữa các danh mục dữ liệu chủ — giống mục "Thiết lập quan hệ giữa thực thể"
 // (chọn 2 thực thể, khai báo khóa liên kết). Liên kết chéo thực thể ở màn Chi tiết bản ghi
 // được xác định dựa trên các quan hệ khai báo tại đây, không hard-code cố định 1 trường cho từng danh mục.
+// 3 loại thực thể hiện tại (hộ tịch cá nhân / quyết định THA / văn bản QPPL) không có trường định danh
+// dùng chung theo đúng bảng quy định, nên chưa khai báo quan hệ nào — để trống, chờ PM bổ sung khi cần.
 type CategoryRelationType = 'one-to-one' | 'one-to-many' | 'many-to-many';
 
 interface CategoryRelationship {
@@ -260,11 +136,7 @@ interface CategoryRelationship {
   status: 'active' | 'inactive';
 }
 
-const CATEGORY_RELATIONSHIPS: CategoryRelationship[] = [
-  { id: 'rel-enf-ind',   categoryA: 'enforcement', fieldA: 'cccd', categoryB: 'individual',       fieldB: 'cccd', relationType: 'many-to-many', description: 'Đương sự trong quyết định THA có thể đồng thời là cá nhân hành nghề bổ trợ tư pháp', status: 'active' },
-  { id: 'rel-enf-legal', categoryA: 'enforcement', fieldA: 'cccd', categoryB: 'legal-aid-object', fieldB: 'cccd', relationType: 'many-to-many', description: 'Đương sự trong quyết định THA có thể đồng thời là đối tượng trợ giúp pháp lý',        status: 'active' },
-  { id: 'rel-ind-legal', categoryA: 'individual',  fieldA: 'cccd', categoryB: 'legal-aid-object', fieldB: 'cccd', relationType: 'many-to-many', description: 'Cá nhân hành nghề bổ trợ tư pháp có thể đồng thời là đối tượng trợ giúp pháp lý',       status: 'active' },
-];
+const CATEGORY_RELATIONSHIPS: CategoryRelationship[] = [];
 
 function categoryHasCrossEntityConfig(category: DataCategory): boolean {
   return CATEGORY_RELATIONSHIPS.some(rel => rel.status === 'active' && (rel.categoryA === category || rel.categoryB === category));
@@ -334,13 +206,9 @@ function getCrossEntityLinks(row: Row, category: DataCategory): CrossEntityLink[
 
 // Trường dùng để so khớp trùng lặp theo từng loại dữ liệu
 const DUPLICATE_KEY_FIELD: Record<DataCategory, string> = {
-  'enforcement': 'hoTen',
-  'civil-registry': 'hoTen',
-  'nationality': 'hoTen',
-  'individual': 'hoTen',
-  'organization': 'tenTochuc',
-  'legal-aid-object': 'hoTen',
-  'asset': 'benBaoDam',
+  'civil-status': 'hoTen',
+  'enforcement-decision': 'ma',
+  'legal-document': 'tenVanBan',
 };
 
 function getDuplicateKeyValue(row: Row, category: DataCategory): string {
@@ -502,7 +370,7 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
   const [currentPageNum, setCurrentPageNum] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  const config = ITEM_CONFIGS[masterId] || { category: 'individual' as DataCategory, unit: '—', system: '—', idLabel: 'Mã' };
+  const config = ITEM_CONFIGS[masterId] || { category: 'civil-status' as DataCategory, unit: '—', system: '—', idLabel: 'Mã' };
   const cols = COLUMNS[config.category];
   const approvalListCols = cols.slice(0, 4);
 
@@ -1123,6 +991,7 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
                         {col.label}
                       </th>
                     ))}
+                    <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Hiệu lực</th>
                     <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Trạng thái dữ liệu</th>
                     <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Phê duyệt</th>
                     <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Công khai</th>
@@ -1155,6 +1024,9 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
                           {row[col.key] || <span className="text-slate-400 italic">(trống)</span>}
                         </td>
                       ))}
+                      <td className="px-6 py-4 text-[13px] text-slate-700 whitespace-nowrap">
+                        {row.hieuLuc || <span className="text-slate-400 italic">(trống)</span>}
+                      </td>
                       <td className="px-6 py-4 text-center"><DataStatusBadge status={getDataStatus(row)} /></td>
                       <td className="px-6 py-4 text-center"><ApprovalBadge status={row.approvalStatus} /></td>
                       <td className="px-6 py-4 text-center"><PublicBadge status={row.publicStatus} /></td>
@@ -1236,7 +1108,7 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
                   })}
                   {paginatedData.length === 0 && (
                     <tr>
-                      <td colSpan={9} className="px-6 py-16 text-center text-[13px] text-slate-400">
+                      <td colSpan={10} className="px-6 py-16 text-center text-[13px] text-slate-400">
                         Không tìm thấy dữ liệu phù hợp
                       </td>
                     </tr>

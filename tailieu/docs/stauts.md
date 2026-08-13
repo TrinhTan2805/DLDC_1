@@ -56,7 +56,7 @@
 - `[ ]` Modal xem chi tiết dịch vụ (`collection/ServiceDetailModal.tsx`)
 - `[ ]` Modal xem dịch vụ (`collection/ViewServiceModal.tsx`)
 - `[ ]` Template trang CSDL (`collection/DatabasePageTemplate.tsx`)
-- `[ ]` Sidebar phụ (`collection/InnerSidebar.tsx`)
+- `[x]` Sidebar phụ (`collection/InnerSidebar.tsx`)
 
 ---
 
@@ -259,6 +259,7 @@
 - `[ ]` Quản lý quy mô / tỉ lệ (`master-data/MasterDataScaleManagementPage.tsx`)
 - `[ ]` Wizard tạo Master Data (`master-data/MasterDataWizard.tsx`)
 - `[x]` Trang cập nhật Master Data (`master-data/MasterDataUpdatePage.tsx`)
+- `[x]` Chi tiết mục dữ liệu Cập nhật Master Data (`master-data/MasterDataUpdateItemPage.tsx`)
 
 ### Tabs trong trang Master Data
 - `[ ]` Tab Quản lý thuộc tính (`master-data/AttributesManagementTab.tsx`)

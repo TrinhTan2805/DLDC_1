@@ -1,5 +1,183 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 69
+
+**Màn hình:** Dữ liệu chủ → Báo cáo tìm kiếm dữ liệu chủ (`MasterDataReportsPage.tsx`), tab "Báo cáo sử dụng dữ liệu chủ" → chế độ "Tiêu thụ".
+
+**Nội dung thay đổi:**
+- Bảng + biểu đồ "Tiêu thụ" đổi nguồn dữ liệu từ `appliedUsageReports` (4 loại dữ liệu cũ: Công chứng/Đăng ký kinh doanh/Trợ giúp pháp lý/Hộ tịch) sang đúng **3 thực thể dữ liệu chủ chính thức** đang có trong Cập nhật dữ liệu chủ (`CATEGORY_LABELS`/`DataCategory`) — cột "Loại dữ liệu chủ" đổi thành "Thực thể dữ liệu chủ".
+- Mock mới `mockCategoryConsumption` (key theo `DataCategory`, gồm `totalUsage` + `growthRate`) thay cho `mockConsumptionGrowthRate` cũ (key theo dataType).
+- Đổi layout từ `flex` tỷ lệ 2/5-3/5 sang **grid 2 cột đều nhau** (`grid grid-cols-1 lg:grid-cols-2 gap-4`) — bảng và biểu đồ tăng trưởng mỗi bên chiếm 1 cột, cùng hàng.
+
+**File bị ảnh hưởng:** `src/components/pages/master-data/MasterDataReportsPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 68
+
+**Màn hình:** Dữ liệu chủ → Báo cáo tìm kiếm dữ liệu chủ (`MasterDataReportsPage.tsx`), tab "Báo cáo sử dụng dữ liệu chủ" → chế độ "Tiêu thụ".
+
+**Nội dung thay đổi:**
+- Bỏ cột "Tổng lượt tiêu thụ" khỏi bảng Tiêu thụ (chỉ giữ STT, Loại dữ liệu chủ, Dung lượng tiêu thụ ước tính) — thu nhỏ bảng còn `w-2/5` (thay vì full width), đặt cùng 1 hàng (`flex flex-col lg:flex-row gap-4`) với biểu đồ mới.
+- Thêm biểu đồ cột **"Tỷ lệ tăng trưởng tiêu thụ so với kỳ trước (%)"** cạnh bảng (chiếm phần còn lại `flex-1`) — dùng `BarChart`/`Bar`/`Cell` mới import từ `recharts`, tô màu xanh lá nếu tăng trưởng dương, đỏ nếu âm. Mock mới `mockConsumptionGrowthRate` (theo từng loại dữ liệu chủ).
+
+**File bị ảnh hưởng:** `src/components/pages/master-data/MasterDataReportsPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 67
+
+**Màn hình:** Dữ liệu chủ → Báo cáo tìm kiếm dữ liệu chủ (`MasterDataReportsPage.tsx`), tab "Báo cáo sử dụng dữ liệu chủ".
+
+**Nội dung thay đổi:**
+- Bảng **"Tiêu thụ"**: bỏ 3 cột "Tổng lượt truy cập", "Tỷ lệ tiêu thụ/truy cập", "Thời gian phản hồi TB" — chỉ còn STT, Loại dữ liệu chủ, Tổng lượt tiêu thụ. Thêm cột mới **"Dung lượng tiêu thụ ước tính"** (MB), suy ra từ `totalUsage × AVG_RECORD_SIZE_KB (giả định 2KB/bản ghi) / 1024`, có dòng tổng cộng.
+- Bảng **"Truy cập"**: thêm cột **"Truy cập gần nhất"**, lấy từ field `lastAccess` mới bổ sung vào `mockCategoryApiStats` (theo từng thực thể dữ liệu chủ chính thức).
+- `colSpan` của các dòng rỗng/tổng cộng ở cả 2 bảng cập nhật lại cho khớp số cột mới.
+
+**File bị ảnh hưởng:** `src/components/pages/master-data/MasterDataReportsPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 66
+
+**Màn hình:** Dữ liệu chủ → Báo cáo tìm kiếm dữ liệu chủ (`MasterDataReportsPage.tsx`), tab "Báo cáo sử dụng dữ liệu chủ" → chế độ "Truy cập".
+
+**Nội dung thay đổi:** Tách header "Báo cáo truy cập dữ liệu thực thể chủ" ra khỏi khung trắng của bảng — trước đó header nằm trong cùng component `bg-white border rounded-2xl` với bảng, giờ là 1 dòng `<p>` độc lập nằm ngoài, phía trên khung trắng chứa bảng.
+
+**File bị ảnh hưởng:** `src/components/pages/master-data/MasterDataReportsPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 65
+
+**Màn hình:** Dữ liệu chủ → Báo cáo tìm kiếm dữ liệu chủ (`MasterDataReportsPage.tsx`), tab "Báo cáo sử dụng dữ liệu chủ" → chế độ "Truy cập".
+
+**Nội dung thay đổi:**
+- Đổi thiết kế bảng "Truy cập" từ bảng "Hệ thống/Cổng dịch vụ kết nối" (Tên hệ thống/Tổng lượt truy xuất/Trạng thái kết nối/Truy cập gần nhất) sang đúng thiết kế bảng thống kê danh mục tại `CategoryTrendAndStatsSection.tsx` (Báo cáo khai thác danh mục): cột STT, [Danh mục], Số API đang chia sẻ, Lượt gọi API, Tỷ lệ API ổn định — dùng chung class `exploitation-report-table`, có dòng "Tổng cộng".
+- Đổi tên cột "Danh mục" thành **"Thực thể dữ liệu chủ"** và đổi nguồn dữ liệu: thay vì lấy theo `appliedUsageReports` (4 loại dữ liệu cũ: Công chứng/Đăng ký kinh doanh/Trợ giúp pháp lý/Hộ tịch — không còn khớp hệ thống), giờ lấy đúng theo **3 danh mục dữ liệu chủ chính thức đang có trong Cập nhật dữ liệu chủ** (`CATEGORY_LABELS`/`DataCategory` export từ `MasterDataUpdateItemPage.tsx`). Mock `mockCategoryApiStats` đổi key từ string dataType sang `DataCategory`.
+- Thêm header "**Báo cáo truy cập dữ liệu thực thể chủ**" (18px, bold — `text-[18px] font-bold text-slate-700`) phía trên bảng, dưới Control Panel.
+
+**File bị ảnh hưởng:** `src/components/pages/master-data/MasterDataReportsPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 64
+
+**Màn hình:** Dữ liệu chủ → Báo cáo tìm kiếm dữ liệu chủ (`MasterDataReportsPage.tsx`), tab "Báo cáo sử dụng dữ liệu chủ".
+
+**Nội dung thay đổi:** Thêm dropdown **"Loại báo cáo"** (Truy cập / Tiêu thụ / Thống kê) vào Control Panel — theo đúng hướng triển khai đơn giản đã thống nhất: tái sử dụng dữ liệu/thành phần đã có, không tạo mock mới.
+- State mới `usageReportType: 'access' | 'consumption' | 'stats'` (mặc định `'access'`).
+- **Thống kê**: giữ nguyên `AreaChart` xu hướng hiện tại.
+- **Truy cập**: giữ nguyên bảng "Hệ thống/Cổng dịch vụ kết nối" hiện tại (`mockConnectedSystems`).
+- **Tiêu thụ**: bảng mới, tái sử dụng đúng field có sẵn nhưng chưa từng hiển thị trong `mockUsageReports` (`totalAccess`, `totalUsage`, `avgResponseTime`) — cột: Loại dữ liệu chủ, Tổng lượt truy cập, Tổng lượt tiêu thụ, Tỷ lệ tiêu thụ/truy cập (tính `totalUsage/totalAccess`), Thời gian phản hồi TB.
+- Cả 3 khối đều gate theo `hasSearchedUsage && usageReportType === '...'`, chỉ 1 khối hiển thị tại 1 thời điểm.
+
+**File bị ảnh hưởng:** `src/components/pages/master-data/MasterDataReportsPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 63
+
+**Màn hình:** Dữ liệu chủ → Báo cáo tìm kiếm dữ liệu chủ (`MasterDataReportsPage.tsx`), tab "Báo cáo vòng đời dữ liệu".
+
+**Nội dung thay đổi:** Đổi tên thẻ đếm đầu tiên từ "Hoạt động bình thường" thành **"Còn hiệu lực"** (khớp đúng với `LIFECYCLE_STAGE_LABEL.active`) — 3 thẻ đếm giờ đồng bộ tên gọi: Còn hiệu lực / Sắp hết hiệu lực / Đã hết hiệu lực.
+
+**File bị ảnh hưởng:** `src/components/pages/master-data/MasterDataReportsPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 62
+
+**Màn hình:** Dữ liệu chủ → Báo cáo tìm kiếm dữ liệu chủ (`MasterDataReportsPage.tsx`), tab "Báo cáo vòng đời dữ liệu".
+
+**Nội dung thay đổi:**
+- Bảng "Chi tiết vòng đời dữ liệu" giới hạn tối đa **7 trường** hiển thị: 4 trường định danh đầu tiên của thực thể (theo `COLUMNS[category]`, bỏ `hieuLuc` ra khỏi danh sách lấy 4 vì đã hiển thị riêng) + Hiệu lực + Số ngày còn lại + Vòng đời (`visibleCols = cols.filter(c => c.key !== 'hieuLuc').slice(0, 4)`).
+- Bỏ cột "Trạng thái" (phê duyệt) khỏi bảng chính, chuyển vào modal chi tiết.
+- Thêm cột **"Thao tác"** với nút Xem chi tiết (icon `Eye`) → mở modal `lifecycleDetailRow`, tham khảo đúng thiết kế modal "Chi tiết bản ghi" tại Cập nhật dữ liệu chủ (`MasterDataUpdateItemPage.tsx`): badge Trạng thái + Vòng đời ở đầu, danh sách toàn bộ trường (`COLUMNS[category]` đầy đủ) + Số ngày còn lại trong khung viền, nút Đóng ở footer.
+
+**File bị ảnh hưởng:** `src/components/pages/master-data/MasterDataReportsPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 61
+
+**Màn hình:** Dữ liệu chủ → Báo cáo tìm kiếm dữ liệu chủ (`MasterDataReportsPage.tsx`), tab "Báo cáo vòng đời dữ liệu".
+
+**Nội dung thay đổi:**
+- Bỏ cột "Ngày hết hạn" khỏi bảng "Chi tiết vòng đời dữ liệu" (giữ lại "Số ngày còn lại"); `colSpan` dòng "Không có bản ghi" giảm từ `cols.length + 5` xuống `cols.length + 4`.
+- Đổi màu chữ cột "Số ngày còn lại" ở trạng thái "Sắp hết hiệu lực" từ cam sang **vàng** (`text-yellow-600`) trong `LIFECYCLE_STAGE_TEXT_COLOR`.
+
+**File bị ảnh hưởng:** `src/components/pages/master-data/MasterDataReportsPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 60
+
+**Màn hình:** Dữ liệu chủ → Báo cáo tìm kiếm dữ liệu chủ (`MasterDataReportsPage.tsx`), tab "Báo cáo vòng đời dữ liệu".
+
+**Nội dung thay đổi:**
+- Bỏ multi-select "Tất cả thực thể" — đổi thành `<select>` chỉ chọn **1** thực thể trong 3 loại chính thức (Thông tin hộ tịch của cá nhân / Quyết định thi hành án / Văn bản quy phạm pháp luật), lấy từ `CATEGORY_LABELS` export mới của `MasterDataUpdateItemPage.tsx`.
+- Bảng grid dưới hiển thị đúng **bản ghi thật** của thực thể đã chọn, lấy từ `MOCK_BY_CATEGORY` (Cập nhật dữ liệu chủ) — không còn dùng mock riêng `mockLifecycleData`/`LifecycleData` (đã xóa, dữ liệu không khớp thực thể thật). Cột bảng render động theo `COLUMNS[category]` của từng thực thể (export mới), thay vì bộ cột cứng cũ (Mã dữ liệu/Tên dữ liệu chủ/Loại dữ liệu...).
+- `MasterDataUpdateItemPage.tsx`: export thêm `DataCategory`, `ColDef`, `Row`, `COLUMNS`, `MOCK_BY_CATEGORY`, `CATEGORY_LABELS` để tái sử dụng ở trang báo cáo.
+- Cập nhật logic ngưỡng: `getLifecycleStage` đổi từ `daysRemaining < 30` thành `daysRemaining <= 30` cho "Sắp hết hiệu lực" (đúng yêu cầu "số ngày còn lại =< 30 thì chuyển sang sắp hết hiệu lực").
+- Quy định lại màu "Số ngày còn lại" dùng chung 1 nguồn với badge "Vòng đời" qua `LIFECYCLE_STAGE_TEXT_COLOR`/`LIFECYCLE_STAGE_BADGE_CLASS` (active: xanh lá, warning: cam, expired: đỏ) — tránh lệch ngưỡng giữa cột màu chữ và badge.
+- Vì 3 loại thực thể chính thức không có sẵn trường "ngày hết hạn/số ngày còn lại" theo đúng bảng quy định, duy trì mapping riêng `LIFECYCLE_EXPIRY_BY_CATEGORY` (theo id bản ghi thật của từng thực thể, tính theo mốc 13/08/2026) chỉ phục vụ báo cáo vòng đời.
+
+**File bị ảnh hưởng:** `src/components/pages/master-data/MasterDataReportsPage.tsx`, `src/components/pages/master-data/MasterDataUpdateItemPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 59
+
+**Màn hình:** Dữ liệu chủ → Cập nhật dữ liệu chủ (`master-data/MasterDataUpdateItemPage.tsx`), tab "Dữ liệu".
+
+**Nội dung thay đổi:** Bảng danh sách chính (tab "Dữ liệu") trước đó chỉ hiển thị 3 cột đầu (`cols.slice(0, 3)`) nên cột "Hiệu lực" mới thêm ở cuối `COLUMNS` (entry #58) chưa lên bảng. Bổ sung thêm 1 cột "Hiệu lực" riêng vào bảng danh sách (giữa 3 cột đầu và cột "Trạng thái dữ liệu"), cập nhật `colSpan` của dòng "Không tìm thấy dữ liệu phù hợp" từ 9 lên 10 cho khớp số cột mới.
+
+Các chỗ còn lại đã tự động có "Hiệu lực" từ entry #58 do dùng chung `cols` đầy đủ, không cần sửa thêm:
+- Modal "Chi tiết bản ghi" (mở từ tab Dữ liệu lẫn tab Phê duyệt — dùng chung 1 modal `detailRow`).
+- Form "Rà soát bản ghi dữ liệu chủ" (chỉnh sửa).
+- Modal chi tiết/so sánh phiên bản.
+
+**File bị ảnh hưởng:** `src/components/pages/master-data/MasterDataUpdateItemPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 58
+
+**Màn hình:** Dữ liệu chủ → Cập nhật dữ liệu chủ (`master-data/MasterDataUpdateItemPage.tsx`).
+
+**Nội dung thay đổi:** Thêm trường mặc định **"Hiệu lực"** (định dạng ngày/tháng/năm) vào cả 3 loại thực thể dữ liệu chủ — Thông tin hộ tịch của cá nhân, Quyết định thi hành án, Văn bản quy phạm pháp luật. Thêm cột `hieuLuc` vào cuối `COLUMNS` của mỗi loại + mock data tương ứng cho toàn bộ bản ghi. Vì bảng dữ liệu/modal chi tiết/form chỉnh sửa đều render cột theo `cols` chung, trường mới tự động xuất hiện ở bảng danh sách, modal xem chi tiết, form chỉnh sửa mà không cần sửa thêm logic UI.
+
+**File bị ảnh hưởng:** `src/components/pages/master-data/MasterDataUpdateItemPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 57
+
+**Màn hình:** Dữ liệu chủ → Cập nhật dữ liệu chủ (inner menu danh mục dữ liệu, `master-data/MasterDataUpdatePage.tsx`).
+
+**Nội dung thay đổi:** Bỏ phần phân nhóm "Dữ liệu nghiệp vụ" bọc ngoài danh sách 3 danh mục dữ liệu chủ (trước đó `InnerSidebar` mặc định gom mọi item không có `dataType` vào khối thu gọn/mở rộng "Dữ liệu nghiệp vụ (N)"), giờ hiển thị thẳng danh sách danh mục, luôn hiện mặc định, không cần bấm mở rộng:
+- Thêm prop mới `flatList?: boolean` vào `InnerSidebar.tsx` (mặc định `false`, không ảnh hưởng các trang khác đang dùng chung component này) — khi bật, bỏ qua toàn bộ logic phân 2 nhóm "Dữ liệu nghiệp vụ"/"Dữ liệu danh mục", render thẳng danh sách item.
+- `MasterDataUpdatePage.tsx` truyền `flatList` khi dùng `InnerSidebar`.
+
+**File này (`InnerSidebar.tsx`) được PM mở khóa `[x]` trong `stauts.md` riêng cho yêu cầu này (file dùng chung nhiều trang, thay đổi chỉ thêm 1 prop tùy chọn, không sửa logic mặc định của các trang khác).**
+
+**File bị ảnh hưởng:** `src/components/pages/collection/InnerSidebar.tsx`, `src/components/pages/master-data/MasterDataUpdatePage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 56
+
+**Màn hình:** Dữ liệu chủ → Cập nhật dữ liệu chủ (`master-data/MasterDataUpdatePage.tsx`, `master-data/MasterDataUpdateItemPage.tsx`).
+
+**Nội dung thay đổi:** Thay thế toàn bộ mock data theo đúng 3 loại thực thể dữ liệu chủ theo quy định của Bộ Tư pháp (theo bảng "Dữ liệu chủ" PM cung cấp), bỏ hệ thống 7 danh mục/38 mục cũ (THADS, hộ tịch, quốc tịch, cá nhân/tổ chức bổ trợ tư pháp, TGPL, tài sản bảo đảm):
+- `MasterDataUpdatePage.tsx`: `MASTER_DATA_ITEMS` rút còn đúng 3 mục — "Thông tin hộ tịch của cá nhân" (Cục Hành chính tư pháp), "Quyết định thi hành án (chủ động, theo yêu cầu)" (Cục Quản lý thi hành án dân sự), "Văn bản quy phạm pháp luật" (Cục Kiểm tra văn bản và Quản lý xử lý vi phạm hành chính).
+- `MasterDataUpdateItemPage.tsx`: đổi `DataCategory` từ 7 giá trị cũ thành 3 giá trị mới (`civil-status`, `enforcement-decision`, `legal-document`); viết lại `ITEM_CONFIGS`, `COLUMNS` (đúng các trường "Thông tin cơ bản mô tả đối tượng" + "Mã quản lý đối tượng" trong bảng quy định), `MOCK_BY_CATEGORY` (mock 7 bản ghi/loại, vẫn giữ nguyên field `approvalStatus`/`publicStatus` và mọi logic phê duyệt, công khai, đồng bộ, rà soát trùng lặp/thiếu dữ liệu, lịch sử phiên bản như thiết kế cũ).
+- Bỏ `CIVIL_REGISTRY_PREFIXES` (không còn cần thiết do "hộ tịch" gộp thành 1 mục duy nhất thay vì 9 mục con); đơn giản hóa `getMockData`.
+- `CATEGORY_RELATIONSHIPS` (liên kết chéo thực thể) để mảng rỗng — 3 loại thực thể mới theo đúng bảng quy định không có trường định danh dùng chung để khai báo quan hệ; cơ chế `categoryHasCrossEntityConfig`/tab "Thông tin liên quan" vẫn giữ nguyên trong code, chỉ đang không có quan hệ nào active.
+- `DUPLICATE_KEY_FIELD` cập nhật theo field phù hợp từng loại mới (`hoTen` / `ma` / `tenVanBan`).
+
+**File này (`MasterDataUpdateItemPage.tsx`) được PM mở khóa `[x]` trong `stauts.md` riêng cho yêu cầu này (trước đó chưa có dòng riêng, coi như đang khóa mặc định).**
+
+**File bị ảnh hưởng:** `src/components/pages/master-data/MasterDataUpdatePage.tsx`, `src/components/pages/master-data/MasterDataUpdateItemPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 55
+
+**Màn hình:** Dữ liệu chủ → Báo cáo tìm kiếm dữ liệu chủ (`MasterDataReportsPage.tsx`), tab "Báo cáo vòng đời dữ liệu".
+
+**Nội dung thay đổi:**
+- Bỏ bộ lọc "Trạng thái vòng đời" — sau khi chọn thực thể dữ liệu chủ và bấm "Truy xuất báo cáo", hiển thị toàn bộ bản ghi của (các) thực thể đã chọn (không lọc theo trạng thái vòng đời nữa).
+- Đổi field `LifecycleData.status` ('active'/'warning'/'expired') thành `approvalStatus: ApprovalStatus` (tham khảo đúng kiểu dữ liệu `ApprovalStatus`/`ApprovalBadge` đang dùng tại "Cập nhật dữ liệu chủ" — `MasterDataUpdateItemPage.tsx`) để cột "Trạng thái" hiển thị đúng ngữ nghĩa phê duyệt (Đã phê duyệt/Chờ phê duyệt/Rà soát/Từ chối/Đã xóa).
+- Thêm cột mới **"Vòng đời"** vào bảng "Chi tiết vòng đời dữ liệu", tách biệt với cột "Trạng thái": suy ra từ `daysRemaining` qua hàm `getLifecycleStage` (>=30 ngày: "Còn hiệu lực"; 0-29 ngày: "Sắp hết hiệu lực"; <0: "Đã hết hiệu lực").
+- 3 thẻ đếm + cảnh báo phía trên bảng cũng tính lại theo `getLifecycleStage(daysRemaining)` thay vì field `status` cũ.
+
+**File bị ảnh hưởng:** `src/components/pages/master-data/MasterDataReportsPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 54
+
+**Màn hình:** Dữ liệu chủ → Báo cáo tìm kiếm dữ liệu chủ (`MasterDataReportsPage.tsx`), tab "Báo cáo vòng đời dữ liệu".
+
+**Nội dung thay đổi:**
+- Đổi bộ lọc "Danh mục dữ liệu" (single-select) thành multi-select "Chọn thực thể dữ liệu chủ" — copy nguyên mẫu dropdown multi-select (kèm "Tất cả thực thể", checkbox từng mục, nút xóa nhanh) từ tab "Báo cáo sử dụng dữ liệu chủ". Thêm state `lifecycleDataTypes` (string[]), `showLifecycleDataTypeDropdown`, ref `lifecycleDataTypeRef`, hàm `toggleLifecycleDataType`/`toggleAllLifecycleDataTypes`/`lifecycleDataTypeDisplayText`, backdrop đóng dropdown khi click ra ngoài.
+- `handleSearchLifecycle` đổi điều kiện lọc theo mảng `lifecycleDataTypes` (thay vì lọc theo 1 giá trị).
+- Điều chỉnh layout Control Panel: 2 bộ lọc (multi-select thực thể + trạng thái vòng đời) dùng `flex-1` để giãn đều theo chiều ngang container, nút "Truy xuất báo cáo"/"Xuất File" giữ `shrink-0` — đồng bộ với thiết kế Control Panel ở tab Báo cáo sử dụng dữ liệu chủ.
+
+**File bị ảnh hưởng:** `src/components/pages/master-data/MasterDataReportsPage.tsx`.
+
 ## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 53
 
 **Màn hình:** Dữ liệu chủ → Báo cáo tìm kiếm dữ liệu chủ (`MasterDataReportsPage.tsx`), tab "Báo cáo vòng đời dữ liệu".

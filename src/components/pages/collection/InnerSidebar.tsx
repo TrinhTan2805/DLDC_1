@@ -15,6 +15,8 @@ interface InnerSidebarProps {
   activeId?: string;
   hideGroupHeaders?: boolean;
   stretchHeight?: boolean;
+  // Bỏ phân nhóm "Dữ liệu nghiệp vụ"/"Dữ liệu danh mục" — hiển thị thẳng toàn bộ items, không cần thu gọn/mở rộng
+  flatList?: boolean;
 }
 
 // Phân loại dữ liệu thu thập thành 2 nhóm cố định: Dữ liệu nghiệp vụ (luôn ở trên) và Dữ liệu danh mục (luôn ở dưới, mặc định đóng)
@@ -23,7 +25,7 @@ const DATA_TYPE_SECTIONS: { key: 'Dữ liệu nghiệp vụ' | 'Dữ liệu danh
   { key: 'Dữ liệu danh mục', label: 'Dữ liệu danh mục' },
 ];
 
-export function InnerSidebar({ title, items, onSelectItem, activeId, hideGroupHeaders = false, stretchHeight = false }: InnerSidebarProps) {
+export function InnerSidebar({ title, items, onSelectItem, activeId, hideGroupHeaders = false, stretchHeight = false, flatList = false }: InnerSidebarProps) {
   const [searchTerm, setSearchTerm] = useState('');
   // "Dữ liệu danh mục" luôn đóng mặc định; "Dữ liệu nghiệp vụ" luôn mở mặc định
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set(['Dữ liệu danh mục']));
@@ -87,6 +89,10 @@ export function InnerSidebar({ title, items, onSelectItem, activeId, hideGroupHe
   const renderContent = () => {
     if (searchTerm) {
       return filteredItems.map((item, i) => renderItem(item, i + 1));
+    }
+
+    if (flatList) {
+      return renderItemsWithGroups(filteredItems, 0);
     }
 
     let runningIndex = 0;
