@@ -33,24 +33,27 @@ const summaryData = [
 
 // Dữ liệu chi tiết từng danh mục (cho bảng — UC yêu cầu thời gian chuyển trạng thái, người duyệt, lý do)
 const detailData = [
-  { id: 'DM-001', name: 'Danh mục giới tính',        status: 'Hiệu lực',       transitionDate: '12/03/2026 08:30', approver: 'Nguyễn Văn A', reason: 'Phê duyệt định kỳ' },
-  { id: 'DM-002', name: 'Danh mục dân tộc',           status: 'Hiệu lực',       transitionDate: '10/03/2026 09:00', approver: 'Trần Thị B',   reason: 'Cập nhật phiên bản mới' },
-  { id: 'DM-003', name: 'Danh mục quốc tịch',         status: 'Chờ phê duyệt',  transitionDate: '15/06/2026 14:15', approver: '—',             reason: 'Chờ lãnh đạo phê duyệt' },
-  { id: 'DM-004', name: 'Danh mục đơn vị hành chính', status: 'Chờ phê duyệt',  transitionDate: '20/06/2026 10:00', approver: '—',             reason: 'Gửi duyệt lần 2' },
-  { id: 'DM-005', name: 'Danh mục tôn giáo',          status: 'Hết hiệu lực',  transitionDate: '01/01/2026 00:00', approver: 'Lê Văn C',      reason: 'Hết thời hạn sử dụng' },
-  { id: 'DM-006', name: 'Danh mục nghề nghiệp',       status: 'Hết hiệu lực',  transitionDate: '15/12/2025 17:00', approver: 'Phạm Văn D',    reason: 'Thay thế bởi phiên bản v2' },
-  { id: 'DM-007', name: 'Danh mục loại hộ gia đình',  status: 'Đang soạn thảo', transitionDate: '05/05/2026 11:30', approver: '—',             reason: 'Đang rà soát chuẩn hóa' },
-  { id: 'DM-008', name: 'Danh mục cơ quan hành chính',status: 'Từ chối',       transitionDate: '18/04/2026 08:00', approver: 'Hoàng Văn F',   reason: 'Phát hiện sai sót cần xử lý' },
-  { id: 'DM-009', name: 'Danh mục biện pháp bảo đảm', status: 'Hiệu lực',       transitionDate: '22/02/2026 13:45', approver: 'Trần Văn G',    reason: 'Phê duyệt theo đề nghị đơn vị' },
-  { id: 'DM-010', name: 'Danh mục phán quyết TAND',   status: 'Hết hiệu lực',  transitionDate: '30/11/2025 16:00', approver: 'Lê Thị H',      reason: 'Hết vòng đời quy định' },
-  { id: 'DM-011', name: 'Danh mục loại hình doanh nghiệp', status: 'Đã phê duyệt', transitionDate: '25/05/2026 09:20', approver: 'Nguyễn Văn I', reason: 'Đã phê duyệt, chờ công bố hiệu lực' },
-  { id: 'DM-012', name: 'Danh mục hình thức xử phạt', status: 'Đã phê duyệt', transitionDate: '28/05/2026 15:40', approver: 'Đặng Thị K',    reason: 'Đã phê duyệt, chờ công bố hiệu lực' },
+  { id: 'DM-001', name: 'Danh mục giới tính',        agency: 'Bộ Tư pháp',            status: 'Hiệu lực',       transitionDate: '12/03/2026 08:30', approver: 'Nguyễn Văn A', reason: 'Phê duyệt định kỳ' },
+  { id: 'DM-002', name: 'Danh mục dân tộc',           agency: 'Ủy ban Dân tộc',         status: 'Hiệu lực',       transitionDate: '10/03/2026 09:00', approver: 'Trần Thị B',   reason: 'Cập nhật phiên bản mới' },
+  { id: 'DM-003', name: 'Danh mục quốc tịch',         agency: 'Bộ Ngoại giao',          status: 'Chờ phê duyệt',  transitionDate: '15/06/2026 14:15', approver: '—',             reason: 'Chờ lãnh đạo phê duyệt' },
+  { id: 'DM-004', name: 'Danh mục đơn vị hành chính', agency: 'Bộ Nội vụ',              status: 'Chờ phê duyệt',  transitionDate: '20/06/2026 10:00', approver: '—',             reason: 'Gửi duyệt lần 2' },
+  { id: 'DM-005', name: 'Danh mục tôn giáo',          agency: 'Ban Tôn giáo Chính phủ', status: 'Hết hiệu lực',  transitionDate: '01/01/2026 00:00', approver: 'Lê Văn C',      reason: 'Hết thời hạn sử dụng' },
+  { id: 'DM-006', name: 'Danh mục nghề nghiệp',       agency: 'Bộ Nội vụ',              status: 'Hết hiệu lực',  transitionDate: '15/12/2025 17:00', approver: 'Phạm Văn D',    reason: 'Thay thế bởi phiên bản v2' },
+  { id: 'DM-007', name: 'Danh mục loại hộ gia đình',  agency: 'Bộ Tư pháp',             status: 'Đang soạn thảo', transitionDate: '05/05/2026 11:30', approver: '—',             reason: 'Đang rà soát chuẩn hóa' },
+  { id: 'DM-008', name: 'Danh mục cơ quan hành chính',agency: 'Bộ Nội vụ',              status: 'Từ chối',       transitionDate: '18/04/2026 08:00', approver: 'Hoàng Văn F',   reason: 'Phát hiện sai sót cần xử lý' },
+  { id: 'DM-009', name: 'Danh mục biện pháp bảo đảm', agency: 'Bộ Tư pháp',             status: 'Hiệu lực',       transitionDate: '22/02/2026 13:45', approver: 'Trần Văn G',    reason: 'Phê duyệt theo đề nghị đơn vị' },
+  { id: 'DM-010', name: 'Danh mục phán quyết TAND',   agency: 'Tòa án nhân dân tối cao', status: 'Hết hiệu lực',  transitionDate: '30/11/2025 16:00', approver: 'Lê Thị H',      reason: 'Hết vòng đời quy định' },
+  { id: 'DM-011', name: 'Danh mục loại hình doanh nghiệp', agency: 'Bộ Kế hoạch và Đầu tư', status: 'Đã phê duyệt', transitionDate: '25/05/2026 09:20', approver: 'Nguyễn Văn I', reason: 'Đã phê duyệt, chờ công bố hiệu lực' },
+  { id: 'DM-012', name: 'Danh mục hình thức xử phạt', agency: 'Bộ Tư pháp',             status: 'Đã phê duyệt', transitionDate: '28/05/2026 15:40', approver: 'Đặng Thị K',    reason: 'Đã phê duyệt, chờ công bố hiệu lực' },
 ];
+
+const AGENCY_OPTIONS = Array.from(new Set(detailData.map(d => d.agency)));
 
 export function CategoryReportStatusPage() {
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
-  const [dateRange, setDateRange] = useState('2026');
+  const [statusSearchTerm, setStatusSearchTerm] = useState('');
+  const [agencyFilter, setAgencyFilter] = useState('all');
   const [showExportMenu, setShowExportMenu] = useState(false);
 
   const [hasSearched, setHasSearched] = useState(false);
@@ -64,6 +67,7 @@ export function CategoryReportStatusPage() {
     const handleClick = (e: MouseEvent) => {
       if (statusRef.current && !statusRef.current.contains(e.target as Node)) {
         setShowStatusDropdown(false);
+        setStatusSearchTerm('');
       }
       if (exportRef.current && !exportRef.current.contains(e.target as Node)) {
         setShowExportMenu(false);
@@ -85,14 +89,19 @@ export function CategoryReportStatusPage() {
     );
   };
 
+  const filteredStatusOptions = STATUS_OPTIONS.filter(opt =>
+    opt.label.toLowerCase().includes(statusSearchTerm.trim().toLowerCase())
+  );
+
   const handleSearch = () => {
-    const filtered = selectedStatuses.length === 0
+    const filteredSummary = selectedStatuses.length === 0
       ? summaryData
       : summaryData.filter(s => selectedStatuses.includes(s.name));
-    const filteredDetail = selectedStatuses.length === 0
-      ? detailData
-      : detailData.filter(d => selectedStatuses.includes(d.status));
-    setAppliedSummary(filtered);
+    const filteredDetail = detailData.filter(d =>
+      (selectedStatuses.length === 0 || selectedStatuses.includes(d.status)) &&
+      (agencyFilter === 'all' || d.agency === agencyFilter)
+    );
+    setAppliedSummary(filteredSummary);
     setAppliedDetail(filteredDetail);
     setHasSearched(true);
   };
@@ -152,58 +161,83 @@ export function CategoryReportStatusPage() {
 
               {showStatusDropdown && (
                 <div className="absolute left-0 top-full mt-1.5 w-full bg-white border border-slate-200 rounded-xl shadow-2xl z-40 overflow-hidden">
-                  <button
-                    type="button"
-                    onClick={toggleAll}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors border-b border-slate-100 text-sm font-medium text-slate-700"
-                  >
-                    <span className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
-                      selectedStatuses.length === STATUS_OPTIONS.length ? 'bg-blue-600 border-blue-600'
-                        : selectedStatuses.length > 0 ? 'bg-blue-100 border-blue-400' : 'border-slate-300'
-                    }`}>
-                      {selectedStatuses.length === STATUS_OPTIONS.length && <Check className="w-3 h-3 text-white" />}
-                      {selectedStatuses.length > 0 && selectedStatuses.length < STATUS_OPTIONS.length && (
-                        <span className="w-2 h-0.5 bg-blue-600 rounded" />
-                      )}
-                    </span>
-                    Tất cả trạng thái
-                  </button>
-                  {STATUS_OPTIONS.map(opt => (
+                  {/* Ô tìm kiếm (search combobox) */}
+                  <div className="p-2 border-b border-slate-100">
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                      <input
+                        type="text"
+                        autoFocus
+                        value={statusSearchTerm}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => setStatusSearchTerm(e.target.value)}
+                        onClick={(e) => e.stopPropagation()}
+                        placeholder="Tìm trạng thái..."
+                        className="w-full pl-8 pr-2 py-1.5 border border-slate-200 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-slate-400"
+                      />
+                    </div>
+                  </div>
+
+                  {statusSearchTerm.trim() === '' && (
                     <button
-                      key={opt.value}
                       type="button"
-                      onClick={() => toggleStatus(opt.value)}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors text-sm text-slate-700"
+                      onClick={toggleAll}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors border-b border-slate-100 text-[13px] font-medium text-slate-700"
                     >
                       <span className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
-                        selectedStatuses.includes(opt.value) ? 'bg-blue-600 border-blue-600' : 'border-slate-300'
+                        selectedStatuses.length === STATUS_OPTIONS.length ? 'bg-blue-600 border-blue-600'
+                          : selectedStatuses.length > 0 ? 'bg-blue-100 border-blue-400' : 'border-slate-300'
                       }`}>
-                        {selectedStatuses.includes(opt.value) && <Check className="w-3 h-3 text-white" />}
+                        {selectedStatuses.length === STATUS_OPTIONS.length && <Check className="w-3 h-3 text-white" />}
+                        {selectedStatuses.length > 0 && selectedStatuses.length < STATUS_OPTIONS.length && (
+                          <span className="w-2 h-0.5 bg-blue-600 rounded" />
+                        )}
                       </span>
-                      <span className="flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${opt.dot}`} />
-                        {opt.label}
-                      </span>
+                      Tất cả trạng thái
                     </button>
-                  ))}
+                  )}
+
+                  <div className="max-h-[180px] overflow-y-auto custom-scrollbar">
+                    {filteredStatusOptions.length === 0 ? (
+                      <p className="px-4 py-3 text-[13px] text-slate-400 text-center">Không tìm thấy trạng thái phù hợp</p>
+                    ) : (
+                      filteredStatusOptions.map(opt => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => toggleStatus(opt.value)}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors text-[13px] text-slate-700 text-left"
+                        >
+                          <span className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
+                            selectedStatuses.includes(opt.value) ? 'bg-blue-600 border-blue-600' : 'border-slate-300'
+                          }`}>
+                            {selectedStatuses.includes(opt.value) && <Check className="w-3 h-3 text-white" />}
+                          </span>
+                          <span className="flex items-center gap-2">
+                            <span className={`w-2 h-2 rounded-full ${opt.dot}`} />
+                            {opt.label}
+                          </span>
+                        </button>
+                      ))
+                    )}
+                  </div>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Thời gian */}
-          <div className="min-w-[170px]">
-            <label className="block text-[12px] text-slate-500 mb-1 font-medium">Thời gian chuyển trạng thái</label>
+          {/* Đơn vị chủ quản */}
+          <div className="min-w-[190px]">
+            <label className="block text-[12px] text-slate-500 mb-1 font-medium">Đơn vị chủ quản</label>
             <select
-              title="Thời gian"
-              value={dateRange}
-              onChange={(e: ChangeEvent<HTMLSelectElement>) => setDateRange(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              title="Đơn vị chủ quản"
+              value={agencyFilter}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) => setAgencyFilter(e.target.value)}
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500 transition-all"
             >
-              <option value="all">Toàn thời gian</option>
-              <option value="2026">Năm 2026</option>
-              <option value="2025">Năm 2025</option>
-              <option value="q2_2026">Quý 2/2026</option>
+              <option value="all">Tất cả</option>
+              {AGENCY_OPTIONS.map(agency => (
+                <option key={agency} value={agency}>{agency}</option>
+              ))}
             </select>
           </div>
 
@@ -255,6 +289,7 @@ export function CategoryReportStatusPage() {
       {/* Biểu đồ tròn + thẻ tổng hợp */}
       {hasSearched && (
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+          <p className="text-[18px] font-bold text-slate-700 mb-3">Báo cáo trạng thái danh mục</p>
           <div className="flex flex-col lg:flex-row items-center gap-6">
             {/* Pie chart */}
             <div className="w-full lg:w-72 h-64 shrink-0">
@@ -307,14 +342,14 @@ export function CategoryReportStatusPage() {
             <h3 className="text-[13px] font-semibold text-slate-700">Chi tiết chuyển trạng thái danh mục</h3>
             <span className="text-[12px] text-slate-400">{appliedDetail.length} bản ghi</span>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse table-auto">
-              <thead>
+          <div className="overflow-x-auto overflow-y-auto max-h-[420px] custom-scrollbar">
+            <table className="status-report-table w-full text-left border-collapse table-auto">
+              <thead className="sticky top-0 z-10">
                 <tr className="bg-slate-50 border-b border-slate-200 text-[13px] font-semibold text-slate-500 uppercase tracking-tight">
                   <th className="py-3 px-4 text-center w-12">STT</th>
                   <th className="py-3 px-4">Mã danh mục</th>
                   <th className="py-3 px-4">Tên danh mục</th>
-                  <th className="py-3 px-4 text-center">Trạng thái</th>
+                  <th className="py-3 px-4 text-center">Trạng thái mới nhất</th>
                   <th className="py-3 px-4">Thời gian chuyển TT</th>
                   <th className="py-3 px-4">Người duyệt</th>
                   <th className="py-3 px-4">Lý do</th>
@@ -326,15 +361,15 @@ export function CategoryReportStatusPage() {
                   return (
                     <tr key={item.id} className="hover:bg-slate-50/50 transition-all">
                       <td className="py-3 px-4 text-center text-slate-400">{idx + 1}</td>
-                      <td className="py-3 px-4 font-mono text-slate-500 text-xs">{item.id}</td>
+                      <td className="py-3 px-4 font-mono text-slate-500 text-[13px]">{item.id}</td>
                       <td className="py-3 px-4 font-medium text-slate-900">{item.name}</td>
                       <td className="py-3 px-4 text-center">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border ${meta?.bg} ${meta?.text} ${meta?.border}`}>
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[13px] font-medium border ${meta?.bg} ${meta?.text} ${meta?.border}`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${meta?.dot}`} />
                           {item.status}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-slate-500 font-mono text-xs">{item.transitionDate}</td>
+                      <td className="py-3 px-4 text-slate-500 font-mono text-[13px]">{item.transitionDate}</td>
                       <td className="py-3 px-4 text-slate-600">{item.approver}</td>
                       <td className="py-3 px-4 text-slate-500">{item.reason}</td>
                     </tr>

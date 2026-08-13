@@ -46,6 +46,7 @@ export function CategoryReportListPage() {
   // Filter state (chưa áp dụng)
   const [selectedAgencies, setSelectedAgencies] = useState<string[]>([]);
   const [showAgencyDropdown, setShowAgencyDropdown] = useState(false);
+  const [agencySearchTerm, setAgencySearchTerm] = useState('');
   const [dateRange, setDateRange] = useState('all');
   const [showExportMenu, setShowExportMenu] = useState(false);
 
@@ -60,6 +61,7 @@ export function CategoryReportListPage() {
     const handleClick = (e: MouseEvent) => {
       if (agencyRef.current && !agencyRef.current.contains(e.target as Node)) {
         setShowAgencyDropdown(false);
+        setAgencySearchTerm('');
       }
       if (exportRef.current && !exportRef.current.contains(e.target as Node)) {
         setShowExportMenu(false);
@@ -80,6 +82,10 @@ export function CategoryReportListPage() {
       prev.length === AGENCY_OPTIONS.length ? [] : AGENCY_OPTIONS.map(o => o.value)
     );
   };
+
+  const filteredAgencyOptions = AGENCY_OPTIONS.filter(opt =>
+    opt.label.toLowerCase().includes(agencySearchTerm.trim().toLowerCase())
+  );
 
   const handleSearch = () => {
     const result = selectedAgencies.length === 0
@@ -149,44 +155,67 @@ export function CategoryReportListPage() {
 
               {showAgencyDropdown && (
                 <div className="absolute left-0 top-full mt-1.5 w-full bg-white border border-slate-200 rounded-xl shadow-2xl z-40 overflow-hidden">
-                  {/* Chọn tất cả */}
-                  <button
-                    type="button"
-                    onClick={toggleAll}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors border-b border-slate-100 text-[13px] font-medium text-slate-700"
-                  >
-                    <span className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
-                      selectedAgencies.length === AGENCY_OPTIONS.length
-                        ? 'bg-blue-600 border-blue-600'
-                        : selectedAgencies.length > 0
-                        ? 'bg-blue-100 border-blue-400'
-                        : 'border-slate-300'
-                    }`}>
-                      {selectedAgencies.length === AGENCY_OPTIONS.length && <Check className="w-3 h-3 text-white" />}
-                      {selectedAgencies.length > 0 && selectedAgencies.length < AGENCY_OPTIONS.length && (
-                        <span className="w-2 h-0.5 bg-blue-600 rounded" />
-                      )}
-                    </span>
-                    Tất cả đơn vị
-                  </button>
+                  {/* Ô tìm kiếm (search combobox) */}
+                  <div className="p-2 border-b border-slate-100">
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                      <input
+                        type="text"
+                        autoFocus
+                        value={agencySearchTerm}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => setAgencySearchTerm(e.target.value)}
+                        onClick={(e) => e.stopPropagation()}
+                        placeholder="Tìm đơn vị..."
+                        className="w-full pl-8 pr-2 py-1.5 border border-slate-200 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-slate-400"
+                      />
+                    </div>
+                  </div>
 
-                  {AGENCY_OPTIONS.map(opt => (
+                  {agencySearchTerm.trim() === '' && (
                     <button
-                      key={opt.value}
                       type="button"
-                      onClick={() => toggleAgency(opt.value)}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors text-[13px] text-slate-700"
+                      onClick={toggleAll}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors border-b border-slate-100 text-[13px] font-medium text-slate-700"
                     >
                       <span className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
-                        selectedAgencies.includes(opt.value)
+                        selectedAgencies.length === AGENCY_OPTIONS.length
                           ? 'bg-blue-600 border-blue-600'
+                          : selectedAgencies.length > 0
+                          ? 'bg-blue-100 border-blue-400'
                           : 'border-slate-300'
                       }`}>
-                        {selectedAgencies.includes(opt.value) && <Check className="w-3 h-3 text-white" />}
+                        {selectedAgencies.length === AGENCY_OPTIONS.length && <Check className="w-3 h-3 text-white" />}
+                        {selectedAgencies.length > 0 && selectedAgencies.length < AGENCY_OPTIONS.length && (
+                          <span className="w-2 h-0.5 bg-blue-600 rounded" />
+                        )}
                       </span>
-                      {opt.label}
+                      Tất cả đơn vị
                     </button>
-                  ))}
+                  )}
+
+                  <div className="max-h-[180px] overflow-y-auto custom-scrollbar">
+                    {filteredAgencyOptions.length === 0 ? (
+                      <p className="px-4 py-3 text-[13px] text-slate-400 text-center">Không tìm thấy đơn vị phù hợp</p>
+                    ) : (
+                      filteredAgencyOptions.map(opt => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => toggleAgency(opt.value)}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors text-[13px] text-slate-700 text-left"
+                        >
+                          <span className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
+                            selectedAgencies.includes(opt.value)
+                              ? 'bg-blue-600 border-blue-600'
+                              : 'border-slate-300'
+                          }`}>
+                            {selectedAgencies.includes(opt.value) && <Check className="w-3 h-3 text-white" />}
+                          </span>
+                          <span className="truncate">{opt.label}</span>
+                        </button>
+                      ))
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -255,6 +284,7 @@ export function CategoryReportListPage() {
       {/* Chart */}
       {hasSearched && (
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+          <p className="text-[18px] font-bold text-slate-700 mb-3">Báo cáo thống kê danh sách danh mục</p>
           <div className="h-96">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={appliedData} margin={{ top: 10, right: 30, left: 0, bottom: 90 }}>
@@ -283,9 +313,9 @@ export function CategoryReportListPage() {
       {/* Data Table */}
       {hasSearched && (
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto overflow-y-auto max-h-[420px] custom-scrollbar">
             <table className="w-full text-left border-collapse table-auto">
-              <thead>
+              <thead className="sticky top-0 z-10">
                 <tr className="bg-slate-50 border-b border-slate-200 text-[13px] font-semibold text-slate-500 uppercase tracking-tight">
                   <th className="py-3 px-4 text-center w-12 text-[13px]">STT</th>
                   <th className="py-3 px-4 text-[13px]">Đơn vị quản lý</th>

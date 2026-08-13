@@ -1,5 +1,136 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 46
+
+**Màn hình:** Tổng quan → Xử lý dữ liệu (`DashboardReportPage.tsx`, tab KPI "Xử lý").
+
+**Nội dung thay đổi:**
+- Thêm text đơn vị **"bản ghi"** ngay sau số liệu ở thẻ "Số lượng xử lý tháng này" (ví dụ: `8.213.821 bản ghi`).
+
+**File bị ảnh hưởng:** `src/components/dashboard/DashboardReportPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 45
+
+**Màn hình:** Tổng quan → Xử lý dữ liệu (`DashboardReportPage.tsx`, tab KPI "Xử lý").
+
+**Nội dung thay đổi:**
+- Đổi thẻ **"Bản ghi còn lại sau xử lý"** thành **"So sánh xử lý theo tháng"**: hiển thị số lượng bản ghi đã xử lý tháng này, kèm % tăng/giảm so với tháng trước (icon TrendingUp/TrendingDown xanh/đỏ tương ứng) và số liệu tháng trước để đối chiếu.
+- Bỏ import `TOTAL_COLLECTED_RECORDS` không còn dùng tới; thêm import icon `TrendingDown`.
+
+**File bị ảnh hưởng:** `src/components/dashboard/DashboardReportPage.tsx`.
+
+**Lưu ý:** Số liệu vẫn là mock minh hoạ (`currentMonthProcessedRecords`/`lastMonthProcessedRecords`), chưa nối dữ liệu thật theo tháng.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 44
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo phiên bản danh mục → Modal "So sánh phiên bản danh mục" (`EntityVersionHistoryModal.tsx`, dùng chung với `EntityVersionDiffModal.tsx`).
+
+**Nội dung thay đổi:** Bổ sung mock data cho 2 tab trước đó đang rỗng (không có badge số lượng, hiển thị "Không có thay đổi..."):
+1. **Tab "Thông tin chung"**: bổ sung `generalRows` cho bản ghi v3 (v2.0 → v3.0) — Mô tả, Phạm vi, Trạng thái hiệu lực.
+2. **Tab "Quan hệ"**: bổ sung `relationshipRows` cho cả 3 bản ghi (v1, v2, v3) — quan hệ giữa "Danh mục giới tính" với "Danh mục dân tộc" (n-n) và "Danh mục mã số hộ tịch" (1-n, mới thêm ở v3).
+
+**File bị ảnh hưởng:** `src/components/pages/category/components/modals/EntityVersionHistoryModal.tsx`.
+
+**Lưu ý:** File `CategoryReportVersionPage.tsx` (trang chứa modal này) được PM mở khóa `[x]` trong `stauts.md` riêng cho yêu cầu này.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 43
+
+**Màn hình:** Cả 3 trang trong Thống kê danh mục.
+
+**Nội dung thay đổi:** Đồng bộ dạng **search combobox** cho bộ lọc chính của cả 3 trang (đã làm "Danh mục" ở trang khai thác trước đó; nay làm nốt 2 trang còn lại):
+1. `CategoryReportListPage.tsx` (Báo cáo thống kê danh sách danh mục) — filter **"Đơn vị quản lý"**: thêm ô tìm kiếm, lọc trực tiếp trong 11 đơn vị, ẩn nút "Tất cả đơn vị" khi đang gõ tìm, có thông báo khi không có kết quả, chiều cao danh sách giảm còn `max-h-[180px]`, reset từ khóa khi đóng dropdown.
+2. `CategoryReportStatusPage.tsx` (Báo cáo trạng thái danh mục) — filter **"Trạng thái danh mục"**: áp dụng y hệt pattern trên cho 6 trạng thái.
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryReportListPage.tsx`, `src/components/pages/category/reports/CategoryReportStatusPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 42
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo tình trạng khai thác danh mục (`CategoryReportExploitationPage.tsx`).
+
+**Nội dung thay đổi:**
+- Giảm chiều cao danh sách trong dropdown "Danh mục" (search combobox) từ `max-h-[280px]` xuống `max-h-[180px]` để dropdown không đè lên nội dung bảng bên dưới.
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryReportExploitationPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 41
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo tình trạng khai thác danh mục (`CategoryReportExploitationPage.tsx`).
+
+**Nội dung thay đổi:**
+- Đổi filter "Danh mục" (multi-select, 29 danh mục) thành dạng **search combobox**: thêm ô tìm kiếm (icon kính lúp, autoFocus khi mở) ngay đầu dropdown, gõ để lọc trực tiếp danh sách hiển thị bên dưới (không phân biệt hoa/thường). Nút "Tất cả danh mục" chỉ hiện khi ô tìm kiếm đang trống (để tránh nhầm lẫn khi đang lọc). Có thông báo "Không tìm thấy danh mục phù hợp" khi không khớp kết quả nào. Từ khóa tìm kiếm tự reset khi đóng dropdown.
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryReportExploitationPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 40
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo trạng thái danh mục (`CategoryReportStatusPage.tsx`).
+
+**Nội dung thay đổi:**
+- Thêm tiêu đề **"Báo cáo trạng thái danh mục"**, `text-[18px] font-bold`, phía trên khối biểu đồ tròn + thẻ tổng hợp (trước đó khối này chưa có tiêu đề).
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryReportStatusPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 39
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo thống kê danh sách danh mục (`CategoryReportListPage.tsx`).
+
+**Nội dung thay đổi:**
+- Giới hạn chiều cao bảng grid (danh sách theo đơn vị quản lý): thêm `max-h-[420px] overflow-y-auto custom-scrollbar`, dòng tiêu đề `sticky top-0` — đồng bộ với các bảng khác trong dự án.
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryReportListPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 38
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo thống kê danh sách danh mục (`CategoryReportListPage.tsx`).
+
+**Nội dung thay đổi:**
+- Thêm tiêu đề biểu đồ **"Báo cáo thống kê danh sách danh mục"**, `text-[18px] font-bold`, phía trên biểu đồ cột (trước đó biểu đồ chưa có tiêu đề).
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryReportListPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 37
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo trạng thái danh mục (`CategoryReportStatusPage.tsx`).
+
+**Nội dung thay đổi:**
+- Giới hạn chiều cao bảng "Chi tiết chuyển trạng thái danh mục": thêm `max-h-[420px] overflow-y-auto custom-scrollbar`, dòng tiêu đề `sticky top-0` — đồng nhất với các bảng khác đã làm trước đó trong dự án.
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryReportStatusPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 36
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo trạng thái danh mục (`CategoryReportStatusPage.tsx`).
+
+**Nội dung thay đổi:**
+1. Đổi tên cột **"Trạng thái"** → **"Trạng thái mới nhất"** trong bảng "Chi tiết chuyển trạng thái danh mục".
+2. Đồng bộ toàn bảng về `text-[13px]` (trước đó cột Mã danh mục, badge trạng thái, Thời gian chuyển TT đang là `text-xs` = 12px).
+3. Thêm class `status-report-table` + rule CSS override `font-size: 13px !important` trong `src/index.css` (theo đúng pattern đã dùng ở các bảng khác) để đảm bảo thắng được rule toàn cục `table th/td { font-size: 14px !important }`.
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryReportStatusPage.tsx`, `src/index.css` (chỉ thêm rule mới).
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 35
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo trạng thái danh mục (`CategoryReportStatusPage.tsx`).
+
+**Nội dung thay đổi:**
+- PM đổi ý: bỏ bộ lọc "Từ khóa" vừa thêm, khôi phục lại bộ lọc **"Trạng thái danh mục"** (multi-select) như trước — cùng logic lọc cả biểu đồ tròn/thẻ tổng hợp (`appliedSummary`) lẫn bảng chi tiết.
+- Giữ nguyên bộ lọc **"Đơn vị chủ quản"** mới thêm.
+- Bộ lọc cuối cùng của trang: **Trạng thái danh mục** (multi-select) + **Đơn vị chủ quản** (dropdown đơn).
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryReportStatusPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 34
+
+**Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo trạng thái danh mục (`CategoryReportStatusPage.tsx`).
+
+**Nội dung thay đổi:**
+1. Bỏ 2 bộ lọc cũ: "Trạng thái danh mục" (multi-select) và "Thời gian chuyển trạng thái" (select) — cùng toàn bộ state/logic liên quan (`selectedStatuses`, `showStatusDropdown`, `dateRange`, `toggleStatus`, `toggleAll`, `statusDisplayText`...).
+2. Thêm 2 bộ lọc mới, đơn giản hơn cho dev: **"Từ khóa"** (input text, tìm theo mã/tên danh mục) và **"Đơn vị chủ quản"** (dropdown đơn, tái sử dụng đúng pattern/style từ `CategoryReportPage.tsx`).
+3. Bổ sung field `agency` vào từng dòng `detailData` (mock) và hằng số `AGENCY_OPTIONS` (derive tự động từ `detailData`, không cần khai báo tay).
+4. Biểu đồ tròn + thẻ tổng hợp (`summaryData`) không còn bị ảnh hưởng bởi filter (luôn hiển thị đầy đủ 6 trạng thái) vì bộ lọc trạng thái đã bị bỏ; chỉ bảng chi tiết bên dưới được lọc theo Từ khóa + Đơn vị chủ quản khi bấm "Truy xuất dữ liệu".
+
+**File bị ảnh hưởng:** `src/components/pages/category/reports/CategoryReportStatusPage.tsx`.
+
 ## Cập nhật giao diện (Ngày thực hiện: 12/08/2026) — 33
 
 **Màn hình:** Danh mục dùng chung → Thống kê danh mục → Báo cáo trạng thái danh mục (`CategoryReportStatusPage.tsx`).

@@ -175,7 +175,7 @@
 - `[x]` Báo cáo danh sách (`category/reports/CategoryReportListPage.tsx`)
 - `[x]` Báo cáo trạng thái (`category/reports/CategoryReportStatusPage.tsx`)
 - `[x]` Báo cáo khai thác (`category/reports/CategoryReportExploitationPage.tsx`)
-- `[ ]` Báo cáo phiên bản (`category/reports/CategoryReportVersionPage.tsx`)
+- `[x]` Báo cáo phiên bản (`category/reports/CategoryReportVersionPage.tsx`)
 
 ---
 

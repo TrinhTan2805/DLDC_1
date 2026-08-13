@@ -34,7 +34,11 @@ const MOCK_HISTORY: Record<string, VersionHistoryItem[]> = {
       description: 'Thêm trường phone_code, cập nhật độ dài gender_code, xóa trường note',
       diff: {
         prevVersion: 2, currentVersion: 3,
-        generalRows: [],
+        generalRows: [
+          { label: 'Mô tả',              oldValue: 'Danh mục giới tính chuẩn quốc gia theo ISO 5218', newValue: 'Danh mục giới tính chuẩn quốc gia theo ISO/IEC 5218:2004' },
+          { label: 'Phạm vi',            oldValue: 'Cấp quốc gia',      newValue: 'Cấp quốc gia' },
+          { label: 'Trạng thái hiệu lực', oldValue: 'Đang soạn thảo',    newValue: 'Hiệu lực' },
+        ],
         structureRows: [
           { changeType: 'unchanged', fieldName: 'id',          displayName: 'Mã bản ghi',    oldDataType: 'Số (Number)',        newDataType: 'Số (Number)' },
           { changeType: 'added',     fieldName: 'phone_code',  displayName: 'Mã điện thoại', newDataType: 'Chuỗi (String)',     newExtra: 'Độ dài: 6' },
@@ -42,7 +46,10 @@ const MOCK_HISTORY: Record<string, VersionHistoryItem[]> = {
           { changeType: 'unchanged', fieldName: 'gender_name', displayName: 'Tên giới tính', oldDataType: 'Chuỗi (String)',    newDataType: 'Chuỗi (String)' },
           { changeType: 'removed',   fieldName: 'note',        displayName: 'Ghi chú',       oldDataType: 'Văn bản dài (Text)' },
         ],
-        relationshipRows: [],
+        relationshipRows: [
+          { changeType: 'added',     sourceEntity: 'Danh mục giới tính', targetEntity: 'Danh mục mã số hộ tịch', newRelType: '1-n' },
+          { changeType: 'unchanged', sourceEntity: 'Danh mục giới tính', targetEntity: 'Danh mục dân tộc',       oldRelType: 'n-n', newRelType: 'n-n' },
+        ],
       },
     },
     {
@@ -67,7 +74,9 @@ const MOCK_HISTORY: Record<string, VersionHistoryItem[]> = {
           { changeType: 'unchanged', fieldName: 'gender_name', displayName: 'Tên giới tính', oldDataType: 'Chuỗi (String)', newDataType: 'Chuỗi (String)' },
           { changeType: 'unchanged', fieldName: 'note',        displayName: 'Ghi chú',       oldDataType: 'Văn bản dài (Text)', newDataType: 'Văn bản dài (Text)' },
         ],
-        relationshipRows: [],
+        relationshipRows: [
+          { changeType: 'unchanged', sourceEntity: 'Danh mục giới tính', targetEntity: 'Danh mục dân tộc', oldRelType: 'n-n', newRelType: 'n-n' },
+        ],
       },
     },
     {
@@ -92,7 +101,9 @@ const MOCK_HISTORY: Record<string, VersionHistoryItem[]> = {
           { changeType: 'added', fieldName: 'gender_name', displayName: 'Tên giới tính', newDataType: 'Chuỗi (String)', newExtra: 'Độ dài: 100' },
           { changeType: 'added', fieldName: 'note',        displayName: 'Ghi chú',       newDataType: 'Văn bản dài (Text)' },
         ],
-        relationshipRows: [],
+        relationshipRows: [
+          { changeType: 'added', sourceEntity: 'Danh mục giới tính', targetEntity: 'Danh mục dân tộc', newRelType: 'n-n' },
+        ],
       },
     },
   ],

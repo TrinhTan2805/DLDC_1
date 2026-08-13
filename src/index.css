@@ -5587,6 +5587,14 @@ table.exploitation-report-table tbody td {
   font-size: 13px !important;
 }
 
+/* Ghi đè 13px cho bảng chi tiết chuyển trạng thái ở trang Báo cáo trạng thái danh mục */
+table.status-report-table th,
+table.status-report-table thead th,
+table.status-report-table td,
+table.status-report-table tbody td {
+  font-size: 13px !important;
+}
+
 .collection-pagination,
 .collection-pagination span,
 .collection-pagination select,

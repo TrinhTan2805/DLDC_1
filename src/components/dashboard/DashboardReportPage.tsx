@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowRight, Database, Hash, CheckCircle2, AlertTriangle, XCircle, FileEdit, FileText, Calendar, ChevronLeft, ChevronRight, ArrowUpDown, ChevronUp, ChevronDown, Settings2, Wand2, Shuffle, Layers, TrendingUp, Zap, Send, Clock, Eye } from 'lucide-react';
+import { ArrowRight, Database, Hash, CheckCircle2, AlertTriangle, XCircle, FileEdit, FileText, Calendar, ChevronLeft, ChevronRight, ArrowUpDown, ChevronUp, ChevronDown, Settings2, Wand2, Shuffle, Layers, TrendingUp, TrendingDown, Zap, Send, Clock, Eye } from 'lucide-react';
 import { BarChart, Bar, LineChart, Line, RadialBarChart, RadialBar, PolarAngleAxis, ReferenceLine, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import {
   KPI_SLUG_TO_LABEL,
@@ -9,7 +9,6 @@ import {
   SOURCE_TREND_MONTHS,
   sourceTrendSeries,
   SourceTrendMetric,
-  TOTAL_COLLECTED_RECORDS,
 } from './kpiReportData';
 
 const SOURCE_LINE_COLORS = [
@@ -60,9 +59,10 @@ const PROCESSING_RULE_CONFIG = [
   { key: 'normalize', label: 'Chuẩn hóa', color: '#ec4899' },
 ] as const;
 
-// Mock: tỷ lệ bản ghi còn lại sau xử lý (đã loại trùng lặp/lỗi) trên tổng số bản ghi thu thập ban đầu, dùng cho thẻ "Bản ghi còn lại sau xử lý"
-const retainedRecordsPercent = 83.6;
-const retainedRecords = Math.round(TOTAL_COLLECTED_RECORDS * retainedRecordsPercent / 100);
+// Mock: số lượng bản ghi đã xử lý tháng này so với tháng trước, dùng cho thẻ "So sánh xử lý theo tháng"
+const currentMonthProcessedRecords = 8213821;
+const lastMonthProcessedRecords = 7180450;
+const monthOverMonthChangePercent = Number((((currentMonthProcessedRecords - lastMonthProcessedRecords) / lastMonthProcessedRecords) * 100).toFixed(1));
 
 // Mock: dung lượng đã xử lý (GB) theo từng hệ thống nguồn, tổng khớp với thẻ "Dữ liệu đã xử lý" (~7,871 GB)
 const PROCESSED_VOLUME_BY_SOURCE: { [source: string]: number } = {
@@ -633,18 +633,22 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
             <div className="flex items-center gap-2 mb-2">
               <Database className="w-4 h-4 text-slate-500" />
               <span className="text-[13px] font-semibold uppercase tracking-wide text-slate-500">
-                Bản ghi còn lại sau xử lý
+                Số lượng xử lý tháng này
               </span>
             </div>
             <div className="text-3xl font-bold text-slate-900">
-              {retainedRecords.toLocaleString('vi-VN')}
-              <span className="text-lg font-medium text-slate-400"> / {TOTAL_COLLECTED_RECORDS.toLocaleString('vi-VN')}</span>
+              {currentMonthProcessedRecords.toLocaleString('vi-VN')} <span className="text-lg font-medium text-slate-400">bản ghi</span>
             </div>
-            <div className="mt-2">
-              <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                <div className="h-full bg-slate-700 rounded-full" style={{ width: `${retainedRecordsPercent}%` }} />
-              </div>
-              <p className="text-[12px] text-slate-500 mt-1">{retainedRecordsPercent}% bản ghi thu thập được giữ lại sau xử lý</p>
+            <div className="flex items-center gap-1.5 mt-2">
+              {monthOverMonthChangePercent >= 0 ? (
+                <TrendingUp className="w-3.5 h-3.5 text-green-600" />
+              ) : (
+                <TrendingDown className="w-3.5 h-3.5 text-red-600" />
+              )}
+              <span className={`text-[13px] font-semibold ${monthOverMonthChangePercent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {monthOverMonthChangePercent >= 0 ? '+' : ''}{monthOverMonthChangePercent}%
+              </span>
+              <span className="text-[12px] text-slate-500">so với tháng trước ({lastMonthProcessedRecords.toLocaleString('vi-VN')})</span>
             </div>
           </div>
         </div>
