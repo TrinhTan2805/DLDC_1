@@ -109,51 +109,107 @@ const statsByFormat = [
   { name: 'XML', value: 10 },
 ];
 
-const mockAccessByMonth = [
-  { key: '2024-01', label: 'T1/2024', views: 4500, downloads: 1200 },
-  { key: '2024-02', label: 'T2/2024', views: 5200, downloads: 1450 },
-  { key: '2024-03', label: 'T3/2024', views: 6100, downloads: 1680 },
-  { key: '2024-04', label: 'T4/2024', views: 5800, downloads: 1520 },
-  { key: '2024-05', label: 'T5/2024', views: 6500, downloads: 1890 },
-  { key: '2024-06', label: 'T6/2024', views: 7200, downloads: 2100 },
-  { key: '2024-07', label: 'T7/2024', views: 6800, downloads: 1950 },
-  { key: '2024-08', label: 'T8/2024', views: 7500, downloads: 2200 },
-  { key: '2024-09', label: 'T9/2024', views: 8100, downloads: 2400 },
-  { key: '2024-10', label: 'T10/2024', views: 7800, downloads: 2300 },
-  { key: '2024-11', label: 'T11/2024', views: 8500, downloads: 2600 },
-  { key: '2024-12', label: 'T12/2024', views: 9200, downloads: 2800 },
-];
+// 12 tháng gần nhất tính đến tháng hiện tại — dùng làm dữ liệu, mặc định khoảng lọc và trục ngang biểu đồ
+const RECENT_MONTHS: { key: string; label: string }[] = (() => {
+  const now = new Date();
+  const arr: { key: string; label: string }[] = [];
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const mm = d.getMonth() + 1;
+    arr.push({ key: `${d.getFullYear()}-${String(mm).padStart(2, '0')}`, label: `T${mm}/${d.getFullYear()}` });
+  }
+  return arr;
+})();
+
+// apiCalls = lượt gọi API (hệ thống khai thác gọi), views = lượt truy cập (người dùng xem giao diện) — hai kênh khác nhau
+const BASE_API_CALLS = [52000, 60000, 71000, 67000, 76000, 84000, 79000, 88000, 95000, 91000, 99000, 108000];
+const BASE_VIEWS = [4500, 5200, 6100, 5800, 6500, 7200, 6800, 7500, 8100, 7800, 8500, 9200];
+const BASE_DOWNLOADS = [1200, 1450, 1680, 1520, 1890, 2100, 1950, 2200, 2400, 2300, 2600, 2800];
+const mockAccessByMonth = RECENT_MONTHS.map((m, i) => ({
+  key: m.key, label: m.label, apiCalls: BASE_API_CALLS[i], views: BASE_VIEWS[i], downloads: BASE_DOWNLOADS[i],
+}));
 const mockAccessByUserType = [
-  { name: 'Quản trị hệ thống', views: 3200, downloads: 950 },
-  { name: 'Lãnh đạo quản trị', views: 4100, downloads: 1200 },
-  { name: 'Chuyên viên quản trị', views: 5800, downloads: 1650 },
-  { name: 'Quản trị đơn vị', views: 3900, downloads: 1100 },
-  { name: 'Lãnh đạo nghiệp vụ', views: 6200, downloads: 1850 },
-  { name: 'Chuyên viên', views: 12120, downloads: 3110 },
+  { name: 'Quản trị hệ thống', apiCalls: 8200, views: 3200, downloads: 950 },
+  { name: 'Lãnh đạo quản trị', apiCalls: 6400, views: 4100, downloads: 1200 },
+  { name: 'Chuyên viên quản trị', apiCalls: 14500, views: 5800, downloads: 1650 },
+  { name: 'Quản trị đơn vị', apiCalls: 9100, views: 3900, downloads: 1100 },
+  { name: 'Lãnh đạo nghiệp vụ', apiCalls: 11200, views: 6200, downloads: 1850 },
+  { name: 'Chuyên viên', apiCalls: 28600, views: 12120, downloads: 3110 },
 ];
 const mockAccessBySource = [
-  { name: 'CSDL Kho DLDC', views: 14500, downloads: 4200 },
-  { name: 'CSDL Phân tích số liệu', views: 12800, downloads: 3600 },
-  { name: 'CSDL Lưu trữ lịch sử', views: 8020, downloads: 2060 },
+  { name: 'CSDL Kho DLDC', apiCalls: 38000, views: 14500, downloads: 4200 },
+  { name: 'CSDL Phân tích số liệu', apiCalls: 31000, views: 12800, downloads: 3600 },
+  { name: 'CSDL Lưu trữ lịch sử', apiCalls: 16500, views: 8020, downloads: 2060 },
 ];
 const mockAccessByFormat = [
-  { name: 'File Excel', views: 22500, downloads: 7200 },
-  { name: 'API', views: 12820, downloads: 2660 },
+  { name: 'File Excel', apiCalls: 0, views: 22500, downloads: 7200 },
+  { name: 'API', apiCalls: 34800, views: 12820, downloads: 2660 },
 ];
-const mockAlertLogs = [
-  { file: 'Danh sách văn bản QPPL 2024', user: 'Nguyễn Văn An', time: '22/06/26 08:30:15', format: 'API', accessCount: 1250 },
-  { file: 'Dữ liệu đăng ký kinh doanh Q1/2024', user: 'Trần Thị Bình', time: '22/06/26 09:12:44', format: 'File Excel', accessCount: 980 },
-  { file: 'Thống kê công chứng viên 2024', user: 'Lê Văn Cường', time: '22/06/26 10:05:22', format: 'API', accessCount: 2100 },
-  { file: 'Danh sách trung tâm TGPL', user: 'Phạm Thị Dung', time: '21/06/26 14:33:08', format: 'File Excel', accessCount: 750 },
-  { file: 'Báo cáo tư pháp Q2/2024', user: 'Hoàng Văn Em', time: '21/06/26 16:45:30', format: 'API', accessCount: 1800 },
-  { file: 'Danh mục hộ tịch 2024', user: 'Vũ Thị Phương', time: '20/06/26 11:20:55', format: 'API', accessCount: 3200 },
-  { file: 'Dữ liệu công chứng Q1/2024', user: 'Đặng Văn Giang', time: '20/06/26 13:15:40', format: 'File Excel', accessCount: 620 },
-  { file: 'Thống kê hộ tịch 2023', user: 'Bùi Thị Hương', time: '19/06/26 09:50:18', format: 'API', accessCount: 1450 },
-  { file: 'Danh sách công chứng viên HN', user: 'Ngô Văn Khánh', time: '19/06/26 15:08:33', format: 'File Excel', accessCount: 540 },
-  { file: 'Báo cáo kinh doanh 2024', user: 'Đinh Thị Lan', time: '18/06/26 10:22:47', format: 'API', accessCount: 2850 },
-  { file: 'Dữ liệu hộ tịch Q1/2024', user: 'Lý Văn Minh', time: '18/06/26 14:40:12', format: 'File Excel', accessCount: 710 },
-  { file: 'Danh mục QPPL 2023', user: 'Tô Thị Nhung', time: '17/06/26 09:15:29', format: 'API', accessCount: 1680 },
+
+// Chi tiết truy cập theo tháng × nguồn (CSDL) × loại dữ liệu chia sẻ — cho phép lọc theo Nguồn truy cập / Loại dữ liệu chia sẻ, biểu đồ luôn vẽ theo trục thời gian.
+// Lượt gọi API chỉ phát sinh ở định dạng chia sẻ API; File Excel không có lượt gọi API.
+const ACCESS_SOURCE_WEIGHTS = [
+  { name: 'CSDL Kho DLDC', weight: 0.45 },
+  { name: 'CSDL Phân tích số liệu', weight: 0.35 },
+  { name: 'CSDL Lưu trữ lịch sử', weight: 0.20 },
 ];
+const accessSourceOptions = ACCESS_SOURCE_WEIGHTS.map(s => s.name);
+
+// Bộ lọc riêng của biểu đồ Lượt tải dữ liệu — theo Đơn vị khai thác (co giãn giá trị theo tỷ trọng đơn vị)
+const ACCESS_EXPLOIT_UNITS = [
+  { value: 'all', label: 'Tất cả đơn vị', ratio: 1 },
+  { value: 'stp-hcm', label: 'Sở Tư pháp TP. Hồ Chí Minh', ratio: 0.28 },
+  { value: 'stp-hn', label: 'Sở Tư pháp TP. Hà Nội', ratio: 0.24 },
+  { value: 'dvcqg', label: 'Cổng Dịch vụ công Quốc gia', ratio: 0.20 },
+  { value: 'mcdt', label: 'Hệ thống một cửa điện tử cấp tỉnh', ratio: 0.16 },
+  { value: 'cuc-cntt', label: 'Cục CNTT - Bộ Tư pháp', ratio: 0.12 },
+];
+// Bộ lọc riêng của biểu đồ Lượt truy cập — theo Loại người dùng (role)
+const ACCESS_USER_TYPES = [
+  { value: 'all', label: 'Tất cả người dùng', ratio: 1 },
+  { value: 'qtht', label: 'Quản trị hệ thống', ratio: 0.10 },
+  { value: 'ldqt', label: 'Lãnh đạo quản trị', ratio: 0.13 },
+  { value: 'cvqt', label: 'Chuyên viên quản trị', ratio: 0.18 },
+  { value: 'qtdv', label: 'Quản trị đơn vị', ratio: 0.12 },
+  { value: 'ldnv', label: 'Lãnh đạo nghiệp vụ', ratio: 0.19 },
+  { value: 'cv', label: 'Chuyên viên', ratio: 0.28 },
+];
+
+// Cộng/trừ tháng cho chuỗi 'YYYY-MM' (dùng giới hạn khoảng Từ/Đến tháng tối đa 1 năm)
+const addMonths = (ym: string, delta: number) => {
+  if (!ym) return '';
+  const [y, m] = ym.split('-').map(Number);
+  const total = y * 12 + (m - 1) + delta;
+  return `${Math.floor(total / 12)}-${String((total % 12) + 1).padStart(2, '0')}`;
+};
+const mockAccessDetail: { key: string; label: string; source: string; format: string; apiCalls: number; views: number }[] = [];
+mockAccessByMonth.forEach(m => {
+  ACCESS_SOURCE_WEIGHTS.forEach(s => {
+    mockAccessDetail.push({ key: m.key, label: m.label, source: s.name, format: 'API', apiCalls: Math.round(m.apiCalls * s.weight), views: Math.round(m.views * s.weight * 0.35) });
+    mockAccessDetail.push({ key: m.key, label: m.label, source: s.name, format: 'File Excel', apiCalls: 0, views: Math.round(m.views * s.weight * 0.65) });
+  });
+});
+// key = tháng phát sinh (khớp khoảng lọc Từ/Đến tháng), source = nguồn truy cập (CSDL), format = loại dữ liệu chia sẻ
+// Log cảnh báo gắn vào 12 tháng gần nhất (mỗi dòng một tháng): day/clock cố định, tháng/năm lấy theo RECENT_MONTHS
+const ALERT_LOG_BASE = [
+  { file: 'Danh sách văn bản QPPL 2024', user: 'Nguyễn Văn An', day: '15', clock: '08:30:15', source: 'CSDL Kho DLDC', format: 'API', accessCount: 1250 },
+  { file: 'Dữ liệu đăng ký kinh doanh Q1/2024', user: 'Trần Thị Bình', day: '20', clock: '09:12:44', source: 'CSDL Phân tích số liệu', format: 'File Excel', accessCount: 980 },
+  { file: 'Thống kê công chứng viên 2024', user: 'Lê Văn Cường', day: '05', clock: '10:05:22', source: 'CSDL Kho DLDC', format: 'API', accessCount: 2100 },
+  { file: 'Danh sách trung tâm TGPL', user: 'Phạm Thị Dung', day: '18', clock: '14:33:08', source: 'CSDL Lưu trữ lịch sử', format: 'File Excel', accessCount: 750 },
+  { file: 'Báo cáo tư pháp Q2/2024', user: 'Hoàng Văn Em', day: '09', clock: '16:45:30', source: 'CSDL Phân tích số liệu', format: 'API', accessCount: 1800 },
+  { file: 'Danh mục hộ tịch 2024', user: 'Vũ Thị Phương', day: '22', clock: '11:20:55', source: 'CSDL Kho DLDC', format: 'API', accessCount: 3200 },
+  { file: 'Dữ liệu công chứng Q1/2024', user: 'Đặng Văn Giang', day: '12', clock: '13:15:40', source: 'CSDL Lưu trữ lịch sử', format: 'File Excel', accessCount: 620 },
+  { file: 'Thống kê hộ tịch 2023', user: 'Bùi Thị Hương', day: '03', clock: '09:50:18', source: 'CSDL Phân tích số liệu', format: 'API', accessCount: 1450 },
+  { file: 'Danh sách công chứng viên HN', user: 'Ngô Văn Khánh', day: '19', clock: '15:08:33', source: 'CSDL Kho DLDC', format: 'File Excel', accessCount: 540 },
+  { file: 'Báo cáo kinh doanh 2024', user: 'Đinh Thị Lan', day: '08', clock: '10:22:47', source: 'CSDL Phân tích số liệu', format: 'API', accessCount: 2850 },
+  { file: 'Dữ liệu hộ tịch Q1/2024', user: 'Lý Văn Minh', day: '14', clock: '14:40:12', source: 'CSDL Lưu trữ lịch sử', format: 'File Excel', accessCount: 710 },
+  { file: 'Danh mục QPPL 2023', user: 'Tô Thị Nhung', day: '09', clock: '09:15:29', source: 'CSDL Kho DLDC', format: 'API', accessCount: 1680 },
+];
+const mockAlertLogs = ALERT_LOG_BASE.map((r, i) => {
+  const m = RECENT_MONTHS[i];
+  const [y, mm] = m.key.split('-');
+  return { file: r.file, user: r.user, time: `${r.day}/${mm}/${y} ${r.clock}`, key: m.key, source: r.source, format: r.format, accessCount: r.accessCount };
+});
 
 const COLORS = ['#0ea5e9', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
 
@@ -302,16 +358,21 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
   const [selectedClassFilters, setSelectedClassFilters] = useState<string[]>([]);
   const [appliedClassFilters, setAppliedClassFilters] = useState<string[]>([]);
   
-  // Access Stats States
-  const [accessGroupBy, setAccessGroupBy] = useState<'time' | 'userType' | 'source' | 'shareFormat'>('time');
-  const [accessFromMonth, setAccessFromMonth] = useState('');
-  const [accessToMonth, setAccessToMonth] = useState('');
-  const [selectedAccessFilters, setSelectedAccessFilters] = useState<string[]>([]);
-  const [appliedAccessGroupBy, setAppliedAccessGroupBy] = useState<'time' | 'userType' | 'source' | 'shareFormat'>('time');
-  const [appliedAccessFromMonth, setAppliedAccessFromMonth] = useState('');
-  const [appliedAccessToMonth, setAppliedAccessToMonth] = useState('');
-  const [appliedAccessFilters, setAppliedAccessFilters] = useState<string[]>([]);
-  const [accessReportReady, setAccessReportReady] = useState(false);
+  // Access Stats States — mặc định khoảng 12 tháng gần nhất (từ tháng đầu → tháng hiện tại), tự hiển thị báo cáo khi vào
+  const defaultAccessFrom = RECENT_MONTHS[0].key;
+  const defaultAccessTo = RECENT_MONTHS[RECENT_MONTHS.length - 1].key;
+  const [accessFromMonth, setAccessFromMonth] = useState(defaultAccessFrom);
+  const [accessToMonth, setAccessToMonth] = useState(defaultAccessTo);
+  const [accessSources, setAccessSources] = useState<string[]>([]);
+  const [accessFormats, setAccessFormats] = useState<string[]>([]);
+  const [appliedAccessFromMonth, setAppliedAccessFromMonth] = useState(defaultAccessFrom);
+  const [appliedAccessToMonth, setAppliedAccessToMonth] = useState(defaultAccessTo);
+  const [appliedAccessSources, setAppliedAccessSources] = useState<string[]>([]);
+  const [appliedAccessFormats, setAppliedAccessFormats] = useState<string[]>([]);
+  const [accessReportReady, setAccessReportReady] = useState(true);
+  // Bộ lọc riêng từng biểu đồ (co giãn giá trị trực tiếp, không cần bấm Tạo báo cáo)
+  const [chartUnit, setChartUnit] = useState('all');
+  const [chartUserType, setChartUserType] = useState('all');
   const [alertThresholdInput, setAlertThresholdInput] = useState('500');
   const [alertThreshold, setAlertThreshold] = useState(500);
 
@@ -414,19 +475,36 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
   const computedClassPieData = computedClassData.map(d => ({ name: d.name, value: d.count }));
 
   const computedAccessChartData = (() => {
-    if (!accessReportReady) return [] as { name: string; views: number; downloads: number }[];
-    if (appliedAccessGroupBy === 'time') {
-      let data = mockAccessByMonth;
-      if (appliedAccessFromMonth) data = data.filter(d => d.key >= appliedAccessFromMonth);
-      if (appliedAccessToMonth) data = data.filter(d => d.key <= appliedAccessToMonth);
-      return data.map(d => ({ name: d.label, views: d.views, downloads: d.downloads }));
-    }
-    const base =
-      appliedAccessGroupBy === 'userType' ? mockAccessByUserType :
-      appliedAccessGroupBy === 'source' ? mockAccessBySource : mockAccessByFormat;
-    const filtered = appliedAccessFilters.length > 0 ? base.filter(d => appliedAccessFilters.includes(d.name)) : base;
-    return filtered;
+    if (!accessReportReady) return [] as { key: string; name: string; apiCalls: number; views: number }[];
+    let rows = mockAccessDetail;
+    if (appliedAccessFromMonth) rows = rows.filter(r => r.key >= appliedAccessFromMonth);
+    if (appliedAccessToMonth) rows = rows.filter(r => r.key <= appliedAccessToMonth);
+    if (appliedAccessSources.length > 0) rows = rows.filter(r => appliedAccessSources.includes(r.source));
+    if (appliedAccessFormats.length > 0) rows = rows.filter(r => appliedAccessFormats.includes(r.format));
+    const byMonth = new Map<string, { key: string; name: string; apiCalls: number; views: number }>();
+    rows.forEach(r => {
+      const e = byMonth.get(r.key) ?? { key: r.key, name: r.label, apiCalls: 0, views: 0 };
+      e.apiCalls += r.apiCalls;
+      e.views += r.views;
+      byMonth.set(r.key, e);
+    });
+    return [...byMonth.values()].sort((a, b) => (a.key < b.key ? -1 : 1));
   })();
+
+  // Bảng cảnh báo lọc theo cùng điều kiện: thời gian (Từ/Đến tháng) + nguồn truy cập + loại dữ liệu chia sẻ
+  const filteredAlertLogs = mockAlertLogs.filter(r => {
+    if (appliedAccessFromMonth && r.key < appliedAccessFromMonth) return false;
+    if (appliedAccessToMonth && r.key > appliedAccessToMonth) return false;
+    if (appliedAccessSources.length > 0 && !appliedAccessSources.includes(r.source)) return false;
+    if (appliedAccessFormats.length > 0 && !appliedAccessFormats.includes(r.format)) return false;
+    return true;
+  });
+
+  // Co giãn giá trị theo bộ lọc riêng của từng biểu đồ
+  const chartUnitRatio = ACCESS_EXPLOIT_UNITS.find(u => u.value === chartUnit)?.ratio ?? 1;
+  const chartUserTypeRatio = ACCESS_USER_TYPES.find(u => u.value === chartUserType)?.ratio ?? 1;
+  const apiChartData = computedAccessChartData.map(d => ({ ...d, apiCalls: Math.round(d.apiCalls * chartUnitRatio) }));
+  const accessChartData = computedAccessChartData.map(d => ({ ...d, views: Math.round(d.views * chartUserTypeRatio) }));
 
   const handleExportExcel = () => {
     alert('Xuất dữ liệu ra Excel');
@@ -1067,120 +1145,125 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
               </div>
             </div>
 
-            {/* Filter Panel */}
+            {/* Filter Panel — lọc theo thời gian + nguồn truy cập (CSDL) + loại dữ liệu chia sẻ (API/Excel) */}
             <div className="bg-white border border-slate-200 rounded-lg p-6">
-              <div className={`grid gap-4 ${accessGroupBy === 'time' ? 'grid-cols-4' : 'grid-cols-3'}`}>
-                <div>
-                  <label className="block text-[13px] text-slate-700 mb-2">Nhóm theo</label>
-                  <select
-                    value={accessGroupBy}
-                    onChange={(e) => { setAccessGroupBy(e.target.value as any); setAccessFromMonth(''); setAccessToMonth(''); setSelectedAccessFilters([]); setAccessReportReady(false); }}
+              <div className="flex flex-wrap items-end gap-3">
+                <div className="w-[150px]">
+                  <label className="block text-[13px] text-slate-700 mb-2">Từ tháng</label>
+                  <input
+                    type="month"
+                    value={accessFromMonth}
+                    min={accessToMonth ? addMonths(accessToMonth, -11) : undefined}
+                    max={accessToMonth || undefined}
+                    onChange={(e) => { setAccessFromMonth(e.target.value); setAccessReportReady(false); }}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="time">Theo khoảng thời gian</option>
-                    <option value="userType">Theo loại người dùng</option>
-                    <option value="source">Theo nguồn truy cập</option>
-                    <option value="shareFormat">Theo loại dữ liệu chia sẻ</option>
-                  </select>
+                  />
                 </div>
-
-                {accessGroupBy === 'time' ? (
-                  <>
-                    <div>
-                      <label className="block text-[13px] text-slate-700 mb-2">Từ tháng</label>
-                      <input
-                        type="month"
-                        value={accessFromMonth}
-                        onChange={(e) => setAccessFromMonth(e.target.value)}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[13px] text-slate-700 mb-2">Đến tháng</label>
-                      <input
-                        type="month"
-                        value={accessToMonth}
-                        min={accessFromMonth}
-                        onChange={(e) => setAccessToMonth(e.target.value)}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div className="flex items-end gap-2">
-                      <button
-                        onClick={() => { setAppliedAccessGroupBy(accessGroupBy); setAppliedAccessFromMonth(accessFromMonth); setAppliedAccessToMonth(accessToMonth); setAccessReportReady(true); setAccessPage(1); }}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 text-[13px] whitespace-nowrap"
-                      >
-                        <TrendingUp className="w-4 h-4" />
-                        Tạo báo cáo
-                      </button>
-                      <ExportDropdown onExportExcel={handleExportExcel} onExportPDF={handleExportPDF} />
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <MultiSelect
-                      label={
-                        accessGroupBy === 'userType' ? 'Loại người dùng' :
-                        accessGroupBy === 'source' ? 'Nguồn truy cập' : 'Loại dữ liệu chia sẻ'
+                <div className="w-[150px]">
+                  <label className="block text-[13px] text-slate-700 mb-2">Đến tháng</label>
+                  <input
+                    type="month"
+                    value={accessToMonth}
+                    min={accessFromMonth || undefined}
+                    max={accessFromMonth ? addMonths(accessFromMonth, 11) : undefined}
+                    onChange={(e) => { setAccessToMonth(e.target.value); setAccessReportReady(false); }}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div className="w-[180px]">
+                  <MultiSelect
+                    label="Nguồn truy cập"
+                    options={accessSourceOptions}
+                    selected={accessSources}
+                    onChange={(v) => { setAccessSources(v); setAccessReportReady(false); }}
+                  />
+                </div>
+                <div className="w-[180px]">
+                  <MultiSelect
+                    label="Loại dữ liệu chia sẻ"
+                    options={formatOptions}
+                    selected={accessFormats}
+                    onChange={(v) => { setAccessFormats(v); setAccessReportReady(false); }}
+                  />
+                </div>
+                <div className="flex items-end gap-2 shrink-0">
+                  <button
+                    onClick={() => {
+                      if (accessFromMonth && accessToMonth) {
+                        if (accessToMonth < accessFromMonth) { alert('“Đến tháng” phải sau “Từ tháng”.'); return; }
+                        if (accessToMonth > addMonths(accessFromMonth, 11)) { alert('Khoảng thời gian tối đa là 1 năm (12 tháng).'); return; }
                       }
-                      options={
-                        accessGroupBy === 'userType' ? userTypeOptions :
-                        accessGroupBy === 'source' ? sourceOptions : formatOptions
-                      }
-                      selected={selectedAccessFilters}
-                      onChange={(v) => { setSelectedAccessFilters(v); setAccessReportReady(false); }}
-                    />
-                    <div className="flex items-end gap-2">
-                      <button
-                        onClick={() => { setAppliedAccessGroupBy(accessGroupBy); setAppliedAccessFilters(selectedAccessFilters); setAccessReportReady(true); setAccessPage(1); }}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 text-[13px] whitespace-nowrap"
-                      >
-                        <TrendingUp className="w-4 h-4" />
-                        Tạo báo cáo
-                      </button>
-                      <ExportDropdown onExportExcel={handleExportExcel} onExportPDF={handleExportPDF} />
-                    </div>
-                  </>
-                )}
+                      setAppliedAccessFromMonth(accessFromMonth); setAppliedAccessToMonth(accessToMonth); setAppliedAccessSources(accessSources); setAppliedAccessFormats(accessFormats); setAccessReportReady(true); setAccessPage(1);
+                    }}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 text-[13px] whitespace-nowrap"
+                  >
+                    <TrendingUp className="w-4 h-4" />
+                    Tạo báo cáo
+                  </button>
+                  <ExportDropdown onExportExcel={handleExportExcel} onExportPDF={handleExportPDF} />
+                </div>
               </div>
             </div>
 
             {accessReportReady ? (
               <>
-                {/* Trend Chart */}
-                <div className="bg-white border border-slate-200 rounded-lg p-6">
-                  <h3 className="text-slate-900 mb-4">
-                    Thống kê truy cập theo {
-                      appliedAccessGroupBy === 'time' ? 'thời gian' :
-                      appliedAccessGroupBy === 'userType' ? 'loại người dùng' :
-                      appliedAccessGroupBy === 'source' ? 'nguồn truy cập' : 'loại dữ liệu chia sẻ'
-                    }
-                  </h3>
-                  {appliedAccessGroupBy === 'time' ? (
-                    <ResponsiveContainer width="100%" height={400}>
-                      <LineChart data={computedAccessChartData}>
+                {/* Trend Charts — 2 kênh: lượt gọi API (hệ thống khai thác) và lượt truy cập (người dùng xem giao diện); trục ngang = tháng, giá trị theo điều kiện lọc */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Biểu đồ 1: Lượt tải dữ liệu — lọc theo Đơn vị khai thác */}
+                  <div className="bg-white border border-slate-200 rounded-lg p-6">
+                    <div className="flex items-start justify-between gap-3 mb-4 flex-wrap">
+                      <h3 className="text-slate-900">Lượt tải dữ liệu</h3>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-[12px] text-slate-500 whitespace-nowrap">Đơn vị khai thác:</span>
+                        <select
+                          title="Đơn vị khai thác"
+                          value={chartUnit}
+                          onChange={(e) => setChartUnit(e.target.value)}
+                          className="px-2.5 py-1.5 border border-slate-200 rounded-lg text-[12px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 max-w-[220px]"
+                        >
+                          {ACCESS_EXPLOIT_UNITS.map(u => <option key={u.value} value={u.value}>{u.label}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    <ResponsiveContainer width="100%" height={360}>
+                      <LineChart data={apiChartData} margin={{ top: 5, right: 20, left: 0, bottom: 28 }}>
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxisAny dataKey="name" />
+                        <XAxisAny dataKey="name" interval={0} angle={-35} textAnchor="end" height={64} tick={{ fontSize: 11 }} />
                         <YAxisAny />
                         <TooltipAny />
                         <LegendAny />
-                        <LineAny type="monotone" dataKey="views" stroke="#0ea5e9" strokeWidth={2} name="Lượt xem" />
-                        <LineAny type="monotone" dataKey="downloads" stroke="#3b82f6" strokeWidth={2} name="Lượt tải" />
+                        <LineAny type="monotone" dataKey="apiCalls" stroke="#2563eb" strokeWidth={2} name="Lượt tải dữ liệu" />
                       </LineChart>
                     </ResponsiveContainer>
-                  ) : (
-                    <ResponsiveContainer width="100%" height={400}>
-                      <BarChart data={computedAccessChartData}>
+                  </div>
+
+                  {/* Biểu đồ 2: Lượt truy cập — lọc theo Loại người dùng */}
+                  <div className="bg-white border border-slate-200 rounded-lg p-6">
+                    <div className="flex items-start justify-between gap-3 mb-4 flex-wrap">
+                      <h3 className="text-slate-900">Lượt truy cập</h3>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-[12px] text-slate-500 whitespace-nowrap">Loại người dùng:</span>
+                        <select
+                          title="Loại người dùng"
+                          value={chartUserType}
+                          onChange={(e) => setChartUserType(e.target.value)}
+                          className="px-2.5 py-1.5 border border-slate-200 rounded-lg text-[12px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 max-w-[200px]"
+                        >
+                          {ACCESS_USER_TYPES.map(u => <option key={u.value} value={u.value}>{u.label}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    <ResponsiveContainer width="100%" height={360}>
+                      <LineChart data={accessChartData} margin={{ top: 5, right: 20, left: 0, bottom: 28 }}>
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxisAny dataKey="name" />
+                        <XAxisAny dataKey="name" interval={0} angle={-35} textAnchor="end" height={64} tick={{ fontSize: 11 }} />
                         <YAxisAny />
                         <TooltipAny />
                         <LegendAny />
-                        <BarAny dataKey="views" name="Lượt xem" fill="#0ea5e9" maxBarSize={32} radius={[4, 4, 0, 0]} />
-                        <BarAny dataKey="downloads" name="Lượt tải" fill="#3b82f6" maxBarSize={32} radius={[4, 4, 0, 0]} />
-                      </BarChart>
+                        <LineAny type="monotone" dataKey="views" stroke="#10B981" strokeWidth={2} name="Lượt truy cập" />
+                      </LineChart>
                     </ResponsiveContainer>
-                  )}
+                  </div>
                 </div>
 
                 {/* Alert Table */}
@@ -1221,18 +1304,26 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                           <th className="px-4 py-3 text-left text-[13px] text-slate-600 w-10">STT</th>
                           <th className="px-4 py-3 text-left text-[13px] text-slate-600">Tên tệp dữ liệu</th>
                           <th className="px-4 py-3 text-left text-[13px] text-slate-600">Thời gian</th>
+                          <th className="px-4 py-3 text-left text-[13px] text-slate-600">Nguồn truy cập</th>
                           <th className="px-4 py-3 text-left text-[13px] text-slate-600">Định dạng chia sẻ</th>
                           <th className="px-4 py-3 text-right text-[13px] text-slate-600">Lượt truy cập chia sẻ</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-200">
-                        {mockAlertLogs.slice((accessPage - 1) * pageSize, accessPage * pageSize).map((row, index) => {
+                        {filteredAlertLogs.length === 0 ? (
+                          <tr>
+                            <td colSpan={6} className="px-4 py-8 text-center text-[13px] text-slate-400">
+                              Không có dữ liệu cảnh báo phù hợp với điều kiện lọc
+                            </td>
+                          </tr>
+                        ) : filteredAlertLogs.slice((accessPage - 1) * pageSize, accessPage * pageSize).map((row, index) => {
                           const exceeded = row.accessCount >= alertThreshold;
                           return (
                             <tr key={index} className={exceeded ? 'bg-orange-50 hover:bg-orange-100' : 'hover:bg-slate-50'}>
                               <td className="px-4 py-3 text-[13px] text-slate-500">{(accessPage - 1) * pageSize + index + 1}</td>
                               <td className="px-4 py-3 text-[13px] text-slate-900">{row.file}</td>
                               <td className="px-4 py-3 text-[13px] text-slate-600">{row.time}</td>
+                              <td className="px-4 py-3 text-[13px] text-slate-600">{row.source}</td>
                               <td className="px-4 py-3 text-[13px]">
                                 <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[12px] ${
                                   row.format === 'API' ? 'bg-blue-50 text-blue-700' : 'bg-emerald-50 text-emerald-700'
@@ -1259,7 +1350,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                       </tbody>
                     </table>
                   </div>
-                  {renderPagination(mockAlertLogs.length, accessPage, setAccessPage)}
+                  {renderPagination(filteredAlertLogs.length, accessPage, setAccessPage)}
                 </div>
               </>
             ) : (

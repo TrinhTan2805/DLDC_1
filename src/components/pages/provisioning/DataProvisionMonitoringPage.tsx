@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { 
   Activity, BarChart3, Download, Network, Share2, Server, Database, 
   AlertCircle, ChevronLeft, ChevronRight, X, Clock, HelpCircle, CheckCircle2, ArrowRightLeft,
-  ChevronDown, Search, Check, Info, List, PieChart as PieChartIcon
+  ChevronDown, Search, Filter, Check, Info, List, PieChart as PieChartIcon
 } from 'lucide-react';
 import { ProvisionExportReportModal } from './modals/ProvisionExportReportModal';
 import { ProvisionServiceModal } from './modals/ProvisionServiceModal';
@@ -263,6 +263,28 @@ const apiList = [
 
 const databases = Array.from(new Set(apiList.map(api => api.database)));
 
+// Loại dữ liệu → danh sách CSDL tương ứng (chọn Loại dữ liệu sẽ lọc dropdown Cơ sở dữ liệu)
+const DATA_TYPE_OPTIONS = [
+  { value: 'all', label: 'Tất cả' },
+  { value: 'dich', label: 'Dữ liệu đích' },
+  { value: 'danhmuc', label: 'Danh mục dùng chung' },
+  { value: 'chu', label: 'Dữ liệu chủ' },
+  { value: 'mo', label: 'Dữ liệu mở' },
+];
+const DATABASES_BY_TYPE: Record<string, string[]> = {
+  dich: databases,
+  danhmuc: ['CSDL Danh mục Giới tính', 'CSDL Danh mục Dân tộc', 'CSDL Danh mục Quốc gia, quốc tịch', 'CSDL Danh mục Tôn giáo', 'CSDL Danh mục Đơn vị hành chính'],
+  chu: ['CSDL Dữ liệu chủ Công dân', 'CSDL Dữ liệu chủ Tổ chức', 'CSDL Dữ liệu chủ Văn bản/Sự kiện pháp lý'],
+  // Dữ liệu mở: chọn theo TỆP/DỊCH VỤ dữ liệu mở đã công bố (không phải CSDL)
+  mo: [
+    'Danh sách tổ chức thực hiện trợ giúp pháp lý Q1-2026.xlsx (Danh sách tổ chức thực hiện trợ giúp pháp lý)',
+    'Danh sách người thực hiện trợ giúp pháp lý 2026.xlsx (Danh sách người thực hiện trợ giúp pháp lý)',
+    'API Danh sách Luật sư Việt Nam (Danh sách Luật sư Việt Nam)',
+    'Danh sách tổ chức bán đấu giá tài sản 2026.xlsx (Danh sách tổ chức bán đấu giá)',
+    'API Tra cứu văn bản QPPL (Văn bản quy phạm pháp luật)',
+  ],
+};
+
 // Dữ liệu báo cáo thống kê theo ngày trong tháng (tổng hợp toàn hệ thống — UC2)
 const reportBase = [150, 210, 180, 260, 300, 90, 70, 160, 230, 200, 280, 310, 100, 80, 170, 240, 190, 300, 290, 110, 75, 165, 225, 205, 295, 320, 95, 70, 180, 250];
 const reportData = reportBase.map((v, i) => ({
@@ -328,8 +350,21 @@ export function DataProvisionMonitoringPage() {
   const [showExportModal, setShowExportModal] = useState(false);
   
   // API monitoring select state
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  // Bộ lọc ĐÃ ÁP DỤNG — điều khiển báo cáo/biểu đồ; chỉ đổi khi bấm "Tìm kiếm"
+  const [loaiDuLieu, setLoaiDuLieu] = useState<string>('all');
   const [selectedDatabase, setSelectedDatabase] = useState<string>('');
   const [selectedApi, setSelectedApi] = useState<string>('');
+  // Bộ lọc NHÁP — người dùng đang chọn, chưa áp vào báo cáo
+  const [draftLoai, setDraftLoai] = useState<string>('all');
+  const [draftDatabase, setDraftDatabase] = useState<string>('');
+  const [draftApi, setDraftApi] = useState<string>('');
+  const [draftFrom, setDraftFrom] = useState<string>('');
+  const [draftTo, setDraftTo] = useState<string>('');
+  const draftDatabaseOptions = draftLoai === 'all'
+    ? [...databases, ...DATABASES_BY_TYPE.danhmuc, ...DATABASES_BY_TYPE.chu, ...DATABASES_BY_TYPE.mo]
+    : (DATABASES_BY_TYPE[draftLoai] || []);
+  const draftFilteredApis = draftDatabase ? apiList.filter(api => api.database === draftDatabase) : apiList;
   
   // Pagination for detailed table
   const [tablePage, setTablePage] = useState(1);
@@ -360,6 +395,14 @@ export function DataProvisionMonitoringPage() {
   // Bộ lọc thời gian
   const [monFrom, setMonFrom] = useState('');
   const [monTo, setMonTo] = useState('');
+  // Bấm "Tìm kiếm" → áp bộ lọc nháp vào bộ lọc đã áp dụng (mới load lại báo cáo)
+  const applySearch = () => {
+    setLoaiDuLieu(draftLoai);
+    setSelectedDatabase(draftDatabase);
+    setSelectedApi(draftApi);
+    setMonFrom(draftFrom);
+    setMonTo(draftTo);
+  };
   // CSDL đang được xem chi tiết (drill-down) trong biểu đồ "Tỷ lệ lưu lượng yêu cầu theo CSDL/API"; null = đang xem theo CSDL
   const [drillDatabase, setDrillDatabase] = useState<string | null>(null);
 
@@ -542,38 +585,56 @@ export function DataProvisionMonitoringPage() {
       <div className="space-y-6">
         
         {/* Filter bar */}
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3">
+          {/* Bộ lọc chính + nút nâng cao + xuất báo cáo */}
           <div className="flex flex-wrap items-end gap-3">
             <div className="flex-1 min-w-[180px]">
-              <label className="block text-[12px] text-slate-500 mb-1 font-medium">Cơ sở dữ liệu</label>
+              <label className="block text-[12px] text-slate-500 mb-1 font-medium">Loại dữ liệu</label>
               <select
-                value={selectedDatabase}
-                onChange={(e) => setSelectedDatabase(e.target.value)}
+                value={draftLoai}
+                onChange={(e) => { setDraftLoai(e.target.value); setDraftDatabase(''); setDraftApi(''); }}
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">Tất cả CSDL</option>
-                {databases.map(db => (<option key={db} value={db}>{db}</option>))}
+                {DATA_TYPE_OPTIONS.map(o => (<option key={o.value} value={o.value}>{o.label}</option>))}
+              </select>
+            </div>
+            <div className="flex-1 min-w-[180px]">
+              <label className="block text-[12px] text-slate-500 mb-1 font-medium">{draftLoai === 'mo' ? 'Dịch vụ dữ liệu mở' : 'Cơ sở dữ liệu'}</label>
+              <select
+                value={draftDatabase}
+                onChange={(e) => { setDraftDatabase(e.target.value); setDraftApi(''); }}
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">{draftLoai === 'mo' ? '-- Chọn tệp dữ liệu mở (Đã công bố) --' : 'Tất cả CSDL'}</option>
+                {draftDatabaseOptions.map(db => (<option key={db} value={db}>{db}</option>))}
               </select>
             </div>
             <div className="flex-1 min-w-[180px]">
               <label className="block text-[12px] text-slate-500 mb-1 font-medium">API</label>
               <select
-                value={selectedApi}
-                onChange={(e) => setSelectedApi(e.target.value)}
+                value={draftApi}
+                onChange={(e) => setDraftApi(e.target.value)}
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Tất cả API</option>
-                {filteredApis.map(api => (<option key={api.id} value={api.id}>{api.name}</option>))}
+                {draftFilteredApis.map(api => (<option key={api.id} value={api.id}>{api.name}</option>))}
               </select>
             </div>
-            <div className="min-w-[150px]">
-              <label className="block text-[12px] text-slate-500 mb-1 font-medium">Từ ngày</label>
-              <input type="date" value={monFrom} onChange={(e) => setMonFrom(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-            <div className="min-w-[150px]">
-              <label className="block text-[12px] text-slate-500 mb-1 font-medium">Đến ngày</label>
-              <input type="date" value={monTo} onChange={(e) => setMonTo(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
+            <button
+              onClick={applySearch}
+              title="Tìm kiếm"
+              aria-label="Tìm kiếm"
+              className="p-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg flex items-center justify-center shadow-sm shrink-0 transition-colors"
+            >
+              <Search className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              title="Tìm kiếm nâng cao"
+              className={`p-2 rounded-lg border flex items-center justify-center shrink-0 transition-colors ${showAdvanced ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+            >
+              {showAdvanced ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
+            </button>
             <button
               onClick={() => setShowExportModal(true)}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition-colors font-medium text-[13px] shadow-sm shrink-0"
@@ -582,6 +643,23 @@ export function DataProvisionMonitoringPage() {
               Xuất báo cáo
             </button>
           </div>
+
+          {/* Khung tìm kiếm nâng cao (xổ ra khi bấm nút nâng cao) */}
+          {showAdvanced && (
+            <div className="pt-3 border-t border-slate-100">
+              <p className="text-[12px] font-semibold text-slate-600 mb-2">Tìm kiếm nâng cao</p>
+              <div className="flex flex-wrap items-end gap-3">
+                <div className="min-w-[160px]">
+                  <label className="block text-[12px] text-slate-500 mb-1 font-medium">Từ ngày</label>
+                  <input type="date" value={draftFrom} onChange={(e) => setDraftFrom(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div className="min-w-[160px]">
+                  <label className="block text-[12px] text-slate-500 mb-1 font-medium">Đến ngày</label>
+                  <input type="date" value={draftTo} onChange={(e) => setDraftTo(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Overview performance stat cards */}
