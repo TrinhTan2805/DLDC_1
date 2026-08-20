@@ -68,23 +68,23 @@ export const COLUMNS: Record<DataCategory, ColDef[]> = {
 export type Row = Record<string, string> & { id: string; approvalStatus: ApprovalStatus; publicStatus: PublicStatus };
 
 const MOCK_CIVIL_STATUS: Row[] = [
-  { id: '1', ma: 'HT-2026-000145', hoTen: 'Trần Minh Khoa',       ngaySinh: '01/01/2026', gioiTinh: 'Nam', noiSinh: 'Hà Nội',      danToc: 'Kinh', quocTich: 'Việt Nam', queQuan: 'Nam Định',    soDinhDanh: '001126000123', ngayXacLapHonNhan: '',           ngayMat: '—',           noiMat: '—',          hieuLuc: '01/01/2026', approvalStatus: 'approved',  publicStatus: 'published' },
-  { id: '2', ma: 'HT-2026-000287', hoTen: 'Trần Minh Khoa',       ngaySinh: '14/02/2026', gioiTinh: 'Nam', noiSinh: '',            danToc: 'Kinh', quocTich: 'Việt Nam', queQuan: 'Nam Định',    soDinhDanh: '001126000456', ngayXacLapHonNhan: '',           ngayMat: '—',           noiMat: '—',          hieuLuc: '14/02/2026', approvalStatus: 'approved',  publicStatus: 'published' },
-  { id: '3', ma: 'HT-2025-008456', hoTen: 'Lê Gia Bảo',           ngaySinh: '08/12/2025', gioiTinh: 'Nam', noiSinh: 'Đà Nẵng',     danToc: 'Kinh', quocTich: 'Việt Nam', queQuan: 'Đà Nẵng',     soDinhDanh: '048125007890', ngayXacLapHonNhan: '',           ngayMat: '—',           noiMat: '—',          hieuLuc: '08/12/2025', approvalStatus: 'pending',   publicStatus: 'unpublished' },
-  { id: '4', ma: 'HT-2026-000298', hoTen: 'Phạm Nhật Minh',       ngaySinh: '03/03/2026', gioiTinh: 'Nam', noiSinh: 'Hải Phòng',   danToc: 'Kinh', quocTich: 'Việt Nam', queQuan: 'Hải Phòng',   soDinhDanh: '031126001234', ngayXacLapHonNhan: '',           ngayMat: '—',           noiMat: '—',          hieuLuc: '03/03/2026', approvalStatus: 'draft',     publicStatus: 'unpublished' },
-  { id: '5', ma: 'HT-1995-002234', hoTen: 'Đinh Thị Yến Nhi',     ngaySinh: '12/05/1995', gioiTinh: 'Nữ',  noiSinh: 'Cần Thơ',     danToc: 'Kinh', quocTich: 'Việt Nam', queQuan: 'Cần Thơ',     soDinhDanh: '092195003456', ngayXacLapHonNhan: '20/09/2020', ngayMat: '—',           noiMat: '—',          hieuLuc: '20/09/2020', approvalStatus: 'pending',   publicStatus: 'unpublished' },
-  { id: '6', ma: 'HT-1950-000512', hoTen: 'Trần Bình An',         ngaySinh: '10/05/1950', gioiTinh: 'Nam', noiSinh: 'Bình Dương',  danToc: 'Kinh', quocTich: 'Việt Nam', queQuan: 'Bình Dương',  soDinhDanh: '079150005678', ngayXacLapHonNhan: '15/03/1975', ngayMat: '12/01/2024',  noiMat: 'Bình Dương', hieuLuc: '12/01/2024', approvalStatus: 'rejected',  publicStatus: 'unpublished' },
-  { id: '7', ma: 'HT-2026-000099', hoTen: 'Bùi Văn Sơn',          ngaySinh: '01/01/2026', gioiTinh: 'Nam', noiSinh: 'Hà Nội',      danToc: 'Kinh', quocTich: 'Việt Nam', queQuan: 'Hà Nội',      soDinhDanh: '001126009012', ngayXacLapHonNhan: '',           ngayMat: '—',           noiMat: '—',          hieuLuc: '01/01/2026', approvalStatus: 'reviewing', publicStatus: 'unpublished' },
+  { id: '1', ma: 'HT-2026-000145', hoTen: 'Trần Minh Khoa',       ngaySinh: '01/01/2026', gioiTinh: 'Nam', noiSinh: 'Hà Nội',      danToc: 'Kinh', quocTich: 'Việt Nam', queQuan: 'Nam Định',    soDinhDanh: '001126000123', maVanBanCanCu: 'VB-2026-000145', ngayXacLapHonNhan: '',           ngayMat: '—',           noiMat: '—',          hieuLuc: '01/01/2026', approvalStatus: 'approved',  publicStatus: 'published' },
+  { id: '2', ma: 'HT-2026-000287', hoTen: 'Trần Minh Khoa',       ngaySinh: '14/02/2026', gioiTinh: 'Nam', noiSinh: '',            danToc: 'Kinh', quocTich: 'Việt Nam', queQuan: 'Nam Định',    soDinhDanh: '001126000456', maVanBanCanCu: 'VB-2026-000287', ngayXacLapHonNhan: '',           ngayMat: '—',           noiMat: '—',          hieuLuc: '14/02/2026', approvalStatus: 'approved',  publicStatus: 'published' },
+  { id: '3', ma: 'HT-2025-008456', hoTen: 'Lê Gia Bảo',           ngaySinh: '08/12/2025', gioiTinh: 'Nam', noiSinh: 'Đà Nẵng',     danToc: 'Kinh', quocTich: 'Việt Nam', queQuan: 'Đà Nẵng',     soDinhDanh: '048125007890', maVanBanCanCu: 'VB-2025-008456', ngayXacLapHonNhan: '',           ngayMat: '—',           noiMat: '—',          hieuLuc: '08/12/2025', approvalStatus: 'pending',   publicStatus: 'unpublished' },
+  { id: '4', ma: 'HT-2026-000298', hoTen: 'Phạm Nhật Minh',       ngaySinh: '03/03/2026', gioiTinh: 'Nam', noiSinh: 'Hải Phòng',   danToc: 'Kinh', quocTich: 'Việt Nam', queQuan: 'Hải Phòng',   soDinhDanh: '031126001234', maVanBanCanCu: 'VB-2026-000401', ngayXacLapHonNhan: '',           ngayMat: '—',           noiMat: '—',          hieuLuc: '03/03/2026', approvalStatus: 'draft',     publicStatus: 'unpublished' },
+  { id: '5', ma: 'HT-1995-002234', hoTen: 'Đinh Thị Yến Nhi',     ngaySinh: '12/05/1995', gioiTinh: 'Nữ',  noiSinh: 'Cần Thơ',     danToc: 'Kinh', quocTich: 'Việt Nam', queQuan: 'Cần Thơ',     soDinhDanh: '092195003456', maVanBanCanCu: 'VB-2026-000512', ngayXacLapHonNhan: '20/09/2020', ngayMat: '—',           noiMat: '—',          hieuLuc: '20/09/2020', approvalStatus: 'pending',   publicStatus: 'unpublished' },
+  { id: '6', ma: 'HT-1950-000512', hoTen: 'Trần Bình An',         ngaySinh: '10/05/1950', gioiTinh: 'Nam', noiSinh: 'Bình Dương',  danToc: 'Kinh', quocTich: 'Việt Nam', queQuan: 'Bình Dương',  soDinhDanh: '079150005678', maVanBanCanCu: 'VB-2026-000623', ngayXacLapHonNhan: '15/03/1975', ngayMat: '12/01/2024',  noiMat: 'Bình Dương', hieuLuc: '12/01/2024', approvalStatus: 'rejected',  publicStatus: 'unpublished' },
+  { id: '7', ma: 'HT-2026-000099', hoTen: 'Bùi Văn Sơn',          ngaySinh: '01/01/2026', gioiTinh: 'Nam', noiSinh: 'Hà Nội',      danToc: 'Kinh', quocTich: 'Việt Nam', queQuan: 'Hà Nội',      soDinhDanh: '001126009012', maVanBanCanCu: 'VB-2026-000734', ngayXacLapHonNhan: '',           ngayMat: '—',           noiMat: '—',          hieuLuc: '01/01/2026', approvalStatus: 'reviewing', publicStatus: 'unpublished' },
 ];
 
 const MOCK_ENFORCEMENT_DECISION: Row[] = [
-  { id: '1', ma: 'QĐ-THADS-2026-00156', ngayQuyetDinh: '15/01/2026', coQuanThiHanhAn: 'Cục THADS TP. Hà Nội',           tinhTrangThiHanhAn: 'Đang thi hành',       hieuLuc: '15/01/2026', approvalStatus: 'approved',  publicStatus: 'published' },
-  { id: '2', ma: 'QĐ-THADS-2026-00287', ngayQuyetDinh: '22/02/2026', coQuanThiHanhAn: 'Chi cục THADS Q. Cầu Giấy, HN',  tinhTrangThiHanhAn: 'Đã thi hành xong',    hieuLuc: '22/02/2026', approvalStatus: 'pending',   publicStatus: 'unpublished' },
-  { id: '3', ma: 'QĐ-THADS-2025-08456', ngayQuyetDinh: '10/11/2025', coQuanThiHanhAn: 'Cục THADS TP. Đà Nẵng',          tinhTrangThiHanhAn: '',                    hieuLuc: '10/11/2025', approvalStatus: 'draft',     publicStatus: 'unpublished' },
-  { id: '4', ma: 'QĐ-THADS-2026-00401', ngayQuyetDinh: '05/03/2026', coQuanThiHanhAn: 'Chi cục THADS TP. Cần Thơ',      tinhTrangThiHanhAn: 'Tạm đình chỉ',        hieuLuc: '05/03/2026', approvalStatus: 'rejected',  publicStatus: 'unpublished' },
-  { id: '5', ma: 'QĐ-THADS-2026-00512', ngayQuyetDinh: '15/04/2026', coQuanThiHanhAn: 'Chi cục THADS Q. Hải An, HN',    tinhTrangThiHanhAn: 'Đang thi hành',       hieuLuc: '15/04/2026', approvalStatus: 'pending',   publicStatus: 'unpublished' },
-  { id: '6', ma: 'QĐ-THADS-2026-00623', ngayQuyetDinh: '28/05/2026', coQuanThiHanhAn: 'Chi cục THADS Q. Sơn Trà, ĐN',   tinhTrangThiHanhAn: 'Đã thi hành xong',    hieuLuc: '28/05/2026', approvalStatus: 'approved',  publicStatus: 'published' },
-  { id: '7', ma: 'QĐ-THADS-2026-00734', ngayQuyetDinh: '02/06/2026', coQuanThiHanhAn: 'Chi cục THADS Q. Cầu Giấy, HN',  tinhTrangThiHanhAn: 'Đang thi hành',       hieuLuc: '02/06/2026', approvalStatus: 'reviewing', publicStatus: 'unpublished' },
+  { id: '1', ma: 'QĐ-THADS-2026-00156', ngayQuyetDinh: '15/01/2026', coQuanThiHanhAn: 'Cục THADS TP. Hà Nội',           tinhTrangThiHanhAn: 'Đang thi hành',       soDinhDanh: '001126000123', maVanBanCanCu: 'VB-2026-000145', hieuLuc: '15/01/2026', approvalStatus: 'approved',  publicStatus: 'published' },
+  { id: '2', ma: 'QĐ-THADS-2026-00287', ngayQuyetDinh: '22/02/2026', coQuanThiHanhAn: 'Chi cục THADS Q. Cầu Giấy, HN',  tinhTrangThiHanhAn: 'Đã thi hành xong',    soDinhDanh: '001126000456', maVanBanCanCu: 'VB-2026-000287', hieuLuc: '22/02/2026', approvalStatus: 'pending',   publicStatus: 'unpublished' },
+  { id: '3', ma: 'QĐ-THADS-2025-08456', ngayQuyetDinh: '10/11/2025', coQuanThiHanhAn: 'Cục THADS TP. Đà Nẵng',          tinhTrangThiHanhAn: '',                    soDinhDanh: '048125007890', maVanBanCanCu: 'VB-2025-008456', hieuLuc: '10/11/2025', approvalStatus: 'draft',     publicStatus: 'unpublished' },
+  { id: '4', ma: 'QĐ-THADS-2026-00401', ngayQuyetDinh: '05/03/2026', coQuanThiHanhAn: 'Chi cục THADS TP. Cần Thơ',      tinhTrangThiHanhAn: 'Tạm đình chỉ',        soDinhDanh: '031126001234', maVanBanCanCu: 'VB-2026-000401', hieuLuc: '05/03/2026', approvalStatus: 'rejected',  publicStatus: 'unpublished' },
+  { id: '5', ma: 'QĐ-THADS-2026-00512', ngayQuyetDinh: '15/04/2026', coQuanThiHanhAn: 'Chi cục THADS Q. Hải An, HN',    tinhTrangThiHanhAn: 'Đang thi hành',       soDinhDanh: '092195003456', maVanBanCanCu: 'VB-2026-000512', hieuLuc: '15/04/2026', approvalStatus: 'pending',   publicStatus: 'unpublished' },
+  { id: '6', ma: 'QĐ-THADS-2026-00623', ngayQuyetDinh: '28/05/2026', coQuanThiHanhAn: 'Chi cục THADS Q. Sơn Trà, ĐN',   tinhTrangThiHanhAn: 'Đã thi hành xong',    soDinhDanh: '079150005678', maVanBanCanCu: 'VB-2026-000623', hieuLuc: '28/05/2026', approvalStatus: 'approved',  publicStatus: 'published' },
+  { id: '7', ma: 'QĐ-THADS-2026-00734', ngayQuyetDinh: '02/06/2026', coQuanThiHanhAn: 'Chi cục THADS Q. Cầu Giấy, HN',  tinhTrangThiHanhAn: 'Đang thi hành',       soDinhDanh: '001126009012', maVanBanCanCu: 'VB-2026-000734', hieuLuc: '02/06/2026', approvalStatus: 'reviewing', publicStatus: 'unpublished' },
 ];
 
 const MOCK_LEGAL_DOCUMENT: Row[] = [
@@ -115,14 +115,12 @@ export const CATEGORY_LABELS: Record<DataCategory, string> = {
 };
 
 function normalizeIdentifier(value: string): string {
-  return (value || '').replace(/\D/g, ''); // chỉ giữ chữ số, bỏ khoảng trắng/gạch nối
+  return (value || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
 // Cấu hình quan hệ giữa các danh mục dữ liệu chủ — giống mục "Thiết lập quan hệ giữa thực thể"
 // (chọn 2 thực thể, khai báo khóa liên kết). Liên kết chéo thực thể ở màn Chi tiết bản ghi
 // được xác định dựa trên các quan hệ khai báo tại đây, không hard-code cố định 1 trường cho từng danh mục.
-// 3 loại thực thể hiện tại (hộ tịch cá nhân / quyết định THA / văn bản QPPL) không có trường định danh
-// dùng chung theo đúng bảng quy định, nên chưa khai báo quan hệ nào — để trống, chờ PM bổ sung khi cần.
 type CategoryRelationType = 'one-to-one' | 'one-to-many' | 'many-to-many';
 
 interface CategoryRelationship {
@@ -136,7 +134,38 @@ interface CategoryRelationship {
   status: 'active' | 'inactive';
 }
 
-const CATEGORY_RELATIONSHIPS: CategoryRelationship[] = [];
+const CATEGORY_RELATIONSHIPS: CategoryRelationship[] = [
+  {
+    id: 'rel-1',
+    categoryA: 'civil-status',
+    fieldA: 'soDinhDanh',
+    categoryB: 'enforcement-decision',
+    fieldB: 'soDinhDanh',
+    relationType: 'one-to-many',
+    description: 'Quan hệ giữa Thông tin hộ tịch cá nhân và Quyết định thi hành án theo Số định danh cá nhân (CCCD)',
+    status: 'active',
+  },
+  {
+    id: 'rel-2',
+    categoryA: 'civil-status',
+    fieldA: 'maVanBanCanCu',
+    categoryB: 'legal-document',
+    fieldB: 'ma',
+    relationType: 'many-to-one',
+    description: 'Văn bản quy phạm pháp luật làm căn cứ điều chỉnh Thông tin hộ tịch',
+    status: 'active',
+  },
+  {
+    id: 'rel-3',
+    categoryA: 'enforcement-decision',
+    fieldA: 'maVanBanCanCu',
+    categoryB: 'legal-document',
+    fieldB: 'ma',
+    relationType: 'many-to-one',
+    description: 'Văn bản quy phạm pháp luật làm căn cứ ban hành Quyết định thi hành án',
+    status: 'active',
+  },
+];
 
 function categoryHasCrossEntityConfig(category: DataCategory): boolean {
   return CATEGORY_RELATIONSHIPS.some(rel => rel.status === 'active' && (rel.categoryA === category || rel.categoryB === category));
@@ -2433,7 +2462,7 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
                               <thead>
                                 <tr className="bg-slate-50 border-b border-slate-200">
                                   <th className="px-3 py-2 text-left text-[13px] font-medium text-slate-600">{COLUMNS[group.links[0].category][0].label}</th>
-                                  <th className="px-3 py-2 text-left text-[13px] font-medium text-slate-600">Trạng thái</th>
+                                  <th className="px-3 py-2 text-left text-[13px] font-medium text-slate-600">Trạng thái phê duyệt</th>
                                   <th className="px-3 py-2 text-left text-[13px] font-medium text-slate-600"></th>
                                 </tr>
                               </thead>
@@ -2529,7 +2558,7 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
               </div>
               <div className="p-6 space-y-3 text-[13px] overflow-y-auto">
                 <div className="flex items-center gap-2">
-                  <span className="text-slate-500">Trạng thái:</span>
+                  <span className="text-slate-500">Trạng thái phê duyệt:</span>
                   <ApprovalBadge status={link.row.approvalStatus} />
                 </div>
                 <div className="border border-slate-200 rounded-lg divide-y divide-slate-100">

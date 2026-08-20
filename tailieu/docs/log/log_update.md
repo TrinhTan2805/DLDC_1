@@ -1,5 +1,17 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Cập nhật giao diện (Ngày thực hiện: 20/08/2026) — 70
+
+**Màn hình:** Dữ liệu chủ → Cập nhật dữ liệu chủ → Phê duyệt (Modal "Chi tiết bản ghi", tab "Thông tin liên quan", `MasterDataUpdateItemPage.tsx`).
+
+**Nội dung thay đổi:**
+- Bổ sung cấu hình quan hệ thực thể `CATEGORY_RELATIONSHIPS` (3 quan hệ liên kết chéo giữa Thông tin hộ tịch cá nhân, Quyết định thi hành án và Văn bản quy phạm pháp luật theo khóa định danh `soDinhDanh` CCCD và `maVanBanCanCu`).
+- Bổ sung dữ liệu mock khóa ngoại (`soDinhDanh`, `maVanBanCanCu`) vào mảng `MOCK_CIVIL_STATUS` và `MOCK_ENFORCEMENT_DECISION` để tự động tạo liên kết chéo giữa các thực thể dữ liệu chủ.
+- Cập nhật hàm `normalizeIdentifier` hỗ trợ chuẩn hóa cả mã văn bản alphanumeric (`VB-2026-...`), giúp hiển thị đầy đủ danh sách và chi tiết các bản ghi liên kết chéo tại tab "Thông tin liên quan" trong modal Chi tiết bản ghi.
+- Đổi tên cột "Trạng thái" thành **"Trạng thái phê duyệt"** ở header các bảng liên kết chéo thực thể tại tab "Thông tin liên quan" và trong modal xem chi tiết bản ghi liên kết.
+
+**File bị ảnh hưởng:** `src/components/pages/master-data/MasterDataUpdateItemPage.tsx`.
+
 ## Cập nhật giao diện (Ngày thực hiện: 13/08/2026) — 69
 
 **Màn hình:** Dữ liệu chủ → Báo cáo tìm kiếm dữ liệu chủ (`MasterDataReportsPage.tsx`), tab "Báo cáo sử dụng dữ liệu chủ" → chế độ "Tiêu thụ".
