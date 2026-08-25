@@ -6,6 +6,14 @@ export interface InnerSidebarItem {
   label: string;
   group?: string;
   dataType?: 'Dữ liệu nghiệp vụ' | 'Dữ liệu danh mục';
+  /** Chấm màu trạng thái hiển thị trước tên mục (VD: trạng thái công khai) */
+  statusDot?: 'green' | 'gray';
+  statusLabel?: string;
+}
+
+export interface InnerSidebarFilter {
+  value: string;
+  label: string;
 }
 
 interface InnerSidebarProps {
@@ -17,6 +25,10 @@ interface InnerSidebarProps {
   stretchHeight?: boolean;
   // Bỏ phân nhóm "Dữ liệu nghiệp vụ"/"Dữ liệu danh mục" — hiển thị thẳng toàn bộ items, không cần thu gọn/mở rộng
   flatList?: boolean;
+  /** Tab lọc hiển thị ngay dưới ô tìm kiếm (VD: lọc theo trạng thái công khai) */
+  filters?: InnerSidebarFilter[];
+  activeFilter?: string;
+  onFilterChange?: (value: string) => void;
 }
 
 // Phân loại dữ liệu thu thập thành 2 nhóm cố định: Dữ liệu nghiệp vụ (luôn ở trên) và Dữ liệu danh mục (luôn ở dưới, mặc định đóng)
@@ -25,7 +37,7 @@ const DATA_TYPE_SECTIONS: { key: 'Dữ liệu nghiệp vụ' | 'Dữ liệu danh
   { key: 'Dữ liệu danh mục', label: 'Dữ liệu danh mục' },
 ];
 
-export function InnerSidebar({ title, items, onSelectItem, activeId, hideGroupHeaders = false, stretchHeight = false, flatList = false }: InnerSidebarProps) {
+export function InnerSidebar({ title, items, onSelectItem, activeId, hideGroupHeaders = false, stretchHeight = false, flatList = false, filters, activeFilter, onFilterChange }: InnerSidebarProps) {
   const [searchTerm, setSearchTerm] = useState('');
   // "Dữ liệu danh mục" luôn đóng mặc định; "Dữ liệu nghiệp vụ" luôn mở mặc định
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set(['Dữ liệu danh mục']));
@@ -61,6 +73,12 @@ export function InnerSidebar({ title, items, onSelectItem, activeId, hideGroupHe
       }`}>
         {item.label}
       </span>
+      {item.statusDot && (
+        <span
+          className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${item.statusDot === 'green' ? 'bg-emerald-500' : 'bg-slate-300'}`}
+          title={item.statusLabel}
+        />
+      )}
     </button>
   );
 
@@ -151,6 +169,24 @@ export function InnerSidebar({ title, items, onSelectItem, activeId, hideGroupHe
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
+        {filters && filters.length > 0 && (
+          <div className="flex items-center gap-1 mt-3 bg-slate-50 border border-slate-200 rounded-lg p-1">
+            {filters.map(f => (
+              <button
+                key={f.value}
+                type="button"
+                onClick={() => onFilterChange?.(f.value)}
+                className={`flex-1 px-2 py-1.5 rounded-md text-[12px] font-medium transition-colors cursor-pointer ${
+                  activeFilter === f.value
+                    ? 'bg-white text-blue-700 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
       <div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
         <div className="space-y-0.5">

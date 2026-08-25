@@ -54,6 +54,10 @@ interface CategoryPageProps {
   categoryName: string;
   categoryId: string;
   readOnly?: boolean;
+  /** Trạng thái công khai ban đầu, dùng để đồng bộ với danh sách danh mục bên ngoài */
+  initialPublished?: boolean;
+  /** Báo cho component cha biết trạng thái công khai vừa thay đổi (true = vừa công khai, false = vừa hủy công khai) */
+  onPublishStatusChange?: (published: boolean) => void;
 }
 
 interface Category {
@@ -141,7 +145,7 @@ const MOCK_RECORDS_BY_CATEGORY: Record<string, Category[]> = {
   ]
 };
 
-export function CategoryPage({ categoryName, categoryId, readOnly = false }: CategoryPageProps) {
+export function CategoryPage({ categoryName, categoryId, readOnly = false, initialPublished = false, onPublishStatusChange }: CategoryPageProps) {
   const [activeTab, setActiveTab] = useState<'setup' | 'approval' | 'publish' | 'stats' | 'version-history'>('setup');
 
   // Mock data - Danh sách tỉnh thành Việt Nam
@@ -329,7 +333,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false }: Cat
   const [inlineAddData, setInlineAddData] = useState({ code: '', name: '', description: '' });
 
   // Publish states
-  const [publishStatus, setPublishStatus] = useState<'unpublished' | 'published' | 'stopped'>('unpublished');
+  const [publishStatus, setPublishStatus] = useState<'unpublished' | 'published' | 'stopped'>(initialPublished ? 'published' : 'unpublished');
   const [shareScope, setShareScope] = useState<'internal' | 'extended' | 'public'>('internal');
   const [unpublishReason, setUnpublishReason] = useState<string>('');
   const [publishActionInfo, setPublishActionInfo] = useState<{ user: string; date: string; reason?: string }>({ user: '', date: '' });
@@ -2046,6 +2050,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false }: Cat
                     user: 'Nguyễn Văn A',
                     date: new Date().toLocaleDateString('vi-VN')
                   });
+                  onPublishStatusChange?.(true);
                   setShowPublishModal(false);
                   setSuccessNotificationMessage(`Công khai danh mục thành công với phạm vi: ${shareScope === 'internal' ? 'Nội bộ' : shareScope === 'extended' ? 'Mở rộng' : 'Toàn dân'}`);
                   setShowSuccessNotification(true);
@@ -2118,6 +2123,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false }: Cat
                     date: new Date().toLocaleDateString('vi-VN'),
                     reason: unpublishReason
                   });
+                  onPublishStatusChange?.(false);
                   setShowUnpublishModal(false);
                   setSuccessNotificationMessage(`Đã hủy công khai danh mục thành công!`);
                   setShowSuccessNotification(true);
