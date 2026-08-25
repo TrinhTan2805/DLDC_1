@@ -48,6 +48,7 @@ import { ApprovalRequestModal } from './components/modals/ApprovalRequestModal';
 import { UpdateApprovalModal } from './components/modals/UpdateApprovalModal';
 import { CategoryInfoViewModal } from './components/modals/CategoryInfoViewModal';
 import { MasterDataEntity } from './categoryTypes';
+import { lifecycleLabels, scopeLabels } from './categoryConstants';
 import { Portal } from '../../common/Portal';
 
 interface CategoryPageProps {
@@ -1902,6 +1903,29 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
             </div>
           </div>
 
+          {/* Thông tin danh mục: Trạng thái phê duyệt / Phiên bản hiện hành / Quyền chia sẻ */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-sm">
+              <p className="text-[12px] text-slate-500 mb-2">Trạng thái phê duyệt</p>
+              <span className={`inline-block px-3 py-1 rounded-full text-[12px] font-medium ${lifecycleLabels[currentCategoryEntity.lifecycleStatus].color}`}>
+                {lifecycleLabels[currentCategoryEntity.lifecycleStatus].label}
+              </span>
+            </div>
+            <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-sm">
+              <p className="text-[12px] text-slate-500 mb-2">Phiên bản hiện hành</p>
+              <span className="inline-block px-3 py-1 rounded-full text-[12px] font-medium bg-blue-50 text-blue-700">
+                v{currentCategoryEntity.version ?? 1}
+              </span>
+            </div>
+            <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-sm">
+              <p className="text-[12px] text-slate-500 mb-2">Quyền chia sẻ</p>
+              <span className="inline-block px-3 py-1 rounded-full text-[12px] font-medium bg-purple-50 text-purple-700">
+                {scopeLabels[currentCategoryEntity.scope]}
+              </span>
+              <p className="text-[11px] text-slate-400 mt-1.5">Theo Phạm vi vĩ mô tại tab Thiết lập</p>
+            </div>
+          </div>
+
           {/* Tiêu đề phần danh sách */}
           <div>
             <h3 className="text-lg text-slate-900 font-semibold">Các trường dữ liệu của danh mục</h3>
@@ -1992,6 +2016,14 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
               <p className="text-slate-600 font-medium leading-relaxed">
                 Vui lòng lựa chọn phạm vi chia sẻ (phân quyền công khai) cho danh mục <strong>{categoryName}</strong>:
               </p>
+
+              {/* Thông tin nhanh của danh mục: Trạng thái phê duyệt / Phiên bản hiện hành / Quyền chia sẻ hiện tại */}
+              <div className="text-[13px] text-slate-500 space-y-1">
+                <p>Trạng thái phê duyệt: <span className="text-slate-700 font-medium">{lifecycleLabels[currentCategoryEntity.lifecycleStatus].label}</span></p>
+                <p>Phiên bản hiện hành: <span className="text-slate-700 font-medium">v{currentCategoryEntity.version ?? 1}</span></p>
+                <p>Quyền chia sẻ: <span className="text-slate-700 font-medium">{scopeLabels[currentCategoryEntity.scope]}</span></p>
+              </div>
+
               <div className="space-y-3">
                 <label className="flex items-start gap-3 p-3 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
                   <input
