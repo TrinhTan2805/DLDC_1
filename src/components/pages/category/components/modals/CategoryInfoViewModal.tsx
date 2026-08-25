@@ -3,6 +3,7 @@ import { Info, CheckCircle2, XCircle, FileText, KeyRound, ArrowRight } from 'luc
 import { MasterDataEntity, ScopeType, DataSourceType } from '../../categoryTypes';
 import { BaseModal } from '../../../../common/BaseModal';
 import { ReviewResultCard } from './ReviewResultCard';
+import { categoryTypeLabels } from '../../categoryConstants';
 
 export interface CategoryDetailAttr { fieldName: string; displayName: string; dataType: string; isPK?: boolean; }
 export interface CategoryDetailRel { sourceEntityName: string; targetEntityName: string; relationshipType: string; foreignKey: string; }
@@ -125,6 +126,7 @@ export function CategoryInfoViewModal({ isOpen, onClose, entity, requestStatus, 
           <div className="grid grid-cols-2 gap-4">
             <Field label="Phiên bản danh mục" value={`v${entity.version ?? 1}.0`} colSpan={2} />
             <Field label="Tên danh sách danh mục" value={entity.name} colSpan={2} />
+            <Field label="Loại danh mục" value={entity.categoryType ? categoryTypeLabels[entity.categoryType] : undefined} colSpan={2} />
             <Field label="Cơ sở dữ liệu/Hệ thống" value={entity.databaseSystem} />
             <Field label="Đơn vị chủ quản" value={entity.managingAgency} />
             <Field label="Căn cứ" value={entity.canCu} colSpan={2} />

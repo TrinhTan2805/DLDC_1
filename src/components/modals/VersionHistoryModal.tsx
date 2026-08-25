@@ -7,6 +7,40 @@ interface VersionHistoryModalProps {
 
 const mockVersions = [
   {
+    id: 33,
+    version: 'v2.6.22',
+    date: '25/08/2026',
+    time: '16:00',
+    content: `1. Modal "Công khai danh mục" (CategoryPage.tsx):
+- Đồng bộ cỡ chữ 3 dòng "Trạng thái phê duyệt/Phiên bản hiện hành/Quyền chia sẻ" về 13px, gắn trực tiếp lên từng thẻ \`<p>\`/\`<span>\` thay vì chỉ dựa vào kế thừa từ div cha.
+
+2. Tab "Công khai" — trang Biên tập danh mục (CategoryPage.tsx):
+- Bỏ 3 thẻ tóm tắt "Trạng thái phê duyệt/Phiên bản hiện hành/Quyền chia sẻ" khỏi tab Công khai.
+- Modal "Hủy công khai danh mục": bổ sung cảnh báo "Danh mục đang được khai thác bởi (n) API" (mock \`exploitingApiCount\`).
+
+3. Thiết lập danh mục dùng chung (CategoryWizardModal.tsx, CategoryInfoViewModal.tsx, categoryTypes.ts, categoryConstants.ts):
+- Bổ sung trường "Loại danh mục" (dropdown: Danh mục dùng chung từ TTDLQG / Danh mục nghiệp vụ / Danh mục tổng hợp theo quyết định) vào bước Thông tin chung — áp dụng cho cả tạo mới/chỉnh sửa/xem chi tiết (CategoryWizardModal dùng chung 1 modal cho 3 chế độ) và modal xem chi tiết riêng (CategoryInfoViewModal).
+- Thêm type \`CategoryType\` và \`categoryTypeLabels\` dùng chung trong \`categoryTypes.ts\`/\`categoryConstants.ts\`.
+
+4. Thống kê danh mục → Báo cáo thống kê danh sách danh mục (CategoryReportListPage.tsx):
+- Bổ sung bộ lọc multi-select "Loại danh mục" cạnh bộ lọc "Đơn vị quản lý", kết hợp lọc AND với dữ liệu mock \`categoryType\` gắn theo từng đơn vị quản lý.
+
+5. Sidebar "Biên tập danh mục" (InnerSidebar.tsx, CategoryAListPage.tsx, CategoryPage.tsx):
+- Đổi bộ lọc trạng thái công khai từ dạng nút pill sang dropdown/select, thêm nhãn "Trạng thái công khai" (prop \`filterLabel\` mới trên InnerSidebar).
+- Nâng cấp trạng thái công khai từ boolean sang tri-state \`CategoryPublishStatus\` ('unpublished'|'published'|'stopped') để hỗ trợ thêm lựa chọn lọc "Ngừng công khai" — trước đây trạng thái này chỉ tồn tại nội bộ trong CategoryPage, không truyền ra ngoài sidebar được.
+- Bỏ header nhóm "Dữ liệu nghiệp vụ (N)" khỏi sidebar Biên tập danh mục (dùng prop \`flatList\` có sẵn), chỉ hiển thị thẳng danh sách thẻ danh mục.
+
+6. Mã nguồn bị ảnh hưởng:
+- \`src/components/pages/category/CategoryPage.tsx\`
+- \`src/components/pages/category/CategoryAListPage.tsx\`
+- \`src/components/pages/category/categoryTypes.ts\`
+- \`src/components/pages/category/categoryConstants.ts\`
+- \`src/components/pages/category/components/modals/CategoryWizardModal.tsx\`
+- \`src/components/pages/category/components/modals/CategoryInfoViewModal.tsx\`
+- \`src/components/pages/category/reports/CategoryReportListPage.tsx\`
+- \`src/components/pages/collection/InnerSidebar.tsx\``
+  },
+  {
     id: 32,
     version: 'v2.6.21',
     date: '03/08/2026',

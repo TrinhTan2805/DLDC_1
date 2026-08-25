@@ -2,10 +2,11 @@ import React, { ChangeEvent, useState, useEffect } from 'react';
 import { X, FileText, Sliders, ChevronRight, ChevronLeft, Save, Send, Link2, ChevronDown, Check, Clock, CalendarClock } from 'lucide-react';
 import { AttributesTab } from '../tabs/AttributesTab';
 import { RelationshipsTab } from '../tabs/RelationshipsTab';
-import { MasterDataEntity, MasterDataAttribute, ScopeType, FieldDataType, ApprovalRequest, EntityRelationship } from '../../categoryTypes';
+import { MasterDataEntity, MasterDataAttribute, ScopeType, CategoryType, FieldDataType, ApprovalRequest, EntityRelationship } from '../../categoryTypes';
 import { Portal } from '../../../../common/Portal';
 import { ReviewResultCard } from './ReviewResultCard';
 import { SOURCE_TREND_LIST } from '../../../../dashboard/kpiReportData';
+import { categoryTypeLabels } from '../../categoryConstants';
 
 const EXPIRE_REASON_LABELS: Record<string, string> = {
   'Tích hợp vào danh mục khác': 'Tích hợp vào danh mục khác',
@@ -214,6 +215,24 @@ export function CategoryWizardModal({
                       placeholder="VD: Danh mục quốc gia, Bộ dữ liệu cán bộ..."
                       className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none disabled:bg-slate-50 disabled:text-slate-500 font-medium bg-white hover:bg-slate-50/30 transition-all shadow-sm"
                     />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block text-[13px] text-slate-700 mb-2 font-medium">Loại danh mục <span className="text-red-500">*</span></label>
+                    <div className="relative">
+                      <select
+                        title="Loại danh mục"
+                        disabled={isViewOnly}
+                        value={formData.categoryType || ''}
+                        onChange={(e: ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, categoryType: e.target.value as CategoryType })}
+                        className="w-full pl-3 pr-8 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white font-medium appearance-none cursor-pointer disabled:bg-slate-50 disabled:text-slate-500"
+                      >
+                        <option value="">-- Chọn loại danh mục --</option>
+                        {(Object.keys(categoryTypeLabels) as CategoryType[]).map(type => (
+                          <option key={type} value={type}>{categoryTypeLabels[type]}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                    </div>
                   </div>
                   <div>
                     <label className="block text-[13px] text-slate-700 mb-2 font-medium">Cơ sở dữ liệu/Hệ thống</label>

@@ -2,19 +2,25 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { InnerSidebar } from '../collection/InnerSidebar';
-import { CategoryPage } from './CategoryPage';
+import { CategoryPage, CategoryPublishStatus } from './CategoryPage';
 
-const CATEGORIES = [
-  { id: 'category-a-1', label: 'Dữ liệu Danh mục giới tính', published: true },
-  { id: 'category-a-2', label: 'Dữ liệu Danh mục và mã các dân tộc Việt Nam', published: true },
-  { id: 'category-a-3', label: 'Dữ liệu Danh mục và mã Quốc gia, Quốc tịch', published: false },
-  { id: 'category-a-4', label: 'Dữ liệu Danh mục và mã các Tôn giáo', published: false },
-  { id: 'category-a-5', label: 'Dữ liệu Danh mục cơ quan', published: true },
-  { id: 'category-a-6', label: 'Dữ liệu Danh mục đơn vị hành chính', published: false },
-  { id: 'category-a-7', label: 'Dữ liệu Danh mục và mã mối quan hệ trong gia đình', published: false },
+const CATEGORIES: { id: string; label: string; status: CategoryPublishStatus }[] = [
+  { id: 'category-a-1', label: 'Dữ liệu Danh mục giới tính', status: 'published' },
+  { id: 'category-a-2', label: 'Dữ liệu Danh mục và mã các dân tộc Việt Nam', status: 'published' },
+  { id: 'category-a-3', label: 'Dữ liệu Danh mục và mã Quốc gia, Quốc tịch', status: 'stopped' },
+  { id: 'category-a-4', label: 'Dữ liệu Danh mục và mã các Tôn giáo', status: 'unpublished' },
+  { id: 'category-a-5', label: 'Dữ liệu Danh mục cơ quan', status: 'published' },
+  { id: 'category-a-6', label: 'Dữ liệu Danh mục đơn vị hành chính', status: 'unpublished' },
+  { id: 'category-a-7', label: 'Dữ liệu Danh mục và mã mối quan hệ trong gia đình', status: 'unpublished' },
 ];
 
-type PublishFilter = 'all' | 'published' | 'unpublished';
+type PublishFilter = 'all' | CategoryPublishStatus;
+
+const STATUS_LABELS: Record<CategoryPublishStatus, string> = {
+  published: 'Đang công khai',
+  stopped: 'Ngừng công khai',
+  unpublished: 'Chưa công khai',
+};
 
 export function CategoryAListPage() {
   const [searchParams] = useSearchParams();
@@ -31,8 +37,8 @@ export function CategoryAListPage() {
 
   const [selectedId, setSelectedId] = useState(getInitialId());
   const [publishFilter, setPublishFilter] = useState<PublishFilter>('all');
-  const [publishedMap, setPublishedMap] = useState<Record<string, boolean>>(
-    () => Object.fromEntries(CATEGORIES.map(c => [c.id, c.published]))
+  const [statusMap, setStatusMap] = useState<Record<string, CategoryPublishStatus>>(
+    () => Object.fromEntries(CATEGORIES.map(c => [c.id, c.status]))
   );
 
   useEffect(() => {
@@ -44,9 +50,8 @@ export function CategoryAListPage() {
   const selected = CATEGORIES.find(c => c.id === selectedId) || CATEGORIES[0];
 
   const visibleCategories = CATEGORIES.filter(c => {
-    if (publishFilter === 'published') return publishedMap[c.id];
-    if (publishFilter === 'unpublished') return !publishedMap[c.id];
-    return true;
+    if (publishFilter === 'all') return true;
+    return statusMap[c.id] === publishFilter;
   });
 
   useEffect(() => {
@@ -55,11 +60,17 @@ export function CategoryAListPage() {
     }
   }, [publishFilter]);
 
+  const DOT_BY_STATUS: Record<CategoryPublishStatus, 'green' | 'red' | 'gray'> = {
+    published: 'green',
+    stopped: 'red',
+    unpublished: 'gray',
+  };
+
   const sidebarItems = visibleCategories.map(c => ({
     id: c.id,
     label: c.label,
-    statusDot: publishedMap[c.id] ? ('green' as const) : ('gray' as const),
-    statusLabel: publishedMap[c.id] ? 'Đang công khai' : 'Chưa công khai',
+    statusDot: DOT_BY_STATUS[statusMap[c.id]],
+    statusLabel: STATUS_LABELS[statusMap[c.id]],
   }));
 
   if (readOnly) {
@@ -83,8 +94,9 @@ export function CategoryAListPage() {
 
   const FILTERS: { value: PublishFilter; label: string }[] = [
     { value: 'all', label: 'Tất cả' },
-    { value: 'published', label: 'Đang công khai' },
-    { value: 'unpublished', label: 'Chưa công khai' },
+    { value: 'published', label: STATUS_LABELS.published },
+    { value: 'stopped', label: STATUS_LABELS.stopped },
+    { value: 'unpublished', label: STATUS_LABELS.unpublished },
   ];
 
   return (
@@ -95,7 +107,9 @@ export function CategoryAListPage() {
           items={sidebarItems}
           onSelectItem={setSelectedId}
           activeId={selectedId}
+          flatList
           filters={FILTERS}
+          filterLabel="Trạng thái công khai"
           activeFilter={publishFilter}
           onFilterChange={(v) => setPublishFilter(v as PublishFilter)}
         />
@@ -106,9 +120,9 @@ export function CategoryAListPage() {
           key={selected.id}
           categoryName={selected.label}
           categoryId={selected.id}
-          initialPublished={publishedMap[selected.id]}
-          onPublishStatusChange={(published) =>
-            setPublishedMap(prev => ({ ...prev, [selected.id]: published }))
+          initialPublishStatus={statusMap[selected.id]}
+          onPublishStatusChange={(status) =>
+            setStatusMap(prev => ({ ...prev, [selected.id]: status }))
           }
         />
       </div>

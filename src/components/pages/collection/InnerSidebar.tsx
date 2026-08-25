@@ -7,7 +7,7 @@ export interface InnerSidebarItem {
   group?: string;
   dataType?: 'Dữ liệu nghiệp vụ' | 'Dữ liệu danh mục';
   /** Chấm màu trạng thái hiển thị trước tên mục (VD: trạng thái công khai) */
-  statusDot?: 'green' | 'gray';
+  statusDot?: 'green' | 'gray' | 'red';
   statusLabel?: string;
 }
 
@@ -27,6 +27,8 @@ interface InnerSidebarProps {
   flatList?: boolean;
   /** Tab lọc hiển thị ngay dưới ô tìm kiếm (VD: lọc theo trạng thái công khai) */
   filters?: InnerSidebarFilter[];
+  /** Nhãn hiển thị phía trên dropdown lọc (VD: "Trạng thái công khai") */
+  filterLabel?: string;
   activeFilter?: string;
   onFilterChange?: (value: string) => void;
 }
@@ -37,7 +39,7 @@ const DATA_TYPE_SECTIONS: { key: 'Dữ liệu nghiệp vụ' | 'Dữ liệu danh
   { key: 'Dữ liệu danh mục', label: 'Dữ liệu danh mục' },
 ];
 
-export function InnerSidebar({ title, items, onSelectItem, activeId, hideGroupHeaders = false, stretchHeight = false, flatList = false, filters, activeFilter, onFilterChange }: InnerSidebarProps) {
+export function InnerSidebar({ title, items, onSelectItem, activeId, hideGroupHeaders = false, stretchHeight = false, flatList = false, filters, filterLabel, activeFilter, onFilterChange }: InnerSidebarProps) {
   const [searchTerm, setSearchTerm] = useState('');
   // "Dữ liệu danh mục" luôn đóng mặc định; "Dữ liệu nghiệp vụ" luôn mở mặc định
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set(['Dữ liệu danh mục']));
@@ -75,7 +77,9 @@ export function InnerSidebar({ title, items, onSelectItem, activeId, hideGroupHe
       </span>
       {item.statusDot && (
         <span
-          className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${item.statusDot === 'green' ? 'bg-emerald-500' : 'bg-slate-300'}`}
+          className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${
+            item.statusDot === 'green' ? 'bg-emerald-500' : item.statusDot === 'red' ? 'bg-red-500' : 'bg-slate-300'
+          }`}
           title={item.statusLabel}
         />
       )}
@@ -170,21 +174,23 @@ export function InnerSidebar({ title, items, onSelectItem, activeId, hideGroupHe
           />
         </div>
         {filters && filters.length > 0 && (
-          <div className="flex items-center gap-1 mt-3 bg-slate-50 border border-slate-200 rounded-lg p-1">
-            {filters.map(f => (
-              <button
-                key={f.value}
-                type="button"
-                onClick={() => onFilterChange?.(f.value)}
-                className={`flex-1 px-2 py-1.5 rounded-md text-[12px] font-medium transition-colors cursor-pointer ${
-                  activeFilter === f.value
-                    ? 'bg-white text-blue-700 shadow-sm'
-                    : 'text-slate-500 hover:text-slate-700'
-                }`}
+          <div className="mt-3">
+            {filterLabel && (
+              <label className="block text-[12px] text-slate-500 mb-1 font-medium">{filterLabel}</label>
+            )}
+            <div className="relative">
+              <select
+                title="Lọc theo trạng thái"
+                value={activeFilter}
+                onChange={(e) => onFilterChange?.(e.target.value)}
+                className="w-full pl-3 pr-8 py-2 border border-slate-200 rounded-lg text-[13px] bg-slate-50 font-medium appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
               >
-                {f.label}
-              </button>
-            ))}
+                {filters.map(f => (
+                  <option key={f.value} value={f.value}>{f.label}</option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            </div>
           </div>
         )}
       </div>

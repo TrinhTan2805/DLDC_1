@@ -1,4 +1,4 @@
-import { MasterDataEntity, DataType, ScopeType, LifecycleStatus, ApprovalType, ApprovalStatus, MasterDataAttribute } from './categoryTypes';
+import { MasterDataEntity, DataType, ScopeType, CategoryType, LifecycleStatus, ApprovalType, ApprovalStatus, MasterDataAttribute } from './categoryTypes';
 
 export const defaultEntities: MasterDataEntity[] = [
   {
@@ -175,6 +175,12 @@ export const scopeLabels: Record<ScopeType, string> = {
   ministry: 'Cấp bộ',
   provincial: 'Cấp tỉnh/thành',
   internal: 'Nội bộ'
+};
+
+export const categoryTypeLabels: Record<CategoryType, string> = {
+  shared_ttdlqg: 'Danh mục dùng chung từ TTDLQG',
+  business: 'Danh mục nghiệp vụ',
+  aggregated_decision: 'Danh mục tổng hợp theo quyết định'
 };
 
 export const lifecycleLabels: Record<LifecycleStatus, { label: string; color: string }> = {

@@ -5,6 +5,7 @@ export type RelationshipStatus = 'active' | 'inactive';
 export type LifecycleStatus = 'active' | 'draft' | 'inactive' | 'archived' | 'pending_approval' | 'pending_expiration' | 'approved' | 'rejected';
 export type DataType = 'standard' | 'reference' | 'transactional';
 export type ScopeType = 'national' | 'ministry' | 'provincial' | 'internal';
+export type CategoryType = 'shared_ttdlqg' | 'business' | 'aggregated_decision';
 export type DataSourceType = 'dldc' | 'manual';
 export type UpdateStrategyType = 'reference' | 'scheduled' | 'realtime';
 export type SyncFrequencyType = 'daily' | 'weekly' | 'monthly' | 'event';
@@ -94,6 +95,7 @@ export interface MasterDataEntity {
   dataType: DataType;
   managingAgency: string;
   scope: ScopeType;
+  categoryType?: CategoryType;
   description: string;
   lifecycleStatus: LifecycleStatus;
   createdDate: string;

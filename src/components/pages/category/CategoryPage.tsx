@@ -51,14 +51,16 @@ import { MasterDataEntity } from './categoryTypes';
 import { lifecycleLabels, scopeLabels } from './categoryConstants';
 import { Portal } from '../../common/Portal';
 
+export type CategoryPublishStatus = 'unpublished' | 'published' | 'stopped';
+
 interface CategoryPageProps {
   categoryName: string;
   categoryId: string;
   readOnly?: boolean;
   /** Trạng thái công khai ban đầu, dùng để đồng bộ với danh sách danh mục bên ngoài */
-  initialPublished?: boolean;
-  /** Báo cho component cha biết trạng thái công khai vừa thay đổi (true = vừa công khai, false = vừa hủy công khai) */
-  onPublishStatusChange?: (published: boolean) => void;
+  initialPublishStatus?: CategoryPublishStatus;
+  /** Báo cho component cha biết trạng thái công khai vừa thay đổi */
+  onPublishStatusChange?: (status: CategoryPublishStatus) => void;
 }
 
 interface Category {
@@ -146,7 +148,7 @@ const MOCK_RECORDS_BY_CATEGORY: Record<string, Category[]> = {
   ]
 };
 
-export function CategoryPage({ categoryName, categoryId, readOnly = false, initialPublished = false, onPublishStatusChange }: CategoryPageProps) {
+export function CategoryPage({ categoryName, categoryId, readOnly = false, initialPublishStatus = 'unpublished', onPublishStatusChange }: CategoryPageProps) {
   const [activeTab, setActiveTab] = useState<'setup' | 'approval' | 'publish' | 'stats' | 'version-history'>('setup');
 
   // Mock data - Danh sách tỉnh thành Việt Nam
@@ -334,7 +336,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
   const [inlineAddData, setInlineAddData] = useState({ code: '', name: '', description: '' });
 
   // Publish states
-  const [publishStatus, setPublishStatus] = useState<'unpublished' | 'published' | 'stopped'>(initialPublished ? 'published' : 'unpublished');
+  const [publishStatus, setPublishStatus] = useState<CategoryPublishStatus>(initialPublishStatus);
   const [shareScope, setShareScope] = useState<'internal' | 'extended' | 'public'>('internal');
   const [unpublishReason, setUnpublishReason] = useState<string>('');
   const [publishActionInfo, setPublishActionInfo] = useState<{ user: string; date: string; reason?: string }>({ user: '', date: '' });
@@ -495,6 +497,8 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
     dataSource: 'manual',
     version: activeVersionNumber,
   };
+  // Mock: số API đang khai thác danh mục này, cảnh báo khi hủy công khai
+  const exploitingApiCount = 5;
   // Mock thuộc tính + quan hệ để xem chi tiết danh mục (chế độ chỉ xem) tại tab Phiên bản
   const currentCategoryAttributes = [
     { fieldName: 'ma_gt', displayName: 'Mã giới tính', dataType: 'Chuỗi', isPK: true },
@@ -1903,29 +1907,6 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
             </div>
           </div>
 
-          {/* Thông tin danh mục: Trạng thái phê duyệt / Phiên bản hiện hành / Quyền chia sẻ */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-sm">
-              <p className="text-[12px] text-slate-500 mb-2">Trạng thái phê duyệt</p>
-              <span className={`inline-block px-3 py-1 rounded-full text-[12px] font-medium ${lifecycleLabels[currentCategoryEntity.lifecycleStatus].color}`}>
-                {lifecycleLabels[currentCategoryEntity.lifecycleStatus].label}
-              </span>
-            </div>
-            <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-sm">
-              <p className="text-[12px] text-slate-500 mb-2">Phiên bản hiện hành</p>
-              <span className="inline-block px-3 py-1 rounded-full text-[12px] font-medium bg-blue-50 text-blue-700">
-                v{currentCategoryEntity.version ?? 1}
-              </span>
-            </div>
-            <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-sm">
-              <p className="text-[12px] text-slate-500 mb-2">Quyền chia sẻ</p>
-              <span className="inline-block px-3 py-1 rounded-full text-[12px] font-medium bg-purple-50 text-purple-700">
-                {scopeLabels[currentCategoryEntity.scope]}
-              </span>
-              <p className="text-[11px] text-slate-400 mt-1.5">Theo Phạm vi vĩ mô tại tab Thiết lập</p>
-            </div>
-          </div>
-
           {/* Tiêu đề phần danh sách */}
           <div>
             <h3 className="text-lg text-slate-900 font-semibold">Các trường dữ liệu của danh mục</h3>
@@ -2019,9 +2000,9 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
 
               {/* Thông tin nhanh của danh mục: Trạng thái phê duyệt / Phiên bản hiện hành / Quyền chia sẻ hiện tại */}
               <div className="text-[13px] text-slate-500 space-y-1">
-                <p>Trạng thái phê duyệt: <span className="text-slate-700 font-medium">{lifecycleLabels[currentCategoryEntity.lifecycleStatus].label}</span></p>
-                <p>Phiên bản hiện hành: <span className="text-slate-700 font-medium">v{currentCategoryEntity.version ?? 1}</span></p>
-                <p>Quyền chia sẻ: <span className="text-slate-700 font-medium">{scopeLabels[currentCategoryEntity.scope]}</span></p>
+                <p className="text-[13px]">Trạng thái phê duyệt: <span className="text-[13px] text-slate-700 font-medium">{lifecycleLabels[currentCategoryEntity.lifecycleStatus].label}</span></p>
+                <p className="text-[13px]">Phiên bản hiện hành: <span className="text-[13px] text-slate-700 font-medium">v{currentCategoryEntity.version ?? 1}</span></p>
+                <p className="text-[13px]">Quyền chia sẻ: <span className="text-[13px] text-slate-700 font-medium">{scopeLabels[currentCategoryEntity.scope]}</span></p>
               </div>
 
               <div className="space-y-3">
@@ -2035,7 +2016,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                   />
                   <div>
                     <strong className="block text-slate-800">Nội bộ</strong>
-                    <span className="text-slate-500 text-[12px] mt-0.5 block">Dữ liệu chỉ được chia sẻ và sử dụng trong nội bộ đơn vị, cơ quan.</span>
+                    <span className="text-slate-500 text-[13px] mt-0.5 block">Dữ liệu chỉ được chia sẻ và sử dụng trong nội bộ đơn vị, cơ quan.</span>
                   </div>
                 </label>
                 
@@ -2049,7 +2030,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                   />
                   <div>
                     <strong className="block text-slate-800">Mở rộng</strong>
-                    <span className="text-slate-500 text-[12px] mt-0.5 block">Chia sẻ cho các đơn vị liên kết, cơ quan thuộc Bộ Tư pháp.</span>
+                    <span className="text-slate-500 text-[13px] mt-0.5 block">Chia sẻ cho các đơn vị liên kết, cơ quan thuộc Bộ Tư pháp.</span>
                   </div>
                 </label>
                 
@@ -2063,7 +2044,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                   />
                   <div>
                     <strong className="block text-slate-800">Toàn dân</strong>
-                    <span className="text-slate-500 text-[12px] mt-0.5 block">Dữ liệu mở, cho phép mọi người dân và doanh nghiệp khai thác tự do.</span>
+                    <span className="text-slate-500 text-[13px] mt-0.5 block">Dữ liệu mở, cho phép mọi người dân và doanh nghiệp khai thác tự do.</span>
                   </div>
                 </label>
               </div>
@@ -2082,7 +2063,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                     user: 'Nguyễn Văn A',
                     date: new Date().toLocaleDateString('vi-VN')
                   });
-                  onPublishStatusChange?.(true);
+                  onPublishStatusChange?.('published');
                   setShowPublishModal(false);
                   setSuccessNotificationMessage(`Công khai danh mục thành công với phạm vi: ${shareScope === 'internal' ? 'Nội bộ' : shareScope === 'extended' ? 'Mở rộng' : 'Toàn dân'}`);
                   setShowSuccessNotification(true);
@@ -2121,6 +2102,14 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
               <p className="text-slate-600 font-medium leading-relaxed">
                 Bạn có chắc chắn muốn hủy công khai danh mục <strong>{categoryName}</strong>? Vui lòng nhập lý do hủy công khai:
               </p>
+              {exploitingApiCount > 0 && (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
+                  <p className="text-amber-800">
+                    Danh mục đang được khai thác bởi <strong>{exploitingApiCount}</strong> API.
+                  </p>
+                </div>
+              )}
               <div>
                 <label className="block text-slate-700 font-semibold mb-2">Lý do hủy công khai <span className="text-red-500">*</span></label>
                 <textarea
@@ -2155,7 +2144,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                     date: new Date().toLocaleDateString('vi-VN'),
                     reason: unpublishReason
                   });
-                  onPublishStatusChange?.(false);
+                  onPublishStatusChange?.('stopped');
                   setShowUnpublishModal(false);
                   setSuccessNotificationMessage(`Đã hủy công khai danh mục thành công!`);
                   setShowSuccessNotification(true);

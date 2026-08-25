@@ -5,6 +5,8 @@ import {
   CartesianGrid, Tooltip as TooltipR,
   ResponsiveContainer, Cell
 } from 'recharts';
+import { categoryTypeLabels } from '../categoryConstants';
+import { CategoryType } from '../categoryTypes';
 
 const Bar = BarR as any;
 const XAxis = XAxisR as any;
@@ -25,19 +27,25 @@ const AGENCY_OPTIONS = [
   { value: 'Trung tâm dữ liệu Quốc gia (TTDLQG)', label: 'Trung tâm dữ liệu Quốc gia (TTDLQG)' },
 ];
 
-// Mỗi đơn vị quản lý (tối đa 11 đơn vị) tương ứng 1 dòng dữ liệu, dùng chung cho bảng và biểu đồ
-const mockDataList = [
-  { agency: 'Cục Hành chính tư pháp', total: 210, recent: 56, updated: 40 },
-  { agency: 'Cục Quản lý thi hành án dân sự', total: 95, recent: 18, updated: 12 },
-  { agency: 'Cục Đăng ký GD bảo đảm & Bồi thường nhà nước', total: 120, recent: 34, updated: 21 },
-  { agency: 'Cục Kiểm tra văn bản & Quản lý xử lý VP hành chính', total: 60, recent: 9, updated: 6 },
-  { agency: 'Cục Pháp luật quốc tế và Giải quyết tranh chấp đầu tư quốc tế', total: 40, recent: 7, updated: 4 },
-  { agency: 'Cục Phổ biến, giáo dục pháp luật và Trợ giúp pháp lý', total: 130, recent: 32, updated: 23 },
-  { agency: 'Cục Bổ trợ tư pháp', total: 30, recent: 5, updated: 3 },
-  { agency: 'Vụ Hợp tác quốc tế', total: 25, recent: 4, updated: 2 },
-  { agency: 'Cục Kế hoạch - Tài chính', total: 50, recent: 8, updated: 5 },
-  { agency: 'Tòa án nhân dân tối cao', total: 70, recent: 15, updated: 10 },
-  { agency: 'Trung tâm dữ liệu Quốc gia (TTDLQG)', total: 45, recent: 10, updated: 7 },
+const CATEGORY_TYPE_OPTIONS = (Object.keys(categoryTypeLabels) as CategoryType[]).map(value => ({
+  value,
+  label: categoryTypeLabels[value],
+}));
+
+// Mỗi đơn vị quản lý (tối đa 11 đơn vị) tương ứng 1 dòng dữ liệu, dùng chung cho bảng và biểu đồ.
+// categoryType: loại danh mục chủ yếu của đơn vị đó (mock, dùng cho bộ lọc "Loại danh mục")
+const mockDataList: { agency: string; total: number; recent: number; updated: number; categoryType: CategoryType }[] = [
+  { agency: 'Cục Hành chính tư pháp', total: 210, recent: 56, updated: 40, categoryType: 'shared_ttdlqg' },
+  { agency: 'Cục Quản lý thi hành án dân sự', total: 95, recent: 18, updated: 12, categoryType: 'business' },
+  { agency: 'Cục Đăng ký GD bảo đảm & Bồi thường nhà nước', total: 120, recent: 34, updated: 21, categoryType: 'aggregated_decision' },
+  { agency: 'Cục Kiểm tra văn bản & Quản lý xử lý VP hành chính', total: 60, recent: 9, updated: 6, categoryType: 'business' },
+  { agency: 'Cục Pháp luật quốc tế và Giải quyết tranh chấp đầu tư quốc tế', total: 40, recent: 7, updated: 4, categoryType: 'aggregated_decision' },
+  { agency: 'Cục Phổ biến, giáo dục pháp luật và Trợ giúp pháp lý', total: 130, recent: 32, updated: 23, categoryType: 'business' },
+  { agency: 'Cục Bổ trợ tư pháp', total: 30, recent: 5, updated: 3, categoryType: 'shared_ttdlqg' },
+  { agency: 'Vụ Hợp tác quốc tế', total: 25, recent: 4, updated: 2, categoryType: 'aggregated_decision' },
+  { agency: 'Cục Kế hoạch - Tài chính', total: 50, recent: 8, updated: 5, categoryType: 'business' },
+  { agency: 'Tòa án nhân dân tối cao', total: 70, recent: 15, updated: 10, categoryType: 'aggregated_decision' },
+  { agency: 'Trung tâm dữ liệu Quốc gia (TTDLQG)', total: 45, recent: 10, updated: 7, categoryType: 'shared_ttdlqg' },
 ];
 
 const COLORS = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899', '#84cc16', '#6366f1', '#14b8a6', '#f97316'];
@@ -47,6 +55,8 @@ export function CategoryReportListPage() {
   const [selectedAgencies, setSelectedAgencies] = useState<string[]>([]);
   const [showAgencyDropdown, setShowAgencyDropdown] = useState(false);
   const [agencySearchTerm, setAgencySearchTerm] = useState('');
+  const [selectedCategoryTypes, setSelectedCategoryTypes] = useState<CategoryType[]>([]);
+  const [showCategoryTypeDropdown, setShowCategoryTypeDropdown] = useState(false);
   const [dateRange, setDateRange] = useState('all');
   const [showExportMenu, setShowExportMenu] = useState(false);
 
@@ -55,6 +65,7 @@ export function CategoryReportListPage() {
   const [appliedData, setAppliedData] = useState(mockDataList);
 
   const agencyRef = useRef<HTMLDivElement | null>(null);
+  const categoryTypeRef = useRef<HTMLDivElement | null>(null);
   const exportRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -62,6 +73,9 @@ export function CategoryReportListPage() {
       if (agencyRef.current && !agencyRef.current.contains(e.target as Node)) {
         setShowAgencyDropdown(false);
         setAgencySearchTerm('');
+      }
+      if (categoryTypeRef.current && !categoryTypeRef.current.contains(e.target as Node)) {
+        setShowCategoryTypeDropdown(false);
       }
       if (exportRef.current && !exportRef.current.contains(e.target as Node)) {
         setShowExportMenu(false);
@@ -83,14 +97,27 @@ export function CategoryReportListPage() {
     );
   };
 
+  const toggleCategoryType = (value: CategoryType) => {
+    setSelectedCategoryTypes(prev =>
+      prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
+    );
+  };
+
+  const toggleAllCategoryTypes = () => {
+    setSelectedCategoryTypes(prev =>
+      prev.length === CATEGORY_TYPE_OPTIONS.length ? [] : CATEGORY_TYPE_OPTIONS.map(o => o.value)
+    );
+  };
+
   const filteredAgencyOptions = AGENCY_OPTIONS.filter(opt =>
     opt.label.toLowerCase().includes(agencySearchTerm.trim().toLowerCase())
   );
 
   const handleSearch = () => {
-    const result = selectedAgencies.length === 0
-      ? mockDataList
-      : mockDataList.filter(d => selectedAgencies.includes(d.agency));
+    const result = mockDataList.filter(d =>
+      (selectedAgencies.length === 0 || selectedAgencies.includes(d.agency)) &&
+      (selectedCategoryTypes.length === 0 || selectedCategoryTypes.includes(d.categoryType))
+    );
     setAppliedData(result);
     setHasSearched(true);
   };
@@ -107,6 +134,14 @@ export function CategoryReportListPage() {
     return `${selectedAgencies.length} đơn vị đã chọn`;
   };
 
+  const categoryTypeDisplayText = () => {
+    if (selectedCategoryTypes.length === 0) return 'Tất cả loại danh mục';
+    if (selectedCategoryTypes.length === 1) {
+      return categoryTypeLabels[selectedCategoryTypes[0]];
+    }
+    return `${selectedCategoryTypes.length} loại đã chọn`;
+  };
+
   const handleExportFile = (format: string) => {
     setShowExportMenu(false);
     alert(`Đang xuất dữ liệu sang định dạng ${format}...`);
@@ -115,10 +150,10 @@ export function CategoryReportListPage() {
   return (
     <div className="space-y-6">
       {/* Backdrop mờ khi dropdown mở */}
-      {showAgencyDropdown && (
+      {(showAgencyDropdown || showCategoryTypeDropdown) && (
         <div
           className="fixed inset-0 z-20"
-          onClick={() => setShowAgencyDropdown(false)}
+          onClick={() => { setShowAgencyDropdown(false); setShowCategoryTypeDropdown(false); }}
         />
       )}
 
@@ -216,6 +251,77 @@ export function CategoryReportListPage() {
                       ))
                     )}
                   </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Multi-select Loại danh mục */}
+          <div className="flex-1 min-w-[220px]">
+            <label className="block text-[12px] text-slate-500 mb-1 font-medium">Loại danh mục</label>
+            <div className="relative" ref={categoryTypeRef}>
+              <button
+                type="button"
+                onClick={() => setShowCategoryTypeDropdown(prev => !prev)}
+                className={`w-full px-3 py-2 border rounded-lg text-[13px] bg-white text-left flex items-center justify-between gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  showCategoryTypeDropdown ? 'border-blue-400 ring-2 ring-blue-500/20' : 'border-slate-200 hover:border-slate-300'
+                }`}
+              >
+                <span className={`truncate ${selectedCategoryTypes.length === 0 ? 'text-slate-500' : 'text-slate-800 font-medium'}`}>
+                  {categoryTypeDisplayText()}
+                </span>
+                <div className="flex items-center gap-1 shrink-0">
+                  {selectedCategoryTypes.length > 0 && (
+                    <span
+                      onClick={(e) => { e.stopPropagation(); setSelectedCategoryTypes([]); }}
+                      className="w-4 h-4 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center cursor-pointer transition-colors"
+                    >
+                      <X className="w-2.5 h-2.5 text-slate-600" />
+                    </span>
+                  )}
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${showCategoryTypeDropdown ? 'rotate-180' : ''}`} />
+                </div>
+              </button>
+
+              {showCategoryTypeDropdown && (
+                <div className="absolute left-0 top-full mt-1.5 w-full bg-white border border-slate-200 rounded-xl shadow-2xl z-40 overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={toggleAllCategoryTypes}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors border-b border-slate-100 text-[13px] font-medium text-slate-700"
+                  >
+                    <span className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
+                      selectedCategoryTypes.length === CATEGORY_TYPE_OPTIONS.length
+                        ? 'bg-blue-600 border-blue-600'
+                        : selectedCategoryTypes.length > 0
+                        ? 'bg-blue-100 border-blue-400'
+                        : 'border-slate-300'
+                    }`}>
+                      {selectedCategoryTypes.length === CATEGORY_TYPE_OPTIONS.length && <Check className="w-3 h-3 text-white" />}
+                      {selectedCategoryTypes.length > 0 && selectedCategoryTypes.length < CATEGORY_TYPE_OPTIONS.length && (
+                        <span className="w-2 h-0.5 bg-blue-600 rounded" />
+                      )}
+                    </span>
+                    Tất cả loại danh mục
+                  </button>
+
+                  {CATEGORY_TYPE_OPTIONS.map(opt => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => toggleCategoryType(opt.value)}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors text-[13px] text-slate-700 text-left"
+                    >
+                      <span className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
+                        selectedCategoryTypes.includes(opt.value)
+                          ? 'bg-blue-600 border-blue-600'
+                          : 'border-slate-300'
+                      }`}>
+                        {selectedCategoryTypes.includes(opt.value) && <Check className="w-3 h-3 text-white" />}
+                      </span>
+                      <span className="truncate">{opt.label}</span>
+                    </button>
+                  ))}
                 </div>
               )}
             </div>

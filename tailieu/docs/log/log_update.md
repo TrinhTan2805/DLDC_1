@@ -1,5 +1,18 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Cập nhật giao diện (Ngày thực hiện: 25/08/2026) — 71
+
+**Màn hình:** Danh mục dùng chung — Biên tập & Công khai (`CategoryPage.tsx`, `CategoryAListPage.tsx`), Thiết lập danh mục (`CategoryWizardModal.tsx`, `CategoryInfoViewModal.tsx`), Thống kê danh mục → Báo cáo thống kê danh sách danh mục (`CategoryReportListPage.tsx`), sidebar dùng chung (`InnerSidebar.tsx`).
+
+**Nội dung thay đổi:**
+- Modal "Công khai danh mục": đồng bộ cỡ chữ 3 dòng "Trạng thái phê duyệt/Phiên bản hiện hành/Quyền chia sẻ" về 13px.
+- Tab "Công khai": bỏ 3 thẻ tóm tắt "Trạng thái phê duyệt/Phiên bản hiện hành/Quyền chia sẻ". Modal "Hủy công khai danh mục" bổ sung cảnh báo "Danh mục đang được khai thác bởi (n) API".
+- Thiết lập danh mục dùng chung: bổ sung trường **"Loại danh mục"** (dropdown: Danh mục dùng chung từ TTDLQG / Danh mục nghiệp vụ / Danh mục tổng hợp theo quyết định) ở bước Thông tin chung, áp dụng cho cả tạo mới/chỉnh sửa/xem chi tiết. Thêm type `CategoryType` + `categoryTypeLabels` dùng chung.
+- Báo cáo thống kê danh sách danh mục: bổ sung bộ lọc multi-select "Loại danh mục" cạnh bộ lọc "Đơn vị quản lý".
+- Sidebar "Biên tập danh mục": đổi bộ lọc trạng thái công khai từ nút pill sang dropdown/select (nhãn "Trạng thái công khai"), nâng cấp trạng thái công khai từ boolean sang tri-state `CategoryPublishStatus` để hỗ trợ thêm lựa chọn "Ngừng công khai". Bỏ header nhóm "Dữ liệu nghiệp vụ (N)", chỉ hiển thị thẳng danh sách thẻ danh mục.
+
+**File bị ảnh hưởng:** `src/components/pages/category/CategoryPage.tsx`, `src/components/pages/category/CategoryAListPage.tsx`, `src/components/pages/category/categoryTypes.ts`, `src/components/pages/category/categoryConstants.ts`, `src/components/pages/category/components/modals/CategoryWizardModal.tsx`, `src/components/pages/category/components/modals/CategoryInfoViewModal.tsx`, `src/components/pages/category/reports/CategoryReportListPage.tsx`, `src/components/pages/collection/InnerSidebar.tsx`.
+
 ## Cập nhật giao diện (Ngày thực hiện: 20/08/2026) — 70
 
 **Màn hình:** Dữ liệu chủ → Cập nhật dữ liệu chủ → Phê duyệt (Modal "Chi tiết bản ghi", tab "Thông tin liên quan", `MasterDataUpdateItemPage.tsx`).
