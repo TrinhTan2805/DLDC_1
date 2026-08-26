@@ -252,11 +252,11 @@ export function DataProvisionServicesPage({ category, group, description }: Data
         </div>
       )}
 
-      {/* Left Sidebar - Danh mục dữ liệu */}
+      {/* Left Sidebar - Danh sách dữ liệu chia sẻ */}
       {hasSidebar && (
         <div className="flex-shrink-0 sticky top-0 h-fit self-start">
           <InnerSidebar
-            title="Danh mục dữ liệu"
+            title="Danh sách dữ liệu chia sẻ"
             items={groupData.map(item => ({
               id: item.id,
               label: groupData.length === 1 ? (item.group || categoryLabels[item.category]) : item.name
@@ -373,7 +373,8 @@ export function DataProvisionServicesPage({ category, group, description }: Data
                           <table className="w-full text-left border-collapse table-auto" style={{ fontSize: '13px' }}>
                             <thead>
                               <tr className="bg-slate-50 text-slate-500 border-b border-slate-200 uppercase tracking-tight" style={{ fontSize: '13px' }}>
-                                <th className="px-4 py-3 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Mã / Tên API</th>
+                                <th className="px-4 py-3 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Mã API</th>
+                                <th className="px-4 py-3 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Tên API</th>
                                 <th className="px-4 py-3 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Đơn vị sử dụng</th>
                                 <th className="px-4 py-3 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Đầu mối tiếp nhận</th>
                                 <th className="px-4 py-3 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Cổng Endpoint / Giao thức</th>
@@ -386,9 +387,11 @@ export function DataProvisionServicesPage({ category, group, description }: Data
                             <tbody className="divide-y divide-slate-100 text-slate-700" style={{ fontSize: '13px' }}>
                               {paginatedConsumerApis.map(api => (
                                 <tr key={api.id} className="hover:bg-slate-50/50 transition-colors" style={{ fontSize: '13px' }}>
-                                  <td className="px-4 py-3 text-slate-900 text-[13px]" style={{ fontSize: '13px' }}>
-                                    <div className="font-bold text-slate-800 text-[13px]" style={{ fontSize: '13px' }}>{api.name}</div>
-                                    <div className="font-mono text-[10px] text-slate-400 mt-0.5">{api.code}</div>
+                                  <td className="px-4 py-3 text-slate-500 font-mono text-[13px]" style={{ fontSize: '13px' }}>
+                                    {api.code}
+                                  </td>
+                                  <td className="px-4 py-3 font-bold text-slate-800 text-[13px]" style={{ fontSize: '13px' }}>
+                                    {api.name}
                                   </td>
                                   <td className="px-4 py-3 font-semibold text-slate-800 text-[13px]" style={{ fontSize: '13px' }}>
                                     {api.unit}
@@ -435,7 +438,7 @@ export function DataProvisionServicesPage({ category, group, description }: Data
                               ))}
                               {paginatedConsumerApis.length === 0 && (
                                 <tr>
-                                  <td colSpan={8} className="text-center py-8 text-slate-400">
+                                  <td colSpan={9} className="text-center py-8 text-slate-400">
                                     Không tìm thấy API nào phù hợp với từ khóa tìm kiếm
                                   </td>
                                 </tr>
