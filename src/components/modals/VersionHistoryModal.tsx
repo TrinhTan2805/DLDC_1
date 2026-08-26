@@ -7,8 +7,8 @@ interface VersionHistoryModalProps {
 
 const mockVersions = [
   {
-    id: 33,
-    version: 'v2.6.22',
+    id: 34,
+    version: 'v2.6.23',
     date: '25/08/2026',
     time: '16:00',
     content: `1. Modal "Công khai danh mục" (CategoryPage.tsx):
@@ -39,6 +39,19 @@ const mockVersions = [
 - \`src/components/pages/category/components/modals/CategoryInfoViewModal.tsx\`
 - \`src/components/pages/category/reports/CategoryReportListPage.tsx\`
 - \`src/components/pages/collection/InnerSidebar.tsx\``
+  },
+  {
+    id: 33,
+    version: 'v2.6.22',
+    date: '25/08/2026',
+    time: '15:20',
+    content: `1. Phân hệ Cung cấp dữ liệu — Dịch vụ chia sẻ (DataProvisionServicesPage.tsx):
+- Bổ sung inner menu "Danh mục dữ liệu" cho màn hình Dữ liệu mở, cho phép chuyển đổi qua lại giữa 32 danh mục dữ liệu mở ngay trong nội dung trang, đồng bộ cơ chế hiển thị với các menu CSDL Trong ngành/Ngoài ngành.
+- Mở rộng cơ chế inner menu "Danh mục dữ liệu" áp dụng cho cả các mục chỉ có 1 bản ghi (Dữ liệu chủ, Trẻ em thuộc CSDL Ngoài ngành), hiển thị đúng số đếm "(1)" đồng bộ với các mục khác.
+- Với các mục chỉ có 1 bản ghi, đổi tên hiển thị trong Danh mục dữ liệu thành tên loại cơ sở dữ liệu tương ứng (VD: "Trẻ em", "Dữ liệu chủ") thay vì tên đầy đủ của dịch vụ, đồng bộ với tiêu đề trang.
+
+2. Mã nguồn bị ảnh hưởng:
+- \`src/components/pages/provisioning/DataProvisionServicesPage.tsx\``
   },
   {
     id: 32,

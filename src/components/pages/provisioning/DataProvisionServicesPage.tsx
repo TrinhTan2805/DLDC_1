@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Sliders, Check, X, Filter } from 'lucide-react';
+import { Search, Eye, Check, X, Filter } from 'lucide-react';
 import { provisionServicesData, ProvisionService } from '../../../data/provisionServicesData';
 import { SharedFieldsConfigModal } from './modals/SharedFieldsConfigModal';
+import { InnerSidebar } from '../collection/InnerSidebar';
+
+const categoryLabels: Record<ProvisionService['category'], string> = {
+  internal: 'CSDL Trong ngành',
+  shared: 'Dữ liệu dùng chung',
+  open: 'Dữ liệu mở',
+  master: 'Dữ liệu chủ',
+};
 
 interface DataProvisionServicesPageProps {
   category: 'internal' | 'shared' | 'open' | 'master';
@@ -46,9 +54,7 @@ export function DataProvisionServicesPage({ category, group, description }: Data
   });
 
   useEffect(() => {
-    if (groupData.length > 0 && !selectedService) {
-      setSelectedService(groupData[0]);
-    }
+    setSelectedService(groupData.length > 0 ? groupData[0] : null);
   }, [group, category]);
 
   // Helper to get initial fields config for mock APIs
@@ -233,8 +239,10 @@ export function DataProvisionServicesPage({ category, group, description }: Data
     );
   };
 
+  const hasSidebar = groupData.length > 0;
+
   return (
-    <div className="space-y-4 relative">
+    <div className={hasSidebar ? "flex gap-6 relative" : "space-y-4 relative"}>
 
       {/* Toast Notification */}
       {toastMessage && (
@@ -244,8 +252,26 @@ export function DataProvisionServicesPage({ category, group, description }: Data
         </div>
       )}
 
+      {/* Left Sidebar - Danh mục dữ liệu */}
+      {hasSidebar && (
+        <div className="flex-shrink-0 sticky top-0 h-fit self-start">
+          <InnerSidebar
+            title="Danh mục dữ liệu"
+            items={groupData.map(item => ({
+              id: item.id,
+              label: groupData.length === 1 ? (item.group || categoryLabels[item.category]) : item.name
+            }))}
+            onSelectItem={(id) => {
+              const service = groupData.find(item => item.id === id);
+              if (service) setSelectedService(service);
+            }}
+            activeId={selectedService?.id}
+          />
+        </div>
+      )}
+
       {/* Content */}
-      <div>
+      <div className={hasSidebar ? "flex-1 overflow-y-auto pr-2" : undefined}>
         {selectedService ? (
           <>
             <div className="space-y-4">
@@ -255,7 +281,7 @@ export function DataProvisionServicesPage({ category, group, description }: Data
                 <div className="pb-2">
                   <h2 className="text-[18px] font-bold text-slate-800 mb-1" style={{ fontSize: '18px' }}>{selectedService.name}</h2>
                   <p className="text-xs text-slate-400">
-                    Nguồn dữ liệu: <strong className="text-slate-600">{selectedService.group || selectedService.category}</strong>
+                    Nguồn dữ liệu: <strong className="text-slate-600">{selectedService.group || categoryLabels[selectedService.category]}</strong>
                   </p>
                 </div>
                 
@@ -398,10 +424,10 @@ export function DataProvisionServicesPage({ category, group, description }: Data
                                   <td className="px-4 py-3 text-center text-[13px]" style={{ fontSize: '13px' }}>
                                     <button
                                       onClick={() => handleOpenFieldsConfig(api)}
-                                      className="p-1.5 text-black hover:text-slate-700 hover:bg-slate-100 rounded-[6px] transition-colors inline-flex items-center justify-center cursor-pointer"
-                                      title="Cấu hình trường"
+                                      className="p-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-[6px] transition-colors inline-flex items-center justify-center cursor-pointer"
+                                      title="Xem chi tiết"
                                     >
-                                      <Sliders className="w-4 h-4" />
+                                      <Eye className="w-4 h-4" />
                                     </button>
                                   </td>
 
@@ -434,6 +460,7 @@ export function DataProvisionServicesPage({ category, group, description }: Data
         consumerUnit={selectedApiForConfig?.unit || ''}
         initialFields={selectedApiForConfig?.fields || []}
         onSave={handleSaveFieldsConfig}
+        readOnly
       />
 
     </div>
